@@ -1,43 +1,54 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Alien : MonoBehaviour
 {
+    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
     [Header("Inscribed")]
+    public AlienBullet bulletPrefab;
 
-    public GameObject bulletPrefab;
-    public AlienFleet fleet;
-    
-    static float bulletSpawnRate = .002f;
-    public float lastShot = 0;
-    public static float shotCooldown = .1f;
+    public Rigidbody Body { get; private set; }
+    public int Column { get; private set; }
+    public int Points { get; private set; }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    AlienFleet fleet;
+    Renderer bodyRenderer;
+    Color color;
+    bool dead;
+
+    void Awake()
     {
-        
+        Body = GetComponent<Rigidbody>();
+        bodyRenderer = GetComponent<Renderer>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Init(AlienFleet owner, int column, int points, Color tint)
     {
-        
+        fleet = owner;
+        Column = column;
+        Points = points;
+        color = tint;
+
+        var block = new MaterialPropertyBlock();
+        block.SetColor(BaseColorId, tint);
+        bodyRenderer.SetPropertyBlock(block);
     }
 
-    void FixedUpdate()
+    public void Fire(float bulletSpeed)
     {
-        Vector3 position = transform.position;
-        
-        if(UnityEngine.Random.value < bulletSpawnRate && Time.time - lastShot > shotCooldown){
-            GameObject bullet = Instantiate<GameObject>(bulletPrefab);
-            bullet.transform.position = position;
-            lastShot = Time.time;
-        }
+        AlienBullet bullet = Instantiate(bulletPrefab, transform.position + Vector3.down * 0.6f, Quaternion.identity);
+        bullet.Launch(bulletSpeed);
     }
 
     void OnCollisionEnter(Collision coll)
     {
-        fleet.GetComponent<AlienFleet>().aliens.Remove(gameObject);
+        Dart dart = coll.collider.GetComponentInParent<Dart>();
+        if (dead || dart == null || !dart.TryConsume()) return;
+
+        dead = true;
+        Debris.Burst(transform.position, bodyRenderer.sharedMaterial, color, 10, 0.3f, 7f);
+        fleet.OnAlienKilled(this);
         Destroy(gameObject);
-        Destroy(coll.gameObject);
     }
 }

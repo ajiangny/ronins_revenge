@@ -1,21 +1,19 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
+[RequireComponent(typeof(TextMeshProUGUI))]
 public class AlienCounter : MonoBehaviour
 {
-    [Header("Dynamic")]
-    public int score = 0;
-    private TextMeshProUGUI uiText;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    TextMeshProUGUI uiText;
+
+    void Awake()
     {
         uiText = GetComponent<TextMeshProUGUI>();
     }
 
-    // Update is called once per frame
-    void Update()
+    // Called by the fleet only when the count changes, instead of rebuilding the string every frame.
+    public void SetCount(int remaining)
     {
-        uiText.text = "Remaining Aliens: " + score.ToString("#,0");
+        uiText.SetText("Remaining Aliens: {0}", remaining);
     }
 }

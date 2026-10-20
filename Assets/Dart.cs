@@ -1,31 +1,30 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Dart : MonoBehaviour
 {
     [Header("Inscribed")]
-    static float speed = .3f;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] float speed = 18f;
+    [SerializeField] float lifetime = 2f;
+
+    bool spent;
+
     void Start()
     {
-        
+        GetComponent<Rigidbody>().linearVelocity = Vector3.up * speed;
+        Destroy(gameObject, lifetime);
     }
 
-    // Update is called once per frame
-    void Update()
+    // A dart can only destroy one alien, even if it touches two in the same physics step.
+    public bool TryConsume()
     {
-        
+        if (spent) return false;
+        spent = true;
+        return true;
     }
 
-    void FixedUpdate()
+    void OnCollisionEnter(Collision coll)
     {
-        Vector3 position = transform.position;
-        position.y += speed;
-        transform.position = position;
-        if(position.y > 10)
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
-
 }

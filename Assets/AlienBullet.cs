@@ -1,36 +1,20 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class AlienBullet : MonoBehaviour
 {
     [Header("Inscribed")]
+    [SerializeField] float lifetime = 4f;
 
-    static float speed = .1f;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void Launch(float speed)
     {
-        
+        GetComponent<Rigidbody>().linearVelocity = Vector3.down * speed;
+        Destroy(gameObject, lifetime);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    void FixedUpdate()
-    {
-        Vector3 position = transform.position;
-        position.y -= speed;
-        transform.position = position;
-        if(position.y < -10)
-        {
-            Destroy(gameObject);
-        }
-    }
-
+    // Whatever was hit handles its own damage; the bullet only removes itself.
     void OnCollisionEnter(Collision coll)
     {
         Destroy(gameObject);
-        Destroy(coll.gameObject);
     }
 }

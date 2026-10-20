@@ -14,6 +14,6 @@ public class AlienCounter : MonoBehaviour
     // Called by the fleet only when the count changes, instead of rebuilding the string every frame.
     public void SetCount(int remaining)
     {
-        uiText.SetText("Remaining Aliens: {0}", remaining);
+        uiText.SetText("Samurai Left: {0}", remaining);
     }
 }

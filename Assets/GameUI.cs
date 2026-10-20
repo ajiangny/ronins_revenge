@@ -39,7 +39,7 @@ public class GameUI : MonoBehaviour
 
     public void SetLevel(int level, int levelCount)
     {
-        levelText.text = $"Wave {level} / {levelCount}";
+        levelText.text = $"Stage {level} / {levelCount}";
     }
 
     // One small ship icon per remaining life.

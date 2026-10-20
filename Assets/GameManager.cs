@@ -64,10 +64,10 @@ public class GameManager : MonoBehaviour
         else
         {
             state = State.Title;
-            ui.ShowOverlay("SPACE INVADERS 3D",
-                "LEFT / RIGHT or A / D to move      SPACE to fire\n\n" +
-                $"Clear all {levels.Length} waves. Each wave is faster and shoots more.\n" +
-                "Hide behind the shields - they won't last forever.\n\n" +
+            ui.ShowOverlay("SHADOW BLADE",
+                "LEFT / RIGHT or A / D to move      SPACE to throw\n\n" +
+                $"Defeat all {levels.Length} stages. Each samurai army is faster and fires more arrows.\n" +
+                "Hide behind the barricades - they won't last forever.\n\n" +
                 "Press ENTER to start",
                 new Color(0.4f, 0.85f, 1f));
         }
@@ -111,8 +111,8 @@ public class GameManager : MonoBehaviour
         LevelConfig level = levels[levelIndex];
         fleet.SpawnWave(level, ship.transform, ship.TopY, shields.TopY);
         ui.SetLevel(levelIndex + 1, levels.Length);
-        ui.ShowOverlay($"WAVE {levelIndex + 1}",
-            levelIndex == 0 ? "Get ready!" : "Wave cleared! The next fleet is bigger, faster and angrier.",
+        ui.ShowOverlay($"STAGE {levelIndex + 1}",
+            levelIndex == 0 ? "Get ready!" : "Stage cleared! The next army is bigger, faster and angrier.",
             level.alienColor);
 
         yield return new WaitForSeconds(levelIntroTime);
@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            EndGame("YOU WIN!", "Every wave has been destroyed. Earth is safe.", new Color(0.4f, 1f, 0.5f));
+            EndGame("VICTORY", "Every samurai army has fallen. The village is safe.", new Color(0.4f, 1f, 0.5f));
         }
     }
 
@@ -149,7 +149,7 @@ public class GameManager : MonoBehaviour
     {
         if (state != State.Playing) return;
         ship.Explode();
-        EndGame("GAME OVER", "The aliens reached your ship - there's no stopping them now.", new Color(1f, 0.3f, 0.3f));
+        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f));
     }
 
     void OnShipHit()
@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour
         if (lives <= 0)
         {
             ship.Explode();
-            EndGame("GAME OVER", "Your ship was destroyed.", new Color(1f, 0.3f, 0.3f));
+            EndGame("DEFEATED", "The ninja has fallen.", new Color(1f, 0.3f, 0.3f));
         }
     }
 
@@ -174,7 +174,7 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.Save();
 
         ui.ShowOverlay(title,
-            $"{message}\n\nScore {score}      High score {highScore}\nReached wave {levelIndex + 1} of {levels.Length}\n\nPress ENTER to play again",
+            $"{message}\n\nScore {score}      High score {highScore}\nReached stage {levelIndex + 1} of {levels.Length}\n\nPress ENTER to play again",
             color);
     }
 

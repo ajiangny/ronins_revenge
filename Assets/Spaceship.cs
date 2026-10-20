@@ -7,6 +7,7 @@ public class Spaceship : MonoBehaviour
 {
     [Header("Inscribed")]
     public GameObject dartPrefab;
+    public CharacterArt art;
     public float speed = 10f;
     [SerializeField] float shotCooldown = 0.35f;
     [SerializeField] float invulnerableTime = 2f;
@@ -15,11 +16,12 @@ public class Spaceship : MonoBehaviour
     public event Action Hit;
 
     public bool ControlsEnabled { get; set; }
-    // World-space height of the top of the hull; aliens reaching it have landed.
+    // World-space height of the top of the ninja; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
 
     Rigidbody body;
-    Renderer[] renderers;
+    SpriteRenderer sprite;
+    SpriteAnimator animator;
     Camera cam;
     float minOffsetX, maxOffsetX, centerOffsetX, topOffset;
     float lastShot = float.NegativeInfinity;
@@ -29,27 +31,29 @@ public class Spaceship : MonoBehaviour
     void Awake()
     {
         body = GetComponent<Rigidbody>();
-        renderers = GetComponentsInChildren<Renderer>();
+        sprite = GetComponentInChildren<SpriteRenderer>();
+        animator = sprite.GetComponent<SpriteAnimator>();
         cam = Camera.main;
 
-        // The hull isn't centred on the pivot, so measure it once and clamp/shoot from the real extents.
-        Bounds hull = renderers[0].bounds;
-        foreach (Renderer r in renderers)
-        {
-            hull.Encapsulate(r.bounds);
-        }
+        // The sprite isn't centred on the pivot, so measure it once and clamp/shoot from the real extents.
+        Bounds bounds = sprite.bounds;
         Vector3 pivot = transform.position;
-        minOffsetX = hull.min.x - pivot.x;
-        maxOffsetX = hull.max.x - pivot.x;
-        centerOffsetX = hull.center.x - pivot.x;
-        topOffset = hull.max.y - pivot.y;
+        minOffsetX = bounds.min.x - pivot.x;
+        maxOffsetX = bounds.max.x - pivot.x;
+        centerOffsetX = bounds.center.x - pivot.x;
+        topOffset = bounds.max.y - pivot.y;
+    }
+
+    void Start()
+    {
+        PlayIdle();
     }
 
     void Update()
     {
         moveInput = 0;
         bool invulnerable = Time.time < invulnerableUntil;
-        SetVisible(!invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f);
+        sprite.enabled = !invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f;
 
         Keyboard keyboard = Keyboard.current;
         if (!ControlsEnabled || keyboard == null) return;
@@ -59,10 +63,17 @@ public class Spaceship : MonoBehaviour
 
         if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown)
         {
-            Vector3 muzzle = new Vector3(transform.position.x + centerOffsetX, transform.position.y, 0);
-            Instantiate(dartPrefab, muzzle, Quaternion.identity);
-            lastShot = Time.time;
+            Fire(dartPrefab);
         }
+    }
+
+    // Every attack goes through here, so a boon can later swap in a different projectile.
+    public void Fire(GameObject projectilePrefab)
+    {
+        Vector3 muzzle = new Vector3(transform.position.x + centerOffsetX, transform.position.y, 0);
+        Instantiate(projectilePrefab, muzzle, Quaternion.identity);
+        lastShot = Time.time;
+        animator.Play(art.attack, false, PlayIdle, art.actionFps);
     }
 
     void FixedUpdate()
@@ -70,7 +81,7 @@ public class Spaceship : MonoBehaviour
         Vector3 position = body.position;
         position.x += moveInput * speed * Time.fixedDeltaTime;
 
-        // Keep the whole hull inside the camera's view.
+        // Keep the whole ninja inside the camera's view.
         float halfWidth = cam.orthographicSize * cam.aspect;
         float centerX = cam.transform.position.x;
         position.x = Mathf.Clamp(position.x,
@@ -85,21 +96,19 @@ public class Spaceship : MonoBehaviour
         if (coll.collider.GetComponentInParent<AlienBullet>() == null) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
-        Debris.Burst(coll.GetContact(0).point, renderers[0].sharedMaterial, Color.white, 14, 0.3f, 6f);
+        Debris.BurstSprites(coll.GetContact(0).point, art.deathParticles, Color.white, 10, 1f, 6f);
+        animator.Play(art.hit, false, PlayIdle, art.actionFps);
         Hit?.Invoke();
     }
 
     public void Explode()
     {
-        Debris.Burst(transform.position + Vector3.right * centerOffsetX, renderers[0].sharedMaterial, Color.white, 30, 0.45f, 9f);
+        Debris.BurstSprites(sprite.bounds.center, art.deathParticles, Color.white, 30, 1.4f, 9f);
         gameObject.SetActive(false);
     }
 
-    void SetVisible(bool visible)
+    void PlayIdle()
     {
-        foreach (Renderer r in renderers)
-        {
-            r.enabled = visible;
-        }
+        animator.Play(art.idle, true, null, art.idleFps);
     }
 }

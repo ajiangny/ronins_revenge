@@ -10,6 +10,7 @@ public class SpriteAnimator : MonoBehaviour
     public SpriteRenderer Renderer { get; private set; }
 
     Sprite[] clip;
+    float clipFps;
     bool loop;
     float frameTime;
     int frame;
@@ -21,10 +22,12 @@ public class SpriteAnimator : MonoBehaviour
     }
 
     // Starts a clip from its first frame. A one-shot clip holds its last frame and then calls onFinished.
-    public void Play(Sprite[] frames, bool looping = true, Action onFinished = null)
+    // framesPerSecond <= 0 uses the animator's default rate.
+    public void Play(Sprite[] frames, bool looping = true, Action onFinished = null, float framesPerSecond = 0)
     {
         if (frames == null || frames.Length == 0) return;
         clip = frames;
+        clipFps = framesPerSecond > 0 ? framesPerSecond : fps;
         loop = looping;
         finished = onFinished;
         frame = 0;
@@ -42,11 +45,11 @@ public class SpriteAnimator : MonoBehaviour
 
     void Update()
     {
-        if (clip == null || clip.Length < 2 || fps <= 0) return;
+        if (clip == null || clipFps <= 0) return;
 
         frameTime += Time.deltaTime;
-        if (frameTime < 1f / fps) return;
-        frameTime -= 1f / fps;
+        if (frameTime < 1f / clipFps) return;
+        frameTime -= 1f / clipFps;
 
         if (frame + 1 < clip.Length)
         {

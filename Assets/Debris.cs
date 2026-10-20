@@ -1,41 +1,15 @@
 using UnityEngine;
 
-// A small cube or sprite that flies outward, spins and shrinks away. Used for collision explosions.
+// A small sprite that flies outward, spins and shrinks away. Used for collision explosions.
 public class Debris : MonoBehaviour
 {
-    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-    static MaterialPropertyBlock colorBlock;
-
     Vector3 velocity;
     Vector3 spin;
     Vector3 startScale;
     float lifetime;
     float age;
 
-    public static void Burst(Vector3 position, Material material, Color color, int count, float size, float speed)
-    {
-        colorBlock ??= new MaterialPropertyBlock();
-        colorBlock.SetColor(BaseColorId, color);
-
-        for (int i = 0; i < count; i++)
-        {
-            GameObject piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // Remove the collider immediately so a fragment can never block a shot this frame.
-            DestroyImmediate(piece.GetComponent<Collider>());
-            piece.name = "Debris";
-            piece.transform.SetPositionAndRotation(position, Random.rotation);
-            piece.transform.localScale = Vector3.one * (size * Random.Range(0.5f, 1.2f));
-
-            Renderer r = piece.GetComponent<Renderer>();
-            r.sharedMaterial = material;
-            r.SetPropertyBlock(colorBlock);
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-            Launch(piece.AddComponent<Debris>(), speed, Random.insideUnitSphere * 720f);
-        }
-    }
-
-    // Same burst, but with sprite pieces (sakura petals, smoke, sparks, wood chips). Sprites only spin in the screen plane.
+    // Bursts sprite pieces (sakura petals, smoke, sparks, wood chips) out from a point. They only spin in the screen plane.
     public static void BurstSprites(Vector3 position, Sprite[] sprites, Color color, int count, float size, float speed)
     {
         if (sprites == null || sprites.Length == 0) return;

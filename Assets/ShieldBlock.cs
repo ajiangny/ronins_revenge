@@ -1,24 +1,22 @@
 using UnityEngine;
 
-// One brick of a shield. Takes a few hits from either side before crumbling.
+// One tile of a barricade. Takes a few hits from either side before crumbling.
 public class ShieldBlock : MonoBehaviour
 {
-    static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-
-    Renderer blockRenderer;
-    MaterialPropertyBlock colorBlock;
-    Color baseColor;
+    SpriteRenderer tile;
+    Sprite[] damageStates;
+    Sprite[] debris;
     int maxHealth;
     int health;
     bool destroyed;
 
-    public void Init(int hitPoints, Color color)
+    public void Init(int hitPoints, SpriteRenderer tileRenderer, Sprite[] states, Sprite[] debrisSprites)
     {
-        blockRenderer = GetComponent<Renderer>();
-        colorBlock = new MaterialPropertyBlock();
-        baseColor = color;
+        tile = tileRenderer;
+        damageStates = states;
+        debris = debrisSprites;
         maxHealth = health = hitPoints;
-        UpdateColor();
+        UpdateSprite();
     }
 
     void OnCollisionEnter(Collision coll)
@@ -30,7 +28,7 @@ public class ShieldBlock : MonoBehaviour
         }
         else
         {
-            UpdateColor();
+            UpdateSprite();
         }
     }
 
@@ -38,14 +36,14 @@ public class ShieldBlock : MonoBehaviour
     {
         if (destroyed) return;
         destroyed = true;
-        Debris.Burst(transform.position, blockRenderer.sharedMaterial, baseColor, 4, 0.18f, 4f);
+        Debris.BurstSprites(transform.position, debris, Color.white, 4, 0.8f, 4f);
         Destroy(gameObject);
     }
 
-    // Damaged blocks get darker so the player can see which ones are about to break.
-    void UpdateColor()
+    // Spreads the damage states across the block's health: full health shows the first, one hit left shows the last.
+    void UpdateSprite()
     {
-        colorBlock.SetColor(BaseColorId, Color.Lerp(baseColor * 0.35f, baseColor, (float)health / maxHealth));
-        blockRenderer.SetPropertyBlock(colorBlock);
+        float damage = maxHealth > 1 ? (float)(maxHealth - health) / (maxHealth - 1) : 0f;
+        tile.sprite = damageStates[Mathf.RoundToInt(damage * (damageStates.Length - 1))];
     }
 }

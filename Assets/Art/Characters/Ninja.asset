@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Ninja
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: cd6532fd281f3480dbf76f25e5a5f898, type: 3}
+  - {fileID: 21300000, guid: f35a665ea36cb4549a1f7938d53a7ce2, type: 3}
+  - {fileID: 21300000, guid: e56314780b281462ab42d6e2a067e5b0, type: 3}
+  - {fileID: 21300000, guid: f78bcbb74186d4dd2a00dfb189268e2b, type: 3}
+  attack:
+  - {fileID: 21300000, guid: dacf53d0226354218b456e29c0f561fb, type: 3}
+  - {fileID: 21300000, guid: c9351eafa9bf0492eb33d00aba10bf2a, type: 3}
+  - {fileID: 21300000, guid: 1e03a7609951c412dad489c06a1f7b8e, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 779b3d758c174451394db89b71dbfaea, type: 3}
+  - {fileID: 21300000, guid: 07e409deb13ea4ca0bc1804ca44edc18, type: 3}
+  death: []
+  idleFps: 5
+  actionFps: 12
+  deathParticles:
+  - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

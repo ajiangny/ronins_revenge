@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Ashigaru
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 4d155753b98b2450badab56b942d2430, type: 3}
+  - {fileID: 21300000, guid: 22fbb5bb2b19543f78424ac1edf02fd0, type: 3}
+  - {fileID: 21300000, guid: b76f9bbe686464629877595267f6da5e, type: 3}
+  - {fileID: 21300000, guid: c1c067828b4074a248f7a428104f9031, type: 3}
+  attack: []
+  hit: []
+  death:
+  - {fileID: 21300000, guid: 7583b7954ffae4ad6b1ab60cda1082e1, type: 3}
+  - {fileID: 21300000, guid: 7cc7e60a80aa84bf0bbc1ce160c09b50, type: 3}
+  - {fileID: 21300000, guid: 75f40bb3bb00247a1b5a1f8197155383, type: 3}
+  idleFps: 6
+  actionFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

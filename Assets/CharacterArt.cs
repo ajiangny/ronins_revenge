@@ -10,6 +10,11 @@ public class CharacterArt : ScriptableObject
     public Sprite[] hit;
     public Sprite[] death;
 
+    [Tooltip("Frames per second for the looping idle/march clip.")]
+    public float idleFps = 6f;
+    [Tooltip("Frames per second for the one-shot attack, hit and death clips.")]
+    public float actionFps = 12f;
+
     [Tooltip("Small pieces burst out on death (sakura petals, smoke).")]
     public Sprite[] deathParticles;
 }

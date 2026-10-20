@@ -7,6 +7,8 @@ public class AlienFleet : MonoBehaviour
     [Header("Inscribed")]
     public Alien alienPrefab;
     public AlienCounter alienCounter;
+    [Tooltip("Samurai type per row from the top; rows past the end reuse the last entry. Matches PointsForRow.")]
+    public CharacterArt[] samuraiByRow;
 
     [SerializeField] float maxSpacingX = 2f;
     [SerializeField] float spacingY = 1.6f;
@@ -58,7 +60,7 @@ public class AlienFleet : MonoBehaviour
             {
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY, 0);
                 Alien alien = Instantiate(alienPrefab, position, Quaternion.identity, transform);
-                alien.Init(this, col, PointsForRow(row), config.alienColor);
+                alien.Init(this, col, PointsForRow(row), config.alienColor, samuraiByRow[Mathf.Min(row, samuraiByRow.Length - 1)]);
                 aliens.Add(alien);
             }
         }

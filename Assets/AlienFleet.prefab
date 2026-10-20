@@ -45,3 +45,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   alienPrefab: {fileID: -8872074747676231410, guid: 30e01da1a41a89c41b91b987c464522c, type: 3}
+  alienCounter: {fileID: 0}
+  samuraiByRow:
+  - {fileID: 11400000, guid: 858bf7e4fa1a743269e84ef3affdf09a, type: 2}
+  - {fileID: 11400000, guid: 633c256d808d7469e83acf8ce1533b6b, type: 2}
+  - {fileID: 11400000, guid: 633c256d808d7469e83acf8ce1533b6b, type: 2}
+  - {fileID: 11400000, guid: 2d84d8c4a90bc4d41bae7eb6ca01fbdf, type: 2}
+  maxSpacingX: 2
+  spacingY: 1.6
+  edgeMargin: 1
+  dropDistance: 0.5
+  dropSpeed: 8
+  alienRadius: 0.45

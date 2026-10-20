@@ -1,16 +1,17 @@
 using UnityEngine;
 
-// Builds the row of shields (bunkers) between the player and the fleet.
+// Builds the row of barricades between the ninja and the samurai.
 public class ShieldWall : MonoBehaviour
 {
     [Header("Inscribed")]
-    [SerializeField] Material blockMaterial;
-    [SerializeField] Color color = new Color(1f, 0.55f, 0.15f);
+    [Tooltip("Barricade tile from intact to nearly broken.")]
+    [SerializeField] Sprite[] damageStates;
+    [SerializeField] Sprite[] debrisSprites;
     [SerializeField] int shieldCount = 4;
     [SerializeField] int blocksWide = 6;
     [SerializeField] int blocksHigh = 3;
     [SerializeField] float blockSize = 0.5f;
-    [SerializeField] int blockHealth = 2;
+    [SerializeField] int blockHealth = 3;
 
     // Bottom edge of the wall is the GameObject's y position.
     public float TopY => transform.position.y + blocksHigh * blockSize;
@@ -56,12 +57,17 @@ public class ShieldWall : MonoBehaviour
 
     void CreateBlock(Vector3 position)
     {
-        GameObject block = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        block.name = "ShieldBlock";
+        var block = new GameObject("ShieldBlock");
         block.transform.SetParent(transform);
         block.transform.position = position;
-        block.transform.localScale = new Vector3(blockSize, blockSize, blockSize);
-        block.GetComponent<Renderer>().sharedMaterial = blockMaterial;
-        block.AddComponent<ShieldBlock>().Init(blockHealth, color);
+        block.AddComponent<BoxCollider>().size = new Vector3(blockSize, blockSize, blockSize);
+
+        // The tile sprite sits on a child scaled to fill exactly one block.
+        var tile = new GameObject("Tile").AddComponent<SpriteRenderer>();
+        tile.transform.SetParent(block.transform, false);
+        tile.sprite = damageStates[0];
+        tile.transform.localScale = Vector3.one * (blockSize / tile.sprite.bounds.size.x);
+
+        block.AddComponent<ShieldBlock>().Init(blockHealth, tile, damageStates, debrisSprites);
     }
 }

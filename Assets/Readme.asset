@@ -25,12 +25,13 @@ MonoBehaviour:
   - heading: URP Documentation
     text:
     linkText: Read more about URP
-    url: https://docs.unity3d.com/6000.6/Documentation/Manual/urp/urp-introduction.html
+    url: https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest
   - heading: Forums
     text:
     linkText: Get answers and support
-    url: https://discussions.unity.com/tags/c/graphics/render-pipelines/136/none/universal-render-pipeline
+    url: https://forum.unity.com/forums/universal-render-pipeline.383/
   - heading: Report bugs
     text:
     linkText: Submit a report
-    url: https://unity.com/releases/editor/qa#bug-reporting
+    url: https://unity3d.com/unity/qa/bug-reporting
+  loadedLayout: 1

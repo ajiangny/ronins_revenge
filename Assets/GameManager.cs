@@ -91,6 +91,8 @@ public class GameManager : MonoBehaviour
     int killsSinceSoul;
     FxPlayer aura;
     bool hitStopping;
+    Scout activeScout;
+    float nextScoutTime;
 
     void Awake()
     {
@@ -173,6 +175,23 @@ public class GameManager : MonoBehaviour
 #if UNITY_EDITOR
         DevHotkeys(keyboard);
 #endif
+        if (state == State.Playing) UpdateScouts();
+    }
+
+    // One scout at a time, every 15-25 seconds in rounds that have them.
+    void UpdateScouts()
+    {
+        if (!Round.scouts || activeScout != null || Time.time < nextScoutTime) return;
+        nextScoutTime = Time.time + Random.Range(15f, 25f);
+        activeScout = Scout.Spawn(army.samuraiByRow[army.samuraiByRow.Length - 1], Round.topRowY + 1.4f, OnScoutKilled);
+    }
+
+    void OnScoutKilled(Scout scout)
+    {
+        score += scout.Points * (stageIndex + 1);
+        highScore = Mathf.Max(highScore, score);
+        ui.SetScore(score, highScore);
+        if (state == State.Playing) MaybeDropSoul(scout.transform.position, true);
     }
 
 #if UNITY_EDITOR
@@ -233,6 +252,7 @@ public class GameManager : MonoBehaviour
         state = State.Playing;
         ronin.ControlsEnabled = true;
         army.Advance();
+        nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
@@ -288,12 +308,13 @@ public class GameManager : MonoBehaviour
         boonChoice.RefreshHud(loadout);
     }
 
-    // One soul at a time, never from the stage's last samurai (the stage ends before it could be caught).
-    void MaybeDropSoul(Vector3 position)
+    // One soul at a time, never from the round's last samurai (the round ends before it could be caught).
+    // A guaranteed drop (a scout's) still waits for the soul already falling.
+    void MaybeDropSoul(Vector3 position, bool guaranteed = false)
     {
         if (activeSoul != null || army.Remaining == 0) return;
         killsSinceSoul++;
-        if (Random.value >= soulDropChance && killsSinceSoul < soulPityKills) return;
+        if (!guaranteed && Random.value >= soulDropChance && killsSinceSoul < soulPityKills) return;
 
         killsSinceSoul = 0;
         var element = (Element)Random.Range(0, 3);
@@ -513,6 +534,10 @@ public class GameManager : MonoBehaviour
         foreach (Soul soul in FindObjectsByType<Soul>())
         {
             Destroy(soul.gameObject);
+        }
+        foreach (Scout scout in FindObjectsByType<Scout>())
+        {
+            Destroy(scout.gameObject);
         }
     }
 }

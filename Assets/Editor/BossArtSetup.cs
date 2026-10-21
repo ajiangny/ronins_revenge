@@ -16,6 +16,8 @@ public static class BossArtSetup
     const string FontRoot = "Assets/Art/Fonts/";
     // About twice a samurai's height, so she reads as the warlord the moment she lands.
     const float BenibanaScale = 2.3f;
+    // Utsusemi stands taller than her, stilts and hat brim included.
+    const float UtsusemiScale = 2.6f;
     // Low enough that her ponytail clears the boss bar.
     const float BossDepth = 4.5f;
 
@@ -37,6 +39,17 @@ public static class BossArtSetup
             death: Frames("Benibana", "Defeat"),
             particles);
 
+        // Utsusemi's frames may not exist yet; without them the GameManager keeps its stand-in.
+        // The hat throw goes in the parry slot, the thrust in the attack slot.
+        Sprite[] utsusemiIdle = TryFrames("Utsusemi", "Idle");
+        CharacterArt utsusemi = utsusemiIdle == null ? null : SaveArt("Utsusemi",
+            idle: utsusemiIdle,
+            attack: TryFrames("Utsusemi", "Thrust") ?? utsusemiIdle,
+            parry: TryFrames("Utsusemi", "Throw") ?? utsusemiIdle,
+            hit: TryFrames("Utsusemi", "Hit") ?? utsusemiIdle,
+            death: TryFrames("Utsusemi", "Defeat") ?? utsusemiIdle,
+            new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
+
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
         if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         var manager = Object.FindAnyObjectByType<GameManager>();
@@ -54,15 +67,22 @@ public static class BossArtSetup
         so.FindProperty("benibanaRosaryLashLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryLash.mp3");
         so.FindProperty("benibanaIaidoLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Iaido.mp3");
         so.FindProperty("benibanaRosaryBloomLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryBloom.mp3");
-        // Every Benibana_Hurt*.mp3 take, so more can be added without touching this.
-        var hurt = new List<AudioClip>();
-        foreach (string guid in AssetDatabase.FindAssets("Benibana_Hurt t:AudioClip", new[] { VoiceRoot.TrimEnd('/') }))
+        SetTakes(so.FindProperty("benibanaHurtLines"), "Benibana_Hurt");
+
+        if (utsusemi != null)
         {
-            hurt.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid)));
+            so.FindProperty("utsusemiArt").objectReferenceValue = utsusemi;
+            so.FindProperty("utsusemiScale").floatValue = UtsusemiScale;
         }
-        SerializedProperty hurtLines = so.FindProperty("benibanaHurtLines");
-        hurtLines.arraySize = hurt.Count;
-        for (int i = 0; i < hurt.Count; i++) hurtLines.GetArrayElementAtIndex(i).objectReferenceValue = hurt[i];
+        so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
+        so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");
+        so.FindProperty("utsusemiIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Intro.mp3");
+        so.FindProperty("utsusemiPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Phase.mp3");
+        so.FindProperty("utsusemiDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Defeat.mp3");
+        so.FindProperty("utsusemiStaggerLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Stagger.mp3");
+        so.FindProperty("utsusemiKasaLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Kasa.mp3");
+        so.FindProperty("utsusemiEscapementLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Escapement.mp3");
+        SetTakes(so.FindProperty("utsusemiHurtLines"), "Utsusemi_Hurt");
         so.ApplyModifiedProperties();
 
         // The fonts for the bosses' Borderlands-style title cards.
@@ -75,6 +95,21 @@ public static class BossArtSetup
         AssetDatabase.SaveAssets();
         Debug.Log($"Benibana art applied: {benibana.idle.Length} idle, {benibana.attack.Length} slash, {benibana.parry.Length} puff, " +
             $"{benibana.hit.Length} hit, {benibana.death.Length} defeat frames.");
+        Debug.Log(utsusemi == null ? "Utsusemi has no frames yet; portraits wired, stand-in art kept."
+            : $"Utsusemi art applied: {utsusemi.idle.Length} idle, {utsusemi.attack.Length} thrust, {utsusemi.parry.Length} throw, " +
+              $"{utsusemi.hit.Length} hit, {utsusemi.death.Length} defeat frames.");
+    }
+
+    // Every <prefix>*.mp3 take, so more can be added without touching this.
+    static void SetTakes(SerializedProperty lines, string prefix)
+    {
+        var takes = new List<AudioClip>();
+        foreach (string guid in AssetDatabase.FindAssets(prefix + " t:AudioClip", new[] { VoiceRoot.TrimEnd('/') }))
+        {
+            takes.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid)));
+        }
+        lines.arraySize = takes.Count;
+        for (int i = 0; i < takes.Count; i++) lines.GetArrayElementAtIndex(i).objectReferenceValue = takes[i];
     }
 
     // The intro illustrations are painted, not pixel art: smooth filtering and full size, as UI sprites.
@@ -115,6 +150,13 @@ public static class BossArtSetup
         art.actionFps = 11f;
         EditorUtility.SetDirty(art);
         return art;
+    }
+
+    // The clip's frames, or null when it hasn't been made yet.
+    static Sprite[] TryFrames(string character, string clip)
+    {
+        var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}{character}/{character}_{clip}_0.png");
+        return sprite == null ? null : Frames(character, clip);
     }
 
     // Every numbered frame of the clip, in order.

@@ -90,7 +90,7 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        SetUpBlockers(Object.FindFirstObjectByType<BlockerWall>());
+        SetUpBlockers(Object.FindAnyObjectByType<BlockerWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -108,7 +108,7 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        SetUpBlockers(Object.FindFirstObjectByType<BlockerWall>());
+        SetUpBlockers(Object.FindAnyObjectByType<BlockerWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);

@@ -1,0 +1,158 @@
+# Architecture
+
+Shadow Blade is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System). One scene,
+`Assets/Scenes/SampleScene.unity`. Every gameplay script sits flat in `Assets/`; editor tooling sits in
+`Assets/Editor/`. This file is a map: where each system lives and how the pieces talk to each other.
+
+## Game flow
+
+`GameManager` owns the run and is the hub everything reports to.
+
+```
+Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─▶ Boss ─▶ stage boon ─▶ next stage / Victory
+                                   │  (soul caught → Choosing: boon screen, time paused)            │
+                                   └──── ronin out of lives / army reaches ronin ──▶ GameOver ◀─────┘
+```
+
+- States: `GameManager.State { Title, Transition, Playing, Choosing, GameOver }`.
+- Content is data: `GameManager.stages` is a `StageConfig[]` (`StageConfig.cs`). Each stage has a name,
+  `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Currently one stage, "The Bamboo Road",
+  three rounds then Benibana. The default array in code is only the initial value; the scene's serialized
+  copy wins, so edit it in the Inspector (or keep both in step).
+- Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `StageCleared` → `BeginBoss` / `OfferStageBoon`,
+  `NextStage`, `EndGame`. Blockers are rebuilt only when a stage starts, so they wear down across its rounds.
+- Restart reloads the scene with `skipTitle` set.
+- **Dev hotkeys (Editor only, `GameManager.DevHotkeys`):** F1 kills the current army, F2 jumps to the last
+  stage's boss (or last round if it has none).
+
+## Player combat — the Ronin
+
+| What | Where |
+|---|---|
+| Movement, input, screen clamp, cooldowns, lives/invulnerability | `Ronin.cs` (reads `Keyboard.current` directly) |
+| Kunai (Space), Inferno Fan spread | `Ronin` → `Kunai.prefab` / `Kunai.cs` |
+| Spirit Shuriken (E / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
+| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`) |
+| Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
+| Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
+| Ronin events | `Hit`, `WardBroken`, `ShurikenThrown`, `Parried` (GameManager subscribes) |
+
+All player projectiles are `Kunai`; `Kunai.cs` also defines `KillSource { Kunai, Shuriken, Deflected, Effect, Reflected }`.
+Damage per source is `Damage.Of` in `IHittable.cs` (kunai 1, shuriken 3, deflected 2, reflected 6).
+Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: `Samurai`, `Scout`, `Boss`.
+
+## Boons (Hades-style upgrades)
+
+| What | Where |
+|---|---|
+| Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
+| What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`, Frost Wards) |
+| Effects in play (blasts, chill/freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`) |
+| Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul` |
+| Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
+
+Rule: kills from `KillSource.Effect` never trigger further effects (no chain reactions). `BoonId` order must
+match `BoonChoiceUI.boonIcons`.
+
+## Enemies
+
+### Samurai army (the "invaders")
+- `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
+  (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
+  raises `ArmyReachedRonin` when it lands. Also hosts chill/freeze and spatial queries
+  (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
+- `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint.
+- `SamuraiKind.cs` — `Ashigaru` (single arrow) and `Archer` (3-arrow fan). Rows pick a kind via
+  `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
+  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru).
+- `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
+- `SamuraiCounter.cs` — "Samurai Left" HUD text.
+
+### Mini-enemy: Scout
+- `Scout.cs` — kite-borne scout crossing the top of the screen (the mystery-ship role). One hit, bonus points,
+  guaranteed soul. Built in code (no prefab). Spawned by `GameManager.UpdateScouts` in rounds with
+  `LevelConfig.scouts = true`, every 15–25 s.
+
+### Bosses
+- `Boss.cs` — abstract base. Handles creation (`Boss.Create<T>`, no prefab), entrance, HP, phase checks,
+  staggers, chill/freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
+  that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`.
+- `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (70 HP). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
+  (parry it back to stagger her), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
+  (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
+- Wiring in `GameManager`: `BeginBoss` (intro, blood moon via `Backdrop.SetBloodMoon`, music),
+  `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
+  `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`
+  (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`).
+- Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`).
+
+**Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
+`Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized
+art/voice fields → set `boss` on a `StageConfig` → extend `BossArtSetup` for its frames.
+
+**Adding a samurai kind:** add to `SamuraiKind` → branch its behaviour in `Samurai.Fire` (or elsewhere) →
+give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's `rowKinds`.
+
+## Environment
+
+- `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild(healthMultiplier)`
+  (Glacier Wall uses the multiplier for ice blockers).
+- `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights.
+
+## UI
+
+- `GameUI.cs` — HUD (score, stage/round, lives), overlay screens (title, stage intro, win/lose), boss bar,
+  subtitles, boss intro. Builds its pieces in code on the Canvas.
+- `BoonChoiceUI.cs` — see Boons. `SpriteAnimatorUI.cs` animates UI images in unscaled time.
+
+## VFX, feel and audio
+
+| What | Where |
+|---|---|
+| Animated pixel effects by id | `Fx.cs` (`Fx.Play`, ids as constants) + `FxLibrary` asset (`Art/Fx/FxLibrary.asset`) |
+| Code-built glows, blasts, lightning bolts | `ElementFx.cs`, `ProceduralSprites.cs` |
+| Debris bursts (petals, chips, sparks) | `Debris.cs` |
+| Screen shake (read `CameraShake.Center`, never the camera, for layout) | `CameraShake.cs` |
+| White hit flash | `HitFlash.cs` + `Art/Fx/SpriteFlash.shader` |
+| Parry hit-stop | `GameManager.HitStop` |
+| Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`) |
+| Music crossfade and ducking | `Music.cs` |
+| Boss voicelines | `GameManager.voice` AudioSource, clips in `Audio/Voice/` |
+
+Missing libraries or clips fall back gracefully (simple glows, silence), so the game runs before art/audio is wired.
+
+## Sprites and animation
+
+- `CharacterArt` ScriptableObject (`Art/Characters/*.asset`): clips `idle`, `attack`, `hit`, `death`, `parry`,
+  `runLeft`, `runRight` and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
+  Benibana.
+- `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
+- Raw frames live in `Art/Sprites/{Characters,Projectiles,Fx,Effects,Blockers,Background,UI}`;
+  `Editor/PixelArtImporter.cs` imports them as point-filtered pixel sprites automatically.
+- Boss intro paintings: `Art/Portraits/`. Font: `Art/Fonts/`.
+
+## Editor menu commands (`Ninja/…`)
+
+These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside Unity; they're safe to re-run.
+
+| Menu | Script | Does |
+|---|---|---|
+| Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
+| Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
+| Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
+| Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt and intro portraits → GameManager |
+| Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
+| Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
+| Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |
+
+## Physics
+
+Gameplay objects use 3D Rigidbodies and colliders on the gameplay plane (sprites are visuals only). Layers:
+`Ronin`, `Samurai`, `Kunai`, `Arrow`; the collision matrix is in `ProjectSettings/DynamicsManager.asset`.
+Characters move kinematically with `Rigidbody.MovePosition`; projectiles are launched once with `linearVelocity`.
+Each object handles its own collision (projectiles only destroy themselves).
+
+## Outside Unity
+
+- `Tools/generate-music.mjs` — regenerates music via ElevenLabs (`npm run music`, key in gitignored `.env.local`).
+- `README.md` — the assignment write-up (requirements, template fixes, features, balancing).

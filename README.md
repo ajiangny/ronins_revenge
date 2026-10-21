@@ -30,7 +30,7 @@ Open `Assets/Scenes/SampleScene.unity` and press Play.
 - **Lives.** 3 lives, shown as ship icons bottom-left. After a hit the ship blinks and is invulnerable for 2 s. (`Spaceship`, `GameUI.SetLives`)
 - **Shields.** Four destructible bunkers built from blocks (`ShieldWall`, `ShieldBlock`). Each block takes 2 hits and darkens when damaged. Aliens that descend into the shields chew through them. Shields are rebuilt every wave.
 - **Collision animations.** Exploding debris bursts for alien kills, ship hits, ship destruction and shield blocks breaking. (`Debris`)
-- **New background.** A dark sky with a parallax-scrolling starfield (`Starfield`).
+- **New background.** A top-down moonlit temple courtyard the samurai march across, with sakura petals drifting over it (`Backdrop`). It's top-down to match the 3/4-view character sprites, so the armies stand on the ground instead of floating in front of a sky.
 
 ## Balancing
 

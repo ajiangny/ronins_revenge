@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 77e69d45076aa45ee8fd8715d71653e2
+guid: d25c25544ed9a4f70b8ee521eb35a4cf
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8273445311213168830
-    second: Mountains_0
+      213: 4684145950162098627
+    second: Courtyard_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mountains_0
+      name: Courtyard_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 384
-        height: 80
+        width: 680
+        height: 384
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2479484f251de2d80800000000000000
-      internalID: -8273445311213168830
+      spriteID: 3c91f7b8ced610140800000000000000
+      internalID: 4684145950162098627
       vertices: []
       indices: 
       edges: []

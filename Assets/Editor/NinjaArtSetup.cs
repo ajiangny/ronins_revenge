@@ -81,11 +81,49 @@ public static class NinjaArtSetup
         ShieldWall wall = Object.FindFirstObjectByType<ShieldWall>();
         Set(wall, "damageStates", new Object[] { Load("Barricade/Barricade_0"), Load("Barricade/Barricade_1"), Load("Barricade/Barricade_2") });
         Set(wall, "debrisSprites", new Object[] { Load("Effects/WoodChip") });
+        SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
 
         AssetDatabase.SaveAssets();
-        Debug.Log("Ninja sprite art applied to Alien, Spaceship, Dart, AlienBullet, AlienFleet and the ShieldWall.");
+        Debug.Log("Ninja sprite art applied to Alien, Spaceship, Dart, AlienBullet, AlienFleet, the ShieldWall and the Backdrop.");
+    }
+
+    // Re-tunes just the backdrop, without rebuilding the prefabs (which reshuffles their internal IDs).
+    [MenuItem("Ninja/Apply Backdrop Only")]
+    public static void ApplyBackdropOnly()
+    {
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
+        if (!scene.isLoaded)
+        {
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        }
+        SetUpBackdrop();
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("Backdrop applied.");
+    }
+
+    // Replaces the old starfield with the top-down courtyard backdrop on the same GameObject (z = 20, behind the play area).
+    static void SetUpBackdrop()
+    {
+        GameObject go = GameObject.Find("Backdrop");
+        if (go == null) go = GameObject.Find("NightSky");
+        if (go == null) go = GameObject.Find("Starfield");
+        go.name = "Backdrop";
+        // Starfield.cs is deleted, so its component shows up as a missing script.
+        GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+        if (!go.TryGetComponent(out Backdrop backdrop)) backdrop = go.AddComponent<Backdrop>();
+
+        var so = new SerializedObject(backdrop);
+        so.FindProperty("ground").objectReferenceValue = Load("Background/Courtyard");
+        so.FindProperty("groundTint").colorValue = new Color(0.8f, 0.8f, 0.9f);
+        so.FindProperty("petal").objectReferenceValue = Load("Effects/Petal");
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        // Deep indigo shows only if the ground ever fails to cover the view.
+        Camera.main.backgroundColor = new Color(0.07f, 0.06f, 0.16f);
+        EditorUtility.SetDirty(Camera.main);
     }
 
     static CharacterArt SamuraiArt(string name, Sprite[] particles)

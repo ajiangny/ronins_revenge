@@ -9,9 +9,12 @@ public class Ronin : MonoBehaviour
     // The main attack on Space. The kunai is kept for a later weapon-select screen.
     public enum Weapon { Sword, Kunai }
 
-    static readonly Color WardColor = new Color(0.7f, 0.9f, 1f);
     // The teal of his spirit flames, before any element takes over.
     static readonly Color DefaultGlow = new Color(0.55f, 1f, 0.85f);
+    // Burning and Frozen Riposte shots: drawn sizes in world units, and the shards' fan either side of straight up.
+    const float FireballSize = 1.3f;
+    const float ShardSize = 0.8f;
+    const float ShardSpread = 25f;
 
     [Header("Inscribed")]
     [Tooltip("Thrown kunai, and the Spirit Shuriken and parry ripostes, which reuse the same projectile.")]
@@ -42,7 +45,6 @@ public class Ronin : MonoBehaviour
     [SerializeField] float parryRadius = 1.1f;
 
     public event Action Hit;
-    public event Action WardBroken;
     public event Action<Vector3> ShurikenThrown;
     // Raised once per parry, on the first arrow it deflects.
     public event Action Parried;
@@ -50,6 +52,8 @@ public class Ronin : MonoBehaviour
     public bool ControlsEnabled { get; set; }
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
     public Func<Transform> RiposteTarget { get; set; }
+    // A fireball or ice shard riposte struck something.
+    public event Action<Vector3, IHittable> RiposteImpact;
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
     // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
@@ -71,7 +75,6 @@ public class Ronin : MonoBehaviour
     Rigidbody body;
     SpriteRenderer sprite;
     SpriteRenderer aura;
-    FxPlayer wardBubble;
     SpriteAnimator animator;
     Camera cam;
     readonly Collider[] parryBuffer = new Collider[16];
@@ -130,9 +133,7 @@ public class Ronin : MonoBehaviour
         moveInput = 0;
         bool invulnerable = Time.time < invulnerableUntil;
         sprite.enabled = !invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f;
-        UpdateWardBubble();
-        bool tintForWard = Loadout.WardCharges > 0 && wardBubble == null;
-        sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : tintForWard ? WardColor : Color.white;
+        sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : Color.white;
 
         Keyboard keyboard = Keyboard.current;
         if (ControlsEnabled && keyboard != null)
@@ -157,21 +158,6 @@ public class Ronin : MonoBehaviour
     }
 
     bool Parrying => Time.time < parryUntil;
-
-    // An icy bubble shows each Frost Ward the ronin is carrying (the plain blue tint is the fallback).
-    void UpdateWardBubble()
-    {
-        bool warded = Loadout.WardCharges > 0 && gameObject.activeSelf;
-        if (warded && wardBubble == null)
-        {
-            wardBubble = Fx.Play(Fx.WardBubble, Bounds.center, new Color(1f, 1f, 1f, 0.85f), 1.1f, transform);
-        }
-        else if (!warded && wardBubble != null)
-        {
-            wardBubble.Stop();
-            wardBubble = null;
-        }
-    }
 
     float Charge(float lastUse, float cooldown) => Mathf.Clamp01((Time.time - lastUse) / (cooldown * Loadout.AbilityCooldownMultiplier));
 
@@ -250,6 +236,31 @@ public class Ronin : MonoBehaviour
         return Instantiate(prefab, position, Quaternion.identity).GetComponent<Kunai>();
     }
 
+    // An elemental riposte: animated fireball or ice shard art when it exists, otherwise the parried arrow in the
+    // element's colour.
+    Kunai SpawnRiposte(Vector3 position, Vector3 direction, int pierce, float scale, string fxId, float drawSize, SpriteRenderer arrowArt, Color color)
+    {
+        Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+        Sprite[] frames = Fx.Frames(fxId);
+        bool hasArt = frames != null && frames.Length > 0;
+        riposte.Launch(direction, 1.1f, pierce, KillSource.Deflected, flipSprite: !hasArt, scale: scale, lifetimeMultiplier: 2f);
+        riposte.Home(RiposteTarget);
+        if (hasArt)
+        {
+            riposte.Animate(frames, 14f, drawSize);
+            riposte.Tint(Color.white, color);
+        }
+        else
+        {
+            riposte.Mimic(arrowArt);
+            riposte.Tint(Color.Lerp(Color.white, color, 0.6f), color);
+        }
+        riposte.ParryAura(Color.Lerp(Color.white, color, 0.7f));
+        return riposte;
+    }
+
+    void OnRiposteImpact(Vector3 point, IHittable target) => RiposteImpact?.Invoke(point, target);
+
     void FixedUpdate()
     {
         if (Parrying) DeflectNearbyArrows();
@@ -277,35 +288,60 @@ public class Ronin : MonoBehaviour
     }
 
     // The arrow itself flies back, same art and all, homing in on a random enemy and wrapped in the parry's aura.
-    // A boss's reflectable slash homes in on the boss instead.
+    // Burning Riposte sends a fireball instead and Frozen Riposte a spread of ice shards. A boss's reflectable
+    // slash homes in on the boss instead.
     void Deflect(Arrow arrow)
     {
         bool reflect = arrow.Reflectable;
         Transform target = arrow.ReflectTarget;
         Color arrowColor = arrow.Color;
         SpriteRenderer arrowArt = arrow.Art;
+        bool heavy = arrow.Unbreakable;
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
-        Kunai riposte = SpawnProjectile(kunaiPrefab, position);
         // Homing shots curve, so they get longer to reach a far target.
         if (reflect)
         {
+            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
             riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, scale: 2.4f, lifetimeMultiplier: 2f);
             riposte.Tint(arrowColor, arrowColor);
             riposte.Home(() => target);
+            riposte.Mimic(arrowArt);
+            riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
             CameraShake.Add(0.25f);
+        }
+        else if (Loadout.Has(BoonId.BurningRiposte, out _))
+        {
+            Color fire = Boons.Info(Element.Fire).Color;
+            Kunai fireball = SpawnRiposte(position, Vector3.up, heavy ? 2 : 0, 2.2f, Fx.Fireball, FireballSize, arrowArt, fire);
+            fireball.Impacted += OnRiposteImpact;
+        }
+        else if (Loadout.Has(BoonId.FrozenRiposte, out float shards))
+        {
+            Color frost = Boons.Info(Element.Water).Color;
+            int count = (int)shards;
+            var sent = new Kunai[count];
+            for (int i = 0; i < count; i++)
+            {
+                float angle = count > 1 ? Mathf.Lerp(-ShardSpread, ShardSpread, i / (count - 1f)) : 0f;
+                Kunai shard = SpawnRiposte(position, Quaternion.Euler(0, 0, angle) * Vector3.up, 0, 1.2f, Fx.IceShard, ShardSize, arrowArt, frost);
+                shard.Impacted += OnRiposteImpact;
+                for (int j = 0; j < i; j++) shard.IgnoreCollisionsWith(sent[j]);
+                sent[i] = shard;
+            }
         }
         else
         {
             // The scale only sizes the hitbox; Mimic draws the arrow at its own size. The arrow art points down,
             // so it's flipped to lead the way back up. A parried Taisho spear keeps its weight and runs through two samurai.
-            riposte.Launch(Vector3.up, 1.1f, arrow.Unbreakable ? 2 : 0, KillSource.Deflected, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
+            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+            riposte.Launch(Vector3.up, 1.1f, heavy ? 2 : 0, KillSource.Deflected, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
             riposte.Tint(Color.white, parryColor);
             riposte.Home(RiposteTarget);
+            riposte.Mimic(arrowArt);
+            riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
         }
-        riposte.Mimic(arrowArt);
-        riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);
@@ -328,24 +364,13 @@ public class Ronin : MonoBehaviour
         TakeHit(coll.GetContact(0).point);
     }
 
-    // Damage that can't be parried, like a boss's chain lash. Wards and invulnerability still apply.
+    // Damage that can't be parried, like a boss's chain lash. Invulnerability still applies.
     public void TakeHit(Vector3 contact)
     {
         if (!ControlsEnabled || Time.time < invulnerableUntil) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
         HitFlash.Flash(sprite);
-        if (Loadout.TryUseWard())
-        {
-            // The Frost Ward shatters instead of the ronin taking the hit.
-            Debris.BurstSprites(contact, art.deathParticles, WardColor, 12, 1f, 6f);
-            Fx.Play(Fx.IceBurst, contact, Color.white, 1.4f);
-            Fx.Play(Fx.FrostWave, Feet, Color.white, 0.9f);
-            CameraShake.Add(0.2f);
-            Sfx.Play(Sfx.WardShatter);
-            WardBroken?.Invoke();
-            return;
-        }
         Debris.BurstSprites(contact, art.deathParticles, Color.white, 10, 1f, 6f);
         Fx.Play(Fx.Impact, contact, new Color(1f, 0.45f, 0.4f), 1.5f);
         CameraShake.Add(0.35f);
@@ -362,7 +387,6 @@ public class Ronin : MonoBehaviour
         Fx.Play(Fx.SmokePuff, sprite.bounds.center, Color.white, 2f);
         CameraShake.Add(0.8f);
         Sfx.Play(Sfx.PlayerDeath);
-        if (wardBubble != null) wardBubble.Stop();
         gameObject.SetActive(false);
     }
 

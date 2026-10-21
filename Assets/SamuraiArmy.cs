@@ -30,8 +30,6 @@ public class SamuraiArmy : MonoBehaviour
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
-    // Expiry time of each Frost Blade chill stack.
-    readonly List<float> chillStacks = new List<float>();
 
     LevelConfig level;
     Transform target;
@@ -43,7 +41,6 @@ public class SamuraiArmy : MonoBehaviour
     float nextSpearTime;
     float landingY;
     float blockerTopY;
-    float chillPerStack;
     float frozenUntil;
     float shownFrost;
     float marchTravel;
@@ -84,7 +81,6 @@ public class SamuraiArmy : MonoBehaviour
         blockerTopY = blockerTop;
         direction = 1f;
         dropRemaining = 0f;
-        chillStacks.Clear();
         frozenUntil = 0f;
         shownFrost = 0f;
 
@@ -156,15 +152,13 @@ public class SamuraiArmy : MonoBehaviour
     float CurrentSpeed()
     {
         float killedFraction = startingCount > 1 ? (float)(startingCount - soldiers.Count) / (startingCount - 1) : 1f;
-        float chill = 1f - chillPerStack * chillStacks.Count;
-        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction) * chill;
+        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction);
     }
 
     void FixedUpdate()
     {
         if (!advancing || soldiers.Count == 0) return;
 
-        chillStacks.RemoveAll(expiry => expiry <= Time.time);
         UpdateFrostTint();
         if (Frozen) return;
 
@@ -234,15 +228,6 @@ public class SamuraiArmy : MonoBehaviour
         marchBeat = (marchBeat + 1) % MarchPitches.Length;
     }
 
-    // Frost Blade: each hit slows the march for a while. Stacks up to maxStacks; a new hit refreshes the oldest stack.
-    public void Chill(float percentPerStack, float seconds, int maxStacks)
-    {
-        chillPerStack = percentPerStack;
-        if (chillStacks.Count >= maxStacks) chillStacks.RemoveAt(0);
-        chillStacks.Add(Time.time + seconds);
-        UpdateFrostTint();
-    }
-
     // Glacial Shuriken: no marching or shooting until the ice thaws.
     public void Freeze(float seconds)
     {
@@ -255,7 +240,7 @@ public class SamuraiArmy : MonoBehaviour
     // Only retints the army when the amount of frost actually changes.
     void UpdateFrostTint()
     {
-        float frost = Frozen ? 1f : chillStacks.Count / 3f;
+        float frost = Frozen ? 1f : 0f;
         if (Mathf.Approximately(frost, shownFrost)) return;
         shownFrost = frost;
         foreach (Samurai soldier in soldiers)
@@ -295,15 +280,16 @@ public class SamuraiArmy : MonoBehaviour
             column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
         }
 
+        // A front samurai encased in ice holds its whole column's fire.
         Samurai shooter = FrontSamuraiInColumn(column);
-        shooter.Fire(level.arrowSpeed);
+        if (!shooter.Encased) shooter.Fire(level.arrowSpeed);
     }
 
     // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line.
     void ThrowSpear()
     {
         nextSpearTime = Time.time + spearInterval * UnityEngine.Random.Range(0.7f, 1.3f);
-        List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho);
+        List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho && !s.Encased);
         if (taisho.Count == 0) return;
         taisho[UnityEngine.Random.Range(0, taisho.Count)].Fire(level.arrowSpeed);
     }

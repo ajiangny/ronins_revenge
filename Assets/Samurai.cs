@@ -21,6 +21,8 @@ public class Samurai : MonoBehaviour, IHittable
     public int Points { get; private set; }
     public SamuraiKind Kind { get; private set; }
     public bool IsDead { get; private set; }
+    // Frozen solid by Frost Blade or an ice shard: holds its fire, and the ronin's next hit shatters it.
+    public bool Encased => Time.time < encasedUntil;
 
     SamuraiArmy army;
     SpriteAnimator animator;
@@ -29,6 +31,8 @@ public class Samurai : MonoBehaviour, IHittable
     int health;
     int maxHealth;
     float frost;
+    float encasedUntil;
+    bool showingIce;
 
     void Awake()
     {
@@ -73,21 +77,45 @@ public class Samurai : MonoBehaviour, IHittable
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
     }
 
-    // Tints the samurai towards ice blue while the army is chilled or frozen (0 = normal, 1 = fully frozen).
+    // Encases the samurai in ice for a while: full ice tint and a frozen pose.
+    public void Encase(float seconds)
+    {
+        if (IsDead) return;
+        encasedUntil = Mathf.Max(encasedUntil, Time.time + seconds);
+        showingIce = true;
+        animator.enabled = false;
+        Fx.Play(Fx.IceBurst, transform.position, Color.white, 0.9f);
+        SetFrost(frost);
+    }
+
+    void Update()
+    {
+        if (!showingIce || Encased) return;
+        // The ice has thawed.
+        showingIce = false;
+        animator.enabled = true;
+        SetFrost(frost);
+    }
+
+    // Tints the samurai towards ice blue while the army is frozen (0 = normal, 1 = fully frozen); being encased
+    // in ice always shows full frost.
     public void SetFrost(float amount)
     {
         if (IsDead) return;
         frost = amount;
+        float shown = Encased ? 1f : frost;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
-        animator.Renderer.color = Color.Lerp(clan, FrostColor, frost * 0.7f);
+        animator.Renderer.color = Color.Lerp(clan, FrostColor, shown * 0.7f);
     }
 
     public void TakeHit(int damage, KillSource source)
     {
         if (IsDead) return;
+        // Ice is brittle: any of the ronin's own hits shatters an encased samurai outright.
+        if (Encased && source != KillSource.Effect) damage = health;
         health -= damage;
         if (health <= 0)
         {
@@ -107,6 +135,7 @@ public class Samurai : MonoBehaviour, IHittable
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
         IsDead = true;
+        animator.enabled = true;
         foreach (Collider c in GetComponentsInChildren<Collider>())
         {
             c.enabled = false;

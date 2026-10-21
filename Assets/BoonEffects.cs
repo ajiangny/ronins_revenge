@@ -1,18 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Carries out the elemental boons while a stage is played: blasts on kills, chill and freeze, lightning strikes.
+// Carries out the elemental boons while a stage is played: blasts on kills, ice and freeze, lightning strikes.
 // Kills made here count as KillSource.Effect, which never triggers another effect.
 public class BoonEffects
 {
     const float ChainRange = 3f;
-    const float ChillSeconds = 3f;
-    const int ChillStacks = 3;
+    // Samurai stand 2 apart across and 1.75 apart down, so this reaches the ones beside, above and below.
+    const float IceRadius = 2.1f;
+    const float ShardFreezeSeconds = 1.5f;
+    const float BossShardFreezeSeconds = 0.5f;
+    // Frost Blade freezes the boss for a quarter of its freeze time, and no more often than this.
+    const float BossFrostCooldown = 4f;
 
     readonly SamuraiArmy army;
     readonly Ronin ronin;
     readonly RoninLoadout loadout;
     readonly Material boltMaterial;
+    float nextBossFrost;
 
     // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
     public Boss Boss { get; set; }
@@ -34,6 +39,8 @@ public class BoonEffects
     public void OnKill(Samurai samurai, KillSource source)
     {
         Vector3 position = samurai.transform.position;
+        // Whatever froze it, an encased samurai cut down by the ronin bursts into shards.
+        if (samurai.Encased && source != KillSource.Effect) Shatter(position);
         float value;
         switch (source)
         {
@@ -42,7 +49,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
-                    army.Chill(value, ChillSeconds, ChillStacks);
+                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Encase(value);
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
                     Sfx.Play(Sfx.FrostChill);
                 }
@@ -54,9 +61,6 @@ public class BoonEffects
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value);
-                break;
-            case KillSource.Deflected:
-                if (loadout.Has(BoonId.BurningRiposte, out value)) Blast(position, value);
                 break;
         }
     }
@@ -74,19 +78,49 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FlameBlade, out value)) BossBlast(point, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
-                    Boss.Chill(value, ChillSeconds, ChillStacks);
-                    Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
-                    Sfx.Play(Sfx.FrostChill);
+                    // A blow on the frozen boss shatters the ice for an extra point of damage; otherwise she freezes.
+                    if (Boss.Frozen)
+                    {
+                        ShatterFx(point, 1.4f);
+                        Boss.TakeHit(1, KillSource.Effect);
+                    }
+                    else if (Time.time >= nextBossFrost)
+                    {
+                        nextBossFrost = Time.time + BossFrostCooldown;
+                        Boss.Freeze(value * 0.25f);
+                        Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
+                        Sfx.Play(Sfx.FrostChill);
+                    }
                 }
                 if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
                 break;
-            case KillSource.Deflected:
+            // Parried arrows act through OnRiposteImpact; only a parried boss slash bursts here.
             case KillSource.Reflected:
                 if (loadout.Has(BoonId.BurningRiposte, out value)) BossBlast(point, value);
                 break;
+        }
+    }
+
+    // A fireball or ice shard sent back by a parry has struck something.
+    public void OnRiposteImpact(Vector3 point, IHittable target)
+    {
+        float value;
+        if (loadout.Has(BoonId.BurningRiposte, out value))
+        {
+            if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, value);
+            else if (!BossFight) Blast(point, value);
+        }
+        if (loadout.Has(BoonId.FrozenRiposte, out _))
+        {
+            if (target is Samurai samurai) samurai.Encase(ShardFreezeSeconds);
+            else if (BossFight && ReferenceEquals(target, Boss))
+            {
+                Boss.Freeze(BossShardFreezeSeconds);
+                Fx.Play(Fx.IceBurst, point, Color.white, 1f);
+            }
         }
     }
 
@@ -141,7 +175,6 @@ public class BoonEffects
     public void OnParried()
     {
         float value;
-        if (loadout.Has(BoonId.FrozenRiposte, out _)) loadout.GainWard();
         if (BossFight)
         {
             if (loadout.Has(BoonId.ThunderRiposte, out _)) Strike(ronin.Bounds.center, Boss.Centre, Boss);
@@ -157,6 +190,24 @@ public class BoonEffects
                 Strike(origin, targets[i]);
             }
         }
+    }
+
+    // An encased samurai bursts into ice shards that cut the samurai around it.
+    void Shatter(Vector3 position)
+    {
+        ShatterFx(position, 1.3f);
+        foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+        {
+            target.TakeHit(1, KillSource.Effect);
+        }
+    }
+
+    void ShatterFx(Vector3 position, float scale)
+    {
+        Fx.Play(Fx.IceBurst, position, Color.white, scale);
+        Debris.BurstSprites(position, ronin.art.deathParticles, Frost, 10, 0.8f, 7f);
+        CameraShake.Add(0.12f);
+        Sfx.Play(Sfx.WardShatter, 0.8f, 1.2f);
     }
 
     // Flame Kunai, Inferno Shuriken and Burning Riposte: everything within the radius burns.

@@ -88,7 +88,6 @@ public class BoonChoiceUI : MonoBehaviour
     readonly HudSlot[] hudSlots = new HudSlot[3];
     RectTransform passiveRow;
     readonly List<Image> passiveIcons = new List<Image>();
-    TextMeshProUGUI wardText;
 
     public bool IsOpen => panel != null && panel.activeSelf;
 
@@ -265,8 +264,6 @@ public class BoonChoiceUI : MonoBehaviour
     {
         hudSlots[(int)BoonSlot.Special].cooldown.fillAmount = 1f - ronin.ShurikenCharge;
         hudSlots[(int)BoonSlot.Parry].cooldown.fillAmount = 1f - ronin.ParryCharge;
-        int wards = ronin.Loadout.WardCharges;
-        wardText.text = wards > 0 ? $"Frost Ward x{wards}" : "";
     }
 
     // Called whenever the loadout changes: slot medallions take the boon's icon and its element's colour.
@@ -441,9 +438,6 @@ public class BoonChoiceUI : MonoBehaviour
 
         passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(-30, 192), new Vector2(400, 50));
         passiveRow.pivot = new Vector2(1f, 0.5f);
-        wardText = GameUI.CreateText(transform, font, "Ward", corner, new Vector2(-30, 236), new Vector2(400, 40), 26, TextAlignmentOptions.Right);
-        wardText.rectTransform.pivot = new Vector2(1f, 0.5f);
-        wardText.color = Boons.Info(Element.Water).Color;
     }
 
     Image CreateImage(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Sprite sprite)

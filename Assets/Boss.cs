@@ -54,8 +54,6 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Telegraphs and hazards the current attack has out; cleared when the attack is interrupted.
     protected readonly List<GameObject> transient = new List<GameObject>();
 
-    readonly List<float> chillStacks = new List<float>();
-    float chillPerStack;
     float frozenUntil;
     float staggeredUntil;
     float invulnerableUntil;
@@ -66,9 +64,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     float lastBeat;
 
     protected bool Staggered => Time.time < staggeredUntil;
-    protected bool Frozen => Time.time < frozenUntil;
-    // How fast the boss's clock runs: frost slows her, a freeze or a stagger stops her.
-    protected float Tempo => Frozen || Staggered ? 0f : 1f - chillPerStack * chillStacks.Count;
+    public bool Frozen => Time.time < frozenUntil;
+    // How fast the boss's clock runs: a freeze or a stagger stops her.
+    protected float Tempo => Frozen || Staggered ? 0f : 1f;
     protected float HalfWidth => Camera.main.orthographicSize * Camera.main.aspect;
 
     public static T Create<T>(CharacterArt art, float scale, int health, Vector3 position, Color tint) where T : Boss
@@ -194,7 +192,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         transient.Clear();
     }
 
-    // Waits in boss time, so frost stretches the wait and a stagger or freeze holds it.
+    // Waits in boss time, so a stagger or freeze holds it.
     protected IEnumerator Wait(float seconds)
     {
         for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
@@ -220,9 +218,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead) return;
         age += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f);
         body.MovePosition(anchor + Vector3.up * (Mathf.Sin(age * 2.4f) * BobHeight));
-        chillStacks.RemoveAll(expiry => expiry <= Time.time);
-        float frost = Frozen ? 1f : chillStacks.Count / 3f;
-        sprite.color = Color.Lerp(bodyTint, new Color(0.55f, 0.8f, 1f), frost * 0.6f);
+        sprite.color = Frozen ? Color.Lerp(bodyTint, new Color(0.55f, 0.8f, 1f), 0.6f) : bodyTint;
     }
 
     // A dash to a new spot that leaves a trail of fading afterimages along the way.
@@ -304,13 +300,6 @@ public abstract class Boss : MonoBehaviour, IHittable
         {
             for (int j = 0; j < i; j++) volley[i].IgnoreCollisionsWith(volley[j]);
         }
-    }
-
-    public void Chill(float percentPerStack, float seconds, int maxStacks)
-    {
-        chillPerStack = percentPerStack;
-        if (chillStacks.Count >= maxStacks) chillStacks.RemoveAt(0);
-        chillStacks.Add(Time.time + seconds);
     }
 
     public void Freeze(float seconds)

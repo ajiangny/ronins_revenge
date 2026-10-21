@@ -30,6 +30,8 @@ public class Kunai : MonoBehaviour
     [SerializeField] float afterimageInterval = 0.035f;
 
     public KillSource Source { get; private set; } = KillSource.Kunai;
+    // Raised with the contact point whenever this shot damages something (fireball and ice shard ripostes).
+    public event Action<Vector3, IHittable> Impacted;
 
     Rigidbody body;
     SpriteRenderer art;
@@ -110,6 +112,19 @@ public class Kunai : MonoBehaviour
             if (!art.TryGetComponent(out SpriteAnimator animator)) animator = art.gameObject.AddComponent<SpriteAnimator>();
             animator.Play(sourceAnimator.Clip, sourceAnimator.Looping, null, sourceAnimator.ClipFps);
         }
+    }
+
+    // Swaps the art for a looping animation drawn drawSize world units tall, such as a fireball or ice shard.
+    // Call after Launch, which sets the hitbox scale this has to undo for the art.
+    public void Animate(Sprite[] frames, float fps, float drawSize)
+    {
+        art.sprite = frames[0];
+        art.color = Color.white;
+        art.flipY = false;
+        float size = drawSize / (frames[0].bounds.size.y * art.transform.parent.lossyScale.y);
+        art.transform.localScale = new Vector3(size, size, 1f);
+        if (!art.TryGetComponent(out SpriteAnimator animator)) animator = art.gameObject.AddComponent<SpriteAnimator>();
+        animator.Play(frames, true, null, fps);
     }
 
     // Seeks whatever picker returns, steering at homingTurnRate. When the target falls (its colliders switch off)
@@ -232,6 +247,7 @@ public class Kunai : MonoBehaviour
         if (target != null)
         {
             target.TakeHit(Damage.Of(Source), Source);
+            Impacted?.Invoke(transform.position, target);
             if (pierceLeft > 0)
             {
                 pierceLeft--;

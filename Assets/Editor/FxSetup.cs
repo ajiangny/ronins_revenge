@@ -25,6 +25,8 @@ public static class FxSetup
         (Fx.FrostWave, 14, false, new Vector2(0.5f, 24f / 64f)),
         (Fx.BoonPillar, 12, false, new Vector2(0.5f, 20f / 112f)),
         (Fx.WardBubble, 10, true, Centre),
+        (Fx.Fireball, 14, true, Centre),
+        (Fx.IceShard, 14, true, Centre),
         (Fx.Aura(Element.Fire), 12, true, AuraFeet),
         (Fx.Aura(Element.Water), 12, true, AuraFeet),
         (Fx.Aura(Element.Lightning), 12, true, AuraFeet),

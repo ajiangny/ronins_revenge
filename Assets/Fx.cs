@@ -13,6 +13,9 @@ public static class Fx
     public const string SlashArc = "SlashArc";
     public const string WardBubble = "WardBubble";
     public const string BoonPillar = "BoonPillar";
+    // Looping projectile art for the Burning and Frozen Riposte shots.
+    public const string Fireball = "Fireball";
+    public const string IceShard = "IceShard";
 
     // Benibana's effects.
     public const string BeniSmokeRing = "Beni_SmokeRing";

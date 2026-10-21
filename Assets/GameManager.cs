@@ -149,6 +149,7 @@ public class GameManager : MonoBehaviour
         ronin.Hit += OnRoninHit;
         ronin.ShurikenThrown += OnShurikenThrown;
         ronin.Parried += OnParried;
+        ronin.RiposteImpact += OnRiposteImpact;
         ronin.RiposteTarget = RandomEnemy;
     }
 
@@ -160,6 +161,7 @@ public class GameManager : MonoBehaviour
         ronin.Hit -= OnRoninHit;
         ronin.ShurikenThrown -= OnShurikenThrown;
         ronin.Parried -= OnParried;
+        ronin.RiposteImpact -= OnRiposteImpact;
     }
 
     void Start()
@@ -326,6 +328,11 @@ public class GameManager : MonoBehaviour
         if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(parryHitStop));
     }
 
+    void OnRiposteImpact(Vector3 point, IHittable target)
+    {
+        if (state == State.Playing) effects.OnRiposteImpact(point, target);
+    }
+
     // A brief freeze when a parry lands. It always undoes its own slow-down, and leaves the time scale alone
     // if something else (the boon screen, game over) changed it in the meantime.
     IEnumerator HitStop(float seconds)
@@ -431,9 +438,6 @@ public class GameManager : MonoBehaviour
                 {
                     Fx.Play(Fx.IceBurst, spot, Color.white, 1.3f);
                 }
-                break;
-            case BoonId.FrozenRiposte:
-                loadout.GainWard();
                 break;
         }
         UpdateRoninLook();

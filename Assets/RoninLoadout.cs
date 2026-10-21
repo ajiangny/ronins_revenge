@@ -23,7 +23,6 @@ public sealed class RoninLoadout
 
     public int BoonCount { get; private set; }
     public Element? LastElement { get; private set; }
-    public int WardCharges { get; private set; }
 
     public IReadOnlyList<EquippedBoon> Passives => passives;
 
@@ -70,7 +69,6 @@ public sealed class RoninLoadout
             if (offer.Replaces != null) elementCounts[(int)offer.Replaces.Boon.Element]--;
             slots[(int)offer.Boon.Slot] = new EquippedBoon(offer.Boon, offer.Rarity);
         }
-        WardCharges = System.Math.Min(WardCharges, MaxWards);
     }
 
     // The element the ronin has invested in most; ties go to the latest pick. Null before any boon.
@@ -95,17 +93,5 @@ public sealed class RoninLoadout
     public float AbilityCooldownMultiplier => 1f - Value(BoonId.StaticCharge);
     public int ExtraProjectiles => (int)Value(BoonId.InfernoFan);
     public float BlockerHealthMultiplier => 1f + Value(BoonId.GlacierWall);
-    public int MaxWards => (int)Value(BoonId.FrozenRiposte);
 
-    public void GainWard()
-    {
-        if (WardCharges < MaxWards) WardCharges++;
-    }
-
-    public bool TryUseWard()
-    {
-        if (WardCharges <= 0) return false;
-        WardCharges--;
-        return true;
-    }
 }

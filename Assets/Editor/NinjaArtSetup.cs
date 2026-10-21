@@ -9,6 +9,9 @@ public static class NinjaArtSetup
     const string SpriteRoot = "Assets/Art/Sprites/";
     const string ArtRoot = "Assets/Art/Characters/";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
+    // Characters are drawn bigger than one 48px unit so they read clearly on the courtyard.
+    const float SamuraiScale = 1.4f;
+    const float RoninScale = 1.5f;
 
     [MenuItem("Ninja/Apply Sprite Art")]
     public static void Apply()
@@ -27,6 +30,7 @@ public static class NinjaArtSetup
         EditPrefab("Assets/Alien.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: true);
+            root.transform.localScale = Vector3.one * SamuraiScale;
             // Feet on the bottom of the collider sphere (radius 0.5 in local space).
             AddSprite(root, "Samurai", Load("Characters/Taisho/Taisho_Base"), new Vector3(0, -0.5f, 0), true);
         });
@@ -34,6 +38,8 @@ public static class NinjaArtSetup
         EditPrefab("Assets/Spaceship.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
+            // Spaceship measures its sprite's world bounds at runtime, so clamping and TopY follow this scale.
+            root.transform.localScale = Vector3.one * RoninScale;
             // The ronin's feet sit 8px above the bottom of his 64px canvas.
             GameObject body = AddSprite(root, "Ronin", Load("Characters/Ronin/Ronin_Base"), new Vector3(0, -0.98f, 0), true);
             // Fit the hitbox to the drawn body and the spirit flames around him rather than the whole canvas.
@@ -70,7 +76,13 @@ public static class NinjaArtSetup
 
         // Row 0 is the Taisho (30 pts), rows 1-2 Bushi (20), the rest Ashigaru (10), as in AlienFleet.PointsForRow.
         EditPrefab("Assets/AlienFleet.prefab", root =>
-            Set(root.GetComponent<AlienFleet>(), "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru }));
+        {
+            var fleet = root.GetComponent<AlienFleet>();
+            Set(fleet, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
+            // The fleet's erosion and landing checks use the samurai collider's world radius; rows are spread to fit the bigger bodies.
+            SetFloat(fleet, "alienRadius", 0.5f * SamuraiScale);
+            SetFloat(fleet, "spacingY", 1.75f);
+        });
 
         // Reuse the scene if it's already open so unsaved edits in it aren't thrown away.
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
@@ -116,7 +128,7 @@ public static class NinjaArtSetup
         if (!go.TryGetComponent(out Backdrop backdrop)) backdrop = go.AddComponent<Backdrop>();
 
         var so = new SerializedObject(backdrop);
-        so.FindProperty("ground").objectReferenceValue = Load("Background/Courtyard");
+        so.FindProperty("ground").objectReferenceValue = Load("Background/CourtyardOpen");
         so.FindProperty("groundTint").colorValue = new Color(0.8f, 0.8f, 0.9f);
         so.FindProperty("petal").objectReferenceValue = Load("Effects/Petal");
         so.ApplyModifiedPropertiesWithoutUndo();
@@ -227,6 +239,13 @@ public static class NinjaArtSetup
     {
         var so = new SerializedObject(target);
         so.FindProperty(field).objectReferenceValue = value;
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void SetFloat(Object target, string field, float value)
+    {
+        var so = new SerializedObject(target);
+        so.FindProperty(field).floatValue = value;
         so.ApplyModifiedPropertiesWithoutUndo();
     }
 

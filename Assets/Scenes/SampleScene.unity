@@ -609,7 +609,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 261d6ed7b9c6c476db556f2ffb62e422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NightSky
-  ground: {fileID: 21300000, guid: d25c25544ed9a4f70b8ee521eb35a4cf, type: 3}
+  ground: {fileID: 21300000, guid: 9d4e459f5dab342b4a1d190411cbdae1, type: 3}
   groundTint: {r: 0.8, g: 0.8, b: 0.9, a: 1}
   petal: {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
   petalCount: 40

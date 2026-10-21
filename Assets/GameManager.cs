@@ -21,9 +21,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] LevelConfig[] levels =
     {
-        new LevelConfig { columns = 10, rows = 4, topRowY = 9f,   baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, bulletSpeed = 7f,   alienColor = new Color(0f, 0.98f, 0.6f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 8.6f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.5f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  bulletSpeed = 8.5f, alienColor = new Color(1f, 0.85f, 0.1f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 8f,   baseSpeed = 3.2f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f,  aimedShotChance = 0.55f, bulletSpeed = 10f,  alienColor = new Color(1f, 0.25f, 0.35f) },
+        new LevelConfig { columns = 10, rows = 4, topRowY = 8.5f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, bulletSpeed = 7f,   alienColor = new Color(0f, 0.98f, 0.6f) },
+        new LevelConfig { columns = 11, rows = 5, topRowY = 8.1f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.5f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  bulletSpeed = 8.5f, alienColor = new Color(1f, 0.85f, 0.1f) },
+        new LevelConfig { columns = 11, rows = 5, topRowY = 7.5f, baseSpeed = 3.2f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f,  aimedShotChance = 0.55f, bulletSpeed = 10f,  alienColor = new Color(1f, 0.25f, 0.35f) },
     };
 
     State state;

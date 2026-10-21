@@ -36,7 +36,9 @@ public class Alien : MonoBehaviour
 
     public void Fire(float bulletSpeed)
     {
-        AlienBullet bullet = Instantiate(bulletPrefab, transform.position + Vector3.down * 0.6f, Quaternion.identity);
+        // Spawn just below the samurai's body (its collider radius is 0.5 in local space), whatever its scale.
+        Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
+        AlienBullet bullet = Instantiate(bulletPrefab, muzzle, Quaternion.identity);
         bullet.Launch(bulletSpeed);
     }
 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d25c25544ed9a4f70b8ee521eb35a4cf
+guid: 9d4e459f5dab342b4a1d190411cbdae1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4684145950162098627
-    second: Courtyard_0
+      213: 8857404807328664186
+    second: CourtyardOpen_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +115,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Courtyard_0
+      name: CourtyardOpen_0
       rect:
         serializedVersion: 2
         x: 0
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3c91f7b8ced610140800000000000000
-      internalID: 4684145950162098627
+      spriteID: a7a89a46eb2dbea70800000000000000
+      internalID: 8857404807328664186
       vertices: []
       indices: 
       edges: []

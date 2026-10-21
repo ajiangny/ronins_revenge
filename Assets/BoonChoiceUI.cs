@@ -41,15 +41,15 @@ public class BoonChoiceUI : MonoBehaviour
         public Image cooldown;
     }
 
-    const float PortraitPixelScale = 3f;
+    const float PortraitPixelScale = 6f;
 
     [Header("Inscribed")]
     [Tooltip("Full-body art of the ronin on the left of the screen, like Zagreus in Hades. Empty shows the soul instead.")]
     [SerializeField] Sprite roninPortrait;
     [Tooltip("Where the caught soul floats over the ronin's open palm, in portrait art pixels from its top-left corner.")]
     [SerializeField] Vector2 portraitSoulPixel = new Vector2(92, 44);
-    [Tooltip("Screen pixels per art pixel for the soul in his hand.")]
-    [SerializeField] float portraitSoulScale = 2f;
+    [Tooltip("Size of the soul in his hand, relative to the portrait's pixels.")]
+    [SerializeField] float heldSoulScale = 0.67f;
     [Tooltip("One icon per boon, in BoonId order.")]
     [SerializeField] Sprite[] boonIcons;
     [Tooltip("9-sliced dark ink panel behind each boon card.")]
@@ -67,6 +67,7 @@ public class BoonChoiceUI : MonoBehaviour
 
     GameObject panel;
     Image portrait;
+    Vector2 portraitHome;
     Image portraitGlow;
     SpriteAnimatorUI portraitAnimator;
     Image heldSoul;
@@ -239,7 +240,9 @@ public class BoonChoiceUI : MonoBehaviour
         // The ronin slides in from the left, then breathes gently while the player chooses.
         float enter = Mathf.Clamp01(elapsed / 0.3f);
         enter = 1f - (1f - enter) * (1f - enter);
-        portrait.rectTransform.anchoredPosition = PortraitPosition + new Vector2((enter - 1f) * 120f, 4f * Mathf.Sin(Time.unscaledTime * 1.8f));
+        // The breath moves in whole art pixels so the big portrait doesn't shimmer.
+        float breath = Mathf.Round(Mathf.Sin(Time.unscaledTime * 1.8f)) * PortraitPixelScale;
+        portrait.rectTransform.anchoredPosition = portraitHome + new Vector2((enter - 1f) * 160f, breath);
         portrait.color = new Color(portrait.color.r, portrait.color.g, portrait.color.b, enter);
         heldSoul.color = new Color(1f, 1f, 1f, enter);
         heldSoul.rectTransform.anchoredPosition = heldSoulGlow.rectTransform.anchoredPosition + new Vector2(0f, 6f * Mathf.Sin(Time.unscaledTime * 3f));
@@ -307,7 +310,10 @@ public class BoonChoiceUI : MonoBehaviour
     }
 
     const float CardX = 170f;
-    static readonly Vector2 PortraitPosition = new Vector2(-690, 40);
+    // Without art the soul floats on its own left of the cards; the ronin's portrait is huge and cropped by the
+    // bottom-left corner of the screen, like Zagreus in Hades.
+    static readonly Vector2 SoulOnlyPosition = new Vector2(-690, 40);
+    static readonly Vector2 PortraitCorner = new Vector2(-140, -150);
 
     void BuildPanel()
     {
@@ -318,17 +324,24 @@ public class BoonChoiceUI : MonoBehaviour
         panel = root.gameObject;
 
         Vector2 center = new Vector2(0.5f, 0.5f);
-        portraitGlow = CreateImage("PortraitGlow", root, center, PortraitPosition, new Vector2(640, 640), ProceduralSprites.Glow);
         // The ronin's art is drawn at a whole-number scale so its pixels stay square.
-        Vector2 portraitSize = roninPortrait != null ? roninPortrait.rect.size * PortraitPixelScale : new Vector2(360, 360);
-        portrait = CreateImage("Portrait", root, center, PortraitPosition, portraitSize, null);
+        bool hasArt = roninPortrait != null;
+        Vector2 portraitSize = hasArt ? roninPortrait.rect.size * PortraitPixelScale : new Vector2(360, 360);
+        Vector2 portraitAnchor = hasArt ? Vector2.zero : center;
+        portraitHome = hasArt ? PortraitCorner : SoulOnlyPosition;
+        Vector2 palm = hasArt
+            ? new Vector2(portraitSoulPixel.x - roninPortrait.rect.width / 2f, roninPortrait.rect.height / 2f - portraitSoulPixel.y) * PortraitPixelScale
+            : Vector2.zero;
+
+        // The element's glow sits behind the soul in his hand.
+        portraitGlow = CreateImage("PortraitGlow", root, portraitAnchor, portraitHome + (hasArt ? portraitSize / 2f + palm : Vector2.zero),
+            hasArt ? new Vector2(1100, 1100) : new Vector2(640, 640), ProceduralSprites.Glow);
+        portraitGlow.rectTransform.pivot = center;
+        portrait = CreateImage("Portrait", root, portraitAnchor, portraitHome, portraitSize, null);
         portrait.preserveAspect = true;
         portraitAnimator = portrait.gameObject.AddComponent<SpriteAnimatorUI>();
 
-        Vector2 palm = roninPortrait != null
-            ? new Vector2(portraitSoulPixel.x - roninPortrait.rect.width / 2f, roninPortrait.rect.height / 2f - portraitSoulPixel.y) * PortraitPixelScale
-            : Vector2.zero;
-        Vector2 soulSize = new Vector2(48, 48) * portraitSoulScale;
+        Vector2 soulSize = new Vector2(48, 48) * PortraitPixelScale * heldSoulScale;
         heldSoulGlow = CreateImage("HeldSoulGlow", portrait.rectTransform, center, palm, soulSize * 2.2f, ProceduralSprites.Glow);
         heldSoul = CreateImage("HeldSoul", portrait.rectTransform, center, palm, soulSize, null);
         heldSoul.preserveAspect = true;

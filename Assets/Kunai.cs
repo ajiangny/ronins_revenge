@@ -218,8 +218,11 @@ public class Kunai : MonoBehaviour
         if (spent) return;
 
         // The ronin's own projectiles pass through each other, and a homing shot passes everything on its way
-        // to the enemy it picked (arrows, blockers, the samurai in front).
-        if (coll.collider.GetComponentInParent<Kunai>() != null || (TargetAlive() && !IsTarget(coll.collider)))
+        // to the enemy it picked (arrows, the samurai in front) except the ronin's cover, which still stops a
+        // parried arrow. A parried boss slash cuts through cover too (below).
+        bool cover = coll.collider.GetComponentInParent<Blocker>() != null;
+        bool passes = TargetAlive() && !IsTarget(coll.collider) && !(cover && Source != KillSource.Reflected);
+        if (coll.collider.GetComponentInParent<Kunai>() != null || passes)
         {
             KeepFlying(coll.collider);
             return;

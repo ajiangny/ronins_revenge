@@ -163,14 +163,40 @@ public class Arrow : MonoBehaviour
     }
 
     // Whatever was hit handles its own damage; the arrow only removes itself.
-    // An unbreakable spear only stops on the ronin and shrugs off everything else.
+    // An unbreakable spear only stops on the ronin and shrugs off everything else. A reflectable slash (the Crimson
+    // Iaido) can only be answered by a parry: it cuts through the ronin's attacks and cover, and only the ronin or
+    // another Iaido slash parried back at the boss stops it.
     void OnCollisionEnter(Collision coll)
     {
-        if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
+        if (Reflectable)
+        {
+            Kunai riposte = coll.collider.GetComponentInParent<Kunai>();
+            if (riposte != null && riposte.Source == KillSource.Reflected)
+            {
+                Shatter();
+                return;
+            }
+            if (coll.collider.GetComponentInParent<Ronin>() == null)
+            {
+                KeepFlying(coll.collider);
+                return;
+            }
+        }
+        else if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
         {
             KeepFlying(coll.collider);
             return;
         }
+        Destroy(gameObject);
+    }
+
+    // A parried Iaido meeting the next one breaks it in a burst of crimson.
+    void Shatter()
+    {
+        Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.3f, 0.35f), 1.6f);
+        Fx.Play(Fx.SlashArc, transform.position, new Color(1f, 0.25f, 0.3f), 1.5f);
+        Sfx.Play(Sfx.WardShatter, 0.8f, 0.8f);
+        CameraShake.Add(0.2f);
         Destroy(gameObject);
     }
 

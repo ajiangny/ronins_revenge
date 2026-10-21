@@ -6,4 +6,6 @@ public enum SamuraiKind
     Archer,
     // A commander in the back rank. Tougher, and hurls an unbreakable spear over its own men.
     Taisho,
+    // A front-rank wall: takes two hits and never fires, while the ranks behind shoot over it.
+    Shieldbearer,
 }

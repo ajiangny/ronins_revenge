@@ -23,10 +23,16 @@ public class Blocker : MonoBehaviour
     {
         // The Spirit Shuriken passes over the ronin's own cover.
         if (coll.collider.GetComponentInParent<Kunai>() is { Source: KillSource.Shuriken }) return;
+        Hit(coll.GetContact(0).point);
+    }
 
+    // One hit's worth of damage, from a projectile or anything that barges through (a diving samurai).
+    public void Hit(Vector3 point)
+    {
+        if (destroyed) return;
         health--;
         HitFlash.Flash(tile, 0.07f);
-        Fx.Play(Fx.Impact, coll.GetContact(0).point, new Color(1f, 0.95f, 0.85f), 0.6f);
+        Fx.Play(Fx.Impact, point, new Color(1f, 0.95f, 0.85f), 0.6f);
         if (health <= 0)
         {
             Demolish();

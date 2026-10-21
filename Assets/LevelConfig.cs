@@ -12,6 +12,8 @@ public class LevelConfig
     public SamuraiKind[] rowKinds;
     [Tooltip("Scouts fly across the top of the screen during this round.")]
     public bool scouts;
+    [Tooltip("Average seconds between samurai breaking formation to swoop at the ronin. 0 means no divers.")]
+    public float diveInterval;
 
     [Tooltip("Sideways speed (units/sec) with the full army alive.")]
     public float baseSpeed = 2.5f;

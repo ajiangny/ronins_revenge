@@ -23,6 +23,16 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] float spearInterval = 4.5f;
     [Tooltip("Taisho take this many hits to fall.")]
     [SerializeField] int taishoHealth = 2;
+    [Tooltip("Shieldbearers take this many hits to fall.")]
+    [SerializeField] int shieldHealth = 2;
+
+    [Header("Divers")]
+    [Tooltip("Seconds a diver flashes in place before it breaks formation.")]
+    [SerializeField] float diveWarning = 0.6f;
+    [Tooltip("Seconds the swoop takes from its slot to below the screen.")]
+    [SerializeField] float diveDuration = 1.7f;
+    [Tooltip("Seconds a diver takes to glide back into its slot from above the screen.")]
+    [SerializeField] float diveReturn = 1.2f;
 
     public event Action<Samurai, KillSource> SamuraiKilled;
     public event Action ArmyDefeated;
@@ -30,6 +40,19 @@ public class SamuraiArmy : MonoBehaviour
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
+    readonly List<Dive> dives = new List<Dive>();
+
+    // A samurai out of formation. Its slot keeps marching with the army so it can fly back into place.
+    class Dive
+    {
+        public Samurai soldier;
+        public Vector3 slot;
+        public Vector3 p0, p1, p2, p3;
+        public float elapsed;
+        public int phase;
+        public bool hitRonin;
+        public readonly HashSet<Blocker> trampled = new HashSet<Blocker>();
+    }
 
     LevelConfig level;
     Transform target;
@@ -39,6 +62,7 @@ public class SamuraiArmy : MonoBehaviour
     float dropRemaining;
     float nextShotTime;
     float nextSpearTime;
+    float nextDiveTime;
     float landingY;
     float blockerTopY;
     float frozenUntil;
@@ -93,7 +117,7 @@ public class SamuraiArmy : MonoBehaviour
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
                 soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
-                    kind == SamuraiKind.Taisho ? taishoHealth : 1);
+                    kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth : 1);
                 soldiers.Add(soldier);
             }
         }
@@ -106,6 +130,7 @@ public class SamuraiArmy : MonoBehaviour
         advancing = true;
         nextShotTime = Time.time + level.fireInterval;
         nextSpearTime = Time.time + spearInterval;
+        nextDiveTime = Time.time + level.diveInterval;
     }
 
     public void Halt()
@@ -120,6 +145,7 @@ public class SamuraiArmy : MonoBehaviour
             Destroy(soldier.gameObject);
         }
         soldiers.Clear();
+        dives.Clear();
         advancing = false;
         samuraiCounter.SetCount(0);
     }
@@ -134,6 +160,7 @@ public class SamuraiArmy : MonoBehaviour
     static int PointsFor(SamuraiKind kind, int row) => kind switch
     {
         SamuraiKind.Taisho => 60,
+        SamuraiKind.Shieldbearer => 40,
         SamuraiKind.Archer => 30,
         _ => row < 2 ? 20 : 10,
     };
@@ -142,7 +169,7 @@ public class SamuraiArmy : MonoBehaviour
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {
         SamuraiKind.Taisho => samuraiByRow[0],
-        SamuraiKind.Archer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
+        SamuraiKind.Archer or SamuraiKind.Shieldbearer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         _ => samuraiByRow[samuraiByRow.Length - 1],
     };
 
@@ -178,8 +205,10 @@ public class SamuraiArmy : MonoBehaviour
 
         // Move every soldier and track the army's extents in a single pass.
         float left = float.PositiveInfinity, right = float.NegativeInfinity, bottom = float.PositiveInfinity;
+        foreach (Dive dive in dives) dive.slot += step;
         foreach (Samurai soldier in soldiers)
         {
+            if (IsDiving(soldier)) continue;
             Vector3 position = soldier.Body.position + step;
             soldier.Body.MovePosition(position);
             left = Mathf.Min(left, position.x);
@@ -217,6 +246,90 @@ public class SamuraiArmy : MonoBehaviour
         {
             ThrowSpear();
         }
+        if (level.diveInterval > 0 && Time.time >= nextDiveTime)
+        {
+            StartDive();
+        }
+        UpdateDives(dt);
+    }
+
+    bool IsDiving(Samurai soldier) => dives.Exists(d => d.soldier == soldier);
+
+    // A random samurai from behind the front rank breaks formation; the front stays put so the wall and the shooters hold.
+    void StartDive()
+    {
+        nextDiveTime = Time.time + level.diveInterval * UnityEngine.Random.Range(0.7f, 1.3f);
+        if (target == null || dives.Count > 0) return;
+        List<Samurai> candidates = soldiers.FindAll(s => !s.Encased && FrontSamuraiInColumn(s.Column) != s);
+        if (candidates.Count == 0) candidates = soldiers.FindAll(s => !s.Encased);
+        if (candidates.Count == 0) return;
+
+        Samurai diver = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        diver.WarnDive();
+        dives.Add(new Dive { soldier = diver, slot = diver.Body.position });
+    }
+
+    void UpdateDives(float dt)
+    {
+        for (int i = dives.Count - 1; i >= 0; i--)
+        {
+            Dive dive = dives[i];
+            dive.elapsed += dt;
+            switch (dive.phase)
+            {
+                case 0:
+                    // Shudders in place as a warning, then picks its line at the ronin as it is right now.
+                    float shake = Mathf.Sin(dive.elapsed * 60f) * 0.08f;
+                    dive.soldier.Body.MovePosition(dive.slot + Vector3.right * shake);
+                    if (dive.elapsed < diveWarning) break;
+                    float side = dive.slot.x < target.position.x ? -1f : 1f;
+                    float bottom = CameraShake.Center.y - cam.orthographicSize - 1.5f;
+                    dive.p0 = dive.slot;
+                    dive.p1 = dive.slot + new Vector3(side * 3.5f, 0.5f, 0);
+                    dive.p2 = new Vector3(target.position.x, target.position.y + 3f, 0);
+                    dive.p3 = new Vector3(target.position.x - side * 1.5f, bottom, 0);
+                    dive.phase = 1;
+                    dive.elapsed = 0f;
+                    break;
+                case 1:
+                    float t = Mathf.Clamp01(dive.elapsed / diveDuration);
+                    Vector3 position = Bezier(dive.p0, dive.p1, dive.p2, dive.p3, t * t * (1.6f - 0.6f * t));
+                    dive.soldier.Body.MovePosition(position);
+                    DiveContact(dive, position);
+                    if (t < 1f) break;
+                    dive.phase = 2;
+                    dive.elapsed = 0f;
+                    break;
+                default:
+                    // Drops back in from above the screen and settles into its marching slot.
+                    float top = CameraShake.Center.y + cam.orthographicSize + 1.5f;
+                    float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(dive.elapsed / diveReturn));
+                    dive.soldier.Body.MovePosition(Vector3.Lerp(new Vector3(dive.slot.x, top, 0), dive.slot, u));
+                    if (u >= 1f) dives.RemoveAt(i);
+                    break;
+            }
+        }
+    }
+
+    // A diver barges through blockers and costs the ronin a life if it reaches him.
+    void DiveContact(Dive dive, Vector3 position)
+    {
+        int hits = Physics.OverlapSphereNonAlloc(position, samuraiRadius, overlapBuffer);
+        for (int i = 0; i < hits; i++)
+        {
+            if (overlapBuffer[i].TryGetComponent(out Blocker block) && dive.trampled.Add(block)) block.Hit(position);
+        }
+        if (!dive.hitRonin && target.TryGetComponent(out Ronin ronin) && (target.position - position).sqrMagnitude < 0.8f * 0.8f)
+        {
+            dive.hitRonin = true;
+            ronin.TakeHit(position);
+        }
+    }
+
+    static Vector3 Bezier(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float t)
+    {
+        float u = 1f - t;
+        return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
     }
 
     void MarchBeat(float distance)
@@ -254,6 +367,7 @@ public class SamuraiArmy : MonoBehaviour
     {
         foreach (Samurai soldier in soldiers)
         {
+            if (IsDiving(soldier)) continue;
             int hits = Physics.OverlapSphereNonAlloc(soldier.Body.position, samuraiRadius, overlapBuffer);
             for (int i = 0; i < hits; i++)
             {
@@ -280,9 +394,10 @@ public class SamuraiArmy : MonoBehaviour
             column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
         }
 
-        // A front samurai encased in ice holds its whole column's fire.
-        Samurai shooter = FrontSamuraiInColumn(column);
-        if (!shooter.Encased) shooter.Fire(level.arrowSpeed);
+        // Shieldbearers never fire, so the column's front shooter looses over their heads. A front shooter encased in ice
+        // holds its whole column's fire.
+        Samurai shooter = FrontShooterInColumn(column);
+        if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed);
     }
 
     // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line.
@@ -307,13 +422,28 @@ public class SamuraiArmy : MonoBehaviour
         return closest.Column;
     }
 
-    // The lowest living samurai in a column, or null if the column is empty.
+    // The lowest samurai in a column that can shoot, skipping shieldbearers and divers.
+    Samurai FrontShooterInColumn(int column)
+    {
+        Samurai front = null;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (soldier.Column == column && soldier.Kind != SamuraiKind.Shieldbearer && !IsDiving(soldier)
+                && (front == null || soldier.Body.position.y < front.Body.position.y))
+            {
+                front = soldier;
+            }
+        }
+        return front;
+    }
+
+    // The lowest living samurai in formation in a column, or null if the column is empty.
     public Samurai FrontSamuraiInColumn(int column)
     {
         Samurai front = null;
         foreach (Samurai soldier in soldiers)
         {
-            if (soldier.Column == column && (front == null || soldier.Body.position.y < front.Body.position.y))
+            if (soldier.Column == column && !IsDiving(soldier) && (front == null || soldier.Body.position.y < front.Body.position.y))
             {
                 front = soldier;
             }
@@ -351,6 +481,7 @@ public class SamuraiArmy : MonoBehaviour
     public void OnSamuraiKilled(Samurai soldier, KillSource source)
     {
         if (!soldiers.Remove(soldier)) return;
+        dives.RemoveAll(d => d.soldier == soldier);
 
         samuraiCounter.SetCount(soldiers.Count);
         SamuraiKilled?.Invoke(soldier, source);

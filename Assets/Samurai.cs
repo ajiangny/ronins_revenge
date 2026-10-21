@@ -8,6 +8,8 @@ public class Samurai : MonoBehaviour, IHittable
     // Encased samurai are drawn fully icy with a pale halo, so they stand out from the army's lighter frost tint.
     static readonly Color IceColor = new Color(0.45f, 0.85f, 1f);
     static readonly Color IceGlow = new Color(0.6f, 0.9f, 1f, 0.7f);
+    // Shieldbearers wear steel-blue armour so the front wall reads apart from the archers behind it.
+    static readonly Color ShieldColor = new Color(0.6f, 0.72f, 0.95f);
     const float ArcherSpread = 15f;
     // The spear is heavy: slower than an arrow, so there's time to see it and dodge or parry.
     const float SpearSpeedMultiplier = 0.8f;
@@ -57,8 +59,11 @@ public class Samurai : MonoBehaviour, IHittable
         animator.Play(art.idle, true, null, art.idleFps);
     }
 
+    public bool CanFire => Kind != SamuraiKind.Shieldbearer && !Encased;
+
     public void Fire(float arrowSpeed)
     {
+        if (Kind == SamuraiKind.Shieldbearer) return;
         // Spawn just below the samurai's body (its collider radius is 0.5 in local space), whatever its scale.
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         if (Kind == SamuraiKind.Archer)
@@ -78,6 +83,14 @@ public class Samurai : MonoBehaviour, IHittable
             Instantiate(arrowPrefab, muzzle, Quaternion.identity).Launch(arrowSpeed);
         }
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
+    }
+
+    // A flash and a battle cry just before it breaks formation to dive.
+    public void WarnDive()
+    {
+        HitFlash.Flash(animator.Renderer, 0.18f);
+        Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.5f, 0.4f), 0.8f);
+        Sfx.Play(Sfx.SamuraiCry, 0.7f, 1.2f);
     }
 
     // Encases the samurai in ice for a while: full ice tint and a frozen pose.
@@ -112,6 +125,7 @@ public class Samurai : MonoBehaviour, IHittable
         if (IsDead) return;
         frost = amount;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
+        if (Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
@@ -130,9 +144,18 @@ public class Samurai : MonoBehaviour, IHittable
             return;
         }
         HitFlash.Flash(animator.Renderer, 0.1f);
-        Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.9f, 0.7f), 0.7f);
         Debris.BurstSprites(transform.position, art.deathParticles, Color.white, 3, 0.7f, 4f);
-        Sfx.Play(Sfx.BlockerHit, 0.8f, 1.3f);
+        // A shield turns the blow with a bright spark and a clang instead of a thud.
+        if (Kind == SamuraiKind.Shieldbearer)
+        {
+            Fx.Play(Fx.Impact, transform.position + Vector3.down * 0.3f, new Color(0.8f, 0.9f, 1f), 1f);
+            Sfx.Play(Sfx.Deflect, 0.7f, 1.2f);
+        }
+        else
+        {
+            Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.9f, 0.7f), 0.7f);
+            Sfx.Play(Sfx.BlockerHit, 0.8f, 1.3f);
+        }
         SetFrost(frost);
     }
 

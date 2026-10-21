@@ -17,6 +17,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: d914d3b00626240be83a7cb1901c6ff1, type: 3}
   - {fileID: 21300000, guid: bb839045ed5dd4c3299ff8410292d058, type: 3}
   - {fileID: 21300000, guid: 34337062bf9b4497e8c3ee24b2e0f3df, type: 3}
+  - {fileID: 21300000, guid: e32be9464d4d94d8bafa3cbb69491bdd, type: 3}
+  - {fileID: 21300000, guid: 4fcf998ec054d4b9cadbebfbf5af2616, type: 3}
+  - {fileID: 21300000, guid: e1406bb09601f48d7940fdc21c9d85da, type: 3}
+  - {fileID: 21300000, guid: a919516e031ba4de49c48aeeaca9170f, type: 3}
   attack:
   - {fileID: 21300000, guid: 8aef8a22ef5a7426983b7a923daf3ea9, type: 3}
   - {fileID: 21300000, guid: 2f978df95aa1e4c5e98feb885343d74a, type: 3}
@@ -56,7 +60,7 @@ MonoBehaviour:
   runLeft: []
   runRight: []
   idleFps: 6
-  actionFps: 14
+  actionFps: 11
   runFps: 14
   deathParticles:
   - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}

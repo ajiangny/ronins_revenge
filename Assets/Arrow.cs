@@ -9,6 +9,8 @@ public class Arrow : MonoBehaviour
     [Tooltip("Draws the arrow bigger than its hitbox so it's easy to see coming.")]
     [SerializeField] float artScale = 2f;
     [SerializeField] Color glowColor = new Color(1f, 0.35f, 0.25f, 0.4f);
+    [Tooltip("How long the Taisho's spear is drawn, in world units.")]
+    [SerializeField] float spearLength = 1.4f;
 
     bool deflected;
     SpriteRenderer art;
@@ -74,12 +76,29 @@ public class Arrow : MonoBehaviour
         ReflectTarget = target;
     }
 
-    // Darkens the shot and gives it a pulsing crimson halo so it reads as a different threat from plain arrows.
-    public void MakeUnbreakable()
+    // Swaps in the Taisho's yari and gives it a pulsing crimson halo so it reads as a different threat from plain arrows.
+    // Without spear art, a darkened, bigger arrow stands in.
+    public void MakeUnbreakable(Sprite spear)
     {
         Unbreakable = true;
-        art.color = new Color(0.55f, 0.35f, 0.75f);
-        art.transform.localScale *= 1.35f;
+        if (spear != null)
+        {
+            art.sprite = spear;
+            art.color = Color.white;
+            art.transform.localScale = Vector3.one * (spearLength / spear.bounds.size.y);
+            // Stretch the hitbox along the shaft so the blade hits where it's drawn.
+            if (GetComponentInChildren<Collider>() is CapsuleCollider capsule)
+            {
+                capsule.height = spearLength * 0.8f / capsule.transform.lossyScale.y;
+            }
+            // The halo sits on the blade, which leads the way down.
+            glow.transform.localPosition += Vector3.down * (spearLength * 0.25f);
+        }
+        else
+        {
+            art.color = new Color(0.55f, 0.35f, 0.75f);
+            art.transform.localScale *= 1.35f;
+        }
         glow.color = new Color(1f, 0.1f, 0.2f, 0.6f);
         glow.transform.localScale *= 1.4f;
     }

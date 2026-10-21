@@ -68,7 +68,8 @@ match `BoonChoiceUI.boonIcons`.
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
   `MakeUnbreakable` makes the Taisho spear: it passes through kunai, arrows and blockers and only stops on the
-  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai).
+  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). Its yari art
+  (`Art/Sprites/Projectiles/Spear.png`) reaches it through `Samurai.spearSprite`, wired by `Ninja/Apply Sprite Art`.
 - `SamuraiCounter.cs` — "Samurai Left" HUD text.
 
 ### Mini-enemy: Scout

@@ -11,6 +11,8 @@ public class Samurai : MonoBehaviour, IHittable
 
     [Header("Inscribed")]
     [FormerlySerializedAs("bulletPrefab")] public Arrow arrowPrefab;
+    [Tooltip("The Taisho's yari. Wired by Ninja/Apply Sprite Art; without it the spear is a darkened arrow.")]
+    [SerializeField] Sprite spearSprite;
     [Tooltip("How strongly the stage's clan colour tints the samurai sprite.")]
     [SerializeField, Range(0, 1)] float tintStrength = 0.2f;
 
@@ -59,7 +61,7 @@ public class Samurai : MonoBehaviour, IHittable
         else if (Kind == SamuraiKind.Taisho)
         {
             Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
-            spear.MakeUnbreakable();
+            spear.MakeUnbreakable(spearSprite);
             spear.Launch(Vector3.down * (arrowSpeed * SpearSpeedMultiplier), 1.5f);
             Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
             return;

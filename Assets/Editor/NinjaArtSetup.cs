@@ -33,6 +33,7 @@ public static class NinjaArtSetup
             root.transform.localScale = Vector3.one * SamuraiScale;
             // Feet on the bottom of the collider sphere (radius 0.5 in local space).
             AddSprite(root, "Samurai", Load("Characters/Taisho/Taisho_Base"), new Vector3(0, -0.5f, 0), true);
+            Set(root.GetComponent<Samurai>(), "spearSprite", Load("Projectiles/Spear"));
         });
 
         EditPrefab("Assets/Ronin.prefab", root =>

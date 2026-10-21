@@ -1,0 +1,118 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+// Carries out the elemental boons while a stage is played: blasts on kills, chill and freeze, lightning strikes.
+// Kills made here count as KillSource.Effect, which never triggers another effect.
+public class BoonEffects
+{
+    const float ChainRange = 3f;
+    const float ChillSeconds = 3f;
+    const int ChillStacks = 3;
+
+    readonly SamuraiArmy army;
+    readonly Ronin ronin;
+    readonly RoninLoadout loadout;
+    readonly Material boltMaterial;
+
+    public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout)
+    {
+        this.army = army;
+        this.ronin = ronin;
+        this.loadout = loadout;
+        // Any sprite material draws vertex colours, which is all a bolt needs.
+        boltMaterial = ronin.GetComponentInChildren<SpriteRenderer>().sharedMaterial;
+    }
+
+    static Color Fire => Boons.Info(Element.Fire).Color;
+    static Color Frost => Boons.Info(Element.Water).Color;
+    static Color Storm => Boons.Info(Element.Lightning).Color;
+
+    public void OnKill(Samurai samurai, KillSource source)
+    {
+        Vector3 position = samurai.transform.position;
+        float value;
+        switch (source)
+        {
+            case KillSource.Kunai:
+                if (loadout.Has(BoonId.FlameKunai, out value)) Blast(position, value);
+                if (loadout.Has(BoonId.FrostKunai, out value)) army.Chill(value, ChillSeconds, ChillStacks);
+                if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value)
+                {
+                    Samurai next = army.NearestSamurai(position, ChainRange);
+                    if (next != null) Strike(position, next);
+                }
+                break;
+            case KillSource.Shuriken:
+                if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value);
+                break;
+            case KillSource.Deflected:
+                if (loadout.Has(BoonId.BurningRiposte, out value)) Blast(position, value);
+                break;
+        }
+    }
+
+    public void OnShurikenThrown(Vector3 muzzle)
+    {
+        if (army.Remaining == 0) return;
+        float value;
+        if (loadout.Has(BoonId.GlacialShuriken, out value))
+        {
+            army.Freeze(value);
+            ElementFx.Glow(muzzle, Frost, 1f, 6f, 0.4f);
+        }
+        if (loadout.Has(BoonId.ThunderShuriken, out value))
+        {
+            int own = army.ClosestColumnTo(muzzle.x);
+            foreach (int column in NearestColumns(own, (int)value))
+            {
+                Samurai front = army.FrontSamuraiInColumn(column);
+                if (front != null) Strike(front.transform.position + Vector3.up * 6f, front);
+            }
+        }
+    }
+
+    public void OnParried()
+    {
+        float value;
+        if (loadout.Has(BoonId.FrozenRiposte, out _)) loadout.GainWard();
+        if (loadout.Has(BoonId.ThunderRiposte, out value))
+        {
+            Vector3 origin = ronin.Bounds.center;
+            var targets = new List<Samurai>(army.Soldiers);
+            targets.Sort((a, b) => (a.Body.position - origin).sqrMagnitude.CompareTo((b.Body.position - origin).sqrMagnitude));
+            for (int i = 0; i < targets.Count && i < (int)value; i++)
+            {
+                Strike(origin, targets[i]);
+            }
+        }
+    }
+
+    // Flame Kunai, Inferno Shuriken and Burning Riposte: everything within the radius burns.
+    void Blast(Vector3 position, float radius)
+    {
+        ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
+        foreach (Samurai target in army.SamuraiWithin(position, radius))
+        {
+            target.Kill(KillSource.Effect);
+        }
+    }
+
+    void Strike(Vector3 from, Samurai target)
+    {
+        ElementFx.Bolt(from, target.transform.position, Storm, boltMaterial);
+        target.Kill(KillSource.Effect);
+    }
+
+    // The other occupied columns closest to `column`, nearest first.
+    List<int> NearestColumns(int column, int count)
+    {
+        var columns = new List<int>();
+        foreach (Samurai soldier in army.Soldiers)
+        {
+            if (soldier.Column != column && !columns.Contains(soldier.Column)) columns.Add(soldier.Column);
+        }
+        columns.Sort((a, b) => Mathf.Abs(a - column).CompareTo(Mathf.Abs(b - column)));
+        if (columns.Count > count) columns.RemoveRange(count, columns.Count - count);
+        return columns;
+    }
+}

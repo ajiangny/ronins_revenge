@@ -18,12 +18,14 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] float dropSpeed = 8f;
     [SerializeField, FormerlySerializedAs("alienRadius")] float samuraiRadius = 0.45f;
 
-    public event Action<Samurai> SamuraiKilled;
+    public event Action<Samurai, KillSource> SamuraiKilled;
     public event Action ArmyDefeated;
     public event Action ArmyReachedRonin;
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
+    // Expiry time of each Frost Kunai chill stack.
+    readonly List<float> chillStacks = new List<float>();
 
     LevelConfig level;
     Transform target;
@@ -34,9 +36,14 @@ public class SamuraiArmy : MonoBehaviour
     float nextShotTime;
     float landingY;
     float blockerTopY;
+    float chillPerStack;
+    float frozenUntil;
+    float shownFrost;
     bool advancing;
 
     public int Remaining => soldiers.Count;
+    public IReadOnlyList<Samurai> Soldiers => soldiers;
+    bool Frozen => Time.time < frozenUntil;
 
     void Awake()
     {
@@ -53,6 +60,9 @@ public class SamuraiArmy : MonoBehaviour
         blockerTopY = blockerTop;
         direction = 1f;
         dropRemaining = 0f;
+        chillStacks.Clear();
+        frozenUntil = 0f;
+        shownFrost = 0f;
 
         float spacingX = Mathf.Min(maxSpacingX, 0.6f * 2f * HalfWidth() / Mathf.Max(1, config.columns - 1));
         for (int col = 0; col < config.columns; col++)
@@ -98,12 +108,17 @@ public class SamuraiArmy : MonoBehaviour
     float CurrentSpeed()
     {
         float killedFraction = startingCount > 1 ? (float)(startingCount - soldiers.Count) / (startingCount - 1) : 1f;
-        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction);
+        float chill = 1f - chillPerStack * chillStacks.Count;
+        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction) * chill;
     }
 
     void FixedUpdate()
     {
         if (!advancing || soldiers.Count == 0) return;
+
+        chillStacks.RemoveAll(expiry => expiry <= Time.time);
+        UpdateFrostTint();
+        if (Frozen) return;
 
         float dt = Time.fixedDeltaTime;
         Vector3 step;
@@ -156,6 +171,35 @@ public class SamuraiArmy : MonoBehaviour
         }
     }
 
+    // Frost Kunai: each hit slows the march for a while. Stacks up to maxStacks; a new hit refreshes the oldest stack.
+    public void Chill(float percentPerStack, float seconds, int maxStacks)
+    {
+        chillPerStack = percentPerStack;
+        if (chillStacks.Count >= maxStacks) chillStacks.RemoveAt(0);
+        chillStacks.Add(Time.time + seconds);
+        UpdateFrostTint();
+    }
+
+    // Glacial Shuriken: no marching or shooting until the ice thaws.
+    public void Freeze(float seconds)
+    {
+        frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
+        nextShotTime = Mathf.Max(nextShotTime, frozenUntil + 0.3f);
+        UpdateFrostTint();
+    }
+
+    // Only retints the army when the amount of frost actually changes.
+    void UpdateFrostTint()
+    {
+        float frost = Frozen ? 1f : chillStacks.Count / 3f;
+        if (Mathf.Approximately(frost, shownFrost)) return;
+        shownFrost = frost;
+        foreach (Samurai soldier in soldiers)
+        {
+            soldier.SetFrost(frost);
+        }
+    }
+
     // Samurai trample any blockers they move into.
     void ErodeBlockers()
     {
@@ -187,18 +231,11 @@ public class SamuraiArmy : MonoBehaviour
             column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
         }
 
-        Samurai shooter = null;
-        foreach (Samurai soldier in soldiers)
-        {
-            if (soldier.Column == column && (shooter == null || soldier.Body.position.y < shooter.Body.position.y))
-            {
-                shooter = soldier;
-            }
-        }
+        Samurai shooter = FrontSamuraiInColumn(column);
         shooter.Fire(level.arrowSpeed);
     }
 
-    int ClosestColumnTo(float x)
+    public int ClosestColumnTo(float x)
     {
         Samurai closest = soldiers[0];
         foreach (Samurai soldier in soldiers)
@@ -211,13 +248,55 @@ public class SamuraiArmy : MonoBehaviour
         return closest.Column;
     }
 
-    public void OnSamuraiKilled(Samurai soldier)
+    // The lowest living samurai in a column, or null if the column is empty.
+    public Samurai FrontSamuraiInColumn(int column)
+    {
+        Samurai front = null;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (soldier.Column == column && (front == null || soldier.Body.position.y < front.Body.position.y))
+            {
+                front = soldier;
+            }
+        }
+        return front;
+    }
+
+    public Samurai NearestSamurai(Vector3 position, float maxDistance)
+    {
+        Samurai nearest = null;
+        float best = maxDistance * maxDistance;
+        foreach (Samurai soldier in soldiers)
+        {
+            float d = (soldier.Body.position - position).sqrMagnitude;
+            if (d <= best)
+            {
+                best = d;
+                nearest = soldier;
+            }
+        }
+        return nearest;
+    }
+
+    // Copies the matches so callers can kill them while the army list changes.
+    public List<Samurai> SamuraiWithin(Vector3 position, float radius)
+    {
+        var found = new List<Samurai>();
+        foreach (Samurai soldier in soldiers)
+        {
+            if ((soldier.Body.position - position).sqrMagnitude <= radius * radius) found.Add(soldier);
+        }
+        return found;
+    }
+
+    public void OnSamuraiKilled(Samurai soldier, KillSource source)
     {
         if (!soldiers.Remove(soldier)) return;
 
         samuraiCounter.SetCount(soldiers.Count);
-        SamuraiKilled?.Invoke(soldier);
-        if (soldiers.Count == 0)
+        SamuraiKilled?.Invoke(soldier, source);
+        // A boon effect inside the event may already have killed the last samurai and ended the stage.
+        if (soldiers.Count == 0 && advancing)
         {
             advancing = false;
             ArmyDefeated?.Invoke();

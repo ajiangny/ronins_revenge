@@ -16,6 +16,8 @@ public class GameUI : MonoBehaviour
     [Tooltip("Screen pixels per art pixel for the banner's border, so the pixel art stays chunky and even.")]
     [SerializeField] float overlayBannerPixelScale = 2f;
 
+    public TMP_FontAsset Font => font;
+
     TextMeshProUGUI scoreText;
     TextMeshProUGUI levelText;
     RectTransform livesRow;
@@ -107,7 +109,14 @@ public class GameUI : MonoBehaviour
     TextMeshProUGUI CreateText(string name, Vector2 anchor, Vector2 position, Vector2 size, float fontSize,
         TextAlignmentOptions alignment, Transform parent = null)
     {
-        RectTransform rect = CreateRect(name, parent != null ? parent : transform, anchor, position, size);
+        return CreateText(parent != null ? parent : transform, font, name, anchor, position, size, fontSize, alignment);
+    }
+
+    // Shared with BoonChoiceUI, which builds its panels the same way.
+    internal static TextMeshProUGUI CreateText(Transform parent, TMP_FontAsset font, string name, Vector2 anchor, Vector2 position,
+        Vector2 size, float fontSize, TextAlignmentOptions alignment)
+    {
+        RectTransform rect = CreateRect(name, parent, anchor, position, size);
         TextMeshProUGUI text = rect.gameObject.AddComponent<TextMeshProUGUI>();
         if (font != null) text.font = font;
         text.fontSize = fontSize;
@@ -117,7 +126,7 @@ public class GameUI : MonoBehaviour
         return text;
     }
 
-    static RectTransform CreateRect(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size)
+    internal static RectTransform CreateRect(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size)
     {
         var go = new GameObject(name, typeof(RectTransform));
         var rect = (RectTransform)go.transform;

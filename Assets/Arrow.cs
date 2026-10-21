@@ -6,6 +6,19 @@ public class Arrow : MonoBehaviour
     [Header("Inscribed")]
     [SerializeField] float lifetime = 4f;
 
+    bool deflected;
+
+    public Sprite Sprite => GetComponentInChildren<SpriteRenderer>().sprite;
+
+    // The ronin's parry removes the arrow and sends its own copy back up. Only the first parry check counts.
+    public bool TryDeflect()
+    {
+        if (deflected) return false;
+        deflected = true;
+        Destroy(gameObject);
+        return true;
+    }
+
     public void Launch(float speed)
     {
         GetComponent<Rigidbody>().linearVelocity = Vector3.down * speed;

@@ -25,6 +25,8 @@ public class BlockerWall : MonoBehaviour
     [SerializeField] int siteCount = 4;
     [SerializeField] float gap = 0.05f;
 
+    float healthMultiplier = 1f;
+
     // Bottom edge of the blockers is the GameObject's y position.
     public float TopY
     {
@@ -36,8 +38,10 @@ public class BlockerWall : MonoBehaviour
         }
     }
 
-    public void Rebuild()
+    // healthMultiplier toughens every blocker (Glacier Wall).
+    public void Rebuild(float healthMultiplier = 1f)
     {
+        this.healthMultiplier = healthMultiplier;
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
@@ -100,8 +104,10 @@ public class BlockerWall : MonoBehaviour
         var art = new GameObject("Sprite").AddComponent<SpriteRenderer>();
         art.transform.SetParent(blocker.transform, false);
         art.sprite = type.damageStates[0];
+        // Glacier Wall's tougher blockers are sheathed in ice.
+        if (healthMultiplier > 1f) art.color = new Color(0.75f, 0.9f, 1f);
         art.transform.localScale = Vector3.one * (type.height / art.sprite.bounds.size.y);
 
-        blocker.AddComponent<Blocker>().Init(type.health, art, type.damageStates, type.debris);
+        blocker.AddComponent<Blocker>().Init(Mathf.CeilToInt(type.health * healthMultiplier), art, type.damageStates, type.debris);
     }
 }

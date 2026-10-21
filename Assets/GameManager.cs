@@ -4,10 +4,22 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
-// Owns the game flow: title screen -> levels -> win/lose screen, plus score and lives.
+// The art for one element: its soul, and how the ronin and his projectiles look once he leans into it.
+// Any field left empty falls back to the default art tinted in the element's colour.
+[System.Serializable]
+public class ElementArt
+{
+    public Element element;
+    public Sprite[] soulFrames;
+    public CharacterArt ronin;
+    public Sprite kunai;
+    public Sprite shuriken;
+}
+
+// Owns the game flow: title screen -> levels -> win/lose screen, plus score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
-    enum State { Title, Transition, Playing, GameOver }
+    enum State { Title, Transition, Playing, Choosing, GameOver }
 
     const string HighScoreKey = "HighScore";
     static bool skipTitle;
@@ -19,6 +31,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameUI ui;
     [SerializeField] int startingLives = 3;
     [SerializeField] float levelIntroTime = 2.5f;
+
+    [Header("Souls and boons")]
+    [Tooltip("Built on the Canvas at runtime if left empty.")]
+    [SerializeField] BoonChoiceUI boonChoice;
+    [Tooltip("Chance that a fallen samurai drops a soul.")]
+    [SerializeField, Range(0, 1)] float soulDropChance = 0.07f;
+    [Tooltip("A soul always drops after this many kills without one.")]
+    [SerializeField] int soulPityKills = 15;
+    [Tooltip("One entry per element: Fire, Water, Lightning.")]
+    [SerializeField] ElementArt[] elementArt = new ElementArt[3];
 
     [SerializeField] LevelConfig[] levels =
     {
@@ -33,12 +55,21 @@ public class GameManager : MonoBehaviour
     int score;
     int highScore;
 
+    RoninLoadout loadout;
+    BoonEffects effects;
+    CharacterArt baseRoninArt;
+    Element? shownElement;
+    Soul activeSoul;
+    int killsSinceSoul;
+
     void OnEnable()
     {
         army.SamuraiKilled += OnSamuraiKilled;
         army.ArmyDefeated += OnArmyDefeated;
         army.ArmyReachedRonin += OnArmyReachedRonin;
         ronin.Hit += OnRoninHit;
+        ronin.ShurikenThrown += OnShurikenThrown;
+        ronin.Parried += OnParried;
     }
 
     void OnDisable()
@@ -47,10 +78,18 @@ public class GameManager : MonoBehaviour
         army.ArmyDefeated -= OnArmyDefeated;
         army.ArmyReachedRonin -= OnArmyReachedRonin;
         ronin.Hit -= OnRoninHit;
+        ronin.ShurikenThrown -= OnShurikenThrown;
+        ronin.Parried -= OnParried;
     }
 
     void Start()
     {
+        Time.timeScale = 1f;
+        if (boonChoice == null) boonChoice = ui.gameObject.AddComponent<BoonChoiceUI>();
+        boonChoice.Bind(ronin, ui.Font);
+        baseRoninArt = ronin.art;
+        ResetLoadout();
+
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0, highScore);
         ui.SetLevel(1, levels.Length);
@@ -66,9 +105,10 @@ public class GameManager : MonoBehaviour
         {
             state = State.Title;
             ui.ShowOverlay("SHADOW BLADE",
-                "LEFT / RIGHT or A / D to move      SPACE to throw\n\n" +
+                "LEFT / RIGHT or A / D to move      SPACE to throw kunai\n" +
+                "E or UP for the Spirit Shuriken      SHIFT or DOWN to parry arrows\n\n" +
                 $"Defeat all {levels.Length} stages. Each samurai army is faster and fires more arrows.\n" +
-                "Hide behind the bushes and stone lanterns - they won't last forever.\n\n" +
+                "Fallen samurai may drop spirit souls. Catch one to choose a boon.\n\n" +
                 "Press ENTER to start",
                 new Color(0.4f, 0.85f, 1f));
         }
@@ -97,6 +137,8 @@ public class GameManager : MonoBehaviour
         lives = startingLives;
         score = 0;
         levelIndex = 0;
+        killsSinceSoul = 0;
+        ResetLoadout();
         ui.SetLives(lives);
         ui.SetScore(score, highScore);
         StartCoroutine(BeginLevel());
@@ -107,7 +149,7 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ClearProjectiles();
-        blockers.Rebuild();
+        blockers.Rebuild(loadout.BlockerHealthMultiplier);
 
         LevelConfig level = levels[levelIndex];
         army.SpawnStage(level, ronin.transform, ronin.TopY, blockers.TopY);
@@ -124,11 +166,128 @@ public class GameManager : MonoBehaviour
         army.Advance();
     }
 
-    void OnSamuraiKilled(Samurai samurai)
+    void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
         score += samurai.Points * (levelIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score, highScore);
+
+        if (state != State.Playing) return;
+        effects.OnKill(samurai, source);
+        MaybeDropSoul(samurai.transform.position);
+    }
+
+    void OnShurikenThrown(Vector3 muzzle)
+    {
+        if (state == State.Playing) effects.OnShurikenThrown(muzzle);
+    }
+
+    void OnParried()
+    {
+        if (state == State.Playing) effects.OnParried();
+    }
+
+    void ResetLoadout()
+    {
+        loadout = new RoninLoadout();
+        ronin.Loadout = loadout;
+        effects = new BoonEffects(army, ronin, loadout);
+        shownElement = null;
+        UpdateRoninLook();
+        boonChoice.RefreshHud(loadout);
+    }
+
+    // One soul at a time, never from the stage's last samurai (the stage ends before it could be caught).
+    void MaybeDropSoul(Vector3 position)
+    {
+        if (activeSoul != null || army.Remaining == 0) return;
+        killsSinceSoul++;
+        if (Random.value >= soulDropChance && killsSinceSoul < soulPityKills) return;
+
+        killsSinceSoul = 0;
+        var element = (Element)Random.Range(0, 3);
+        activeSoul = Soul.Spawn(position, element, ArtFor(element)?.soulFrames, ronin, OnSoulCollected);
+    }
+
+    // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades.
+    void OnSoulCollected(Soul soul)
+    {
+        if (state != State.Playing) return;
+        var offers = Boons.Draw(soul.Element, 3, loadout, lives);
+        if (offers.Count == 0) return;
+
+        state = State.Choosing;
+        ronin.ControlsEnabled = false;
+        Time.timeScale = 0f;
+        boonChoice.Show(soul.Element, offers, ArtFor(soul.Element)?.soulFrames, index =>
+        {
+            TakeBoon(offers[index]);
+            Time.timeScale = 1f;
+            state = State.Playing;
+            ronin.ControlsEnabled = true;
+        });
+    }
+
+    void TakeBoon(BoonOffer offer)
+    {
+        loadout.Take(offer);
+        float value = offer.Boon.ValueAt(offer.Rarity);
+        switch (offer.Boon.Id)
+        {
+            case BoonId.TidalRenewal:
+                lives = Mathf.Min(lives + (int)value, Boons.MaxLives);
+                ui.SetLives(lives);
+                break;
+            case BoonId.GlacierWall:
+                blockers.Rebuild(loadout.BlockerHealthMultiplier);
+                break;
+            case BoonId.FrozenRiposte:
+                loadout.GainWard();
+                break;
+        }
+        UpdateRoninLook();
+        boonChoice.RefreshHud(loadout);
+    }
+
+    ElementArt ArtFor(Element element)
+    {
+        foreach (ElementArt art in elementArt)
+        {
+            if (art != null && art.element == element) return art;
+        }
+        return null;
+    }
+
+    // Flames follow the element he has the most boons of; each projectile follows the element in its slot.
+    void UpdateRoninLook()
+    {
+        Element? dominant = loadout.DominantElement;
+        CharacterArt look = dominant is Element d && ArtFor(d)?.ronin != null ? ArtFor(d).ronin : baseRoninArt;
+
+        Element? attack = loadout.SlotElement(BoonSlot.Attack);
+        Element? special = loadout.SlotElement(BoonSlot.Special);
+        Element? parry = loadout.SlotElement(BoonSlot.Parry);
+        Sprite kunai = attack is Element a ? ArtFor(a)?.kunai : null;
+        Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
+
+        ronin.SetLook(look,
+            kunai, StandInTint(attack, kunai),
+            shuriken, StandInTint(special, shuriken),
+            parry is Element p ? Boons.Info(p).Color : Color.white);
+
+        if (dominant != shownElement && dominant is Element changed)
+        {
+            ElementFx.Glow(ronin.Bounds.center, Boons.Info(changed).Color, 1f, 4f, 0.5f);
+            Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, Boons.Info(changed).Color, 14, 1f, 6f);
+        }
+        shownElement = dominant;
+    }
+
+    // Recoloured art needs no tint; without it the default sprite is tinted in the element's colour.
+    static Color StandInTint(Element? element, Sprite elementSprite)
+    {
+        if (element is not Element e || elementSprite != null) return Color.white;
+        return Color.Lerp(Color.white, Boons.Info(e).Color, 0.75f);
     }
 
     void OnArmyDefeated()
@@ -169,6 +328,7 @@ public class GameManager : MonoBehaviour
     void EndGame(string title, string message, Color color)
     {
         state = State.GameOver;
+        Time.timeScale = 1f;
         army.Halt();
         ronin.ControlsEnabled = false;
         PlayerPrefs.SetInt(HighScoreKey, highScore);
@@ -188,6 +348,10 @@ public class GameManager : MonoBehaviour
         foreach (Arrow arrow in FindObjectsByType<Arrow>())
         {
             Destroy(arrow.gameObject);
+        }
+        foreach (Soul soul in FindObjectsByType<Soul>())
+        {
+            Destroy(soul.gameObject);
         }
     }
 }

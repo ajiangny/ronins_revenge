@@ -4,6 +4,8 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(Rigidbody))]
 public class Samurai : MonoBehaviour
 {
+    static readonly Color FrostColor = new Color(0.55f, 0.8f, 1f);
+
     [Header("Inscribed")]
     [FormerlySerializedAs("bulletPrefab")] public Arrow arrowPrefab;
     [Tooltip("How strongly the stage's clan colour tints the samurai sprite.")]
@@ -12,11 +14,12 @@ public class Samurai : MonoBehaviour
     public Rigidbody Body { get; private set; }
     public int Column { get; private set; }
     public int Points { get; private set; }
+    public bool IsDead { get; private set; }
 
     SamuraiArmy army;
     SpriteAnimator animator;
     CharacterArt art;
-    bool dead;
+    Color clanTint;
 
     void Awake()
     {
@@ -30,8 +33,9 @@ public class Samurai : MonoBehaviour
         Column = column;
         Points = points;
         art = characterArt;
+        clanTint = tint;
 
-        animator.Renderer.color = Color.Lerp(Color.white, tint, tintStrength);
+        SetFrost(0);
         animator.Play(art.idle, true, null, art.idleFps);
     }
 
@@ -43,19 +47,26 @@ public class Samurai : MonoBehaviour
         arrow.Launch(arrowSpeed);
     }
 
-    void OnCollisionEnter(Collision coll)
+    // Tints the samurai towards ice blue while the army is chilled or frozen (0 = normal, 1 = fully frozen).
+    public void SetFrost(float amount)
     {
-        Kunai kunai = coll.collider.GetComponentInParent<Kunai>();
-        if (dead || kunai == null || !kunai.TryConsume()) return;
+        if (IsDead) return;
+        Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
+        animator.Renderer.color = Color.Lerp(clan, FrostColor, amount * 0.7f);
+    }
+
+    public void Kill(KillSource source)
+    {
+        if (IsDead) return;
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
-        dead = true;
+        IsDead = true;
         foreach (Collider c in GetComponentsInChildren<Collider>())
         {
             c.enabled = false;
         }
         Debris.BurstSprites(transform.position, art.deathParticles, Color.white, 8, 1f, 6f);
-        army.OnSamuraiKilled(this);
+        army.OnSamuraiKilled(this, source);
         if (art.death != null && art.death.Length > 0)
         {
             animator.Play(art.death, false, () => Destroy(gameObject), art.actionFps);

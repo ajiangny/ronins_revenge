@@ -270,7 +270,8 @@ public class GameManager : MonoBehaviour
         Sprite kunai = attack is Element a ? ArtFor(a)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
-        ronin.SetLook(look,
+        Color aura = dominant is Element glow ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
+        ronin.SetLook(look, aura,
             kunai, StandInTint(attack, kunai),
             shuriken, StandInTint(special, shuriken),
             parry is Element p ? Boons.Info(p).Color : Color.white);

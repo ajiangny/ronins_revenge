@@ -1,0 +1,172 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+
+// Builds the elemental ronin variants and wires the soul/boon art into the scene. Safe to re-run;
+// any art that doesn't exist yet is skipped, and the game falls back to placeholders for it.
+public static class BoonArtSetup
+{
+    const string SpriteRoot = "Assets/Art/Sprites/";
+    const string ArtRoot = "Assets/Art/Characters/";
+    const string ScenePath = "Assets/Scenes/SampleScene.unity";
+
+    // The ronin's spirit flames and the spirit kunai are teal-green (hue ~160°); his red scarf and skin sit near 0-20°,
+    // so only this hue band is recoloured.
+    const float FlameHueMin = 120f / 360f;
+    const float FlameHueMax = 200f / 360f;
+
+    static readonly (Element element, string suffix, float hue, float valueBoost)[] Variants =
+    {
+        (Element.Fire, "Fire", 18f / 360f, 1.1f),
+        (Element.Water, "Water", 205f / 360f, 1f),
+        (Element.Lightning, "Lightning", 280f / 360f, 1.05f),
+    };
+
+    [MenuItem("Ninja/Apply Boon Art")]
+    public static void Apply()
+    {
+        CharacterArt baseRonin = AssetDatabase.LoadAssetAtPath<CharacterArt>(ArtRoot + "Ronin.asset");
+        Sprite[] parry = Frames("Characters/Ronin/Ronin_Parry_");
+        if (parry.Length > 0)
+        {
+            baseRonin.parry = parry;
+            EditorUtility.SetDirty(baseRonin);
+        }
+
+        Sprite shuriken = Load("Projectiles/Shuriken");
+        if (shuriken != null)
+        {
+            GameObject root = PrefabUtility.LoadPrefabContents("Assets/Ronin.prefab");
+            try
+            {
+                var so = new SerializedObject(root.GetComponent<Ronin>());
+                so.FindProperty("shurikenSprite").objectReferenceValue = shuriken;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(root, "Assets/Ronin.prefab");
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
+        if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+
+        var manager = Object.FindAnyObjectByType<GameManager>();
+        var managerSo = new SerializedObject(manager);
+        SerializedProperty elementArt = managerSo.FindProperty("elementArt");
+        elementArt.arraySize = Variants.Length;
+        for (int i = 0; i < Variants.Length; i++)
+        {
+            var (element, suffix, hue, boost) = Variants[i];
+            SerializedProperty entry = elementArt.GetArrayElementAtIndex(i);
+            entry.FindPropertyRelative("element").enumValueIndex = (int)element;
+            SetArray(entry.FindPropertyRelative("soulFrames"), Frames($"Effects/Soul_{suffix}_"));
+            entry.FindPropertyRelative("ronin").objectReferenceValue = BuildRoninVariant(baseRonin, suffix, hue, boost);
+            entry.FindPropertyRelative("kunai").objectReferenceValue = Recolor(Load("Projectiles/Kunai"), suffix, hue, boost);
+            entry.FindPropertyRelative("shuriken").objectReferenceValue = Recolor(shuriken, suffix, hue, boost);
+        }
+
+        GameUI ui = Object.FindAnyObjectByType<GameUI>();
+        if (!ui.TryGetComponent(out BoonChoiceUI choice)) choice = ui.gameObject.AddComponent<BoonChoiceUI>();
+        managerSo.FindProperty("boonChoice").objectReferenceValue = choice;
+        managerSo.ApplyModifiedPropertiesWithoutUndo();
+
+        var choiceSo = new SerializedObject(choice);
+        var icons = new List<Sprite>();
+        foreach (BoonId id in System.Enum.GetValues(typeof(BoonId))) icons.Add(Load("UI/Boons/" + id));
+        SetArray(choiceSo.FindProperty("boonIcons"), icons.ToArray());
+        SetArray(choiceSo.FindProperty("abilityIcons"), new[] { Load("UI/Abilities/Kunai"), Load("UI/Abilities/Shuriken"), Load("UI/Abilities/Parry") });
+        choiceSo.FindProperty("cardSprite").objectReferenceValue = Load("UI/BoonCard");
+        choiceSo.FindProperty("cardGlowSprite").objectReferenceValue = Load("UI/BoonCardGlow");
+        choiceSo.ApplyModifiedPropertiesWithoutUndo();
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        Debug.Log("Boon art applied: elemental ronin variants, souls, boon icons and cards.");
+    }
+
+    // Copies every clip of the ronin with his flames recoloured, into Characters/Ronin_<suffix>/.
+    static CharacterArt BuildRoninVariant(CharacterArt source, string suffix, float hue, float boost)
+    {
+        string path = ArtRoot + "Ronin" + suffix + ".asset";
+        var art = AssetDatabase.LoadAssetAtPath<CharacterArt>(path);
+        if (art == null)
+        {
+            art = ScriptableObject.CreateInstance<CharacterArt>();
+            AssetDatabase.CreateAsset(art, path);
+        }
+        art.idle = Recolor(source.idle, suffix, hue, boost);
+        art.attack = Recolor(source.attack, suffix, hue, boost);
+        art.hit = Recolor(source.hit, suffix, hue, boost);
+        art.death = Recolor(source.death, suffix, hue, boost);
+        art.parry = Recolor(source.parry, suffix, hue, boost);
+        art.runLeft = Recolor(source.runLeft, suffix, hue, boost);
+        art.runRight = Recolor(source.runRight, suffix, hue, boost);
+        art.idleFps = source.idleFps;
+        art.actionFps = source.actionFps;
+        art.runFps = source.runFps;
+        art.deathParticles = source.deathParticles;
+        EditorUtility.SetDirty(art);
+        return art;
+    }
+
+    static Sprite[] Recolor(Sprite[] frames, string suffix, float hue, float boost)
+    {
+        if (frames == null) return null;
+        var result = new Sprite[frames.Length];
+        for (int i = 0; i < frames.Length; i++) result[i] = Recolor(frames[i], suffix, hue, boost);
+        return result;
+    }
+
+    // Writes <folder>_<suffix>/<name>_<suffix>.png (characters) or <name>_<suffix>.png (everything else) next to the source.
+    static Sprite Recolor(Sprite source, string suffix, float hue, float boost)
+    {
+        if (source == null) return null;
+        string sourcePath = AssetDatabase.GetAssetPath(source);
+        string folder = Path.GetDirectoryName(sourcePath).Replace('\\', '/');
+        string name = Path.GetFileNameWithoutExtension(sourcePath);
+        string targetFolder = sourcePath.StartsWith(SpriteRoot + "Characters/") ? $"{folder}_{suffix}" : folder;
+        string targetPath = $"{targetFolder}/{name}_{suffix}.png";
+        Directory.CreateDirectory(targetFolder);
+
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        texture.LoadImage(File.ReadAllBytes(sourcePath));
+        Color32[] pixels = texture.GetPixels32();
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            Color32 p = pixels[i];
+            if (p.a == 0) continue;
+            Color.RGBToHSV(p, out float h, out float s, out float v);
+            if (h < FlameHueMin || h > FlameHueMax || s < 0.15f) continue;
+            Color shifted = Color.HSVToRGB(hue, s, Mathf.Clamp01(v * boost));
+            pixels[i] = new Color32((byte)(shifted.r * 255), (byte)(shifted.g * 255), (byte)(shifted.b * 255), p.a);
+        }
+        texture.SetPixels32(pixels);
+        File.WriteAllBytes(targetPath, texture.EncodeToPNG());
+        Object.DestroyImmediate(texture);
+
+        AssetDatabase.ImportAsset(targetPath);
+        return AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
+    }
+
+    // Every numbered frame <prefix>0, <prefix>1, ... that exists.
+    static Sprite[] Frames(string prefix)
+    {
+        var frames = new List<Sprite>();
+        for (int i = 0; Load(prefix + i) is Sprite frame; i++) frames.Add(frame);
+        return frames.ToArray();
+    }
+
+    static Sprite Load(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + path + ".png");
+
+    static void SetArray(SerializedProperty array, Sprite[] values)
+    {
+        array.arraySize = values.Length;
+        for (int i = 0; i < values.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+    }
+}

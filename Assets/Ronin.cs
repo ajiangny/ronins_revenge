@@ -48,6 +48,7 @@ public class Ronin : MonoBehaviour
 
     Rigidbody body;
     SpriteRenderer sprite;
+    SpriteRenderer aura;
     SpriteAnimator animator;
     Camera cam;
     readonly Collider[] parryBuffer = new Collider[16];
@@ -82,6 +83,15 @@ public class Ronin : MonoBehaviour
         maxOffsetX = bounds.max.x - pivot.x;
         centerOffsetX = bounds.center.x - pivot.x;
         topOffset = bounds.max.y - pivot.y;
+
+        // A soft glow behind the ronin in his main element's colour; his idle frames have no spirit flames to recolour.
+        aura = new GameObject("Aura").AddComponent<SpriteRenderer>();
+        aura.transform.SetParent(transform, false);
+        aura.transform.position = bounds.center + Vector3.forward * 0.1f;
+        aura.transform.localScale = Vector3.one * (bounds.size.y * 1.3f / transform.lossyScale.y);
+        aura.sprite = ProceduralSprites.Glow;
+        aura.sortingOrder = sprite.sortingOrder - 1;
+        aura.color = Color.clear;
     }
 
     void Start()
@@ -239,8 +249,9 @@ public class Ronin : MonoBehaviour
     }
 
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
-    public void SetLook(CharacterArt lookArt, Sprite kunai, Color kunaiColor, Sprite shuriken, Color shurikenColor, Color parry)
+    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite kunai, Color kunaiColor, Sprite shuriken, Color shurikenColor, Color parry)
     {
+        aura.color = auraColor;
         if (lookArt != null && lookArt != art)
         {
             art = lookArt;

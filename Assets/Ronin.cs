@@ -25,7 +25,7 @@ public class Ronin : MonoBehaviour
     [SerializeField] Sprite shurikenSprite;
     [SerializeField] float shurikenCooldown = 6f;
     [Tooltip("Scales the whole shuriken, hitbox included (the art is also drawn larger by Kunai.artScale).")]
-    [SerializeField] float shurikenScale = 1.8f;
+    [SerializeField] float shurikenScale = 2.6f;
     [SerializeField] float shurikenSpeed = 0.75f;
 
     [Header("Parry (Shift / Down)")]

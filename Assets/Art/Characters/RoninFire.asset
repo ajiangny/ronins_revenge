@@ -32,6 +32,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0d2d6e1e3793f4e619765c7c033df255, type: 3}
   - {fileID: 21300000, guid: 9e2d5dffadfef4c7ea29df24caf99173, type: 3}
   - {fileID: 21300000, guid: cabc6a16747db4f4d93a888b40b8b31d, type: 3}
+  slash:
+  - {fileID: 21300000, guid: 6a4aaf2cddd5449039721a4e448f7c8b, type: 3}
+  - {fileID: 21300000, guid: 0ae2ac62a601b487dbb5251bdaca7c12, type: 3}
+  - {fileID: 21300000, guid: 958ed7114859145a9bc6625c201e8160, type: 3}
+  - {fileID: 21300000, guid: 52393167120ff4f62a5b593da6089059, type: 3}
   runLeft:
   - {fileID: 21300000, guid: 33d8c3d5b7dda4e80ac5f7540fcbcd14, type: 3}
   - {fileID: 21300000, guid: 13db89f2f059448d6b1b983e2e829236, type: 3}

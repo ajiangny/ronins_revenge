@@ -23,8 +23,8 @@ public static class NinjaArtSetup
         // Separate west/east clips rather than one flipped, so his armoured arm stays on the right side.
         ronin.runLeft = Frames("Ronin", "RunWest");
         ronin.runRight = Frames("Ronin", "RunEast");
-        // Empty until the katana swing is drawn; the ronin then swings with his parry stance.
-        ronin.slash = Frames("Ronin", "Slash");
+        // The middle of the katana swing: four frames finish inside the 0.35 s attack cooldown while Space is held.
+        ronin.slash = Frames("Ronin", "Slash", 1, 2, 3, 4);
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);

@@ -41,7 +41,15 @@ public class BoonChoiceUI : MonoBehaviour
         public Image cooldown;
     }
 
+    const float PortraitPixelScale = 3f;
+
     [Header("Inscribed")]
+    [Tooltip("Full-body art of the ronin on the left of the screen, like Zagreus in Hades. Empty shows the soul instead.")]
+    [SerializeField] Sprite roninPortrait;
+    [Tooltip("Where the caught soul floats over the ronin's open palm, in portrait art pixels from its top-left corner.")]
+    [SerializeField] Vector2 portraitSoulPixel = new Vector2(92, 44);
+    [Tooltip("Screen pixels per art pixel for the soul in his hand.")]
+    [SerializeField] float portraitSoulScale = 2f;
     [Tooltip("One icon per boon, in BoonId order.")]
     [SerializeField] Sprite[] boonIcons;
     [Tooltip("9-sliced dark ink panel behind each boon card.")]
@@ -61,6 +69,9 @@ public class BoonChoiceUI : MonoBehaviour
     Image portrait;
     Image portraitGlow;
     SpriteAnimatorUI portraitAnimator;
+    Image heldSoul;
+    Image heldSoulGlow;
+    SpriteAnimatorUI heldSoulAnimator;
     TextMeshProUGUI title;
     TextMeshProUGUI subtitle;
     Image divider;
@@ -105,10 +116,29 @@ public class BoonChoiceUI : MonoBehaviour
         subtitle.text = info.Subtitle;
         divider.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.7f);
 
-        bool hasPortrait = soulFrames != null && soulFrames.Length > 0;
-        portrait.sprite = hasPortrait ? soulFrames[0] : ProceduralSprites.Glow;
-        portrait.color = hasPortrait ? Color.white : Color.Lerp(elementColor, Color.white, 0.5f);
-        portraitAnimator.Play(hasPortrait ? soulFrames : null, 8f);
+        bool hasSoul = soulFrames != null && soulFrames.Length > 0;
+        if (roninPortrait != null)
+        {
+            portrait.sprite = roninPortrait;
+            portrait.color = Color.white;
+            portraitAnimator.Play(null, 0f);
+            // The soul he caught floats over his palm, so it takes the element's colours.
+            heldSoul.gameObject.SetActive(hasSoul);
+            if (hasSoul)
+            {
+                heldSoul.sprite = soulFrames[0];
+                heldSoulAnimator.Play(soulFrames, 8f);
+            }
+            heldSoulGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.8f);
+        }
+        else
+        {
+            portrait.sprite = hasSoul ? soulFrames[0] : ProceduralSprites.Glow;
+            portrait.color = hasSoul ? Color.white : Color.Lerp(elementColor, Color.white, 0.5f);
+            portraitAnimator.Play(hasSoul ? soulFrames : null, 8f);
+            heldSoul.gameObject.SetActive(false);
+            heldSoulGlow.color = Color.clear;
+        }
         portraitGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.6f);
 
         for (int i = 0; i < cards.Length; i++)
@@ -206,6 +236,14 @@ public class BoonChoiceUI : MonoBehaviour
         float dt = Time.unscaledDeltaTime;
         float pulse = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 5f);
         portraitGlow.rectTransform.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(Time.unscaledTime * 2.5f));
+        // The ronin slides in from the left, then breathes gently while the player chooses.
+        float enter = Mathf.Clamp01(elapsed / 0.3f);
+        enter = 1f - (1f - enter) * (1f - enter);
+        portrait.rectTransform.anchoredPosition = PortraitPosition + new Vector2((enter - 1f) * 120f, 4f * Mathf.Sin(Time.unscaledTime * 1.8f));
+        portrait.color = new Color(portrait.color.r, portrait.color.g, portrait.color.b, enter);
+        heldSoul.color = new Color(1f, 1f, 1f, enter);
+        heldSoul.rectTransform.anchoredPosition = heldSoulGlow.rectTransform.anchoredPosition + new Vector2(0f, 6f * Mathf.Sin(Time.unscaledTime * 3f));
+        heldSoulGlow.rectTransform.localScale = Vector3.one * (0.9f + 0.15f * pulse);
 
         for (int i = 0; i < offers.Count; i++)
         {
@@ -269,6 +307,7 @@ public class BoonChoiceUI : MonoBehaviour
     }
 
     const float CardX = 170f;
+    static readonly Vector2 PortraitPosition = new Vector2(-690, 40);
 
     void BuildPanel()
     {
@@ -279,10 +318,21 @@ public class BoonChoiceUI : MonoBehaviour
         panel = root.gameObject;
 
         Vector2 center = new Vector2(0.5f, 0.5f);
-        portraitGlow = CreateImage("PortraitGlow", root, center, new Vector2(-690, 40), new Vector2(640, 640), ProceduralSprites.Glow);
-        portrait = CreateImage("Portrait", root, center, new Vector2(-690, 40), new Vector2(360, 360), null);
+        portraitGlow = CreateImage("PortraitGlow", root, center, PortraitPosition, new Vector2(640, 640), ProceduralSprites.Glow);
+        // The ronin's art is drawn at a whole-number scale so its pixels stay square.
+        Vector2 portraitSize = roninPortrait != null ? roninPortrait.rect.size * PortraitPixelScale : new Vector2(360, 360);
+        portrait = CreateImage("Portrait", root, center, PortraitPosition, portraitSize, null);
         portrait.preserveAspect = true;
         portraitAnimator = portrait.gameObject.AddComponent<SpriteAnimatorUI>();
+
+        Vector2 palm = roninPortrait != null
+            ? new Vector2(portraitSoulPixel.x - roninPortrait.rect.width / 2f, roninPortrait.rect.height / 2f - portraitSoulPixel.y) * PortraitPixelScale
+            : Vector2.zero;
+        Vector2 soulSize = new Vector2(48, 48) * portraitSoulScale;
+        heldSoulGlow = CreateImage("HeldSoulGlow", portrait.rectTransform, center, palm, soulSize * 2.2f, ProceduralSprites.Glow);
+        heldSoul = CreateImage("HeldSoul", portrait.rectTransform, center, palm, soulSize, null);
+        heldSoul.preserveAspect = true;
+        heldSoulAnimator = heldSoul.gameObject.AddComponent<SpriteAnimatorUI>();
 
         title = GameUI.CreateText(root, font, "Title", center, new Vector2(CardX, 425), new Vector2(1300, 90), 66, TextAlignmentOptions.Center);
         title.characterSpacing = 38f;

@@ -86,6 +86,7 @@ public static class BoonArtSetup
         foreach (BoonId id in System.Enum.GetValues(typeof(BoonId))) icons.Add(Load("UI/Boons/" + id));
         SetArray(choiceSo.FindProperty("boonIcons"), icons.ToArray());
         SetArray(choiceSo.FindProperty("abilityIcons"), new[] { Load("UI/Abilities/Kunai"), Load("UI/Abilities/Shuriken"), Load("UI/Abilities/Parry") });
+        choiceSo.FindProperty("roninPortrait").objectReferenceValue = Load("UI/RoninPortrait");
         choiceSo.FindProperty("cardSprite").objectReferenceValue = Load("UI/BoonCard");
         choiceSo.FindProperty("cardGlowSprite").objectReferenceValue = Load("UI/BoonCardGlow");
         choiceSo.ApplyModifiedPropertiesWithoutUndo();

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // What killed a samurai. Boon effects only trigger on the ronin's own attacks, never on other effects' kills,
@@ -20,6 +21,14 @@ public class Kunai : MonoBehaviour
     [Tooltip("Soft glow behind the projectile, in world units; its colour comes from Tint.")]
     [SerializeField] float glowSize = 0.9f;
 
+    [Header("Parried shots")]
+    [Tooltip("How fast a parried shot turns toward its target, in degrees per second.")]
+    [SerializeField] float homingTurnRate = 540f;
+    [Tooltip("Size of the pulsing parry aura, in world units.")]
+    [SerializeField] float parryAuraSize = 1.7f;
+    [Tooltip("Seconds between the fading afterimages a parried shot leaves behind.")]
+    [SerializeField] float afterimageInterval = 0.035f;
+
     public KillSource Source { get; private set; } = KillSource.Kunai;
 
     Rigidbody body;
@@ -29,6 +38,12 @@ public class Kunai : MonoBehaviour
     int pierceLeft;
     bool spent;
     bool launched;
+    Func<Transform> pickTarget;
+    Transform target;
+    Collider[] targetColliders;
+    SpriteRenderer parryAura;
+    Color parryColor;
+    float nextAfterimage;
 
     void Awake()
     {
@@ -81,6 +96,83 @@ public class Kunai : MonoBehaviour
         glow.color = new Color(glowColor.r, glowColor.g, glowColor.b, 0.45f);
     }
 
+    // Takes on a parried shot's own look: its sprite, colour, drawn size and animation.
+    // Call after Launch, which sets the hitbox scale this has to undo for the art.
+    public void Mimic(SpriteRenderer source)
+    {
+        art.sprite = source.sprite;
+        art.color = source.color;
+        Vector3 world = source.transform.lossyScale;
+        Vector3 parent = art.transform.parent.lossyScale;
+        art.transform.localScale = new Vector3(Mathf.Abs(world.x / parent.x), Mathf.Abs(world.y / parent.y), 1f);
+        if (source.TryGetComponent(out SpriteAnimator sourceAnimator) && sourceAnimator.Clip != null)
+        {
+            if (!art.TryGetComponent(out SpriteAnimator animator)) animator = art.gameObject.AddComponent<SpriteAnimator>();
+            animator.Play(sourceAnimator.Clip, sourceAnimator.Looping, null, sourceAnimator.ClipFps);
+        }
+    }
+
+    // Seeks whatever picker returns, steering at homingTurnRate. When the target falls (its colliders switch off)
+    // it asks for a new one; with nothing left it flies straight on.
+    public void Home(Func<Transform> picker)
+    {
+        pickTarget = picker;
+        AcquireTarget();
+        // Turn straight at the first target so the shot leaves the parry already on its way.
+        if (target != null) Steer(TargetPoint() - transform.position, float.MaxValue);
+    }
+
+    // A pulsing halo in the parry's colour and a trail of fading afterimages: this shot was parried.
+    public void ParryAura(Color color)
+    {
+        parryColor = color;
+        parryAura = CreateGlow(transform, parryAuraSize, art.sortingOrder - 2, color);
+    }
+
+    void AcquireTarget()
+    {
+        target = pickTarget?.Invoke();
+        targetColliders = target != null ? target.GetComponentsInChildren<Collider>() : null;
+    }
+
+    bool TargetAlive()
+    {
+        if (target == null) return false;
+        foreach (Collider c in targetColliders)
+        {
+            if (c != null && c.enabled) return true;
+        }
+        return false;
+    }
+
+    bool IsTarget(Collider other) => Array.IndexOf(targetColliders, other) >= 0;
+
+    Vector3 TargetPoint()
+    {
+        foreach (Collider c in targetColliders)
+        {
+            if (c != null && c.enabled) return c.bounds.center;
+        }
+        return target.position;
+    }
+
+    void Steer(Vector3 toward, float maxDegrees)
+    {
+        toward.z = 0;
+        if (toward.sqrMagnitude < 0.0001f) return;
+        Vector3 direction = Vector3.RotateTowards(velocity.normalized, toward.normalized, maxDegrees * Mathf.Deg2Rad, 0f);
+        velocity = direction * velocity.magnitude;
+        body.linearVelocity = velocity;
+        transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
+    }
+
+    void FixedUpdate()
+    {
+        if (pickTarget == null || spent) return;
+        if (!TargetAlive()) AcquireTarget();
+        if (TargetAlive()) Steer(TargetPoint() - transform.position, homingTurnRate * Time.fixedDeltaTime);
+    }
+
     // Kunai thrown together (Inferno Fan) start on the same spot; they must not knock each other out.
     public void IgnoreCollisionsWith(Kunai other)
     {
@@ -99,6 +191,25 @@ public class Kunai : MonoBehaviour
         {
             spinner.Rotate(0, 0, -spinSpeed * Time.deltaTime);
         }
+        if (parryAura != null) UpdateParryAura();
+    }
+
+    void UpdateParryAura()
+    {
+        float pulse = Mathf.Sin(Time.time * 18f);
+        parryAura.transform.localScale = Vector3.one * (parryAuraSize * (1f + 0.15f * pulse));
+        parryAura.color = new Color(parryColor.r, parryColor.g, parryColor.b, 0.55f + 0.2f * pulse);
+        if (Time.time < nextAfterimage) return;
+        nextAfterimage = Time.time + afterimageInterval;
+
+        var ghost = new GameObject("Afterimage").AddComponent<SpriteRenderer>();
+        ghost.transform.SetPositionAndRotation(art.transform.position, art.transform.rotation);
+        ghost.transform.localScale = art.transform.lossyScale;
+        ghost.sprite = art.sprite;
+        ghost.flipY = art.flipY;
+        ghost.sortingOrder = art.sortingOrder - 1;
+        ghost.color = new Color(parryColor.r, parryColor.g, parryColor.b, 0.5f);
+        Fader.Fade(ghost, 0.18f);
     }
 
     // The kunai decides what its hit does, so piercing doesn't depend on which OnCollisionEnter Unity calls first.
@@ -106,8 +217,9 @@ public class Kunai : MonoBehaviour
     {
         if (spent) return;
 
-        // The ronin's own projectiles pass through each other.
-        if (coll.collider.GetComponentInParent<Kunai>() != null)
+        // The ronin's own projectiles pass through each other, and a homing shot passes everything on its way
+        // to the enemy it picked (arrows, blockers, the samurai in front).
+        if (coll.collider.GetComponentInParent<Kunai>() != null || (TargetAlive() && !IsTarget(coll.collider)))
         {
             KeepFlying(coll.collider);
             return;

@@ -8,6 +8,10 @@ public class SpriteAnimator : MonoBehaviour
     [SerializeField] float fps = 8f;
 
     public SpriteRenderer Renderer { get; private set; }
+    // The clip playing now, so another sprite can copy it (a parried shot keeps animating as it flies back).
+    public Sprite[] Clip => clip;
+    public float ClipFps => clipFps;
+    public bool Looping => loop;
 
     Sprite[] clip;
     float clipFps;

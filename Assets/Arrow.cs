@@ -23,6 +23,7 @@ public class Arrow : MonoBehaviour
     public bool Reflectable => ReflectTarget != null;
     public Transform ReflectTarget { get; private set; }
     public Sprite Sprite => art.sprite;
+    public SpriteRenderer Art => art;
     public Color Color => art.color;
     // A Taisho's spear: kunai and arrows break on it and it cuts through cover, so it can only be dodged or parried.
     public bool Unbreakable { get; private set; }

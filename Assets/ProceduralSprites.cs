@@ -7,6 +7,7 @@ public static class ProceduralSprites
     static Sprite white;
     static Sprite glow;
     static Sprite disc;
+    static Sprite arrowDown;
 
     public static Sprite White => white != null ? white : white = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
 
@@ -15,6 +16,30 @@ public static class ProceduralSprites
 
     // A hard-edged pixel disc, used for round UI medallions until the art is in.
     public static Sprite Disc => disc != null ? disc : disc = Circle(64, soft: false);
+
+    // A hard-edged arrow pointing down, standing in for the soul hint's art.
+    public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);
+
+    static Sprite BuildArrowDown(int size)
+    {
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[size * size];
+        int shaftHalf = size / 6;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                // Bottom half is the head (a triangle widening upward), top half the shaft.
+                float fromCentre = Mathf.Abs(x + 0.5f - size / 2f);
+                bool head = y < size / 2 && fromCentre <= y + 0.5f;
+                bool shaft = y >= size / 2 && fromCentre <= shaftHalf;
+                pixels[y * size + x] = head || shaft ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
 
     static Sprite Circle(int size, bool soft)
     {

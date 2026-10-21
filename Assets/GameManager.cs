@@ -43,6 +43,8 @@ public class GameManager : MonoBehaviour
     [SerializeField, Range(0, 1)] float soulDropChance = 0.07f;
     [Tooltip("A soul always drops after this many kills without one.")]
     [SerializeField] int soulPityKills = 15;
+    [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
+    [SerializeField] Sprite soulHintArrow;
     [Tooltip("One entry per element: Fire, Water, Lightning.")]
     [SerializeField] ElementArt[] elementArt = new ElementArt[3];
 
@@ -113,6 +115,8 @@ public class GameManager : MonoBehaviour
     Element? shownElement;
     Soul activeSoul;
     int killsSinceSoul;
+    // Souls carry a hint arrow until the player has caught one this run.
+    bool soulCaught;
     FxPlayer aura;
     bool hitStopping;
     Scout activeScout;
@@ -145,6 +149,7 @@ public class GameManager : MonoBehaviour
         ronin.Hit += OnRoninHit;
         ronin.ShurikenThrown += OnShurikenThrown;
         ronin.Parried += OnParried;
+        ronin.RiposteTarget = RandomEnemy;
     }
 
     void OnDisable()
@@ -333,9 +338,23 @@ public class GameManager : MonoBehaviour
         hitStopping = false;
     }
 
+    // Any enemy still standing: a samurai, the scout or the boss. Parried arrows home in on one at random.
+    Transform RandomEnemy()
+    {
+        var enemies = new List<Transform>();
+        foreach (Samurai samurai in army.Soldiers)
+        {
+            if (!samurai.IsDead) enemies.Add(samurai.transform);
+        }
+        if (activeScout != null && activeScout.GetComponentInChildren<Collider>() is { enabled: true }) enemies.Add(activeScout.transform);
+        if (activeBoss != null && !activeBoss.IsDead) enemies.Add(activeBoss.transform);
+        return enemies.Count > 0 ? enemies[Random.Range(0, enemies.Count)] : null;
+    }
+
     void ResetLoadout()
     {
         loadout = new RoninLoadout();
+        soulCaught = false;
         ronin.Loadout = loadout;
         effects = new BoonEffects(army, ronin, loadout);
         shownElement = null;
@@ -354,6 +373,7 @@ public class GameManager : MonoBehaviour
         killsSinceSoul = 0;
         var element = (Element)Random.Range(0, 3);
         activeSoul = Soul.Spawn(position, element, ArtFor(element)?.soulFrames, ronin, OnSoulCollected);
+        if (!soulCaught) activeSoul.ShowHint(soulHintArrow);
     }
 
     // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades.
@@ -361,6 +381,7 @@ public class GameManager : MonoBehaviour
     {
         if (state != State.Playing) return;
         if (!OfferBoons(soul.Element, ResumePlay)) return;
+        soulCaught = true;
         Fx.Play(Fx.Impact, soul.transform.position, Boons.Info(soul.Element).Color, 1.6f);
         Sfx.Play(Sfx.SoulCollect);
     }

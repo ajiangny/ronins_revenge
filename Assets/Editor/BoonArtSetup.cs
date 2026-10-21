@@ -75,6 +75,7 @@ public static class BoonArtSetup
         GameUI ui = Object.FindAnyObjectByType<GameUI>();
         if (!ui.TryGetComponent(out BoonChoiceUI choice)) choice = ui.gameObject.AddComponent<BoonChoiceUI>();
         managerSo.FindProperty("boonChoice").objectReferenceValue = choice;
+        managerSo.FindProperty("soulHintArrow").objectReferenceValue = Load("UI/SoulArrow");
         managerSo.ApplyModifiedPropertiesWithoutUndo();
 
         // The card panel stretches to fit: keep the gold-trimmed corners and the ragged ink edge on the right intact.

@@ -48,6 +48,8 @@ public class Ronin : MonoBehaviour
     public event Action Parried;
 
     public bool ControlsEnabled { get; set; }
+    // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
+    public Func<Transform> RiposteTarget { get; set; }
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
     // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
@@ -274,32 +276,36 @@ public class Ronin : MonoBehaviour
         }
     }
 
-    // The arrow is knocked back up as a projectile of the ronin's that kills the first samurai it reaches.
-    // A boss's reflectable slash is sent straight back at the boss instead.
+    // The arrow itself flies back, same art and all, homing in on a random enemy and wrapped in the parry's aura.
+    // A boss's reflectable slash homes in on the boss instead.
     void Deflect(Arrow arrow)
     {
         bool reflect = arrow.Reflectable;
         Transform target = arrow.ReflectTarget;
         Color arrowColor = arrow.Color;
+        SpriteRenderer arrowArt = arrow.Art;
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
         Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+        // Homing shots curve, so they get longer to reach a far target.
         if (reflect)
         {
-            Vector3 toTarget = target.position - position;
-            toTarget.z = 0;
-            riposte.Launch(toTarget.normalized, 1.3f, 0, KillSource.Reflected, arrow.Sprite, scale: 2.4f);
+            riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, scale: 2.4f, lifetimeMultiplier: 2f);
             riposte.Tint(arrowColor, arrowColor);
+            riposte.Home(() => target);
             CameraShake.Add(0.25f);
         }
         else
         {
-            // Kunai art is drawn at half size in the prefab; scale the riposte so it matches the arrow it came from.
-            // A parried Taisho spear keeps its weight and runs through two samurai.
-            riposte.Launch(Vector3.up, 1.1f, arrow.Unbreakable ? 2 : 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
-            riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
+            // The scale only sizes the hitbox; Mimic draws the arrow at its own size. The arrow art points down,
+            // so it's flipped to lead the way back up. A parried Taisho spear keeps its weight and runs through two samurai.
+            riposte.Launch(Vector3.up, 1.1f, arrow.Unbreakable ? 2 : 0, KillSource.Deflected, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
+            riposte.Tint(Color.white, parryColor);
+            riposte.Home(RiposteTarget);
         }
+        riposte.Mimic(arrowArt);
+        riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);

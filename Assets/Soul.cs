@@ -9,6 +9,10 @@ public class Soul : MonoBehaviour
     const float SwayWidth = 0.25f;
     const float FadeTime = 0.5f;
     const float PickupRadius = 0.35f;
+    const float HintHeight = 0.95f;
+    const float HintBounce = 0.18f;
+    // The 32px arrow art is drawn half again as big so it reads at a glance.
+    const float HintScale = 1.5f;
 
     public Element Element { get; private set; }
 
@@ -17,6 +21,7 @@ public class Soul : MonoBehaviour
     SpriteRenderer body;
     SpriteRenderer aura;
     FxPlayer crackle;
+    SpriteRenderer hint;
     Color color;
     float originX;
     float age;
@@ -49,6 +54,14 @@ public class Soul : MonoBehaviour
         // Element-coloured sparks crackling around the wisp.
         soul.crackle = Fx.Play(Fx.SoulCrackle(element), go.transform.position, Color.white, 1.1f, go.transform, 42);
         return soul;
+    }
+
+    // A bobbing arrow over the soul, so a new player knows to catch it. Without art a plain gold arrow stands in.
+    public void ShowHint(Sprite arrow)
+    {
+        bool hasArt = arrow != null;
+        hint = CreateLayer(transform, "Hint", hasArt ? arrow : ProceduralSprites.ArrowDown, hasArt ? HintScale : 0.65f, 43);
+        if (!hasArt) hint.color = new Color(1f, 0.82f, 0.3f);
     }
 
     static SpriteRenderer CreateLayer(Transform parent, string name, Sprite sprite, float scale, int order)
@@ -89,6 +102,13 @@ public class Soul : MonoBehaviour
         Color b = body.color;
         body.color = new Color(b.r, b.g, b.b, alpha);
         if (crackle != null) crackle.Color = new Color(1f, 1f, 1f, alpha);
+        if (hint != null)
+        {
+            // Bounces down toward the soul, like a pickup marker.
+            hint.transform.localPosition = Vector3.up * (HintHeight + HintBounce * Mathf.Abs(Mathf.Sin(age * 5f)));
+            Color h = hint.color;
+            hint.color = new Color(h.r, h.g, h.b, alpha);
+        }
 
         if (ronin == null || !ronin.isActiveAndEnabled) return;
         Bounds bounds = ronin.Bounds;

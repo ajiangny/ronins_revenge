@@ -19,7 +19,7 @@ public class Arrow : MonoBehaviour
     Vector3 velocity;
     Quaternion heading;
 
-    // A parry sends a reflectable shot back at ReflectTarget (a boss) as a heavy KillSource.Reflected hit.
+    // A parry sends a reflectable shot back at ReflectTarget (a boss) as a KillSource.Reflected hit that staggers her.
     public bool Reflectable => ReflectTarget != null;
     public Transform ReflectTarget { get; private set; }
     public Sprite Sprite => art.sprite;

@@ -97,10 +97,6 @@ public class BoonEffects
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
                 break;
-            // Parried arrows act through OnRiposteImpact; only a parried boss slash bursts here.
-            case KillSource.Reflected:
-                if (loadout.Has(BoonId.BurningRiposte, out value)) BossBlast(point, value);
-                break;
         }
     }
 

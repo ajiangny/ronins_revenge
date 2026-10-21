@@ -33,10 +33,10 @@ Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ R
 | Sword slash (Space), Inferno Fan spread | `Ronin.Attack` → `Ronin.Slash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`) |
 | Kunai throw (kept for a future weapon select) | `Ronin.weapon = Kunai` → `Ronin.ThrowKunai` → `Kunai.prefab`; also the fallback while `slashPrefab` is unset |
 | Spirit Shuriken (E / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
-| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target and blockers |
+| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target and blockers. With Burning Riposte it's a fireball, with Frozen Riposte a fan of ice shards (`Ronin.SpawnRiposte`, `Kunai.Animate` with `Fx.Fireball` / `Fx.IceShard` frames); their hits raise `Kunai.Impacted` → `Ronin.RiposteImpact` → `BoonEffects.OnRiposteImpact` |
 | Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
-| Ronin events | `Hit`, `WardBroken`, `ShurikenThrown`, `Parried` (GameManager subscribes) |
+| Ronin events | `Hit`, `ShurikenThrown`, `Parried`, `RiposteImpact` (GameManager subscribes) |
 
 All player projectiles use the `Kunai` component (slash waves, kunai, shuriken, ripostes); `Kunai.cs` also defines
 `KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash }`. The Attack-slot boons (Flame/Frost/Storm Blade)
@@ -48,8 +48,8 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | What | Where |
 |---|---|
 | Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
-| What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`, Frost Wards) |
-| Effects in play (blasts, chill/freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`) |
+| What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`) |
+| Effects in play (blasts, encase/shatter, freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`, `OnRiposteImpact`). Any encased samurai killed by a non-`Effect` source `Shatter`s, hitting its neighbours |
 | Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul`. Until the first soul of a run is caught, `Soul.ShowHint` adds the bobbing `GameManager.soulHintArrow` (`UI/SoulArrow`, wired by Apply Boon Art) |
 | Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
 
@@ -61,9 +61,9 @@ match `BoonChoiceUI.boonIcons`.
 ### Samurai army (the "invaders")
 - `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
   (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
-  raises `ArmyReachedRonin` when it lands. Also hosts chill/freeze and spatial queries
+  raises `ArmyReachedRonin` when it lands. Also hosts the army-wide freeze and spatial queries
   (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
-- `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint.
+- `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint, and `Encase` (ice from Frost Blade / Frozen Riposte: holds its fire, and the ronin's next hit kills it outright).
 - `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan) and `Taisho` (2 HP, unbreakable spear
   thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front). Rows pick a kind via
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
@@ -81,7 +81,7 @@ match `BoonChoiceUI.boonIcons`.
 
 ### Bosses
 - `Boss.cs` — abstract base. Handles creation (`Boss.Create<T>`, no prefab), entrance, HP, phase checks,
-  staggers, chill/freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
+  staggers, freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
   that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`.
 - `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (70 HP). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried

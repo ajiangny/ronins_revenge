@@ -84,6 +84,7 @@ public class Scout : MonoBehaviour, IHittable
         Fx.Play(Fx.Explosion, transform.position, Color.white, 1.2f);
         CameraShake.Add(0.15f);
         Sfx.Play(Sfx.SamuraiDeath, 1f, 0.8f);
+        Sfx.Play(Sfx.SamuraiCry, 1f, 0.85f);
         killed?.Invoke(this);
         Destroy(gameObject);
     }

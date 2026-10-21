@@ -2,9 +2,11 @@
   "name": "shadow-blade-audio-tools",
   "private": true,
   "type": "module",
-  "description": "Generates the game's music with ElevenLabs. Not part of the Unity build.",
+  "description": "Generates the game's music, sound effects and boss voicelines with ElevenLabs. Not part of the Unity build.",
   "scripts": {
-    "music": "node --env-file=.env.local Tools/generate-music.mjs"
+    "music": "node --env-file=.env.local Tools/generate-music.mjs",
+    "sfx": "node --env-file=.env.local Tools/generate-sfx.mjs",
+    "voice": "node --env-file=.env.local Tools/generate-voice.mjs"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.74.0"

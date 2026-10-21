@@ -29,6 +29,11 @@ public static class Sfx
     public const string VictorySting = "VictorySting";
     public const string DefeatSting = "DefeatSting";
     public const string MarchStep = "MarchStep";
+    public const string ParryClang = "ParryClang";
+    public const string SamuraiCry = "SamuraiCry";
+    public const string PlayerHurt = "PlayerHurt";
+    public const string BossHit = "BossHit";
+    public const string BossStagger = "BossStagger";
 
     const int VoiceCount = 16;
 

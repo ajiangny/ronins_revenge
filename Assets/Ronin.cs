@@ -306,6 +306,7 @@ public class Ronin : MonoBehaviour
 
         if (parryLanded) return;
         parryLanded = true;
+        Sfx.Play(Sfx.ParryClang);
         Parried?.Invoke();
     }
 
@@ -343,6 +344,7 @@ public class Ronin : MonoBehaviour
         Fx.Play(Fx.Impact, contact, new Color(1f, 0.45f, 0.4f), 1.5f);
         CameraShake.Add(0.35f);
         Sfx.Play(Sfx.PlayerHit);
+        Sfx.Play(Sfx.PlayerHurt);
         PlayAction(art.hit);
         Hit?.Invoke();
     }

@@ -38,6 +38,12 @@ public static class AudioSetup
         (Sfx.VictorySting, 0.9f, 0f, 1f),
         (Sfx.DefeatSting, 0.9f, 0f, 1f),
         (Sfx.MarchStep, 0.7f, 0f, 0.1f),
+        (Sfx.ParryClang, 1f, 0.05f, 0.1f),
+        // Mass kills would otherwise be a wall of screams.
+        (Sfx.SamuraiCry, 0.55f, 0.12f, 0.12f),
+        (Sfx.PlayerHurt, 0.9f, 0.05f, 0.2f),
+        (Sfx.BossHit, 0.75f, 0.08f, 0.05f),
+        (Sfx.BossStagger, 1f, 0f, 0.5f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

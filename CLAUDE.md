@@ -14,7 +14,7 @@ player-facing feature changes.
 - Editor tooling: `Assets/Editor/*.cs` (menu commands under `Ninja/`).
 - Art: `Assets/Art/` (`Sprites/` raw frames, `Characters/` CharacterArt assets, `Fx/`, `Portraits/`, `Fonts/`).
 - Audio: `Assets/Audio/` (`Sfx/`, `Music/`, `Voice/`, `SfxLibrary.asset`).
-- Node tooling outside Unity: `Tools/` (`npm run music`, ElevenLabs key in gitignored `.env.local`).
+- Node tooling outside Unity: `Tools/` (`npm run music`, `npm run sfx`, `npm run voice`; ElevenLabs key in gitignored `.env.local`).
 
 ## Working in the Unity Editor
 

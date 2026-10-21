@@ -66,6 +66,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip benibanaIntroLine;
     [SerializeField] AudioClip benibanaPhaseLine;
     [SerializeField] AudioClip benibanaDefeatLine;
+    [Tooltip("Her short mid-fight barks: a gasp when her stance breaks and a callout for each move.")]
+    [SerializeField] AudioClip benibanaStaggerLine;
+    [SerializeField] AudioClip benibanaSmokeRingsLine;
+    [SerializeField] AudioClip benibanaRosaryLashLine;
+    [SerializeField] AudioClip benibanaIaidoLine;
+    [SerializeField] AudioClip benibanaRosaryBloomLine;
+    [Tooltip("Pained gasps when she takes a hit; one is picked at random.")]
+    [SerializeField] AudioClip[] benibanaHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
     [SerializeField] float bossDepth = 3f;
@@ -111,6 +119,8 @@ public class GameManager : MonoBehaviour
     float nextScoutTime;
     Boss activeBoss;
     AudioSource voice;
+    // Whether the voice source is playing a full line rather than a bark.
+    bool speakingFullLine;
     Backdrop backdrop;
 
     void Awake()
@@ -580,7 +590,22 @@ public class GameManager : MonoBehaviour
     struct BossVoice
     {
         public Sprite portrait, closeup;
-        public AudioClip intro, phase, defeat;
+        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom;
+        public AudioClip[] hurt;
+
+        public AudioClip Clip(BossLine line) => line switch
+        {
+            BossLine.Intro => intro,
+            BossLine.Phase => phase,
+            BossLine.Defeat => defeat,
+            BossLine.Hurt => hurt != null && hurt.Length > 0 ? hurt[Random.Range(0, hurt.Length)] : null,
+            BossLine.Stagger => stagger,
+            BossLine.SmokeRings => smokeRings,
+            BossLine.RosaryLash => rosaryLash,
+            BossLine.Iaido => iaido,
+            BossLine.RosaryBloom => rosaryBloom,
+            _ => null,
+        };
     }
 
     BossVoice VoiceFor(BossKind kind) => kind switch
@@ -589,24 +614,30 @@ public class GameManager : MonoBehaviour
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
+            stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
+            iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
         },
         _ => default,
     };
 
-    // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them.
+    // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them. Barks (move
+    // callouts, gasps) never cut off a full line, and a hurt gasp never cuts off anything.
     void OnBossSpoke(Boss boss, BossLine line)
     {
-        BossVoice lines = VoiceFor(Stage.boss);
-        AudioClip clip = line == BossLine.Phase ? lines.phase : line == BossLine.Defeat ? lines.defeat : lines.intro;
+        bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat;
+        if (!full && voice.isPlaying && (speakingFullLine || line == BossLine.Hurt)) return;
+
+        AudioClip clip = VoiceFor(Stage.boss).Clip(line);
         string text = boss.Line(line);
-        float seconds = clip != null ? clip.length : 2.5f;
+        float seconds = clip != null ? clip.length : full ? 2.5f : 1.2f;
         if (clip != null)
         {
             voice.Stop();
             voice.volume = voiceVolume;
             voice.clip = clip;
             voice.Play();
-            Music.Duck(0.3f, seconds + 0.3f);
+            speakingFullLine = full;
+            if (full) Music.Duck(0.3f, seconds + 0.3f);
         }
         if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(text, boss.Colour, seconds + 0.6f);
     }

@@ -115,6 +115,7 @@ public class Samurai : MonoBehaviour, IHittable
         Fx.Play(Fx.SmokePuff, transform.position + Vector3.up * 0.2f, new Color(1f, 1f, 1f, 0.8f), 0.9f);
         HitFlash.Flash(animator.Renderer, 0.12f);
         Sfx.Play(Sfx.SamuraiDeath);
+        Sfx.Play(Sfx.SamuraiCry);
         army.OnSamuraiKilled(this, source);
         if (art.death != null && art.death.Length > 0)
         {

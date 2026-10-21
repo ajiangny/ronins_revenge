@@ -172,6 +172,41 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0
     minInterval: 0.1
+  - id: ParryClang
+    clips:
+    - {fileID: 8300000, guid: 7f31628903d2e492d8633731ceafb0a6, type: 3}
+    - {fileID: 8300000, guid: 4343c4a4410114c438f7a0aaae18ee2d, type: 3}
+    volume: 1
+    pitchJitter: 0.05
+    minInterval: 0.1
+  - id: SamuraiCry
+    clips:
+    - {fileID: 8300000, guid: dbc5e24b812434ffca02cf6aa524c24f, type: 3}
+    - {fileID: 8300000, guid: 11aeb4b36ab28433f833e242d8e05eea, type: 3}
+    volume: 0.55
+    pitchJitter: 0.12
+    minInterval: 0.12
+  - id: PlayerHurt
+    clips:
+    - {fileID: 8300000, guid: abe64c67d54c441fd89c4fbd6e1227c0, type: 3}
+    - {fileID: 8300000, guid: 38518630176d94dbe87a7ba341f7e8b4, type: 3}
+    volume: 0.9
+    pitchJitter: 0.05
+    minInterval: 0.2
+  - id: BossHit
+    clips:
+    - {fileID: 8300000, guid: eea96f1967a274cfb951e8dd297e40c1, type: 3}
+    - {fileID: 8300000, guid: 880abcae5fe9c471e9c9ea6cd8adde0a, type: 3}
+    volume: 0.75
+    pitchJitter: 0.08
+    minInterval: 0.05
+  - id: BossStagger
+    clips:
+    - {fileID: 8300000, guid: 066b661cecf4f4135b6c7a3173fd57fe, type: 3}
+    - {fileID: 8300000, guid: 96a67cce9798c48a1974e8b6574f18ee, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.5
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

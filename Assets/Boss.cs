@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// The things a boss says out loud; GameManager plays the matching voice clip and subtitle.
-public enum BossLine { Intro, Phase, Defeat }
+// The things a boss says out loud; GameManager plays the matching voice clip and subtitle. Intro, Phase and
+// Defeat are full lines; the rest are short barks that never cut one off.
+public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -17,6 +18,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     const float BlinkTime = 0.2f;
     // A fight that hasn't started a new move in this long has stalled and is restarted.
     const float StallSeconds = 8f;
+    // The shortest gap between her pained gasps, so a flurry of hits doesn't become a stream of them.
+    const float HurtLineGap = 2.5f;
 
     public event Action<Vector3, KillSource> Damaged;
     public event Action Defeated;
@@ -56,6 +59,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     float frozenUntil;
     float staggeredUntil;
     float invulnerableUntil;
+    float nextHurtLine;
     float age;
     Coroutine fight;
     bool fighting;
@@ -311,6 +315,9 @@ public abstract class Boss : MonoBehaviour, IHittable
         Interrupt();
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
+        Sfx.Play(Sfx.BossStagger);
+        Speak(BossLine.Stagger);
+        nextHurtLine = Time.time + seconds;
         StartCoroutine(RecoverFromStagger(seconds));
     }
 
@@ -339,7 +346,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
         Vector3 point = Centre;
         HitFlash.Flash(sprite, 0.1f);
-        Sfx.Play(Sfx.BlockerHit, 0.9f, 0.8f);
+        Sfx.Play(Sfx.BossHit);
         Damaged?.Invoke(point, source);
         if (IsDead) return;
 
@@ -349,6 +356,11 @@ public abstract class Boss : MonoBehaviour, IHittable
             return;
         }
         if (source == KillSource.Reflected) Stagger(StaggerSeconds);
+        else if (Time.time >= nextHurtLine)
+        {
+            nextHurtLine = Time.time + HurtLineGap;
+            Speak(BossLine.Hurt);
+        }
         OnDamaged();
     }
 

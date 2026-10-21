@@ -49,6 +49,20 @@ public static class BossArtSetup
         so.FindProperty("benibanaIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Intro.mp3");
         so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
         so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
+        so.FindProperty("benibanaStaggerLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Stagger.mp3");
+        so.FindProperty("benibanaSmokeRingsLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_SmokeRings.mp3");
+        so.FindProperty("benibanaRosaryLashLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryLash.mp3");
+        so.FindProperty("benibanaIaidoLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Iaido.mp3");
+        so.FindProperty("benibanaRosaryBloomLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryBloom.mp3");
+        // Every Benibana_Hurt*.mp3 take, so more can be added without touching this.
+        var hurt = new List<AudioClip>();
+        foreach (string guid in AssetDatabase.FindAssets("Benibana_Hurt t:AudioClip", new[] { VoiceRoot.TrimEnd('/') }))
+        {
+            hurt.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid)));
+        }
+        SerializedProperty hurtLines = so.FindProperty("benibanaHurtLines");
+        hurtLines.arraySize = hurt.Count;
+        for (int i = 0; i < hurt.Count; i++) hurtLines.GetArrayElementAtIndex(i).objectReferenceValue = hurt[i];
         so.ApplyModifiedProperties();
 
         // The fonts for the bosses' Borderlands-style title cards.

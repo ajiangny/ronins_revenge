@@ -521,6 +521,15 @@ MonoBehaviour:
   benibanaIntroLine: {fileID: 8300000, guid: 126d0f563be954d7fbaa233b87797292, type: 3}
   benibanaPhaseLine: {fileID: 8300000, guid: 8973700f7b05041729a016aa2cb0fcf3, type: 3}
   benibanaDefeatLine: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
+  benibanaStaggerLine: {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
+  benibanaSmokeRingsLine: {fileID: 8300000, guid: da5f91080559c4ec7b86b356f8307e5b, type: 3}
+  benibanaRosaryLashLine: {fileID: 8300000, guid: f84e195f87fe44a7fa5e5436c54c1346, type: 3}
+  benibanaIaidoLine: {fileID: 8300000, guid: b5889d987020d4c2fbaac7f9346c8ae4, type: 3}
+  benibanaRosaryBloomLine: {fileID: 8300000, guid: 7d16fea8e77ff44fc9ac0cefd825b8bc, type: 3}
+  benibanaHurtLines:
+  - {fileID: 8300000, guid: 1bd50a4aa2c0848f6ba1ad9c7ff62879, type: 3}
+  - {fileID: 8300000, guid: 57f295bc86d894353937206d1b38f318, type: 3}
+  - {fileID: 8300000, guid: 07f6ee6cadf4c4a4b929d6e0ef855d57, type: 3}
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2

@@ -30,6 +30,11 @@ public class Benibana : Boss
         BossLine.Intro => "The heavens have forsaken you, and the gods have turned their gaze away. How fortunate... that I shall be the one to paint your final moments in crimson.",
         BossLine.Phase => "You've torn my kimono... You will pay for that in blood!",
         BossLine.Defeat => "Crimson... suits you... after all...",
+        BossLine.Stagger => "What?! My own blade...",
+        BossLine.SmokeRings => "Breathe it in...",
+        BossLine.RosaryLash => "Kneel!",
+        BossLine.Iaido => "Crimson... Iaido!",
+        BossLine.RosaryBloom => "Bloom, my rosary!",
         _ => null,
     };
 
@@ -93,6 +98,8 @@ public class Benibana : Boss
     // In her second phase silver crosses hide inside them.
     IEnumerator SmokeRings()
     {
+        // Her two common moves are only called out half the time, so combos don't become a monologue.
+        if (Random.value < 0.5f) Speak(BossLine.SmokeRings);
         PlayAction(art.parry);
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.2f);
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.55f);
@@ -136,6 +143,7 @@ public class Benibana : Boss
         float side = Random.value < 0.5f ? -1f : 1f;
         var columns = new List<float> { here, ClampToScreen(here + side * 3.4f) };
         if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
+        if (Random.value < 0.5f) Speak(BossLine.RosaryLash);
 
         var tells = new List<SpriteRenderer>();
         foreach (float x in columns)
@@ -200,6 +208,8 @@ public class Benibana : Boss
     // phase she cuts an X: two crescents that cross over the ronin.
     IEnumerator Iaido()
     {
+        // Always named: the callout doubles as the cue to get ready to parry.
+        Speak(BossLine.Iaido);
         float left = CameraShake.Center.x - HalfWidth;
         float right = CameraShake.Center.x + HalfWidth;
         SpriteRenderer line = Bar(new Vector3(left, Centre.y, 0), new Vector3(right, Centre.y, 0), 0.06f, Crimson);
@@ -248,6 +258,7 @@ public class Benibana : Boss
     {
         Vector3 centre = new Vector3(CameraShake.Center.x, anchor.y, 0);
         yield return BlinkTo(centre.x, new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
+        Speak(BossLine.RosaryBloom);
         ElementFx.Glow(Centre, Silver, 1f, 5f, 0.5f, transform);
         for (int beat = 0; beat < 3; beat++)
         {

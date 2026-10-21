@@ -126,7 +126,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 | Parry hit-stop | `GameManager.HitStop` |
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`) |
 | Music crossfade and ducking | `Music.cs` |
-| Boss voicelines | `GameManager.voice` AudioSource, clips in `Audio/Voice/` |
+| Boss voicelines | `GameManager.voice` AudioSource, clips in `Audio/Voice/`; `BossLine` full lines (intro/phase/defeat) vs. barks (hurt, stagger, move callouts) in `OnBossSpoke` |
 
 Missing libraries or clips fall back gracefully (simple glows, silence), so the game runs before art/audio is wired.
 
@@ -164,4 +164,5 @@ Each object handles its own collision (projectiles only destroy themselves).
 ## Outside Unity
 
 - `Tools/generate-music.mjs` — regenerates music via ElevenLabs (`npm run music`, key in gitignored `.env.local`).
+- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects and Benibana's mid-fight barks (`npm run sfx`, `npm run voice`).
 - `README.md` — the assignment write-up (requirements, template fixes, features, balancing).

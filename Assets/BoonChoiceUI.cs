@@ -287,7 +287,7 @@ public class BoonChoiceUI : MonoBehaviour
         subtitle.color = MutedText;
         divider = CreateImage("Divider", root, center, new Vector2(CardX, 326), new Vector2(760, 3), null);
 
-        float[] rows = { 170f, -40f, -250f };
+        float[] rows = { 175f, -40f, -255f };
         for (int i = 0; i < cards.Length; i++)
         {
             cards[i] = BuildCard(root, new Vector2(CardX, rows[i]), i);
@@ -309,33 +309,34 @@ public class BoonChoiceUI : MonoBehaviour
     {
         var card = new Card();
         Vector2 center = new Vector2(0.5f, 0.5f);
-        Vector2 size = new Vector2(1180, 186);
+        Vector2 size = new Vector2(1180, 200);
         card.root = GameUI.CreateRect("Card" + index, parent, center, position, size);
         card.group = card.root.gameObject.AddComponent<CanvasGroup>();
 
-        card.glow = CreateImage("Glow", card.root, center, Vector2.zero, size + new Vector2(22, 22), cardGlowSprite);
+        // A white silhouette of the card, so the selection glow follows its ragged ink edge.
+        card.glow = CreateImage("Glow", card.root, center, Vector2.zero, size + new Vector2(24, 24), cardGlowSprite);
         Image background = CreateImage("Panel", card.root, center, Vector2.zero, size, cardSprite);
         if (cardSprite == null) background.color = CardColor;
 
         // Round medallion on the left, like the god boon icons in Hades.
-        Image frame = CreateImage("IconFrame", card.root, center, new Vector2(-500, 8), new Vector2(150, 150), ProceduralSprites.Disc);
+        Image frame = CreateImage("IconFrame", card.root, center, new Vector2(-498, 0), new Vector2(142, 142), ProceduralSprites.Disc);
         frame.color = new Color(0.12f, 0.09f, 0.16f);
-        card.icon = CreateImage("Icon", frame.rectTransform, center, Vector2.zero, new Vector2(128, 128), null);
+        card.icon = CreateImage("Icon", frame.rectTransform, center, Vector2.zero, new Vector2(124, 124), null);
         card.icon.preserveAspect = true;
         card.letter = GameUI.CreateText(frame.rectTransform, font, "Letter", center, Vector2.zero, new Vector2(128, 128), 64, TextAlignmentOptions.Center);
-        card.slot = GameUI.CreateText(card.root, font, "Slot", center, new Vector2(-500, -76), new Vector2(170, 30), 20, TextAlignmentOptions.Center);
+        card.slot = GameUI.CreateText(card.root, font, "Slot", center, new Vector2(400, 14), new Vector2(300, 28), 20, TextAlignmentOptions.Right);
         card.slot.color = MutedText;
         card.slot.characterSpacing = 8f;
 
-        card.name = GameUI.CreateText(card.root, font, "Name", center, new Vector2(-90, 50), new Vector2(640, 56), 44, TextAlignmentOptions.Left);
+        card.name = GameUI.CreateText(card.root, font, "Name", center, new Vector2(-90, 46), new Vector2(640, 52), 42, TextAlignmentOptions.Left);
         card.name.fontStyle = FontStyles.SmallCaps;
-        card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(400, 50), new Vector2(300, 56), 34, TextAlignmentOptions.Right);
+        card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(400, 46), new Vector2(300, 52), 32, TextAlignmentOptions.Right);
         card.rarity.fontStyle = FontStyles.SmallCaps;
         // Room for two lines under the name; the stat line sits below them.
-        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(70, -8), new Vector2(960, 64), 26, TextAlignmentOptions.TopLeft);
+        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(-15, -10), new Vector2(790, 60), 26, TextAlignmentOptions.TopLeft);
         card.description.color = new Color(0.9f, 0.88f, 0.84f);
-        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -62), new Vector2(960, 36), 26, TextAlignmentOptions.Left);
-        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -62), new Vector2(440, 36), 22, TextAlignmentOptions.Right);
+        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -47), new Vector2(960, 32), 26, TextAlignmentOptions.Left);
+        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -47), new Vector2(440, 32), 22, TextAlignmentOptions.Right);
         card.note.color = new Color(1f, 0.75f, 0.55f, 0.85f);
         card.note.fontStyle = FontStyles.Italic;
         return card;

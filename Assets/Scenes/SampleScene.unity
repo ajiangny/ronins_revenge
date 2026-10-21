@@ -487,20 +487,23 @@ MonoBehaviour:
   soulPityKills: 15
   elementArt:
   - element: 0
-    soulFrames: []
+    soulFrames:
+    - {fileID: 21300000, guid: e0d9161bf73a04caeaf95bd40706742d, type: 3}
     ronin: {fileID: 11400000, guid: 87854a5e3b08f448e84815e10623cf65, type: 2}
     kunai: {fileID: 21300000, guid: a4e51af349d844efcbaea19692953b58, type: 3}
-    shuriken: {fileID: 0}
+    shuriken: {fileID: 21300000, guid: be8ff31cdb2094369a07bf5ece558d0f, type: 3}
   - element: 1
-    soulFrames: []
+    soulFrames:
+    - {fileID: 21300000, guid: bea9c4fb3d9f2474ba034cae5580a084, type: 3}
     ronin: {fileID: 11400000, guid: 0b85754cadf1441e1a665c4e9e2471ee, type: 2}
     kunai: {fileID: 21300000, guid: 76b73bd8597e74851972cd6c7ec4945d, type: 3}
-    shuriken: {fileID: 0}
+    shuriken: {fileID: 21300000, guid: fb6b204124c234d3f9beb83f7e4caa50, type: 3}
   - element: 2
-    soulFrames: []
+    soulFrames:
+    - {fileID: 21300000, guid: 3292803b3302e473dabb0fabac449d0a, type: 3}
     ronin: {fileID: 11400000, guid: 6c0aef5ba9c6e49dc98b8f2414fca399, type: 2}
     kunai: {fileID: 21300000, guid: 8aafdb898a50942fb95a2f3718151ae8, type: 3}
-    shuriken: {fileID: 0}
+    shuriken: {fileID: 21300000, guid: b060325bb3a104e6d9b118a552ff3be9, type: 3}
   levels:
   - columns: 10
     rows: 4
@@ -1034,28 +1037,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoonChoiceUI
   boonIcons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  cardSprite: {fileID: 0}
-  cardGlowSprite: {fileID: 0}
+  - {fileID: 21300000, guid: 5b730031eba5940ff9138118f6bcf9f3, type: 3}
+  - {fileID: 21300000, guid: 86574e7096e714f7aa78c49a83f581f7, type: 3}
+  - {fileID: 21300000, guid: c7dae008e41b540e7b671b1ccc3b4da4, type: 3}
+  - {fileID: 21300000, guid: 811307229aebb44588fc883927488a0f, type: 3}
+  - {fileID: 21300000, guid: e8e58ccd319ae4507943362734a6d0a4, type: 3}
+  - {fileID: 21300000, guid: 43acc090d48744afd800660747429ae8, type: 3}
+  - {fileID: 21300000, guid: 72680fe738fb942d8a70cb15552cfd43, type: 3}
+  - {fileID: 21300000, guid: 3d3393d8dec024d788436bbc5bc9fbb6, type: 3}
+  - {fileID: 21300000, guid: 558945e7b8a9549f889d2e498b0a30c1, type: 3}
+  - {fileID: 21300000, guid: 4e08cc1f483f541b9b8dacd082cedef5, type: 3}
+  - {fileID: 21300000, guid: 14657058ee80142b2a2099b022f999ab, type: 3}
+  - {fileID: 21300000, guid: c0c9473812fae4f24b49d297107bbfdd, type: 3}
+  - {fileID: 21300000, guid: 4377baa7389d34ed492436b7849858c6, type: 3}
+  - {fileID: 21300000, guid: fd8b3b820261f47328b0910782fcdf1a, type: 3}
+  - {fileID: 21300000, guid: 7fa0d8193ca574d79964dd4e8bd7f641, type: 3}
+  cardSprite: {fileID: 21300000, guid: 95f6090db275040bb872d266973586df, type: 3}
+  cardGlowSprite: {fileID: 21300000, guid: 73bc91f206f6d449881fbac5e511e716, type: 3}
   cardPixelScale: 2
   abilityIcons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 21300000, guid: 4092ece2735604ec2b0cb8c21304a77d, type: 3}
+  - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}
+  - {fileID: 21300000, guid: f27c837ea8d514ce1a7866759b4c901d, type: 3}
 --- !u!1001 &3533950217798640327
 PrefabInstance:
   m_ObjectHideFlags: 0

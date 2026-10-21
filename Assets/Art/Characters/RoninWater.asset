@@ -25,7 +25,13 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 45e707272c76f435aaafd65763094dba, type: 3}
   - {fileID: 21300000, guid: fc5466818884b4beb9261d5e0cc20f4c, type: 3}
   death: []
-  parry: []
+  parry:
+  - {fileID: 21300000, guid: befacf5c0415a49e69f32cc5801ecd39, type: 3}
+  - {fileID: 21300000, guid: 2c4635142d579433d96b37b15de295b1, type: 3}
+  - {fileID: 21300000, guid: a29e37e7a45bc4214a044f17350c2e3e, type: 3}
+  - {fileID: 21300000, guid: dbc8816f115004d41b771bdcb43da5d8, type: 3}
+  - {fileID: 21300000, guid: 5f6a596e9bf39439faea6412a5f14f28, type: 3}
+  - {fileID: 21300000, guid: 2a5e964a48de54a358cea7e1875ef645, type: 3}
   runLeft:
   - {fileID: 21300000, guid: efbb6203cab84488d8ed5f98d7a26138, type: 3}
   - {fileID: 21300000, guid: 3b0c73d33ae2947b69ca8dbaedd32911, type: 3}

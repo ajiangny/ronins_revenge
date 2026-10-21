@@ -174,12 +174,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5020781550b381a41af88a20626fe4f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spaceship
-  dartPrefab: {fileID: 2877393848094754609, guid: bebbfc44e1e054743a23b83b6650da17, type: 3}
+  kunaiPrefab: {fileID: 2877393848094754609, guid: bebbfc44e1e054743a23b83b6650da17, type: 3}
   art: {fileID: 11400000, guid: 51b137782b7f3451eb1999c3b82adf63, type: 2}
   speed: 10
   shotCooldown: 0.35
   invulnerableTime: 2
   screenMargin: 0.2
+  fanAngle: 9
+  shurikenSprite: {fileID: 21300000, guid: b7db46bb0af00413d98c9b244a733d4a, type: 3}
+  shurikenCooldown: 6
+  shurikenScale: 2.6
+  shurikenSpeed: 0.75
+  parryWindow: 0.25
+  parryCooldown: 1.5
+  parryRadius: 1.1
 --- !u!54 &-5681516107360910860
 Rigidbody:
   m_ObjectHideFlags: 0

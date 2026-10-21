@@ -75,6 +75,12 @@ public static class BoonArtSetup
         managerSo.FindProperty("boonChoice").objectReferenceValue = choice;
         managerSo.ApplyModifiedPropertiesWithoutUndo();
 
+        // The card panel stretches to fit: keep the gold-trimmed corners and the ragged ink edge on the right intact.
+        Vector4 cardBorder = new Vector4(44, 24, 80, 24);
+        SetSpriteBorder("UI/BoonCard", cardBorder);
+        BuildSilhouette("UI/BoonCard", "UI/BoonCardGlow");
+        SetSpriteBorder("UI/BoonCardGlow", cardBorder);
+
         var choiceSo = new SerializedObject(choice);
         var icons = new List<Sprite>();
         foreach (BoonId id in System.Enum.GetValues(typeof(BoonId))) icons.Add(Load("UI/Boons/" + id));
@@ -163,6 +169,31 @@ public static class BoonArtSetup
     }
 
     static Sprite Load(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + path + ".png");
+
+    // A white copy of a sprite that keeps only its shape, for glows tinted at runtime.
+    static void BuildSilhouette(string sourcePath, string targetPath)
+    {
+        string source = SpriteRoot + sourcePath + ".png";
+        string target = SpriteRoot + targetPath + ".png";
+        if (!File.Exists(source)) return;
+
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        texture.LoadImage(File.ReadAllBytes(source));
+        Color32[] pixels = texture.GetPixels32();
+        for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color32(255, 255, 255, pixels[i].a);
+        texture.SetPixels32(pixels);
+        File.WriteAllBytes(target, texture.EncodeToPNG());
+        Object.DestroyImmediate(texture);
+        AssetDatabase.ImportAsset(target);
+    }
+
+    // border is left, bottom, right, top in texture pixels.
+    static void SetSpriteBorder(string path, Vector4 border)
+    {
+        if (!(AssetImporter.GetAtPath(SpriteRoot + path + ".png") is TextureImporter importer) || importer.spriteBorder == border) return;
+        importer.spriteBorder = border;
+        importer.SaveAndReimport();
+    }
 
     static void SetArray(SerializedProperty array, Sprite[] values)
     {

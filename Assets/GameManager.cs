@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] FxLibrary fxLibrary;
     [Tooltip("Real seconds the action freezes when a parry lands, for weight.")]
     [SerializeField] float parryHitStop = 0.06f;
+    [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
+    [SerializeField] float auraLift = 0.3f;
 
     [SerializeField] LevelConfig[] levels =
     {
@@ -328,9 +330,8 @@ public class GameManager : MonoBehaviour
             aura = null;
             if (dominant is Element changed)
             {
-                // Behind the ronin, faded so he stays readable in front of it.
-                // Wider than the ronin so the flames show round his silhouette, and faded so he stays readable.
-                aura = Fx.Play(Fx.Aura(changed), ronin.Feet, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
+                // Behind the ronin and wider than him so the flames show round his silhouette; faded so he stays readable.
+                aura = Fx.Play(Fx.Aura(changed), ronin.Feet + Vector3.up * auraLift, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
                 Color burst = Boons.Info(changed).Color;
                 if (Fx.Play(Fx.Impact, ronin.Bounds.center, new Color(burst.r, burst.g, burst.b, 0.7f), 1.3f) == null)
                 {

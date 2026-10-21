@@ -112,3 +112,11 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+# Local secrets written by `elevenlabs onboard`
+/.env.local
+
+# ElevenLabs API key (written by the ElevenLabs CLI)
+.env.local
+
+# Node tooling for ElevenLabs audio generation
+/node_modules/

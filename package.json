@@ -1,0 +1,12 @@
+{
+  "name": "shadow-blade-audio-tools",
+  "private": true,
+  "type": "module",
+  "description": "Generates the game's music with ElevenLabs. Not part of the Unity build.",
+  "scripts": {
+    "music": "node --env-file=.env.local Tools/generate-music.mjs"
+  },
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.74.0"
+  }
+}

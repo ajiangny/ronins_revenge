@@ -30,7 +30,7 @@ public class SamuraiArmy : MonoBehaviour
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
-    // Expiry time of each Frost Kunai chill stack.
+    // Expiry time of each Frost Blade chill stack.
     readonly List<float> chillStacks = new List<float>();
 
     LevelConfig level;
@@ -234,7 +234,7 @@ public class SamuraiArmy : MonoBehaviour
         marchBeat = (marchBeat + 1) % MarchPitches.Length;
     }
 
-    // Frost Kunai: each hit slows the march for a while. Stacks up to maxStacks; a new hit refreshes the oldest stack.
+    // Frost Blade: each hit slows the march for a while. Stacks up to maxStacks; a new hit refreshes the oldest stack.
     public void Chill(float percentPerStack, float seconds, int maxStacks)
     {
         chillPerStack = percentPerStack;

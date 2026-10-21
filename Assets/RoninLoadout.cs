@@ -90,10 +90,10 @@ public sealed class RoninLoadout
 
     public Element? SlotElement(BoonSlot slot) => InSlot(slot)?.Boon.Element;
 
-    public float ThrowCooldownMultiplier => 1f - Value(BoonId.BlazingHands);
+    public float AttackCooldownMultiplier => 1f - Value(BoonId.BlazingHands);
     public float MoveSpeedMultiplier => 1f + Value(BoonId.StormStep);
     public float AbilityCooldownMultiplier => 1f - Value(BoonId.StaticCharge);
-    public int ExtraKunai => (int)Value(BoonId.InfernoFan);
+    public int ExtraProjectiles => (int)Value(BoonId.InfernoFan);
     public float BlockerHealthMultiplier => 1f + Value(BoonId.GlacierWall);
     public int MaxWards => (int)Value(BoonId.FrozenRiposte);
 

@@ -12,7 +12,7 @@ public static class BoonArtSetup
     const string ArtRoot = "Assets/Art/Characters/";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
-    // The ronin's spirit flames and the spirit kunai are teal-green (hue ~160°); his red scarf and skin sit near 0-20°,
+    // The ronin's spirit flames, the slash wave and the spirit kunai are teal-green (hue ~160°); his red scarf and skin sit near 0-20°,
     // so only this hue band is recoloured.
     const float FlameHueMin = 120f / 360f;
     const float FlameHueMax = 200f / 360f;
@@ -66,6 +66,7 @@ public static class BoonArtSetup
             entry.FindPropertyRelative("element").enumValueIndex = (int)element;
             SetArray(entry.FindPropertyRelative("soulFrames"), Frames($"Effects/Soul_{suffix}_"));
             entry.FindPropertyRelative("ronin").objectReferenceValue = BuildRoninVariant(baseRonin, suffix, hue, boost);
+            entry.FindPropertyRelative("slash").objectReferenceValue = Recolor(Load("Projectiles/SlashWave"), suffix, hue, boost);
             entry.FindPropertyRelative("kunai").objectReferenceValue = Recolor(Load("Projectiles/Kunai"), suffix, hue, boost);
             entry.FindPropertyRelative("shuriken").objectReferenceValue = Recolor(shuriken, suffix, hue, boost);
             entry.FindPropertyRelative("portrait").objectReferenceValue = RecolorPortrait(Load("UI/RoninPortrait"), suffix, hue, boost);
@@ -86,7 +87,7 @@ public static class BoonArtSetup
         var icons = new List<Sprite>();
         foreach (BoonId id in System.Enum.GetValues(typeof(BoonId))) icons.Add(Load("UI/Boons/" + id));
         SetArray(choiceSo.FindProperty("boonIcons"), icons.ToArray());
-        SetArray(choiceSo.FindProperty("abilityIcons"), new[] { Load("UI/Abilities/Kunai"), Load("UI/Abilities/Shuriken"), Load("UI/Abilities/Parry") });
+        SetArray(choiceSo.FindProperty("abilityIcons"), new[] { Load("UI/Abilities/Sword"), Load("UI/Abilities/Shuriken"), Load("UI/Abilities/Parry") });
         choiceSo.FindProperty("roninPortrait").objectReferenceValue = Load("UI/RoninPortrait");
         choiceSo.FindProperty("cardSprite").objectReferenceValue = Load("UI/BoonCard");
         choiceSo.FindProperty("cardGlowSprite").objectReferenceValue = Load("UI/BoonCardGlow");
@@ -113,6 +114,7 @@ public static class BoonArtSetup
         art.hit = Recolor(source.hit, suffix, hue, boost);
         art.death = Recolor(source.death, suffix, hue, boost);
         art.parry = Recolor(source.parry, suffix, hue, boost);
+        art.slash = Recolor(source.slash, suffix, hue, boost);
         art.runLeft = Recolor(source.runLeft, suffix, hue, boost);
         art.runRight = Recolor(source.runRight, suffix, hue, boost);
         art.idleFps = source.idleFps;

@@ -37,15 +37,16 @@ public class BoonEffects
         float value;
         switch (source)
         {
+            case KillSource.Slash:
             case KillSource.Kunai:
-                if (loadout.Has(BoonId.FlameKunai, out value)) Blast(position, value);
-                if (loadout.Has(BoonId.FrostKunai, out value))
+                if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
+                if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     army.Chill(value, ChillSeconds, ChillStacks);
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
                     Sfx.Play(Sfx.FrostChill);
                 }
-                if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value)
+                if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value)
                 {
                     Samurai next = army.NearestSamurai(position, ChainRange);
                     if (next != null) Strike(position, next);
@@ -68,15 +69,16 @@ public class BoonEffects
         float value;
         switch (source)
         {
+            case KillSource.Slash:
             case KillSource.Kunai:
-                if (loadout.Has(BoonId.FlameKunai, out value)) BossBlast(point, value);
-                if (loadout.Has(BoonId.FrostKunai, out value))
+                if (loadout.Has(BoonId.FlameBlade, out value)) BossBlast(point, value);
+                if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     Boss.Chill(value, ChillSeconds, ChillStacks);
                     Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
                     Sfx.Play(Sfx.FrostChill);
                 }
-                if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
+                if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);

@@ -13,6 +13,7 @@ public class ElementArt
     public Element element;
     public Sprite[] soulFrames;
     public CharacterArt ronin;
+    public Sprite slash;
     public Sprite kunai;
     public Sprite shuriken;
     [Tooltip("The boon screen's ronin portrait with his spirit wisps in this element's colour.")]
@@ -170,7 +171,7 @@ public class GameManager : MonoBehaviour
             state = State.Title;
             if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
             ui.ShowOverlay("SHADOW BLADE",
-                "LEFT / RIGHT or A / D to move      SPACE to throw kunai\n" +
+                "LEFT / RIGHT or A / D to move      SPACE to slash\n" +
                 "E or UP for the Spirit Shuriken      SHIFT or DOWN to parry arrows\n\n" +
                 $"Survive {stages.Length} {(stages.Length == 1 ? "stage" : "stages")} of three samurai armies each. A warlord waits at the end of every stage.\n" +
                 "Fallen samurai may drop spirit souls. Catch one to choose a boon.\n\n" +
@@ -289,7 +290,7 @@ public class GameManager : MonoBehaviour
         // Boon effects bring their own blasts and bolts; the ronin's own hits spark in his projectile's colour.
         if (source != KillSource.Effect)
         {
-            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.KunaiGlow;
+            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.AttackGlow;
             Fx.Play(Fx.Impact, samurai.transform.position, Color.Lerp(Color.white, spark, 0.6f), source == KillSource.Shuriken ? 1.4f : 1f);
         }
         effects.OnKill(samurai, source);
@@ -417,7 +418,7 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    // His flames and aura follow his Kunai boon's element (or, before he has one, the element he has the most boons
+    // His flames and aura follow his Blade boon's element (or, before he has one, the element he has the most boons
     // of); each projectile follows the element in its slot.
     void UpdateRoninLook()
     {
@@ -427,14 +428,15 @@ public class GameManager : MonoBehaviour
 
         Element? special = loadout.SlotElement(BoonSlot.Special);
         Element? parry = loadout.SlotElement(BoonSlot.Parry);
-        Sprite kunai = attack is Element a ? ArtFor(a)?.kunai : null;
+        Sprite slash = attack is Element a ? ArtFor(a)?.slash : null;
+        Sprite kunai = attack is Element a1 ? ArtFor(a1)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
         // The animated aura replaces the plain glow when its art exists.
         bool animatedAura = primary is Element a2 && Fx.Has(Fx.Aura(a2));
         Color glowAura = primary is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
         ronin.SetLook(look, glowAura,
-            kunai, StandInTint(attack, kunai), ElementColor(attack),
+            slash, kunai, StandInTint(attack, slash), ElementColor(attack),
             shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
@@ -628,7 +630,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.KunaiGlow;
+            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.AttackGlow;
             Fx.Play(Fx.Impact, point + (Vector3)Random.insideUnitCircle * 0.6f, Color.Lerp(Color.white, spark, 0.6f), 1.2f);
         }
         effects.OnBossHit(point, source);

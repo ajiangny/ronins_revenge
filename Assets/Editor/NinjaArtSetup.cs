@@ -23,6 +23,8 @@ public static class NinjaArtSetup
         // Separate west/east clips rather than one flipped, so his armoured arm stays on the right side.
         ronin.runLeft = Frames("Ronin", "RunWest");
         ronin.runRight = Frames("Ronin", "RunEast");
+        // Empty until the katana swing is drawn; the ronin then swings with his parry stance.
+        ronin.slash = Frames("Ronin", "Slash");
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
@@ -48,6 +50,7 @@ public static class NinjaArtSetup
             box.center = new Vector3(0.01f, 0.69f, 0);
             box.size = new Vector3(0.77f, 1.06f, 0.5f);
             Set(root.GetComponent<Ronin>(), "art", ronin);
+            Set(root.GetComponent<Ronin>(), "slashPrefab", BuildSlashWave());
         });
 
         EditPrefab("Assets/Kunai.prefab", root =>
@@ -97,7 +100,30 @@ public static class NinjaArtSetup
         EditorSceneManager.SaveScene(scene);
 
         AssetDatabase.SaveAssets();
-        Debug.Log("Ninja sprite art applied to Samurai, Ronin, Kunai, Arrow, SamuraiArmy, the BlockerWall and the Backdrop.");
+        Debug.Log("Ninja sprite art applied to Samurai, Ronin, Kunai, SlashWave, Arrow, SamuraiArmy, the BlockerWall and the Backdrop.");
+    }
+
+    // The katana's crescent wave: a Kunai projectile with a wide, flat hitbox. Built from a copy of the kunai prefab
+    // so it keeps its layer and rigidbody. Returns null (the ronin then throws kunai) until the art exists.
+    static GameObject BuildSlashWave()
+    {
+        const string path = "Assets/SlashWave.prefab";
+        Sprite wave = AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + "Projectiles/SlashWave.png");
+        if (wave == null) return null;
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) AssetDatabase.CopyAsset("Assets/Kunai.prefab", path);
+
+        EditPrefab(path, root =>
+        {
+            StripVisuals(root, keepRootCollider: false);
+            root.transform.localScale = Vector3.one;
+            var box = root.AddComponent<BoxCollider>();
+            box.size = new Vector3(0.6f, 0.25f, 0.4f);
+            // Drawn at half size like the kunai; Kunai.artScale brings it back up.
+            GameObject art = AddSprite(root, "SlashWave", wave, Vector3.zero, false);
+            art.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+            Set(root.GetComponent<Kunai>(), "spinner", (Object)null);
+        });
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
     }
 
     // Re-tunes just the backdrop, without rebuilding the prefabs (which reshuffles their internal IDs).

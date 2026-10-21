@@ -6,18 +6,25 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(Rigidbody))]
 public class Ronin : MonoBehaviour
 {
+    // The main attack on Space. The kunai is kept for a later weapon-select screen.
+    public enum Weapon { Sword, Kunai }
+
     static readonly Color WardColor = new Color(0.7f, 0.9f, 1f);
     // The teal of his spirit flames, before any element takes over.
     static readonly Color DefaultGlow = new Color(0.55f, 1f, 0.85f);
 
     [Header("Inscribed")]
+    [Tooltip("Thrown kunai, and the Spirit Shuriken and parry ripostes, which reuse the same projectile.")]
     [FormerlySerializedAs("dartPrefab")] public GameObject kunaiPrefab;
+    [Tooltip("The crescent wave each katana swing sends up the screen.")]
+    public GameObject slashPrefab;
+    [SerializeField] Weapon weapon = Weapon.Sword;
     public CharacterArt art;
     public float speed = 10f;
     [SerializeField] float shotCooldown = 0.35f;
     [SerializeField] float invulnerableTime = 2f;
     [SerializeField] float screenMargin = 0.2f;
-    [Tooltip("Degrees between kunai when Inferno Fan throws several at once.")]
+    [Tooltip("Degrees between slashes (or kunai) when Inferno Fan sends several at once.")]
     [SerializeField] float fanAngle = 9f;
 
     [Header("Spirit Shuriken (E / Up)")]
@@ -54,7 +61,7 @@ public class Ronin : MonoBehaviour
     public float ShurikenCharge => Charge(lastShuriken, shurikenCooldown);
     public float ParryCharge => Charge(lastParry, parryCooldown);
     // The colours his attacks spark in, for effects elsewhere (hit sparks on kills).
-    public Color KunaiGlow => kunaiGlow;
+    public Color AttackGlow => attackGlow;
     public Color ShurikenGlow => shurikenGlow;
     public Color ParryColor => parryColor;
     public int SpriteOrder => sprite.sortingOrder;
@@ -79,8 +86,9 @@ public class Ronin : MonoBehaviour
 
     // The current elemental look: art set, projectile sprites and colours.
     Sprite kunaiSprite;
-    Color kunaiTint = Color.white;
-    Color kunaiGlow = DefaultGlow;
+    Sprite slashSprite;
+    Color attackTint = Color.white;
+    Color attackGlow = DefaultGlow;
     Color shurikenTint = Color.white;
     Color shurikenGlow = DefaultGlow;
     Color parryColor = Color.white;
@@ -130,9 +138,9 @@ public class Ronin : MonoBehaviour
             if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
             if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
 
-            if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown * Loadout.ThrowCooldownMultiplier)
+            if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
             {
-                ThrowKunai();
+                Attack();
             }
             if ((keyboard.eKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && ShurikenCharge >= 1f)
             {
@@ -167,29 +175,50 @@ public class Ronin : MonoBehaviour
 
     Vector3 Muzzle => new Vector3(transform.position.x + centerOffsetX, transform.position.y, 0);
 
-    // Inferno Fan adds kunai either side of the straight throw.
+    void Attack()
+    {
+        // Without the slash prefab (art not applied yet) the sword falls back to throwing kunai.
+        if (weapon == Weapon.Sword && slashPrefab != null) Slash();
+        else ThrowKunai();
+        lastShot = Time.time;
+    }
+
+    // Each swing of the katana sends a crescent of spirit energy up the screen.
+    void Slash()
+    {
+        Fan(slashPrefab, KillSource.Slash, slashSprite);
+        Sfx.Play(Sfx.SwordSlash);
+        Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, attackGlow, 0.5f), 0.8f, transform);
+        PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
+    }
+
     void ThrowKunai()
     {
-        int count = 1 + Loadout.ExtraKunai;
-        var thrown = new Kunai[count];
+        Fan(kunaiPrefab, KillSource.Kunai, kunaiSprite);
+        Sfx.Play(Sfx.KunaiThrow);
+        PlayAction(art.attack);
+    }
+
+    // Inferno Fan adds projectiles either side of the straight one.
+    void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
+    {
+        int count = 1 + Loadout.ExtraProjectiles;
+        var sent = new Kunai[count];
         for (int i = 0; i < count; i++)
         {
             float angle = (i - (count - 1) / 2f) * fanAngle;
-            Kunai kunai = SpawnProjectile(Muzzle);
-            kunai.Launch(Quaternion.Euler(0, 0, angle) * Vector3.up, 1f, 0, KillSource.Kunai, kunaiSprite);
-            kunai.Tint(kunaiTint, kunaiGlow);
-            for (int j = 0; j < i; j++) kunai.IgnoreCollisionsWith(thrown[j]);
-            thrown[i] = kunai;
+            Kunai projectile = SpawnProjectile(prefab, Muzzle);
+            projectile.Launch(Quaternion.Euler(0, 0, angle) * Vector3.up, 1f, 0, source, projectileSprite);
+            projectile.Tint(attackTint, attackGlow);
+            for (int j = 0; j < i; j++) projectile.IgnoreCollisionsWith(sent[j]);
+            sent[i] = projectile;
         }
-        lastShot = Time.time;
-        Sfx.Play(Sfx.KunaiThrow);
-        PlayAction(art.attack);
     }
 
     // A big spinning blade that flies straight up through every samurai in its column.
     void ThrowShuriken()
     {
-        Kunai shuriken = SpawnProjectile(Muzzle);
+        Kunai shuriken = SpawnProjectile(kunaiPrefab, Muzzle);
         bool hasArt = shurikenSprite != null;
         shuriken.Launch(Vector3.up, shurikenSpeed, int.MaxValue, KillSource.Shuriken,
             hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
@@ -214,9 +243,9 @@ public class Ronin : MonoBehaviour
         PlayAction(art.parry != null && art.parry.Length > 0 ? art.parry : art.attack);
     }
 
-    Kunai SpawnProjectile(Vector3 position)
+    Kunai SpawnProjectile(GameObject prefab, Vector3 position)
     {
-        return Instantiate(kunaiPrefab, position, Quaternion.identity).GetComponent<Kunai>();
+        return Instantiate(prefab, position, Quaternion.identity).GetComponent<Kunai>();
     }
 
     void FixedUpdate()
@@ -255,7 +284,7 @@ public class Ronin : MonoBehaviour
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
-        Kunai riposte = SpawnProjectile(position);
+        Kunai riposte = SpawnProjectile(kunaiPrefab, position);
         if (reflect)
         {
             Vector3 toTarget = target.position - position;
@@ -331,10 +360,10 @@ public class Ronin : MonoBehaviour
 
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
     // A null glow colour keeps the default spirit-flame teal.
-    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite kunai, Color kunaiColor, Color? kunaiHalo,
+    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Sprite kunai, Color attackColor, Color? attackHalo,
         Sprite shuriken, Color shurikenColor, Color? shurikenHalo, Color parry)
     {
-        kunaiGlow = kunaiHalo ?? DefaultGlow;
+        attackGlow = attackHalo ?? DefaultGlow;
         shurikenGlow = shurikenHalo ?? DefaultGlow;
         aura.color = auraColor;
         if (lookArt != null && lookArt != art)
@@ -343,14 +372,15 @@ public class Ronin : MonoBehaviour
             loopClip = null;
             if (!actionPlaying) UpdateLoopClip();
         }
+        slashSprite = slash;
         kunaiSprite = kunai;
-        kunaiTint = kunaiColor;
+        attackTint = attackColor;
         if (shuriken != null) shurikenSprite = shuriken;
         shurikenTint = shurikenColor;
         parryColor = parry;
     }
 
-    // Sprint while moving, idle while still. Throw, parry and hit clips play over this and hand back when done.
+    // Sprint while moving, idle while still. Slash, throw, parry and hit clips play over this and hand back when done.
     void UpdateLoopClip()
     {
         if (actionPlaying) return;

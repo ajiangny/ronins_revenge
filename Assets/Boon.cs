@@ -15,7 +15,7 @@ public enum Rarity { Common, Rare, Epic }
 // Indexes the icon array, so keep the order in step with BoonChoiceUI.boonIcons.
 public enum BoonId
 {
-    FlameKunai, FrostKunai, StormKunai,
+    FlameBlade, FrostBlade, StormBlade,
     InfernoShuriken, GlacialShuriken, ThunderShuriken,
     BurningRiposte, FrozenRiposte, ThunderRiposte,
     BlazingHands, InfernoFan,
@@ -105,8 +105,8 @@ public static class Boons
     {
         // Fire: burn. Kills explode. Samurai stand 2 apart across and 1.75 apart down, so 1.8 reaches the samurai
     // above and below, 2.1 adds the ones beside it and 2.7 the diagonals.
-        new BoonDefinition { Id = BoonId.FlameKunai, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Kunai",
-            Description = "Your <b>Kunai</b> burst into flame on a kill, burning nearby samurai.",
+        new BoonDefinition { Id = BoonId.FlameBlade, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Blade",
+            Description = "Your <b>Slashes</b> burst into flame on a kill, burning nearby samurai.",
             StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.7f }, Format = Plus },
         new BoonDefinition { Id = BoonId.InfernoShuriken, Element = Element.Fire, Slot = BoonSlot.Special, Name = "Inferno Shuriken",
             Description = "Every samurai your <b>Shuriken</b> cuts down explodes.",
@@ -115,15 +115,15 @@ public static class Boons
             Description = "Arrows you <b>Parry</b> come back as fire arrows that explode.",
             StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.7f }, Format = Plus },
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
-            Description = "You throw <b>Kunai</b> faster.",
-            StatLabel = "Throw cooldown:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },
+            Description = "You <b>Slash</b> faster.",
+            StatLabel = "Slash cooldown:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },
         new BoonDefinition { Id = BoonId.InfernoFan, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Inferno Fan",
-            Description = "You throw extra <b>Kunai</b> in a spread.",
-            StatLabel = "Extra kunai:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
+            Description = "You send extra <b>Slashes</b> in a spread.",
+            StatLabel = "Extra slashes:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
 
         // Water: chill. Slows, freezes, protects.
-        new BoonDefinition { Id = BoonId.FrostKunai, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Kunai",
-            Description = "Each <b>Kunai</b> kill <b>Chills</b> the army, slowing its march. Stacks 3 times.",
+        new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
+            Description = "Each <b>Slash</b> kill <b>Chills</b> the army, slowing its march. Stacks 3 times.",
             StatLabel = "Slow per stack:", Values = new[] { 0.05f, 0.07f, 0.1f }, Format = Percent },
         new BoonDefinition { Id = BoonId.GlacialShuriken, Element = Element.Water, Slot = BoonSlot.Special, Name = "Glacial Shuriken",
             Description = "Your <b>Shuriken</b> freezes the whole army: no marching, no arrows.",
@@ -139,8 +139,8 @@ public static class Boons
             StatLabel = "Blocker health:", Values = new[] { 0.25f, 0.5f, 1f }, Format = Percent },
 
         // Lightning: jolt. Chains and speed.
-        new BoonDefinition { Id = BoonId.StormKunai, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Kunai",
-            Description = "A <b>Kunai</b> kill may arc lightning to the nearest samurai.",
+        new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",
+            Description = "A <b>Slash</b> kill may arc lightning to the nearest samurai.",
             StatLabel = "Chain chance:", Values = new[] { 0.25f, 0.35f, 0.5f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderShuriken, Element = Element.Lightning, Slot = BoonSlot.Special, Name = "Thunder Shuriken",
             Description = "Your <b>Shuriken</b> calls lightning on the front samurai of nearby columns.",

@@ -6,7 +6,7 @@ public interface IHittable
 
 public static class Damage
 {
-    // A kunai is one point; the shuriken and parried arrows hit harder, which matters against armour and bosses.
+    // A slash or kunai is one point; the shuriken and parried arrows hit harder, which matters against armour and bosses.
     public static int Of(KillSource source) => source switch
     {
         KillSource.Shuriken => 3,

@@ -15,6 +15,7 @@ public static class AudioSetup
     // id, starting volume, pitch jitter, and the real seconds before it can repeat.
     static readonly (string id, float volume, float jitter, float minInterval)[] Sounds =
     {
+        (Sfx.SwordSlash, 0.55f, 0.08f, 0.05f),
         (Sfx.KunaiThrow, 0.55f, 0.08f, 0.05f),
         (Sfx.ShurikenThrow, 0.8f, 0.04f, 0.1f),
         (Sfx.ParrySwing, 0.7f, 0.06f, 0.05f),

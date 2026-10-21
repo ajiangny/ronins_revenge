@@ -6,6 +6,7 @@ using UnityEngine;
 // play normally through the parry hit-stop and the paused boon screen.
 public static class Sfx
 {
+    public const string SwordSlash = "SwordSlash";
     public const string KunaiThrow = "KunaiThrow";
     public const string ShurikenThrow = "ShurikenThrow";
     public const string ParrySwing = "ParrySwing";

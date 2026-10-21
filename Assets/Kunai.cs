@@ -2,9 +2,10 @@ using UnityEngine;
 
 // What killed a samurai. Boon effects only trigger on the ronin's own attacks, never on other effects' kills,
 // so explosions and lightning can't chain into each other forever. Reflected is a boss's own slash parried back at it.
-public enum KillSource { Kunai, Shuriken, Deflected, Effect, Reflected }
+// Slash is the katana's crescent wave; new values go on the end so saved ints keep their meaning.
+public enum KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash }
 
-// Every projectile the ronin sends upward: thrown kunai, the Spirit Shuriken and parried arrows.
+// Every projectile the ronin sends upward: katana slash waves, thrown kunai, the Spirit Shuriken and parried arrows.
 [RequireComponent(typeof(Rigidbody))]
 public class Kunai : MonoBehaviour
 {

@@ -11,6 +11,8 @@ public class CharacterArt : ScriptableObject
     public Sprite[] death;
     [Tooltip("The ronin's katana parry stance. Falls back to the attack clip when empty.")]
     public Sprite[] parry;
+    [Tooltip("The ronin's katana swing for his main attack. Falls back to the parry clip when empty.")]
+    public Sprite[] slash;
     [Tooltip("Sprint loops played while moving left/right. Leave empty to keep the idle clip while moving.")]
     public Sprite[] runLeft;
     public Sprite[] runRight;

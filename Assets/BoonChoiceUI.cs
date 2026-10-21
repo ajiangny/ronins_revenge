@@ -58,7 +58,7 @@ public class BoonChoiceUI : MonoBehaviour
     [SerializeField] Sprite cardGlowSprite;
     [Tooltip("Screen pixels per art pixel for the card borders.")]
     [SerializeField] float cardPixelScale = 2f;
-    [Tooltip("Default icons for the Kunai, Shuriken and Parry slots before they hold a boon.")]
+    [Tooltip("Default icons for the Attack (sword), Shuriken and Parry slots before they hold a boon.")]
     [SerializeField] Sprite[] abilityIcons = new Sprite[3];
 
     Ronin ronin;
@@ -288,7 +288,7 @@ public class BoonChoiceUI : MonoBehaviour
                 Sprite ability = abilityIcons != null && i < abilityIcons.Length ? abilityIcons[i] : null;
                 slot.icon.sprite = ability != null ? ability : ProceduralSprites.Disc;
                 slot.icon.color = ability != null ? Color.white : new Color(0.25f, 0.25f, 0.3f);
-                slot.letter.text = ability != null ? "" : new[] { "K", "S", "P" }[i];
+                slot.letter.text = ability != null ? "" : new[] { "B", "S", "P" }[i];
                 slot.ring.color = new Color(0.55f, 0.55f, 0.6f);
             }
         }

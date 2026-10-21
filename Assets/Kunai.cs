@@ -14,11 +14,16 @@ public class Kunai : MonoBehaviour
     [Tooltip("Visual child that spins; the collider stays on the root so it doesn't turn with it.")]
     [SerializeField] Transform spinner;
     [SerializeField] float spinSpeed = 1080f;
+    [Tooltip("Draws the art bigger than the hitbox so projectiles are easy to follow without changing what they hit.")]
+    [SerializeField] float artScale = 1.8f;
+    [Tooltip("Soft glow behind the projectile, in world units; its colour comes from Tint.")]
+    [SerializeField] float glowSize = 0.9f;
 
     public KillSource Source { get; private set; } = KillSource.Kunai;
 
     Rigidbody body;
     SpriteRenderer art;
+    SpriteRenderer glow;
     Vector3 velocity;
     int pierceLeft;
     bool spent;
@@ -28,6 +33,21 @@ public class Kunai : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         art = GetComponentInChildren<SpriteRenderer>();
+        art.transform.localScale *= artScale;
+        glow = CreateGlow(transform, glowSize, art.sortingOrder - 1, new Color(0.55f, 1f, 0.85f, 0.45f));
+    }
+
+    // Shared with Arrow: a soft disc behind a projectile so it reads against the grass.
+    public static SpriteRenderer CreateGlow(Transform parent, float size, int sortingOrder, Color color)
+    {
+        var glow = new GameObject("Glow").AddComponent<SpriteRenderer>();
+        glow.transform.SetParent(parent, false);
+        glow.transform.localPosition = Vector3.forward * 0.05f;
+        glow.transform.localScale = Vector3.one * size;
+        glow.sprite = ProceduralSprites.Glow;
+        glow.sortingOrder = sortingOrder;
+        glow.color = color;
+        return glow;
     }
 
     void Start()
@@ -53,9 +73,23 @@ public class Kunai : MonoBehaviour
         Destroy(gameObject, lifetime * lifetimeMultiplier);
     }
 
-    public void Tint(Color color)
+    // spriteColor tints the art (white for recoloured element art); glowColor is the halo, usually the element's colour.
+    public void Tint(Color spriteColor, Color glowColor)
     {
-        art.color = color;
+        art.color = spriteColor;
+        glow.color = new Color(glowColor.r, glowColor.g, glowColor.b, 0.45f);
+    }
+
+    // Kunai thrown together (Inferno Fan) start on the same spot; they must not knock each other out.
+    public void IgnoreCollisionsWith(Kunai other)
+    {
+        foreach (Collider mine in GetComponentsInChildren<Collider>())
+        {
+            foreach (Collider theirs in other.GetComponentsInChildren<Collider>())
+            {
+                Physics.IgnoreCollision(mine, theirs);
+            }
+        }
     }
 
     void Update()
@@ -70,6 +104,13 @@ public class Kunai : MonoBehaviour
     void OnCollisionEnter(Collision coll)
     {
         if (spent) return;
+
+        // The ronin's own projectiles pass through each other.
+        if (coll.collider.GetComponentInParent<Kunai>() != null)
+        {
+            KeepFlying(coll.collider);
+            return;
+        }
 
         Samurai samurai = coll.collider.GetComponentInParent<Samurai>();
         if (samurai != null)

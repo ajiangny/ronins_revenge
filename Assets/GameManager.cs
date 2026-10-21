@@ -272,8 +272,8 @@ public class GameManager : MonoBehaviour
 
         Color aura = dominant is Element glow ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
         ronin.SetLook(look, aura,
-            kunai, StandInTint(attack, kunai),
-            shuriken, StandInTint(special, shuriken),
+            kunai, StandInTint(attack, kunai), ElementColor(attack),
+            shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
         if (dominant != shownElement && dominant is Element changed)
@@ -283,6 +283,8 @@ public class GameManager : MonoBehaviour
         }
         shownElement = dominant;
     }
+
+    static Color? ElementColor(Element? element) => element is Element e ? Boons.Info(e).Color : (Color?)null;
 
     // Recoloured art needs no tint; without it the default sprite is tinted in the element's colour.
     static Color StandInTint(Element? element, Sprite elementSprite)

@@ -5,8 +5,18 @@ public class Arrow : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] float lifetime = 4f;
+    [Tooltip("Draws the arrow bigger than its hitbox so it's easy to see coming.")]
+    [SerializeField] float artScale = 2f;
+    [SerializeField] Color glowColor = new Color(1f, 0.35f, 0.25f, 0.4f);
 
     bool deflected;
+
+    void Awake()
+    {
+        SpriteRenderer art = GetComponentInChildren<SpriteRenderer>();
+        art.transform.localScale *= artScale;
+        Kunai.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
+    }
 
     public Sprite Sprite => GetComponentInChildren<SpriteRenderer>().sprite;
 

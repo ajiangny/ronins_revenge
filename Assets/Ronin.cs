@@ -7,6 +7,8 @@ using UnityEngine.Serialization;
 public class Ronin : MonoBehaviour
 {
     static readonly Color WardColor = new Color(0.7f, 0.9f, 1f);
+    // The teal of his spirit flames, before any element takes over.
+    static readonly Color DefaultGlow = new Color(0.55f, 1f, 0.85f);
 
     [Header("Inscribed")]
     [FormerlySerializedAs("dartPrefab")] public GameObject kunaiPrefab;
@@ -22,7 +24,8 @@ public class Ronin : MonoBehaviour
     [Tooltip("Leave empty to throw a big spinning kunai until the shuriken art is in.")]
     [SerializeField] Sprite shurikenSprite;
     [SerializeField] float shurikenCooldown = 6f;
-    [SerializeField] float shurikenScale = 2.6f;
+    [Tooltip("Scales the whole shuriken, hitbox included (the art is also drawn larger by Kunai.artScale).")]
+    [SerializeField] float shurikenScale = 1.8f;
     [SerializeField] float shurikenSpeed = 0.75f;
 
     [Header("Parry (Shift / Down)")]
@@ -66,7 +69,9 @@ public class Ronin : MonoBehaviour
     // The current elemental look: art set, projectile sprites and colours.
     Sprite kunaiSprite;
     Color kunaiTint = Color.white;
+    Color kunaiGlow = DefaultGlow;
     Color shurikenTint = Color.white;
+    Color shurikenGlow = DefaultGlow;
     Color parryColor = Color.white;
 
     void Awake()
@@ -138,12 +143,15 @@ public class Ronin : MonoBehaviour
     void ThrowKunai()
     {
         int count = 1 + Loadout.ExtraKunai;
+        var thrown = new Kunai[count];
         for (int i = 0; i < count; i++)
         {
             float angle = (i - (count - 1) / 2f) * fanAngle;
             Kunai kunai = SpawnProjectile(Muzzle);
             kunai.Launch(Quaternion.Euler(0, 0, angle) * Vector3.up, 1f, 0, KillSource.Kunai, kunaiSprite);
-            kunai.Tint(kunaiTint);
+            kunai.Tint(kunaiTint, kunaiGlow);
+            for (int j = 0; j < i; j++) kunai.IgnoreCollisionsWith(thrown[j]);
+            thrown[i] = kunai;
         }
         lastShot = Time.time;
         PlayAction(art.attack);
@@ -156,7 +164,7 @@ public class Ronin : MonoBehaviour
         bool hasArt = shurikenSprite != null;
         shuriken.Launch(Vector3.up, shurikenSpeed, int.MaxValue, KillSource.Shuriken,
             hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
-        shuriken.Tint(shurikenTint);
+        shuriken.Tint(shurikenTint, shurikenGlow);
         lastShuriken = Time.time;
         PlayAction(art.attack);
         ShurikenThrown?.Invoke(Muzzle);
@@ -209,8 +217,9 @@ public class Ronin : MonoBehaviour
 
         Vector3 position = arrow.transform.position;
         Kunai riposte = SpawnProjectile(position);
-        riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true);
-        riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f));
+        // Kunai art is drawn at half size in the prefab; scale the riposte so it matches the arrow it came from.
+        riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
+        riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
 
         if (parryLanded) return;
@@ -249,8 +258,12 @@ public class Ronin : MonoBehaviour
     }
 
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
-    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite kunai, Color kunaiColor, Sprite shuriken, Color shurikenColor, Color parry)
+    // A null glow colour keeps the default spirit-flame teal.
+    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite kunai, Color kunaiColor, Color? kunaiHalo,
+        Sprite shuriken, Color shurikenColor, Color? shurikenHalo, Color parry)
     {
+        kunaiGlow = kunaiHalo ?? DefaultGlow;
+        shurikenGlow = shurikenHalo ?? DefaultGlow;
         aura.color = auraColor;
         if (lookArt != null && lookArt != art)
         {

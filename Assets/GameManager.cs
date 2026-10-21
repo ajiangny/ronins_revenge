@@ -72,13 +72,14 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Fx.Library = fxLibrary;
         // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
         if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
     }
 
+    // OnEnable also runs after the Editor reloads scripts mid-play, which clears statics like the effect library.
     void OnEnable()
     {
+        Fx.Library = fxLibrary;
         army.SamuraiKilled += OnSamuraiKilled;
         army.ArmyDefeated += OnArmyDefeated;
         army.ArmyReachedRonin += OnArmyReachedRonin;
@@ -270,7 +271,8 @@ public class GameManager : MonoBehaviour
         float value = offer.Boon.ValueAt(offer.Rarity);
         Color colour = Boons.Info(offer.Boon.Element).Color;
         Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
-        Fx.Play(Fx.BoonPillar, feet, Color.Lerp(Color.white, colour, 0.7f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
+        Color pillar = Color.Lerp(Color.white, colour, 0.7f);
+        Fx.Play(Fx.BoonPillar, feet, new Color(pillar.r, pillar.g, pillar.b, 0.75f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
         switch (offer.Boon.Id)
         {
             case BoonId.TidalRenewal:
@@ -329,8 +331,10 @@ public class GameManager : MonoBehaviour
             {
                 Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
                 // Behind the ronin, faded so he stays readable in front of it.
-                aura = Fx.Play(Fx.Aura(changed), feet, new Color(1f, 1f, 1f, 0.6f), 1f, ronin.transform, ronin.SpriteOrder - 1);
-                if (Fx.Play(Fx.Impact, ronin.Bounds.center, Boons.Info(changed).Color, 2f) == null)
+                // Wider than the ronin so the flames show round his silhouette, and faded so he stays readable.
+                aura = Fx.Play(Fx.Aura(changed), feet, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
+                Color burst = Boons.Info(changed).Color;
+                if (Fx.Play(Fx.Impact, ronin.Bounds.center, new Color(burst.r, burst.g, burst.b, 0.7f), 1.3f) == null)
                 {
                     ElementFx.Glow(ronin.Bounds.center, Boons.Info(changed).Color, 1f, 4f, 0.5f);
                 }

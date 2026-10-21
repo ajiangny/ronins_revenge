@@ -22,15 +22,21 @@ public class CameraShake : MonoBehaviour
         {
             Camera cam = Camera.main;
             if (cam == null) return;
-            instance = cam.gameObject.AddComponent<CameraShake>();
+            instance = cam.GetComponent<CameraShake>();
+            if (instance == null) instance = cam.gameObject.AddComponent<CameraShake>();
         }
         instance.trauma = Mathf.Min(1f, instance.trauma + amount);
     }
 
     void Awake()
     {
-        instance = this;
         basePosition = transform.position;
+    }
+
+    // Also runs after the Editor reloads scripts mid-play, which clears the static.
+    void OnEnable()
+    {
+        instance = this;
     }
 
     void OnDestroy()

@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // Builds the HUD (score, level, lives) and the full-screen overlay used for the title/level/end screens.
@@ -34,6 +36,9 @@ public class GameUI : MonoBehaviour
     float shownBossHealth = 1f;
     float bossHealth = 1f;
 
+    TextMeshProUGUI subtitle;
+    float subtitleUntil;
+
     void Awake()
     {
         scoreText = CreateText("Score", new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(800, 50), 36, TextAlignmentOptions.Top);
@@ -44,12 +49,17 @@ public class GameUI : MonoBehaviour
         livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(140, 26), new Vector2(400, 40));
 
         BuildBossBar();
+        subtitle = CreateText("Subtitle", new Vector2(0.5f, 0f), new Vector2(0, 110), new Vector2(1400, 90), 34, TextAlignmentOptions.Bottom);
+        subtitle.fontStyle = FontStyles.Italic;
+        subtitle.gameObject.SetActive(false);
         BuildOverlay();
     }
 
-    // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
     void Update()
     {
+        if (subtitle.gameObject.activeSelf && Time.unscaledTime > subtitleUntil) subtitle.gameObject.SetActive(false);
+
+        // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;
         shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
         bossFill.anchorMax = new Vector2(bossHealth, 1f);
@@ -71,6 +81,140 @@ public class GameUI : MonoBehaviour
     {
         bossHealth = Mathf.Clamp01(fraction);
     }
+
+    // A spoken line shown along the bottom of the screen for `seconds`.
+    public void ShowSubtitle(string text, Color colour, float seconds)
+    {
+        subtitle.text = text;
+        subtitle.color = Color.Lerp(colour, Color.white, 0.35f);
+        subtitleUntil = Time.unscaledTime + seconds;
+        subtitle.gameObject.SetActive(true);
+    }
+
+    // A boss's entrance: the screen darkens under a crimson ink slash, her full-body art slides in beside her
+    // name, then a close-up of her face slams across the screen while she speaks her line. Runs on unscaled
+    // time; ENTER or SPACE skips to the fight.
+    public IEnumerator PlayBossIntro(Sprite full, Sprite closeUp, string title, string epithet, Color colour,
+        AudioSource voice, AudioClip line, string lineText)
+    {
+        var rims = new List<RectTransform>();
+        RectTransform root = Stretch(CreateRect("BossIntro", transform, Vector2.zero, Vector2.zero, Vector2.zero));
+        root.pivot = new Vector2(0.5f, 0.5f);
+        root.SetAsLastSibling();
+        CanvasGroup group = root.gameObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+
+        Image dim = Stretch(CreateRect("Dim", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        dim.color = Color.clear;
+
+        RectTransform slash = CreateRect("Slash", root, new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(0, 44));
+        slash.localRotation = Quaternion.Euler(0, 0, -16f);
+        Image slashImage = slash.gameObject.AddComponent<Image>();
+        slashImage.color = colour;
+
+        // Her full-body art on the right, sized to the screen's height.
+        RectTransform art = CreateRect("FullArt", root, new Vector2(1f, 0.5f), Vector2.zero, new Vector2(1060f * full.rect.width / full.rect.height, 1060f));
+        Image artImage = art.gameObject.AddComponent<Image>();
+        artImage.sprite = full;
+        artImage.preserveAspect = true;
+        const float artRestX = -140f, artStartX = 760f;
+
+        TextMeshProUGUI name = CreateText("Name", new Vector2(0f, 0.5f), new Vector2(130, 150), new Vector2(1100, 190), 150, TextAlignmentOptions.Left, root);
+        name.text = title;
+        name.fontStyle = FontStyles.Bold;
+        name.color = Color.clear;
+        TextMeshProUGUI epithetText = CreateText("Epithet", new Vector2(0f, 0.5f), new Vector2(140, 40), new Vector2(1100, 70), 52, TextAlignmentOptions.Left, root);
+        epithetText.text = epithet;
+        epithetText.color = Color.clear;
+
+        // The close-up: a tilted letterbox panel across the lower left, cropped to her eyes and pipe. A stencil
+        // Mask, since RectMask2D can't clip a rotated rectangle.
+        const float stripWidth = 1500f, stripHeight = 300f;
+        RectTransform strip = CreateRect("CloseUp", root, new Vector2(0.5f, 0.5f), new Vector2(-180, -230), new Vector2(stripWidth, stripHeight));
+        strip.localRotation = Quaternion.Euler(0, 0, -5f);
+        strip.gameObject.AddComponent<Image>().color = new Color(0.06f, 0f, 0.02f, 1f);
+        strip.gameObject.AddComponent<Mask>().showMaskGraphic = true;
+        const float faceWidth = stripWidth;
+        float faceHeight = faceWidth * closeUp.rect.height / closeUp.rect.width;
+        // Her eyes sit about 53% across and 30% down the close-up: centre the strip on them.
+        Vector2 faceRest = new Vector2(-(0.53f - 0.5f) * faceWidth + 35f, -(0.5f - 0.30f) * faceHeight);
+        RectTransform face = CreateRect("Face", strip, new Vector2(0.5f, 0.5f), faceRest, new Vector2(faceWidth, faceHeight));
+        face.gameObject.AddComponent<Image>().sprite = closeUp;
+        // Crimson rims drawn over the strip's edges, outside the mask so they stay crisp.
+        foreach (float edge in new[] { 1f, -1f })
+        {
+            RectTransform rim = CreateRect("Rim", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(stripWidth + 40, 8));
+            rim.localRotation = strip.localRotation;
+            rim.anchoredPosition = strip.anchoredPosition + (Vector2)(strip.localRotation * new Vector3(0, edge * stripHeight / 2f, 0));
+            rim.gameObject.AddComponent<Image>().color = colour;
+            rims.Add(rim);
+        }
+        strip.localScale = new Vector3(1f, 0f, 1f);
+
+        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0.5f), new Vector2(-180, -478), new Vector2(1500, 100), 32, TextAlignmentOptions.Top, root);
+        said.text = lineText ?? "";
+        said.fontStyle = FontStyles.Italic;
+        said.maxVisibleCharacters = 0;
+
+        Image flash = Stretch(CreateRect("Flash", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        flash.color = Color.clear;
+
+        const float closeUpAt = 1.4f;
+        float lineLength = line != null ? line.length : 3f;
+        float end = closeUpAt + lineLength + 0.6f;
+        bool spoke = false;
+        for (float t = 0; t < end; t += Time.unscaledDeltaTime)
+        {
+            Keyboard keyboard = Keyboard.current;
+            if (t > 0.3f && keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)) break;
+
+            dim.color = new Color(0.03f, 0f, 0.02f, 0.85f * Mathf.Clamp01(t / 0.25f));
+            slash.sizeDelta = new Vector2(Mathf.Lerp(0, 2700, EaseOut(Mathf.Clamp01(t / 0.22f))), 44);
+            slashImage.color = new Color(colour.r, colour.g, colour.b, 1f - Mathf.Clamp01((t - 0.6f) / 0.5f));
+
+            float slide = EaseOut(Mathf.Clamp01((t - 0.2f) / 0.4f));
+            art.anchoredPosition = new Vector2(Mathf.Lerp(artStartX, artRestX, slide), -10f);
+            art.localScale = Vector3.one * (1f + 0.05f * Mathf.Clamp01((t - 0.6f) / (end - 0.6f)));
+
+            float stamp = Mathf.Clamp01((t - 0.35f) / 0.18f);
+            name.color = new Color(colour.r, colour.g, colour.b, stamp);
+            name.rectTransform.localScale = Vector3.one * Mathf.Lerp(1.6f, 1f, EaseOut(stamp));
+            epithetText.color = new Color(1f, 1f, 1f, Mathf.Clamp01((t - 0.6f) / 0.3f));
+
+            if (!spoke && t >= closeUpAt)
+            {
+                spoke = true;
+                if (voice != null && line != null)
+                {
+                    voice.clip = line;
+                    voice.Play();
+                }
+                CameraShake.Add(0.35f);
+                Sfx.Play(Sfx.ParrySwing, 1f, 0.55f);
+            }
+            float since = t - closeUpAt;
+            float open = since < 0 ? 0f : EaseOut(Mathf.Clamp01(since / 0.12f));
+            strip.localScale = new Vector3(1f, open, 1f);
+            foreach (RectTransform rim in rims) rim.localScale = new Vector3(open, 1f, 1f);
+            face.anchoredPosition = faceRest + Vector2.left * (70f * Mathf.Clamp01(since / lineLength));
+            flash.color = new Color(1f, 1f, 1f, since < 0 ? 0f : 0.85f * (1f - Mathf.Clamp01(since / 0.25f)));
+            said.maxVisibleCharacters = Mathf.RoundToInt(said.text.Length * Mathf.Clamp01((since - 0.2f) / (lineLength * 0.85f)));
+            yield return null;
+        }
+        if (voice != null && voice.isPlaying) voice.Stop();
+
+        // Wipe everything off to the left.
+        for (float t = 0; t < 0.35f; t += Time.unscaledDeltaTime)
+        {
+            float k = t / 0.35f;
+            root.anchoredPosition = new Vector2(-2200f * k * k, 0);
+            group.alpha = 1f - k;
+            yield return null;
+        }
+        Destroy(root.gameObject);
+    }
+
+    static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);
 
     public void HideBossBar()
     {

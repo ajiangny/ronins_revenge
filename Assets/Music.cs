@@ -10,6 +10,8 @@ public class Music : MonoBehaviour
     readonly float[] targets = new float[2];
     int live;
     float fadeSpeed = 1f;
+    float duckLevel = 1f;
+    float duckUntil;
 
     public static void Play(AudioClip clip, float volume, float fadeSeconds = 1f)
     {
@@ -31,6 +33,14 @@ public class Music : MonoBehaviour
         next.volume = 0f;
         next.Play();
         music.targets[music.live] = volume;
+    }
+
+    // Lowers the music to `level` of its volume for a while, under a voiceline.
+    public static void Duck(float level, float seconds)
+    {
+        Music music = Instance;
+        music.duckLevel = level;
+        music.duckUntil = Time.unscaledTime + seconds;
     }
 
     public static void Stop(float fadeSeconds = 1f)
@@ -65,7 +75,9 @@ public class Music : MonoBehaviour
         {
             AudioSource deck = decks[i];
             if (!deck.isPlaying) continue;
-            deck.volume = Mathf.MoveTowards(deck.volume, targets[i], fadeSpeed * Time.unscaledDeltaTime);
+            float target = targets[i] * (Time.unscaledTime < duckUntil ? duckLevel : 1f);
+            // Ducking eases in and out quickly whatever the crossfade speed.
+            deck.volume = Mathf.MoveTowards(deck.volume, target, Mathf.Max(fadeSpeed, 2f) * Time.unscaledDeltaTime);
             if (deck.volume <= 0f && targets[i] <= 0f) deck.Stop();
         }
     }

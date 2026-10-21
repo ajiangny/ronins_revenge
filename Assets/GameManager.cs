@@ -59,6 +59,13 @@ public class GameManager : MonoBehaviour
     [Tooltip("Benibana's sprite frames. Leave empty to use the Taisho art, tinted crimson, as a stand-in.")]
     [SerializeField] CharacterArt benibanaArt;
     [SerializeField] float benibanaScale = 3.4f;
+    [Tooltip("Her full-body illustration and the close-up used in her intro. Without them she gets the plain title card.")]
+    [SerializeField] Sprite benibanaPortrait;
+    [SerializeField] Sprite benibanaCloseup;
+    [SerializeField] AudioClip benibanaIntroLine;
+    [SerializeField] AudioClip benibanaPhaseLine;
+    [SerializeField] AudioClip benibanaDefeatLine;
+    [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
     [SerializeField] float bossDepth = 3f;
 
@@ -102,11 +109,16 @@ public class GameManager : MonoBehaviour
     Scout activeScout;
     float nextScoutTime;
     Boss activeBoss;
+    AudioSource voice;
 
     void Awake()
     {
         // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
         if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
+        // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects.
+        voice = gameObject.AddComponent<AudioSource>();
+        voice.playOnAwake = false;
+        voice.spatialBlend = 0f;
     }
 
     // OnEnable also runs after the Editor reloads scripts mid-play, which clears statics like the effect library.
@@ -499,6 +511,7 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
         army.Clear();
         ClearProjectiles();
+        ui.HideOverlay();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
         yield return new WaitForSeconds(1f);
@@ -517,16 +530,28 @@ public class GameManager : MonoBehaviour
         activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
         activeBoss.Damaged += OnBossDamaged;
         activeBoss.Defeated += OnBossDefeated;
+        activeBoss.Spoke += OnBossSpoke;
         effects.Boss = activeBoss;
         yield return activeBoss.Enter(post, 1.6f);
 
         Fx.Play(Fx.SlashArc, post, activeBoss.Colour, 6f);
+        Fx.Play(Fx.BeniPetals, post, Color.white, 3f);
         CameraShake.Add(0.4f);
         Sfx.Play(Sfx.StageStart, 1f, 0.75f);
-        ui.ShowOverlay(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
-        yield return new WaitForSeconds(2.2f);
+        BossVoice lines = VoiceFor(Stage.boss);
+        if (lines.portrait != null && lines.closeup != null)
+        {
+            voice.volume = voiceVolume;
+            yield return ui.PlayBossIntro(lines.portrait, lines.closeup, activeBoss.Title, activeBoss.Epithet, activeBoss.Colour,
+                voice, lines.intro, activeBoss.Line(BossLine.Intro));
+        }
+        else
+        {
+            ui.ShowOverlay(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
+            yield return new WaitForSeconds(2.2f);
+            ui.HideOverlay();
+        }
 
-        ui.HideOverlay();
         ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
         state = State.Playing;
@@ -544,6 +569,40 @@ public class GameManager : MonoBehaviour
                 Color tint = standIn ? new Color(1f, 0.55f, 0.6f) : Color.white;
                 return Boss.Create<Benibana>(art, benibanaScale, Benibana.StartingHealth, position, tint);
         }
+    }
+
+    struct BossVoice
+    {
+        public Sprite portrait, closeup;
+        public AudioClip intro, phase, defeat;
+    }
+
+    BossVoice VoiceFor(BossKind kind) => kind switch
+    {
+        BossKind.Benibana => new BossVoice
+        {
+            portrait = benibanaPortrait, closeup = benibanaCloseup,
+            intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
+        },
+        _ => default,
+    };
+
+    // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them.
+    void OnBossSpoke(Boss boss, BossLine line)
+    {
+        BossVoice lines = VoiceFor(Stage.boss);
+        AudioClip clip = line == BossLine.Phase ? lines.phase : line == BossLine.Defeat ? lines.defeat : lines.intro;
+        string text = boss.Line(line);
+        float seconds = clip != null ? clip.length : 2.5f;
+        if (clip != null)
+        {
+            voice.Stop();
+            voice.volume = voiceVolume;
+            voice.clip = clip;
+            voice.Play();
+            Music.Duck(0.3f, seconds + 0.3f);
+        }
+        if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(text, boss.Colour, seconds + 0.6f);
     }
 
     void OnBossDamaged(Vector3 point, KillSource source)

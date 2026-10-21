@@ -10,6 +10,8 @@ public static class BossArtSetup
     const string SpriteRoot = "Assets/Art/Sprites/Characters/";
     const string ArtRoot = "Assets/Art/Characters/";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
+    const string PortraitRoot = "Assets/Art/Portraits/";
+    const string VoiceRoot = "Assets/Audio/Voice/";
     // About twice a samurai's height, so she reads as the warlord the moment she lands.
     const float BenibanaScale = 2.3f;
     // Low enough that her ponytail clears the boss bar.
@@ -40,12 +42,36 @@ public static class BossArtSetup
         so.FindProperty("benibanaArt").objectReferenceValue = benibana;
         so.FindProperty("benibanaScale").floatValue = BenibanaScale;
         so.FindProperty("bossDepth").floatValue = BossDepth;
+        so.FindProperty("benibanaPortrait").objectReferenceValue = Portrait("Benibana_Full");
+        so.FindProperty("benibanaCloseup").objectReferenceValue = Portrait("Benibana_Closeup");
+        so.FindProperty("benibanaIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Intro.mp3");
+        so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
+        so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
         so.ApplyModifiedProperties();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
         Debug.Log($"Benibana art applied: {benibana.idle.Length} idle, {benibana.attack.Length} slash, {benibana.parry.Length} puff, " +
             $"{benibana.hit.Length} hit, {benibana.death.Length} defeat frames.");
+    }
+
+    // The intro illustrations are painted, not pixel art: smooth filtering and full size, as UI sprites.
+    static Sprite Portrait(string name)
+    {
+        string path = PortraitRoot + name + ".png";
+        if (AssetImporter.GetAtPath(path) is TextureImporter importer &&
+            (importer.textureType != TextureImporterType.Sprite || importer.filterMode != FilterMode.Bilinear || importer.maxTextureSize != 2048))
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.maxTextureSize = 2048;
+            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            importer.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     static CharacterArt SaveArt(string name, Sprite[] idle, Sprite[] attack, Sprite[] parry, Sprite[] hit, Sprite[] death, Sprite[] particles)

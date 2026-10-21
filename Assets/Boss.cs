@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// The things a boss says out loud; GameManager plays the matching voice clip and subtitle.
+public enum BossLine { Intro, Phase, Defeat }
+
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
 // staggers, frost and movement. Built in code, so a boss needs no prefab.
@@ -17,10 +20,19 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public event Action<Vector3, KillSource> Damaged;
     public event Action Defeated;
+    public event Action<Boss, BossLine> Spoke;
 
     public abstract string Title { get; }
     public abstract string Epithet { get; }
     public abstract Color Colour { get; }
+
+    // The subtitle for a line, or null when the boss has nothing to say there.
+    public virtual string Line(BossLine line) => null;
+
+    protected void Speak(BossLine line)
+    {
+        Spoke?.Invoke(this, line);
+    }
 
     public int Health { get; private set; }
     public int MaxHealth { get; private set; }
@@ -345,6 +357,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         ClearTransient();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Defeated?.Invoke();
+        Speak(BossLine.Defeat);
         StartCoroutine(Fall());
     }
 

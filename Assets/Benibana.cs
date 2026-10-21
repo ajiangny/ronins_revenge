@@ -20,6 +20,14 @@ public class Benibana : Boss
     public override string Epithet => "The Crimson Smoke";
     public override Color Colour => Crimson;
 
+    public override string Line(BossLine line) => line switch
+    {
+        BossLine.Intro => "The heavens have forsaken you, and the gods have turned their gaze away. How fortunate... that I shall be the one to paint your final moments in crimson.",
+        BossLine.Phase => "You tore my kimono... Now I'll enjoy this.",
+        BossLine.Defeat => "Crimson... suits you... after all...",
+        _ => null,
+    };
+
     bool secondPhase;
     bool breaking;
     Move? lastMove;
@@ -273,6 +281,7 @@ public class Benibana : Boss
         }
         bodyTint = new Color(0.8f, 0.45f, 0.5f);
         AddEyes();
+        Speak(BossLine.Phase);
         yield return new WaitForSeconds(0.6f);
         SpawnVeil();
         yield return new WaitForSeconds(1.2f);
@@ -374,7 +383,7 @@ public class VeilPuff : MonoBehaviour
             puff.transform.localScale = Vector3.one * (size * 0.8f / frames[0].bounds.size.x);
             puff.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 8f);
             // The cloud art is already dark; only its alpha comes from the colour.
-            colour = new Color(1f, 1f, 1f, 0.85f);
+            colour = new Color(1f, 1f, 1f, 0.55f);
         }
         puff.colour = colour;
         puff.drift = Random.Range(0.3f, 0.7f) * (Random.value < 0.5f ? -1f : 1f);

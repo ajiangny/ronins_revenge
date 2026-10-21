@@ -33,7 +33,7 @@ Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ R
 | Sword slash (Space), Inferno Fan spread | `Ronin.Attack` → `Ronin.Slash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`) |
 | Kunai throw (kept for a future weapon select) | `Ronin.weapon = Kunai` → `Ronin.ThrowKunai` → `Kunai.prefab`; also the fallback while `slashPrefab` is unset |
 | Spirit Shuriken (E / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
-| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target |
+| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target and blockers |
 | Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
 | Ronin events | `Hit`, `WardBroken`, `ShurikenThrown`, `Parried` (GameManager subscribes) |
@@ -84,7 +84,8 @@ match `BoonChoiceUI.boonIcons`.
   staggers, chill/freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
   that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`.
 - `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (70 HP). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
-  (parry it back to stagger her), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
+  (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
+  back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
 - Wiring in `GameManager`: `BeginBoss` (intro, blood moon via `Backdrop.SetBloodMoon`, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,

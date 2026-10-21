@@ -7,14 +7,19 @@ using UnityEngine;
 // to break her stance.
 public class Benibana : Boss
 {
-    public const int StartingHealth = 45;
+    public const int StartingHealth = 70;
 
     static readonly Color Crimson = new Color(0.95f, 0.15f, 0.22f);
     static readonly Color Silver = new Color(0.85f, 0.88f, 0.95f);
     static readonly Color Smoke = new Color(0.6f, 0.58f, 0.62f, 0.8f);
     static readonly Color VeilColour = new Color(0.16f, 0.14f, 0.17f, 0.72f);
 
-    enum Move { SmokeRings, RosaryLash, Iaido }
+    enum Move { SmokeRings, RosaryLash, Iaido, RosaryBloom }
+
+    // Phase 1 is hard; phase 2 is relentless. Each value is (phase 1, phase 2).
+    float Recovery => secondPhase ? 0.45f : 0.9f;
+    float ComboChance => secondPhase ? 0.7f : 0.4f;
+    int MaxCombo => secondPhase ? 3 : 2;
 
     public override string Title => "BENIBANA";
     public override string Epithet => "The Crimson Smoke";
@@ -23,7 +28,7 @@ public class Benibana : Boss
     public override string Line(BossLine line) => line switch
     {
         BossLine.Intro => "The heavens have forsaken you, and the gods have turned their gaze away. How fortunate... that I shall be the one to paint your final moments in crimson.",
-        BossLine.Phase => "You tore my kimono... Now I'll enjoy this.",
+        BossLine.Phase => "You've torn my kimono... You will pay for that in blood!",
         BossLine.Defeat => "Crimson... suits you... after all...",
         _ => null,
     };
@@ -33,9 +38,13 @@ public class Benibana : Boss
     Move? lastMove;
     int movesSinceIaido;
     SpriteRenderer eyes;
+    FxPlayer auraFlames;
+    SpriteRenderer auraGlow;
     readonly List<VeilPuff> veil = new List<VeilPuff>();
 
     protected override bool Busy => breaking;
+    protected override float StaggerSeconds => secondPhase ? 1.4f : 2f;
+    float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     Vector3 Mouth => Centre + Vector3.up * 0.5f;
 
@@ -44,28 +53,38 @@ public class Benibana : Boss
         while (true)
         {
             while (breaking) yield return null;
-            Beat();
-            yield return Wait(secondPhase ? 1.1f : 1.6f);
-            yield return BlinkTo(RandomX(3f), new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
-            yield return Wait(0.25f);
+            yield return Wait(Recovery);
 
-            Move move = NextMove();
-            lastMove = move;
-            movesSinceIaido = move == Move.Iaido ? 0 : movesSinceIaido + 1;
-            switch (move)
+            // A string of moves with no breath between them: the opening comes only after the combo ends.
+            int combo = 1;
+            while (combo < MaxCombo && Random.value < ComboChance) combo++;
+            for (int i = 0; i < combo; i++)
             {
-                case Move.SmokeRings: yield return SmokeRings(); break;
-                case Move.RosaryLash: yield return RosaryLash(); break;
-                case Move.Iaido: yield return Iaido(); break;
+                Beat();
+                yield return BlinkTo(RandomX(3f), new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
+                yield return Wait(0.12f);
+
+                Move move = NextMove();
+                lastMove = move;
+                movesSinceIaido = move == Move.Iaido ? 0 : movesSinceIaido + 1;
+                switch (move)
+                {
+                    case Move.SmokeRings: yield return SmokeRings(); break;
+                    case Move.RosaryLash: yield return RosaryLash(); break;
+                    case Move.Iaido: yield return Iaido(); break;
+                    case Move.RosaryBloom: yield return RosaryBloom(); break;
+                }
             }
         }
     }
 
     // Never the same move twice in a row, and the Iaido at least every third move so the duel keeps its rhythm.
+    // The Rosary Bloom only comes out in her second phase.
     Move NextMove()
     {
         if (movesSinceIaido >= 2 && lastMove != Move.Iaido) return Move.Iaido;
         var options = new List<Move> { Move.SmokeRings, Move.RosaryLash, Move.Iaido };
+        if (secondPhase) options.Add(Move.RosaryBloom);
         if (lastMove is Move last) options.Remove(last);
         return options[Random.Range(0, options.Count)];
     }
@@ -77,15 +96,27 @@ public class Benibana : Boss
         PlayAction(art.parry);
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.2f);
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.55f);
-        yield return Wait(0.55f);
+        yield return Wait(secondPhase ? 0.35f : 0.45f);
 
-        int count = secondPhase ? 5 : 4;
-        float spread = 32f;
+        int volleys = secondPhase ? 3 : 2;
+        for (int volley = 0; volley < volleys; volley++)
+        {
+            if (volley > 0) yield return Wait(secondPhase ? 0.3f : 0.4f);
+            PuffRings(secondPhase ? 8 : 6, secondPhase ? 4.8f : 4.2f, volley % 2 == 1);
+        }
+        Sfx.Play(Sfx.ParrySwing, 0.7f, 0.6f);
+    }
+
+    // One fan of rings aimed at the ronin; offset volleys fill the gaps the last one left.
+    void PuffRings(int count, float speed, bool offset)
+    {
+        float spread = 40f;
+        float step = 2f * spread / (count - 1f);
         Vector3 aim = (ronin.Bounds.center - Mouth).normalized;
         for (int i = 0; i < count; i++)
         {
-            float angle = Mathf.Lerp(-spread, spread, i / (count - 1f));
-            Vector3 velocity = Quaternion.Euler(0, 0, angle) * aim * 3.4f;
+            float angle = Mathf.Lerp(-spread, spread, i / (count - 1f)) + (offset ? step / 2f : 0f);
+            Vector3 velocity = Quaternion.Euler(0, 0, angle) * aim * speed;
             Arrow ring = Shoot(Mouth, velocity);
             Sprite[] ringFrames = Fx.Frames(Fx.BeniSmokeRing);
             if (ringFrames != null) ring.Restyle(ringFrames, 10f, new Color(1f, 1f, 1f, 0.9f), new Vector2(1.15f, 1.15f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.3f), 1.4f);
@@ -94,37 +125,34 @@ public class Benibana : Boss
             if (secondPhase && i % 2 == 1) Cross(Mouth, velocity * 1.02f);
         }
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.8f);
-        Sfx.Play(Sfx.ParrySwing, 0.7f, 0.6f);
     }
 
     // Rosary Lash: a silver line marks a column, then her cross-chain slams down it, smashing blockers. It hangs
     // there as a wall for a moment before its crosses break off and fall. Two columns in her second phase.
     IEnumerator RosaryLash()
     {
-        var columns = new List<float> { ronin.Bounds.center.x };
-        if (secondPhase)
-        {
-            float side = Random.value < 0.5f ? -1f : 1f;
-            float other = columns[0] + side * 3.5f;
-            if (Mathf.Abs(other - CameraShake.Center.x) > HalfWidth - 1f) other = columns[0] - side * 3.5f;
-            columns.Add(other);
-        }
+        // One chain on the ronin, the others hemming him in on either side.
+        float here = ronin.Bounds.center.x;
+        float side = Random.value < 0.5f ? -1f : 1f;
+        var columns = new List<float> { here, ClampToScreen(here + side * 3.4f) };
+        if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
 
         var tells = new List<SpriteRenderer>();
         foreach (float x in columns)
         {
-            tells.Add(Bar(new Vector3(x, Centre.y, 0), new Vector3(x, GroundY, 0), 0.08f, new Color(Silver.r, Silver.g, Silver.b, 0.4f)));
+            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 0.08f, new Color(Silver.r, Silver.g, Silver.b, 0.4f)));
         }
+        float beatTime = secondPhase ? 0.15f : 0.2f;
         for (int beat = 0; beat < 3; beat++)
         {
             Sfx.Play(Sfx.BlockerHit, 0.45f, 1.9f);
-            yield return Wait(0.25f);
+            yield return Wait(beatTime);
         }
 
         var chains = new List<GameObject>();
         foreach (float x in columns)
         {
-            Vector3 top = new Vector3(x, Centre.y, 0);
+            Vector3 top = new Vector3(x, TopOfScreen, 0);
             Vector3 bottom = new Vector3(x, GroundY, 0);
             chains.Add(Chain(top, bottom));
             if (Fx.Play(Fx.BeniChainImpact, bottom + Vector3.up * 0.3f, Color.white, 1.8f) == null)
@@ -148,12 +176,14 @@ public class Benibana : Boss
             yield return null;
         }
 
+        int crosses = secondPhase ? 6 : 5;
+        float crossSpeed = secondPhase ? 7.5f : 6.5f;
         foreach (float x in columns)
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < crosses; i++)
             {
-                float y = Mathf.Lerp(Centre.y - 1f, GroundY + 3.5f, i / 3f);
-                Cross(new Vector3(x, y, 0), Quaternion.Euler(0, 0, Random.Range(-22f, 22f)) * Vector3.down * 5.5f);
+                float y = Mathf.Lerp(TopOfScreen - 1.5f, GroundY + 3.5f, i / (crosses - 1f));
+                Cross(new Vector3(x, y, 0), Quaternion.Euler(0, 0, Random.Range(-28f, 28f)) * Vector3.down * crossSpeed);
             }
         }
         foreach (GameObject chain in chains)
@@ -174,7 +204,7 @@ public class Benibana : Boss
         float right = CameraShake.Center.x + HalfWidth;
         SpriteRenderer line = Bar(new Vector3(left, Centre.y, 0), new Vector3(right, Centre.y, 0), 0.06f, Crimson);
         ElementFx.Glow(Centre, Crimson, 1f, 3f, 0.6f, transform);
-        float windUp = secondPhase ? 0.65f : 0.8f;
+        float windUp = secondPhase ? 0.45f : 0.6f;
         for (float t = 0; t < windUp; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
         {
             Color c = Crimson;
@@ -195,19 +225,59 @@ public class Benibana : Boss
         Vector3 target = ronin.Bounds.center;
         if (secondPhase)
         {
-            Crescent(Centre + Vector3.left * 2.5f, target);
-            Crescent(Centre + Vector3.right * 2.5f, target);
+            Crescent(Centre + Vector3.left * 2.5f, target, 14f);
+            Crescent(Centre + Vector3.right * 2.5f, target, 14f);
         }
         else
         {
-            Crescent(Centre, target);
+            Crescent(Centre, target, 12.5f);
         }
-        yield return Wait(0.3f);
+
+        // The follow-up: a second draw a beat later, aimed where the ronin dodged to.
+        yield return Wait(secondPhase ? 0.3f : 0.4f);
+        PlayAction(art.attack);
+        Sfx.Play(Sfx.ParrySwing, 1f, 0.7f);
+        Fx.Play(Fx.BeniIaidoFlash, Centre + new Vector3(-2.2f, -0.5f, 0), Color.white, 3f);
+        Crescent(Centre, ronin.Bounds.center, secondPhase ? 16f : 14f);
+        yield return Wait(0.25f);
     }
 
-    void Crescent(Vector3 from, Vector3 target)
+    // Rosary Bloom (second phase only): she spins her rosary overhead and flings three rotating waves of crosses
+    // down across the whole field, each wave turned to cover the last one's gaps.
+    IEnumerator RosaryBloom()
     {
-        Vector3 velocity = (target - from).normalized * 10f;
+        Vector3 centre = new Vector3(CameraShake.Center.x, anchor.y, 0);
+        yield return BlinkTo(centre.x, new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
+        ElementFx.Glow(Centre, Silver, 1f, 5f, 0.5f, transform);
+        for (int beat = 0; beat < 3; beat++)
+        {
+            Sfx.Play(Sfx.BlockerHit, 0.5f, 2.1f);
+            yield return Wait(0.15f);
+        }
+        const int perWave = 13;
+        for (int wave = 0; wave < 3; wave++)
+        {
+            float turn = wave * (150f / (perWave - 1)) / 3f;
+            for (int i = 0; i < perWave; i++)
+            {
+                float angle = Mathf.Lerp(-75f, 75f, i / (perWave - 1f)) + turn;
+                Cross(Centre, Quaternion.Euler(0, 0, angle) * Vector3.down * 6f);
+            }
+            Fx.Play(Fx.BeniPetals, Centre, Color.white, 2f);
+            Sfx.Play(Sfx.WardShatter, 0.5f, 1.6f);
+            yield return Wait(0.35f);
+        }
+    }
+
+    float ClampToScreen(float x)
+    {
+        float centre = CameraShake.Center.x;
+        return Mathf.Clamp(x, centre - HalfWidth + 1f, centre + HalfWidth - 1f);
+    }
+
+    void Crescent(Vector3 from, Vector3 target, float speed)
+    {
+        Vector3 velocity = (target - from).normalized * speed;
         Arrow wave = Shoot(from, velocity);
         Sprite[] frames = Fx.Frames(Fx.BeniCrescent);
         if (frames != null) wave.Restyle(frames, 14f, Color.white, new Vector2(3.2f, 2f), 0.55f, new Color(1f, 0.1f, 0.15f, 0.45f), 3.5f);
@@ -281,12 +351,34 @@ public class Benibana : Boss
         }
         bodyTint = new Color(0.8f, 0.45f, 0.5f);
         AddEyes();
+        AddAura();
         Speak(BossLine.Phase);
         yield return new WaitForSeconds(0.6f);
         SpawnVeil();
         yield return new WaitForSeconds(1.2f);
         breaking = false;
         RestartFight();
+    }
+
+    // Her killing intent made visible: crimson flames licking up from her feet and a red glow pulsing behind her.
+    void AddAura()
+    {
+        Vector3 feet = new Vector3(Centre.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0);
+        auraFlames = Fx.Play(Fx.Aura(Element.Fire), feet, new Color(1f, 0.22f, 0.28f, 0.9f), 3.4f, transform, sprite.sortingOrder - 1);
+        auraGlow = Kunai.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Crimson.r, Crimson.g, Crimson.b, 0.5f));
+        StartCoroutine(PulseAura(auraGlow));
+    }
+
+    IEnumerator PulseAura(SpriteRenderer glow)
+    {
+        while (glow != null && !IsDead)
+        {
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
+            glow.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.3f + 0.35f * pulse);
+            glow.transform.localScale = Vector3.one * (2f + 0.4f * pulse);
+            yield return null;
+        }
+        if (glow != null) Destroy(glow.gameObject);
     }
 
     // Glowing red eyes drawn above the smoke, so she can always be found inside it.
@@ -328,6 +420,8 @@ public class Benibana : Boss
             if (puff != null) puff.Dissolve();
         }
         if (eyes != null) Destroy(eyes.gameObject);
+        if (auraFlames != null) auraFlames.Stop();
+        if (auraGlow != null) Destroy(auraGlow.gameObject);
         // The pipe falls and the blade snaps.
         Debris.BurstSprites(Centre, art.deathParticles, Silver, 16, 0.9f, 8f);
         Fx.Play(Fx.BeniPetals, Centre, Color.white, 3f);

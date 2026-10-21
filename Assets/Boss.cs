@@ -152,6 +152,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
     protected virtual bool Busy => false;
 
+    // How long a reflected strike breaks the boss's stance.
+    protected virtual float StaggerSeconds => 2f;
+
     // An exception inside an attack silently ends its coroutine; rather than stand idle for the rest of the
     // fight, the boss notices it has stopped moving and starts over.
     void Update()
@@ -345,7 +348,7 @@ public abstract class Boss : MonoBehaviour, IHittable
             Die();
             return;
         }
-        if (source == KillSource.Reflected) Stagger(2f);
+        if (source == KillSource.Reflected) Stagger(StaggerSeconds);
         OnDamaged();
     }
 

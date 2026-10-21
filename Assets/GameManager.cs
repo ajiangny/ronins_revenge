@@ -110,12 +110,14 @@ public class GameManager : MonoBehaviour
     float nextScoutTime;
     Boss activeBoss;
     AudioSource voice;
+    Backdrop backdrop;
 
     void Awake()
     {
         // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
         if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
         // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects.
+        backdrop = FindAnyObjectByType<Backdrop>();
         voice = gameObject.AddComponent<AudioSource>();
         voice.playOnAwake = false;
         voice.spatialBlend = 0f;
@@ -514,6 +516,8 @@ public class GameManager : MonoBehaviour
         ui.HideOverlay();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
+        // A blood moon rises over the duel.
+        if (backdrop != null) backdrop.SetBloodMoon(true);
         yield return new WaitForSeconds(1f);
 
         Camera cam = Camera.main;
@@ -654,6 +658,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2.2f);
         effects.Boss = null;
         activeBoss = null;
+        // Her fall lifts the blood moon.
+        if (backdrop != null) backdrop.SetBloodMoon(false);
 
         var element = (Element)Random.Range(0, 3);
         ElementFx.Glow(where, Boons.Info(element).Color, 1f, 5f, 1f);

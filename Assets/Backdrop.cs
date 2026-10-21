@@ -23,6 +23,16 @@ public class Backdrop : MonoBehaviour
     Petal[] petals;
     float halfWidth, halfHeight, centerX, centerY;
 
+    // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
+    static readonly Color BloodGround = new Color(0.95f, 0.42f, 0.42f);
+    static readonly Color BloodPetal = new Color(0.9f, 0.08f, 0.14f, 0.9f);
+    SpriteRenderer groundRenderer;
+    SpriteRenderer[] petalRenderers;
+    SpriteRenderer moon;
+    SpriteRenderer moonHalo;
+    float blood;
+    float bloodTarget;
+
     void Start()
     {
         Camera cam = Camera.main;
@@ -35,15 +45,23 @@ public class Backdrop : MonoBehaviour
         // Fit the ground to the real view (not the petals' overscan) so the courtyard isn't cropped more than needed.
         float viewHeight = 2f * halfHeight, viewWidth = viewHeight * cam.aspect;
         float scale = Mathf.Max(viewWidth / ground.bounds.size.x, viewHeight / ground.bounds.size.y);
-        CreateSprite("Ground", ground, new Vector3(centerX, centerY, 0), scale, 0, groundTint);
+        groundRenderer = CreateSprite("Ground", ground, new Vector3(centerX, centerY, 0), scale, 0, groundTint);
+
+        // The blood moon hangs in the top-left corner, hidden until a boss fight raises it.
+        Vector3 moonSpot = new Vector3(centerX - viewWidth * 0.36f, centerY + viewHeight * 0.3f, 0);
+        moonHalo = CreateSprite("MoonHalo", ProceduralSprites.Glow, moonSpot, 9f, 0, Color.clear);
+        moon = CreateSprite("BloodMoon", ProceduralSprites.Disc, moonSpot, 3.2f, 0, Color.clear);
+        moonHalo.sortingOrder = moon.sortingOrder = -99;
 
         petals = new Petal[petalCount];
+        petalRenderers = new SpriteRenderer[petalCount];
         for (int i = 0; i < petalCount; i++)
         {
             float size = Random.Range(petalSizeRange.x, petalSizeRange.y);
+            petalRenderers[i] = CreateSprite("Petal", petal, Vector3.zero, size, 1, petalTint);
             var p = new Petal
             {
-                transform = CreateSprite("Petal", petal, Vector3.zero, size, 1, petalTint).transform,
+                transform = petalRenderers[i].transform,
                 // Bigger petals are "closer", so they fall faster.
                 fallSpeed = Mathf.Lerp(fallSpeedRange.x, fallSpeedRange.y, Mathf.InverseLerp(petalSizeRange.x, petalSizeRange.y, size)),
                 swayPhase = Random.Range(0f, Mathf.PI * 2f),
@@ -54,6 +72,17 @@ public class Backdrop : MonoBehaviour
             p.transform.position = new Vector3(p.baseX, centerY + Random.Range(-halfHeight, halfHeight), p.transform.position.z);
             petals[i] = p;
         }
+    }
+
+    // Eases the whole scene toward (or away from) the blood moon over about two seconds.
+    void UpdateBloodMoon(float dt)
+    {
+        blood = Mathf.MoveTowards(blood, bloodTarget, dt * 0.5f);
+        groundRenderer.color = Color.Lerp(groundTint, groundTint * BloodGround, blood);
+        Color petalColour = Color.Lerp(petalTint, BloodPetal, blood);
+        foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
+        moon.color = new Color(0.85f, 0.1f, 0.12f, blood);
+        moonHalo.color = new Color(1f, 0.15f, 0.15f, 0.5f * blood);
     }
 
     SpriteRenderer CreateSprite(string name, Sprite sprite, Vector3 position, float scale, int order, Color color)
@@ -70,9 +99,15 @@ public class Backdrop : MonoBehaviour
         return r;
     }
 
+    public void SetBloodMoon(bool on)
+    {
+        bloodTarget = on ? 1f : 0f;
+    }
+
     void Update()
     {
         float dt = Time.deltaTime;
+        if (!Mathf.Approximately(blood, bloodTarget)) UpdateBloodMoon(Time.unscaledDeltaTime);
         foreach (Petal p in petals)
         {
             Vector3 position = p.transform.position;

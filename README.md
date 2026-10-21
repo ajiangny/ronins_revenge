@@ -31,7 +31,7 @@ In the code the original class names are kept (`Alien` = samurai, `Spaceship` = 
 
 - **Start and end screens.** A "SHADOW BLADE" title screen with controls, a "Stage N" intro between levels, and Defeated / Victory screens showing score and high score. High score is saved with `PlayerPrefs`. (`GameManager`, `GameUI`)
 - **Additional levels.** Three stages, configured in `GameManager.levels` (`LevelConfig`). Each stage has more samurai, starts lower, moves faster, shoots more often with more aimed, faster arrows, and tints the army a new clan colour.
-- **Lives.** 3 lives, shown as icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Spaceship`, `GameUI.SetLives`)
+- **Lives.** 3 lives, shown as ronin head icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Spaceship`, `GameUI.SetLives`)
 - **Shields.** Four sets of courtyard blockers, each a bush, a stone lantern and a bush (`ShieldWall`, `ShieldBlock`). Bushes take 5 hits and lanterns 8; each shows three damage states and then breaks into leaves or stone chips, so you can shoot gaps into a set. Samurai that march into the blockers trample them. Blockers are rebuilt every stage.
 - **Collision animations.** Samurai play a death animation and burst into sakura petals and smoke; the ronin bursts into sparks and smoke when hit and when killed; blockers break into leaves or stone chips. (`Debris.BurstSprites`, `SpriteAnimator`)
 - **New graphics.** Every primitive (sphere aliens, capsule ship, cube debris) is replaced with chibi pixel art I generated with PixelLab's AI tools from my own prompts:

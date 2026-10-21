@@ -44,9 +44,9 @@ public class GameUI : MonoBehaviour
         scoreText.text = $"Score {score:000000}      High {highScore:000000}";
     }
 
-    public void SetLevel(int level, int levelCount)
+    public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
-        levelText.text = $"Stage {level} / {levelCount}";
+        levelText.text = $"Stage {stage}/{stageCount}   Round {round}/{roundCount}";
     }
 
     // One ronin head icon per remaining life.

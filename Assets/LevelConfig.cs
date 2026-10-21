@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-// Tuning values for one stage of samurai. GameManager holds one of these per level.
+// Tuning values for one round of samurai. Each StageConfig holds one of these per round.
 [System.Serializable]
 public class LevelConfig
 {

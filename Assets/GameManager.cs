@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -18,7 +19,7 @@ public class ElementArt
     public Sprite portrait;
 }
 
-// Owns the game flow: title screen -> levels -> win/lose screen, plus score, lives, souls and boons.
+// Owns the game flow: title screen -> stages of rounds -> win/lose screen, plus score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
     enum State { Title, Transition, Playing, Choosing, GameOver }
@@ -54,15 +55,28 @@ public class GameManager : MonoBehaviour
     [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
     [SerializeField] float auraLift = 0.3f;
 
-    [SerializeField] LevelConfig[] levels =
+    [Tooltip("Intro time for the second and later rounds of a stage; the first round uses levelIntroTime.")]
+    [SerializeField] float roundIntroTime = 1.2f;
+    [Tooltip("Pause after a stage's last army falls, before its boon is offered.")]
+    [SerializeField] float stageClearPause = 1f;
+
+    [SerializeField] StageConfig[] stages =
     {
-        new LevelConfig { columns = 10, rows = 4, topRowY = 8.5f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 8.1f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.5f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 8.5f, samuraiColor = new Color(1f, 0.85f, 0.1f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 7.5f, baseSpeed = 3.2f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f,  aimedShotChance = 0.55f, arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.25f, 0.35f) },
+        new StageConfig
+        {
+            name = "The Bamboo Road",
+            rounds = new[]
+            {
+                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 1f,   aimedShotChance = 0.2f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
+                new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f, aimedShotChance = 0.25f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f) },
+                new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
+            },
+        },
     };
 
     State state;
-    int levelIndex;
+    int stageIndex;
+    int roundIndex;
     int lives;
     int score;
     int highScore;
@@ -115,7 +129,7 @@ public class GameManager : MonoBehaviour
 
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0, highScore);
-        ui.SetLevel(1, levels.Length);
+        ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
         ui.SetLives(startingLives);
         blockers.Rebuild();
 
@@ -131,7 +145,7 @@ public class GameManager : MonoBehaviour
             ui.ShowOverlay("SHADOW BLADE",
                 "LEFT / RIGHT or A / D to move      SPACE to throw kunai\n" +
                 "E or UP for the Spirit Shuriken      SHIFT or DOWN to parry arrows\n\n" +
-                $"Defeat all {levels.Length} stages. Each samurai army is faster and fires more arrows.\n" +
+                $"Survive {stages.Length} {(stages.Length == 1 ? "stage" : "stages")} of three samurai armies each. A warlord waits at the end of every stage.\n" +
                 "Fallen samurai may drop spirit souls. Catch one to choose a boon.\n\n" +
                 "Press ENTER to start",
                 new Color(0.4f, 0.85f, 1f));
@@ -154,37 +168,64 @@ public class GameManager : MonoBehaviour
             skipTitle = true;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+#if UNITY_EDITOR
+        DevHotkeys(keyboard);
+#endif
     }
+
+#if UNITY_EDITOR
+    // Testing shortcuts: F1 wipes out the current army, F2 skips to the last round of the last stage.
+    void DevHotkeys(Keyboard keyboard)
+    {
+        if (state != State.Playing) return;
+        if (keyboard.f1Key.wasPressedThisFrame)
+        {
+            foreach (Samurai soldier in new List<Samurai>(army.Soldiers)) soldier.Kill(KillSource.Effect);
+        }
+        else if (keyboard.f2Key.wasPressedThisFrame)
+        {
+            stageIndex = stages.Length - 1;
+            roundIndex = Stage.rounds.Length - 1;
+            StartCoroutine(BeginRound());
+        }
+    }
+#endif
+
+    StageConfig Stage => stages[stageIndex];
+    LevelConfig Round => Stage.rounds[roundIndex];
 
     void StartGame()
     {
         lives = startingLives;
         score = 0;
-        levelIndex = 0;
+        stageIndex = 0;
+        roundIndex = 0;
         killsSinceSoul = 0;
         ResetLoadout();
         ui.SetLives(lives);
         ui.SetScore(score, highScore);
-        StartCoroutine(BeginLevel());
+        StartCoroutine(BeginRound());
     }
 
-    IEnumerator BeginLevel()
+    IEnumerator BeginRound()
     {
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ClearProjectiles();
-        blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        // Blockers carry their damage from round to round; a new stage brings fresh ones.
+        if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
 
-        LevelConfig level = levels[levelIndex];
-        army.SpawnStage(level, ronin.transform, ronin.TopY, blockers.TopY);
-        ui.SetLevel(levelIndex + 1, levels.Length);
-        ui.ShowOverlay($"STAGE {levelIndex + 1}",
-            levelIndex == 0 ? "Get ready!" : "Stage cleared! The next army is bigger, faster and angrier.",
-            level.samuraiColor);
+        LevelConfig round = Round;
+        army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
+        ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, Stage.rounds.Length);
+        string body = roundIndex > 0 ? "Another army marches in."
+            : stageIndex == 0 ? $"{Stage.name}\n\nGet ready!"
+            : $"{Stage.name}\n\nThe next armies are bigger, faster and angrier.";
+        ui.ShowOverlay($"STAGE {stageIndex + 1}  -  ROUND {roundIndex + 1}", body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
 
-        yield return new WaitForSeconds(levelIntroTime);
+        yield return new WaitForSeconds(roundIndex == 0 ? levelIntroTime : roundIntroTime);
 
         ui.HideOverlay();
         state = State.Playing;
@@ -194,7 +235,7 @@ public class GameManager : MonoBehaviour
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
-        score += samurai.Points * (levelIndex + 1);
+        score += samurai.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score, highScore);
 
@@ -261,22 +302,35 @@ public class GameManager : MonoBehaviour
     void OnSoulCollected(Soul soul)
     {
         if (state != State.Playing) return;
-        var offers = Boons.Draw(soul.Element, 3, loadout, lives);
-        if (offers.Count == 0) return;
+        if (!OfferBoons(soul.Element, ResumePlay)) return;
         Fx.Play(Fx.Impact, soul.transform.position, Boons.Info(soul.Element).Color, 1.6f);
         Sfx.Play(Sfx.SoulCollect);
+    }
+
+    void ResumePlay()
+    {
+        state = State.Playing;
+        ronin.ControlsEnabled = true;
+    }
+
+    // Pauses on the boon screen and runs afterPick once a boon is taken. False (and nothing shown) when the element
+    // has nothing left to offer.
+    bool OfferBoons(Element element, System.Action afterPick)
+    {
+        var offers = Boons.Draw(element, 3, loadout, lives);
+        if (offers.Count == 0) return false;
 
         state = State.Choosing;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
-        ElementArt art = ArtFor(soul.Element);
-        boonChoice.Show(soul.Element, offers, art?.soulFrames, art?.portrait, index =>
+        ElementArt art = ArtFor(element);
+        boonChoice.Show(element, offers, art?.soulFrames, art?.portrait, index =>
         {
             TakeBoon(offers[index]);
             Time.timeScale = 1f;
-            state = State.Playing;
-            ronin.ControlsEnabled = true;
+            afterPick();
         });
+        return true;
     }
 
     void TakeBoon(BoonOffer offer)
@@ -369,10 +423,37 @@ public class GameManager : MonoBehaviour
     {
         if (state != State.Playing) return;
 
-        if (levelIndex + 1 < levels.Length)
+        if (roundIndex + 1 < Stage.rounds.Length)
         {
-            levelIndex++;
-            StartCoroutine(BeginLevel());
+            roundIndex++;
+            StartCoroutine(BeginRound());
+        }
+        else
+        {
+            StartCoroutine(StageCleared());
+        }
+    }
+
+    // Every cleared stage earns a boon of a random element, then the next stage begins.
+    IEnumerator StageCleared()
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        yield return new WaitForSeconds(stageClearPause);
+
+        var element = (Element)Random.Range(0, 3);
+        Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
+        Sfx.Play(Sfx.SoulCollect);
+        if (!OfferBoons(element, NextStage)) NextStage();
+    }
+
+    void NextStage()
+    {
+        if (stageIndex + 1 < stages.Length)
+        {
+            stageIndex++;
+            roundIndex = 0;
+            StartCoroutine(BeginRound());
         }
         else
         {
@@ -413,7 +494,7 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.Save();
 
         ui.ShowOverlay(title,
-            $"{message}\n\nScore {score}      High score {highScore}\nReached stage {levelIndex + 1} of {levels.Length}\n\nPress ENTER to play again",
+            $"{message}\n\nScore {score}      High score {highScore}\nReached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}\n\nPress ENTER to play again",
             color);
     }
 

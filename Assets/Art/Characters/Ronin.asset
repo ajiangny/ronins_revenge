@@ -25,8 +25,27 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fde0ce36f7ddd452c8f8a0538a60a74f, type: 3}
   - {fileID: 21300000, guid: cac602b6f03a54dfe87d23fbd68b366d, type: 3}
   death: []
+  runLeft:
+  - {fileID: 21300000, guid: de8de28280e3444a4846e551d7183642, type: 3}
+  - {fileID: 21300000, guid: e71755d85d6fe4d8aa21e17ad21600cb, type: 3}
+  - {fileID: 21300000, guid: e49d2e3870f50443eb084b1ad85523ac, type: 3}
+  - {fileID: 21300000, guid: 1a50497abb1ab45e2a4adeb108339082, type: 3}
+  - {fileID: 21300000, guid: ace9a0690dde940dca5e322384f4d8cb, type: 3}
+  - {fileID: 21300000, guid: 144ed0bb96346426aa6597e842d0acbc, type: 3}
+  - {fileID: 21300000, guid: 279147fbc51cd43de921b1a64fd536e8, type: 3}
+  - {fileID: 21300000, guid: 3acca8aa0a1f445a887138fad5df8559, type: 3}
+  runRight:
+  - {fileID: 21300000, guid: f072dffd23aaf4f23aa9ed2919bc35cf, type: 3}
+  - {fileID: 21300000, guid: d92195aa97d08429c999a6012a5c8319, type: 3}
+  - {fileID: 21300000, guid: d88cccb4b92d04cf78bfe6a7aca96af5, type: 3}
+  - {fileID: 21300000, guid: 0bb73796aab83422ab0806c3fd69f36f, type: 3}
+  - {fileID: 21300000, guid: 0abdc7bb9e1e24c1eb45a8ebcce6f6d5, type: 3}
+  - {fileID: 21300000, guid: 93ca01ae2a66c4204a49a31fd417b073, type: 3}
+  - {fileID: 21300000, guid: 358f6dac6d8294e50b9175137772b875, type: 3}
+  - {fileID: 21300000, guid: e6539eb0c342d45a9a26e93800618f13, type: 3}
   idleFps: 5
   actionFps: 12
+  runFps: 14
   deathParticles:
   - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
   - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

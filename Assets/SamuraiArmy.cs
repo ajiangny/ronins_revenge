@@ -19,6 +19,10 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField, FormerlySerializedAs("alienRadius")] float samuraiRadius = 0.45f;
     [Tooltip("Distance the army marches per drum beat, so the beat quickens as the army speeds up.")]
     [SerializeField] float marchBeatDistance = 1.2f;
+    [Tooltip("Average seconds between Taisho spears. Taisho throw on their own timer, over the heads of the ranks in front.")]
+    [SerializeField] float spearInterval = 4.5f;
+    [Tooltip("Taisho take this many hits to fall.")]
+    [SerializeField] int taishoHealth = 2;
 
     public event Action<Samurai, KillSource> SamuraiKilled;
     public event Action ArmyDefeated;
@@ -36,6 +40,7 @@ public class SamuraiArmy : MonoBehaviour
     float direction = 1f;
     float dropRemaining;
     float nextShotTime;
+    float nextSpearTime;
     float landingY;
     float blockerTopY;
     float chillPerStack;
@@ -91,7 +96,8 @@ public class SamuraiArmy : MonoBehaviour
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
-                soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind);
+                soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
+                    kind == SamuraiKind.Taisho ? taishoHealth : 1);
                 soldiers.Add(soldier);
             }
         }
@@ -103,6 +109,7 @@ public class SamuraiArmy : MonoBehaviour
     {
         advancing = true;
         nextShotTime = Time.time + level.fireInterval;
+        nextSpearTime = Time.time + spearInterval;
     }
 
     public void Halt()
@@ -128,11 +135,17 @@ public class SamuraiArmy : MonoBehaviour
     }
 
     // Higher ranks are worth more; archers are worth the most of the rank and file.
-    static int PointsFor(SamuraiKind kind, int row) => kind == SamuraiKind.Archer ? 30 : row < 2 ? 20 : 10;
+    static int PointsFor(SamuraiKind kind, int row) => kind switch
+    {
+        SamuraiKind.Taisho => 60,
+        SamuraiKind.Archer => 30,
+        _ => row < 2 ? 20 : 10,
+    };
 
-    // Ashigaru wear the foot soldier's look and archers the Bushi's, so each kind reads at a glance.
+    // Taisho wear the commander's look, archers the Bushi's and Ashigaru the foot soldier's, so each kind reads at a glance.
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {
+        SamuraiKind.Taisho => samuraiByRow[0],
         SamuraiKind.Archer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         _ => samuraiByRow[samuraiByRow.Length - 1],
     };
@@ -206,6 +219,10 @@ public class SamuraiArmy : MonoBehaviour
         {
             FireShot();
         }
+        if (Time.time >= nextSpearTime)
+        {
+            ThrowSpear();
+        }
     }
 
     void MarchBeat(float distance)
@@ -231,6 +248,7 @@ public class SamuraiArmy : MonoBehaviour
     {
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
         nextShotTime = Mathf.Max(nextShotTime, frozenUntil + 0.3f);
+        nextSpearTime = Mathf.Max(nextSpearTime, frozenUntil + 0.3f);
         UpdateFrostTint();
     }
 
@@ -279,6 +297,15 @@ public class SamuraiArmy : MonoBehaviour
 
         Samurai shooter = FrontSamuraiInColumn(column);
         shooter.Fire(level.arrowSpeed);
+    }
+
+    // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line.
+    void ThrowSpear()
+    {
+        nextSpearTime = Time.time + spearInterval * UnityEngine.Random.Range(0.7f, 1.3f);
+        List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho);
+        if (taisho.Count == 0) return;
+        taisho[UnityEngine.Random.Range(0, taisho.Count)].Fire(level.arrowSpeed);
     }
 
     public int ClosestColumnTo(float x)

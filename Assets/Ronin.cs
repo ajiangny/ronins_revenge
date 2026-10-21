@@ -267,7 +267,8 @@ public class Ronin : MonoBehaviour
         else
         {
             // Kunai art is drawn at half size in the prefab; scale the riposte so it matches the arrow it came from.
-            riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
+            // A parried Taisho spear keeps its weight and runs through two samurai.
+            riposte.Launch(Vector3.up, 1.1f, arrow.Unbreakable ? 2 : 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
             riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
         }
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);

@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
                 new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f, aimedShotChance = 0.25f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f),
                     rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru } },
                 new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true },
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true },
             },
             boss = BossKind.Benibana,
         },

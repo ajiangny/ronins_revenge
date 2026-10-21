@@ -13,15 +13,21 @@ public class Arrow : MonoBehaviour
     bool deflected;
     SpriteRenderer art;
     SpriteRenderer glow;
+    Rigidbody body;
+    Vector3 velocity;
+    Quaternion heading;
 
     // A parry sends a reflectable shot back at ReflectTarget (a boss) as a heavy KillSource.Reflected hit.
     public bool Reflectable => ReflectTarget != null;
     public Transform ReflectTarget { get; private set; }
     public Sprite Sprite => art.sprite;
     public Color Color => art.color;
+    // A Taisho's spear: kunai and arrows break on it and it cuts through cover, so it can only be dodged or parried.
+    public bool Unbreakable { get; private set; }
 
     void Awake()
     {
+        body = GetComponent<Rigidbody>();
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
         glow = Kunai.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
@@ -68,6 +74,23 @@ public class Arrow : MonoBehaviour
         ReflectTarget = target;
     }
 
+    // Darkens the shot and gives it a pulsing crimson halo so it reads as a different threat from plain arrows.
+    public void MakeUnbreakable()
+    {
+        Unbreakable = true;
+        art.color = new Color(0.55f, 0.35f, 0.75f);
+        art.transform.localScale *= 1.35f;
+        glow.color = new Color(1f, 0.1f, 0.2f, 0.6f);
+        glow.transform.localScale *= 1.4f;
+    }
+
+    void Update()
+    {
+        if (!Unbreakable) return;
+        float pulse = 0.45f + 0.25f * Mathf.Sin(Time.time * 14f);
+        glow.color = new Color(glow.color.r, glow.color.g, glow.color.b, pulse);
+    }
+
     // The ronin's parry removes the arrow and sends its own copy back up. Only the first parry check counts.
     public bool TryDeflect()
     {
@@ -87,8 +110,8 @@ public class Arrow : MonoBehaviour
     // Angled shots turn the arrow to face where it flies. Slow shots pass a longer lifetime so they reach the ground.
     public void Launch(Vector3 velocity, float lifetimeMultiplier = 1f)
     {
-        transform.rotation = Quaternion.FromToRotation(Vector3.down, velocity);
-        GetComponent<Rigidbody>().linearVelocity = velocity;
+        transform.rotation = heading = Quaternion.FromToRotation(Vector3.down, velocity);
+        body.linearVelocity = this.velocity = velocity;
         Destroy(gameObject, lifetime * lifetimeMultiplier);
     }
 
@@ -120,8 +143,27 @@ public class Arrow : MonoBehaviour
     }
 
     // Whatever was hit handles its own damage; the arrow only removes itself.
+    // An unbreakable spear only stops on the ronin and shrugs off everything else.
     void OnCollisionEnter(Collision coll)
     {
+        if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
+        {
+            KeepFlying(coll.collider);
+            return;
+        }
         Destroy(gameObject);
+    }
+
+    // Undo the knock from the collision and never touch that collider again.
+    void KeepFlying(Collider passedThrough)
+    {
+        foreach (Collider own in GetComponentsInChildren<Collider>())
+        {
+            Physics.IgnoreCollision(own, passedThrough);
+        }
+        Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.4f, 0.45f), 0.5f);
+        body.linearVelocity = velocity;
+        body.angularVelocity = Vector3.zero;
+        transform.rotation = heading;
     }
 }

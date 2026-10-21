@@ -550,7 +550,7 @@ MonoBehaviour:
     - columns: 10
       rows: 4
       topRowY: 8.2
-      rowKinds: 010000000100000000000000i
+      rowKinds: 020000000100000000000000i
       scouts: 1
       baseSpeed: 2.7
       maxSpeedMultiplier: 4.2

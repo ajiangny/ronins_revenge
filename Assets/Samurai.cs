@@ -6,6 +6,8 @@ public class Samurai : MonoBehaviour, IHittable
 {
     static readonly Color FrostColor = new Color(0.55f, 0.8f, 1f);
     const float ArcherSpread = 15f;
+    // The spear is heavy: slower than an arrow, so there's time to see it and dodge or parry.
+    const float SpearSpeedMultiplier = 0.8f;
 
     [Header("Inscribed")]
     [FormerlySerializedAs("bulletPrefab")] public Arrow arrowPrefab;
@@ -53,6 +55,14 @@ public class Samurai : MonoBehaviour, IHittable
         if (Kind == SamuraiKind.Archer)
         {
             Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 3, ArcherSpread, arrowSpeed * 0.9f);
+        }
+        else if (Kind == SamuraiKind.Taisho)
+        {
+            Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
+            spear.MakeUnbreakable();
+            spear.Launch(Vector3.down * (arrowSpeed * SpearSpeedMultiplier), 1.5f);
+            Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
+            return;
         }
         else
         {

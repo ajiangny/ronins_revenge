@@ -62,10 +62,13 @@ match `BoonChoiceUI.boonIcons`.
   raises `ArmyReachedRonin` when it lands. Also hosts chill/freeze and spatial queries
   (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
 - `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint.
-- `SamuraiKind.cs` — `Ashigaru` (single arrow) and `Archer` (3-arrow fan). Rows pick a kind via
+- `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan) and `Taisho` (2 HP, unbreakable spear
+  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front). Rows pick a kind via
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
-  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru).
+  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
+  `MakeUnbreakable` makes the Taisho spear: it passes through kunai, arrows and blockers and only stops on the
+  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai).
 - `SamuraiCounter.cs` — "Samurai Left" HUD text.
 
 ### Mini-enemy: Scout

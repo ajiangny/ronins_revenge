@@ -161,7 +161,7 @@ public class GameManager : MonoBehaviour
         if (lives <= 0)
         {
             ship.Explode();
-            EndGame("DEFEATED", "The ninja has fallen.", new Color(1f, 0.3f, 0.3f));
+            EndGame("DEFEATED", "The ronin has fallen.", new Color(1f, 0.3f, 0.3f));
         }
     }
 

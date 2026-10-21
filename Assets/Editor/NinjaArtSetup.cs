@@ -15,8 +15,8 @@ public static class NinjaArtSetup
     {
         Sprite[] samuraiParticles = { Load("Effects/Petal"), Load("Effects/Smoke") };
 
-        CharacterArt ninja = SaveArt("Ninja", Frames("Ninja", "Idle"), Frames("Ninja", "Throw", 2, 3, 4),
-            Frames("Ninja", "Hit", 1, 2), null, new[] { Load("Effects/Spark"), Load("Effects/Smoke") }, 5f, 12f);
+        CharacterArt ronin = SaveArt("Ronin", Frames("Ronin", "Idle"), Frames("Ronin", "Throw", 2, 3, 4),
+            Frames("Ronin", "Hit", 2, 3), null, new[] { Load("Effects/Spark"), Load("Effects/Smoke") }, 5f, 12f);
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
@@ -31,21 +31,27 @@ public static class NinjaArtSetup
         EditPrefab("Assets/Spaceship.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
-            GameObject body = AddSprite(root, "Ninja", Load("Characters/Ninja/Ninja_Base"), new Vector3(0, -0.9f, 0), true);
-            // Fit the hitbox to the drawn body rather than the 64px canvas.
+            // The ronin's feet sit 8px above the bottom of his 64px canvas.
+            GameObject body = AddSprite(root, "Ronin", Load("Characters/Ronin/Ronin_Base"), new Vector3(0, -0.98f, 0), true);
+            // Fit the hitbox to the drawn body rather than the canvas or the spirit flames around him.
             var box = body.AddComponent<BoxCollider>();
-            box.center = new Vector3(-0.07f, 0.64f, 0);
-            box.size = new Vector3(0.8f, 1.2f, 0.5f);
-            Set(root.GetComponent<Spaceship>(), "art", ninja);
+            box.center = new Vector3(0, 0.69f, 0);
+            box.size = new Vector3(0.62f, 1.06f, 0.5f);
+            Set(root.GetComponent<Spaceship>(), "art", ronin);
         });
 
         EditPrefab("Assets/Dart.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
-            root.AddComponent<SphereCollider>().radius = 0.15f;
-            GameObject star = AddSprite(root, "Shuriken", Load("Projectiles/Shuriken"), Vector3.zero, false);
-            Set(root.GetComponent<Dart>(), "spinner", star.transform);
+            var capsule = root.AddComponent<CapsuleCollider>();
+            capsule.direction = 1;
+            capsule.radius = 0.1f;
+            capsule.height = 0.46f;
+            // The kunai flies point-first, so it doesn't spin. Drawn at half size to match the samurai arrows.
+            GameObject kunai = AddSprite(root, "Kunai", Load("Projectiles/Kunai"), Vector3.zero, false);
+            kunai.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+            Set(root.GetComponent<Dart>(), "spinner", (Object)null);
         });
 
         EditPrefab("Assets/AlienBullet.prefab", root =>

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 73935904252839687}
   - component: {fileID: -8314694969419125409}
   - component: {fileID: 967972848353266225}
-  - component: {fileID: 6655036073519336849}
+  - component: {fileID: 3112546850869415139}
   m_Layer: 8
   m_Name: Dart
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4566140768015780329}
+  - {fileID: 5921173459626788689}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &-8314694969419125409
@@ -76,10 +76,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   speed: 18
   lifetime: 2
-  spinner: {fileID: 4566140768015780329}
+  spinner: {fileID: 0}
   spinSpeed: 1080
---- !u!135 &6655036073519336849
-SphereCollider:
+--- !u!136 &3112546850869415139
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -96,10 +96,12 @@ SphereCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.15
+  serializedVersion: 2
+  m_Radius: 0.1
+  m_Height: 0.46
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &6009545012034075850
+--- !u!1 &8928562818624519914
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,38 +109,38 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4566140768015780329}
-  - component: {fileID: 7641655607917267054}
+  - component: {fileID: 5921173459626788689}
+  - component: {fileID: 8418435699580453492}
   m_Layer: 8
-  m_Name: Shuriken
+  m_Name: Kunai
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4566140768015780329
+--- !u!4 &5921173459626788689
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6009545012034075850}
+  m_GameObject: {fileID: 8928562818624519914}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 73935904252839687}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &7641655607917267054
+--- !u!212 &8418435699580453492
 SpriteRenderer:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6009545012034075850}
+  m_GameObject: {fileID: 8928562818624519914}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -180,12 +182,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: d1284f1504ee0418bae3d0e6b6753f74, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8a58036dff6fc498da5ef451a16c5dc6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.33333334, y: 0.33333334}
+  m_Size: {x: 0.25, y: 0.9166667}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

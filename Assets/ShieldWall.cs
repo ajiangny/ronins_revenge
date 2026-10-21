@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Builds the row of barricades between the ninja and the samurai.
+// Builds the row of barricades between the ronin and the samurai.
 public class ShieldWall : MonoBehaviour
 {
     [Header("Inscribed")]

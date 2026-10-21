@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Ronin
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 48d002a5969ba4ae38baeaa84fc14d7b, type: 3}
+  - {fileID: 21300000, guid: 5733ddf262d74448e95573a94cdc746d, type: 3}
+  - {fileID: 21300000, guid: 153e86dd29a7d40f48b65baea2c4caea, type: 3}
+  - {fileID: 21300000, guid: 112f37db28b134b9a990439f0ca22402, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 4bb4061641662442996589597fbe28f3, type: 3}
+  - {fileID: 21300000, guid: 2dab8a80cbbdc4700be8ae8cd9aaf6f1, type: 3}
+  - {fileID: 21300000, guid: e615b6653c56048b78320d74cb20d57a, type: 3}
+  hit:
+  - {fileID: 21300000, guid: fde0ce36f7ddd452c8f8a0538a60a74f, type: 3}
+  - {fileID: 21300000, guid: cac602b6f03a54dfe87d23fbd68b366d, type: 3}
+  death: []
+  idleFps: 5
+  actionFps: 12
+  deathParticles:
+  - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

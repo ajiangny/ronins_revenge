@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// The sprite frames for one character (the ninja or a samurai type). Swapping the asset re-skins the character.
+// The sprite frames for one character (the ronin or a samurai type). Swapping the asset re-skins the character.
 [CreateAssetMenu(menuName = "Ninja/Character Art")]
 public class CharacterArt : ScriptableObject
 {

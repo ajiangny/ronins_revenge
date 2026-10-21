@@ -16,7 +16,7 @@ public class Spaceship : MonoBehaviour
     public event Action Hit;
 
     public bool ControlsEnabled { get; set; }
-    // World-space height of the top of the ninja; samurai reaching it have landed.
+    // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
 
     Rigidbody body;
@@ -81,7 +81,7 @@ public class Spaceship : MonoBehaviour
         Vector3 position = body.position;
         position.x += moveInput * speed * Time.fixedDeltaTime;
 
-        // Keep the whole ninja inside the camera's view.
+        // Keep the whole ronin inside the camera's view.
         float halfWidth = cam.orthographicSize * cam.aspect;
         float centerX = cam.transform.position.x;
         position.x = Mathf.Clamp(position.x,

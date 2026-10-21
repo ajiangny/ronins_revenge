@@ -47,7 +47,7 @@ public class BoonChoiceUI : MonoBehaviour
     [Tooltip("Full-body art of the ronin on the left of the screen, like Zagreus in Hades. Empty shows the soul instead.")]
     [SerializeField] Sprite roninPortrait;
     [Tooltip("Where the caught soul floats over the ronin's open palm, in portrait art pixels from its top-left corner.")]
-    [SerializeField] Vector2 portraitSoulPixel = new Vector2(92, 44);
+    [SerializeField] Vector2 portraitSoulPixel = new Vector2(84, -2);
     [Tooltip("Size of the soul in his hand, relative to the portrait's pixels.")]
     [SerializeField] float heldSoulScale = 0.67f;
     [Tooltip("One icon per boon, in BoonId order.")]
@@ -311,9 +311,9 @@ public class BoonChoiceUI : MonoBehaviour
 
     const float CardX = 170f;
     // Without art the soul floats on its own left of the cards; the ronin's portrait is huge and cropped by the
-    // bottom-left corner of the screen, like Zagreus in Hades.
+    // bottom-left corner of the screen, raising the soul up into the top-left like Zagreus in Hades.
     static readonly Vector2 SoulOnlyPosition = new Vector2(-690, 40);
-    static readonly Vector2 PortraitCorner = new Vector2(-140, -150);
+    static readonly Vector2 PortraitCorner = new Vector2(-80, -128);
 
     void BuildPanel()
     {

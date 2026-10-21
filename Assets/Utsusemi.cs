@@ -120,7 +120,7 @@ public class Utsusemi : Boss
     // The clock that times everything: a high tick and a lower tock in turn.
     void Tick(float volume = 0.4f)
     {
-        Sfx.Play(Sfx.BlockerHit, volume, tock ? 1.7f : 2.2f);
+        Sfx.Play(Sfx.ClockTick, volume, tock ? 0.8f : 1f);
         tock = !tock;
     }
 
@@ -161,7 +161,7 @@ public class Utsusemi : Boss
         StartCoroutine(FlyHat(dir, false));
         if (secondPhase) StartCoroutine(FlyHat(-dir, true));
         ShowEye(true);
-        Sfx.Play(Sfx.ShurikenThrow, 1f, 0.5f);
+        Sfx.Play(Sfx.HatWhirr);
 
         // It waits, head bare, for the hats to come home; the wait is part of the move, so it keeps the watchdog fed.
         for (float t = 0; t < 12f && hatsOut > 0; t += Time.deltaTime)
@@ -181,14 +181,14 @@ public class Utsusemi : Boss
         hat.MakeUnbreakable(null);
         Sprite[] frames = Fx.Frames(Fx.UtsuKasa);
         Color tint = phantom ? new Color(0.7f, 0.8f, 1f, 0.5f) : Color.white;
-        if (frames != null) hat.Restyle(frames, 14f, tint, new Vector2(2.6f, 1.1f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
+        if (frames != null) hat.Restyle(frames, 14f, tint, new Vector2(2.6f, 1.18f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
         else hat.Restyle(ProceduralSprites.Disc, phantom ? new Color(0.4f, 0.45f, 0.55f, 0.5f) : Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
         transient.Add(hat.gameObject);
 
         float speed = secondPhase ? 14f : 12f;
         // Three passes: from its own height down to just over the cover, so the tassels it sheds rain on the ronin
         // but the hat itself leaves the blockers standing for the Heart Lantern.
-        BlockerWall wall = FindFirstObjectByType<BlockerWall>();
+        BlockerWall wall = FindAnyObjectByType<BlockerWall>();
         float top = Head.y - 1f;
         float bottom = (wall != null ? wall.TopY : ronin.TopY + 2f) + 1.4f;
         int pass = 0;
@@ -251,7 +251,7 @@ public class Utsusemi : Boss
     {
         Arrow weight = Shoot(from + Vector3.down * 0.4f, Vector3.down * (secondPhase ? 7.5f : 6.5f));
         Sprite[] frames = Fx.Frames(Fx.UtsuPlumb);
-        if (frames != null) weight.Restyle(frames, 10f, Color.white, new Vector2(0.6f, 0.9f), 0.2f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 0.8f);
+        if (frames != null) weight.Restyle(frames, 8f, Color.white, new Vector2(0.65f, 0.77f), 0.2f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 0.8f);
         else weight.Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.4f, 0.55f), 0.2f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 0.8f);
     }
 
@@ -379,7 +379,7 @@ public class Utsusemi : Boss
         PlayAction(art.attack);
         Arrow blade = Shoot(tip, Vector3.down * 20f);
         Sprite[] frames = Fx.Frames(Fx.UtsuThrust);
-        if (frames != null) blade.Restyle(frames, 14f, Color.white, new Vector2(0.6f, 2.6f), 0.35f, new Color(1f, 0.2f, 0.18f, 0.45f), 2f);
+        if (frames != null) blade.Restyle(frames, 14f, Color.white, new Vector2(0.7f, 2.45f), 0.35f, new Color(1f, 0.2f, 0.18f, 0.45f), 2f);
         else blade.Restyle(ProceduralSprites.White, new Color(0.85f, 0.9f, 1f), new Vector2(0.22f, 2.4f), 0.35f, new Color(1f, 0.2f, 0.18f, 0.5f), 2f);
         blade.MakeReflectable(transform);
         Sfx.Play(Sfx.ParrySwing, 1f, 0.5f);
@@ -417,7 +417,7 @@ public class Utsusemi : Boss
             lengths[i] = pivotY - lowY;
             phases[i] = Random.Range(0f, Mathf.PI * 2f);
             weights[i] = Shoot(pivots[i], Vector3.down * 0.1f);
-            if (frames != null) weights[i].Restyle(frames, 10f, Color.white, new Vector2(0.8f, 1.2f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
+            if (frames != null) weights[i].Restyle(frames, 8f, Color.white, new Vector2(0.9f, 1.07f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
             threads[i] = Bar(pivots[i], pivots[i], 0.06f, new Color(0.95f, 0.95f, 1f, 0.6f), 50);
         }
@@ -571,7 +571,7 @@ public class Utsusemi : Boss
     {
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 2f) == null) Fx.Play(Fx.Impact, Centre, Gold, 2f);
         Debris.BurstSprites(Centre, art.deathParticles, Gold, 12, 0.8f, 7f);
-        Sfx.Play(Sfx.BlockerBreak, 0.8f, 1.6f);
+        Sfx.Play(Sfx.GearGrind);
     }
 
     protected override void OnDamaged()
@@ -589,7 +589,7 @@ public class Utsusemi : Boss
         ShowEye(false);
         SetInvulnerable(1.8f);
         CameraShake.Add(0.5f);
-        Sfx.Play(Sfx.BlockerBreak, 1f, 0.6f);
+        Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
         Sfx.Play(Sfx.StageStart, 1f, 0.8f);
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 3f) == null) Fx.Play(Fx.Explosion, Centre, Gold, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
@@ -632,7 +632,7 @@ public class Utsusemi : Boss
         if (Fx.Play(Fx.UtsuParts, Centre, Color.white, 3f) == null) Fx.Play(Fx.Impact, Centre, Gold, 3f);
         Debris.BurstSprites(Centre, art.deathParticles, Gold, 20, 1f, 8f);
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 16, 0.9f, 6f);
-        Sfx.Play(Sfx.BlockerBreak, 1f, 0.5f);
+        Sfx.Play(Sfx.GearGrind, 1f, 0.6f);
         return base.Fall();
     }
 }

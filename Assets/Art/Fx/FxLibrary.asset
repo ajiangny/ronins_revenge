@@ -295,4 +295,78 @@ MonoBehaviour:
     - {fileID: 21300000, guid: efa8390dc5ccc4858ad4f4cb8e0899df, type: 3}
     fps: 14
     loop: 0
+  - id: Utsu_Kasa
+    frames:
+    - {fileID: 21300000, guid: 7d7974ec80b9645b298d2bb21fc9b862, type: 3}
+    - {fileID: 21300000, guid: a9299cccbc1be41e79276af02e085449, type: 3}
+    - {fileID: 21300000, guid: b9244a1f6ed044feaa991c6411640239, type: 3}
+    - {fileID: 21300000, guid: 101a08144c39543219fa08b770540198, type: 3}
+    - {fileID: 21300000, guid: 213f650c650ae47febded439d33da17f, type: 3}
+    - {fileID: 21300000, guid: 672f92b9c5bbc4535934b44b9ade1f8c, type: 3}
+    - {fileID: 21300000, guid: f529593cbf028490fad0c3e443f7f198, type: 3}
+    - {fileID: 21300000, guid: 6bd62287c4560410d8c096fe26c042e9, type: 3}
+    fps: 14
+    loop: 1
+  - id: Utsu_Lace
+    frames:
+    - {fileID: 21300000, guid: d9b028e281a46413299e7c90c1063c66, type: 3}
+    - {fileID: 21300000, guid: bd5b69d8776f64b12ad763f94a034262, type: 3}
+    - {fileID: 21300000, guid: b2a4abdc28b544293bcf496144aadef1, type: 3}
+    - {fileID: 21300000, guid: f74bb639310e6466d87d01159eef28c7, type: 3}
+    - {fileID: 21300000, guid: cff1d3b4e0f004c5090ae881c8b5c18a, type: 3}
+    - {fileID: 21300000, guid: 7c97d0e6d9d6b494ab37bba3301518fe, type: 3}
+    fps: 8
+    loop: 1
+  - id: Utsu_Plumb
+    frames:
+    - {fileID: 21300000, guid: f073106e192b54237b5e79e54ebf873a, type: 3}
+    - {fileID: 21300000, guid: b0dfd1713f91044afb447af5afef1d46, type: 3}
+    - {fileID: 21300000, guid: 1755c5f1bd94f4a348d1fc5a68a00e5b, type: 3}
+    - {fileID: 21300000, guid: d3d75e0b886854b95ab98d34a85738f4, type: 3}
+    fps: 8
+    loop: 1
+  - id: Utsu_Thrust
+    frames:
+    - {fileID: 21300000, guid: 99e910b2297074ab3805c197a062fd56, type: 3}
+    - {fileID: 21300000, guid: 89a12d1d2c43a4c758614e9cbc7a15ee, type: 3}
+    - {fileID: 21300000, guid: 9ffc33e4a7dde4e79a112ac6381649f3, type: 3}
+    - {fileID: 21300000, guid: 43b17c24d9ad04053b17c92679817448, type: 3}
+    - {fileID: 21300000, guid: 36ce75146bf8246e88261990904b03a9, type: 3}
+    - {fileID: 21300000, guid: 94e3fe292407f4011b90f3a5944de3bc, type: 3}
+    fps: 14
+    loop: 1
+  - id: Utsu_Gears
+    frames:
+    - {fileID: 21300000, guid: 7f9f8f508940b4fb38fdc45803b1ba62, type: 3}
+    - {fileID: 21300000, guid: 324929bc6564b4af3a9ce84402a1e2b9, type: 3}
+    - {fileID: 21300000, guid: 83a4e2fd6568446899b562f4f09c13ef, type: 3}
+    - {fileID: 21300000, guid: 7b60201c20b78418499e49f5876e41fd, type: 3}
+    - {fileID: 21300000, guid: 618bb0b92a6764074b0930b64ef56565, type: 3}
+    - {fileID: 21300000, guid: 9f0c10b7b4ae14e0fb456f9da45c9f4b, type: 3}
+    - {fileID: 21300000, guid: 95e6f19b6175d4553bca686b1a58b5a0, type: 3}
+    - {fileID: 21300000, guid: fffcc750e82604577b29bcb453935ec1, type: 3}
+    - {fileID: 21300000, guid: 8d3dfa34d38bf4d00a44b3d49fea9014, type: 3}
+    - {fileID: 21300000, guid: cc5e5a21a8b1541628e8fec6532a2366, type: 3}
+    - {fileID: 21300000, guid: aead330048470428387f471b4d9105b8, type: 3}
+    fps: 16
+    loop: 0
+  - id: Utsu_Parts
+    frames:
+    - {fileID: 21300000, guid: 404f0f049c9474e4ab66a4570ec99d14, type: 3}
+    - {fileID: 21300000, guid: 8fc6771ff318d413d8a784075213202f, type: 3}
+    - {fileID: 21300000, guid: 1dbc657c9dad44cc690b0ccd2697c73b, type: 3}
+    - {fileID: 21300000, guid: 35b3229d36e5d4ba6ab2955faa48250a, type: 3}
+    - {fileID: 21300000, guid: ce7daeb019d3645bd8a9fc66f5842954, type: 3}
+    - {fileID: 21300000, guid: c95e38d26ecb245ca927acf1734b8f4e, type: 3}
+    - {fileID: 21300000, guid: b5baff86c393448cb9dc1bb7e3598e43, type: 3}
+    - {fileID: 21300000, guid: 9499e259e5746440dbf62068fe315c97, type: 3}
+    - {fileID: 21300000, guid: d6999469214204939982488abffe4a73, type: 3}
+    - {fileID: 21300000, guid: 310383e476c6d487783a03ab304cfed2, type: 3}
+    - {fileID: 21300000, guid: 4bde8f8b43e43456eb4cfba4c507571c, type: 3}
+    - {fileID: 21300000, guid: 48ea8d853e5364b3bbdccc2c26683757, type: 3}
+    - {fileID: 21300000, guid: 9527c1c84d79a48459e04fb8f675a2d9, type: 3}
+    - {fileID: 21300000, guid: e01dcc1e79484445cbd3a3768cc542ba, type: 3}
+    - {fileID: 21300000, guid: 1bea8d09349d34fbdbceed3f623ca721, type: 3}
+    fps: 14
+    loop: 0
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

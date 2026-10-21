@@ -44,6 +44,10 @@ public static class AudioSetup
         (Sfx.PlayerHurt, 0.9f, 0.05f, 0.2f),
         (Sfx.BossHit, 0.75f, 0.08f, 0.05f),
         (Sfx.BossStagger, 1f, 0f, 0.5f),
+        // Utsusemi's ticks land on every step and every telegraph beat, so they must be allowed close together.
+        (Sfx.ClockTick, 0.6f, 0f, 0.04f),
+        (Sfx.GearGrind, 0.9f, 0.05f, 0.4f),
+        (Sfx.HatWhirr, 0.7f, 0.05f, 0.2f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

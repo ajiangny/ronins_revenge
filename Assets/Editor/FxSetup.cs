@@ -42,6 +42,13 @@ public static class FxSetup
         (Fx.BeniChainImpact, 16, false, new Vector2(40f / 87f, 1f - 31f / 63f)),
         (Fx.BeniSmokeVeil, 8, true, Centre),
         (Fx.BeniPetals, 14, false, Centre),
+        (Fx.UtsuKasa, 14, true, Centre),
+        (Fx.UtsuLace, 8, true, Centre),
+        (Fx.UtsuPlumb, 8, true, Centre),
+        (Fx.UtsuThrust, 14, true, Centre),
+        // The jam bursts from where its sparks start, high in the canvas, so the steam has room to rise.
+        (Fx.UtsuGears, 16, false, new Vector2(30f / 61f, 1f - 16f / 52f)),
+        (Fx.UtsuParts, 14, false, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

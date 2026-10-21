@@ -34,6 +34,9 @@ public static class Sfx
     public const string PlayerHurt = "PlayerHurt";
     public const string BossHit = "BossHit";
     public const string BossStagger = "BossStagger";
+    public const string ClockTick = "ClockTick";
+    public const string GearGrind = "GearGrind";
+    public const string HatWhirr = "HatWhirr";
 
     const int VoiceCount = 16;
 

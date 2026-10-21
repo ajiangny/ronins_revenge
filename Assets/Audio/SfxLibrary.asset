@@ -207,6 +207,27 @@ MonoBehaviour:
     volume: 1
     pitchJitter: 0
     minInterval: 0.5
+  - id: ClockTick
+    clips:
+    - {fileID: 8300000, guid: 389e1e549e4ab44e7820a84a2c4bea45, type: 3}
+    - {fileID: 8300000, guid: 588fcdfc138ce412b832bdd912c61dd1, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 0.04
+  - id: GearGrind
+    clips:
+    - {fileID: 8300000, guid: afa41bd2510d847eda616c2e2e79bb82, type: 3}
+    - {fileID: 8300000, guid: 9b4dc2c5fc0a6471b9feda62f46ad9ef, type: 3}
+    volume: 0.9
+    pitchJitter: 0.05
+    minInterval: 0.4
+  - id: HatWhirr
+    clips:
+    - {fileID: 8300000, guid: efb7eb1021d8c481cb2978501af4969c, type: 3}
+    - {fileID: 8300000, guid: 2fbb51b671f324199b3ea88a691ba485, type: 3}
+    volume: 0.7
+    pitchJitter: 0.05
+    minInterval: 0.2
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

@@ -98,7 +98,7 @@ match `BoonChoiceUI.boonIcons`.
   blade; parried, it jams and staggers, `OnStaggered`), Plumb Lines (weights swing on threads, flown with
   `Arrow.Steer`), and in phase 2 the Heart Lantern (a core beam swept across the ground that only blockers stop, and
   which burns them). Phase 2 at half health opens its core and speeds the clock. Fire burns the lace (`Burn`).
-  Effect ids `Fx.Utsu*` fall back to code shapes until art exists.
+  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr` and `GearGrind`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`

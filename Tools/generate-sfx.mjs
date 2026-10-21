@@ -41,6 +41,25 @@ const SOUNDS = {
       "A boss's guard being broken in a fighting game: a huge metallic clang as her sword is knocked away, a " +
       "deep resonant ringing like a struck temple bell, and a whoosh of a stumble. Dramatic, no music.",
   },
+  // Utsusemi, the clockwork boss: everything it does keeps time to a ticking escapement.
+  ClockTick: {
+    seconds: 0.5,
+    prompt:
+      "A single loud mechanical clock tick: the crisp metallic click of a large antique escapement, dry and " +
+      "close, one tick only, no tock, no music, no reverb tail.",
+  },
+  GearGrind: {
+    seconds: 1.4,
+    prompt:
+      "Heavy brass clockwork gears jamming: a harsh grinding screech of metal teeth catching, a spring twanging " +
+      "and a burst of sparks, then a sputtering whir winding down. Video game boss stagger, no music.",
+  },
+  HatWhirr: {
+    seconds: 1.2,
+    prompt:
+      "A wide metal disc thrown spinning through the air: a fast rising whirring whoosh with a faint metallic " +
+      "hum and tiny jingling tassel weights, passing by. Video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

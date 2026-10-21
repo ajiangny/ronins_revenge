@@ -120,6 +120,7 @@ public class Benibana : Boss
         float spread = 40f;
         float step = 2f * spread / (count - 1f);
         Vector3 aim = (ronin.Bounds.center - Mouth).normalized;
+        var volley = new List<Arrow>();
         for (int i = 0; i < count; i++)
         {
             float angle = Mathf.Lerp(-spread, spread, i / (count - 1f)) + (offset ? step / 2f : 0f);
@@ -129,8 +130,10 @@ public class Benibana : Boss
             if (ringFrames != null) ring.Restyle(ringFrames, 10f, new Color(1f, 1f, 1f, 0.9f), new Vector2(1.15f, 1.15f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.3f), 1.4f);
             else ring.Restyle(ProceduralSprites.Disc, Smoke, new Vector2(0.75f, 0.75f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.35f), 1.4f);
             ring.gameObject.AddComponent<Swell>().Begin(1f, 1.9f, 2.2f);
-            if (secondPhase && i % 2 == 1) Cross(Mouth, velocity * 1.02f);
+            volley.Add(ring);
+            if (secondPhase && i % 2 == 1) volley.Add(Cross(Mouth, velocity * 1.02f));
         }
+        IgnoreEachOther(volley);
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.8f);
     }
 
@@ -269,11 +272,13 @@ public class Benibana : Boss
         for (int wave = 0; wave < 3; wave++)
         {
             float turn = wave * (150f / (perWave - 1)) / 3f;
+            var volley = new List<Arrow>();
             for (int i = 0; i < perWave; i++)
             {
                 float angle = Mathf.Lerp(-75f, 75f, i / (perWave - 1f)) + turn;
-                Cross(Centre, Quaternion.Euler(0, 0, angle) * Vector3.down * 6f);
+                volley.Add(Cross(Centre, Quaternion.Euler(0, 0, angle) * Vector3.down * 6f));
             }
+            IgnoreEachOther(volley);
             Fx.Play(Fx.BeniPetals, Centre, Color.white, 2f);
             Sfx.Play(Sfx.WardShatter, 0.5f, 1.6f);
             yield return Wait(0.35f);
@@ -297,12 +302,13 @@ public class Benibana : Boss
     }
 
     // A small silver cross off her rosary.
-    void Cross(Vector3 position, Vector3 velocity)
+    Arrow Cross(Vector3 position, Vector3 velocity)
     {
         Arrow cross = Shoot(position, velocity);
         Sprite[] frames = Fx.Frames(Fx.BeniCross);
         if (frames != null) cross.Restyle(frames, 10f, Color.white, new Vector2(1.1f, 1.3f), 0.16f, new Color(0.8f, 0.85f, 1f, 0.35f), 0.8f);
         else cross.Restyle(cross.Sprite, Silver, new Vector2(0.45f, 0.9f), 0.12f, new Color(0.8f, 0.85f, 1f, 0.4f), 0.8f);
+        return cross;
     }
 
     // Her rosary chain hanging from top to bottom: a column of silver links, or a plain bar without the art.

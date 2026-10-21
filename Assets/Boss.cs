@@ -296,6 +296,16 @@ public abstract class Boss : MonoBehaviour, IHittable
         return arrow;
     }
 
+    // Shots fired together start out overlapping, and arrows collide with each other, so without this a volley
+    // destroys itself the moment it's fired.
+    protected static void IgnoreEachOther(List<Arrow> volley)
+    {
+        for (int i = 0; i < volley.Count; i++)
+        {
+            for (int j = 0; j < i; j++) volley[i].IgnoreCollisionsWith(volley[j]);
+        }
+    }
+
     public void Chill(float percentPerStack, float seconds, int maxStacks)
     {
         chillPerStack = percentPerStack;

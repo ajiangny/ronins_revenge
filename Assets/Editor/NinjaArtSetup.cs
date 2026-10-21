@@ -90,9 +90,7 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        ShieldWall wall = Object.FindFirstObjectByType<ShieldWall>();
-        Set(wall, "damageStates", new Object[] { Load("Barricade/Barricade_0"), Load("Barricade/Barricade_1"), Load("Barricade/Barricade_2") });
-        Set(wall, "debrisSprites", new Object[] { Load("Effects/WoodChip") });
+        SetUpBlockers(Object.FindFirstObjectByType<ShieldWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -102,7 +100,7 @@ public static class NinjaArtSetup
     }
 
     // Re-tunes just the backdrop, without rebuilding the prefabs (which reshuffles their internal IDs).
-    [MenuItem("Ninja/Apply Backdrop Only")]
+    [MenuItem("Ninja/Apply Backdrop And Blockers Only")]
     public static void ApplyBackdropOnly()
     {
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
@@ -110,10 +108,43 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
+        SetUpBlockers(Object.FindFirstObjectByType<ShieldWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log("Backdrop applied.");
+        Debug.Log("Backdrop and blockers applied.");
+    }
+
+    // Each barricade site is a bush, a stone lantern and a bush. Lanterns are taller and tougher; bushes are wider.
+    static void SetUpBlockers(ShieldWall wall)
+    {
+        var so = new SerializedObject(wall);
+        (string name, string sprite, string debris, int health, float height)[] specs =
+        {
+            ("Bush", "Blockers/Bush", "Effects/Leaf", 5, 1.2f),
+            ("Lantern", "Blockers/Lantern", "Effects/StoneChip", 8, 1.8f),
+        };
+        SerializedProperty types = so.FindProperty("types");
+        types.arraySize = specs.Length;
+        for (int i = 0; i < specs.Length; i++)
+        {
+            SerializedProperty type = types.GetArrayElementAtIndex(i);
+            type.FindPropertyRelative("name").stringValue = specs[i].name;
+            SerializedProperty states = type.FindPropertyRelative("damageStates");
+            states.arraySize = 3;
+            for (int d = 0; d < 3; d++)
+            {
+                states.GetArrayElementAtIndex(d).objectReferenceValue = Load($"{specs[i].sprite}_{d}");
+            }
+            SerializedProperty debris = type.FindPropertyRelative("debris");
+            debris.arraySize = 1;
+            debris.GetArrayElementAtIndex(0).objectReferenceValue = Load(specs[i].debris);
+            type.FindPropertyRelative("health").intValue = specs[i].health;
+            type.FindPropertyRelative("height").floatValue = specs[i].height;
+            type.FindPropertyRelative("hitbox").vector2Value = new Vector2(0.85f, 0.85f);
+        }
+        so.FindProperty("pattern").stringValue = "BLB";
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Replaces the old starfield with the top-down courtyard backdrop on the same GameObject (z = 20, behind the play area).
@@ -128,7 +159,7 @@ public static class NinjaArtSetup
         if (!go.TryGetComponent(out Backdrop backdrop)) backdrop = go.AddComponent<Backdrop>();
 
         var so = new SerializedObject(backdrop);
-        so.FindProperty("ground").objectReferenceValue = Load("Background/CourtyardOpen");
+        so.FindProperty("ground").objectReferenceValue = Load("Background/CourtyardGrass");
         so.FindProperty("groundTint").colorValue = new Color(0.8f, 0.8f, 0.9f);
         so.FindProperty("petal").objectReferenceValue = Load("Effects/Petal");
         so.ApplyModifiedPropertiesWithoutUndo();

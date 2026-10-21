@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// One tile of a barricade. Takes a few hits from either side before crumbling.
+// One courtyard blocker (a bush or stone lantern). Takes a few hits from either side before breaking apart.
 public class ShieldBlock : MonoBehaviour
 {
     SpriteRenderer tile;

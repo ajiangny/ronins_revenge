@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9f39e469899ce4005ac17ec084017b7a
+guid: b10f165aa75424c70b8f465d8c23dddb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -564916279296260005
-    second: WoodChip_0
+      213: 6130030234127702308
+    second: Bush_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: WoodChip_0
+      name: Bush_2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
+        width: 40
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b5806b413a30928f0800000000000000
-      internalID: -564916279296260005
+      spriteID: 4291697050e321550800000000000000
+      internalID: 6130030234127702308
       vertices: []
       indices: 
       edges: []

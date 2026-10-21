@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6c02619e08ead4ec08bea7d6f173daef
+guid: 054e607206efd4acebaf7465909496e9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3232376919433053708
-    second: Barricade_1_0
+      213: 6986090453812348333
+    second: Lantern_1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Barricade_1_0
+      name: Lantern_1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
+        width: 24
+        height: 44
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4f97501515a4423d0800000000000000
-      internalID: -3232376919433053708
+      spriteID: da58b3cf04493f060800000000000000
+      internalID: 6986090453812348333
       vertices: []
       indices: 
       edges: []

@@ -28,9 +28,9 @@ Open `Assets/Scenes/SampleScene.unity` and press Play.
 - **Start and end screens.** A title screen with controls, a "Wave N" intro between levels, and Game Over / You Win screens showing score and high score. High score is saved with `PlayerPrefs`. (`GameManager`, `GameUI`)
 - **Additional levels.** Three waves, configured in `GameManager.levels` (`LevelConfig`). Each wave has more aliens, starts lower, moves faster, fires more often with more aimed shots and faster bullets, and uses a new alien colour.
 - **Lives.** 3 lives, shown as ship icons bottom-left. After a hit the ship blinks and is invulnerable for 2 s. (`Spaceship`, `GameUI.SetLives`)
-- **Shields.** Four destructible bunkers built from blocks (`ShieldWall`, `ShieldBlock`). Each block takes 2 hits and darkens when damaged. Aliens that descend into the shields chew through them. Shields are rebuilt every wave.
+- **Shields.** Four sets of courtyard blockers, each a bush, a stone lantern and a bush (`ShieldWall`, `ShieldBlock`). Bushes take 5 hits and lanterns 8; each shows three damage states and then breaks into leaves or stone chips, so you can shoot gaps into a set. Samurai that march into the blockers trample them. Blockers are rebuilt every stage.
 - **Collision animations.** Exploding debris bursts for alien kills, ship hits, ship destruction and shield blocks breaking. (`Debris`)
-- **New background.** A top-down moonlit temple courtyard the samurai march across, with sakura petals drifting over it (`Backdrop`). It's top-down to match the 3/4-view character sprites, so the armies stand on the ground instead of floating in front of a sky.
+- **New background.** A top-down moonlit grass courtyard the samurai march across, with sakura petals drifting over it (`Backdrop`). It's top-down to match the 3/4-view character sprites, so the armies stand on the ground instead of floating in front of a sky.
 
 ## Balancing
 

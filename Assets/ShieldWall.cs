@@ -1,20 +1,40 @@
 using UnityEngine;
 
-// Builds the row of barricades between the ronin and the samurai.
+// Builds the rows of courtyard blockers (bushes, stone lanterns) between the ronin and the samurai.
 public class ShieldWall : MonoBehaviour
 {
-    [Header("Inscribed")]
-    [Tooltip("Barricade tile from intact to nearly broken.")]
-    [SerializeField] Sprite[] damageStates;
-    [SerializeField] Sprite[] debrisSprites;
-    [SerializeField] int shieldCount = 4;
-    [SerializeField] int blocksWide = 6;
-    [SerializeField] int blocksHigh = 3;
-    [SerializeField] float blockSize = 0.5f;
-    [SerializeField] int blockHealth = 3;
+    [System.Serializable]
+    public class BlockerType
+    {
+        [Tooltip("Its first letter is the code used in the pattern.")]
+        public string name = "Bush";
+        [Tooltip("From intact to nearly broken.")]
+        public Sprite[] damageStates;
+        public Sprite[] debris;
+        public int health = 6;
+        [Tooltip("Drawn height in world units; the width follows the art.")]
+        public float height = 1f;
+        [Tooltip("Hitbox as a fraction of the drawn size, so shots can graze the edges.")]
+        public Vector2 hitbox = new Vector2(0.85f, 0.85f);
+    }
 
-    // Bottom edge of the wall is the GameObject's y position.
-    public float TopY => transform.position.y + blocksHigh * blockSize;
+    [Header("Inscribed")]
+    [SerializeField] BlockerType[] types;
+    [Tooltip("Blockers at each site, left to right, by each type's first letter (e.g. BLB = bush, lantern, bush).")]
+    [SerializeField] string pattern = "BLB";
+    [SerializeField] int siteCount = 4;
+    [SerializeField] float gap = 0.05f;
+
+    // Bottom edge of the blockers is the GameObject's y position.
+    public float TopY
+    {
+        get
+        {
+            float tallest = 0f;
+            foreach (BlockerType type in types) tallest = Mathf.Max(tallest, type.height);
+            return transform.position.y + tallest;
+        }
+    }
 
     public void Rebuild()
     {
@@ -25,49 +45,63 @@ public class ShieldWall : MonoBehaviour
 
         Camera cam = Camera.main;
         float width = 2f * cam.orthographicSize * cam.aspect;
-        float spacing = width / shieldCount;
+        float spacing = width / siteCount;
         float left = cam.transform.position.x - width / 2f;
 
-        for (int s = 0; s < shieldCount; s++)
+        for (int s = 0; s < siteCount; s++)
         {
-            float centerX = left + spacing * (s + 0.5f);
-            for (int x = 0; x < blocksWide; x++)
-            {
-                for (int y = 0; y < blocksHigh; y++)
-                {
-                    if (!IsSolid(x, y)) continue;
-
-                    Vector3 position = new Vector3(
-                        centerX + (x - (blocksWide - 1) / 2f) * blockSize,
-                        transform.position.y + (y + 0.5f) * blockSize,
-                        0);
-                    CreateBlock(position);
-                }
-            }
+            BuildSite(left + spacing * (s + 0.5f));
         }
     }
 
-    // Classic bunker shape: clipped top corners and an arch cut out of the bottom middle.
-    bool IsSolid(int x, int y)
+    void BuildSite(float centerX)
     {
-        bool topCorner = y == blocksHigh - 1 && (x == 0 || x == blocksWide - 1);
-        bool arch = y == 0 && x > 0 && x < blocksWide - 1 && Mathf.Abs(x - (blocksWide - 1) / 2f) < 1f;
-        return !topCorner && !arch;
+        var row = new BlockerType[pattern.Length];
+        float rowWidth = gap * (pattern.Length - 1);
+        for (int i = 0; i < pattern.Length; i++)
+        {
+            row[i] = TypeFor(pattern[i]);
+            rowWidth += WidthOf(row[i]);
+        }
+
+        float x = centerX - rowWidth / 2f;
+        foreach (BlockerType type in row)
+        {
+            float w = WidthOf(type);
+            CreateBlocker(type, new Vector3(x + w / 2f, transform.position.y + type.height / 2f, 0));
+            x += w + gap;
+        }
     }
 
-    void CreateBlock(Vector3 position)
+    BlockerType TypeFor(char code)
     {
-        var block = new GameObject("ShieldBlock");
-        block.transform.SetParent(transform);
-        block.transform.position = position;
-        block.AddComponent<BoxCollider>().size = new Vector3(blockSize, blockSize, blockSize);
+        foreach (BlockerType type in types)
+        {
+            if (char.ToUpperInvariant(type.name[0]) == char.ToUpperInvariant(code)) return type;
+        }
+        throw new System.ArgumentException($"No blocker type starts with '{code}' (pattern \"{pattern}\").");
+    }
 
-        // The tile sprite sits on a child scaled to fill exactly one block.
-        var tile = new GameObject("Tile").AddComponent<SpriteRenderer>();
-        tile.transform.SetParent(block.transform, false);
-        tile.sprite = damageStates[0];
-        tile.transform.localScale = Vector3.one * (blockSize / tile.sprite.bounds.size.x);
+    static float WidthOf(BlockerType type)
+    {
+        Vector3 size = type.damageStates[0].bounds.size;
+        return type.height * size.x / size.y;
+    }
 
-        block.AddComponent<ShieldBlock>().Init(blockHealth, tile, damageStates, debrisSprites);
+    void CreateBlocker(BlockerType type, Vector3 center)
+    {
+        var blocker = new GameObject(type.name);
+        blocker.transform.SetParent(transform);
+        blocker.transform.position = center;
+        float w = WidthOf(type);
+        blocker.AddComponent<BoxCollider>().size = new Vector3(w * type.hitbox.x, type.height * type.hitbox.y, 0.5f);
+
+        // The sprite sits on a child scaled to the blocker's drawn height.
+        var art = new GameObject("Sprite").AddComponent<SpriteRenderer>();
+        art.transform.SetParent(blocker.transform, false);
+        art.sprite = type.damageStates[0];
+        art.transform.localScale = Vector3.one * (type.height / art.sprite.bounds.size.y);
+
+        blocker.AddComponent<ShieldBlock>().Init(type.health, art, type.damageStates, type.debris);
     }
 }

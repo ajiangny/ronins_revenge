@@ -127,17 +127,20 @@ public class GameUI : MonoBehaviour
         epithetText.text = epithet;
         epithetText.color = Color.clear;
 
-        // The close-up: a tilted letterbox panel across the lower left, cropped to her eyes and pipe. A stencil
+        // The close-up: a tilted letterbox panel across the lower left, cropped to her face and pipe. A stencil
         // Mask, since RectMask2D can't clip a rotated rectangle.
-        const float stripWidth = 1500f, stripHeight = 300f;
-        RectTransform strip = CreateRect("CloseUp", root, new Vector2(0.5f, 0.5f), new Vector2(-180, -230), new Vector2(stripWidth, stripHeight));
+        const float stripWidth = 1500f, stripHeight = 350f;
+        RectTransform strip = CreateRect("CloseUp", root, new Vector2(0.5f, 0.5f), new Vector2(-180, -225), new Vector2(stripWidth, stripHeight));
         strip.localRotation = Quaternion.Euler(0, 0, -5f);
         strip.gameObject.AddComponent<Image>().color = new Color(0.06f, 0f, 0.02f, 1f);
         strip.gameObject.AddComponent<Mask>().showMaskGraphic = true;
-        const float faceWidth = stripWidth;
+        // Narrower than the strip so the crop takes in her whole face, hairline to chin.
+        const float faceWidth = 1230f;
         float faceHeight = faceWidth * closeUp.rect.height / closeUp.rect.width;
-        // Her eyes sit about 53% across and 30% down the close-up: centre the strip on them.
-        Vector2 faceRest = new Vector2(-(0.53f - 0.5f) * faceWidth + 35f, -(0.5f - 0.30f) * faceHeight);
+        // Her face is centred about 26% down the close-up: centre the strip on it. Her hair runs off the art's
+        // right edge, so keep that edge flush with the strip's (allowing for the pan) rather than cut mid-strip.
+        const float facePan = 70f;
+        Vector2 faceRest = new Vector2((stripWidth - faceWidth) / 2f + facePan, -(0.5f - 0.26f) * faceHeight);
         RectTransform face = CreateRect("Face", strip, new Vector2(0.5f, 0.5f), faceRest, new Vector2(faceWidth, faceHeight));
         face.gameObject.AddComponent<Image>().sprite = closeUp;
         // Crimson rims drawn over the strip's edges, outside the mask so they stay crisp.
@@ -151,7 +154,7 @@ public class GameUI : MonoBehaviour
         }
         strip.localScale = new Vector3(1f, 0f, 1f);
 
-        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0.5f), new Vector2(-180, -478), new Vector2(1500, 100), 32, TextAlignmentOptions.Top, root);
+        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0.5f), new Vector2(-230, -510), new Vector2(1400, 100), 32, TextAlignmentOptions.Top, root);
         said.text = lineText ?? "";
         said.fontStyle = FontStyles.Italic;
         said.maxVisibleCharacters = 0;
@@ -196,7 +199,7 @@ public class GameUI : MonoBehaviour
             float open = since < 0 ? 0f : EaseOut(Mathf.Clamp01(since / 0.12f));
             strip.localScale = new Vector3(1f, open, 1f);
             foreach (RectTransform rim in rims) rim.localScale = new Vector3(open, 1f, 1f);
-            face.anchoredPosition = faceRest + Vector2.left * (70f * Mathf.Clamp01(since / lineLength));
+            face.anchoredPosition = faceRest + Vector2.left * (facePan * Mathf.Clamp01(since / lineLength));
             flash.color = new Color(1f, 1f, 1f, since < 0 ? 0f : 0.85f * (1f - Mathf.Clamp01(since / 0.25f)));
             said.maxVisibleCharacters = Mathf.RoundToInt(said.text.Length * Mathf.Clamp01((since - 0.2f) / (lineLength * 0.85f)));
             yield return null;

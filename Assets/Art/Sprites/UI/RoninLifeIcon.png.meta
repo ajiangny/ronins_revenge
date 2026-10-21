@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ec090ff659cc8440283926350c83ed52
+guid: caceff5aceb7d40f58919d8490b266b1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4116083014604829336
-    second: NinjaLifeIcon_0
+      213: 1918842447146581545
+    second: RoninLifeIcon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +115,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: NinjaLifeIcon_0
+      name: RoninLifeIcon_0
       rect:
         serializedVersion: 2
         x: 0
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 86dc5706e4cb0e6c0800000000000000
-      internalID: -4116083014604829336
+      spriteID: 92efc1a0a0911aa10800000000000000
+      internalID: 1918842447146581545
       vertices: []
       indices: 
       edges: []

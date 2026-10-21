@@ -998,7 +998,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUI
   font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  lifeIconColor: {r: 0.4, g: 0.85, b: 1, a: 1}
+  lifeIcon: {fileID: 21300000, guid: caceff5aceb7d40f58919d8490b266b1, type: 3}
 --- !u!1001 &3533950217798640327
 PrefabInstance:
   m_ObjectHideFlags: 0

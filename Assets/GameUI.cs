@@ -9,7 +9,8 @@ public class GameUI : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] TMP_FontAsset font;
-    [SerializeField] Color lifeIconColor = new Color(0.4f, 0.85f, 1f);
+    [Tooltip("Ronin head shown once per remaining life.")]
+    [SerializeField] Sprite lifeIcon;
 
     TextMeshProUGUI scoreText;
     TextMeshProUGUI levelText;
@@ -83,12 +84,10 @@ public class GameUI : MonoBehaviour
 
     GameObject CreateLifeIcon(int index)
     {
-        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * 60 + 25, 0), new Vector2(48, 30));
-        // A wide hull with a cockpit on top, roughly matching the ship's silhouette.
-        RectTransform hull = CreateRect("Hull", icon, new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(48, 14));
-        hull.gameObject.AddComponent<Image>().color = lifeIconColor;
-        RectTransform cockpit = CreateRect("Cockpit", icon, new Vector2(0.5f, 0f), new Vector2(0, 20), new Vector2(16, 16));
-        cockpit.gameObject.AddComponent<Image>().color = lifeIconColor;
+        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * 54 + 24, 0), new Vector2(48, 48));
+        Image image = icon.gameObject.AddComponent<Image>();
+        image.sprite = lifeIcon;
+        image.preserveAspect = true;
         return icon.gameObject;
     }
 

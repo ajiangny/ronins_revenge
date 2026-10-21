@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class AlienBullet : MonoBehaviour
+public class Arrow : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] float lifetime = 4f;
@@ -12,7 +12,7 @@ public class AlienBullet : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    // Whatever was hit handles its own damage; the bullet only removes itself.
+    // Whatever was hit handles its own damage; the arrow only removes itself.
     void OnCollisionEnter(Collision coll)
     {
         Destroy(gameObject);

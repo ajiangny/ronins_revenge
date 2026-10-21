@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Dart : MonoBehaviour
+public class Kunai : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] float speed = 18f;
@@ -26,7 +26,7 @@ public class Dart : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    // A dart can only destroy one alien, even if it touches two in the same physics step.
+    // A kunai can only kill one samurai, even if it touches two in the same physics step.
     public bool TryConsume()
     {
         if (spent) return false;

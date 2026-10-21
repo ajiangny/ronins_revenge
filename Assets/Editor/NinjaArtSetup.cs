@@ -27,7 +27,7 @@ public static class NinjaArtSetup
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
 
-        EditPrefab("Assets/Alien.prefab", root =>
+        EditPrefab("Assets/Samurai.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: true);
             root.transform.localScale = Vector3.one * SamuraiScale;
@@ -35,10 +35,10 @@ public static class NinjaArtSetup
             AddSprite(root, "Samurai", Load("Characters/Taisho/Taisho_Base"), new Vector3(0, -0.5f, 0), true);
         });
 
-        EditPrefab("Assets/Spaceship.prefab", root =>
+        EditPrefab("Assets/Ronin.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
-            // Spaceship measures its sprite's world bounds at runtime, so clamping and TopY follow this scale.
+            // Ronin measures its sprite's world bounds at runtime, so clamping and TopY follow this scale.
             root.transform.localScale = Vector3.one * RoninScale;
             // The ronin's feet sit 8px above the bottom of his 64px canvas.
             GameObject body = AddSprite(root, "Ronin", Load("Characters/Ronin/Ronin_Base"), new Vector3(0, -0.98f, 0), true);
@@ -46,10 +46,10 @@ public static class NinjaArtSetup
             var box = body.AddComponent<BoxCollider>();
             box.center = new Vector3(0.01f, 0.69f, 0);
             box.size = new Vector3(0.77f, 1.06f, 0.5f);
-            Set(root.GetComponent<Spaceship>(), "art", ronin);
+            Set(root.GetComponent<Ronin>(), "art", ronin);
         });
 
-        EditPrefab("Assets/Dart.prefab", root =>
+        EditPrefab("Assets/Kunai.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
@@ -60,10 +60,10 @@ public static class NinjaArtSetup
             // The kunai flies point-first, so it doesn't spin. Drawn at half size to match the samurai arrows.
             GameObject kunai = AddSprite(root, "Kunai", Load("Projectiles/Kunai"), Vector3.zero, false);
             kunai.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-            Set(root.GetComponent<Dart>(), "spinner", (Object)null);
+            Set(root.GetComponent<Kunai>(), "spinner", (Object)null);
         });
 
-        EditPrefab("Assets/AlienBullet.prefab", root =>
+        EditPrefab("Assets/Arrow.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
@@ -74,14 +74,14 @@ public static class NinjaArtSetup
             AddSprite(root, "Arrow", Load("Projectiles/Arrow"), Vector3.zero, false);
         });
 
-        // Row 0 is the Taisho (30 pts), rows 1-2 Bushi (20), the rest Ashigaru (10), as in AlienFleet.PointsForRow.
-        EditPrefab("Assets/AlienFleet.prefab", root =>
+        // Row 0 is the Taisho (30 pts), rows 1-2 Bushi (20), the rest Ashigaru (10), as in SamuraiArmy.PointsForRow.
+        EditPrefab("Assets/SamuraiArmy.prefab", root =>
         {
-            var fleet = root.GetComponent<AlienFleet>();
-            Set(fleet, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
-            // The fleet's erosion and landing checks use the samurai collider's world radius; rows are spread to fit the bigger bodies.
-            SetFloat(fleet, "alienRadius", 0.5f * SamuraiScale);
-            SetFloat(fleet, "spacingY", 1.75f);
+            var army = root.GetComponent<SamuraiArmy>();
+            Set(army, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
+            // The army's trampling and landing checks use the samurai collider's world radius; rows are spread to fit the bigger bodies.
+            SetFloat(army, "samuraiRadius", 0.5f * SamuraiScale);
+            SetFloat(army, "spacingY", 1.75f);
         });
 
         // Reuse the scene if it's already open so unsaved edits in it aren't thrown away.
@@ -90,13 +90,13 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        SetUpBlockers(Object.FindFirstObjectByType<ShieldWall>());
+        SetUpBlockers(Object.FindFirstObjectByType<BlockerWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
 
         AssetDatabase.SaveAssets();
-        Debug.Log("Ninja sprite art applied to Alien, Spaceship, Dart, AlienBullet, AlienFleet, the ShieldWall and the Backdrop.");
+        Debug.Log("Ninja sprite art applied to Samurai, Ronin, Kunai, Arrow, SamuraiArmy, the BlockerWall and the Backdrop.");
     }
 
     // Re-tunes just the backdrop, without rebuilding the prefabs (which reshuffles their internal IDs).
@@ -108,7 +108,7 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        SetUpBlockers(Object.FindFirstObjectByType<ShieldWall>());
+        SetUpBlockers(Object.FindFirstObjectByType<BlockerWall>());
         SetUpBackdrop();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -116,7 +116,7 @@ public static class NinjaArtSetup
     }
 
     // Each barricade site is a bush, a stone lantern and a bush. Lanterns are taller and tougher; bushes are wider.
-    static void SetUpBlockers(ShieldWall wall)
+    static void SetUpBlockers(BlockerWall wall)
     {
         var so = new SerializedObject(wall);
         (string name, string sprite, string debris, int health, float height)[] specs =

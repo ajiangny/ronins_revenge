@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // One courtyard blocker (a bush or stone lantern). Takes a few hits from either side before breaking apart.
-public class ShieldBlock : MonoBehaviour
+public class Blocker : MonoBehaviour
 {
     SpriteRenderer tile;
     Sprite[] damageStates;

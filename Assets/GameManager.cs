@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 // Owns the game flow: title screen -> levels -> win/lose screen, plus score and lives.
 public class GameManager : MonoBehaviour
@@ -12,18 +13,18 @@ public class GameManager : MonoBehaviour
     static bool skipTitle;
 
     [Header("Inscribed")]
-    [SerializeField] AlienFleet fleet;
-    [SerializeField] Spaceship ship;
-    [SerializeField] ShieldWall shields;
+    [SerializeField, FormerlySerializedAs("fleet")] SamuraiArmy army;
+    [SerializeField, FormerlySerializedAs("ship")] Ronin ronin;
+    [SerializeField, FormerlySerializedAs("shields")] BlockerWall blockers;
     [SerializeField] GameUI ui;
     [SerializeField] int startingLives = 3;
     [SerializeField] float levelIntroTime = 2.5f;
 
     [SerializeField] LevelConfig[] levels =
     {
-        new LevelConfig { columns = 10, rows = 4, topRowY = 8.5f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, bulletSpeed = 7f,   alienColor = new Color(0f, 0.98f, 0.6f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 8.1f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.5f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  bulletSpeed = 8.5f, alienColor = new Color(1f, 0.85f, 0.1f) },
-        new LevelConfig { columns = 11, rows = 5, topRowY = 7.5f, baseSpeed = 3.2f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f,  aimedShotChance = 0.55f, bulletSpeed = 10f,  alienColor = new Color(1f, 0.25f, 0.35f) },
+        new LevelConfig { columns = 10, rows = 4, topRowY = 8.5f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
+        new LevelConfig { columns = 11, rows = 5, topRowY = 8.1f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.5f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 8.5f, samuraiColor = new Color(1f, 0.85f, 0.1f) },
+        new LevelConfig { columns = 11, rows = 5, topRowY = 7.5f, baseSpeed = 3.2f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f,  aimedShotChance = 0.55f, arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.25f, 0.35f) },
     };
 
     State state;
@@ -34,18 +35,18 @@ public class GameManager : MonoBehaviour
 
     void OnEnable()
     {
-        fleet.AlienDestroyed += OnAlienDestroyed;
-        fleet.FleetCleared += OnFleetCleared;
-        fleet.FleetLanded += OnFleetLanded;
-        ship.Hit += OnShipHit;
+        army.SamuraiKilled += OnSamuraiKilled;
+        army.ArmyDefeated += OnArmyDefeated;
+        army.ArmyReachedRonin += OnArmyReachedRonin;
+        ronin.Hit += OnRoninHit;
     }
 
     void OnDisable()
     {
-        fleet.AlienDestroyed -= OnAlienDestroyed;
-        fleet.FleetCleared -= OnFleetCleared;
-        fleet.FleetLanded -= OnFleetLanded;
-        ship.Hit -= OnShipHit;
+        army.SamuraiKilled -= OnSamuraiKilled;
+        army.ArmyDefeated -= OnArmyDefeated;
+        army.ArmyReachedRonin -= OnArmyReachedRonin;
+        ronin.Hit -= OnRoninHit;
     }
 
     void Start()
@@ -54,7 +55,7 @@ public class GameManager : MonoBehaviour
         ui.SetScore(0, highScore);
         ui.SetLevel(1, levels.Length);
         ui.SetLives(startingLives);
-        shields.Rebuild();
+        blockers.Rebuild();
 
         if (skipTitle)
         {
@@ -85,7 +86,7 @@ public class GameManager : MonoBehaviour
         }
         else if (state == State.GameOver && confirm)
         {
-            // Reload for a clean slate (bullets, debris, ship), then jump straight into play.
+            // Reload for a clean slate (arrows, debris, ronin), then jump straight into play.
             skipTitle = true;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
@@ -104,33 +105,33 @@ public class GameManager : MonoBehaviour
     IEnumerator BeginLevel()
     {
         state = State.Transition;
-        ship.ControlsEnabled = false;
+        ronin.ControlsEnabled = false;
         ClearProjectiles();
-        shields.Rebuild();
+        blockers.Rebuild();
 
         LevelConfig level = levels[levelIndex];
-        fleet.SpawnWave(level, ship.transform, ship.TopY, shields.TopY);
+        army.SpawnStage(level, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetLevel(levelIndex + 1, levels.Length);
         ui.ShowOverlay($"STAGE {levelIndex + 1}",
             levelIndex == 0 ? "Get ready!" : "Stage cleared! The next army is bigger, faster and angrier.",
-            level.alienColor);
+            level.samuraiColor);
 
         yield return new WaitForSeconds(levelIntroTime);
 
         ui.HideOverlay();
         state = State.Playing;
-        ship.ControlsEnabled = true;
-        fleet.Advance();
+        ronin.ControlsEnabled = true;
+        army.Advance();
     }
 
-    void OnAlienDestroyed(Alien alien)
+    void OnSamuraiKilled(Samurai samurai)
     {
-        score += alien.Points * (levelIndex + 1);
+        score += samurai.Points * (levelIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score, highScore);
     }
 
-    void OnFleetCleared()
+    void OnArmyDefeated()
     {
         if (state != State.Playing) return;
 
@@ -145,14 +146,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void OnFleetLanded()
+    void OnArmyReachedRonin()
     {
         if (state != State.Playing) return;
-        ship.Explode();
+        ronin.Explode();
         EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f));
     }
 
-    void OnShipHit()
+    void OnRoninHit()
     {
         if (state != State.Playing) return;
 
@@ -160,7 +161,7 @@ public class GameManager : MonoBehaviour
         ui.SetLives(lives);
         if (lives <= 0)
         {
-            ship.Explode();
+            ronin.Explode();
             EndGame("DEFEATED", "The ronin has fallen.", new Color(1f, 0.3f, 0.3f));
         }
     }
@@ -168,8 +169,8 @@ public class GameManager : MonoBehaviour
     void EndGame(string title, string message, Color color)
     {
         state = State.GameOver;
-        fleet.Halt();
-        ship.ControlsEnabled = false;
+        army.Halt();
+        ronin.ControlsEnabled = false;
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
 
@@ -180,13 +181,13 @@ public class GameManager : MonoBehaviour
 
     static void ClearProjectiles()
     {
-        foreach (Dart dart in FindObjectsByType<Dart>())
+        foreach (Kunai kunai in FindObjectsByType<Kunai>())
         {
-            Destroy(dart.gameObject);
+            Destroy(kunai.gameObject);
         }
-        foreach (AlienBullet bullet in FindObjectsByType<AlienBullet>())
+        foreach (Arrow arrow in FindObjectsByType<Arrow>())
         {
-            Destroy(bullet.gameObject);
+            Destroy(arrow.gameObject);
         }
     }
 }

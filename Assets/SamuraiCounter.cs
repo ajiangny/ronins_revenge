@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
-public class AlienCounter : MonoBehaviour
+public class SamuraiCounter : MonoBehaviour
 {
     TextMeshProUGUI uiText;
 
@@ -11,7 +11,7 @@ public class AlienCounter : MonoBehaviour
         uiText = GetComponent<TextMeshProUGUI>();
     }
 
-    // Called by the fleet only when the count changes, instead of rebuilding the string every frame.
+    // Called by the army only when the count changes, instead of rebuilding the string every frame.
     public void SetCount(int remaining)
     {
         uiText.SetText("Samurai Left: {0}", remaining);

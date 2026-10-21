@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class AlienFleet : MonoBehaviour
+public class SamuraiArmy : MonoBehaviour
 {
     [Header("Inscribed")]
-    public Alien alienPrefab;
-    public AlienCounter alienCounter;
+    [FormerlySerializedAs("alienPrefab")] public Samurai samuraiPrefab;
+    [FormerlySerializedAs("alienCounter")] public SamuraiCounter samuraiCounter;
     [Tooltip("Samurai type per row from the top; rows past the end reuse the last entry. Matches PointsForRow.")]
     public CharacterArt[] samuraiByRow;
 
@@ -15,13 +16,13 @@ public class AlienFleet : MonoBehaviour
     [SerializeField] float edgeMargin = 1f;
     [SerializeField] float dropDistance = 0.5f;
     [SerializeField] float dropSpeed = 8f;
-    [SerializeField] float alienRadius = 0.45f;
+    [SerializeField, FormerlySerializedAs("alienRadius")] float samuraiRadius = 0.45f;
 
-    public event Action<Alien> AlienDestroyed;
-    public event Action FleetCleared;
-    public event Action FleetLanded;
+    public event Action<Samurai> SamuraiKilled;
+    public event Action ArmyDefeated;
+    public event Action ArmyReachedRonin;
 
-    readonly List<Alien> aliens = new List<Alien>();
+    readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
 
     LevelConfig level;
@@ -32,24 +33,24 @@ public class AlienFleet : MonoBehaviour
     float dropRemaining;
     float nextShotTime;
     float landingY;
-    float shieldTopY;
+    float blockerTopY;
     bool advancing;
 
-    public int Remaining => aliens.Count;
+    public int Remaining => soldiers.Count;
 
     void Awake()
     {
         cam = Camera.main;
     }
 
-    // Builds a fresh wave. The fleet stays still until Advance() is called.
-    public void SpawnWave(LevelConfig config, Transform player, float landingLineY, float shieldTop)
+    // Builds a fresh stage. The army stays still until Advance() is called.
+    public void SpawnStage(LevelConfig config, Transform player, float landingLineY, float blockerTop)
     {
         Clear();
         level = config;
         target = player;
         landingY = landingLineY;
-        shieldTopY = shieldTop;
+        blockerTopY = blockerTop;
         direction = 1f;
         dropRemaining = 0f;
 
@@ -59,13 +60,13 @@ public class AlienFleet : MonoBehaviour
             for (int row = 0; row < config.rows; row++)
             {
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY, 0);
-                Alien alien = Instantiate(alienPrefab, position, Quaternion.identity, transform);
-                alien.Init(this, col, PointsForRow(row), config.alienColor, samuraiByRow[Mathf.Min(row, samuraiByRow.Length - 1)]);
-                aliens.Add(alien);
+                Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
+                soldier.Init(this, col, PointsForRow(row), config.samuraiColor, samuraiByRow[Mathf.Min(row, samuraiByRow.Length - 1)]);
+                soldiers.Add(soldier);
             }
         }
-        startingCount = aliens.Count;
-        alienCounter.SetCount(aliens.Count);
+        startingCount = soldiers.Count;
+        samuraiCounter.SetCount(soldiers.Count);
     }
 
     public void Advance()
@@ -81,11 +82,11 @@ public class AlienFleet : MonoBehaviour
 
     void Clear()
     {
-        foreach (Alien alien in aliens)
+        foreach (Samurai soldier in soldiers)
         {
-            Destroy(alien.gameObject);
+            Destroy(soldier.gameObject);
         }
-        aliens.Clear();
+        soldiers.Clear();
         advancing = false;
     }
 
@@ -93,16 +94,16 @@ public class AlienFleet : MonoBehaviour
 
     float HalfWidth() => cam.orthographicSize * cam.aspect;
 
-    // Speeds up linearly from baseSpeed to baseSpeed * maxSpeedMultiplier as aliens die.
+    // Speeds up linearly from baseSpeed to baseSpeed * maxSpeedMultiplier as soldiers fall.
     float CurrentSpeed()
     {
-        float killedFraction = startingCount > 1 ? (float)(startingCount - aliens.Count) / (startingCount - 1) : 1f;
+        float killedFraction = startingCount > 1 ? (float)(startingCount - soldiers.Count) / (startingCount - 1) : 1f;
         return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction);
     }
 
     void FixedUpdate()
     {
-        if (!advancing || aliens.Count == 0) return;
+        if (!advancing || soldiers.Count == 0) return;
 
         float dt = Time.fixedDeltaTime;
         Vector3 step;
@@ -117,12 +118,12 @@ public class AlienFleet : MonoBehaviour
             step = Vector3.right * (direction * CurrentSpeed() * dt);
         }
 
-        // Move every alien and track the fleet's extents in a single pass.
+        // Move every soldier and track the army's extents in a single pass.
         float left = float.PositiveInfinity, right = float.NegativeInfinity, bottom = float.PositiveInfinity;
-        foreach (Alien alien in aliens)
+        foreach (Samurai soldier in soldiers)
         {
-            Vector3 position = alien.Body.position + step;
-            alien.Body.MovePosition(position);
+            Vector3 position = soldier.Body.position + step;
+            soldier.Body.MovePosition(position);
             left = Mathf.Min(left, position.x);
             right = Mathf.Max(right, position.x);
             bottom = Mathf.Min(bottom, position.y);
@@ -136,16 +137,16 @@ public class AlienFleet : MonoBehaviour
             dropRemaining = dropDistance;
         }
 
-        if (bottom - alienRadius <= shieldTopY)
+        if (bottom - samuraiRadius <= blockerTopY)
         {
-            ErodeShields();
+            ErodeBlockers();
         }
 
-        // Once the fleet reaches the ship's height it can no longer be shot down.
-        if (bottom - alienRadius <= landingY)
+        // Once the army reaches the ronin's height it can no longer be shot down.
+        if (bottom - samuraiRadius <= landingY)
         {
             advancing = false;
-            FleetLanded?.Invoke();
+            ArmyReachedRonin?.Invoke();
             return;
         }
 
@@ -155,15 +156,15 @@ public class AlienFleet : MonoBehaviour
         }
     }
 
-    // Aliens chew through any shield blocks they move into.
-    void ErodeShields()
+    // Samurai trample any blockers they move into.
+    void ErodeBlockers()
     {
-        foreach (Alien alien in aliens)
+        foreach (Samurai soldier in soldiers)
         {
-            int hits = Physics.OverlapSphereNonAlloc(alien.Body.position, alienRadius, overlapBuffer);
+            int hits = Physics.OverlapSphereNonAlloc(soldier.Body.position, samuraiRadius, overlapBuffer);
             for (int i = 0; i < hits; i++)
             {
-                if (overlapBuffer[i].TryGetComponent(out ShieldBlock block))
+                if (overlapBuffer[i].TryGetComponent(out Blocker block))
                 {
                     block.Demolish();
                 }
@@ -171,7 +172,7 @@ public class AlienFleet : MonoBehaviour
         }
     }
 
-    // Only the bottom alien of a column fires, so shots never come from behind the front line.
+    // Only the front soldier of a column fires, so shots never come from behind the front line.
     void FireShot()
     {
         nextShotTime = Time.time + level.fireInterval * UnityEngine.Random.Range(0.5f, 1.5f);
@@ -183,43 +184,43 @@ public class AlienFleet : MonoBehaviour
         }
         else
         {
-            column = aliens[UnityEngine.Random.Range(0, aliens.Count)].Column;
+            column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
         }
 
-        Alien shooter = null;
-        foreach (Alien alien in aliens)
+        Samurai shooter = null;
+        foreach (Samurai soldier in soldiers)
         {
-            if (alien.Column == column && (shooter == null || alien.Body.position.y < shooter.Body.position.y))
+            if (soldier.Column == column && (shooter == null || soldier.Body.position.y < shooter.Body.position.y))
             {
-                shooter = alien;
+                shooter = soldier;
             }
         }
-        shooter.Fire(level.bulletSpeed);
+        shooter.Fire(level.arrowSpeed);
     }
 
     int ClosestColumnTo(float x)
     {
-        Alien closest = aliens[0];
-        foreach (Alien alien in aliens)
+        Samurai closest = soldiers[0];
+        foreach (Samurai soldier in soldiers)
         {
-            if (Mathf.Abs(alien.Body.position.x - x) < Mathf.Abs(closest.Body.position.x - x))
+            if (Mathf.Abs(soldier.Body.position.x - x) < Mathf.Abs(closest.Body.position.x - x))
             {
-                closest = alien;
+                closest = soldier;
             }
         }
         return closest.Column;
     }
 
-    public void OnAlienKilled(Alien alien)
+    public void OnSamuraiKilled(Samurai soldier)
     {
-        if (!aliens.Remove(alien)) return;
+        if (!soldiers.Remove(soldier)) return;
 
-        alienCounter.SetCount(aliens.Count);
-        AlienDestroyed?.Invoke(alien);
-        if (aliens.Count == 0)
+        samuraiCounter.SetCount(soldiers.Count);
+        SamuraiKilled?.Invoke(soldier);
+        if (soldiers.Count == 0)
         {
             advancing = false;
-            FleetCleared?.Invoke();
+            ArmyDefeated?.Invoke();
         }
     }
 }

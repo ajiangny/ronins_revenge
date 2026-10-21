@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Spaceship : MonoBehaviour
+public class Ronin : MonoBehaviour
 {
     [Header("Inscribed")]
-    public GameObject dartPrefab;
+    [FormerlySerializedAs("dartPrefab")] public GameObject kunaiPrefab;
     public CharacterArt art;
     public float speed = 10f;
     [SerializeField] float shotCooldown = 0.35f;
@@ -65,7 +66,7 @@ public class Spaceship : MonoBehaviour
 
             if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown)
             {
-                Fire(dartPrefab);
+                Fire(kunaiPrefab);
             }
         }
         UpdateLoopClip();
@@ -97,7 +98,7 @@ public class Spaceship : MonoBehaviour
     void OnCollisionEnter(Collision coll)
     {
         if (!ControlsEnabled || Time.time < invulnerableUntil) return;
-        if (coll.collider.GetComponentInParent<AlienBullet>() == null) return;
+        if (coll.collider.GetComponentInParent<Arrow>() == null) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
         Debris.BurstSprites(coll.GetContact(0).point, art.deathParticles, Color.white, 10, 1f, 6f);

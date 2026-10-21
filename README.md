@@ -7,15 +7,15 @@ Open `Assets/Scenes/SampleScene.unity` and press Play.
 
 **Controls:** Left/Right or A/D to move, Space to throw a kunai, Enter to start or restart.
 
-In the code the original class names are kept (`Alien` = samurai, `Spaceship` = ronin, `Dart` = kunai, `AlienBullet` = arrow) so prefab and scene references don't break.
+The template's Space Invaders classes, prefabs and layers are renamed to the theme: `Alien` → `Samurai`, `AlienFleet` → `SamuraiArmy`, `AlienBullet` → `Arrow`, `AlienCounter` → `SamuraiCounter`, `Spaceship` → `Ronin`, `Dart` → `Kunai`, `ShieldWall`/`ShieldBlock` → `BlockerWall`/`Blocker`. The section on template code issues below uses the template's original names.
 
 ## Required features
 
 | Requirement | Where |
 |---|---|
-| Remaining aliens speed up as others are destroyed | `AlienFleet.CurrentSpeed()` scales linearly from `baseSpeed` to `baseSpeed × maxSpeedMultiplier` as the fleet empties. |
-| Detect when the game can no longer be won | `AlienFleet.FixedUpdate()` raises `FleetLanded` once the lowest alien reaches the top of the ship's hull (`Spaceship.TopY`). At that height the aliens can't be shot down, so `GameManager` ends the game. |
-| Ship can't move offscreen | `Spaceship.FixedUpdate()` clamps the ship to the camera's visible width, using the hull's measured bounds (the pivot isn't centred on the mesh). |
+| Remaining aliens speed up as others are destroyed | `SamuraiArmy.CurrentSpeed()` scales linearly from `baseSpeed` to `baseSpeed × maxSpeedMultiplier` as the army shrinks. |
+| Detect when the game can no longer be won | `SamuraiArmy.FixedUpdate()` raises `ArmyReachedRonin` once the lowest samurai reaches the top of the ronin (`Ronin.TopY`). At that height the samurai can't be hit, so `GameManager` ends the game. |
+| Ship can't move offscreen | `Ronin.FixedUpdate()` clamps the ronin to the camera's visible width, using his sprite's measured bounds (the pivot isn't centred on the art). |
 | Balance (harder but beatable) | See [Balancing](#balancing). |
 
 ## Code issues found in the template and fixed
@@ -31,8 +31,8 @@ In the code the original class names are kept (`Alien` = samurai, `Spaceship` = 
 
 - **Start and end screens.** A "SHADOW BLADE" title screen with controls, a "Stage N" intro between levels, and Defeated / Victory screens showing score and high score. High score is saved with `PlayerPrefs`. (`GameManager`, `GameUI`)
 - **Additional levels.** Three stages, configured in `GameManager.levels` (`LevelConfig`). Each stage has more samurai, starts lower, moves faster, shoots more often with more aimed, faster arrows, and tints the army a new clan colour.
-- **Lives.** 3 lives, shown as ronin head icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Spaceship`, `GameUI.SetLives`)
-- **Shields.** Four sets of courtyard blockers, each a bush, a stone lantern and a bush (`ShieldWall`, `ShieldBlock`). Bushes take 5 hits and lanterns 8; each shows three damage states and then breaks into leaves or stone chips, so you can shoot gaps into a set. Samurai that march into the blockers trample them. Blockers are rebuilt every stage.
+- **Lives.** 3 lives, shown as ronin head icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Ronin`, `GameUI.SetLives`)
+- **Shields (courtyard blockers).** Four sets of courtyard blockers, each a bush, a stone lantern and a bush (`BlockerWall`, `Blocker`). Bushes take 5 hits and lanterns 8; each shows three damage states and then breaks into leaves or stone chips, so you can shoot gaps into a set. Samurai that march into the blockers trample them. Blockers are rebuilt every stage.
 - **Collision animations.** Samurai play a death animation and burst into sakura petals and smoke; the ronin bursts into sparks and smoke when hit and when killed; blockers break into leaves or stone chips. (`Debris.BurstSprites`, `SpriteAnimator`)
 - **New graphics.** Every primitive (sphere aliens, capsule ship, cube debris) is replaced with chibi pixel art I generated with PixelLab's AI tools from my own prompts:
   - **Samurai:** three types by row, worth more points the higher they stand: Ashigaru (spear, straw hat) in the bottom rows, Bushi (katana, lamellar armour) in the middle, and Taishō (horned kabuto, menpō mask) on top. Each has a march loop and a death animation.
@@ -52,4 +52,4 @@ The template was easy because the player could fire 20 shots per second and the 
 - Arrows come from the front line, partly aimed at the player, and get faster each stage.
 - The game is still beatable thanks to 3 lives, invulnerability after a hit, and the courtyard blockers.
 
-All of these values can be tuned in the Inspector on `GameManager` (the per-stage `levels` array), `AlienFleet`, `Spaceship` and `Shields`.
+All of these values can be tuned in the Inspector on `GameManager` (the per-stage `levels` array), `SamuraiArmy`, `Ronin` and `Blockers`.

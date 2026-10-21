@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // Builds the rows of courtyard blockers (bushes, stone lanterns) between the ronin and the samurai.
-public class ShieldWall : MonoBehaviour
+public class BlockerWall : MonoBehaviour
 {
     [System.Serializable]
     public class BlockerType
@@ -102,6 +102,6 @@ public class ShieldWall : MonoBehaviour
         art.sprite = type.damageStates[0];
         art.transform.localScale = Vector3.one * (type.height / art.sprite.bounds.size.y);
 
-        blocker.AddComponent<ShieldBlock>().Init(type.health, art, type.damageStates, type.debris);
+        blocker.AddComponent<Blocker>().Init(type.health, art, type.damageStates, type.debris);
     }
 }

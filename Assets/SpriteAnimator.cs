@@ -35,7 +35,7 @@ public class SpriteAnimator : MonoBehaviour
         Renderer.sprite = clip[0];
     }
 
-    // Moves to the next frame by hand, for clips driven by game events (the fleet's march step) rather than time.
+    // Moves to the next frame by hand, for clips driven by game events (the army's march step) rather than time.
     public void Step()
     {
         if (clip == null) return;

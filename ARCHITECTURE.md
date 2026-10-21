@@ -30,15 +30,17 @@ Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ R
 | What | Where |
 |---|---|
 | Movement, input, screen clamp, cooldowns, lives/invulnerability | `Ronin.cs` (reads `Keyboard.current` directly) |
-| Kunai (Space), Inferno Fan spread | `Ronin` → `Kunai.prefab` / `Kunai.cs` |
+| Sword slash (Space), Inferno Fan spread | `Ronin.Attack` → `Ronin.Slash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`) |
+| Kunai throw (kept for a future weapon select) | `Ronin.weapon = Kunai` → `Ronin.ThrowKunai` → `Kunai.prefab`; also the fallback while `slashPrefab` is unset |
 | Spirit Shuriken (E / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
 | Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`) |
 | Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
 | Ronin events | `Hit`, `WardBroken`, `ShurikenThrown`, `Parried` (GameManager subscribes) |
 
-All player projectiles are `Kunai`; `Kunai.cs` also defines `KillSource { Kunai, Shuriken, Deflected, Effect, Reflected }`.
-Damage per source is `Damage.Of` in `IHittable.cs` (kunai 1, shuriken 3, deflected 2, reflected 6).
+All player projectiles use the `Kunai` component (slash waves, kunai, shuriken, ripostes); `Kunai.cs` also defines
+`KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash }`. The Attack-slot boons (Flame/Frost/Storm Blade)
+trigger on both `Slash` and `Kunai`. Damage per source is `Damage.Of` in `IHittable.cs` (slash and kunai 1, shuriken 3, deflected 2, reflected 6).
 Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: `Samurai`, `Scout`, `Boss`.
 
 ## Boons (Hades-style upgrades)
@@ -67,7 +69,7 @@ match `BoonChoiceUI.boonIcons`.
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
-  `MakeUnbreakable` makes the Taisho spear: it passes through kunai, arrows and blockers and only stops on the
+  `MakeUnbreakable` makes the Taisho spear: it passes through slashes, kunai, arrows and blockers and only stops on the
   ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). Its yari art
   (`Art/Sprites/Projectiles/Spear.png`) reaches it through `Samurai.spearSprite`, wired by `Ninja/Apply Sprite Art`.
 - `SamuraiCounter.cs` — "Samurai Left" HUD text.

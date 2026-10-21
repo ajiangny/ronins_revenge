@@ -147,7 +147,8 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 
 - `CharacterArt` ScriptableObject (`Art/Characters/*.asset`): clips `idle`, `attack`, `hit`, `death`, `parry`,
   `runLeft`, `runRight` and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
-  Benibana.
+  Benibana, Utsusemi. A boss can rest in a different loop by overriding `Boss.IdleClip` (Utsusemi's bare-headed
+  idle, `GameManager.utsusemiBareIdle`, while its hat is thrown).
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
 - Raw frames live in `Art/Sprites/{Characters,Projectiles,Fx,Effects,Blockers,Background,UI}`;
   `Editor/PixelArtImporter.cs` imports them as point-filtered pixel sprites automatically.

@@ -118,6 +118,7 @@ public class SamuraiArmy : MonoBehaviour
         }
         soldiers.Clear();
         advancing = false;
+        samuraiCounter.SetCount(0);
     }
 
     static SamuraiKind KindForRow(LevelConfig config, int row)

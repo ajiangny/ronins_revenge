@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Benibana
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 6afbb132d022244c49c299d848aa91e4, type: 3}
+  - {fileID: 21300000, guid: d914d3b00626240be83a7cb1901c6ff1, type: 3}
+  - {fileID: 21300000, guid: bb839045ed5dd4c3299ff8410292d058, type: 3}
+  - {fileID: 21300000, guid: 34337062bf9b4497e8c3ee24b2e0f3df, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 8aef8a22ef5a7426983b7a923daf3ea9, type: 3}
+  - {fileID: 21300000, guid: 2f978df95aa1e4c5e98feb885343d74a, type: 3}
+  - {fileID: 21300000, guid: 12fd2352d9289422ca81d46af8a0889f, type: 3}
+  - {fileID: 21300000, guid: a5aa65a6e4f044d49954c5a3b563c98c, type: 3}
+  - {fileID: 21300000, guid: 76cacd985a2b347caa51d92aee3638fd, type: 3}
+  - {fileID: 21300000, guid: 0e5e30e2bd87249a8b60c95df05582e6, type: 3}
+  - {fileID: 21300000, guid: c75b0989f0c8146c8a360fb60269d841, type: 3}
+  - {fileID: 21300000, guid: d12d27b66e2684e339328732bad75e19, type: 3}
+  - {fileID: 21300000, guid: 8dc05d9a3c3184b0496efa7479a1adff, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 5d46f92b5d26e43c7928f469b17b8c48, type: 3}
+  - {fileID: 21300000, guid: 531c46c3212574b21945f7256bfb71aa, type: 3}
+  - {fileID: 21300000, guid: dd6f41cd3e8fa462d9b321ff49db6105, type: 3}
+  - {fileID: 21300000, guid: e02b836c0744b474c80ae56627f26ad4, type: 3}
+  - {fileID: 21300000, guid: fc52ef38fac9749e0921b869699e64c0, type: 3}
+  - {fileID: 21300000, guid: c4bb81d3aa99246e087941dec4692cdf, type: 3}
+  - {fileID: 21300000, guid: 21ca37ea5bb674acdbbd7f9f46e2ad31, type: 3}
+  death:
+  - {fileID: 21300000, guid: 77dc10e502ec5432cbcd968eb89b560d, type: 3}
+  - {fileID: 21300000, guid: 48e6c45bdef8e4fec894d41976cd0422, type: 3}
+  - {fileID: 21300000, guid: 467852e6236884a30b1bb73b45528892, type: 3}
+  - {fileID: 21300000, guid: 41eb5f21387d74560b8c43cf972c5e39, type: 3}
+  - {fileID: 21300000, guid: b058b6d8fd8d944d5bc8c08b43122df5, type: 3}
+  - {fileID: 21300000, guid: 55e988913a6574948bbc05e5b0f89926, type: 3}
+  - {fileID: 21300000, guid: eaf292b788db64c1abe33e28cbce2519, type: 3}
+  - {fileID: 21300000, guid: 3862108b2c80e49809019b7fc11bff48, type: 3}
+  - {fileID: 21300000, guid: 24dad249fd3be41db9449bdaa65429e4, type: 3}
+  parry:
+  - {fileID: 21300000, guid: 1d75719270f894472aa226ed3cc52aea, type: 3}
+  - {fileID: 21300000, guid: a2693c46298de4eaba7a7efc525beb7b, type: 3}
+  - {fileID: 21300000, guid: 38effe01a1be64e98a88f66da92c720e, type: 3}
+  - {fileID: 21300000, guid: 22f1b80be4d4d4f058e034c559c543b5, type: 3}
+  - {fileID: 21300000, guid: 92c444b42dd9e49b4b5d55f1e3ee3e14, type: 3}
+  - {fileID: 21300000, guid: f5e3f0430681e4ab6969218514f7e9e4, type: 3}
+  - {fileID: 21300000, guid: 0c7bd1544f21e44b58ff37c5d9e518a1, type: 3}
+  runLeft: []
+  runRight: []
+  idleFps: 6
+  actionFps: 14
+  runFps: 14
+  deathParticles:
+  - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

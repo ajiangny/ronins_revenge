@@ -61,7 +61,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         body.isKinematic = true;
         body.useGravity = false;
         body.interpolation = RigidbodyInterpolation.Interpolate;
-        go.AddComponent<SphereCollider>().radius = 0.5f;
+        var hitbox = go.AddComponent<SphereCollider>();
 
         var view = new GameObject("Sprite") { layer = SamuraiLayer };
         view.transform.SetParent(go.transform, false);
@@ -79,6 +79,10 @@ public abstract class Boss : MonoBehaviour, IHittable
         boss.Health = boss.MaxHealth = health;
         renderer.color = tint;
         animator.Play(art.idle, true, null, art.idleFps);
+        // Centre the art on the body, and fit the hitbox to it with some leeway around the canvas padding.
+        Bounds frame = renderer.sprite.bounds;
+        view.transform.localPosition = -frame.center;
+        hitbox.radius = 0.6f * Mathf.Min(frame.extents.x, frame.extents.y);
         return boss;
     }
 
@@ -145,6 +149,13 @@ public abstract class Boss : MonoBehaviour, IHittable
         {
             yield return null;
         }
+    }
+
+    // A one-shot clip (a slash, a puff of the pipe) that hands back to the idle loop.
+    protected void PlayAction(Sprite[] clip)
+    {
+        if (IsDead || clip == null || clip.Length == 0) return;
+        animator.Play(clip, false, () => animator.Play(art.idle, true, null, art.idleFps), art.actionFps);
     }
 
     protected void SetInvulnerable(float seconds)
@@ -243,6 +254,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead) return;
         Interrupt();
         staggeredUntil = Time.time + seconds;
+        PlayAction(art.hit);
         StartCoroutine(RecoverFromStagger(seconds));
     }
 
@@ -302,12 +314,17 @@ public abstract class Boss : MonoBehaviour, IHittable
         Fx.Play(Fx.Explosion, Centre, Color.white, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Colour, 40, 1.4f, 9f);
         Sfx.Play(Sfx.PlayerDeath, 1f, 0.8f);
+        // With a defeat clip she sinks down in her own animation; without one the sprite tips over.
+        bool clip = art.death != null && art.death.Length > 0;
+        if (clip) animator.Play(art.death, false, null, art.actionFps * 0.6f);
         Vector3 from = anchor;
         for (float t = 0; t < 2.5f; t += Time.deltaTime)
         {
             float k = t / 2.5f;
-            sprite.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Lerp(0, -14f, Mathf.Min(1f, k * 3f)));
-            anchor = from + Vector3.down * Mathf.Min(0.6f, k * 2f);
+            if (!clip) sprite.transform.localRotation = Quaternion.Euler(0, 0, Mathf.Lerp(0, -14f, Mathf.Min(1f, k * 3f)));
+            anchor = from + Vector3.down * Mathf.Min(clip ? 0.2f : 0.6f, k * 2f);
+            // Hold her kneeling pose fully visible until the clip has played, then fade.
+            k = clip ? Mathf.Clamp01((k - 0.45f) / 0.55f) : k;
             body.MovePosition(anchor);
             Color c = bodyTint;
             c.a = 1f - k;

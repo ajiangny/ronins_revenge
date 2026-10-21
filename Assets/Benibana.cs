@@ -64,6 +64,7 @@ public class Benibana : Boss
     // In her second phase silver crosses hide inside them.
     IEnumerator SmokeRings()
     {
+        PlayAction(art.parry);
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.2f);
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.55f);
         yield return Wait(0.55f);
@@ -168,6 +169,7 @@ public class Benibana : Boss
         transient.Remove(line.gameObject);
         Destroy(line.gameObject);
 
+        PlayAction(art.attack);
         if (Fx.Play(Fx.SlashArc, Centre, Crimson, 3f) == null) ElementFx.Glow(Centre, Crimson, 1f, 4f, 0.25f);
         Sfx.Play(Sfx.ParrySwing, 1f, 0.55f);
         CameraShake.Add(0.2f);

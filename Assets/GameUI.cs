@@ -37,7 +37,7 @@ public class GameUI : MonoBehaviour
     void Awake()
     {
         scoreText = CreateText("Score", new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(800, 50), 36, TextAlignmentOptions.Top);
-        levelText = CreateText("Level", new Vector2(1f, 1f), new Vector2(-30, -20), new Vector2(400, 50), 36, TextAlignmentOptions.TopRight);
+        levelText = CreateText("Level", new Vector2(1f, 1f), new Vector2(-30, -20), new Vector2(600, 50), 36, TextAlignmentOptions.TopRight);
 
         TextMeshProUGUI livesLabel = CreateText("LivesLabel", new Vector2(0f, 0f), new Vector2(30, 20), new Vector2(150, 50), 36, TextAlignmentOptions.BottomLeft);
         livesLabel.text = "Lives";
@@ -79,7 +79,7 @@ public class GameUI : MonoBehaviour
 
     void BuildBossBar()
     {
-        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -95), new Vector2(904, 30));
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -115), new Vector2(904, 30));
         frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
         RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
         back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);

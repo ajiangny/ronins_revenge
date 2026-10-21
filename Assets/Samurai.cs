@@ -5,6 +5,9 @@ using UnityEngine.Serialization;
 public class Samurai : MonoBehaviour, IHittable
 {
     static readonly Color FrostColor = new Color(0.55f, 0.8f, 1f);
+    // Encased samurai are drawn fully icy with a pale halo, so they stand out from the army's lighter frost tint.
+    static readonly Color IceColor = new Color(0.45f, 0.85f, 1f);
+    static readonly Color IceGlow = new Color(0.6f, 0.9f, 1f, 0.7f);
     const float ArcherSpread = 15f;
     // The spear is heavy: slower than an arrow, so there's time to see it and dodge or parry.
     const float SpearSpeedMultiplier = 0.8f;
@@ -32,7 +35,7 @@ public class Samurai : MonoBehaviour, IHittable
     int maxHealth;
     float frost;
     float encasedUntil;
-    bool showingIce;
+    SpriteRenderer iceGlow;
 
     void Awake()
     {
@@ -82,19 +85,24 @@ public class Samurai : MonoBehaviour, IHittable
     {
         if (IsDead) return;
         encasedUntil = Mathf.Max(encasedUntil, Time.time + seconds);
-        showingIce = true;
         animator.enabled = false;
+        if (iceGlow == null) iceGlow = Kunai.CreateGlow(transform, 1.6f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, IceGlow);
         Fx.Play(Fx.IceBurst, transform.position, Color.white, 0.9f);
         SetFrost(frost);
     }
 
     void Update()
     {
-        if (!showingIce || Encased) return;
-        // The ice has thawed.
-        showingIce = false;
-        animator.enabled = true;
+        if (iceGlow == null || Encased) return;
+        Thaw();
         SetFrost(frost);
+    }
+
+    void Thaw()
+    {
+        animator.enabled = true;
+        if (iceGlow != null) Destroy(iceGlow.gameObject);
+        iceGlow = null;
     }
 
     // Tints the samurai towards ice blue while the army is frozen (0 = normal, 1 = fully frozen); being encased
@@ -103,12 +111,11 @@ public class Samurai : MonoBehaviour, IHittable
     {
         if (IsDead) return;
         frost = amount;
-        float shown = Encased ? 1f : frost;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
-        animator.Renderer.color = Color.Lerp(clan, FrostColor, shown * 0.7f);
+        animator.Renderer.color = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
     }
 
     public void TakeHit(int damage, KillSource source)
@@ -135,7 +142,7 @@ public class Samurai : MonoBehaviour, IHittable
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
         IsDead = true;
-        animator.enabled = true;
+        Thaw();
         foreach (Collider c in GetComponentsInChildren<Collider>())
         {
             c.enabled = false;

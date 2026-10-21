@@ -43,7 +43,7 @@ public class GameUI : MonoBehaviour
         levelText.text = $"Stage {level} / {levelCount}";
     }
 
-    // One small ship icon per remaining life.
+    // One ronin head icon per remaining life.
     public void SetLives(int lives)
     {
         while (lifeIcons.Count < lives)

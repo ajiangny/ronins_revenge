@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour
             ui.ShowOverlay("SHADOW BLADE",
                 "LEFT / RIGHT or A / D to move      SPACE to throw\n\n" +
                 $"Defeat all {levels.Length} stages. Each samurai army is faster and fires more arrows.\n" +
-                "Hide behind the barricades - they won't last forever.\n\n" +
+                "Hide behind the bushes and stone lanterns - they won't last forever.\n\n" +
                 "Press ENTER to start",
                 new Color(0.4f, 0.85f, 1f));
         }
@@ -141,7 +141,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            EndGame("VICTORY", "Every samurai army has fallen. The village is safe.", new Color(0.4f, 1f, 0.5f));
+            EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f));
         }
     }
 

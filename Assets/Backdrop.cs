@@ -29,8 +29,8 @@ public class Backdrop : MonoBehaviour
         // Over-size the field a little so resizing the window doesn't reveal gaps.
         halfHeight = cam.orthographicSize + 0.5f;
         halfWidth = halfHeight * Mathf.Max(cam.aspect, 2f);
-        centerX = cam.transform.position.x;
-        centerY = cam.transform.position.y;
+        centerX = CameraShake.Center.x;
+        centerY = CameraShake.Center.y;
 
         // Fit the ground to the real view (not the petals' overscan) so the courtyard isn't cropped more than needed.
         float viewHeight = 2f * halfHeight, viewWidth = viewHeight * cam.aspect;

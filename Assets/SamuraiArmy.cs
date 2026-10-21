@@ -43,6 +43,18 @@ public class SamuraiArmy : MonoBehaviour
 
     public int Remaining => soldiers.Count;
     public IReadOnlyList<Samurai> Soldiers => soldiers;
+
+    // Middle of the living army, for effects that wash over all of it.
+    public Vector3 Centre
+    {
+        get
+        {
+            if (soldiers.Count == 0) return transform.position;
+            Vector3 sum = Vector3.zero;
+            foreach (Samurai soldier in soldiers) sum += soldier.Body.position;
+            return sum / soldiers.Count;
+        }
+    }
     bool Frozen => Time.time < frozenUntil;
 
     void Awake()
@@ -144,7 +156,8 @@ public class SamuraiArmy : MonoBehaviour
             bottom = Mathf.Min(bottom, position.y);
         }
 
-        float centerX = cam.transform.position.x;
+        // The resting camera position: a screen shake mustn't move the army's turning points.
+        float centerX = CameraShake.Center.x;
         float bound = HalfWidth() - edgeMargin;
         if (dropRemaining <= 0 && (direction > 0 && right >= centerX + bound || direction < 0 && left <= centerX - bound))
         {

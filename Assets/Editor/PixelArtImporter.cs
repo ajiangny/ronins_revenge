@@ -22,8 +22,10 @@ public class PixelArtImporter : AssetPostprocessor
         importer.alphaIsTransparency = true;
 
         // Characters stand on their feet; everything else (projectiles, effects, tiles) is centred.
+        // A custom pivot set by a setup script (effects anchored on their strike point) is kept.
         var settings = new TextureImporterSettings();
         importer.ReadTextureSettings(settings);
+        if (settings.spriteAlignment == (int)SpriteAlignment.Custom) return;
         settings.spriteAlignment = (int)(assetPath.StartsWith(CharacterRoot) ? SpriteAlignment.BottomCenter : SpriteAlignment.Center);
         importer.SetTextureSettings(settings);
     }

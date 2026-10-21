@@ -66,6 +66,8 @@ public class Samurai : MonoBehaviour
             c.enabled = false;
         }
         Debris.BurstSprites(transform.position, art.deathParticles, Color.white, 8, 1f, 6f);
+        Fx.Play(Fx.SmokePuff, transform.position + Vector3.up * 0.2f, new Color(1f, 1f, 1f, 0.8f), 0.9f);
+        HitFlash.Flash(animator.Renderer, 0.12f);
         army.OnSamuraiKilled(this, source);
         if (art.death != null && art.death.Length > 0)
         {

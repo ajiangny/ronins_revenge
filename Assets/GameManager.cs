@@ -42,6 +42,12 @@ public class GameManager : MonoBehaviour
     [Tooltip("One entry per element: Fire, Water, Lightning.")]
     [SerializeField] ElementArt[] elementArt = new ElementArt[3];
 
+    [Header("Effects")]
+    [Tooltip("Animated effects; built by Ninja/Apply VFX. Effects fall back to simple glows when it's empty.")]
+    [SerializeField] FxLibrary fxLibrary;
+    [Tooltip("Real seconds the action freezes when a parry lands, for weight.")]
+    [SerializeField] float parryHitStop = 0.06f;
+
     [SerializeField] LevelConfig[] levels =
     {
         new LevelConfig { columns = 10, rows = 4, topRowY = 8.5f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f,  aimedShotChance = 0.25f, arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
@@ -61,6 +67,15 @@ public class GameManager : MonoBehaviour
     Element? shownElement;
     Soul activeSoul;
     int killsSinceSoul;
+    FxPlayer aura;
+    bool hitStopping;
+
+    void Awake()
+    {
+        Fx.Library = fxLibrary;
+        // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
+        if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
+    }
 
     void OnEnable()
     {
@@ -173,6 +188,12 @@ public class GameManager : MonoBehaviour
         ui.SetScore(score, highScore);
 
         if (state != State.Playing) return;
+        // Boon effects bring their own blasts and bolts; the ronin's own hits spark in his projectile's colour.
+        if (source != KillSource.Effect)
+        {
+            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.KunaiGlow;
+            Fx.Play(Fx.Impact, samurai.transform.position, Color.Lerp(Color.white, spark, 0.6f), source == KillSource.Shuriken ? 1.4f : 1f);
+        }
         effects.OnKill(samurai, source);
         MaybeDropSoul(samurai.transform.position);
     }
@@ -184,7 +205,21 @@ public class GameManager : MonoBehaviour
 
     void OnParried()
     {
-        if (state == State.Playing) effects.OnParried();
+        if (state != State.Playing) return;
+        effects.OnParried();
+        if (!hitStopping) StartCoroutine(HitStop(parryHitStop));
+    }
+
+    // A brief freeze when a parry lands. It only resumes play if nothing else (the boon screen, game over)
+    // changed the time scale in the meantime.
+    IEnumerator HitStop(float seconds)
+    {
+        if (Time.timeScale != 1f) yield break;
+        hitStopping = true;
+        Time.timeScale = 0.02f;
+        yield return new WaitForSecondsRealtime(seconds);
+        if (state == State.Playing && Mathf.Approximately(Time.timeScale, 0.02f)) Time.timeScale = 1f;
+        hitStopping = false;
     }
 
     void ResetLoadout()
@@ -215,6 +250,7 @@ public class GameManager : MonoBehaviour
         if (state != State.Playing) return;
         var offers = Boons.Draw(soul.Element, 3, loadout, lives);
         if (offers.Count == 0) return;
+        Fx.Play(Fx.Impact, soul.transform.position, Boons.Info(soul.Element).Color, 1.6f);
 
         state = State.Choosing;
         ronin.ControlsEnabled = false;
@@ -232,6 +268,9 @@ public class GameManager : MonoBehaviour
     {
         loadout.Take(offer);
         float value = offer.Boon.ValueAt(offer.Rarity);
+        Color colour = Boons.Info(offer.Boon.Element).Color;
+        Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
+        Fx.Play(Fx.BoonPillar, feet, Color.Lerp(Color.white, colour, 0.7f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
         switch (offer.Boon.Id)
         {
             case BoonId.TidalRenewal:
@@ -240,6 +279,10 @@ public class GameManager : MonoBehaviour
                 break;
             case BoonId.GlacierWall:
                 blockers.Rebuild(loadout.BlockerHealthMultiplier);
+                foreach (Vector3 spot in blockers.BlockerPositions)
+                {
+                    Fx.Play(Fx.IceBurst, spot, Color.white, 1.3f);
+                }
                 break;
             case BoonId.FrozenRiposte:
                 loadout.GainWard();
@@ -270,16 +313,29 @@ public class GameManager : MonoBehaviour
         Sprite kunai = attack is Element a ? ArtFor(a)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
-        Color aura = dominant is Element glow ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
-        ronin.SetLook(look, aura,
+        // The animated aura replaces the plain glow when its art exists.
+        bool animatedAura = dominant is Element a2 && Fx.Has(Fx.Aura(a2));
+        Color glowAura = dominant is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
+        ronin.SetLook(look, glowAura,
             kunai, StandInTint(attack, kunai), ElementColor(attack),
             shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
-        if (dominant != shownElement && dominant is Element changed)
+        if (dominant != shownElement)
         {
-            ElementFx.Glow(ronin.Bounds.center, Boons.Info(changed).Color, 1f, 4f, 0.5f);
-            Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, Boons.Info(changed).Color, 14, 1f, 6f);
+            if (aura != null) aura.Stop();
+            aura = null;
+            if (dominant is Element changed)
+            {
+                Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
+                // Behind the ronin, faded so he stays readable in front of it.
+                aura = Fx.Play(Fx.Aura(changed), feet, new Color(1f, 1f, 1f, 0.6f), 1f, ronin.transform, ronin.SpriteOrder - 1);
+                if (Fx.Play(Fx.Impact, ronin.Bounds.center, Boons.Info(changed).Color, 2f) == null)
+                {
+                    ElementFx.Glow(ronin.Bounds.center, Boons.Info(changed).Color, 1f, 4f, 0.5f);
+                }
+                Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, Boons.Info(changed).Color, 14, 1f, 6f);
+            }
         }
         shownElement = dominant;
     }
@@ -311,6 +367,7 @@ public class GameManager : MonoBehaviour
     void OnArmyReachedRonin()
     {
         if (state != State.Playing) return;
+        CameraShake.Add(0.6f);
         ronin.Explode();
         EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f));
     }

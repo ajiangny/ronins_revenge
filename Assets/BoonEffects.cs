@@ -35,7 +35,11 @@ public class BoonEffects
         {
             case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameKunai, out value)) Blast(position, value);
-                if (loadout.Has(BoonId.FrostKunai, out value)) army.Chill(value, ChillSeconds, ChillStacks);
+                if (loadout.Has(BoonId.FrostKunai, out value))
+                {
+                    army.Chill(value, ChillSeconds, ChillStacks);
+                    Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
+                }
                 if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value)
                 {
                     Samurai next = army.NearestSamurai(position, ChainRange);
@@ -58,7 +62,13 @@ public class BoonEffects
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
             army.Freeze(value);
-            ElementFx.Glow(muzzle, Frost, 1f, 6f, 0.4f);
+            // A wave of frost rolls across the army, and every samurai's armour cracks with ice.
+            if (Fx.Play(Fx.FrostWave, army.Centre, Color.white, 3.5f) == null) ElementFx.Glow(muzzle, Frost, 1f, 6f, 0.4f);
+            foreach (Samurai soldier in army.Soldiers)
+            {
+                if (Random.value < 0.5f) Fx.Play(Fx.IceBurst, soldier.transform.position, Color.white, 0.8f);
+            }
+            CameraShake.Add(0.2f);
         }
         if (loadout.Has(BoonId.ThunderShuriken, out value))
         {
@@ -90,16 +100,23 @@ public class BoonEffects
     // Flame Kunai, Inferno Shuriken and Burning Riposte: everything within the radius burns.
     void Blast(Vector3 position, float radius)
     {
-        ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
+        // The explosion art is about 0.9 units across at full size.
+        if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
+        else Debris.BurstSprites(position, ronin.art.deathParticles, Fire, 8, 0.9f, 4f + 4f * radius);
+        CameraShake.Add(0.12f);
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
             target.Kill(KillSource.Effect);
         }
     }
 
+    // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.
     void Strike(Vector3 from, Samurai target)
     {
-        ElementFx.Bolt(from, target.transform.position, Storm, boltMaterial);
+        Vector3 to = target.transform.position;
+        ElementFx.Bolt(from, to, Storm, boltMaterial);
+        Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
+        CameraShake.Add(0.1f);
         target.Kill(KillSource.Effect);
     }
 

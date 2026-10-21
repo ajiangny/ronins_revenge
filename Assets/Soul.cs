@@ -16,6 +16,7 @@ public class Soul : MonoBehaviour
     Action<Soul> collected;
     SpriteRenderer body;
     SpriteRenderer aura;
+    FxPlayer crackle;
     Color color;
     float originX;
     float age;
@@ -44,6 +45,8 @@ public class Soul : MonoBehaviour
         {
             soul.body.color = Color.Lerp(soul.color, Color.white, 0.6f);
         }
+        // Element-coloured sparks crackling around the wisp.
+        soul.crackle = Fx.Play(Fx.SoulCrackle(element), go.transform.position, Color.white, 1.1f, go.transform, 42);
         return soul;
     }
 
@@ -84,6 +87,7 @@ public class Soul : MonoBehaviour
         aura.color = new Color(color.r, color.g, color.b, 0.55f * alpha);
         Color b = body.color;
         body.color = new Color(b.r, b.g, b.b, alpha);
+        if (crackle != null) crackle.Color = new Color(1f, 1f, 1f, alpha);
 
         if (ronin == null || !ronin.isActiveAndEnabled) return;
         Bounds bounds = ronin.Bounds;

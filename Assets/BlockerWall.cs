@@ -26,6 +26,10 @@ public class BlockerWall : MonoBehaviour
     [SerializeField] float gap = 0.05f;
 
     float healthMultiplier = 1f;
+    readonly System.Collections.Generic.List<Vector3> built = new System.Collections.Generic.List<Vector3>();
+
+    // Centres of the blockers made by the last Rebuild (the old ones are still being destroyed this frame).
+    public System.Collections.Generic.IReadOnlyList<Vector3> BlockerPositions => built;
 
     // Bottom edge of the blockers is the GameObject's y position.
     public float TopY
@@ -42,6 +46,7 @@ public class BlockerWall : MonoBehaviour
     public void Rebuild(float healthMultiplier = 1f)
     {
         this.healthMultiplier = healthMultiplier;
+        built.Clear();
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
@@ -50,7 +55,7 @@ public class BlockerWall : MonoBehaviour
         Camera cam = Camera.main;
         float width = 2f * cam.orthographicSize * cam.aspect;
         float spacing = width / siteCount;
-        float left = cam.transform.position.x - width / 2f;
+        float left = CameraShake.Center.x - width / 2f;
 
         for (int s = 0; s < siteCount; s++)
         {
@@ -97,6 +102,7 @@ public class BlockerWall : MonoBehaviour
         var blocker = new GameObject(type.name);
         blocker.transform.SetParent(transform);
         blocker.transform.position = center;
+        built.Add(center);
         float w = WidthOf(type);
         blocker.AddComponent<BoxCollider>().size = new Vector3(w * type.hitbox.x, type.height * type.hitbox.y, 0.5f);
 

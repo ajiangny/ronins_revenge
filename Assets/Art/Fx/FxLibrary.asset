@@ -1,0 +1,192 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ce1caa657a6944e9ae3fcef4bd2b99e, type: 3}
+  m_Name: FxLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::FxLibrary
+  clips:
+  - id: Impact
+    frames:
+    - {fileID: 21300000, guid: 9a218af2464f541f48f206e1d6f67a25, type: 3}
+    - {fileID: 21300000, guid: f6f7f018f2675462bbf4233497a9861c, type: 3}
+    - {fileID: 21300000, guid: d43feb75a81934d3cbce13ae637f4d0c, type: 3}
+    - {fileID: 21300000, guid: 25f747b824f734e8995f60aafeed0d89, type: 3}
+    - {fileID: 21300000, guid: b41595214969f4315b62e11d1287d151, type: 3}
+    fps: 16
+    loop: 0
+  - id: IceBurst
+    frames:
+    - {fileID: 21300000, guid: 253710b15e65941e580cdfa8b6a60b65, type: 3}
+    - {fileID: 21300000, guid: e609f4013a1ff4033a7fb46b9678d373, type: 3}
+    - {fileID: 21300000, guid: 57fcbae4d9faf4abe97a5c6bba424932, type: 3}
+    - {fileID: 21300000, guid: 87bc3f6a812b1485bb0c4a0b25288d80, type: 3}
+    - {fileID: 21300000, guid: bcf9575134c9e4798a8c1777eef7b732, type: 3}
+    - {fileID: 21300000, guid: 3c4f70ce62fb047e5b14637bf188e881, type: 3}
+    fps: 16
+    loop: 0
+  - id: SmokePuff
+    frames:
+    - {fileID: 21300000, guid: 40d99db1d5d724b30932127c3637725b, type: 3}
+    - {fileID: 21300000, guid: 33023b16f05194d69ae8eea609c96fa4, type: 3}
+    - {fileID: 21300000, guid: 5d99ec7f7b3a743d48ca0693e59c94ee, type: 3}
+    - {fileID: 21300000, guid: eb75d40f3bd094422bf8f759aa148c10, type: 3}
+    - {fileID: 21300000, guid: a04f27159eb1a4f15920a42f48ae3918, type: 3}
+    - {fileID: 21300000, guid: d90147d40ad264853b9cdca29a727374, type: 3}
+    - {fileID: 21300000, guid: 4729528366adf4d6f82d9661a7902c2d, type: 3}
+    - {fileID: 21300000, guid: 2bb2c52e7ef764a20a1479f715491723, type: 3}
+    fps: 12
+    loop: 0
+  - id: Explosion
+    frames:
+    - {fileID: 21300000, guid: 1cef89c9cceb843199eb5149339af98e, type: 3}
+    - {fileID: 21300000, guid: ed1a4655f6847471cb6203d99d8f5f6c, type: 3}
+    - {fileID: 21300000, guid: 10b3cbf8b542e4b179654d7971f5e4e4, type: 3}
+    - {fileID: 21300000, guid: 7960cd33acab744bb889b943a56eeda1, type: 3}
+    - {fileID: 21300000, guid: 8e3bbb9b57a9948c08ef11f4e98e9df0, type: 3}
+    - {fileID: 21300000, guid: 446ff87c129ba48ac9772890ff726cca, type: 3}
+    - {fileID: 21300000, guid: 95a54d9235a6c4af69a114fd0f28707b, type: 3}
+    - {fileID: 21300000, guid: 9db7165a5d87b46718b0c93bc9430e1b, type: 3}
+    - {fileID: 21300000, guid: 313c17b9ea572449a911d54eaa307214, type: 3}
+    - {fileID: 21300000, guid: 25059041ecca34d75a3638a9fe5a7f21, type: 3}
+    fps: 14
+    loop: 0
+  - id: SlashArc
+    frames:
+    - {fileID: 21300000, guid: 8009909f0b9474fb0bb741d1759abc7e, type: 3}
+    - {fileID: 21300000, guid: 55f596022517444ba827ab2a0c7f5248, type: 3}
+    - {fileID: 21300000, guid: c3a19a1527217410fbc2226df59ec8bf, type: 3}
+    - {fileID: 21300000, guid: f6046c6dadfab48d18181f7398101b62, type: 3}
+    - {fileID: 21300000, guid: 771ac07026f2f498a978231a251b5bcd, type: 3}
+    - {fileID: 21300000, guid: 526c0ab5873d04fb8bd78cca67fe1c68, type: 3}
+    fps: 16
+    loop: 0
+  - id: LightningStrike
+    frames:
+    - {fileID: 21300000, guid: e9a2d7dd15d7b424281c53b6314a6360, type: 3}
+    - {fileID: 21300000, guid: bebf3d275ea4a4cb3884d69baad59e9f, type: 3}
+    - {fileID: 21300000, guid: ae1fd5ef2927e43659505aef0be4a8ad, type: 3}
+    - {fileID: 21300000, guid: 587988d285df94106ae414ce82a2013f, type: 3}
+    - {fileID: 21300000, guid: 13bd4ada35048459588e4b2833645b8e, type: 3}
+    - {fileID: 21300000, guid: c1d4ae27846cb41d590fda94bfde1874, type: 3}
+    - {fileID: 21300000, guid: 36efc5c96aecc4d1c85b3ce4eaa0d6d2, type: 3}
+    - {fileID: 21300000, guid: 9b61de7e7235745269ab68bcda3f1dcd, type: 3}
+    fps: 14
+    loop: 0
+  - id: FrostWave
+    frames:
+    - {fileID: 21300000, guid: bfed2b1296ced4c02a8d624c9d2a7b6a, type: 3}
+    - {fileID: 21300000, guid: 7da231fb08eab4edea61e9fc59831441, type: 3}
+    - {fileID: 21300000, guid: 228cb3b86caf045e7bb8b3f476334854, type: 3}
+    - {fileID: 21300000, guid: 6f0022ffc50d042ea9a853eedf458c7b, type: 3}
+    - {fileID: 21300000, guid: f91567cb873ba45418028a7dc66beede, type: 3}
+    - {fileID: 21300000, guid: dd0fe83aad1b047c1a7639c53c7678fe, type: 3}
+    - {fileID: 21300000, guid: 30161ee5a32a24d079634a5be1d0fca9, type: 3}
+    fps: 14
+    loop: 0
+  - id: BoonPillar
+    frames:
+    - {fileID: 21300000, guid: be2b2573592a34ff189343a1c30022eb, type: 3}
+    - {fileID: 21300000, guid: d75c7d14a77fd4fc8b41f4285d023d7b, type: 3}
+    - {fileID: 21300000, guid: 1f97f22a2839b48c8b10e833e711b2f7, type: 3}
+    - {fileID: 21300000, guid: 28910c9700e524f18a996c318b359677, type: 3}
+    - {fileID: 21300000, guid: 013370dd5705742d8b836280f26e7f0a, type: 3}
+    - {fileID: 21300000, guid: dd84744722191493d8a5251b942fa0bd, type: 3}
+    - {fileID: 21300000, guid: dd1038fd5e0764993b9a111c845851fd, type: 3}
+    - {fileID: 21300000, guid: 7eb34a074370943eda2c0533177408cd, type: 3}
+    - {fileID: 21300000, guid: 384abe58054a94e5191f89e9814dad63, type: 3}
+    - {fileID: 21300000, guid: 0f12a1dbcb5434a7fb8713b02a31d90a, type: 3}
+    fps: 12
+    loop: 0
+  - id: WardBubble
+    frames:
+    - {fileID: 21300000, guid: 0e8f509a6d21940d38051bc899d3dae2, type: 3}
+    - {fileID: 21300000, guid: 896cac06cc4184e648b54f620ee6de8e, type: 3}
+    - {fileID: 21300000, guid: 5145612bdb7304552a41618c243cbe2a, type: 3}
+    - {fileID: 21300000, guid: 44273720aff4a4d4995c778cb4e7ebd0, type: 3}
+    - {fileID: 21300000, guid: 5d00f562f80cf4b478bfb6ead9c9f065, type: 3}
+    - {fileID: 21300000, guid: 897bf7c8972814a43bedbcddb7c7d952, type: 3}
+    - {fileID: 21300000, guid: 9972549641fa84091885c3873cf43f76, type: 3}
+    - {fileID: 21300000, guid: b4fea84315942474facb2146b3fb26a7, type: 3}
+    fps: 10
+    loop: 1
+  - id: Aura_Fire
+    frames:
+    - {fileID: 21300000, guid: 848e3788047fb4763af64f7670b00c25, type: 3}
+    - {fileID: 21300000, guid: 77599712089964823a17a8b2b1ed2545, type: 3}
+    - {fileID: 21300000, guid: 9b5629bee667740ab9788b2f1f997605, type: 3}
+    - {fileID: 21300000, guid: c948c74508e184747831740f36b52281, type: 3}
+    - {fileID: 21300000, guid: eb0dfe334012448549436a746abeddd2, type: 3}
+    - {fileID: 21300000, guid: efd46216c26744494a31c5b04d5e5062, type: 3}
+    - {fileID: 21300000, guid: a3a753264dcc4479c8ab1073d0fc50fa, type: 3}
+    - {fileID: 21300000, guid: 9a056467920d34cae922e74f35b8fc19, type: 3}
+    fps: 12
+    loop: 1
+  - id: Aura_Water
+    frames:
+    - {fileID: 21300000, guid: 9469fa0d4880346c3af1f029297f3ceb, type: 3}
+    - {fileID: 21300000, guid: 78c21b64b9ec74f10ac2db6023f1e87b, type: 3}
+    - {fileID: 21300000, guid: d461c1ad4b5f3429eabaf4fb99cc12c6, type: 3}
+    - {fileID: 21300000, guid: e9dddffb9572b421aad15eb02e420f9a, type: 3}
+    - {fileID: 21300000, guid: 478d2a7a97b1c4e218d45e727620c049, type: 3}
+    - {fileID: 21300000, guid: 6e422762f69914705961588d02b1a6a2, type: 3}
+    - {fileID: 21300000, guid: dc70fc8b79068418dabefc676a69940f, type: 3}
+    - {fileID: 21300000, guid: 1c8523674b0f64053bbe45d8748a7a54, type: 3}
+    fps: 12
+    loop: 1
+  - id: Aura_Lightning
+    frames:
+    - {fileID: 21300000, guid: 211c7009663294e4884326b567abc8fc, type: 3}
+    - {fileID: 21300000, guid: 321172e2dacde4592aa1b703d072a29b, type: 3}
+    - {fileID: 21300000, guid: d93bd54bd0fd447d193ba85d989f63a0, type: 3}
+    - {fileID: 21300000, guid: 301bd969af40549fe9fef7da913d5381, type: 3}
+    - {fileID: 21300000, guid: 5b20971696ad54ab5baa2c6fd4a9a53c, type: 3}
+    - {fileID: 21300000, guid: b3c35761ff81d42f283bc3f4c0c56020, type: 3}
+    - {fileID: 21300000, guid: e377d37c087ad40a7b424095f84c9d40, type: 3}
+    - {fileID: 21300000, guid: 79412a22d558344119d9153aa9c2046b, type: 3}
+    fps: 12
+    loop: 1
+  - id: SoulCrackle_Fire
+    frames:
+    - {fileID: 21300000, guid: 0f67d7aae23874c03bf19c8a5d48d811, type: 3}
+    - {fileID: 21300000, guid: f3b7eb6be257f477782186c70a750296, type: 3}
+    - {fileID: 21300000, guid: db5eba1100f2d4e4383b7fa9c0de1ae3, type: 3}
+    - {fileID: 21300000, guid: b91b18f68a54148789756a5af534fe4a, type: 3}
+    - {fileID: 21300000, guid: ecdeb33be0e3f42429a5379f3425cb73, type: 3}
+    - {fileID: 21300000, guid: cdf1f9456282040af8e66d1de847945e, type: 3}
+    - {fileID: 21300000, guid: ec414dfb62c8746bdab1ac561557a66d, type: 3}
+    - {fileID: 21300000, guid: 56a918bd7ff644b57ae917ec1e541225, type: 3}
+    fps: 12
+    loop: 1
+  - id: SoulCrackle_Water
+    frames:
+    - {fileID: 21300000, guid: c064ea0d0b3304ae68795b41a8c34471, type: 3}
+    - {fileID: 21300000, guid: 6adb83bc9f81c46ea8c02324d17e3f1a, type: 3}
+    - {fileID: 21300000, guid: 41536e33ccb15460cbbdda951dce4371, type: 3}
+    - {fileID: 21300000, guid: 99998d52dc589484a998ba69796a7f57, type: 3}
+    - {fileID: 21300000, guid: 20ddce07e29c44f679e183e05dd1a445, type: 3}
+    - {fileID: 21300000, guid: 7d6b6e44555be4b4f86a9b8f9f35ffe0, type: 3}
+    - {fileID: 21300000, guid: 664a644420a824037abb62c7179a601a, type: 3}
+    - {fileID: 21300000, guid: e04e560b87b0d495db4a46b8e47d7965, type: 3}
+    fps: 12
+    loop: 1
+  - id: SoulCrackle_Lightning
+    frames:
+    - {fileID: 21300000, guid: f12cdad0b99a34c4a88165ebca0d7859, type: 3}
+    - {fileID: 21300000, guid: 1820229451df64996b37a3318da3686e, type: 3}
+    - {fileID: 21300000, guid: 153f66544347c4f7e963420e05bfb720, type: 3}
+    - {fileID: 21300000, guid: 834d3e8ad6cd94b56904a2cdffcc5d35, type: 3}
+    - {fileID: 21300000, guid: 53c124e8df6814eb6872cdbcf294c243, type: 3}
+    - {fileID: 21300000, guid: 1cf6a0b9e12b74fbcacf36c6750b3e31, type: 3}
+    - {fileID: 21300000, guid: f160db3ef11224b2da5cb97fa3c3c862, type: 3}
+    - {fileID: 21300000, guid: 2a904128572304549a6c69ddf007a1a4, type: 3}
+    fps: 12
+    loop: 1
+  flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

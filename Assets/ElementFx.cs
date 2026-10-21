@@ -6,6 +6,8 @@ public class ElementFx : MonoBehaviour
 {
     SpriteRenderer sprite;
     LineRenderer line;
+    Vector3 boltFrom, boltTo;
+    float rejag;
     Color color;
     float startScale;
     float endScale;
@@ -31,27 +33,40 @@ public class ElementFx : MonoBehaviour
         fx.Begin(color, fromSize, toSize, seconds);
     }
 
-    // A zig-zag lightning bolt between two points. material should draw vertex colours (any sprite material does).
+    // A zig-zag lightning bolt between two points: a wide coloured glow with a thin white-hot core, re-jagged every
+    // couple of frames so it crackles. material should draw vertex colours (any sprite material does).
     public static void Bolt(Vector3 from, Vector3 to, Color color, Material material)
+    {
+        BoltLayer(from, to, color, material, 0.28f, 50);
+        BoltLayer(from, to, Color.Lerp(color, Color.white, 0.8f), material, 0.08f, 51);
+        Glow(to, color, 0.6f, 1.8f, 0.25f);
+    }
+
+    static void BoltLayer(Vector3 from, Vector3 to, Color color, Material material, float width, int order)
     {
         var go = new GameObject("Bolt");
         var fx = go.AddComponent<ElementFx>();
         fx.line = go.AddComponent<LineRenderer>();
         fx.line.sharedMaterial = material;
         fx.line.useWorldSpace = true;
-        fx.line.sortingOrder = 50;
-        fx.line.widthMultiplier = 0.12f;
+        fx.line.sortingOrder = order;
+        fx.line.widthMultiplier = width;
+        fx.line.positionCount = 10;
+        fx.boltFrom = from;
+        fx.boltTo = to;
+        fx.Jag();
+        fx.Begin(color, 1f, 1f, 0.28f);
+    }
 
-        const int segments = 9;
-        fx.line.positionCount = segments + 1;
-        Vector3 side = Vector3.Cross(to - from, Vector3.forward).normalized;
-        for (int i = 0; i <= segments; i++)
+    void Jag()
+    {
+        int last = line.positionCount - 1;
+        Vector3 side = Vector3.Cross(boltTo - boltFrom, Vector3.forward).normalized;
+        for (int i = 0; i <= last; i++)
         {
-            float jitter = i == 0 || i == segments ? 0f : Random.Range(-0.35f, 0.35f);
-            fx.line.SetPosition(i, Vector3.Lerp(from, to, i / (float)segments) + side * jitter + Vector3.back);
+            float jitter = i == 0 || i == last ? 0f : Random.Range(-0.35f, 0.35f);
+            line.SetPosition(i, Vector3.Lerp(boltFrom, boltTo, i / (float)last) + side * jitter + Vector3.back);
         }
-        fx.Begin(color, 1f, 1f, 0.25f);
-        Glow(to, color, 0.6f, 1.8f, 0.25f);
     }
 
     void Begin(Color tint, float fromScale, float toScale, float seconds)
@@ -86,6 +101,12 @@ public class ElementFx : MonoBehaviour
         if (line != null)
         {
             line.startColor = line.endColor = c;
+            rejag += Time.deltaTime;
+            if (rejag > 0.05f)
+            {
+                rejag = 0f;
+                Jag();
+            }
         }
     }
 }

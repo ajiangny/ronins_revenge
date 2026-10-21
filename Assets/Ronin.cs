@@ -48,10 +48,16 @@ public class Ronin : MonoBehaviour
     // 0 right after use, 1 when ready. Shown on the HUD.
     public float ShurikenCharge => Charge(lastShuriken, shurikenCooldown);
     public float ParryCharge => Charge(lastParry, parryCooldown);
+    // The colours his attacks spark in, for effects elsewhere (hit sparks on kills).
+    public Color KunaiGlow => kunaiGlow;
+    public Color ShurikenGlow => shurikenGlow;
+    public Color ParryColor => parryColor;
+    public int SpriteOrder => sprite.sortingOrder;
 
     Rigidbody body;
     SpriteRenderer sprite;
     SpriteRenderer aura;
+    FxPlayer wardBubble;
     SpriteAnimator animator;
     Camera cam;
     readonly Collider[] parryBuffer = new Collider[16];
@@ -109,7 +115,9 @@ public class Ronin : MonoBehaviour
         moveInput = 0;
         bool invulnerable = Time.time < invulnerableUntil;
         sprite.enabled = !invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f;
-        sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : Loadout.WardCharges > 0 ? WardColor : Color.white;
+        UpdateWardBubble();
+        bool tintForWard = Loadout.WardCharges > 0 && wardBubble == null;
+        sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : tintForWard ? WardColor : Color.white;
 
         Keyboard keyboard = Keyboard.current;
         if (ControlsEnabled && keyboard != null)
@@ -134,6 +142,21 @@ public class Ronin : MonoBehaviour
     }
 
     bool Parrying => Time.time < parryUntil;
+
+    // An icy bubble shows each Frost Ward the ronin is carrying (the plain blue tint is the fallback).
+    void UpdateWardBubble()
+    {
+        bool warded = Loadout.WardCharges > 0 && gameObject.activeSelf;
+        if (warded && wardBubble == null)
+        {
+            wardBubble = Fx.Play(Fx.WardBubble, Bounds.center, new Color(1f, 1f, 1f, 0.85f), 1.1f, transform);
+        }
+        else if (!warded && wardBubble != null)
+        {
+            wardBubble.Stop();
+            wardBubble = null;
+        }
+    }
 
     float Charge(float lastUse, float cooldown) => Mathf.Clamp01((Time.time - lastUse) / (cooldown * Loadout.AbilityCooldownMultiplier));
 
@@ -175,7 +198,11 @@ public class Ronin : MonoBehaviour
         lastParry = Time.time;
         parryUntil = Time.time + parryWindow;
         parryLanded = false;
-        ElementFx.Glow(Bounds.center, parryColor, 0.8f, parryRadius * 2.4f, parryWindow, transform);
+        // The slash sweeps over his head, where the arrows come from.
+        if (Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, parryColor, 0.7f), 1.15f, transform) == null)
+        {
+            ElementFx.Glow(Bounds.center, parryColor, 0.8f, parryRadius * 2.4f, parryWindow, transform);
+        }
         PlayAction(art.parry != null && art.parry.Length > 0 ? art.parry : art.attack);
     }
 
@@ -193,7 +220,7 @@ public class Ronin : MonoBehaviour
 
         // Keep the whole ronin inside the camera's view.
         float halfWidth = cam.orthographicSize * cam.aspect;
-        float centerX = cam.transform.position.x;
+        float centerX = CameraShake.Center.x;
         position.x = Mathf.Clamp(position.x,
             centerX - halfWidth + screenMargin - minOffsetX,
             centerX + halfWidth - screenMargin - maxOffsetX);
@@ -221,6 +248,7 @@ public class Ronin : MonoBehaviour
         riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
         riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
+        Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
 
         if (parryLanded) return;
         parryLanded = true;
@@ -239,14 +267,21 @@ public class Ronin : MonoBehaviour
         if (Time.time < invulnerableUntil) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
+        Vector3 contact = coll.GetContact(0).point;
+        HitFlash.Flash(sprite);
         if (Loadout.TryUseWard())
         {
             // The Frost Ward shatters instead of the ronin taking the hit.
-            Debris.BurstSprites(coll.GetContact(0).point, art.deathParticles, WardColor, 12, 1f, 6f);
+            Debris.BurstSprites(contact, art.deathParticles, WardColor, 12, 1f, 6f);
+            Fx.Play(Fx.IceBurst, contact, Color.white, 1.4f);
+            Fx.Play(Fx.FrostWave, new Vector3(Bounds.center.x, Bounds.min.y, 0f), Color.white, 0.9f);
+            CameraShake.Add(0.2f);
             WardBroken?.Invoke();
             return;
         }
-        Debris.BurstSprites(coll.GetContact(0).point, art.deathParticles, Color.white, 10, 1f, 6f);
+        Debris.BurstSprites(contact, art.deathParticles, Color.white, 10, 1f, 6f);
+        Fx.Play(Fx.Impact, contact, new Color(1f, 0.45f, 0.4f), 1.5f);
+        CameraShake.Add(0.35f);
         PlayAction(art.hit);
         Hit?.Invoke();
     }
@@ -254,6 +289,10 @@ public class Ronin : MonoBehaviour
     public void Explode()
     {
         Debris.BurstSprites(sprite.bounds.center, art.deathParticles, Color.white, 30, 1.4f, 9f);
+        Fx.Play(Fx.Explosion, sprite.bounds.center, Color.white, 1.6f);
+        Fx.Play(Fx.SmokePuff, sprite.bounds.center, Color.white, 2f);
+        CameraShake.Add(0.8f);
+        if (wardBubble != null) wardBubble.Stop();
         gameObject.SetActive(false);
     }
 

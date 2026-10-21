@@ -25,6 +25,8 @@ public class Blocker : MonoBehaviour
         if (coll.collider.GetComponentInParent<Kunai>() is { Source: KillSource.Shuriken }) return;
 
         health--;
+        HitFlash.Flash(tile, 0.07f);
+        Fx.Play(Fx.Impact, coll.GetContact(0).point, new Color(1f, 0.95f, 0.85f), 0.6f);
         if (health <= 0)
         {
             Demolish();
@@ -40,6 +42,7 @@ public class Blocker : MonoBehaviour
         if (destroyed) return;
         destroyed = true;
         Debris.BurstSprites(transform.position, debris, Color.white, 4, 0.8f, 4f);
+        Fx.Play(Fx.SmokePuff, transform.position, new Color(1f, 1f, 1f, 0.85f), 1.2f);
         Destroy(gameObject);
     }
 

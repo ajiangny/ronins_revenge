@@ -131,6 +131,8 @@ public class Kunai : MonoBehaviour
         }
 
         spent = true;
+        // A small spark where it breaks on a blocker or an arrow (samurai kills get their own).
+        if (samurai == null) Fx.Play(Fx.Impact, transform.position, glow.color * new Color(1f, 1f, 1f, 2f), 0.55f);
         Destroy(gameObject);
     }
 

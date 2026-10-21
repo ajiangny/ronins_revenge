@@ -12,7 +12,7 @@ public class GameUI : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] TMP_FontAsset font;
-    [Tooltip("Ronin head shown once per remaining life.")]
+    [Tooltip("Heart shown once per remaining life.")]
     [SerializeField] Sprite lifeIcon;
     [Tooltip("9-sliced panel drawn behind the title/stage/end screen text.")]
     [SerializeField] Sprite overlayBanner;
@@ -336,7 +336,7 @@ public class GameUI : MonoBehaviour
         levelText.text = $"Stage {stage}/{stageCount}   Round {round}/{roundCount}";
     }
 
-    // One ronin head icon per remaining life.
+    // One heart icon per remaining life.
     public void SetLives(int lives)
     {
         while (lifeIcons.Count < lives)

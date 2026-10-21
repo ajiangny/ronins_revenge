@@ -16,8 +16,8 @@ Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ R
 
 - States: `GameManager.State { Title, Transition, Playing, Choosing, GameOver }`.
 - Content is data: `GameManager.stages` is a `StageConfig[]` (`StageConfig.cs`). Each stage has a name,
-  `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Currently one stage, "The Bamboo Road",
-  three rounds then Benibana. The default array in code is only the initial value; the scene's serialized
+  `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Two stages: "The Bamboo Road" (three
+  rounds, then Benibana) and "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi). The default array in code is only the initial value; the scene's serialized
   copy wins, so edit it in the Inspector (or keep both in step).
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `StageCleared` → `BeginBoss` / `OfferStageBoon`,
   `NextStage`, `EndGame`. Blockers are rebuilt only when a stage starts, so they wear down across its rounds.
@@ -61,11 +61,15 @@ match `BoonChoiceUI.boonIcons`.
 ### Samurai army (the "invaders")
 - `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
   (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
-  raises `ArmyReachedRonin` when it lands. Also hosts the army-wide freeze and spatial queries
+  raises `ArmyReachedRonin` when it lands. Rounds with `LevelConfig.diveInterval` send a samurai from behind the
+  front rank on a telegraphed bezier swoop at the ronin (`StartDive`/`UpdateDives`): it hits blockers (`Blocker.Hit`)
+  and the ronin, then glides back into its marching slot; divers are left out of the edge, landing and front-column
+  checks. Also hosts the army-wide freeze and spatial queries
   (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
 - `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint, and `Encase` (ice from Frost Blade / Frozen Riposte: holds its fire, and the ronin's next hit kills it outright).
-- `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan) and `Taisho` (2 HP, unbreakable spear
-  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front). Rows pick a kind via
+- `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan), `Taisho` (2 HP, unbreakable spear
+  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front) and `Shieldbearer` (2 HP,
+  steel-tinted, never fires; `FrontShooterInColumn` lets the rank behind shoot over it). Rows pick a kind via
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
@@ -87,7 +91,15 @@ match `BoonChoiceUI.boonIcons`.
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
-- Wiring in `GameManager`: `BeginBoss` (intro, blood moon via `Backdrop.SetBloodMoon`, music),
+- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (90 HP), a karakuri automaton that moves in ticking steps
+  (`Stride`). Moves: Kasa Wheel (its unbreakable hat zig-zags down and back, shedding tassel shots; hits deal double
+  while the hat is off via `Boss.DamageMultiplier`), Lace Lattice (a curtain of breakable diamonds with gaps that
+  drifts through cover, `Arrow.PassesCover`), Escapement (the arm ticks down over the ronin then thrusts a reflectable
+  blade; parried, it jams and staggers, `OnStaggered`), Plumb Lines (weights swing on threads, flown with
+  `Arrow.Steer`), and in phase 2 the Heart Lantern (a core beam swept across the ground that only blockers stop, and
+  which burns them). Phase 2 at half health opens its core and speeds the clock. Fire burns the lace (`Burn`).
+  Effect ids `Fx.Utsu*` fall back to code shapes until art exists.
+- Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`
   (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`). The intro's Borderlands-style title card

@@ -33,7 +33,7 @@ Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ R
 | Sword slash (Space), Inferno Fan spread | `Ronin.Attack` → `Ronin.Slash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`) |
 | Kunai throw (kept for a future weapon select) | `Ronin.weapon = Kunai` → `Ronin.ThrowKunai` → `Kunai.prefab`; also the fallback while `slashPrefab` is unset |
 | Spirit Shuriken (E / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
-| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`) |
+| Parry (Shift / Down), 1.5 s cooldown, 0.25 s window | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target |
 | Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
 | Ronin events | `Hit`, `WardBroken`, `ShurikenThrown`, `Parried` (GameManager subscribes) |
@@ -50,7 +50,7 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
 | What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`, Frost Wards) |
 | Effects in play (blasts, chill/freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`) |
-| Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul` |
+| Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul`. Until the first soul of a run is caught, `Soul.ShowHint` adds the bobbing `GameManager.soulHintArrow` (`UI/SoulArrow`, wired by Apply Boon Art) |
 | Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
 
 Rule: kills from `KillSource.Effect` never trigger further effects (no chain reactions). `BoonId` order must

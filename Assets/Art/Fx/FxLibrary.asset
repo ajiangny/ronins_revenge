@@ -117,6 +117,22 @@ MonoBehaviour:
     - {fileID: 21300000, guid: b4fea84315942474facb2146b3fb26a7, type: 3}
     fps: 10
     loop: 1
+  - id: Fireball
+    frames:
+    - {fileID: 21300000, guid: 03334ebe8e3a64cb3b68247176a5946a, type: 3}
+    - {fileID: 21300000, guid: 6aeb107226f77492183eec47deae66ff, type: 3}
+    - {fileID: 21300000, guid: be8077dc6b47b430094c08c08d67068e, type: 3}
+    - {fileID: 21300000, guid: 885c8b9fa33a8433c8dda990f10f66a0, type: 3}
+    fps: 14
+    loop: 1
+  - id: IceShard
+    frames:
+    - {fileID: 21300000, guid: 85eb4c47d4be649e487cb60b04b3f35f, type: 3}
+    - {fileID: 21300000, guid: bc2b4da00d64348c4bed502755a255f9, type: 3}
+    - {fileID: 21300000, guid: 0dbd97dd39a774cf3be63f052bd47d68, type: 3}
+    - {fileID: 21300000, guid: 862633689ab314824950cd92600fca66, type: 3}
+    fps: 14
+    loop: 1
   - id: Aura_Fire
     frames:
     - {fileID: 21300000, guid: 848e3788047fb4763af64f7670b00c25, type: 3}

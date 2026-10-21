@@ -189,4 +189,94 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 2a904128572304549a6c69ddf007a1a4, type: 3}
     fps: 12
     loop: 1
+  - id: Beni_SmokeRing
+    frames:
+    - {fileID: 21300000, guid: 0c028f014d8214ade9db3daaee3708c3, type: 3}
+    - {fileID: 21300000, guid: a3fd7c57862294bea9706a8eef418c52, type: 3}
+    - {fileID: 21300000, guid: 7245362474fa14b6290a08f4d3a14980, type: 3}
+    - {fileID: 21300000, guid: 91927bd17fa92495c82cde4771bc1f3d, type: 3}
+    - {fileID: 21300000, guid: c2b1a27d83fc34c38846dad22db13fd1, type: 3}
+    - {fileID: 21300000, guid: b22c45d8f89c841aebbc534f64f4efa3, type: 3}
+    - {fileID: 21300000, guid: 3f67206131d2d4740a093bc01e58831e, type: 3}
+    - {fileID: 21300000, guid: fa19eebc3c80f4aa0ac15cd92dee4763, type: 3}
+    fps: 10
+    loop: 1
+  - id: Beni_Crescent
+    frames:
+    - {fileID: 21300000, guid: a125d61a0ceb64c3ab566c589712c90d, type: 3}
+    - {fileID: 21300000, guid: 14ed2f311234f45edabfef6c747ec984, type: 3}
+    - {fileID: 21300000, guid: 8e34cb049ba3044bc89e983b5e4a99c9, type: 3}
+    - {fileID: 21300000, guid: 08345a0b31db042e886adff9d541c082, type: 3}
+    - {fileID: 21300000, guid: 5502a78edea854e3bbc0fc12d679f1cb, type: 3}
+    fps: 14
+    loop: 1
+  - id: Beni_IaidoFlash
+    frames:
+    - {fileID: 21300000, guid: cd82f19d924ac496ea1d47727d85b28e, type: 3}
+    - {fileID: 21300000, guid: d1c952b60d9e746aaa16b2e40b717ba1, type: 3}
+    - {fileID: 21300000, guid: 6ef5c535ddfbb465c8652b020e5287eb, type: 3}
+    - {fileID: 21300000, guid: 1bdeaf3eb00c547bf8a3f60952beb60d, type: 3}
+    - {fileID: 21300000, guid: 37d8812fbe40843519028121ccd31e94, type: 3}
+    - {fileID: 21300000, guid: 68efe2c9d68e048d785dce46f53d3c6c, type: 3}
+    - {fileID: 21300000, guid: 604b147b5c9434344b2144534a6b6b5d, type: 3}
+    fps: 16
+    loop: 0
+  - id: Beni_Cross
+    frames:
+    - {fileID: 21300000, guid: 40ed8590ddbc04b2090b214ab512c89c, type: 3}
+    - {fileID: 21300000, guid: 72b825e281baf4b25a3c4a66506948c8, type: 3}
+    - {fileID: 21300000, guid: 28cae9afe01c149a084e5ec05603b371, type: 3}
+    - {fileID: 21300000, guid: 7bc872f62662e40a18ad5002ef6e013e, type: 3}
+    - {fileID: 21300000, guid: 8b68b99ee1f5f413c9cf16b86de6c9a3, type: 3}
+    - {fileID: 21300000, guid: d5b1432747c8e462391f21dfd848ab51, type: 3}
+    fps: 10
+    loop: 1
+  - id: Beni_Chain
+    frames:
+    - {fileID: 21300000, guid: f6e2886622c6c4f98836e72013572340, type: 3}
+    fps: 1
+    loop: 1
+  - id: Beni_ChainImpact
+    frames:
+    - {fileID: 21300000, guid: 291e72d8b7df943449901e9e88f60eef, type: 3}
+    - {fileID: 21300000, guid: 023974fe293fe429e8be916ca9685f43, type: 3}
+    - {fileID: 21300000, guid: aa409c09fb9c04359bc70e9f17e86965, type: 3}
+    - {fileID: 21300000, guid: 0709f38d37a8048ee806499f8fd86721, type: 3}
+    - {fileID: 21300000, guid: f2b26c9cbeb41461fb9b1365362aaaa7, type: 3}
+    - {fileID: 21300000, guid: c946723b65d5446ae8875c035c465180, type: 3}
+    - {fileID: 21300000, guid: 74d97786606fb430aa9b5116049db64e, type: 3}
+    - {fileID: 21300000, guid: 2df75cf852c764804a733d900e00c84b, type: 3}
+    - {fileID: 21300000, guid: 7a5480054a4a64c21bf1313d8398a763, type: 3}
+    - {fileID: 21300000, guid: 3a23e3ee91b624108ab9437ad1ed08e7, type: 3}
+    - {fileID: 21300000, guid: 293ae19302618470ab86fb2edec53444, type: 3}
+    - {fileID: 21300000, guid: e433175a5775c49babacf367fd07faf0, type: 3}
+    fps: 16
+    loop: 0
+  - id: Beni_SmokeVeil
+    frames:
+    - {fileID: 21300000, guid: 1e5c19a74780540cfa4825067b135e55, type: 3}
+    - {fileID: 21300000, guid: a49912fe84e1b43dc8bf504eabd708cc, type: 3}
+    - {fileID: 21300000, guid: 80d22e9c5b17c454cacfd920b5ecc3c0, type: 3}
+    - {fileID: 21300000, guid: 91b3410dacd2f4121a3f57abfe31179e, type: 3}
+    - {fileID: 21300000, guid: ea68e29daa00b4a5db58fbdcf0c004b0, type: 3}
+    - {fileID: 21300000, guid: 0bc67bb3e50264a9e8fc921ffe43f8ac, type: 3}
+    - {fileID: 21300000, guid: 910ba69f46073410a9637f46b2ac6290, type: 3}
+    - {fileID: 21300000, guid: e561ba3f436e24e61a77e3b16307b9ed, type: 3}
+    fps: 8
+    loop: 1
+  - id: Beni_Petals
+    frames:
+    - {fileID: 21300000, guid: 6cb52e0e0b40049fc93c92b8cd638733, type: 3}
+    - {fileID: 21300000, guid: a38768cfb429e44cfadb4a06608eef94, type: 3}
+    - {fileID: 21300000, guid: 63adde227e49a453e9911815981900d8, type: 3}
+    - {fileID: 21300000, guid: 1b3dae53dcfff4948aaedc257f8c5c30, type: 3}
+    - {fileID: 21300000, guid: 1b32e0f430b704c68847674a2ffe60e5, type: 3}
+    - {fileID: 21300000, guid: 2b01fcdb3588c494f8cada930e35d6c6, type: 3}
+    - {fileID: 21300000, guid: c08a0284fc84745f8aa1eb755cb8013b, type: 3}
+    - {fileID: 21300000, guid: fa44a28f936604bc199e88518ecc4c4c, type: 3}
+    - {fileID: 21300000, guid: 353123830adab47ca990d2be6e949306, type: 3}
+    - {fileID: 21300000, guid: 54f4258c2ca514e87b5306824ccc0277, type: 3}
+    - {fileID: 21300000, guid: efa8390dc5ccc4858ad4f4cb8e0899df, type: 3}
+    fps: 14
+    loop: 0
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

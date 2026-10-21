@@ -558,6 +558,7 @@ public class GameManager : MonoBehaviour
         {
             // Her own slash breaks her stance: a heavy hit-stop and a burst of red petals.
             Debris.BurstSprites(point, ronin.art.deathParticles, activeBoss.Colour, 24, 1.2f, 8f);
+            Fx.Play(Fx.BeniPetals, point, Color.white, 2.2f);
             Fx.Play(Fx.Impact, point, activeBoss.Colour, 2.5f);
             CameraShake.Add(0.45f);
             if (!hitStopping) StartCoroutine(HitStop(0.15f));

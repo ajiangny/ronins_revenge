@@ -79,7 +79,9 @@ public class Benibana : Boss
             float angle = Mathf.Lerp(-spread, spread, i / (count - 1f));
             Vector3 velocity = Quaternion.Euler(0, 0, angle) * aim * 3.4f;
             Arrow ring = Shoot(Mouth, velocity);
-            ring.Restyle(ProceduralSprites.Disc, Smoke, new Vector2(0.75f, 0.75f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.35f), 1.4f);
+            Sprite[] ringFrames = Fx.Frames(Fx.BeniSmokeRing);
+            if (ringFrames != null) ring.Restyle(ringFrames, 10f, new Color(1f, 1f, 1f, 0.9f), new Vector2(1.15f, 1.15f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.3f), 1.4f);
+            else ring.Restyle(ProceduralSprites.Disc, Smoke, new Vector2(0.75f, 0.75f), 0.3f, new Color(0.5f, 0.5f, 0.55f, 0.35f), 1.4f);
             ring.gameObject.AddComponent<Swell>().Begin(1f, 1.9f, 2.2f);
             if (secondPhase && i % 2 == 1) Cross(Mouth, velocity * 1.02f);
         }
@@ -111,13 +113,16 @@ public class Benibana : Boss
             yield return Wait(0.25f);
         }
 
-        var chains = new List<SpriteRenderer>();
+        var chains = new List<GameObject>();
         foreach (float x in columns)
         {
             Vector3 top = new Vector3(x, Centre.y, 0);
             Vector3 bottom = new Vector3(x, GroundY, 0);
-            chains.Add(Bar(top, bottom, 0.32f, Silver, 54));
-            Fx.Play(Fx.Impact, bottom + Vector3.up * 0.4f, Color.white, 1.6f);
+            chains.Add(Chain(top, bottom));
+            if (Fx.Play(Fx.BeniChainImpact, bottom + Vector3.up * 0.3f, Color.white, 1.8f) == null)
+            {
+                Fx.Play(Fx.Impact, bottom + Vector3.up * 0.4f, Color.white, 1.6f);
+            }
             Debris.BurstSprites(bottom, art.deathParticles, Silver, 10, 0.8f, 7f);
             SmashBlockers(x, top.y, bottom.y);
         }
@@ -143,10 +148,11 @@ public class Benibana : Boss
                 Cross(new Vector3(x, y, 0), Quaternion.Euler(0, 0, Random.Range(-22f, 22f)) * Vector3.down * 5.5f);
             }
         }
-        foreach (SpriteRenderer chain in chains)
+        foreach (GameObject chain in chains)
         {
-            transient.Remove(chain.gameObject);
-            Fader.Fade(chain, 0.25f);
+            transient.Remove(chain);
+            foreach (SpriteRenderer link in chain.GetComponentsInChildren<SpriteRenderer>()) Fader.Fade(link, 0.25f);
+            Destroy(chain, 0.3f);
         }
         Sfx.Play(Sfx.WardShatter, 0.6f, 1.4f);
     }
@@ -173,6 +179,8 @@ public class Benibana : Boss
 
         PlayAction(art.attack);
         if (Fx.Play(Fx.SlashArc, Centre, Crimson, 3f) == null) ElementFx.Glow(Centre, Crimson, 1f, 4f, 0.25f);
+        // The draw streak cuts through her at sword height, from her left to well past her right.
+        Fx.Play(Fx.BeniIaidoFlash, Centre + new Vector3(-2.2f, -0.5f, 0), Color.white, 3f);
         Sfx.Play(Sfx.ParrySwing, 1f, 0.55f);
         CameraShake.Add(0.2f);
 
@@ -193,7 +201,9 @@ public class Benibana : Boss
     {
         Vector3 velocity = (target - from).normalized * 10f;
         Arrow wave = Shoot(from, velocity);
-        wave.Restyle(ProceduralSprites.Glow, new Color(1f, 0.25f, 0.3f), new Vector2(3.2f, 1f), 0.55f, new Color(1f, 0.1f, 0.15f, 0.5f), 3.5f);
+        Sprite[] frames = Fx.Frames(Fx.BeniCrescent);
+        if (frames != null) wave.Restyle(frames, 14f, Color.white, new Vector2(3.2f, 2f), 0.55f, new Color(1f, 0.1f, 0.15f, 0.45f), 3.5f);
+        else wave.Restyle(ProceduralSprites.Glow, new Color(1f, 0.25f, 0.3f), new Vector2(3.2f, 1f), 0.55f, new Color(1f, 0.1f, 0.15f, 0.5f), 3.5f);
         wave.MakeReflectable(transform);
     }
 
@@ -201,7 +211,32 @@ public class Benibana : Boss
     void Cross(Vector3 position, Vector3 velocity)
     {
         Arrow cross = Shoot(position, velocity);
-        cross.Restyle(cross.Sprite, Silver, new Vector2(0.45f, 0.9f), 0.12f, new Color(0.8f, 0.85f, 1f, 0.4f), 0.8f);
+        Sprite[] frames = Fx.Frames(Fx.BeniCross);
+        if (frames != null) cross.Restyle(frames, 10f, Color.white, new Vector2(1.1f, 1.3f), 0.16f, new Color(0.8f, 0.85f, 1f, 0.35f), 0.8f);
+        else cross.Restyle(cross.Sprite, Silver, new Vector2(0.45f, 0.9f), 0.12f, new Color(0.8f, 0.85f, 1f, 0.4f), 0.8f);
+    }
+
+    // Her rosary chain hanging from top to bottom: a column of silver links, or a plain bar without the art.
+    GameObject Chain(Vector3 top, Vector3 bottom)
+    {
+        Sprite[] link = Fx.Frames(Fx.BeniChain);
+        if (link == null) return Bar(top, bottom, 0.32f, Silver, 54).gameObject;
+
+        var chain = new GameObject("Chain");
+        transient.Add(chain);
+        // Drawn at twice the art's size so the links read as the chain from her sheet.
+        const float scale = 2f;
+        float step = link[0].bounds.size.y * scale;
+        for (float y = top.y; y > bottom.y - step * 0.5f; y -= step)
+        {
+            var piece = new GameObject("Link").AddComponent<SpriteRenderer>();
+            piece.transform.SetParent(chain.transform, false);
+            piece.transform.position = new Vector3(top.x, y, -0.2f);
+            piece.transform.localScale = Vector3.one * scale;
+            piece.sprite = link[0];
+            piece.sortingOrder = 54;
+        }
+        return chain;
     }
 
     void SmashBlockers(float x, float top, float bottom)
@@ -230,6 +265,7 @@ public class Benibana : Boss
         CameraShake.Add(0.5f);
         Sfx.Play(Sfx.StageStart, 1f, 0.7f);
         Fx.Play(Fx.SlashArc, Centre, Crimson, 4f);
+        Fx.Play(Fx.BeniPetals, Centre, Color.white, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Crimson, 30, 1.2f, 8f);
         for (int i = 0; i < 6; i++)
         {
@@ -263,7 +299,7 @@ public class Benibana : Boss
         {
             float x = centre + Mathf.Lerp(-HalfWidth, HalfWidth, i / 8f);
             float y = anchor.y + Random.Range(-1.2f, 1.6f);
-            veil.Add(VeilPuff.Create(new Vector3(x, y, 0), Random.Range(5f, 7f), VeilColour, centre, HalfWidth + 3f));
+            veil.Add(VeilPuff.Create(new Vector3(x, y, 0), Random.Range(5f, 7f), VeilColour, centre, HalfWidth + 3f, Fx.Frames(Fx.BeniSmokeVeil)));
         }
     }
 
@@ -285,6 +321,7 @@ public class Benibana : Boss
         if (eyes != null) Destroy(eyes.gameObject);
         // The pipe falls and the blade snaps.
         Debris.BurstSprites(Centre, art.deathParticles, Silver, 16, 0.9f, 8f);
+        Fx.Play(Fx.BeniPetals, Centre, Color.white, 3f);
         Sfx.Play(Sfx.WardShatter, 1f, 0.8f);
         return base.Fall();
     }
@@ -323,7 +360,8 @@ public class VeilPuff : MonoBehaviour
     float fadeIn;
     bool dissolving;
 
-    public static VeilPuff Create(Vector3 position, float size, Color colour, float centreX, float wrapDistance)
+    // frames, when the veil art exists, replace the soft glow with a drifting cloud drawn at about the same size.
+    public static VeilPuff Create(Vector3 position, float size, Color colour, float centreX, float wrapDistance, Sprite[] frames = null)
     {
         var puff = new GameObject("Veil").AddComponent<VeilPuff>();
         puff.transform.position = position + Vector3.back * 0.4f;
@@ -331,6 +369,13 @@ public class VeilPuff : MonoBehaviour
         puff.sprite = puff.gameObject.AddComponent<SpriteRenderer>();
         puff.sprite.sprite = ProceduralSprites.Glow;
         puff.sprite.sortingOrder = 40;
+        if (frames != null && frames.Length > 0)
+        {
+            puff.transform.localScale = Vector3.one * (size * 0.8f / frames[0].bounds.size.x);
+            puff.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 8f);
+            // The cloud art is already dark; only its alpha comes from the colour.
+            colour = new Color(1f, 1f, 1f, 0.85f);
+        }
         puff.colour = colour;
         puff.drift = Random.Range(0.3f, 0.7f) * (Random.value < 0.5f ? -1f : 1f);
         puff.centre = centreX;

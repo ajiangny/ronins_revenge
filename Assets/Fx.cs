@@ -14,6 +14,16 @@ public static class Fx
     public const string WardBubble = "WardBubble";
     public const string BoonPillar = "BoonPillar";
 
+    // Benibana's effects.
+    public const string BeniSmokeRing = "Beni_SmokeRing";
+    public const string BeniCrescent = "Beni_Crescent";
+    public const string BeniIaidoFlash = "Beni_IaidoFlash";
+    public const string BeniCross = "Beni_Cross";
+    public const string BeniChain = "Beni_Chain";
+    public const string BeniChainImpact = "Beni_ChainImpact";
+    public const string BeniSmokeVeil = "Beni_SmokeVeil";
+    public const string BeniPetals = "Beni_Petals";
+
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;
 
@@ -23,6 +33,9 @@ public static class Fx
     public static string SoulCrackle(Element element) => "SoulCrackle_" + element;
 
     public static bool Has(string id) => Library != null && Library.Find(id) != null;
+
+    // A clip's frames, for things that animate themselves (projectiles, tiles); null when it's missing.
+    public static Sprite[] Frames(string id) => Library != null ? Library.Find(id)?.frames : null;
 
     public static FxPlayer Play(string id, Vector3 position, Color color, float scale = 1f, Transform follow = null, int order = DefaultOrder)
     {

@@ -31,6 +31,15 @@ public static class FxSetup
         (Fx.SoulCrackle(Element.Fire), 12, true, Centre),
         (Fx.SoulCrackle(Element.Water), 12, true, Centre),
         (Fx.SoulCrackle(Element.Lightning), 12, true, Centre),
+        (Fx.BeniSmokeRing, 10, true, Centre),
+        (Fx.BeniCrescent, 14, true, Centre),
+        // The draw streak starts at her and shoots right.
+        (Fx.BeniIaidoFlash, 16, false, new Vector2(6f / 76f, 0.5f)),
+        (Fx.BeniCross, 10, true, Centre),
+        (Fx.BeniChain, 1, true, Centre),
+        (Fx.BeniChainImpact, 16, false, new Vector2(40f / 87f, 1f - 31f / 63f)),
+        (Fx.BeniSmokeVeil, 8, true, Centre),
+        (Fx.BeniPetals, 14, false, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

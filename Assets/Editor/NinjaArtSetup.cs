@@ -17,6 +17,9 @@ public static class NinjaArtSetup
 
         CharacterArt ronin = SaveArt("Ronin", Frames("Ronin", "Idle"), Frames("Ronin", "Throw", 2, 3, 4),
             Frames("Ronin", "Hit", 2, 3), null, new[] { Load("Effects/Spark"), Load("Effects/Smoke") }, 5f, 12f);
+        // Separate west/east clips rather than one flipped, so his armoured arm stays on the right side.
+        ronin.runLeft = Frames("Ronin", "RunWest");
+        ronin.runRight = Frames("Ronin", "RunEast");
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
@@ -33,10 +36,10 @@ public static class NinjaArtSetup
             StripVisuals(root, keepRootCollider: false);
             // The ronin's feet sit 8px above the bottom of his 64px canvas.
             GameObject body = AddSprite(root, "Ronin", Load("Characters/Ronin/Ronin_Base"), new Vector3(0, -0.98f, 0), true);
-            // Fit the hitbox to the drawn body rather than the canvas or the spirit flames around him.
+            // Fit the hitbox to the drawn body and the spirit flames around him rather than the whole canvas.
             var box = body.AddComponent<BoxCollider>();
-            box.center = new Vector3(0, 0.69f, 0);
-            box.size = new Vector3(0.62f, 1.06f, 0.5f);
+            box.center = new Vector3(0.01f, 0.69f, 0);
+            box.size = new Vector3(0.77f, 1.06f, 0.5f);
             Set(root.GetComponent<Spaceship>(), "art", ronin);
         });
 

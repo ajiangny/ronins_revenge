@@ -27,6 +27,8 @@ public class Spaceship : MonoBehaviour
     float lastShot = float.NegativeInfinity;
     float invulnerableUntil;
     float moveInput;
+    Sprite[] loopClip;
+    bool actionPlaying;
 
     void Awake()
     {
@@ -46,7 +48,7 @@ public class Spaceship : MonoBehaviour
 
     void Start()
     {
-        PlayIdle();
+        UpdateLoopClip();
     }
 
     void Update()
@@ -56,15 +58,17 @@ public class Spaceship : MonoBehaviour
         sprite.enabled = !invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f;
 
         Keyboard keyboard = Keyboard.current;
-        if (!ControlsEnabled || keyboard == null) return;
-
-        if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
-        if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
-
-        if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown)
+        if (ControlsEnabled && keyboard != null)
         {
-            Fire(dartPrefab);
+            if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
+            if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
+
+            if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown)
+            {
+                Fire(dartPrefab);
+            }
         }
+        UpdateLoopClip();
     }
 
     // Every attack goes through here, so a boon can later swap in a different projectile.
@@ -73,7 +77,7 @@ public class Spaceship : MonoBehaviour
         Vector3 muzzle = new Vector3(transform.position.x + centerOffsetX, transform.position.y, 0);
         Instantiate(projectilePrefab, muzzle, Quaternion.identity);
         lastShot = Time.time;
-        animator.Play(art.attack, false, PlayIdle, art.actionFps);
+        PlayAction(art.attack);
     }
 
     void FixedUpdate()
@@ -97,7 +101,7 @@ public class Spaceship : MonoBehaviour
 
         invulnerableUntil = Time.time + invulnerableTime;
         Debris.BurstSprites(coll.GetContact(0).point, art.deathParticles, Color.white, 10, 1f, 6f);
-        animator.Play(art.hit, false, PlayIdle, art.actionFps);
+        PlayAction(art.hit);
         Hit?.Invoke();
     }
 
@@ -107,8 +111,28 @@ public class Spaceship : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    void PlayIdle()
+    // Sprint while moving, idle while still. Throw and hit clips play over this and hand back when done.
+    void UpdateLoopClip()
     {
-        animator.Play(art.idle, true, null, art.idleFps);
+        if (actionPlaying) return;
+        Sprite[] run = moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
+        Sprite[] clip = run != null && run.Length > 0 ? run : art.idle;
+        if (clip == loopClip) return;
+        loopClip = clip;
+        animator.Play(clip, true, null, clip == art.idle ? art.idleFps : art.runFps);
+    }
+
+    void PlayAction(Sprite[] clip)
+    {
+        if (clip == null || clip.Length == 0) return;
+        actionPlaying = true;
+        animator.Play(clip, false, EndAction, art.actionFps);
+    }
+
+    void EndAction()
+    {
+        actionPlaying = false;
+        loopClip = null;
+        UpdateLoopClip();
     }
 }

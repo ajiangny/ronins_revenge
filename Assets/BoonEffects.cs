@@ -14,6 +14,10 @@ public class BoonEffects
     readonly RoninLoadout loadout;
     readonly Material boltMaterial;
 
+    // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
+    public Boss Boss { get; set; }
+    bool BossFight => Boss != null && !Boss.IsDead;
+
     public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout)
     {
         this.army = army;
@@ -56,8 +60,41 @@ public class BoonEffects
         }
     }
 
+    // The kill effects, triggered by hits on the boss: fire bursts on her (and burns her smoke), frost slows her,
+    // lightning arcs into her.
+    public void OnBossHit(Vector3 point, KillSource source)
+    {
+        if (!BossFight) return;
+        float value;
+        switch (source)
+        {
+            case KillSource.Kunai:
+                if (loadout.Has(BoonId.FlameKunai, out value)) BossBlast(point, value);
+                if (loadout.Has(BoonId.FrostKunai, out value))
+                {
+                    Boss.Chill(value, ChillSeconds, ChillStacks);
+                    Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
+                    Sfx.Play(Sfx.FrostChill);
+                }
+                if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
+                break;
+            case KillSource.Shuriken:
+                if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
+                break;
+            case KillSource.Deflected:
+            case KillSource.Reflected:
+                if (loadout.Has(BoonId.BurningRiposte, out value)) BossBlast(point, value);
+                break;
+        }
+    }
+
     public void OnShurikenThrown(Vector3 muzzle)
     {
+        if (BossFight)
+        {
+            OnShurikenThrownAtBoss();
+            return;
+        }
         if (army.Remaining == 0) return;
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
@@ -83,10 +120,31 @@ public class BoonEffects
         }
     }
 
+    void OnShurikenThrownAtBoss()
+    {
+        float value;
+        if (loadout.Has(BoonId.GlacialShuriken, out value))
+        {
+            Boss.Freeze(value);
+            if (Fx.Play(Fx.FrostWave, Boss.Centre, Color.white, 3f) == null) ElementFx.Glow(Boss.Centre, Frost, 1f, 5f, 0.4f);
+            CameraShake.Add(0.2f);
+            Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
+        }
+        if (loadout.Has(BoonId.ThunderShuriken, out value))
+        {
+            for (int i = 0; i < (int)value; i++) Strike(Boss.Centre + new Vector3((i - (value - 1) / 2f) * 1.5f, 6f, 0), Boss.Centre, Boss);
+        }
+    }
+
     public void OnParried()
     {
         float value;
         if (loadout.Has(BoonId.FrozenRiposte, out _)) loadout.GainWard();
+        if (BossFight)
+        {
+            if (loadout.Has(BoonId.ThunderRiposte, out _)) Strike(ronin.Bounds.center, Boss.Centre, Boss);
+            return;
+        }
         if (loadout.Has(BoonId.ThunderRiposte, out value))
         {
             Vector3 origin = ronin.Bounds.center;
@@ -113,10 +171,24 @@ public class BoonEffects
         }
     }
 
+    // Fire on the boss: the burst, plus one point of damage and a hole burnt in any smoke around her.
+    void BossBlast(Vector3 position, float radius)
+    {
+        if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
+        CameraShake.Add(0.12f);
+        Sfx.Play(Sfx.FireBlast);
+        Boss.Burn(position, radius);
+        Boss.TakeHit(1, KillSource.Effect);
+    }
+
     // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.
     void Strike(Vector3 from, Samurai target)
     {
-        Vector3 to = target.transform.position;
+        Strike(from, target.transform.position, target);
+    }
+
+    void Strike(Vector3 from, Vector3 to, IHittable target)
+    {
         ElementFx.Bolt(from, to, Storm, boltMaterial);
         Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
         CameraShake.Add(0.1f);

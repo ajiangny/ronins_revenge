@@ -11,6 +11,7 @@ public static class Damage
     {
         KillSource.Shuriken => 3,
         KillSource.Deflected => 2,
+        KillSource.Reflected => 6,
         _ => 1,
     };
 }

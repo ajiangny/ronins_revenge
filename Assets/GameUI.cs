@@ -27,6 +27,13 @@ public class GameUI : MonoBehaviour
     TextMeshProUGUI overlayTitle;
     TextMeshProUGUI overlayBody;
 
+    GameObject bossBar;
+    TextMeshProUGUI bossName;
+    RectTransform bossFill;
+    Image bossFillImage;
+    float shownBossHealth = 1f;
+    float bossHealth = 1f;
+
     void Awake()
     {
         scoreText = CreateText("Score", new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(800, 50), 36, TextAlignmentOptions.Top);
@@ -36,7 +43,64 @@ public class GameUI : MonoBehaviour
         livesLabel.text = "Lives";
         livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(140, 26), new Vector2(400, 40));
 
+        BuildBossBar();
         BuildOverlay();
+    }
+
+    // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
+    void Update()
+    {
+        if (bossBar == null || !bossBar.activeSelf) return;
+        shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
+        bossFill.anchorMax = new Vector2(bossHealth, 1f);
+        bossTrail.anchorMax = new Vector2(shownBossHealth, 1f);
+    }
+
+    RectTransform bossTrail;
+
+    public void ShowBossBar(string name, Color colour)
+    {
+        bossName.text = name;
+        bossName.color = colour;
+        bossFillImage.color = colour;
+        bossHealth = shownBossHealth = 1f;
+        bossBar.SetActive(true);
+    }
+
+    public void SetBossHealth(float fraction)
+    {
+        bossHealth = Mathf.Clamp01(fraction);
+    }
+
+    public void HideBossBar()
+    {
+        bossBar.SetActive(false);
+    }
+
+    void BuildBossBar()
+    {
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -95), new Vector2(904, 30));
+        frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
+        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
+        back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
+        bossTrail = Stretch(CreateRect("Trail", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        bossTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
+        bossFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        bossFillImage = bossFill.gameObject.AddComponent<Image>();
+        bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(904, 44), 34, TextAlignmentOptions.Bottom, frame);
+        bossName.fontStyle = FontStyles.Bold;
+        bossBar = frame.gameObject;
+        bossBar.SetActive(false);
+    }
+
+    static RectTransform Stretch(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.sizeDelta = Vector2.zero;
+        rect.anchoredPosition = Vector2.zero;
+        return rect;
     }
 
     public void SetScore(int score, int highScore)

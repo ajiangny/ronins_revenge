@@ -110,7 +110,7 @@ public class SamuraiArmy : MonoBehaviour
         advancing = false;
     }
 
-    void Clear()
+    public void Clear()
     {
         foreach (Samurai soldier in soldiers)
         {

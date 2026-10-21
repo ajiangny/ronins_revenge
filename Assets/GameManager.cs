@@ -55,6 +55,13 @@ public class GameManager : MonoBehaviour
     [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
     [SerializeField] float auraLift = 0.3f;
 
+    [Header("Bosses")]
+    [Tooltip("Benibana's sprite frames. Leave empty to use the Taisho art, tinted crimson, as a stand-in.")]
+    [SerializeField] CharacterArt benibanaArt;
+    [SerializeField] float benibanaScale = 3.4f;
+    [Tooltip("Where bosses stand, in world units from the top of the screen.")]
+    [SerializeField] float bossDepth = 3f;
+
     [Tooltip("Intro time for the second and later rounds of a stage; the first round uses levelIntroTime.")]
     [SerializeField] float roundIntroTime = 1.2f;
     [Tooltip("Pause after a stage's last army falls, before its boon is offered.")]
@@ -73,6 +80,7 @@ public class GameManager : MonoBehaviour
                 new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
                     rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true },
             },
+            boss = BossKind.Benibana,
         },
     };
 
@@ -93,6 +101,7 @@ public class GameManager : MonoBehaviour
     bool hitStopping;
     Scout activeScout;
     float nextScoutTime;
+    Boss activeBoss;
 
     void Awake()
     {
@@ -181,7 +190,7 @@ public class GameManager : MonoBehaviour
     // One scout at a time, every 15-25 seconds in rounds that have them.
     void UpdateScouts()
     {
-        if (!Round.scouts || activeScout != null || Time.time < nextScoutTime) return;
+        if (!Round.scouts || activeScout != null || activeBoss != null || Time.time < nextScoutTime) return;
         nextScoutTime = Time.time + Random.Range(15f, 25f);
         activeScout = Scout.Spawn(army.samuraiByRow[army.samuraiByRow.Length - 1], Round.topRowY + 1.4f, OnScoutKilled);
     }
@@ -203,11 +212,12 @@ public class GameManager : MonoBehaviour
         {
             foreach (Samurai soldier in new List<Samurai>(army.Soldiers)) soldier.Kill(KillSource.Effect);
         }
-        else if (keyboard.f2Key.wasPressedThisFrame)
+        else if (keyboard.f2Key.wasPressedThisFrame && activeBoss == null)
         {
+            // Straight to the last stage's boss, or its last round when it has none.
             stageIndex = stages.Length - 1;
             roundIndex = Stage.rounds.Length - 1;
-            StartCoroutine(BeginRound());
+            StartCoroutine(Stage.boss != BossKind.None ? BeginBoss() : BeginRound());
         }
     }
 #endif
@@ -464,9 +474,132 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
         yield return new WaitForSeconds(stageClearPause);
 
+        if (Stage.boss != BossKind.None)
+        {
+            StartCoroutine(BeginBoss());
+        }
+        else
+        {
+            OfferStageBoon();
+        }
+    }
+
+    void OfferStageBoon()
+    {
         var element = (Element)Random.Range(0, 3);
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
         Sfx.Play(Sfx.SoulCollect);
+        if (!OfferBoons(element, NextStage)) NextStage();
+    }
+
+    // The music cuts out, smoke rolls in across the top of the screen, and the stage's warlord descends.
+    IEnumerator BeginBoss()
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        army.Clear();
+        ClearProjectiles();
+        ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
+        Music.Stop(0.8f);
+        yield return new WaitForSeconds(1f);
+
+        Camera cam = Camera.main;
+        float top = CameraShake.Center.y + cam.orthographicSize;
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        Vector3 post = new Vector3(CameraShake.Center.x, top - bossDepth, 0);
+        for (int i = 0; i < 7; i++)
+        {
+            Vector3 puff = new Vector3(post.x + Mathf.Lerp(-halfWidth, halfWidth, i / 6f), post.y + Random.Range(-0.5f, 1.5f), 0);
+            Fx.Play(Fx.SmokePuff, puff, new Color(0.7f, 0.68f, 0.72f, 0.8f), 3f);
+        }
+        Sfx.Play(Sfx.FrostChill, 0.8f, 0.5f);
+
+        activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
+        activeBoss.Damaged += OnBossDamaged;
+        activeBoss.Defeated += OnBossDefeated;
+        effects.Boss = activeBoss;
+        yield return activeBoss.Enter(post, 1.6f);
+
+        Fx.Play(Fx.SlashArc, post, activeBoss.Colour, 6f);
+        CameraShake.Add(0.4f);
+        Sfx.Play(Sfx.StageStart, 1f, 0.75f);
+        ui.ShowOverlay(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
+        yield return new WaitForSeconds(2.2f);
+
+        ui.HideOverlay();
+        ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
+        state = State.Playing;
+        ronin.ControlsEnabled = true;
+        activeBoss.Begin(ronin, army.samuraiPrefab.arrowPrefab);
+    }
+
+    Boss CreateBoss(BossKind kind, Vector3 position)
+    {
+        switch (kind)
+        {
+            default:
+                bool standIn = benibanaArt == null;
+                CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
+                Color tint = standIn ? new Color(1f, 0.55f, 0.6f) : Color.white;
+                return Boss.Create<Benibana>(art, benibanaScale, Benibana.StartingHealth, position, tint);
+        }
+    }
+
+    void OnBossDamaged(Vector3 point, KillSource source)
+    {
+        score += 10 * (stageIndex + 1);
+        highScore = Mathf.Max(highScore, score);
+        ui.SetScore(score, highScore);
+        ui.SetBossHealth(activeBoss.HealthFraction);
+        if (state != State.Playing || source == KillSource.Effect) return;
+
+        if (source == KillSource.Reflected)
+        {
+            // Her own slash breaks her stance: a heavy hit-stop and a burst of red petals.
+            Debris.BurstSprites(point, ronin.art.deathParticles, activeBoss.Colour, 24, 1.2f, 8f);
+            Fx.Play(Fx.Impact, point, activeBoss.Colour, 2.5f);
+            CameraShake.Add(0.45f);
+            if (!hitStopping) StartCoroutine(HitStop(0.15f));
+        }
+        else
+        {
+            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.KunaiGlow;
+            Fx.Play(Fx.Impact, point + (Vector3)Random.insideUnitCircle * 0.6f, Color.Lerp(Color.white, spark, 0.6f), 1.2f);
+        }
+        effects.OnBossHit(point, source);
+    }
+
+    void OnBossDefeated()
+    {
+        if (state != State.Playing) return;
+        score += 2000 * (stageIndex + 1);
+        highScore = Mathf.Max(highScore, score);
+        ui.SetScore(score, highScore);
+        StartCoroutine(BossFell());
+    }
+
+    // She kneels and fades; her soul rises and becomes the stage's boon.
+    IEnumerator BossFell()
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        ui.HideBossBar();
+        ClearProjectiles();
+        Music.Stop(1.5f);
+        if (!hitStopping) StartCoroutine(HitStop(0.25f));
+        Vector3 where = activeBoss.Centre;
+        // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
+        // working through the blow that felled her.
+        yield return new WaitForSeconds(2.2f);
+        effects.Boss = null;
+        activeBoss = null;
+
+        var element = (Element)Random.Range(0, 3);
+        ElementFx.Glow(where, Boons.Info(element).Color, 1f, 5f, 1f);
+        Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
+        Sfx.Play(Sfx.SoulCollect);
+        yield return new WaitForSeconds(0.6f);
         if (!OfferBoons(element, NextStage)) NextStage();
     }
 
@@ -508,6 +641,7 @@ public class GameManager : MonoBehaviour
     void EndGame(string title, string message, Color color, string sting)
     {
         state = State.GameOver;
+        if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);
         Sfx.Play(sting);
         Time.timeScale = 1f;

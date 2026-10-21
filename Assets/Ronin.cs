@@ -246,15 +246,30 @@ public class Ronin : MonoBehaviour
     }
 
     // The arrow is knocked back up as a projectile of the ronin's that kills the first samurai it reaches.
+    // A boss's reflectable slash is sent straight back at the boss instead.
     void Deflect(Arrow arrow)
     {
+        bool reflect = arrow.Reflectable;
+        Transform target = arrow.ReflectTarget;
+        Color arrowColor = arrow.Color;
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
         Kunai riposte = SpawnProjectile(position);
-        // Kunai art is drawn at half size in the prefab; scale the riposte so it matches the arrow it came from.
-        riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
-        riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
+        if (reflect)
+        {
+            Vector3 toTarget = target.position - position;
+            toTarget.z = 0;
+            riposte.Launch(toTarget.normalized, 1.3f, 0, KillSource.Reflected, arrow.Sprite, scale: 2.4f);
+            riposte.Tint(arrowColor, arrowColor);
+            CameraShake.Add(0.25f);
+        }
+        else
+        {
+            // Kunai art is drawn at half size in the prefab; scale the riposte so it matches the arrow it came from.
+            riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Deflected, arrow.Sprite, flipSprite: true, scale: 1.8f);
+            riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
+        }
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);
@@ -273,10 +288,15 @@ public class Ronin : MonoBehaviour
             Deflect(arrow);
             return;
         }
-        if (Time.time < invulnerableUntil) return;
+        TakeHit(coll.GetContact(0).point);
+    }
+
+    // Damage that can't be parried, like a boss's chain lash. Wards and invulnerability still apply.
+    public void TakeHit(Vector3 contact)
+    {
+        if (!ControlsEnabled || Time.time < invulnerableUntil) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
-        Vector3 contact = coll.GetContact(0).point;
         HitFlash.Flash(sprite);
         if (Loadout.TryUseWard())
         {

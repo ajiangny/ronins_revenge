@@ -11,7 +11,9 @@ public abstract class Boss : MonoBehaviour, IHittable
 {
     const int SamuraiLayer = 7;
     const float BobHeight = 0.18f;
-    const float BlinkTime = 0.14f;
+    const float BlinkTime = 0.2f;
+    // A fight that hasn't started a new move in this long has stalled and is restarted.
+    const float StallSeconds = 8f;
 
     public event Action<Vector3, KillSource> Damaged;
     public event Action Defeated;
@@ -45,6 +47,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     float age;
     Coroutine fight;
     bool fighting;
+    float lastBeat;
 
     protected bool Staggered => Time.time < staggeredUntil;
     protected bool Frozen => Time.time < frozenUntil;
@@ -61,7 +64,8 @@ public abstract class Boss : MonoBehaviour, IHittable
         body.isKinematic = true;
         body.useGravity = false;
         body.interpolation = RigidbodyInterpolation.Interpolate;
-        var hitbox = go.AddComponent<SphereCollider>();
+        var hitbox = go.AddComponent<CapsuleCollider>();
+        hitbox.direction = 1;
 
         var view = new GameObject("Sprite") { layer = SamuraiLayer };
         view.transform.SetParent(go.transform, false);
@@ -79,10 +83,11 @@ public abstract class Boss : MonoBehaviour, IHittable
         boss.Health = boss.MaxHealth = health;
         renderer.color = tint;
         animator.Play(art.idle, true, null, art.idleFps);
-        // Centre the art on the body, and fit the hitbox to it with some leeway around the canvas padding.
+        // Centre the art on the body, and fit an upright capsule to the figure inside the canvas padding.
         Bounds frame = renderer.sprite.bounds;
         view.transform.localPosition = -frame.center;
-        hitbox.radius = 0.6f * Mathf.Min(frame.extents.x, frame.extents.y);
+        hitbox.radius = 0.45f * frame.extents.x;
+        hitbox.height = 1.4f * frame.extents.y;
         return boss;
     }
 
@@ -122,7 +127,34 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected void RestartFight()
     {
         if (fight != null) StopCoroutine(fight);
+        lastBeat = Time.time;
         fight = fighting && !IsDead ? StartCoroutine(Fight()) : null;
+    }
+
+    // Fight loops call this each time they start a move, to show the watchdog they're alive.
+    protected void Beat()
+    {
+        lastBeat = Time.time;
+    }
+
+    // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
+    protected virtual bool Busy => false;
+
+    // An exception inside an attack silently ends its coroutine; rather than stand idle for the rest of the
+    // fight, the boss notices it has stopped moving and starts over.
+    void Update()
+    {
+        if (!fighting || IsDead || Busy || Staggered || Frozen)
+        {
+            lastBeat = Time.time;
+            return;
+        }
+        if (Time.time - lastBeat > StallSeconds)
+        {
+            Debug.LogWarning($"{name}'s fight stalled; restarting it.");
+            ClearTransient();
+            RestartFight();
+        }
     }
 
     // Cuts the current attack short; the fight starts over once the boss can act again.
@@ -131,6 +163,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (fight != null) StopCoroutine(fight);
         fight = null;
         ClearTransient();
+        if (!IsDead) animator.Play(art.idle, true, null, art.idleFps);
     }
 
     protected void ClearTransient()
@@ -173,16 +206,24 @@ public abstract class Boss : MonoBehaviour, IHittable
         sprite.color = Color.Lerp(bodyTint, new Color(0.55f, 0.8f, 1f), frost * 0.6f);
     }
 
-    // A dash to a new spot that leaves a fading afterimage behind.
+    // A dash to a new spot that leaves a trail of fading afterimages along the way.
     protected IEnumerator BlinkTo(float x, Color trail)
     {
-        Afterimage(trail);
         Vector3 from = anchor;
         Vector3 to = new Vector3(x, anchor.y, anchor.z);
         Sfx.Play(Sfx.ParrySwing, 0.5f, 1.5f);
+        int ghosts = 0;
         for (float t = 0; t < BlinkTime; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
         {
-            anchor = Vector3.Lerp(from, to, t / BlinkTime);
+            float k = t / BlinkTime;
+            if (k >= ghosts / 3f && ghosts < 3)
+            {
+                Color fading = trail;
+                fading.a *= 1f - ghosts * 0.25f;
+                Afterimage(fading);
+                ghosts++;
+            }
+            anchor = Vector3.Lerp(from, to, Mathf.SmoothStep(0, 1, k));
             yield return null;
         }
         anchor = to;

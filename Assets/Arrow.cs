@@ -37,8 +37,30 @@ public class Arrow : MonoBehaviour
         art.transform.localScale = new Vector3(artSize.x / spriteSize.x, artSize.y / spriteSize.y, 1f);
         glow.color = glowTint;
         glow.transform.localScale = Vector3.one * glowSize;
-        SphereCollider hitbox = GetComponentInChildren<SphereCollider>();
-        hitbox.radius = hitRadius / Mathf.Max(hitbox.transform.lossyScale.x, hitbox.transform.lossyScale.y);
+        // The prefab's hitbox is a capsule; restyled shots use it as a ball of the given radius.
+        Collider hitbox = GetComponentInChildren<Collider>();
+        if (hitbox == null) return;
+        float local = hitRadius / Mathf.Max(hitbox.transform.lossyScale.x, hitbox.transform.lossyScale.y);
+        switch (hitbox)
+        {
+            case SphereCollider sphere:
+                sphere.radius = local;
+                break;
+            case CapsuleCollider capsule:
+                capsule.radius = local;
+                capsule.height = local * 2f;
+                break;
+        }
+    }
+
+    // An animated restyle: the shot loops through frames as it flies.
+    public void Restyle(Sprite[] frames, float fps, Color color, Vector2 artSize, float hitRadius, Color glowTint, float glowSize)
+    {
+        Restyle(frames[0], color, artSize, hitRadius, glowTint, glowSize);
+        if (frames.Length < 2) return;
+        SpriteAnimator animator = art.GetComponent<SpriteAnimator>();
+        if (animator == null) animator = art.gameObject.AddComponent<SpriteAnimator>();
+        animator.Play(frames, true, null, fps);
     }
 
     public void MakeReflectable(Transform target)

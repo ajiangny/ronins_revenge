@@ -64,7 +64,7 @@ public static class BossArtSetup
         art.death = death;
         art.deathParticles = particles;
         art.idleFps = 6f;
-        art.actionFps = 14f;
+        art.actionFps = 11f;
         EditorUtility.SetDirty(art);
         return art;
     }

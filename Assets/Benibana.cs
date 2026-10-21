@@ -27,6 +27,7 @@ public class Benibana : Boss
     SpriteRenderer eyes;
     readonly List<VeilPuff> veil = new List<VeilPuff>();
 
+    protected override bool Busy => breaking;
     float GroundY => ronin.Feet.y - 0.3f;
     Vector3 Mouth => Centre + Vector3.up * 0.5f;
 
@@ -35,6 +36,7 @@ public class Benibana : Boss
         while (true)
         {
             while (breaking) yield return null;
+            Beat();
             yield return Wait(secondPhase ? 1.1f : 1.6f);
             yield return BlinkTo(RandomX(3f), new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
             yield return Wait(0.25f);

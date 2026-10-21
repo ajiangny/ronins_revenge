@@ -182,6 +182,7 @@ public class Ronin : MonoBehaviour
             thrown[i] = kunai;
         }
         lastShot = Time.time;
+        Sfx.Play(Sfx.KunaiThrow);
         PlayAction(art.attack);
     }
 
@@ -194,6 +195,7 @@ public class Ronin : MonoBehaviour
             hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
         shuriken.Tint(shurikenTint, shurikenGlow);
         lastShuriken = Time.time;
+        Sfx.Play(Sfx.ShurikenThrow);
         PlayAction(art.attack);
         ShurikenThrown?.Invoke(Muzzle);
     }
@@ -203,6 +205,7 @@ public class Ronin : MonoBehaviour
         lastParry = Time.time;
         parryUntil = Time.time + parryWindow;
         parryLanded = false;
+        Sfx.Play(Sfx.ParrySwing);
         // The slash sweeps over his head, where the arrows come from.
         if (Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, parryColor, 0.7f), 1.15f, transform) == null)
         {
@@ -254,6 +257,7 @@ public class Ronin : MonoBehaviour
         riposte.Tint(Color.Lerp(Color.white, parryColor, 0.6f), parryColor);
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
+        Sfx.Play(Sfx.Deflect);
 
         if (parryLanded) return;
         parryLanded = true;
@@ -281,12 +285,14 @@ public class Ronin : MonoBehaviour
             Fx.Play(Fx.IceBurst, contact, Color.white, 1.4f);
             Fx.Play(Fx.FrostWave, Feet, Color.white, 0.9f);
             CameraShake.Add(0.2f);
+            Sfx.Play(Sfx.WardShatter);
             WardBroken?.Invoke();
             return;
         }
         Debris.BurstSprites(contact, art.deathParticles, Color.white, 10, 1f, 6f);
         Fx.Play(Fx.Impact, contact, new Color(1f, 0.45f, 0.4f), 1.5f);
         CameraShake.Add(0.35f);
+        Sfx.Play(Sfx.PlayerHit);
         PlayAction(art.hit);
         Hit?.Invoke();
     }
@@ -297,6 +303,7 @@ public class Ronin : MonoBehaviour
         Fx.Play(Fx.Explosion, sprite.bounds.center, Color.white, 1.6f);
         Fx.Play(Fx.SmokePuff, sprite.bounds.center, Color.white, 2f);
         CameraShake.Add(0.8f);
+        Sfx.Play(Sfx.PlayerDeath);
         if (wardBubble != null) wardBubble.Stop();
         gameObject.SetActive(false);
     }

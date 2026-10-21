@@ -17,6 +17,8 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] float dropDistance = 0.5f;
     [SerializeField] float dropSpeed = 8f;
     [SerializeField, FormerlySerializedAs("alienRadius")] float samuraiRadius = 0.45f;
+    [Tooltip("Distance the army marches per drum beat, so the beat quickens as the army speeds up.")]
+    [SerializeField] float marchBeatDistance = 1.2f;
 
     public event Action<Samurai, KillSource> SamuraiKilled;
     public event Action ArmyDefeated;
@@ -39,7 +41,12 @@ public class SamuraiArmy : MonoBehaviour
     float chillPerStack;
     float frozenUntil;
     float shownFrost;
+    float marchTravel;
+    int marchBeat;
     bool advancing;
+
+    // The classic four-note march, falling a step each beat.
+    static readonly float[] MarchPitches = { 1f, 0.94f, 0.89f, 0.84f };
 
     public int Remaining => soldiers.Count;
     public IReadOnlyList<Samurai> Soldiers => soldiers;
@@ -144,6 +151,7 @@ public class SamuraiArmy : MonoBehaviour
         {
             step = Vector3.right * (direction * CurrentSpeed() * dt);
         }
+        MarchBeat(step.magnitude);
 
         // Move every soldier and track the army's extents in a single pass.
         float left = float.PositiveInfinity, right = float.NegativeInfinity, bottom = float.PositiveInfinity;
@@ -182,6 +190,15 @@ public class SamuraiArmy : MonoBehaviour
         {
             FireShot();
         }
+    }
+
+    void MarchBeat(float distance)
+    {
+        marchTravel += distance;
+        if (marchTravel < marchBeatDistance) return;
+        marchTravel -= marchBeatDistance;
+        Sfx.Play(Sfx.MarchStep, 0.8f, MarchPitches[marchBeat]);
+        marchBeat = (marchBeat + 1) % MarchPitches.Length;
     }
 
     // Frost Kunai: each hit slows the march for a while. Stacks up to maxStacks; a new hit refreshes the oldest stack.

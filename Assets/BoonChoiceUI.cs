@@ -70,6 +70,7 @@ public class BoonChoiceUI : MonoBehaviour
     Action<int> chosen;
     Color elementColor;
     int selected;
+    int heardSelection;
     float shownAt;
 
     readonly HudSlot[] hudSlots = new HudSlot[3];
@@ -96,7 +97,7 @@ public class BoonChoiceUI : MonoBehaviour
         chosen = onChosen;
         ElementInfo info = Boons.Info(element);
         elementColor = info.Color;
-        selected = 0;
+        selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
 
         title.text = $"Boons of {info.Name}";
@@ -153,6 +154,9 @@ public class BoonChoiceUI : MonoBehaviour
         if (ronin != null) UpdateHud();
         if (!IsOpen) return;
 
+        if (selected != heardSelection) Sfx.Play(Sfx.UiMove);
+        heardSelection = selected;
+
         float elapsed = Time.unscaledTime - shownAt;
         AnimatePanel(elapsed);
         if (elapsed < InputDelay) return;
@@ -189,6 +193,7 @@ public class BoonChoiceUI : MonoBehaviour
 
     void Choose(int index)
     {
+        Sfx.Play(Sfx.UiConfirm);
         panel.SetActive(false);
         Action<int> callback = chosen;
         chosen = null;

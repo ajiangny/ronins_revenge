@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour
     [Header("Effects")]
     [Tooltip("Animated effects; built by Ninja/Apply VFX. Effects fall back to simple glows when it's empty.")]
     [SerializeField] FxLibrary fxLibrary;
+    [Tooltip("ElevenLabs sound effects and music; built by Ninja/Apply Audio. The game runs silent when it's empty.")]
+    [SerializeField] SfxLibrary sfxLibrary;
     [Tooltip("Real seconds the action freezes when a parry lands, for weight.")]
     [SerializeField] float parryHitStop = 0.06f;
     [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
@@ -82,6 +84,7 @@ public class GameManager : MonoBehaviour
     void OnEnable()
     {
         Fx.Library = fxLibrary;
+        Sfx.Library = sfxLibrary;
         army.SamuraiKilled += OnSamuraiKilled;
         army.ArmyDefeated += OnArmyDefeated;
         army.ArmyReachedRonin += OnArmyReachedRonin;
@@ -122,6 +125,7 @@ public class GameManager : MonoBehaviour
         else
         {
             state = State.Title;
+            if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
             ui.ShowOverlay("SHADOW BLADE",
                 "LEFT / RIGHT or A / D to move      SPACE to throw kunai\n" +
                 "E or UP for the Spirit Shuriken      SHIFT or DOWN to parry arrows\n\n" +
@@ -175,6 +179,8 @@ public class GameManager : MonoBehaviour
         ui.ShowOverlay($"STAGE {levelIndex + 1}",
             levelIndex == 0 ? "Get ready!" : "Stage cleared! The next army is bigger, faster and angrier.",
             level.samuraiColor);
+        Sfx.Play(Sfx.StageStart);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
 
         yield return new WaitForSeconds(levelIntroTime);
 
@@ -254,6 +260,7 @@ public class GameManager : MonoBehaviour
         var offers = Boons.Draw(soul.Element, 3, loadout, lives);
         if (offers.Count == 0) return;
         Fx.Play(Fx.Impact, soul.transform.position, Boons.Info(soul.Element).Color, 1.6f);
+        Sfx.Play(Sfx.SoulCollect);
 
         state = State.Choosing;
         ronin.ControlsEnabled = false;
@@ -363,7 +370,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f));
+            EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f), Sfx.VictorySting);
         }
     }
 
@@ -372,7 +379,7 @@ public class GameManager : MonoBehaviour
         if (state != State.Playing) return;
         CameraShake.Add(0.6f);
         ronin.Explode();
-        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f));
+        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
     }
 
     void OnRoninHit()
@@ -384,13 +391,15 @@ public class GameManager : MonoBehaviour
         if (lives <= 0)
         {
             ronin.Explode();
-            EndGame("DEFEATED", "The ronin has fallen.", new Color(1f, 0.3f, 0.3f));
+            EndGame("DEFEATED", "The ronin has fallen.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
         }
     }
 
-    void EndGame(string title, string message, Color color)
+    void EndGame(string title, string message, Color color, string sting)
     {
         state = State.GameOver;
+        Music.Stop(0.6f);
+        Sfx.Play(sting);
         Time.timeScale = 1f;
         army.Halt();
         ronin.ControlsEnabled = false;

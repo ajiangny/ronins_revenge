@@ -45,6 +45,7 @@ public class Samurai : MonoBehaviour
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         Arrow arrow = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
         arrow.Launch(arrowSpeed);
+        Sfx.Play(Sfx.ArrowFire, 0.6f);
     }
 
     // Tints the samurai towards ice blue while the army is chilled or frozen (0 = normal, 1 = fully frozen).
@@ -68,6 +69,7 @@ public class Samurai : MonoBehaviour
         Debris.BurstSprites(transform.position, art.deathParticles, Color.white, 8, 1f, 6f);
         Fx.Play(Fx.SmokePuff, transform.position + Vector3.up * 0.2f, new Color(1f, 1f, 1f, 0.8f), 0.9f);
         HitFlash.Flash(animator.Renderer, 0.12f);
+        Sfx.Play(Sfx.SamuraiDeath);
         army.OnSamuraiKilled(this, source);
         if (art.death != null && art.death.Length > 0)
         {

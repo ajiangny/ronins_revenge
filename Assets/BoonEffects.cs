@@ -39,6 +39,7 @@ public class BoonEffects
                 {
                     army.Chill(value, ChillSeconds, ChillStacks);
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
+                    Sfx.Play(Sfx.FrostChill);
                 }
                 if (loadout.Has(BoonId.StormKunai, out value) && Random.value < value)
                 {
@@ -69,6 +70,7 @@ public class BoonEffects
                 if (Random.value < 0.5f) Fx.Play(Fx.IceBurst, soldier.transform.position, Color.white, 0.8f);
             }
             CameraShake.Add(0.2f);
+            Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
         }
         if (loadout.Has(BoonId.ThunderShuriken, out value))
         {
@@ -104,6 +106,7 @@ public class BoonEffects
         if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
         else Debris.BurstSprites(position, ronin.art.deathParticles, Fire, 8, 0.9f, 4f + 4f * radius);
         CameraShake.Add(0.12f);
+        Sfx.Play(Sfx.FireBlast);
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
             target.Kill(KillSource.Effect);
@@ -117,6 +120,7 @@ public class BoonEffects
         ElementFx.Bolt(from, to, Storm, boltMaterial);
         Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
         CameraShake.Add(0.1f);
+        Sfx.Play(Sfx.LightningStrike);
         target.Kill(KillSource.Effect);
     }
 

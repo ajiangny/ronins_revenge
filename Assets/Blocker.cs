@@ -33,6 +33,7 @@ public class Blocker : MonoBehaviour
         }
         else
         {
+            Sfx.Play(Sfx.BlockerHit, 0.7f);
             UpdateSprite();
         }
     }
@@ -43,6 +44,7 @@ public class Blocker : MonoBehaviour
         destroyed = true;
         Debris.BurstSprites(transform.position, debris, Color.white, 4, 0.8f, 4f);
         Fx.Play(Fx.SmokePuff, transform.position, new Color(1f, 1f, 1f, 0.85f), 1.2f);
+        Sfx.Play(Sfx.BlockerBreak);
         Destroy(gameObject);
     }
 

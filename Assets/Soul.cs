@@ -33,6 +33,7 @@ public class Soul : MonoBehaviour
         soul.collected = onCollected;
         soul.color = Boons.Info(element).Color;
         soul.originX = position.x;
+        Sfx.Play(Sfx.SoulSpawn);
 
         soul.aura = CreateLayer(go.transform, "Aura", ProceduralSprites.Glow, 1.6f, 40);
         bool hasArt = frames != null && frames.Length > 0;

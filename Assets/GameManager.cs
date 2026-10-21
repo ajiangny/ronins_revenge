@@ -270,9 +270,8 @@ public class GameManager : MonoBehaviour
         loadout.Take(offer);
         float value = offer.Boon.ValueAt(offer.Rarity);
         Color colour = Boons.Info(offer.Boon.Element).Color;
-        Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
-        Fx.Play(Fx.BoonPillar, feet, new Color(pillar.r, pillar.g, pillar.b, 0.75f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
+        Fx.Play(Fx.BoonPillar, ronin.Feet, new Color(pillar.r, pillar.g, pillar.b, 0.75f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
         switch (offer.Boon.Id)
         {
             case BoonId.TidalRenewal:
@@ -329,10 +328,9 @@ public class GameManager : MonoBehaviour
             aura = null;
             if (dominant is Element changed)
             {
-                Vector3 feet = new Vector3(ronin.Bounds.center.x, ronin.Bounds.min.y, 0f);
                 // Behind the ronin, faded so he stays readable in front of it.
                 // Wider than the ronin so the flames show round his silhouette, and faded so he stays readable.
-                aura = Fx.Play(Fx.Aura(changed), feet, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
+                aura = Fx.Play(Fx.Aura(changed), ronin.Feet, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
                 Color burst = Boons.Info(changed).Color;
                 if (Fx.Play(Fx.Impact, ronin.Bounds.center, new Color(burst.r, burst.g, burst.b, 0.7f), 1.3f) == null)
                 {

@@ -45,6 +45,11 @@ public class Ronin : MonoBehaviour
     // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
     public Bounds Bounds => sprite.bounds;
+    // Where his feet touch the ground: the art is drawn standing 7px above the bottom of its canvas, which is the
+    // sprite's pivot, so effects anchored here (aura, frost wave, boon pillar) line up with him.
+    public Vector3 Feet => sprite.transform.position + Vector3.up * (FeetAbovePivotPx / sprite.sprite.pixelsPerUnit * sprite.transform.lossyScale.y);
+
+    const float FeetAbovePivotPx = 7f;
     // 0 right after use, 1 when ready. Shown on the HUD.
     public float ShurikenCharge => Charge(lastShuriken, shurikenCooldown);
     public float ParryCharge => Charge(lastParry, parryCooldown);
@@ -274,7 +279,7 @@ public class Ronin : MonoBehaviour
             // The Frost Ward shatters instead of the ronin taking the hit.
             Debris.BurstSprites(contact, art.deathParticles, WardColor, 12, 1f, 6f);
             Fx.Play(Fx.IceBurst, contact, Color.white, 1.4f);
-            Fx.Play(Fx.FrostWave, new Vector3(Bounds.center.x, Bounds.min.y, 0f), Color.white, 0.9f);
+            Fx.Play(Fx.FrostWave, Feet, Color.white, 0.9f);
             CameraShake.Add(0.2f);
             WardBroken?.Invoke();
             return;

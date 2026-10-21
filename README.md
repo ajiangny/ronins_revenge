@@ -5,7 +5,7 @@ A Space Invaders remake re-themed as a lone chibi ronin holding a moonlit temple
 Built on the class template ([Oren-Steinberg/Space-Invaders-3D](https://github.com/Oren-Steinberg/Space-Invaders-3D)), Unity 6000.6, URP.
 Open `Assets/Scenes/SampleScene.unity` and press Play.
 
-**Controls:** Left/Right or A/D to move, Space to throw a kunai, Enter to start or restart.
+**Controls:** Left/Right or A/D to move, Space to throw kunai, E or Up for the Spirit Shuriken, Shift or Down to parry, Enter to start or restart. On the boon screen: Up/Down (or W/S, or 1/2/3) to select, Enter or click to choose.
 
 The template's Space Invaders classes, prefabs and layers are renamed to the theme: `Alien` → `Samurai`, `AlienFleet` → `SamuraiArmy`, `AlienBullet` → `Arrow`, `AlienCounter` → `SamuraiCounter`, `Spaceship` → `Ronin`, `Dart` → `Kunai`, `ShieldWall`/`ShieldBlock` → `BlockerWall`/`Blocker`. The section on template code issues below uses the template's original names.
 
@@ -31,15 +31,24 @@ The template's Space Invaders classes, prefabs and layers are renamed to the the
 
 - **Start and end screens.** A "SHADOW BLADE" title screen with controls, a "Stage N" intro between levels, and Defeated / Victory screens showing score and high score. High score is saved with `PlayerPrefs`. (`GameManager`, `GameUI`)
 - **Additional levels.** Three stages, configured in `GameManager.levels` (`LevelConfig`). Each stage has more samurai, starts lower, moves faster, shoots more often with more aimed, faster arrows, and tints the army a new clan colour.
-- **Lives.** 3 lives, shown as ronin head icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Ronin`, `GameUI.SetLives`)
+- **Lives.** 3 lives (up to 5 with the Tidal Renewal boon), shown as ronin head icons bottom-left. After a hit the ronin plays his hit animation, blinks and is invulnerable for 2 s. (`Ronin`, `GameUI.SetLives`)
 - **Shields (courtyard blockers).** Four sets of courtyard blockers, each a bush, a stone lantern and a bush (`BlockerWall`, `Blocker`). Bushes take 5 hits and lanterns 8; each shows three damage states and then breaks into leaves or stone chips, so you can shoot gaps into a set. Samurai that march into the blockers trample them. Blockers are rebuilt every stage.
 - **Collision animations.** Samurai play a death animation and burst into sakura petals and smoke; the ronin bursts into sparks and smoke when hit and when killed; blockers break into leaves or stone chips. (`Debris.BurstSprites`, `SpriteAnimator`)
 - **New graphics.** Every primitive (sphere aliens, capsule ship, cube debris) is replaced with chibi pixel art I generated with PixelLab's AI tools from my own prompts:
   - **Samurai:** three types by row, worth more points the higher they stand: Ashigaru (spear, straw hat) in the bottom rows, Bushi (katana, lamellar armour) in the middle, and Taishō (horned kabuto, menpō mask) on top. Each has a march loop and a death animation.
-  - **Ronin (player):** idle, kunai throw, hit, and left/right sprint animations. The hitbox is fitted to his body and spirit flames.
-  - **Projectiles:** a spirit-flame kunai that flies point-first, and samurai arrows.
+  - **Ronin (player):** idle, kunai throw, katana parry, hit, and left/right sprint animations. The hitbox is fitted to his body and spirit flames.
+  - **Projectiles:** a spirit-flame kunai that flies point-first, the Spirit Shuriken, and samurai arrows.
+  - **Souls and boons:** fire, water and lightning soul wisps, 15 boon medallion icons, 3 ability icons and an ink-brush boon card with gold trim.
   - **UI:** a pixel brush-style font made with PixelLab (`Art/Fonts/ShadowBladePixel.ttf`, baked into a TMP font asset), a black-lacquer panel with crimson and gold trim behind the title, stage and end screens (9-sliced so it scales cleanly), and ronin head life icons.
-  - **Pipeline:** `Editor/PixelArtImporter.cs` imports everything under `Assets/Art/Sprites` as crisp point-filtered sprites at a fixed pixels-per-unit. `CharacterArt` ScriptableObjects hold each character's clips, `SpriteAnimator` plays them, and the `Ninja/Apply Sprite Art` menu command (`Editor/NinjaArtSetup.cs`) rebuilds the prefabs from the art. Gameplay objects keep their 3D Rigidbodies and colliders, so only the visuals changed.
+  - **Pipeline:** `Editor/PixelArtImporter.cs` imports everything under `Assets/Art/Sprites` as crisp point-filtered sprites at a fixed pixels-per-unit. `CharacterArt` ScriptableObjects hold each character's clips, `SpriteAnimator` plays them, and the `Ninja/Apply Sprite Art` menu command (`Editor/NinjaArtSetup.cs`) rebuilds the prefabs from the art. `Ninja/Apply Boon Art` (`Editor/BoonArtSetup.cs`) builds the fire, water and lightning versions of the ronin and his projectiles by recolouring only the teal spirit-flame hues of the original frames, and wires the soul and boon art into the scene. Gameplay objects keep their 3D Rigidbodies and colliders, so only the visuals changed.
+- **Elemental souls and Hades-style boons.** Fallen samurai sometimes drop a **Fire**, **Water** or **Lightning** soul (7% per kill, guaranteed after 15 kills without one, one on screen at a time) that drifts down and fades if you miss it. Catching one pauses the game on a "Boons of Fire / Frost / Storm" screen modelled on Hades: the soul glows on the left, and three ink-brush cards each show a medallion icon, the boon name in its rarity colour (Common, Rare, Epic), its effect and a stat line. Like the Olympian gods, each element has its own theme:
+  - **Slots.** The ronin has three core slots, **Attack** (kunai), **Special** (Spirit Shuriken) and **Parry**, which hold one boon each; picking another element's boon for a filled slot replaces it (the card says so). **Passives** stack alongside them. A boon you already hold comes back as an **Upgrade** to the next rarity. The first soul of a run always offers a slot boon.
+  - **Fire (burn):** Flame Kunai, Inferno Shuriken and Burning Riposte make kills explode; Blazing Hands throws faster; Inferno Fan adds kunai in a spread.
+  - **Water (chill):** Frost Kunai slows the army's march (stacks 3×), Glacial Shuriken freezes the whole army, Frozen Riposte turns parries into Frost Wards that absorb a hit; Tidal Renewal restores lives; Glacier Wall rebuilds the blockers in tougher ice.
+  - **Lightning (jolt):** Storm Kunai chains to the nearest samurai, Thunder Shuriken strikes nearby columns, Thunder Riposte calls lightning on samurai near you; Storm Step adds move speed; Static Charge shortens the Special and Parry cooldowns.
+  - Kills made by these effects never trigger further effects, so there are no runaway chain reactions. The HUD shows the three slots (with cooldown sweeps) and your passives bottom-right.
+  - The ronin changes to match: his spirit flames, aura, kunai, shuriken and parry flash take the colour of his boons. (`Boon`, `RoninLoadout`, `BoonEffects`, `Soul`, `BoonChoiceUI`, `ElementFx`)
+- **New abilities.** The **Spirit Shuriken** is a big spinning blade that cuts through a whole column (6 s cooldown). **Parry** is a quick katana stance that knocks arrows back up at the samurai (1.5 s cooldown). Both projectiles go through `Kunai`, which also handles piercing.
 - **New background.** A top-down moonlit grass courtyard the samurai march across, with sakura petals drifting over it (`Backdrop`). It's top-down to match the 3/4-view character sprites, so the armies stand on the ground instead of floating in front of a sky.
 
 ## Balancing
@@ -51,5 +60,6 @@ The template was easy because the player could fire 20 shots per second and the 
 - More samurai (40 / 55 / 55 instead of 30), and the army starts closer to the player on later stages.
 - Arrows come from the front line, partly aimed at the player, and get faster each stage.
 - The game is still beatable thanks to 3 lives, invulnerability after a hit, and the courtyard blockers.
+- Because the base game is hard, souls give the player a way to build up power over a run: about three boons per stage, and the Spirit Shuriken and Parry give tools for clearing columns and dealing with arrows. The drop chance and pity count are tunable on `GameManager`.
 
 All of these values can be tuned in the Inspector on `GameManager` (the per-stage `levels` array), `SamuraiArmy`, `Ronin` and `Blockers`.

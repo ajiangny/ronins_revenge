@@ -531,8 +531,17 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1bd50a4aa2c0848f6ba1ad9c7ff62879, type: 3}
   - {fileID: 8300000, guid: 57f295bc86d894353937206d1b38f318, type: 3}
   - {fileID: 8300000, guid: 07f6ee6cadf4c4a4b929d6e0ef855d57, type: 3}
-  utsusemiArt: {fileID: 0}
-  utsusemiScale: 3.6
+  utsusemiArt: {fileID: 11400000, guid: 6514831e1a6094492aee329c5d8aaf37, type: 2}
+  utsusemiScale: 2.6
+  utsusemiBareIdle:
+  - {fileID: 21300000, guid: edabf8bf89a2f48089e36264a918ab8b, type: 3}
+  - {fileID: 21300000, guid: 211d37c3c368349cc809ad8573d4e2ad, type: 3}
+  - {fileID: 21300000, guid: 032dc7ddae73c4f64af179153a72ed24, type: 3}
+  - {fileID: 21300000, guid: bf05387118985417f84e0b69e1fb766d, type: 3}
+  - {fileID: 21300000, guid: 6883f747cd02742a3807f68eeb7911fa, type: 3}
+  - {fileID: 21300000, guid: 4546248868dbd417f97c02a3937d7ce3, type: 3}
+  - {fileID: 21300000, guid: 23b9424ecc4124cf3be59866b3fc6a08, type: 3}
+  - {fileID: 21300000, guid: fa887ddf283f3463eadf72ae1fd3df7c, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
   utsusemiIntroLine: {fileID: 0}

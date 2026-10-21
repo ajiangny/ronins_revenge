@@ -79,6 +79,8 @@ public class GameManager : MonoBehaviour
     [Tooltip("Utsusemi's sprite frames. Leave empty to use the Taisho art, tinted steel blue, as a stand-in.")]
     [SerializeField] CharacterArt utsusemiArt;
     [SerializeField] float utsusemiScale = 3.6f;
+    [Tooltip("Utsusemi's idle with its hat off, played while the hat is thrown.")]
+    [SerializeField] Sprite[] utsusemiBareIdle;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [SerializeField] AudioClip utsusemiIntroLine;
@@ -633,8 +635,10 @@ public class GameManager : MonoBehaviour
         {
             case BossKind.Utsusemi:
                 bool noArt = utsusemiArt == null;
-                return Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Utsusemi.StartingHealth, position,
-                    noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
+                Utsusemi automaton = Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Utsusemi.StartingHealth,
+                    position, noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
+                if (!noArt) automaton.SetBareIdle(utsusemiBareIdle);
+                return automaton;
             default:
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;

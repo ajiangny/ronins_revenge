@@ -51,11 +51,19 @@ public class Utsusemi : Boss
     SpriteRenderer eye;
     SpriteRenderer coreGlow;
     readonly List<Arrow> lattice = new List<Arrow>();
+    // Its idle with the hat off, for while the hat is out; null keeps the hatted idle.
+    Sprite[] bareIdle;
+
+    public void SetBareIdle(Sprite[] frames)
+    {
+        bareIdle = frames != null && frames.Length > 0 ? frames : null;
+    }
 
     protected override bool Busy => breaking;
     protected override float StaggerSeconds => secondPhase ? 2f : 2.5f;
     // Its slit-eye is only exposed while the hat is off.
     protected override int DamageMultiplier => hatsOut > 0 ? 2 : 1;
+    protected override Sprite[] IdleClip => hatsOut > 0 && bareIdle != null ? bareIdle : art.idle;
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     float LeftEdge => CameraShake.Center.x - HalfWidth;
@@ -146,7 +154,8 @@ public class Utsusemi : Boss
         PlayAction(art.parry);
         ElementFx.Glow(Head, Gold, 1f, 3f, 0.4f, transform);
         Sfx.Play(Sfx.ParrySwing, 0.8f, 0.6f);
-        yield return Wait(0.4f);
+        // The hat leaves its hand on the throw clip's last frame.
+        yield return Wait(0.55f);
 
         float dir = ronin.Bounds.center.x < anchor.x ? -1f : 1f;
         StartCoroutine(FlyHat(dir, false));
@@ -233,6 +242,8 @@ public class Utsusemi : Boss
             Tick(0.7f);
         }
         hatsOut--;
+        // Hat back on its head.
+        if (hatsOut == 0 && !IsDead) PlayIdle();
     }
 
     // A gold weight snapping off the hat's brim and dropping straight down.
@@ -408,7 +419,7 @@ public class Utsusemi : Boss
             weights[i] = Shoot(pivots[i], Vector3.down * 0.1f);
             if (frames != null) weights[i].Restyle(frames, 10f, Color.white, new Vector2(0.8f, 1.2f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
-            threads[i] = Bar(pivots[i], pivots[i], 0.04f, new Color(0.95f, 0.95f, 1f, 0.6f), 50);
+            threads[i] = Bar(pivots[i], pivots[i], 0.06f, new Color(0.95f, 0.95f, 1f, 0.6f), 50);
         }
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
@@ -416,8 +427,10 @@ public class Utsusemi : Boss
         const float amplitude = 28f * Mathf.Deg2Rad;
         float swing = secondPhase ? 4.5f : 4f;
         float omega = Mathf.PI * 2f / (secondPhase ? 2f : 2.4f);
-        for (float t = 0; t < drop + swing; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        // Steered once per physics step: a velocity worked out from a render frame's delta overshoots the next step.
+        for (float t = 0; t < drop + swing; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
         {
+            Beat();
             for (int i = 0; i < count; i++)
             {
                 if (weights[i] == null)
@@ -428,10 +441,10 @@ public class Utsusemi : Boss
                 float length = lengths[i] * Mathf.Clamp01(t / drop);
                 float angle = t < drop ? 0f : amplitude * Mathf.Sin(omega * (t - drop) + phases[i]) * Mathf.Clamp01((t - drop) / 0.6f);
                 Vector3 target = pivots[i] + new Vector3(Mathf.Sin(angle), -Mathf.Cos(angle), 0) * length;
-                weights[i].Steer((target - weights[i].transform.position) / Mathf.Max(Time.deltaTime, 0.005f));
-                Stretch(threads[i], pivots[i], weights[i].transform.position, 0.04f);
+                weights[i].Steer((target - weights[i].transform.position) / Time.fixedDeltaTime);
+                Stretch(threads[i], pivots[i], weights[i].transform.position, 0.06f);
             }
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
 
         // The threads snap and the weights fall.
@@ -480,6 +493,7 @@ public class Utsusemi : Boss
         float nextHum = 0f;
         for (float t = 0; t < sweep; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
         {
+            Beat();
             float x = Mathf.Lerp(from, to, t / sweep);
             Vector3 end = BeamEnd(x, out Blocker cover);
             Stretch(beam, Core, end, 0.5f + 0.1f * Mathf.Sin(t * 40f));

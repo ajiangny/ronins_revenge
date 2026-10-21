@@ -187,7 +187,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (fight != null) StopCoroutine(fight);
         fight = null;
         ClearTransient();
-        if (!IsDead) animator.Play(art.idle, true, null, art.idleFps);
+        if (!IsDead) PlayIdle();
     }
 
     protected void ClearTransient()
@@ -212,7 +212,15 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected void PlayAction(Sprite[] clip)
     {
         if (IsDead || clip == null || clip.Length == 0) return;
-        animator.Play(clip, false, () => animator.Play(art.idle, true, null, art.idleFps), art.actionFps);
+        animator.Play(clip, false, PlayIdle, art.actionFps);
+    }
+
+    // The loop the boss rests in; a subclass can swap it for a different look (Utsusemi without its hat).
+    protected virtual Sprite[] IdleClip => art.idle;
+
+    protected void PlayIdle()
+    {
+        animator.Play(IdleClip, true, null, art.idleFps);
     }
 
     protected void SetInvulnerable(float seconds)

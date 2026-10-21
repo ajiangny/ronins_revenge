@@ -73,6 +73,10 @@ public static class BossArtSetup
         {
             so.FindProperty("utsusemiArt").objectReferenceValue = utsusemi;
             so.FindProperty("utsusemiScale").floatValue = UtsusemiScale;
+            Sprite[] bare = TryFrames("Utsusemi", "BareIdle");
+            SerializedProperty bareIdle = so.FindProperty("utsusemiBareIdle");
+            bareIdle.arraySize = bare?.Length ?? 0;
+            for (int i = 0; i < bareIdle.arraySize; i++) bareIdle.GetArrayElementAtIndex(i).objectReferenceValue = bare[i];
         }
         so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
         so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");

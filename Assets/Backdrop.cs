@@ -26,6 +26,12 @@ public class Backdrop : MonoBehaviour
     // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
     static readonly Color BloodGround = new Color(0.95f, 0.42f, 0.42f);
     static readonly Color BloodPetal = new Color(0.9f, 0.08f, 0.14f, 0.9f);
+    // Steel moon: Utsusemi's pass turns cold and pale, and the petals become drifting flakes of lace.
+    static readonly Color SteelGround = new Color(0.6f, 0.7f, 0.9f);
+    static readonly Color SteelPetal = new Color(0.9f, 0.93f, 1f, 0.85f);
+
+    public enum MoonLook { Blood, Steel }
+    MoonLook look;
     SpriteRenderer groundRenderer;
     SpriteRenderer[] petalRenderers;
     SpriteRenderer moon;
@@ -78,11 +84,12 @@ public class Backdrop : MonoBehaviour
     void UpdateBloodMoon(float dt)
     {
         blood = Mathf.MoveTowards(blood, bloodTarget, dt * 0.5f);
-        groundRenderer.color = Color.Lerp(groundTint, groundTint * BloodGround, blood);
-        Color petalColour = Color.Lerp(petalTint, BloodPetal, blood);
+        bool steel = look == MoonLook.Steel;
+        groundRenderer.color = Color.Lerp(groundTint, groundTint * (steel ? SteelGround : BloodGround), blood);
+        Color petalColour = Color.Lerp(petalTint, steel ? SteelPetal : BloodPetal, blood);
         foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
-        moon.color = new Color(0.85f, 0.1f, 0.12f, blood);
-        moonHalo.color = new Color(1f, 0.15f, 0.15f, 0.5f * blood);
+        moon.color = steel ? new Color(0.85f, 0.9f, 1f, blood) : new Color(0.85f, 0.1f, 0.12f, blood);
+        moonHalo.color = steel ? new Color(0.6f, 0.75f, 1f, 0.45f * blood) : new Color(1f, 0.15f, 0.15f, 0.5f * blood);
     }
 
     SpriteRenderer CreateSprite(string name, Sprite sprite, Vector3 position, float scale, int order, Color color)
@@ -99,8 +106,10 @@ public class Backdrop : MonoBehaviour
         return r;
     }
 
-    public void SetBloodMoon(bool on)
+    // Raises (or sets) the boss moon; the look only changes when it rises, so it fades out in the colour it came in.
+    public void SetBossMoon(bool on, MoonLook moonLook = MoonLook.Blood)
     {
+        if (on) look = moonLook;
         bloodTarget = on ? 1f : 0f;
     }
 

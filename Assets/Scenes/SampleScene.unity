@@ -531,6 +531,17 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 1bd50a4aa2c0848f6ba1ad9c7ff62879, type: 3}
   - {fileID: 8300000, guid: 57f295bc86d894353937206d1b38f318, type: 3}
   - {fileID: 8300000, guid: 07f6ee6cadf4c4a4b929d6e0ef855d57, type: 3}
+  utsusemiArt: {fileID: 0}
+  utsusemiScale: 3.6
+  utsusemiPortrait: {fileID: 0}
+  utsusemiCloseup: {fileID: 0}
+  utsusemiIntroLine: {fileID: 0}
+  utsusemiPhaseLine: {fileID: 0}
+  utsusemiDefeatLine: {fileID: 0}
+  utsusemiStaggerLine: {fileID: 0}
+  utsusemiKasaLine: {fileID: 0}
+  utsusemiEscapementLine: {fileID: 0}
+  utsusemiHurtLines: []
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2
@@ -543,6 +554,7 @@ MonoBehaviour:
       topRowY: 8.5
       rowKinds: 
       scouts: 0
+      diveInterval: 0
       baseSpeed: 2.3
       maxSpeedMultiplier: 3.5
       fireInterval: 1
@@ -554,6 +566,7 @@ MonoBehaviour:
       topRowY: 8.4
       rowKinds: 0100000000000000i
       scouts: 0
+      diveInterval: 0
       baseSpeed: 2.5
       maxSpeedMultiplier: 4
       fireInterval: 0.9
@@ -565,6 +578,7 @@ MonoBehaviour:
       topRowY: 8.2
       rowKinds: 020000000100000000000000i
       scouts: 1
+      diveInterval: 0
       baseSpeed: 2.7
       maxSpeedMultiplier: 4.2
       fireInterval: 0.8
@@ -572,6 +586,45 @@ MonoBehaviour:
       arrowSpeed: 8
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     boss: 1
+  - name: The Pilgrim's Pass
+    rounds:
+    - columns: 10
+      rows: 4
+      topRowY: 8.3
+      rowKinds: 02000000010000000000000003000000i
+      scouts: 0
+      diveInterval: 0
+      baseSpeed: 2.6
+      maxSpeedMultiplier: 4
+      fireInterval: 0.85
+      aimedShotChance: 0.3
+      arrowSpeed: 8
+      samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
+    - columns: 11
+      rows: 4
+      topRowY: 8.3
+      rowKinds: 0100000000000000i
+      scouts: 0
+      diveInterval: 6
+      baseSpeed: 2.8
+      maxSpeedMultiplier: 4.2
+      fireInterval: 0.8
+      aimedShotChance: 0.3
+      arrowSpeed: 8
+      samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
+    - columns: 11
+      rows: 5
+      topRowY: 8.5
+      rowKinds: 0200000001000000010000000000000003000000i
+      scouts: 1
+      diveInterval: 5
+      baseSpeed: 3
+      maxSpeedMultiplier: 4.4
+      fireInterval: 0.75
+      aimedShotChance: 0.35
+      arrowSpeed: 8.5
+      samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
+    boss: 2
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0

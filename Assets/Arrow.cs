@@ -27,6 +27,8 @@ public class Arrow : MonoBehaviour
     public Color Color => art.color;
     // A Taisho's spear: kunai and arrows break on it and it cuts through cover, so it can only be dodged or parried.
     public bool Unbreakable { get; private set; }
+    // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
+    public bool PassesCover { get; set; }
 
     void Awake()
     {
@@ -151,6 +153,12 @@ public class Arrow : MonoBehaviour
         return volley;
     }
 
+    // Changes course mid-flight, for shots a boss flies along a path (a thrown hat, a swinging weight).
+    public void Steer(Vector3 newVelocity)
+    {
+        body.linearVelocity = velocity = newVelocity;
+    }
+
     public void IgnoreCollisionsWith(Arrow other)
     {
         foreach (Collider mine in GetComponentsInChildren<Collider>())
@@ -182,6 +190,11 @@ public class Arrow : MonoBehaviour
                 return;
             }
         }
+        else if (PassesCover && coll.collider.GetComponentInParent<Blocker>() != null)
+        {
+            KeepFlying(coll.collider);
+            return;
+        }
         else if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
         {
             KeepFlying(coll.collider);
@@ -207,7 +220,8 @@ public class Arrow : MonoBehaviour
         {
             Physics.IgnoreCollision(own, passedThrough);
         }
-        Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.4f, 0.45f), 0.5f);
+        // Lace slipping through cover makes no spark; a blade or spear cutting through does.
+        if (!PassesCover) Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.4f, 0.45f), 0.5f);
         body.linearVelocity = velocity;
         body.angularVelocity = Vector3.zero;
         transform.rotation = heading;

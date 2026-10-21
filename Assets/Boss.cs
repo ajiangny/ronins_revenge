@@ -5,7 +5,8 @@ using UnityEngine;
 
 // The things a boss says out loud; GameManager plays the matching voice clip and subtitle. Intro, Phase and
 // Defeat are full lines; the rest are short barks that never cut one off.
-public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom }
+public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom,
+    KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -138,6 +139,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Called after every hit that leaves the boss standing, for phase changes.
     protected virtual void OnDamaged() { }
 
+    // Called when a reflected strike breaks the boss's stance, for its own reaction on top of the wobble.
+    protected virtual void OnStaggered() { }
+
     protected void RestartFight()
     {
         if (fight != null) StopCoroutine(fight);
@@ -153,6 +157,9 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
     protected virtual bool Busy => false;
+
+    // Extra damage taken while a weak spot is open (Utsusemi with its hat off).
+    protected virtual int DamageMultiplier => 1;
 
     // How long a reflected strike breaks the boss's stance.
     protected virtual float StaggerSeconds => 2f;
@@ -316,6 +323,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         PlayAction(art.hit);
         Sfx.Play(Sfx.BossStagger);
         Speak(BossLine.Stagger);
+        OnStaggered();
         nextHurtLine = Time.time + seconds;
         StartCoroutine(RecoverFromStagger(seconds));
     }
@@ -341,6 +349,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         if (IsDead || Time.time < invulnerableUntil) return;
         if (Staggered) damage *= 2;
+        damage *= DamageMultiplier;
         Health = Mathf.Max(0, Health - damage);
 
         Vector3 point = Centre;

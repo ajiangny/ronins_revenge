@@ -27,6 +27,14 @@ public static class Fx
     public const string BeniSmokeVeil = "Beni_SmokeVeil";
     public const string BeniPetals = "Beni_Petals";
 
+    // Utsusemi's effects.
+    public const string UtsuKasa = "Utsu_Kasa";
+    public const string UtsuLace = "Utsu_Lace";
+    public const string UtsuPlumb = "Utsu_Plumb";
+    public const string UtsuThrust = "Utsu_Thrust";
+    public const string UtsuGears = "Utsu_Gears";
+    public const string UtsuParts = "Utsu_Parts";
+
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;
 

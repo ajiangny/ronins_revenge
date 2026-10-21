@@ -23,6 +23,7 @@ public class Blocker : MonoBehaviour
     {
         // The Spirit Shuriken passes over the ronin's own cover.
         if (coll.collider.GetComponentInParent<Kunai>() is { Source: KillSource.Shuriken }) return;
+        if (coll.collider.GetComponentInParent<Arrow>() is { PassesCover: true }) return;
         Hit(coll.GetContact(0).point);
     }
 

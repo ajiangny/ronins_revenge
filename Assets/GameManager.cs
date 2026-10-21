@@ -76,6 +76,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip benibanaRosaryBloomLine;
     [Tooltip("Pained gasps when she takes a hit; one is picked at random.")]
     [SerializeField] AudioClip[] benibanaHurtLines;
+    [Tooltip("Utsusemi's sprite frames. Leave empty to use the Taisho art, tinted steel blue, as a stand-in.")]
+    [SerializeField] CharacterArt utsusemiArt;
+    [SerializeField] float utsusemiScale = 3.6f;
+    [SerializeField] Sprite utsusemiPortrait;
+    [SerializeField] Sprite utsusemiCloseup;
+    [SerializeField] AudioClip utsusemiIntroLine;
+    [SerializeField] AudioClip utsusemiPhaseLine;
+    [SerializeField] AudioClip utsusemiDefeatLine;
+    [SerializeField] AudioClip utsusemiStaggerLine;
+    [SerializeField] AudioClip utsusemiKasaLine;
+    [SerializeField] AudioClip utsusemiEscapementLine;
+    [SerializeField] AudioClip[] utsusemiHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
     [SerializeField] float bossDepth = 3f;
@@ -99,6 +111,21 @@ public class GameManager : MonoBehaviour
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true },
             },
             boss = BossKind.Benibana,
+        },
+        new StageConfig
+        {
+            name = "The Pilgrim's Pass",
+            rounds = new[]
+            {
+                new LevelConfig { columns = 10, rows = 4, topRowY = 8.3f, baseSpeed = 2.6f, maxSpeedMultiplier = 4f,   fireInterval = 0.85f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer } },
+                new LevelConfig { columns = 11, rows = 4, topRowY = 8.3f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f,  aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 6f },
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.75f, aimedShotChance = 0.35f, arrowSpeed = 8.5f, samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer },
+                    diveInterval = 5f, scouts = true },
+            },
+            boss = BossKind.Utsusemi,
         },
     };
 
@@ -553,8 +580,8 @@ public class GameManager : MonoBehaviour
         ui.HideOverlay();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
-        // A blood moon rises over the duel.
-        if (backdrop != null) backdrop.SetBloodMoon(true);
+        // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi.
+        if (backdrop != null) backdrop.SetBossMoon(true, Stage.boss == BossKind.Utsusemi ? Backdrop.MoonLook.Steel : Backdrop.MoonLook.Blood);
         yield return new WaitForSeconds(1f);
 
         Camera cam = Camera.main;
@@ -576,7 +603,7 @@ public class GameManager : MonoBehaviour
         yield return activeBoss.Enter(post, 1.6f);
 
         Fx.Play(Fx.SlashArc, post, activeBoss.Colour, 6f);
-        Fx.Play(Fx.BeniPetals, post, Color.white, 3f);
+        if (Stage.boss == BossKind.Benibana) Fx.Play(Fx.BeniPetals, post, Color.white, 3f);
         CameraShake.Add(0.4f);
         Sfx.Play(Sfx.StageStart, 1f, 0.75f);
         BossVoice lines = VoiceFor(Stage.boss);
@@ -604,6 +631,10 @@ public class GameManager : MonoBehaviour
     {
         switch (kind)
         {
+            case BossKind.Utsusemi:
+                bool noArt = utsusemiArt == null;
+                return Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Utsusemi.StartingHealth, position,
+                    noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
             default:
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
@@ -615,7 +646,7 @@ public class GameManager : MonoBehaviour
     struct BossVoice
     {
         public Sprite portrait, closeup;
-        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom;
+        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, escapement;
         public AudioClip[] hurt;
 
         public AudioClip Clip(BossLine line) => line switch
@@ -629,6 +660,8 @@ public class GameManager : MonoBehaviour
             BossLine.RosaryLash => rosaryLash,
             BossLine.Iaido => iaido,
             BossLine.RosaryBloom => rosaryBloom,
+            BossLine.KasaWheel => kasaWheel,
+            BossLine.Escapement => escapement,
             _ => null,
         };
     }
@@ -641,6 +674,12 @@ public class GameManager : MonoBehaviour
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
+        },
+        BossKind.Utsusemi => new BossVoice
+        {
+            portrait = utsusemiPortrait, closeup = utsusemiCloseup,
+            intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
+            stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, escapement = utsusemiEscapementLine, hurt = utsusemiHurtLines,
         },
         _ => default,
     };
@@ -717,7 +756,7 @@ public class GameManager : MonoBehaviour
         effects.Boss = null;
         activeBoss = null;
         // Her fall lifts the blood moon.
-        if (backdrop != null) backdrop.SetBloodMoon(false);
+        if (backdrop != null) backdrop.SetBossMoon(false);
 
         var element = (Element)Random.Range(0, 3);
         ElementFx.Glow(where, Boons.Info(element).Color, 1f, 5f, 1f);

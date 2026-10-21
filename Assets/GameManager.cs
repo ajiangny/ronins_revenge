@@ -152,6 +152,8 @@ public class GameManager : MonoBehaviour
     float nextScoutTime;
     Boss activeBoss;
     AudioSource voice;
+    // Utsusemi's machine voice: a doubled, ringing, slightly gritty layer over the recorded lines.
+    Behaviour[] machineVoice;
     // Whether the voice source is playing a full line rather than a bark.
     bool speakingFullLine;
     Backdrop backdrop;
@@ -160,11 +162,39 @@ public class GameManager : MonoBehaviour
     {
         // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
         if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
-        // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects.
+        // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects. It sits on its
+        // own child so the machine-voice filters only ever touch it.
         backdrop = FindAnyObjectByType<Backdrop>();
-        voice = gameObject.AddComponent<AudioSource>();
+        var voiceObject = new GameObject("BossVoice");
+        voiceObject.transform.SetParent(transform, false);
+        voice = voiceObject.AddComponent<AudioSource>();
         voice.playOnAwake = false;
         voice.spatialBlend = 0f;
+        machineVoice = CreateMachineVoice(voiceObject);
+    }
+
+    // The metallic ring: a chorus doubles the voice, a very short echo gives it a comb-filtered hollow ring, and a
+    // touch of distortion adds grit. Off until a mechanical boss speaks.
+    static Behaviour[] CreateMachineVoice(GameObject target)
+    {
+        var chorus = target.AddComponent<AudioChorusFilter>();
+        chorus.dryMix = 0.7f;
+        chorus.wetMix1 = 0.45f;
+        chorus.wetMix2 = 0.45f;
+        chorus.wetMix3 = 0f;
+        chorus.delay = 14f;
+        chorus.rate = 0.35f;
+        chorus.depth = 0.06f;
+        var ring = target.AddComponent<AudioEchoFilter>();
+        ring.delay = 16f;
+        ring.decayRatio = 0.4f;
+        ring.wetMix = 0.35f;
+        ring.dryMix = 1f;
+        var grit = target.AddComponent<AudioDistortionFilter>();
+        grit.distortionLevel = 0.12f;
+        var filters = new Behaviour[] { chorus, ring, grit };
+        foreach (Behaviour filter in filters) filter.enabled = false;
+        return filters;
     }
 
     // OnEnable also runs after the Editor reloads scripts mid-play, which clears statics like the effect library.
@@ -598,6 +628,7 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.FrostChill, 0.8f, 0.5f);
 
         activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
+        foreach (Behaviour filter in machineVoice) filter.enabled = Stage.boss == BossKind.Utsusemi;
         activeBoss.Damaged += OnBossDamaged;
         activeBoss.Defeated += OnBossDefeated;
         activeBoss.Spoke += OnBossSpoke;

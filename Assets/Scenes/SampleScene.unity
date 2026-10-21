@@ -544,13 +544,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa887ddf283f3463eadf72ae1fd3df7c, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
-  utsusemiIntroLine: {fileID: 0}
-  utsusemiPhaseLine: {fileID: 0}
-  utsusemiDefeatLine: {fileID: 0}
-  utsusemiStaggerLine: {fileID: 0}
-  utsusemiKasaLine: {fileID: 0}
-  utsusemiEscapementLine: {fileID: 0}
-  utsusemiHurtLines: []
+  utsusemiIntroLine: {fileID: 8300000, guid: a56e622e912b24336a5dd663a2e52f19, type: 3}
+  utsusemiPhaseLine: {fileID: 8300000, guid: 1b30d9fbdb3de4d1da819f848d500919, type: 3}
+  utsusemiDefeatLine: {fileID: 8300000, guid: 02a75a57046f8430b9af9a2e168c71ef, type: 3}
+  utsusemiStaggerLine: {fileID: 8300000, guid: d8e7c0de73f6e4d93a50192952104d62, type: 3}
+  utsusemiKasaLine: {fileID: 8300000, guid: cc324ee4c78b8477fad210001b1c5295, type: 3}
+  utsusemiEscapementLine: {fileID: 8300000, guid: f96c0055df7e349148f82aa418af7422, type: 3}
+  utsusemiHurtLines:
+  - {fileID: 8300000, guid: e261d72157c784654adb568f6fb473cc, type: 3}
+  - {fileID: 8300000, guid: 6f1bad16c944d45799b48a0c9e46942c, type: 3}
+  - {fileID: 8300000, guid: 48e4f08bad8644e05af5b1fa47db8893, type: 3}
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2

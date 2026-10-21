@@ -216,18 +216,20 @@ public class GameManager : MonoBehaviour
     {
         if (state != State.Playing) return;
         effects.OnParried();
-        if (!hitStopping) StartCoroutine(HitStop(parryHitStop));
+        // Thunder Riposte can strike down the army's last samurai, which already moved on to the next stage
+        // or the victory screen; freezing then would stall the stage intro.
+        if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(parryHitStop));
     }
 
-    // A brief freeze when a parry lands. It only resumes play if nothing else (the boon screen, game over)
-    // changed the time scale in the meantime.
+    // A brief freeze when a parry lands. It always undoes its own slow-down, and leaves the time scale alone
+    // if something else (the boon screen, game over) changed it in the meantime.
     IEnumerator HitStop(float seconds)
     {
         if (Time.timeScale != 1f) yield break;
         hitStopping = true;
         Time.timeScale = 0.02f;
         yield return new WaitForSecondsRealtime(seconds);
-        if (state == State.Playing && Mathf.Approximately(Time.timeScale, 0.02f)) Time.timeScale = 1f;
+        if (Mathf.Approximately(Time.timeScale, 0.02f)) Time.timeScale = 1f;
         hitStopping = false;
     }
 

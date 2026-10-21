@@ -316,31 +316,32 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    // Flames follow the element he has the most boons of; each projectile follows the element in its slot.
+    // His flames and aura follow his Kunai boon's element (or, before he has one, the element he has the most boons
+    // of); each projectile follows the element in its slot.
     void UpdateRoninLook()
     {
-        Element? dominant = loadout.DominantElement;
-        CharacterArt look = dominant is Element d && ArtFor(d)?.ronin != null ? ArtFor(d).ronin : baseRoninArt;
-
         Element? attack = loadout.SlotElement(BoonSlot.Attack);
+        Element? primary = attack ?? loadout.DominantElement;
+        CharacterArt look = primary is Element d && ArtFor(d)?.ronin != null ? ArtFor(d).ronin : baseRoninArt;
+
         Element? special = loadout.SlotElement(BoonSlot.Special);
         Element? parry = loadout.SlotElement(BoonSlot.Parry);
         Sprite kunai = attack is Element a ? ArtFor(a)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
         // The animated aura replaces the plain glow when its art exists.
-        bool animatedAura = dominant is Element a2 && Fx.Has(Fx.Aura(a2));
-        Color glowAura = dominant is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
+        bool animatedAura = primary is Element a2 && Fx.Has(Fx.Aura(a2));
+        Color glowAura = primary is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
         ronin.SetLook(look, glowAura,
             kunai, StandInTint(attack, kunai), ElementColor(attack),
             shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
-        if (dominant != shownElement)
+        if (primary != shownElement)
         {
             if (aura != null) aura.Stop();
             aura = null;
-            if (dominant is Element changed)
+            if (primary is Element changed)
             {
                 // Behind the ronin and wider than him so the flames show round his silhouette; faded so he stays readable.
                 aura = Fx.Play(Fx.Aura(changed), ronin.Feet + Vector3.up * auraLift, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
@@ -352,7 +353,7 @@ public class GameManager : MonoBehaviour
                 Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, Boons.Info(changed).Color, 14, 1f, 6f);
             }
         }
-        shownElement = dominant;
+        shownElement = primary;
     }
 
     static Color? ElementColor(Element? element) => element is Element e ? Boons.Info(e).Color : (Color?)null;

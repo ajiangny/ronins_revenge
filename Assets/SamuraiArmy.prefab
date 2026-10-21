@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fe700f4a4229c443a9921addc2f7517, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  alienPrefab: {fileID: -8872074747676231410, guid: 30e01da1a41a89c41b91b987c464522c, type: 3}
-  alienCounter: {fileID: 0}
+  samuraiPrefab: {fileID: -8872074747676231410, guid: 30e01da1a41a89c41b91b987c464522c, type: 3}
+  samuraiCounter: {fileID: 0}
   samuraiByRow:
   - {fileID: 11400000, guid: 858bf7e4fa1a743269e84ef3affdf09a, type: 2}
   - {fileID: 11400000, guid: 633c256d808d7469e83acf8ce1533b6b, type: 2}
@@ -56,4 +56,7 @@ MonoBehaviour:
   edgeMargin: 1
   dropDistance: 0.5
   dropSpeed: 8
-  alienRadius: 0.7
+  samuraiRadius: 0.7
+  marchBeatDistance: 1.2
+  spearInterval: 4.5
+  taishoHealth: 2

@@ -23,6 +23,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 7583b7954ffae4ad6b1ab60cda1082e1, type: 3}
   - {fileID: 21300000, guid: 7cc7e60a80aa84bf0bbc1ce160c09b50, type: 3}
   - {fileID: 21300000, guid: 75f40bb3bb00247a1b5a1f8197155383, type: 3}
+  parry: []
   runLeft: []
   runRight: []
   idleFps: 6

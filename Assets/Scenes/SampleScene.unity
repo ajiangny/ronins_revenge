@@ -482,24 +482,24 @@ MonoBehaviour:
   ui: {fileID: 2080831155}
   startingLives: 3
   levelIntroTime: 2.5
-  boonChoice: {fileID: 0}
+  boonChoice: {fileID: 2080831156}
   soulDropChance: 0.07
   soulPityKills: 15
   elementArt:
   - element: 0
     soulFrames: []
-    ronin: {fileID: 0}
-    kunai: {fileID: 0}
+    ronin: {fileID: 11400000, guid: 87854a5e3b08f448e84815e10623cf65, type: 2}
+    kunai: {fileID: 21300000, guid: a4e51af349d844efcbaea19692953b58, type: 3}
     shuriken: {fileID: 0}
-  - element: 0
+  - element: 1
     soulFrames: []
-    ronin: {fileID: 0}
-    kunai: {fileID: 0}
+    ronin: {fileID: 11400000, guid: 0b85754cadf1441e1a665c4e9e2471ee, type: 2}
+    kunai: {fileID: 21300000, guid: 76b73bd8597e74851972cd6c7ec4945d, type: 3}
     shuriken: {fileID: 0}
-  - element: 0
+  - element: 2
     soulFrames: []
-    ronin: {fileID: 0}
-    kunai: {fileID: 0}
+    ronin: {fileID: 11400000, guid: 6c0aef5ba9c6e49dc98b8f2414fca399, type: 2}
+    kunai: {fileID: 21300000, guid: 8aafdb898a50942fb95a2f3718151ae8, type: 3}
     shuriken: {fileID: 0}
   levels:
   - columns: 10
@@ -913,6 +913,7 @@ GameObject:
   - component: {fileID: 2080831152}
   - component: {fileID: 2080831151}
   - component: {fileID: 2080831155}
+  - component: {fileID: 2080831156}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1020,6 +1021,41 @@ MonoBehaviour:
   lifeIcon: {fileID: 21300000, guid: caceff5aceb7d40f58919d8490b266b1, type: 3}
   overlayBanner: {fileID: 21300000, guid: 67f054b675f2c4b658d5619a39573a46, type: 3}
   overlayBannerPixelScale: 2
+--- !u!114 &2080831156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2080831150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f5a8be2e01dd453e9a35974e599e7e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoonChoiceUI
+  boonIcons:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  cardSprite: {fileID: 0}
+  cardGlowSprite: {fileID: 0}
+  cardPixelScale: 2
+  abilityIcons:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1001 &3533950217798640327
 PrefabInstance:
   m_ObjectHideFlags: 0

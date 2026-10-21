@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: RoninFire
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 77179c08c0c8d4f07bad90bbee82a1c6, type: 3}
+  - {fileID: 21300000, guid: b9f04a9a8c1b743fab05060320619ddb, type: 3}
+  - {fileID: 21300000, guid: fdc0325a9b1dc499c9575866efbd70a4, type: 3}
+  - {fileID: 21300000, guid: 3572dd724633343fd9c46e1587103c37, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 14bd467de0a2f48599960e3ab9bdc4ad, type: 3}
+  - {fileID: 21300000, guid: d9cd7d9a8ad3e40fe884dfae428afeab, type: 3}
+  - {fileID: 21300000, guid: 52aae118b6dfa49cea990a03b29aede3, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 5f3861c5e35fc40ef86c3a2554bed18f, type: 3}
+  - {fileID: 21300000, guid: ae45263c4a19b4a65b22c5112f0236d8, type: 3}
+  death: []
+  parry: []
+  runLeft:
+  - {fileID: 21300000, guid: 33d8c3d5b7dda4e80ac5f7540fcbcd14, type: 3}
+  - {fileID: 21300000, guid: 13db89f2f059448d6b1b983e2e829236, type: 3}
+  - {fileID: 21300000, guid: f8bc4e53a63c44bb09dfb9d1a2e9c62b, type: 3}
+  - {fileID: 21300000, guid: 5040becc359d24e359a276fc085ed082, type: 3}
+  - {fileID: 21300000, guid: dee66265822b54e2ca5cea2ad5520487, type: 3}
+  - {fileID: 21300000, guid: af50097618b1744f8b58cec349084426, type: 3}
+  - {fileID: 21300000, guid: f7e891df7e92f43e5a91351e38590d26, type: 3}
+  - {fileID: 21300000, guid: f8e62fdf394ce48cb978acf9d0163d18, type: 3}
+  runRight:
+  - {fileID: 21300000, guid: d02fca487ef7c4bf68c8faf83419fead, type: 3}
+  - {fileID: 21300000, guid: 625e84058290e45f48e2c15c4dd5a54f, type: 3}
+  - {fileID: 21300000, guid: 1b6a74802f3fd446f9566ad33640b13d, type: 3}
+  - {fileID: 21300000, guid: b866d08e4a38e4003b58edac90521674, type: 3}
+  - {fileID: 21300000, guid: 5e02cf4b8985e40cba49fd55f6fc02b0, type: 3}
+  - {fileID: 21300000, guid: d80cda2e06edd420e9bbeb8f9ac5d682, type: 3}
+  - {fileID: 21300000, guid: 6e795bb9f7f5847f18da3e19d8140ff5, type: 3}
+  - {fileID: 21300000, guid: 8e139bc17de054dbb8c3bd5af2265a52, type: 3}
+  idleFps: 5
+  actionFps: 12
+  runFps: 14
+  deathParticles:
+  - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

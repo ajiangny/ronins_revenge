@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: RoninWater
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 4aedea3b4f0b8448c81492ee1323722e, type: 3}
+  - {fileID: 21300000, guid: dde02765fe7fd4be6b1cfd1e48bead54, type: 3}
+  - {fileID: 21300000, guid: 8b545e822097a4d19b91de8e73a6d2a2, type: 3}
+  - {fileID: 21300000, guid: 10d364b9bcc9143a48f3491e0d7e1cfd, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 1c7ffcfb2bb974f2ea930fb701a7f75b, type: 3}
+  - {fileID: 21300000, guid: 1ce5d483a4263449a98b1c1aa2166fc3, type: 3}
+  - {fileID: 21300000, guid: c87abdcb187b544b39a5aa5ec6c41e15, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 45e707272c76f435aaafd65763094dba, type: 3}
+  - {fileID: 21300000, guid: fc5466818884b4beb9261d5e0cc20f4c, type: 3}
+  death: []
+  parry: []
+  runLeft:
+  - {fileID: 21300000, guid: efbb6203cab84488d8ed5f98d7a26138, type: 3}
+  - {fileID: 21300000, guid: 3b0c73d33ae2947b69ca8dbaedd32911, type: 3}
+  - {fileID: 21300000, guid: 2c603971b259c48eca92fb07cded56db, type: 3}
+  - {fileID: 21300000, guid: b4bc31236f9654099851cf3144d83f2f, type: 3}
+  - {fileID: 21300000, guid: b5d8d3a97cf70475394aef53e353f38a, type: 3}
+  - {fileID: 21300000, guid: 8bb3909b1ae59453e89f53b6d95fc94d, type: 3}
+  - {fileID: 21300000, guid: e2e073c9c120e46499297693980080ca, type: 3}
+  - {fileID: 21300000, guid: d1a951afa3df943f4b9452677c4a1423, type: 3}
+  runRight:
+  - {fileID: 21300000, guid: b645182d5dbd848a5890b876207496b1, type: 3}
+  - {fileID: 21300000, guid: a3a99665cd9504552aec8174990da014, type: 3}
+  - {fileID: 21300000, guid: dd79648c9a37848c8868c537ae30aa94, type: 3}
+  - {fileID: 21300000, guid: d92a8da9cb9484719b05960d375ec9bd, type: 3}
+  - {fileID: 21300000, guid: 9b96e53f8b337446eb0b510a4bc90b26, type: 3}
+  - {fileID: 21300000, guid: b92a2ef24def346d8820bce0a739841b, type: 3}
+  - {fileID: 21300000, guid: 551b3d9c9a1d84a239f8b5aa7b873413, type: 3}
+  - {fileID: 21300000, guid: fc8074293150e4c6fa8ff14bf242db19, type: 3}
+  idleFps: 5
+  actionFps: 12
+  runFps: 14
+  deathParticles:
+  - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

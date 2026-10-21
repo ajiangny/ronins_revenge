@@ -38,6 +38,7 @@ In the code the original class names are kept (`Alien` = samurai, `Spaceship` = 
   - **Samurai:** three types by row, worth more points the higher they stand: Ashigaru (spear, straw hat) in the bottom rows, Bushi (katana, lamellar armour) in the middle, and Taishō (horned kabuto, menpō mask) on top. Each has a march loop and a death animation.
   - **Ronin (player):** idle, kunai throw, hit, and left/right sprint animations. The hitbox is fitted to his body and spirit flames.
   - **Projectiles:** a spirit-flame kunai that flies point-first, and samurai arrows.
+  - **UI:** a pixel brush-style font made with PixelLab (`Art/Fonts/ShadowBladePixel.ttf`, baked into a TMP font asset), a black-lacquer panel with crimson and gold trim behind the title, stage and end screens (9-sliced so it scales cleanly), and ronin head life icons.
   - **Pipeline:** `Editor/PixelArtImporter.cs` imports everything under `Assets/Art/Sprites` as crisp point-filtered sprites at a fixed pixels-per-unit. `CharacterArt` ScriptableObjects hold each character's clips, `SpriteAnimator` plays them, and the `Ninja/Apply Sprite Art` menu command (`Editor/NinjaArtSetup.cs`) rebuilds the prefabs from the art. Gameplay objects keep their 3D Rigidbodies and colliders, so only the visuals changed.
 - **New background.** A top-down moonlit grass courtyard the samurai march across, with sakura petals drifting over it (`Backdrop`). It's top-down to match the 3/4-view character sprites, so the armies stand on the ground instead of floating in front of a sky.
 

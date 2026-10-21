@@ -712,8 +712,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Samurai Left: 0'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a6eecc1ac6fb74ce7b66997f741a9075, type: 2}
+  m_sharedMaterial: {fileID: -8739719055726808858, guid: a6eecc1ac6fb74ce7b66997f741a9075, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -997,8 +997,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d8c2799f5c243828e53b7099c247a05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameUI
-  font: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  font: {fileID: 11400000, guid: a6eecc1ac6fb74ce7b66997f741a9075, type: 2}
   lifeIcon: {fileID: 21300000, guid: caceff5aceb7d40f58919d8490b266b1, type: 3}
+  overlayBanner: {fileID: 21300000, guid: 67f054b675f2c4b658d5619a39573a46, type: 3}
+  overlayBannerPixelScale: 2
 --- !u!1001 &3533950217798640327
 PrefabInstance:
   m_ObjectHideFlags: 0

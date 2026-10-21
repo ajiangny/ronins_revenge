@@ -11,6 +11,10 @@ public class GameUI : MonoBehaviour
     [SerializeField] TMP_FontAsset font;
     [Tooltip("Ronin head shown once per remaining life.")]
     [SerializeField] Sprite lifeIcon;
+    [Tooltip("9-sliced panel drawn behind the title/stage/end screen text.")]
+    [SerializeField] Sprite overlayBanner;
+    [Tooltip("Screen pixels per art pixel for the banner's border, so the pixel art stays chunky and even.")]
+    [SerializeField] float overlayBannerPixelScale = 2f;
 
     TextMeshProUGUI scoreText;
     TextMeshProUGUI levelText;
@@ -77,9 +81,18 @@ public class GameUI : MonoBehaviour
         panel.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0.05f, 0.75f);
         overlay = panel.gameObject;
 
+        if (overlayBanner != null)
+        {
+            RectTransform banner = CreateRect("Banner", panel, new Vector2(0.5f, 0.5f), new Vector2(0, 20), new Vector2(1560, 500));
+            Image image = banner.gameObject.AddComponent<Image>();
+            image.sprite = overlayBanner;
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = GetComponent<Canvas>().referencePixelsPerUnit / overlayBanner.pixelsPerUnit / overlayBannerPixelScale;
+        }
+
         overlayTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 140), new Vector2(1600, 180), 110, TextAlignmentOptions.Center, panel);
         overlayTitle.fontStyle = FontStyles.Bold;
-        overlayBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(1400, 360), 40, TextAlignmentOptions.Top, panel);
+        overlayBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(1400, 360), 34, TextAlignmentOptions.Top, panel);
     }
 
     GameObject CreateLifeIcon(int index)

@@ -485,6 +485,7 @@ MonoBehaviour:
   boonChoice: {fileID: 2080831156}
   soulDropChance: 0.07
   soulPityKills: 15
+  soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
   elementArt:
   - element: 0
     soulFrames:

@@ -57,6 +57,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 92c444b42dd9e49b4b5d55f1e3ee3e14, type: 3}
   - {fileID: 21300000, guid: f5e3f0430681e4ab6969218514f7e9e4, type: 3}
   - {fileID: 21300000, guid: 0c7bd1544f21e44b58ff37c5d9e518a1, type: 3}
+  slash: []
   runLeft: []
   runRight: []
   idleFps: 6

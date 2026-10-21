@@ -3,7 +3,8 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Builds the bosses' CharacterArt from their PixelLab frames and hands it to the GameManager in the scene.
+// Builds the bosses' CharacterArt from their PixelLab frames and hands it to the GameManager in the scene, along
+// with their intro portraits, voice lines and title-card fonts.
 // Safe to re-run after regenerating any of the art.
 public static class BossArtSetup
 {
@@ -12,6 +13,7 @@ public static class BossArtSetup
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
     const string PortraitRoot = "Assets/Art/Portraits/";
     const string VoiceRoot = "Assets/Audio/Voice/";
+    const string FontRoot = "Assets/Art/Fonts/";
     // About twice a samurai's height, so she reads as the warlord the moment she lands.
     const float BenibanaScale = 2.3f;
     // Low enough that her ponytail clears the boss bar.
@@ -48,6 +50,12 @@ public static class BossArtSetup
         so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
         so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
         so.ApplyModifiedProperties();
+
+        // The fonts for the bosses' Borderlands-style title cards.
+        var ui = new SerializedObject(Object.FindAnyObjectByType<GameUI>());
+        ui.FindProperty("cardNameFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Shojumaru-Regular.ttf");
+        ui.FindProperty("cardTagFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Bangers-Regular.ttf");
+        ui.ApplyModifiedProperties();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();

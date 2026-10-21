@@ -1,0 +1,177 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 550c41c6ebf164705a06b519f7ccb314, type: 3}
+  m_Name: SfxLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::SfxLibrary
+  sounds:
+  - id: SwordSlash
+    clips:
+    - {fileID: 8300000, guid: 4fcc22e5e1a2f47a1bd84c3119cbe272, type: 3}
+    - {fileID: 8300000, guid: 78eea4d92bd19473ca264bd097fd1c06, type: 3}
+    volume: 0.55
+    pitchJitter: 0.08
+    minInterval: 0.05
+  - id: KunaiThrow
+    clips:
+    - {fileID: 8300000, guid: 593e7bd861b264cf88e093c158e8348a, type: 3}
+    - {fileID: 8300000, guid: 79da46443a86e4e75a592ce0177c0878, type: 3}
+    volume: 0.55
+    pitchJitter: 0.08
+    minInterval: 0.05
+  - id: ShurikenThrow
+    clips:
+    - {fileID: 8300000, guid: d8e6b6839af83411f8b83cc69cca7b03, type: 3}
+    - {fileID: 8300000, guid: d0a1a7d56e5674278a332991d4780a3d, type: 3}
+    volume: 0.8
+    pitchJitter: 0.04
+    minInterval: 0.1
+  - id: ParrySwing
+    clips:
+    - {fileID: 8300000, guid: 8d43c9655c2dd47ceb8a10e1e677c7ee, type: 3}
+    volume: 0.7
+    pitchJitter: 0.06
+    minInterval: 0.05
+  - id: Deflect
+    clips:
+    - {fileID: 8300000, guid: 451031da2efe94d6794052a6a5fd68d5, type: 3}
+    volume: 0.85
+    pitchJitter: 0.06
+    minInterval: 0.04
+  - id: ArrowFire
+    clips:
+    - {fileID: 8300000, guid: cb73a06634f154d0cbefae6a7c1fc951, type: 3}
+    - {fileID: 8300000, guid: a15bf4dbb59054fc6b3c3e6a82b56e35, type: 3}
+    volume: 0.5
+    pitchJitter: 0.1
+    minInterval: 0.08
+  - id: SamuraiDeath
+    clips:
+    - {fileID: 8300000, guid: 3113cd3da99e54d88af121d0aa611193, type: 3}
+    - {fileID: 8300000, guid: 8db92fb6a8aa148e8bcc4b699fd91aa5, type: 3}
+    volume: 0.7
+    pitchJitter: 0.1
+    minInterval: 0.04
+  - id: PlayerHit
+    clips:
+    - {fileID: 8300000, guid: f2e163b25eb5a47a191a5f827bf8854e, type: 3}
+    - {fileID: 8300000, guid: ae69c422f223f4d938cac5e073c75c8e, type: 3}
+    volume: 1
+    pitchJitter: 0.03
+    minInterval: 0.2
+  - id: WardShatter
+    clips:
+    - {fileID: 8300000, guid: 3617eb935fea64f24b1ef85456c7c38f, type: 3}
+    - {fileID: 8300000, guid: 8c62fb177cf3841808269e84fb08411a, type: 3}
+    volume: 0.9
+    pitchJitter: 0.03
+    minInterval: 0.2
+  - id: PlayerDeath
+    clips:
+    - {fileID: 8300000, guid: 83c505eae1a3145b39ba339e42893fac, type: 3}
+    - {fileID: 8300000, guid: d2959d37fe21844eab2a80ce01571cb9, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.5
+  - id: BlockerHit
+    clips:
+    - {fileID: 8300000, guid: 7a5218d0827ca4c61bdfc64b31be6fae, type: 3}
+    - {fileID: 8300000, guid: b965e74b8f0674beca70ff14d58819a9, type: 3}
+    volume: 0.5
+    pitchJitter: 0.1
+    minInterval: 0.05
+  - id: BlockerBreak
+    clips:
+    - {fileID: 8300000, guid: 3e944ccbaafe04362b50fbaa2f6d0a49, type: 3}
+    - {fileID: 8300000, guid: 85de44cd7d68a42b89d646bc3fc64624, type: 3}
+    volume: 0.7
+    pitchJitter: 0.08
+    minInterval: 0.08
+  - id: SoulSpawn
+    clips:
+    - {fileID: 8300000, guid: ef396377c3af049bbbf51754745a5c1a, type: 3}
+    - {fileID: 8300000, guid: c9c7eafad9472442eabf007d0ea5fac7, type: 3}
+    volume: 0.7
+    pitchJitter: 0.03
+    minInterval: 0.2
+  - id: SoulCollect
+    clips:
+    - {fileID: 8300000, guid: d85e64d1ee3ba4b18b207deb44857f04, type: 3}
+    - {fileID: 8300000, guid: 68dd21b4a36fd46cc84a29c2049a5653, type: 3}
+    volume: 0.9
+    pitchJitter: 0
+    minInterval: 0.2
+  - id: FireBlast
+    clips:
+    - {fileID: 8300000, guid: 2d0c7978414af4139bf24a0fa2adfa97, type: 3}
+    - {fileID: 8300000, guid: f6105e8f78939492f8c25689ad57e3fe, type: 3}
+    volume: 0.75
+    pitchJitter: 0.08
+    minInterval: 0.06
+  - id: LightningStrike
+    clips:
+    - {fileID: 8300000, guid: 7ec0f78babcca4312999e408a94f0ac6, type: 3}
+    - {fileID: 8300000, guid: ff1c9beb044c64f01abe9815bfe6f6ea, type: 3}
+    volume: 0.7
+    pitchJitter: 0.08
+    minInterval: 0.06
+  - id: FrostChill
+    clips:
+    - {fileID: 8300000, guid: d6920d3e89d504a458b303e01d9362bc, type: 3}
+    - {fileID: 8300000, guid: af6309339e827417cb56f60754a0cf85, type: 3}
+    volume: 0.6
+    pitchJitter: 0.06
+    minInterval: 0.08
+  - id: UiMove
+    clips:
+    - {fileID: 8300000, guid: 202d2fbc49c2546938dbf99b053e46f8, type: 3}
+    - {fileID: 8300000, guid: 417867516ace14dc18ac26b37c89a00a, type: 3}
+    volume: 0.6
+    pitchJitter: 0.04
+    minInterval: 0.03
+  - id: UiConfirm
+    clips:
+    - {fileID: 8300000, guid: 773ee1fe125a34a53aa2fc0ec32c23d7, type: 3}
+    - {fileID: 8300000, guid: c9945e2d7138b4361aded8116ea2e0d2, type: 3}
+    volume: 0.8
+    pitchJitter: 0
+    minInterval: 0.1
+  - id: StageStart
+    clips:
+    - {fileID: 8300000, guid: 3d585b08125574d90816ce300f3c4707, type: 3}
+    - {fileID: 8300000, guid: 40b9380c20a3b415785844533b0d8951, type: 3}
+    volume: 0.9
+    pitchJitter: 0
+    minInterval: 0.5
+  - id: VictorySting
+    clips:
+    - {fileID: 8300000, guid: a77507972685e402ba1635ce93aa70fd, type: 3}
+    - {fileID: 8300000, guid: 5952ae335177f4999953ff33af651b95, type: 3}
+    volume: 0.9
+    pitchJitter: 0
+    minInterval: 1
+  - id: DefeatSting
+    clips:
+    - {fileID: 8300000, guid: 130ea73c51d5d46a3a53e5631aa06e15, type: 3}
+    - {fileID: 8300000, guid: b54a4eb231a6543c196a8a6e775e59bf, type: 3}
+    volume: 0.9
+    pitchJitter: 0
+    minInterval: 1
+  - id: MarchStep
+    clips:
+    - {fileID: 8300000, guid: 3d13893519d964a35a886ba14d09d0aa, type: 3}
+    - {fileID: 8300000, guid: a3d393a4dc1ba46c694926481b8a4a4e, type: 3}
+    volume: 0.7
+    pitchJitter: 0
+    minInterval: 0.1
+  titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
+  battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
+  musicVolume: 0.45

@@ -109,7 +109,7 @@ public class BoonEffects
         Sfx.Play(Sfx.FireBlast);
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
-            target.Kill(KillSource.Effect);
+            target.TakeHit(1, KillSource.Effect);
         }
     }
 
@@ -121,7 +121,7 @@ public class BoonEffects
         Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
         CameraShake.Add(0.1f);
         Sfx.Play(Sfx.LightningStrike);
-        target.Kill(KillSource.Effect);
+        target.TakeHit(1, KillSource.Effect);
     }
 
     // The other occupied columns closest to `column`, nearest first.

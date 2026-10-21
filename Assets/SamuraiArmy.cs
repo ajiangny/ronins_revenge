@@ -8,7 +8,7 @@ public class SamuraiArmy : MonoBehaviour
     [Header("Inscribed")]
     [FormerlySerializedAs("alienPrefab")] public Samurai samuraiPrefab;
     [FormerlySerializedAs("alienCounter")] public SamuraiCounter samuraiCounter;
-    [Tooltip("Samurai type per row from the top; rows past the end reuse the last entry. Matches PointsForRow.")]
+    [Tooltip("Samurai art from the top rank down: Taisho, Bushi, Bushi, Ashigaru. Each SamuraiKind picks its look from here.")]
     public CharacterArt[] samuraiByRow;
 
     [SerializeField] float maxSpacingX = 2f;
@@ -90,7 +90,8 @@ public class SamuraiArmy : MonoBehaviour
             {
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
-                soldier.Init(this, col, PointsForRow(row), config.samuraiColor, samuraiByRow[Mathf.Min(row, samuraiByRow.Length - 1)]);
+                SamuraiKind kind = KindForRow(config, row);
+                soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind);
                 soldiers.Add(soldier);
             }
         }
@@ -119,7 +120,21 @@ public class SamuraiArmy : MonoBehaviour
         advancing = false;
     }
 
-    static int PointsForRow(int row) => row == 0 ? 30 : row < 3 ? 20 : 10;
+    static SamuraiKind KindForRow(LevelConfig config, int row)
+    {
+        if (config.rowKinds == null || config.rowKinds.Length == 0) return SamuraiKind.Ashigaru;
+        return config.rowKinds[Mathf.Min(row, config.rowKinds.Length - 1)];
+    }
+
+    // Higher ranks are worth more; archers are worth the most of the rank and file.
+    static int PointsFor(SamuraiKind kind, int row) => kind == SamuraiKind.Archer ? 30 : row < 2 ? 20 : 10;
+
+    // Ashigaru wear the foot soldier's look and archers the Bushi's, so each kind reads at a glance.
+    CharacterArt ArtFor(SamuraiKind kind) => kind switch
+    {
+        SamuraiKind.Archer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
+        _ => samuraiByRow[samuraiByRow.Length - 1],
+    };
 
     float HalfWidth() => cam.orthographicSize * cam.aspect;
 

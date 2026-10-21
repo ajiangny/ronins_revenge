@@ -8,6 +8,10 @@ public class LevelConfig
     public int columns = 10;
     public int rows = 4;
     public float topRowY = 9f;
+    [Tooltip("Kind of samurai per row from the top; rows past the end reuse the last entry. Empty means all Ashigaru.")]
+    public SamuraiKind[] rowKinds;
+    [Tooltip("Scouts fly across the top of the screen during this round.")]
+    public bool scouts;
 
     [Tooltip("Sideways speed (units/sec) with the full army alive.")]
     public float baseSpeed = 2.5f;

@@ -112,10 +112,10 @@ public class Kunai : MonoBehaviour
             return;
         }
 
-        Samurai samurai = coll.collider.GetComponentInParent<Samurai>();
-        if (samurai != null)
+        IHittable target = coll.collider.GetComponentInParent<IHittable>();
+        if (target != null)
         {
-            samurai.Kill(Source);
+            target.TakeHit(Damage.Of(Source), Source);
             if (pierceLeft > 0)
             {
                 pierceLeft--;
@@ -131,8 +131,8 @@ public class Kunai : MonoBehaviour
         }
 
         spent = true;
-        // A small spark where it breaks on a blocker or an arrow (samurai kills get their own).
-        if (samurai == null) Fx.Play(Fx.Impact, transform.position, glow.color * new Color(1f, 1f, 1f, 2f), 0.55f);
+        // A small spark where it breaks on a blocker or an arrow (hits on enemies get their own).
+        if (target == null) Fx.Play(Fx.Impact, transform.position, glow.color * new Color(1f, 1f, 1f, 2f), 0.55f);
         Destroy(gameObject);
     }
 

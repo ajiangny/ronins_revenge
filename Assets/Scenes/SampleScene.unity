@@ -492,18 +492,21 @@ MonoBehaviour:
     ronin: {fileID: 11400000, guid: 87854a5e3b08f448e84815e10623cf65, type: 2}
     kunai: {fileID: 21300000, guid: a4e51af349d844efcbaea19692953b58, type: 3}
     shuriken: {fileID: 21300000, guid: be8ff31cdb2094369a07bf5ece558d0f, type: 3}
+    portrait: {fileID: 21300000, guid: b25373bcddb734ca7b796db12c5bf83b, type: 3}
   - element: 1
     soulFrames:
     - {fileID: 21300000, guid: bea9c4fb3d9f2474ba034cae5580a084, type: 3}
     ronin: {fileID: 11400000, guid: 0b85754cadf1441e1a665c4e9e2471ee, type: 2}
     kunai: {fileID: 21300000, guid: 76b73bd8597e74851972cd6c7ec4945d, type: 3}
     shuriken: {fileID: 21300000, guid: fb6b204124c234d3f9beb83f7e4caa50, type: 3}
+    portrait: {fileID: 21300000, guid: 2a16c87b6155c4e7884407264947d3d8, type: 3}
   - element: 2
     soulFrames:
     - {fileID: 21300000, guid: 3292803b3302e473dabb0fabac449d0a, type: 3}
     ronin: {fileID: 11400000, guid: 6c0aef5ba9c6e49dc98b8f2414fca399, type: 2}
     kunai: {fileID: 21300000, guid: 8aafdb898a50942fb95a2f3718151ae8, type: 3}
     shuriken: {fileID: 21300000, guid: b060325bb3a104e6d9b118a552ff3be9, type: 3}
+    portrait: {fileID: 21300000, guid: 40c38b58b0f684bb982f86cf29593207, type: 3}
   fxLibrary: {fileID: 11400000, guid: bd9d599437bb141c490c7f26310fb69e, type: 2}
   parryHitStop: 0.06
   levels:

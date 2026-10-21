@@ -14,6 +14,8 @@ public class ElementArt
     public CharacterArt ronin;
     public Sprite kunai;
     public Sprite shuriken;
+    [Tooltip("The boon screen's ronin portrait with his spirit wisps in this element's colour.")]
+    public Sprite portrait;
 }
 
 // Owns the game flow: title screen -> levels -> win/lose screen, plus score, lives, souls and boons.
@@ -267,7 +269,8 @@ public class GameManager : MonoBehaviour
         state = State.Choosing;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
-        boonChoice.Show(soul.Element, offers, ArtFor(soul.Element)?.soulFrames, index =>
+        ElementArt art = ArtFor(soul.Element);
+        boonChoice.Show(soul.Element, offers, art?.soulFrames, art?.portrait, index =>
         {
             TakeBoon(offers[index]);
             Time.timeScale = 1f;

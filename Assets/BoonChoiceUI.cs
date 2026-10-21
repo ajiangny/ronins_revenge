@@ -103,7 +103,8 @@ public class BoonChoiceUI : MonoBehaviour
         panel.SetActive(false);
     }
 
-    public void Show(Element element, List<BoonOffer> boonOffers, Sprite[] soulFrames, Action<int> onChosen)
+    // elementPortrait is the ronin with his wisps in the soul's colour; empty uses the default portrait.
+    public void Show(Element element, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)
     {
         offers = boonOffers;
         chosen = onChosen;
@@ -120,7 +121,7 @@ public class BoonChoiceUI : MonoBehaviour
         bool hasSoul = soulFrames != null && soulFrames.Length > 0;
         if (roninPortrait != null)
         {
-            portrait.sprite = roninPortrait;
+            portrait.sprite = elementPortrait != null ? elementPortrait : roninPortrait;
             portrait.color = Color.white;
             portraitAnimator.Play(null, 0f);
             // The soul he caught floats over his palm, so it takes the element's colours.

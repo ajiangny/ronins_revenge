@@ -68,6 +68,7 @@ public static class BoonArtSetup
             entry.FindPropertyRelative("ronin").objectReferenceValue = BuildRoninVariant(baseRonin, suffix, hue, boost);
             entry.FindPropertyRelative("kunai").objectReferenceValue = Recolor(Load("Projectiles/Kunai"), suffix, hue, boost);
             entry.FindPropertyRelative("shuriken").objectReferenceValue = Recolor(shuriken, suffix, hue, boost);
+            entry.FindPropertyRelative("portrait").objectReferenceValue = RecolorPortrait(Load("UI/RoninPortrait"), suffix, hue, boost);
         }
 
         GameUI ui = Object.FindAnyObjectByType<GameUI>();
@@ -157,6 +158,77 @@ public static class BoonArtSetup
         File.WriteAllBytes(targetPath, texture.EncodeToPNG());
         Object.DestroyImmediate(texture);
 
+        AssetDatabase.ImportAsset(targetPath);
+        return AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
+    }
+
+    // The boon screen portrait: his spirit wisps, oni eyes and blade glint take the element's colour, but the jade knee
+    // guards (solid green patches below the belt) keep theirs. The wisps are a pale mint, so they get extra saturation,
+    // or fire would come out peach. Writes UI/RoninPortrait_<suffix>.png.
+    const int PortraitBeltRow = 130;
+    const int KneeGuardMinPixels = 30;
+    const float PortraitMinSaturation = 0.65f;
+
+    static Sprite RecolorPortrait(Sprite source, string suffix, float hue, float boost)
+    {
+        if (source == null) return null;
+        string sourcePath = AssetDatabase.GetAssetPath(source);
+        string targetPath = $"{Path.GetDirectoryName(sourcePath).Replace('\\', '/')}/{Path.GetFileNameWithoutExtension(sourcePath)}_{suffix}.png";
+
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        texture.LoadImage(File.ReadAllBytes(sourcePath));
+        int width = texture.width, height = texture.height;
+        Color32[] pixels = texture.GetPixels32();
+
+        var flame = new bool[pixels.Length];
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i].a == 0) continue;
+            Color.RGBToHSV(pixels[i], out float h, out float s, out float _);
+            flame[i] = h >= FlameHueMin && h <= FlameHueMax && s >= 0.15f;
+        }
+
+        // Flood-fill each patch of green; a big patch that sits wholly below the belt is a knee guard.
+        var seen = new bool[pixels.Length];
+        var patch = new List<int>();
+        var stack = new Stack<int>();
+        for (int start = 0; start < pixels.Length; start++)
+        {
+            if (!flame[start] || seen[start]) continue;
+            patch.Clear();
+            stack.Push(start);
+            seen[start] = true;
+            int highestRow = height;
+            while (stack.Count > 0)
+            {
+                int i = stack.Pop();
+                patch.Add(i);
+                int x = i % width, y = i / width;
+                highestRow = Mathf.Min(highestRow, height - 1 - y);
+                for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    int nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    int n = ny * width + nx;
+                    if (!flame[n] || seen[n]) continue;
+                    seen[n] = true;
+                    stack.Push(n);
+                }
+            }
+            if (highestRow > PortraitBeltRow && patch.Count >= KneeGuardMinPixels) continue;
+
+            foreach (int i in patch)
+            {
+                Color.RGBToHSV(pixels[i], out float _, out float s, out float v);
+                Color shifted = Color.HSVToRGB(hue, Mathf.Max(s, PortraitMinSaturation), Mathf.Clamp01(v * boost));
+                pixels[i] = new Color32((byte)(shifted.r * 255), (byte)(shifted.g * 255), (byte)(shifted.b * 255), pixels[i].a);
+            }
+        }
+
+        texture.SetPixels32(pixels);
+        File.WriteAllBytes(targetPath, texture.EncodeToPNG());
+        Object.DestroyImmediate(texture);
         AssetDatabase.ImportAsset(targetPath);
         return AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
     }

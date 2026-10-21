@@ -135,6 +135,9 @@ public class BoonChoiceUI : MonoBehaviour
         card.stat.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>- {boon.StatLabel}</color>   <color={StatGreen}>{value}</color>";
         card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";
         card.slide = 0f;
+        // Hidden until AnimatePanel slides it in, so it never flashes at full opacity on the first frame.
+        card.group.alpha = 0f;
+        card.glow.color = Color.clear;
     }
 
     void SetIcon(Image icon, TextMeshProUGUI letter, BoonDefinition boon, Color color)

@@ -331,10 +331,11 @@ public class BoonChoiceUI : MonoBehaviour
         card.name.fontStyle = FontStyles.SmallCaps;
         card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(400, 50), new Vector2(300, 56), 34, TextAlignmentOptions.Right);
         card.rarity.fontStyle = FontStyles.SmallCaps;
-        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(70, -2), new Vector2(960, 46), 28, TextAlignmentOptions.Left);
+        // Room for two lines under the name; the stat line sits below them.
+        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(70, -8), new Vector2(960, 64), 26, TextAlignmentOptions.TopLeft);
         card.description.color = new Color(0.9f, 0.88f, 0.84f);
-        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -50), new Vector2(960, 40), 28, TextAlignmentOptions.Left);
-        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -50), new Vector2(440, 36), 22, TextAlignmentOptions.Right);
+        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -62), new Vector2(960, 36), 26, TextAlignmentOptions.Left);
+        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -62), new Vector2(440, 36), 22, TextAlignmentOptions.Right);
         card.note.color = new Color(1f, 0.75f, 0.55f, 0.85f);
         card.note.fontStyle = FontStyles.Italic;
         return card;
@@ -368,9 +369,9 @@ public class BoonChoiceUI : MonoBehaviour
             hudSlots[i] = slot;
         }
 
-        passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(-30, 150), new Vector2(400, 50));
+        passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(-30, 192), new Vector2(400, 50));
         passiveRow.pivot = new Vector2(1f, 0.5f);
-        wardText = GameUI.CreateText(transform, font, "Ward", corner, new Vector2(-30, 196), new Vector2(400, 40), 26, TextAlignmentOptions.Right);
+        wardText = GameUI.CreateText(transform, font, "Ward", corner, new Vector2(-30, 236), new Vector2(400, 40), 26, TextAlignmentOptions.Right);
         wardText.rectTransform.pivot = new Vector2(1f, 0.5f);
         wardText.color = Boons.Info(Element.Water).Color;
     }

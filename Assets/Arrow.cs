@@ -15,6 +15,8 @@ public class Arrow : MonoBehaviour
     {
         if (deflected) return false;
         deflected = true;
+        // Leave physics right away: the riposte spawns on this spot and would otherwise hit the arrow it replaces.
+        gameObject.SetActive(false);
         Destroy(gameObject);
         return true;
     }

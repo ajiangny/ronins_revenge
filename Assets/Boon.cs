@@ -103,16 +103,17 @@ public static class Boons
 
     public static readonly BoonDefinition[] All =
     {
-        // Fire: burn. Kills explode.
+        // Fire: burn. Kills explode. Samurai stand 2 apart across and 1.75 apart down, so 1.8 reaches the samurai
+    // above and below, 2.1 adds the ones beside it and 2.7 the diagonals.
         new BoonDefinition { Id = BoonId.FlameKunai, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Kunai",
             Description = "Your <b>Kunai</b> burst into flame on a kill, burning nearby samurai.",
-            StatLabel = "Blast radius:", Values = new[] { 0.8f, 1.1f, 1.5f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.7f }, Format = Plus },
         new BoonDefinition { Id = BoonId.InfernoShuriken, Element = Element.Fire, Slot = BoonSlot.Special, Name = "Inferno Shuriken",
             Description = "Every samurai your <b>Shuriken</b> cuts down explodes.",
-            StatLabel = "Blast radius:", Values = new[] { 0.6f, 0.8f, 1.0f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.7f }, Format = Plus },
         new BoonDefinition { Id = BoonId.BurningRiposte, Element = Element.Fire, Slot = BoonSlot.Parry, Name = "Burning Riposte",
             Description = "Arrows you <b>Parry</b> come back as fire arrows that explode.",
-            StatLabel = "Blast radius:", Values = new[] { 0.8f, 1.1f, 1.5f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.7f }, Format = Plus },
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
             Description = "You throw <b>Kunai</b> faster.",
             StatLabel = "Throw cooldown:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },

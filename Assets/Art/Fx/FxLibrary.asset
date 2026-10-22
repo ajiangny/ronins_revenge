@@ -409,11 +409,29 @@ MonoBehaviour:
     - {fileID: 21300000, guid: c385305a675b141cfaab06d25f6ff228, type: 3}
     fps: 16
     loop: 1
-  - id: Utsu_Scorch
+  - id: Utsu_Burn
     frames:
-    - {fileID: 21300000, guid: 824060966d8584da89c0c5a34c40c19c, type: 3}
-    fps: 1
+    - {fileID: 21300000, guid: df076beeea7cf4ab084e959862ffe6c3, type: 3}
+    - {fileID: 21300000, guid: df505ea9a1b08401fb0a28d89cf6f124, type: 3}
+    - {fileID: 21300000, guid: 96dd94118121c4e59bdbff8820149262, type: 3}
+    - {fileID: 21300000, guid: 736c391672f5740638007dc21b289e0b, type: 3}
+    - {fileID: 21300000, guid: dd113e64f606b4171a02017ba6cfda31, type: 3}
+    - {fileID: 21300000, guid: c2ff0d4aff1e6449a8fb1f9de9d65970, type: 3}
+    - {fileID: 21300000, guid: edb072e93db574cb0834736fd6944c69, type: 3}
+    - {fileID: 21300000, guid: fa9f5d92424e940ff9a335765343df59, type: 3}
+    fps: 12
     loop: 1
+  - id: Utsu_Stab
+    frames:
+    - {fileID: 21300000, guid: 59f99d04977da47148f139e5ddf1c79b, type: 3}
+    - {fileID: 21300000, guid: 09fc240f5525b4bfa94f404efd18c832, type: 3}
+    - {fileID: 21300000, guid: f4cee666a1e2f445eb8f84d28b1daad1, type: 3}
+    - {fileID: 21300000, guid: 64b22ab60c790409396a3393ba36520e, type: 3}
+    - {fileID: 21300000, guid: 6416cfdbdb26c42979ff66a5c8a6f0d9, type: 3}
+    - {fileID: 21300000, guid: dfba6366b7fb247619e8df9396e1a1c5, type: 3}
+    - {fileID: 21300000, guid: 61726b83e4a8943e4852cb512258120b, type: 3}
+    fps: 16
+    loop: 0
   - id: Utsu_ClockMark
     frames:
     - {fileID: 21300000, guid: 48f6e732f920f4876a0ab1b7b7d8042a, type: 3}

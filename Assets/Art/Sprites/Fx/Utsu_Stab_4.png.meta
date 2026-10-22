@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 824060966d8584da89c0c5a34c40c19c
+guid: 6416cfdbdb26c42979ff66a5c8a6f0d9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 444699683827872366
-    second: Utsu_Scorch_0_0
+      213: 3789471974537982468
+    second: Utsu_Stab_4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -50,7 +50,7 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.5}
+  spritePivot: {x: 0.5625, y: 0.9322034}
   spritePixelsToUnits: 48
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Utsu_Scorch_0_0
+      name: Utsu_Stab_4_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 24
-        height: 16
+        width: 16
+        height: 59
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e62f94e9104eb2600800000000000000
-      internalID: 444699683827872366
+      spriteID: 40272a0fea8e69430800000000000000
+      internalID: 3789471974537982468
       vertices: []
       indices: 
       edges: []

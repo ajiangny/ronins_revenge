@@ -420,9 +420,10 @@ public class Utsusemi : Boss
         lattice.RemoveAll(a => a == null);
     }
 
-    // Escapement: the jointed arm reaches out over the ronin and the blade tip ticks down towards him, re-aiming on
-    // every tick, then thrusts. Only a parry answers it: sent back, it jams the gears and staggers the automaton.
-    // In the second phase it ticks six times, faster, and thrusts twice.
+    // Escapement: its sword arm unfolds from its right shoulder into a long jointed limb, the blade hanging point-down
+    // from the wrist. The wrist ticks down towards the ronin, re-aiming on every tick, then the blade is thrust. Only a
+    // parry answers it: sent back, it jams the gears and staggers the automaton. In the second phase it ticks six
+    // times, faster, and thrusts twice.
     IEnumerator Escapement()
     {
         // Always named: the callout is the cue to start counting.
@@ -431,22 +432,35 @@ public class Utsusemi : Boss
         float tickTime = secondPhase ? 0.32f : 0.45f;
         float lowest = ronin.Bounds.center.y + 3.2f;
 
-        SpriteRenderer arm = Bar(Shoulder, Shoulder, 0.16f, Gunmetal, 54);
+        UnfoldSwordArm();
+        var arm = new SwordArm(this);
+        Vector3 wrist = SwordShoulder;
         var sight = new List<SpriteRenderer>();
-        Vector3 tip = Shoulder;
         for (int i = 1; i <= ticks; i++)
         {
-            tip = new Vector3(ronin.Bounds.center.x, Mathf.Lerp(Shoulder.y, lowest, i / (float)ticks), 0);
-            Stretch(arm, Shoulder, tip, 0.16f);
-            // A dashed red sight down to the ground, re-aimed and flared on every tick, white on the last.
-            foreach (SpriteRenderer dash in sight) RemoveTransient(dash);
             bool last = i == ticks;
-            sight = Dashes(tip, new Vector3(tip.x, GroundY, 0), last ? Color.white : CoreRed, last ? 0.12f : 0.08f);
-            ElementFx.Glow(Shoulder, CoreRed, 0.6f, 1.4f, tickTime * 0.6f);
-            ElementFx.Glow(tip, last ? Color.white : CoreRed, 0.4f, 1.2f, tickTime * 0.6f);
-            Tick(0.9f);
-            for (float t = 0; t < tickTime; t += Time.deltaTime * Tempo)
+            Vector3 from = wrist;
+            Vector3 to = new Vector3(ronin.Bounds.center.x, Mathf.Lerp(SwordShoulder.y, lowest, i / (float)ticks), 0);
+            // Each tick is a clockwork step: a quick eased lurch, then a dead stop.
+            const float lurch = 0.12f;
+            for (float t = 0; t < lurch; t += Time.deltaTime * Tempo)
             {
+                wrist = Vector3.Lerp(from, to, 1f - (1f - t / lurch) * (1f - t / lurch));
+                arm.Draw(wrist, last);
+                yield return null;
+            }
+            wrist = to;
+            // A dashed red sight from the blade's point to the ground, flared on every tick, white on the last.
+            foreach (SpriteRenderer dash in sight) RemoveTransient(dash);
+            Vector3 point = arm.Point(wrist);
+            sight = Dashes(point, new Vector3(point.x, GroundY, 0), last ? Color.white : CoreRed, last ? 0.12f : 0.08f);
+            ElementFx.Glow(SwordShoulder, CoreRed, 0.5f, 1.2f, tickTime * 0.6f);
+            ElementFx.Glow(point, last ? Color.white : CoreRed, 0.4f, 1.2f, tickTime * 0.6f);
+            Tick(0.9f);
+            for (float t = 0; t < tickTime - lurch; t += Time.deltaTime * Tempo)
+            {
+                HoldSwordArm();
+                arm.Draw(wrist, last);
                 float alpha = Mathf.Lerp(1f, 0.35f, t / tickTime);
                 foreach (SpriteRenderer dash in sight)
                 {
@@ -460,19 +474,214 @@ public class Utsusemi : Boss
         }
         foreach (SpriteRenderer dash in sight) RemoveTransient(dash);
 
-        Thrust(tip);
+        yield return Thrust(arm, wrist);
         if (secondPhase)
         {
-            // The follow-up: the arm snaps over to where the ronin dodged and thrusts again.
-            yield return Wait(0.35f);
-            tip = new Vector3(ronin.Bounds.center.x, lowest, 0);
-            Stretch(arm, Shoulder, tip, 0.16f);
+            // The follow-up: the arm snaps over to where the ronin dodged, a fresh blade drops into its hand, and it
+            // thrusts again.
+            Vector3 from = wrist;
+            Vector3 to = new Vector3(ronin.Bounds.center.x, lowest, 0);
+            arm.Rearm();
+            for (float t = 0; t < 0.2f; t += Time.deltaTime * Tempo)
+            {
+                wrist = Vector3.Lerp(from, to, Mathf.SmoothStep(0, 1, t / 0.2f));
+                arm.Draw(wrist, true);
+                yield return null;
+            }
+            wrist = to;
             Tick(0.9f);
-            yield return Wait(0.15f);
-            Thrust(tip);
+            ElementFx.Glow(arm.Point(wrist), Color.white, 0.4f, 1.2f, 0.2f);
+            for (float t = 0; t < 0.2f; t += Time.deltaTime * Tempo)
+            {
+                arm.Draw(wrist, true);
+                yield return null;
+            }
+            yield return Thrust(arm, wrist);
         }
-        yield return Wait(0.3f);
-        RemoveTransient(arm);
+
+        // The arm folds back into the shoulder and the sword returns to its hand.
+        Vector3 reached = wrist;
+        for (float t = 0; t < 0.3f; t += Time.deltaTime * Tempo)
+        {
+            HoldSwordArm();
+            wrist = Vector3.Lerp(reached, SwordShoulder, Mathf.SmoothStep(0, 1, t / 0.3f));
+            arm.Draw(wrist, false);
+            yield return null;
+        }
+        arm.Remove();
+        Tick(0.3f);
+        PlayIdle();
+    }
+
+    // Where the sword arm meets the body: its right shoulder in the frame where the arm has left the sprite.
+    Vector3 SwordShoulder => OnSprite(73f, 47f);
+
+    // A point given in the sprite frame's own pixels (from its top-left), so code-drawn parts meet the art.
+    Vector3 OnSprite(float px, float py)
+    {
+        Bounds b = sprite.bounds;
+        Rect frame = sprite.sprite != null ? sprite.sprite.rect : new Rect(0, 0, 116, 116);
+        float u = px / frame.width, v = 1f - py / frame.height;
+        if (sprite.flipX) u = 1f - u;
+        return new Vector3(b.min.x + u * b.size.x, b.min.y + v * b.size.y, 0);
+    }
+
+    // The thrust frames raise the sword and tuck the arm away (frames 0-4); it then holds on frame 4, where the arm
+    // has left the body, while the code-drawn arm does the reaching.
+    const int SwordTuckedFrame = 4;
+    Sprite[] swordHold;
+
+    void UnfoldSwordArm()
+    {
+        if (art.attack == null || art.attack.Length <= SwordTuckedFrame) return;
+        var windUp = new Sprite[SwordTuckedFrame + 1];
+        System.Array.Copy(art.attack, windUp, windUp.Length);
+        swordHold = new[] { art.attack[SwordTuckedFrame] };
+        animator.Play(windUp, false, () => animator.Play(swordHold, true), art.actionFps * 1.5f);
+    }
+
+    // A flinch hands back to the idle loop, which would put the sword back in its hand mid-attack.
+    void HoldSwordArm()
+    {
+        if (swordHold != null && animator.Clip == IdleClip) animator.Play(swordHold, true);
+    }
+
+    IEnumerator Thrust(SwordArm arm, Vector3 wrist)
+    {
+        Vector3 point = arm.Point(wrist);
+        Vector3 blade = arm.BladeCentre(wrist);
+        arm.Release();
+        Arrow shot = Shoot(blade, Vector3.down * 20f);
+        Sprite[] frames = Fx.Frames(Fx.UtsuThrust);
+        if (frames != null) shot.Restyle(frames, 14f, Color.white, new Vector2(0.7f, SwordArm.BladeLength), 0.35f, new Color(1f, 0.2f, 0.18f, 0.45f), 2f);
+        else shot.Restyle(ProceduralSprites.White, new Color(0.85f, 0.9f, 1f), new Vector2(0.22f, SwordArm.BladeLength), 0.35f, new Color(1f, 0.2f, 0.18f, 0.5f), 2f);
+        shot.MakeReflectable(transform);
+        // A lance of light stabs ahead of the blade, with a white flash at the wrist as it lets go.
+        if (Fx.Play(Fx.UtsuStab, point, Color.white, 2.2f) == null) ElementFx.Glow(point, Color.white, 0.5f, 2f, 0.2f);
+        ElementFx.Glow(wrist, Color.white, 0.6f, 1.6f, 0.18f);
+        Sfx.Play(Sfx.ParrySwing, 1f, 0.5f);
+        Sfx.Play(Sfx.ClockTick, 0.8f, 0.6f);
+        CameraShake.Add(0.15f);
+
+        // The empty wrist punches down after the blade, then recoils.
+        for (float t = 0; t < 0.2f; t += Time.deltaTime * Tempo)
+        {
+            float k = t / 0.2f;
+            arm.Draw(wrist + Vector3.down * (0.9f * Mathf.Sin(k * Mathf.PI) * (1f - k * 0.5f)), true);
+            yield return null;
+        }
+        arm.Draw(wrist, false);
+        yield return Wait(0.15f);
+    }
+
+    // The jointed sword arm: two gunmetal segments with gold gear joints, bent at the elbow away from the ground, and
+    // the blade hanging from the wrist. Its parts are transient, so an interrupted attack takes them with it.
+    class SwordArm
+    {
+        public const float BladeLength = 2.45f;
+        static readonly Color Outline = new Color(0.07f, 0.07f, 0.1f);
+        static readonly Color Edge = new Color(0.55f, 0.6f, 0.72f);
+
+        readonly Utsusemi owner;
+        readonly SpriteRenderer upperLine, upper, upperEdge, foreLine, fore, foreEdge;
+        readonly SpriteRenderer shoulderGear, elbowGear, wristGear;
+        SpriteRenderer blade;
+
+        public SwordArm(Utsusemi owner)
+        {
+            this.owner = owner;
+            Vector3 s = owner.SwordShoulder;
+            upperLine = owner.Bar(s, s, 0.3f, Outline, 52);
+            upper = owner.Bar(s, s, 0.18f, Gunmetal, 53);
+            upperEdge = owner.Bar(s, s, 0.05f, Edge, 54);
+            foreLine = owner.Bar(s, s, 0.26f, Outline, 52);
+            fore = owner.Bar(s, s, 0.15f, Gunmetal, 53);
+            foreEdge = owner.Bar(s, s, 0.04f, Edge, 54);
+            shoulderGear = Gear(0.42f);
+            elbowGear = Gear(0.36f);
+            wristGear = Gear(0.3f);
+            Rearm();
+        }
+
+        SpriteRenderer Gear(float size)
+        {
+            SpriteRenderer gear = owner.Bar(owner.SwordShoulder, owner.SwordShoulder, size, Gold, 55);
+            gear.sprite = ProceduralSprites.Disc;
+            gear.transform.localScale = Vector3.one * size;
+            return gear;
+        }
+
+        // A blade in its hand, hanging point-down from the wrist.
+        public void Rearm()
+        {
+            if (blade != null) return;
+            Sprite[] frames = Fx.Frames(Fx.UtsuThrust);
+            blade = owner.Bar(owner.SwordShoulder, owner.SwordShoulder, 1f, Color.white, 54);
+            blade.transform.rotation = Quaternion.identity;
+            if (frames != null)
+            {
+                blade.sprite = frames[0];
+                blade.transform.localScale = Vector3.one * (BladeLength / frames[0].bounds.size.y);
+                blade.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 14f);
+            }
+            else
+            {
+                blade.color = new Color(0.85f, 0.9f, 1f);
+                blade.transform.localScale = new Vector3(0.22f, BladeLength, 1f);
+            }
+        }
+
+        // The blade leaves its hand as the thrust.
+        public void Release()
+        {
+            if (blade != null) owner.RemoveTransient(blade);
+            blade = null;
+        }
+
+        public Vector3 BladeCentre(Vector3 wrist) => wrist + Vector3.down * (BladeLength * 0.5f + 0.05f);
+        public Vector3 Point(Vector3 wrist) => wrist + Vector3.down * (BladeLength + 0.05f);
+
+        public void Draw(Vector3 wrist, bool hot)
+        {
+            Vector3 shoulder = owner.SwordShoulder;
+            Vector3 reach = wrist - shoulder;
+            float distance = reach.magnitude;
+            // Fixed-ratio segments make it bend like a limb at any reach; the elbow kinks up and outwards.
+            float segment = Mathf.Max(distance * 0.58f, 0.9f);
+            float rise = Mathf.Sqrt(Mathf.Max(0, segment * segment - distance * distance * 0.25f));
+            Vector3 side = distance > 0.001f ? new Vector3(-reach.y, reach.x, 0) / distance : Vector3.up;
+            if (side.y < 0) side = -side;
+            Vector3 elbow = shoulder + reach * 0.5f + side * rise;
+
+            Stretch(upperLine, shoulder, elbow, 0.3f);
+            Stretch(upper, shoulder, elbow, 0.18f);
+            Stretch(upperEdge, shoulder + Vector3.up * 0.04f, elbow + Vector3.up * 0.04f, 0.05f);
+            Stretch(foreLine, elbow, wrist, 0.26f);
+            Stretch(fore, elbow, wrist, 0.15f);
+            Stretch(foreEdge, elbow + Vector3.up * 0.03f, wrist + Vector3.up * 0.03f, 0.04f);
+            Place(shoulderGear, shoulder);
+            Place(elbowGear, elbow);
+            Place(wristGear, wrist);
+            // The gears glow hot red on the final tick.
+            Color joint = hot ? Color.Lerp(Gold, CoreRed, 0.5f + 0.5f * Mathf.Sin(Time.time * 30f)) : Gold;
+            if (elbowGear != null) elbowGear.color = joint;
+            if (wristGear != null) wristGear.color = joint;
+            if (blade != null) blade.transform.position = BladeCentre(wrist) + Vector3.back * 0.25f;
+        }
+
+        static void Place(SpriteRenderer gear, Vector3 at)
+        {
+            if (gear != null) gear.transform.position = at + Vector3.back * 0.3f;
+        }
+
+        public void Remove()
+        {
+            Release();
+            foreach (SpriteRenderer part in new[] { upperLine, upper, upperEdge, foreLine, fore, foreEdge, shoulderGear, elbowGear, wristGear })
+            {
+                if (part != null) owner.RemoveTransient(part);
+            }
+        }
     }
 
     // A dashed line, for sights and telegraphs.
@@ -487,18 +696,6 @@ public class Utsusemi : Boss
             dashes.Add(Bar(from + along * d, from + along * Mathf.Min(length, d + dash), width, color, 55));
         }
         return dashes;
-    }
-
-    void Thrust(Vector3 tip)
-    {
-        PlayAction(art.attack);
-        Arrow blade = Shoot(tip, Vector3.down * 20f);
-        Sprite[] frames = Fx.Frames(Fx.UtsuThrust);
-        if (frames != null) blade.Restyle(frames, 14f, Color.white, new Vector2(0.7f, 2.45f), 0.35f, new Color(1f, 0.2f, 0.18f, 0.45f), 2f);
-        else blade.Restyle(ProceduralSprites.White, new Color(0.85f, 0.9f, 1f), new Vector2(0.22f, 2.4f), 0.35f, new Color(1f, 0.2f, 0.18f, 0.5f), 2f);
-        blade.MakeReflectable(transform);
-        Sfx.Play(Sfx.ParrySwing, 1f, 0.5f);
-        CameraShake.Add(0.15f);
     }
 
     // Plumb Lines: gold weights drop from its tassels on silk threads and swing as pendulums through the ronin's
@@ -762,12 +959,12 @@ public class Utsusemi : Boss
     }
 
     // A laser in three layers redrawn every frame (a soft red glow, a flickering red body, a white-hot core), with a
-    // flare at the core, sparks where it lands and scorch marks it leaves on the ground.
+    // flare at the core, sparks where it lands and a trail of fire it leaves burning on the ground.
     class Beam
     {
         public SpriteRenderer glow, body, core;
         public FxPlayer flare, hit;
-        public float nextScorch, nextBurn, nextSpark;
+        public float nextFire, nextBurn, nextSpark, lastFireX;
     }
 
     Beam MakeBeam()
@@ -810,33 +1007,14 @@ public class Utsusemi : Boss
             beam.nextSpark = Time.time + 0.12f;
             Fx.Play(Fx.Impact, to, CoreRed, 0.7f);
         }
-        if (onGround && Time.time >= beam.nextScorch)
+        // A trail of fire along the ground behind it: a new patch every half unit it drags, or every so often if
+        // it holds still, so the burn reads as one unbroken line.
+        if (onGround && (Mathf.Abs(to.x - beam.lastFireX) >= 0.5f || Time.time >= beam.nextFire))
         {
-            beam.nextScorch = Time.time + 0.12f;
-            Scorch(to);
+            beam.nextFire = Time.time + 0.25f;
+            beam.lastFireX = to.x;
+            GroundFire.Light(to);
         }
-    }
-
-    // A dark burn left on the ground under the beam, fading over a couple of seconds.
-    static void Scorch(Vector3 at)
-    {
-        Sprite[] frames = Fx.Frames(Fx.UtsuScorch);
-        var mark = new GameObject("Scorch").AddComponent<SpriteRenderer>();
-        mark.transform.position = at + Vector3.forward * 0.1f;
-        mark.sortingOrder = 1;
-        if (frames != null)
-        {
-            mark.sprite = frames[0];
-            mark.color = Color.white;
-            mark.transform.localScale = Vector3.one * (1.1f / frames[0].bounds.size.x);
-        }
-        else
-        {
-            mark.sprite = ProceduralSprites.Glow;
-            mark.color = new Color(0.12f, 0.05f, 0.04f, 0.6f);
-            mark.transform.localScale = new Vector3(1f, 0.45f, 1f);
-        }
-        Fader.Fade(mark, 2f);
     }
 
     void BurnCover(Beam beam, Blocker cover, Vector3 at)

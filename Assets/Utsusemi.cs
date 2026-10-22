@@ -47,8 +47,11 @@ public class Utsusemi : Boss
     bool breaking;
     bool tock;
     int hatsOut;
-    // Its sword wheeling out on the Kasa Wheel's loop in the second phase.
-    bool swordWheeling;
+    // The Kasa Wheel's sword in the second phase: wheeling from the throw until it's back (the fight waits for it,
+    // since every other move has the sword in hand), and thrown once it has left its hand.
+    bool swordWheeling, swordThrown;
+    // Hat off and sword out at once, patched together from its other idles; built the first time it's needed.
+    Sprite[] bareUnarmedIdle;
     Move? lastMove;
     int movesSinceHours;
     // Phase 2 is the laser phase: a laser at least every other move, never the same one twice running.
@@ -70,9 +73,31 @@ public class Utsusemi : Boss
     protected override float StaggerSeconds => secondPhase ? 2f : 2.5f;
     // Its slit-eye is only exposed while the hat is off.
     protected override int DamageMultiplier => hatsOut > 0 ? 2 : 1;
-    // The bare head wins while both are out: the missing hat is what the ronin is watching for.
-    protected override Sprite[] IdleClip => hatsOut > 0 && bareIdle != null ? bareIdle
-        : (swordOut || swordWheeling) && unarmedIdle != null ? unarmedIdle : art.idle;
+    protected override Sprite[] IdleClip
+    {
+        get
+        {
+            bool bare = hatsOut > 0 && bareIdle != null;
+            bool unarmed = (swordOut || swordThrown) && unarmedIdle != null;
+            if (bare && unarmed && BareUnarmedIdle is Sprite[] both) return both;
+            // Without that art the bare head wins: the missing hat is what the ronin is watching for.
+            return bare ? bareIdle : unarmed ? unarmedIdle : art.idle;
+        }
+    }
+
+    // Its unarmed stance with the hat region of its bare-headed idle swapped in.
+    Sprite[] BareUnarmedIdle
+    {
+        get
+        {
+            if (bareUnarmedIdle == null && bareIdle != null && unarmedIdle != null && art.idle != null && art.idle.Length > 0)
+            {
+                Sprite patched = ProceduralSprites.Patched(unarmedIdle[0], art.idle[0], bareIdle[0], 3);
+                bareUnarmedIdle = patched != null ? new[] { patched } : new Sprite[0];
+            }
+            return bareUnarmedIdle != null && bareUnarmedIdle.Length > 0 ? bareUnarmedIdle : null;
+        }
+    }
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     float LeftEdge => CameraShake.Center.x - HalfWidth;
@@ -104,6 +129,13 @@ public class Utsusemi : Boss
             bool hourStruck = false;
             for (int i = 0; i < combo; i++)
             {
+                // Every move has the sword in hand (or throws it), so it stands empty-handed until the wheeling
+                // sword is home.
+                while (swordWheeling)
+                {
+                    Beat();
+                    yield return null;
+                }
                 Beat();
                 yield return Stride(RandomX(2.5f));
                 yield return Wait(0.15f);
@@ -113,12 +145,6 @@ public class Utsusemi : Boss
                 hourStruck |= move == Move.HourStrikes;
                 movesSinceHours = move == Move.HourStrikes ? 0 : movesSinceHours + 1;
                 bool laser = move == Move.HeartLantern || move == Move.Midnight;
-                // Both lasers throw the sword, so they wait for it to wheel home.
-                while (laser && swordWheeling)
-                {
-                    Beat();
-                    yield return null;
-                }
                 movesSinceLaser = laser ? 0 : movesSinceLaser + 1;
                 if (laser) lastLaser = move;
                 switch (move)
@@ -336,8 +362,15 @@ public class Utsusemi : Boss
     // The hat (or, with sword set, the sword wheeling end over end) flown around the loop as an unbreakable shot.
     IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool sword)
     {
-        if (sword) swordWheeling = true;
-        else hatsOut++;
+        if (sword)
+        {
+            swordWheeling = swordThrown = true;
+            PlayIdle();
+        }
+        else
+        {
+            hatsOut++;
+        }
         Arrow hat = Instantiate(arrowPrefab, Head, Quaternion.identity);
         // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
@@ -419,7 +452,7 @@ public class Utsusemi : Boss
         }
         if (sword)
         {
-            swordWheeling = false;
+            swordWheeling = swordThrown = false;
         }
         else
         {

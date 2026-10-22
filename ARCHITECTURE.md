@@ -118,7 +118,7 @@ match `BoonChoiceUI.boonIcons`.
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
   `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
-  and a parried hat circles it as the ronin's riposte, back on its head only once that riposte is gone: `Arrow.Riposte`, set by `Ronin.Deflect`; in phase 2 the sword wheels round a second loop, `ThrowSwordWheel`/`swordWheeling`, and lasers wait for it), Lace Lattice (a curtain of breakable diamonds with gaps that
+  and a parried hat circles it as the ronin's riposte, back on its head only once that riposte is gone: `Arrow.Riposte`, set by `Ronin.Deflect`; in phase 2 the sword wheels round a second loop, `ThrowSwordWheel`/`swordWheeling`, and the fight waits for it, standing in `BareUnarmedIdle`, patched at runtime by `ProceduralSprites.Patched` from its unarmed and bare-headed idles), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze and lets only `ArmorDamageTaken`, 5%, of each hit's damage through
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
   `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, placed by `PlaceHours` in spread spots numbered in a `ZigZag` order, are shown one by one, then hidden; it `Dash`es

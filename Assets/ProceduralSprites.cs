@@ -76,21 +76,12 @@ public static class ProceduralSprites
     public static Sprite White => white != null ? white : white = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
 
     // Just the outline of a sprite's shape, drawn white to be tinted, with its inside filled in the given colour:
-    // an empty heart beside the full ones. The art is read back through the GPU so it needn't be marked readable.
+    // an empty heart beside the full ones.
     public static Sprite Hollow(Sprite source, Color inside)
     {
-        Rect rect = source.textureRect;
-        int width = (int)rect.width, height = (int)rect.height;
-        var target = RenderTexture.GetTemporary(source.texture.width, source.texture.height, 0, RenderTextureFormat.ARGB32);
-        Graphics.Blit(source.texture, target);
-        RenderTexture previous = RenderTexture.active;
-        RenderTexture.active = target;
-        var copy = new Texture2D(width, height, TextureFormat.RGBA32, false);
-        copy.ReadPixels(new Rect(rect.x, rect.y, width, height), 0, 0);
-        RenderTexture.active = previous;
-        RenderTexture.ReleaseTemporary(target);
-
-        // Only the shape matters, so the colours (and any colour-space shift in the copy) are thrown away.
+        Texture2D copy = ReadBack(source);
+        int width = copy.width, height = copy.height;
+        // Only the shape matters, so the colours are thrown away.
         Color32[] source32 = copy.GetPixels32();
         bool Solid(int x, int y) => x >= 0 && y >= 0 && x < width && y < height && source32[y * width + x].a > 127;
         var pixels = new Color32[width * height];
@@ -105,10 +96,57 @@ public static class ProceduralSprites
             }
         }
         copy.SetPixels32(pixels);
-        copy.filterMode = FilterMode.Point;
-        copy.wrapMode = TextureWrapMode.Clamp;
         copy.Apply();
         return Sprite.Create(copy, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
+    }
+
+    // baseSprite with one patch taken from b: the box (padded by pad pixels) where frames a and b differ. Utsusemi's
+    // empty-handed stance with its hat off comes from its unarmed frame and the hat region of its bare-headed idle.
+    // Null when the three frames aren't the same size.
+    public static Sprite Patched(Sprite baseSprite, Sprite a, Sprite b, int pad)
+    {
+        Texture2D result = ReadBack(baseSprite), first = ReadBack(a), second = ReadBack(b);
+        int width = result.width, height = result.height;
+        if (first.width != width || second.width != width || first.height != height || second.height != height) return null;
+        Color32[] pixels = result.GetPixels32(), aPixels = first.GetPixels32(), bPixels = second.GetPixels32();
+        int minX = width, minY = height, maxX = -1, maxY = -1;
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (aPixels[i].Equals(bPixels[i])) continue;
+            int x = i % width, y = i / width;
+            minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
+            minY = Mathf.Min(minY, y); maxY = Mathf.Max(maxY, y);
+        }
+        if (maxX < 0) return baseSprite;
+        for (int y = Mathf.Max(0, minY - pad); y <= Mathf.Min(height - 1, maxY + pad); y++)
+        {
+            for (int x = Mathf.Max(0, minX - pad); x <= Mathf.Min(width - 1, maxX + pad); x++)
+            {
+                pixels[y * width + x] = bPixels[y * width + x];
+            }
+        }
+        result.SetPixels32(pixels);
+        result.Apply();
+        Rect rect = baseSprite.rect;
+        return Sprite.Create(result, new Rect(0, 0, width, height), new Vector2(baseSprite.pivot.x / rect.width, baseSprite.pivot.y / rect.height), baseSprite.pixelsPerUnit);
+    }
+
+    // A sprite's pixels in a new point-filtered texture, read back through the GPU so the art needn't be marked
+    // readable. The copy keeps the art's sRGB colours byte for byte.
+    static Texture2D ReadBack(Sprite source)
+    {
+        Rect rect = source.textureRect;
+        int width = (int)rect.width, height = (int)rect.height;
+        var target = RenderTexture.GetTemporary(source.texture.width, source.texture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+        Graphics.Blit(source.texture, target);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = target;
+        var copy = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        copy.ReadPixels(new Rect(rect.x, rect.y, width, height), 0, 0);
+        copy.Apply();
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(target);
+        return copy;
     }
 
     // A disc whose alpha fades from the centre to the edge.

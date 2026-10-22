@@ -17,6 +17,8 @@ public class Backdrop : MonoBehaviour
         public BlockerWall.BlockerType[] blockers;
         [Tooltip("Blockers at each site, left to right, by each type's first letter.")]
         public string blockerPattern;
+        [Tooltip("This map's mood: cloud shadows, moonlight, mist, motes, darkened edges.")]
+        public Atmosphere.Settings atmosphere;
     }
 
     [Header("Inscribed")]
@@ -29,6 +31,8 @@ public class Backdrop : MonoBehaviour
     [SerializeField] Vector2 fallSpeedRange = new Vector2(0.6f, 1.6f);
     [SerializeField] float swayAmount = 0.6f;
     [SerializeField] Color petalTint = new Color(1f, 1f, 1f, 0.8f);
+    [Tooltip("The courtyard's mood, and any map's that has no ground of its own.")]
+    [SerializeField] Atmosphere.Settings courtyardAtmosphere = new Atmosphere.Settings { clouds = 3, moonlight = new Color(0.8f, 0.88f, 1f, 0.1f) };
 
     class Petal
     {
@@ -57,6 +61,7 @@ public class Backdrop : MonoBehaviour
     SpriteRenderer[] petalRenderers;
     SpriteRenderer moon;
     SpriteRenderer moonHalo;
+    Atmosphere atmosphere;
     float blood;
     float bloodTarget;
 
@@ -76,6 +81,11 @@ public class Backdrop : MonoBehaviour
         FitGround();
         shownGroundTint = groundTint;
         shownPetalTint = petalTint;
+
+        atmosphere = new GameObject("Atmosphere").AddComponent<Atmosphere>();
+        atmosphere.transform.SetParent(transform);
+        atmosphere.Init(new Vector2(centerX, centerY), viewWidth / 2f, viewHeight / 2f, transform.position.z - 0.3f);
+        atmosphere.Apply(courtyardAtmosphere);
 
         // The blood moon hangs in the top-left corner, hidden until a boss fight raises it.
         Vector3 moonSpot = new Vector3(centerX - viewWidth * 0.36f, centerY + viewHeight * 0.3f, 0);
@@ -128,6 +138,7 @@ public class Backdrop : MonoBehaviour
         bool ownPetals = own && map.petal != null;
         shownPetalTint = ownPetals ? map.petalTint : petalTint;
         foreach (SpriteRenderer r in petalRenderers) r.sprite = ownPetals ? map.petal : petal;
+        atmosphere.Apply(own ? map.atmosphere : courtyardAtmosphere);
         UpdateBloodMoon(0f);
     }
 
@@ -141,6 +152,7 @@ public class Backdrop : MonoBehaviour
         foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
         moon.color = steel ? new Color(0.85f, 0.9f, 1f, blood) : new Color(0.85f, 0.1f, 0.12f, blood);
         moonHalo.color = steel ? new Color(0.6f, 0.75f, 1f, 0.45f * blood) : new Color(1f, 0.15f, 0.15f, 0.5f * blood);
+        atmosphere.TintMoon(steel ? new Color(0.7f, 0.8f, 1f) : new Color(1f, 0.35f, 0.35f), blood);
     }
 
     SpriteRenderer CreateSprite(string name, Sprite sprite, Vector3 position, float scale, int order, Color color)

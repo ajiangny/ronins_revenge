@@ -32,8 +32,8 @@ public class MenuUI : MonoBehaviour
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
     static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
     // The title screen is ink on paper, like a Final Fantasy title: dark labels, a deep red for the selection.
-    const float LightRowWidth = 460f;
-    const float LightRowHeight = 78f;
+    const float LightRowWidth = 300f;
+    const float LightRowHeight = 66f;
     static readonly Color Paper = new Color(0.975f, 0.963f, 0.945f);
     static readonly Color Ink = new Color(0.17f, 0.13f, 0.15f);
     static readonly Color InkAccent = new Color(0.72f, 0.1f, 0.08f);
@@ -42,7 +42,6 @@ public class MenuUI : MonoBehaviour
     {
         public RectTransform root;
         public Image bar;
-        public Image rule;
         public RectTransform marker;
         public TextMeshProUGUI label;
         public RectTransform track;
@@ -128,8 +127,9 @@ public class MenuUI : MonoBehaviour
         Animate(0f);
     }
 
-    // The title screen: the game's logo large on the left of a paper-white page, a slim menu column on the right
-    // with a hairline under each item. Without logo art the title is set in the header font.
+    // The title screen, laid out like a Final Fantasy title: the game's logo centred high on a paper-white page and
+    // a short left-aligned menu column under it, the selection marked in red. Without logo art the title is set
+    // in the header font.
     public void ShowTitle(string title, Item[] pageItems)
     {
         items = pageItems;
@@ -150,7 +150,8 @@ public class MenuUI : MonoBehaviour
         titleText.fontSharedMaterial = titleText.font.material;
         hintText.text = $"↑ ↓  Select      Enter  Confirm";
 
-        rowsRoot.anchoredPosition = new Vector2(600f, items.Length * LightRowHeight / 2f - 20f);
+        // The column is centred under the logo by its text, not its box, so short labels don't drift left.
+        rowsRoot.anchoredPosition = new Vector2(MenuColumnX, -40f);
         dim.color = Color.clear;
         page.SetAsLastSibling();
         page.gameObject.SetActive(true);
@@ -171,7 +172,8 @@ public class MenuUI : MonoBehaviour
         figureAnimator.Play(frames, fps);
     }
 
-    static readonly Vector2 LogoCentre = new Vector2(-330f, 110f);
+    static readonly Vector2 LogoCentre = new Vector2(0f, 250f);
+    const float MenuColumnX = 40f;
 
     // Switches between the dark overlay pages and the light title page.
     void SetLight(bool on)
@@ -190,8 +192,8 @@ public class MenuUI : MonoBehaviour
         hintText.color = on ? new Color(Ink.r, Ink.g, Ink.b, 0.55f) : GameUI.MutedColour;
         hintText.fontSharedMaterial = on ? hintText.font.material : null;
         if (!on) ui.Style(hintText, TextStyle.Hint);
-        hintText.rectTransform.anchoredPosition = on ? new Vector2(600f, 40f) : new Vector2(0, 40f);
-        hintText.rectTransform.sizeDelta = on ? new Vector2(LightRowWidth + 200f, 50f) : new Vector2(1600f, 50f);
+        hintText.rectTransform.anchoredPosition = new Vector2(0, 40f);
+        hintText.rectTransform.sizeDelta = new Vector2(1600f, 50f);
     }
 
     static string Hint(string key, string action) => $"<mark=#FFFFFF26 padding=\"12,12,2,2\">{key}</mark>  {action}       ";
@@ -309,11 +311,9 @@ public class MenuUI : MonoBehaviour
             row.marker.localScale = Vector3.one * k;
             if (light)
             {
-                // Ink turns red and the hairline under it darkens and draws out to full width.
-                row.root.localScale = Vector3.one * (1f + 0.05f * k);
+                // Ink turns red and the label steps right a touch as the marker arrives beside it.
                 row.label.color = Color.Lerp(Ink, InkAccent, k);
-                row.rule.color = Color.Lerp(new Color(Ink.r, Ink.g, Ink.b, 0.2f), InkAccent, k);
-                row.rule.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(LightRowWidth * 0.8f, LightRowWidth, k), 2f);
+                row.label.rectTransform.anchoredPosition = new Vector2(8f * k, 0);
                 continue;
             }
             row.root.localScale = Vector3.one * (1f + 0.08f * k);
@@ -349,12 +349,6 @@ public class MenuUI : MonoBehaviour
             row.bar.sprite = ProceduralSprites.White;
             row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.32f);
             row.bar.raycastTarget = false;
-            if (light)
-            {
-                row.rule = GameUI.CreateRect("Rule", row.root, new Vector2(0.5f, 0f), new Vector2(0, -4f), new Vector2(rowWidth, 2f)).gameObject.AddComponent<Image>();
-                row.rule.sprite = ProceduralSprites.SoftGlow;
-                row.rule.raycastTarget = false;
-            }
 
             // A small diamond to the left of the selected label.
             row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-RowWidth / 2f + 46f, 0), new Vector2(20, 20));
@@ -364,16 +358,22 @@ public class MenuUI : MonoBehaviour
             marker.raycastTarget = false;
 
             bool slider = items[i].IsSlider;
-            row.label = GameUI.CreateText(row.root, ui.BodyFont, "Label", new Vector2(slider ? 0f : 0.5f, 0.5f),
-                slider ? new Vector2(76f, 0) : Vector2.zero, new Vector2(slider ? 300f : rowWidth, rowHeight), light ? 38 : 44,
-                slider ? TextAlignmentOptions.Left : TextAlignmentOptions.Center);
+            // Title-page labels line up on their left edge, like a classic JRPG menu; the rest are centred.
+            bool left = slider || light;
+            row.label = GameUI.CreateText(row.root, ui.BodyFont, "Label", new Vector2(left ? 0f : 0.5f, 0.5f),
+                slider ? new Vector2(76f, 0) : Vector2.zero, new Vector2(slider ? 300f : rowWidth, rowHeight), light ? 40 : 44,
+                left ? TextAlignmentOptions.Left : TextAlignmentOptions.Center);
             row.label.text = items[i].label;
             row.label.characterSpacing = 6;
             ui.Style(row.label, TextStyle.Heading);
             // Ink on paper needs no outline or shadow.
             if (light) row.label.fontSharedMaterial = row.label.font.material;
-            // A button's marker sits just left of its centred label.
-            if (!slider)
+            // A button's marker sits just left of its label.
+            if (light)
+            {
+                row.marker.anchoredPosition = new Vector2(-rowWidth / 2f - 30f, 0);
+            }
+            else if (!slider)
             {
                 row.label.ForceMeshUpdate(true);
                 row.marker.anchoredPosition = new Vector2(row.label.textBounds.min.x - 34f, 0);
@@ -411,7 +411,7 @@ public class MenuUI : MonoBehaviour
         paper = Stretch(GameUI.CreateRect("Paper", page, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
         paper.color = Paper;
         paper.raycastTarget = false;
-        titleArt = GameUI.CreateRect("TitleLogo", page, new Vector2(0.5f, 0.5f), LogoCentre, new Vector2(1180f, 680f)).gameObject.AddComponent<Image>();
+        titleArt = GameUI.CreateRect("TitleLogo", page, new Vector2(0.5f, 0.5f), LogoCentre, new Vector2(1000f, 563f)).gameObject.AddComponent<Image>();
         titleArt.sprite = ui.TitleLogo;
         titleArt.preserveAspect = true;
         titleArt.raycastTarget = false;

@@ -12,6 +12,53 @@ public static class ProceduralSprites
     static Sprite arrowDown;
     static Sprite fadeDown;
 
+    static readonly string[][] NotePatterns =
+    {
+        new[]
+        {
+            "...##..",
+            "...#.#.",
+            "...#..#",
+            "...#..#",
+            "...#...",
+            ".###...",
+            "####...",
+            "####...",
+            ".##....",
+        },
+        new[]
+        {
+            "..#######",
+            "..#######",
+            "..#.....#",
+            "..#.....#",
+            "..#.....#",
+            ".##....##",
+            "###...###",
+            "###...###",
+            ".#.....#.",
+        },
+    };
+    static readonly Sprite[] notes = new Sprite[NotePatterns.Length];
+
+    // Rows are listed top to bottom; '#' is a filled pixel.
+    static Sprite FromPattern(string[] rows)
+    {
+        int width = rows[0].Length, height = rows.Length;
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                pixels[(height - 1 - y) * width + x] = rows[y][x] == '#' ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), height);
+    }
+
     static Sprite BuildFadeDown(int height)
     {
         var texture = new Texture2D(1, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
@@ -42,6 +89,11 @@ public static class ProceduralSprites
 
     // Opaque at the top fading to clear at the bottom, for shading behind the HUD.
     public static Sprite FadeDown => fadeDown != null ? fadeDown : fadeDown = BuildFadeDown(32);
+
+    // Little pixel music notes (a single eighth note and a beamed pair), drawn white to be tinted.
+    public static Sprite Note(int kind) => notes[kind % NotePatterns.Length] != null
+        ? notes[kind % NotePatterns.Length]
+        : notes[kind % NotePatterns.Length] = FromPattern(NotePatterns[kind % NotePatterns.Length]);
 
     // A hard-edged arrow pointing down, standing in for the soul hint's art.
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);

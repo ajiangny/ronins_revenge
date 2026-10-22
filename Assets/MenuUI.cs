@@ -69,6 +69,15 @@ public class MenuUI : MonoBehaviour
     Image titleArt;
     Image figure;
     SpriteAnimatorUI figureAnimator;
+    // Music notes drifting up from the figure's flute.
+    static readonly Color NoteColour = new Color(0.25f, 0.72f, 0.56f);
+    const float NoteLife = 2.8f;
+    readonly List<(Image image, float born, Vector2 from, float drift)> liveNotes = new List<(Image, float, Vector2, float)>();
+    readonly List<Image> spareNotes = new List<Image>();
+    Vector2 noteSource;
+    float notePixel;
+    float nextNoteAt;
+    int nextNoteKind;
     int selected;
     int heardSelection;
     float shownAt;
@@ -165,9 +174,13 @@ public class MenuUI : MonoBehaviour
     }
 
     // A figure standing (or sitting) on the title page, its feet at `feet` in page coordinates and each art pixel
-    // `pixelSize` page units across, looping `frames`. Null or empty frames hide it.
-    public void ShowFigure(Sprite[] frames, float fps, Vector2 feet, float pixelSize)
+    // `pixelSize` page units across, looping `frames`. Null or empty frames hide it. With a `notesFrom` art pixel
+    // (from the frame's top-left), music notes float up from there.
+    public void ShowFigure(Sprite[] frames, float fps, Vector2 feet, float pixelSize, Vector2? notesFrom = null)
     {
+        foreach (var note in liveNotes) Release(note.image);
+        liveNotes.Clear();
+        notePixel = notesFrom.HasValue ? pixelSize : 0f;
         bool shown = frames != null && frames.Length > 0;
         figure.gameObject.SetActive(shown);
         if (!shown) return;
@@ -175,6 +188,12 @@ public class MenuUI : MonoBehaviour
         figure.rectTransform.anchoredPosition = feet;
         figure.rectTransform.sizeDelta = frames[0].rect.size * pixelSize;
         figureAnimator.Play(frames, fps);
+        if (notesFrom.HasValue)
+        {
+            Vector2 size = frames[0].rect.size;
+            noteSource = feet + new Vector2(notesFrom.Value.x - size.x / 2f, size.y - notesFrom.Value.y) * pixelSize;
+            nextNoteAt = Time.unscaledTime + 0.6f;
+        }
     }
 
     static readonly Vector2 LogoCentre = new Vector2(0f, 250f);
@@ -235,6 +254,7 @@ public class MenuUI : MonoBehaviour
     void Update()
     {
         if (!IsOpen) return;
+        UpdateNotes();
 
         if (selected != heardSelection) Sfx.Play(Sfx.UiMove);
         heardSelection = selected;
@@ -482,6 +502,53 @@ public class MenuUI : MonoBehaviour
         paper.gameObject.SetActive(false);
         titleArt.gameObject.SetActive(false);
         page.gameObject.SetActive(false);
+    }
+
+    // Every second or so a note leaves the flute, then rises, sways and drifts right as it fades, so the title
+    // screen's tune seems to come from him.
+    void UpdateNotes()
+    {
+        bool playing = light && figure.gameObject.activeSelf && notePixel > 0f;
+        float now = Time.unscaledTime;
+        if (playing && now >= nextNoteAt)
+        {
+            nextNoteAt = now + UnityEngine.Random.Range(0.8f, 1.3f);
+            Image image = spareNotes.Count > 0 ? spareNotes[spareNotes.Count - 1] : null;
+            if (image != null) spareNotes.RemoveAt(spareNotes.Count - 1);
+            else
+            {
+                image = GameUI.CreateRect("Note", page, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+                image.raycastTarget = false;
+            }
+            image.sprite = ProceduralSprites.Note(nextNoteKind++);
+            // Notes are drawn at twice the figure's pixel size, so they read at a glance.
+            image.rectTransform.sizeDelta = image.sprite.rect.size * notePixel * 2f;
+            image.gameObject.SetActive(true);
+            liveNotes.Add((image, now, noteSource, UnityEngine.Random.Range(30f, 90f)));
+        }
+
+        for (int i = liveNotes.Count - 1; i >= 0; i--)
+        {
+            var (image, born, from, drift) = liveNotes[i];
+            float t = (now - born) / NoteLife;
+            if (t >= 1f || !playing)
+            {
+                Release(image);
+                liveNotes.RemoveAt(i);
+                continue;
+            }
+            float sway = Mathf.Sin((now - born) * 3f) * 10f;
+            image.rectTransform.anchoredPosition = from + new Vector2(drift * t + sway, 150f * EaseOut(t));
+            image.rectTransform.localRotation = Quaternion.Euler(0, 0, Mathf.Sin((now - born) * 2.4f) * 12f);
+            float alpha = Mathf.Clamp01(t / 0.12f) * (1f - Mathf.Clamp01((t - 0.6f) / 0.4f));
+            image.color = new Color(NoteColour.r, NoteColour.g, NoteColour.b, alpha);
+        }
+    }
+
+    void Release(Image image)
+    {
+        image.gameObject.SetActive(false);
+        spareNotes.Add(image);
     }
 
     static RectTransform Stretch(RectTransform rect)

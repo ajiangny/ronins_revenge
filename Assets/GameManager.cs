@@ -322,6 +322,10 @@ public class GameManager : MonoBehaviour
         ShowTitleRonin();
     }
 
+    // Where the notes leave the flute frames, just right of the flute so they clear his head, in art pixels from
+    // the top-left.
+    static readonly Vector2 FluteTip = new Vector2(50f, 36f);
+
     // The ronin sits in the bottom-left corner of the title page, on the row he fights from, drawn at the same pixel
     // size as in play.
     void ShowTitleRonin()
@@ -333,7 +337,9 @@ public class GameManager : MonoBehaviour
         var canvas = (RectTransform)ui.transform;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, cam.WorldToScreenPoint(seat), null, out Vector2 feet);
         float canvasPerWorld = canvas.rect.height / (2f * cam.orthographicSize);
-        menu.ShowFigure(frames, titleFluteFps, feet, ronin.ArtPixelSize * canvasPerWorld);
+        // Notes rise from the flute's tip, beside his mouth, when he's playing it.
+        bool flute = titleFluteFrames != null && titleFluteFrames.Length > 0;
+        menu.ShowFigure(frames, titleFluteFps, feet, ronin.ArtPixelSize * canvasPerWorld, flute ? FluteTip : (Vector2?)null);
     }
 
     // The title screen keeps the playfield clear of score, lives and ability slots.

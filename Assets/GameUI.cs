@@ -288,22 +288,24 @@ public class GameUI : MonoBehaviour
         shadeImage.sprite = ProceduralSprites.FadeDown;
         shadeImage.color = new Color(0.02f, 0.01f, 0.03f, 0f);
 
-        // The lower third: epithet, a rule that draws out from the centre, then her name.
-        TextMeshProUGUI epithetText = CreateText("Epithet", new Vector2(0.5f, 0f), new Vector2(0, 262f), new Vector2(1600f, 90f), 66, TextAlignmentOptions.Bottom, root);
+        // The lower third: epithet, a rule that draws out from the centre, then her name a size down; both bold.
+        TextMeshProUGUI epithetText = CreateText("Epithet", new Vector2(0.5f, 0f), new Vector2(0, 262f), new Vector2(1800f, 120f), 88, TextAlignmentOptions.Bottom, root);
         epithetText.textWrappingMode = TextWrappingModes.NoWrap;
         epithetText.text = epithet;
         Style(epithetText, TextStyle.Title);
+        epithetText.fontStyle = FontStyles.Bold;
         epithetText.alpha = 0f;
         RectTransform rule = CreateRect("Rule", root, new Vector2(0.5f, 0f), new Vector2(0, 248f), new Vector2(0f, 5f));
         Image ruleImage = rule.gameObject.AddComponent<Image>();
         // The glow sprite stretched thin gives a rule that's brightest in the middle and fades out at the ends.
         ruleImage.sprite = ProceduralSprites.SoftGlow;
         Color ruleColour = Color.Lerp(colour, Color.white, 0.55f);
-        TextMeshProUGUI nameText = CreateText("Name", new Vector2(0.5f, 0f), new Vector2(0, 158f), new Vector2(1600f, 86f), 58, TextAlignmentOptions.Top, root);
+        TextMeshProUGUI nameText = CreateText("Name", new Vector2(0.5f, 0f), new Vector2(0, 128f), new Vector2(1800f, 116f), 72, TextAlignmentOptions.Top, root);
         nameText.textWrappingMode = TextWrappingModes.NoWrap;
         // Title case, so the Roman capitals set the rest of the name in small caps.
         nameText.text = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(title.ToLowerInvariant());
         Style(nameText, TextStyle.Title);
+        nameText.fontStyle = FontStyles.Bold;
         nameText.alpha = 0f;
 
         TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0f), new Vector2(0, 26f), new Vector2(1640f, 112f), 32, TextAlignmentOptions.Center, root);
@@ -359,7 +361,7 @@ public class GameUI : MonoBehaviour
             rule.sizeDelta = new Vector2(1180f * ruleIn, 5f);
             ruleImage.color = new Color(ruleColour.r, ruleColour.g, ruleColour.b, ruleIn);
             Reveal(epithetText, since - 0.4f, 262f, 1f);
-            Reveal(nameText, since - 0.6f, 158f, -1f);
+            Reveal(nameText, since - 0.6f, 128f, -1f);
             said.maxVisibleCharacters = Mathf.RoundToInt(said.text.Length * Mathf.Clamp01((since - 0.3f) / (lineLength * 0.85f)));
             yield return null;
         }

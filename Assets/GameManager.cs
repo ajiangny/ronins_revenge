@@ -32,6 +32,17 @@ public class GameManager : MonoBehaviour
     static int devJumpStage = -1;
     static bool devJumpBoss;
 
+    // The project enters Play mode without a domain reload, so these would otherwise carry over from the last
+    // session: god mode left on, or a run that skips the title.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetSession()
+    {
+        skipTitle = false;
+        godMode = false;
+        devJumpStage = -1;
+        devJumpBoss = false;
+    }
+
     [Header("Inscribed")]
     [SerializeField, FormerlySerializedAs("fleet")] SamuraiArmy army;
     [SerializeField, FormerlySerializedAs("ship")] Ronin ronin;
@@ -525,10 +536,18 @@ public class GameManager : MonoBehaviour
         {
             int stage = Mathf.Min(devJumpStage, stages.Length - 1);
             devJumpStage = -1;
-            StartAt(stage, devJumpBoss);
+            StartCoroutine(DevJumpTo(stage, devJumpBoss));
             return;
         }
         StartCoroutine(BeginRound());
+    }
+
+    // A jump starts from this scene's Start, before the backdrop has built its ground, so it waits a frame
+    // before swapping maps.
+    IEnumerator DevJumpTo(int stage, bool boss)
+    {
+        yield return null;
+        StartAt(stage, boss);
     }
 
     IEnumerator BeginRound()

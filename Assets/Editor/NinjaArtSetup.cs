@@ -23,6 +23,7 @@ public static class NinjaArtSetup
         // Separate west/east clips rather than one flipped, so his armoured arm stays on the right side.
         ronin.runLeft = Frames("Ronin", "RunWest");
         ronin.runRight = Frames("Ronin", "RunEast");
+        SetUpWalkUp(ronin);
         // The middle of the katana swing: four frames finish inside the 0.35 s attack cooldown while Space is held.
         ronin.slash = Frames("Ronin", "Slash", 1, 2, 3, 4);
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
@@ -194,6 +195,59 @@ public static class NinjaArtSetup
         // Deep indigo shows only if the ground ever fails to cover the view.
         Camera.main.backgroundColor = new Color(0.07f, 0.06f, 0.16f);
         EditorUtility.SetDirty(Camera.main);
+    }
+
+    // The ronin's walk off the field between maps, and the ground of each stage and boss, without touching the prefabs.
+    [MenuItem("Ninja/Apply Maps")]
+    public static void ApplyMaps()
+    {
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
+        if (!scene.isLoaded)
+        {
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        }
+        SetUpWalkUp(AssetDatabase.LoadAssetAtPath<CharacterArt>(ArtRoot + "Ronin.asset"));
+        SetUpMaps(Object.FindAnyObjectByType<GameManager>());
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        Debug.Log("Maps and the ronin's walk-up applied. Re-run Ninja/Apply Boon Art to recolour the walk for the elemental ronin.");
+    }
+
+    static void SetUpWalkUp(CharacterArt ronin)
+    {
+        ronin.walkUp = Frames("Ronin", "WalkNorth");
+        ronin.walkFps = 9f;
+        EditorUtility.SetDirty(ronin);
+    }
+
+    // Stage 1 keeps the courtyard; later stages fight on Background/Pass_Stage<n>, and each boss waits on Background/Arena_<boss>.
+    static void SetUpMaps(GameManager manager)
+    {
+        var so = new SerializedObject(manager);
+        SerializedProperty stages = so.FindProperty("stages");
+        for (int i = 0; i < stages.arraySize; i++)
+        {
+            SerializedProperty stage = stages.GetArrayElementAtIndex(i);
+            var boss = (BossKind)stage.FindPropertyRelative("boss").enumValueIndex;
+            SetMap(stage.FindPropertyRelative("roundsMap"), i == 0 ? null : $"Background/Pass_Stage{i + 1}", Color.white,
+                "Effects/Leaf", new Color(0.85f, 0.75f, 0.5f, 0.6f));
+            // Benibana's maple leaves are bright; dimmed so her crimson shots still stand out on them.
+            SetMap(stage.FindPropertyRelative("bossMap"), boss == BossKind.None ? null : $"Background/Arena_{boss}",
+                boss == BossKind.Benibana ? new Color(0.7f, 0.66f, 0.7f) : Color.white,
+                boss == BossKind.Benibana ? "Effects/Leaf" : null, new Color(0.9f, 0.2f, 0.2f, 0.85f));
+        }
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // A missing ground sprite leaves the map empty, which the game reads as "stay where you are".
+    static void SetMap(SerializedProperty map, string ground, Color groundTint, string petal, Color petalTint)
+    {
+        Sprite groundSprite = ground != null ? AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + ground + ".png") : null;
+        map.FindPropertyRelative("ground").objectReferenceValue = groundSprite;
+        map.FindPropertyRelative("groundTint").colorValue = groundTint;
+        map.FindPropertyRelative("petal").objectReferenceValue = groundSprite != null && petal != null ? Load(petal) : null;
+        map.FindPropertyRelative("petalTint").colorValue = petalTint;
     }
 
     static CharacterArt SamuraiArt(string name, Sprite[] particles)

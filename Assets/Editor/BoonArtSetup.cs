@@ -118,9 +118,11 @@ public static class BoonArtSetup
         art.slash = Recolor(source.slash, suffix, hue, boost);
         art.runLeft = Recolor(source.runLeft, suffix, hue, boost);
         art.runRight = Recolor(source.runRight, suffix, hue, boost);
+        art.walkUp = Recolor(source.walkUp, suffix, hue, boost);
         art.idleFps = source.idleFps;
         art.actionFps = source.actionFps;
         art.runFps = source.runFps;
+        art.walkFps = source.walkFps;
         art.deathParticles = source.deathParticles;
         EditorUtility.SetDirty(art);
         return art;

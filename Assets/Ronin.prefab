@@ -60,7 +60,7 @@ MonoBehaviour:
   shurikenScale: 2.6
   shurikenSpeed: 0.75
   parryWindow: 0.25
-  parryCooldown: 1.5
+  parryMissCooldown: 2
   parryRadius: 1.1
 --- !u!54 &-5681516107360910860
 Rigidbody:

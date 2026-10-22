@@ -55,9 +55,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 93ca01ae2a66c4204a49a31fd417b073, type: 3}
   - {fileID: 21300000, guid: 358f6dac6d8294e50b9175137772b875, type: 3}
   - {fileID: 21300000, guid: e6539eb0c342d45a9a26e93800618f13, type: 3}
+  walkUp:
+  - {fileID: 21300000, guid: b2b1dbefdf9734deeb1171fe71c6acaf, type: 3}
+  - {fileID: 21300000, guid: d403287a9f2fc4f8297844e08d2e8f98, type: 3}
+  - {fileID: 21300000, guid: 6457bf3cf890d43a0b8c040d1bc6e63d, type: 3}
+  - {fileID: 21300000, guid: ea2437b40796245c9af6ce19eb8a2c8d, type: 3}
+  - {fileID: 21300000, guid: 3a3f51d277e5e41eb9cc2938a25a0b67, type: 3}
+  - {fileID: 21300000, guid: 104cb72596adc41d682b9dabbd871a8e, type: 3}
+  - {fileID: 21300000, guid: 7bb3573287cf84c4b8a59c85b4c46ca6, type: 3}
+  - {fileID: 21300000, guid: 9e19f9e58f0c44d69902831a228fd69c, type: 3}
   idleFps: 5
   actionFps: 12
   runFps: 14
+  walkFps: 9
   deathParticles:
   - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
   - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

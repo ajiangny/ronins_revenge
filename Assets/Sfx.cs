@@ -48,6 +48,21 @@ public static class Sfx
 
     public static SfxLibrary Library { get; set; }
 
+    // The player's sound-effect volume (0-1) from the settings menu, kept between sessions.
+    public static float Volume
+    {
+        get => savedVolume >= 0f ? savedVolume : savedVolume = PlayerPrefs.GetFloat(VolumeKey, 1f);
+        set
+        {
+            savedVolume = Mathf.Clamp01(value);
+            PlayerPrefs.SetFloat(VolumeKey, savedVolume);
+            PlayerPrefs.Save();
+        }
+    }
+
+    const string VolumeKey = "SfxVolume";
+    static float savedVolume = -1f;
+
     static AudioSource[] voices;
     // When each voice's sound has finished being heard (unscaled time); after that it can be reused even while its
     // clip's silent tail is still playing.
@@ -91,7 +106,7 @@ public static class Sfx
             busyUntil[index] = now + sound.AudibleLength(pick) / Mathf.Max(0.1f, finalPitch);
         }
         voice.clip = sound.clips[pick];
-        voice.volume = sound.volume * volume;
+        voice.volume = sound.volume * volume * Volume;
         voice.pitch = finalPitch;
         voice.Play();
     }
@@ -103,7 +118,7 @@ public static class Sfx
         if (sound == null || !sound.ownSource) return;
         AudioSource source = OwnSource(id);
         source.clip = sound.clips[Random.Range(0, sound.clips.Length)];
-        source.volume = sound.volume * volume;
+        source.volume = sound.volume * volume * Volume;
         source.pitch = pitch;
         source.loop = true;
         source.Play();

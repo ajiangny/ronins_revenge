@@ -9,7 +9,7 @@ using UnityEngine.UI;
 // How a piece of text is drawn: Title in the brush font, the rest in the clean body font, all outlined and shadowed.
 public enum TextStyle { Title, Heading, Hud, Body, Hint }
 
-// Builds the HUD (score, stage, lives, boss bar, subtitles), the boss intro and the full-screen overlay, and owns
+// Builds the HUD (score, stage, lives, boss bar, subtitles), the boss intro and the stage banner, and owns
 // the text styles every other screen uses.
 [RequireComponent(typeof(Canvas))]
 public class GameUI : MonoBehaviour
@@ -18,7 +18,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] TMP_FontAsset font;
     [Tooltip("Heart shown once per remaining life.")]
     [SerializeField] Sprite lifeIcon;
-    [Tooltip("9-sliced panel drawn behind the title/stage/end screen text.")]
+    [Tooltip("9-sliced panel drawn behind the stage and round announcements.")]
     [SerializeField] Sprite overlayBanner;
     [Tooltip("Screen pixels per art pixel for the banner's border, so the pixel art stays chunky and even.")]
     [SerializeField] float overlayBannerPixelScale = 2f;
@@ -37,14 +37,15 @@ public class GameUI : MonoBehaviour
     public static readonly Color HighScoreColour = new Color(1f, 0.84f, 0.42f);
 
     TextMeshProUGUI scoreText;
-    TextMeshProUGUI highScoreText;
     TextMeshProUGUI levelText;
     RectTransform livesRow;
     readonly List<GameObject> lifeIcons = new List<GameObject>();
+    readonly List<GameObject> hudParts = new List<GameObject>();
 
-    GameObject overlay;
-    TextMeshProUGUI overlayTitle;
-    TextMeshProUGUI overlayBody;
+    CanvasGroup banner;
+    TextMeshProUGUI bannerTitle;
+    TextMeshProUGUI bannerBody;
+    bool bannerShown;
 
     GameObject bossBar;
     TextMeshProUGUI bossName;
@@ -68,11 +69,12 @@ public class GameUI : MonoBehaviour
         BuildHud();
         BuildBossBar();
         BuildSubtitle();
-        BuildOverlay();
+        BuildBanner();
     }
 
-    // Arcade layout: score top left, high score top centre, stage and samurai left top right, lives bottom left.
-    // Small dim labels sit over big bright numbers, on a shade that fades out before the army's top row.
+    // Arcade layout: score top left, stage and samurai left top right, lives bottom left. The top centre stays clear
+    // for the boss bar; the high score is shown on the title and end menus instead. Small dim labels sit over big
+    // bright numbers, on a shade that fades out before the army's top row.
     void BuildHud()
     {
         RectTransform shade = CreateRect("HudShade", transform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 150));
@@ -82,11 +84,10 @@ public class GameUI : MonoBehaviour
         shadeImage.sprite = ProceduralSprites.FadeDown;
         shadeImage.color = new Color(0.02f, 0.01f, 0.04f, 0.7f);
         shadeImage.raycastTarget = false;
+        hudParts.Add(shade.gameObject);
 
         HudLabel("ScoreLabel", "SCORE", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft);
         scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -42), TextAlignmentOptions.TopLeft, Color.white);
-        HudLabel("HighLabel", "HIGH SCORE", new Vector2(0.5f, 1f), new Vector2(0, -14), TextAlignmentOptions.Top);
-        highScoreText = HudValue("HighScore", new Vector2(0.5f, 1f), new Vector2(0, -42), TextAlignmentOptions.Top, HighScoreColour);
         levelText = HudValue("Level", new Vector2(1f, 1f), new Vector2(-36, -14), TextAlignmentOptions.TopRight, Color.white);
         levelText.fontSize = 36;
 
@@ -102,11 +103,19 @@ public class GameUI : MonoBehaviour
             counterText.fontSize = 30;
             counterText.color = MutedColour;
             Style(counterText, TextStyle.Hud);
+            hudParts.Add(counterText.gameObject);
         }
 
         TextMeshProUGUI livesLabel = HudLabel("LivesLabel", "LIVES", new Vector2(0f, 0f), new Vector2(36, 76), TextAlignmentOptions.BottomLeft);
         livesLabel.rectTransform.sizeDelta = new Vector2(200, 36);
         livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(24, 24), new Vector2(400, 52));
+        hudParts.Add(livesRow.gameObject);
+    }
+
+    // Score, stage and lives; hidden behind the title menu.
+    public void SetHudVisible(bool visible)
+    {
+        foreach (GameObject part in hudParts) part.SetActive(visible);
     }
 
     TextMeshProUGUI HudLabel(string name, string label, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment)
@@ -116,6 +125,7 @@ public class GameUI : MonoBehaviour
         text.color = MutedColour;
         text.characterSpacing = 8;
         Style(text, TextStyle.Hint);
+        hudParts.Add(text.gameObject);
         return text;
     }
 
@@ -124,6 +134,7 @@ public class GameUI : MonoBehaviour
         TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(600, 64), 50, alignment);
         text.color = colour;
         Style(text, TextStyle.Hud);
+        hudParts.Add(text.gameObject);
         return text;
     }
 
@@ -147,6 +158,7 @@ public class GameUI : MonoBehaviour
     void Update()
     {
         if (subtitlePlate.gameObject.activeSelf && Time.unscaledTime > subtitleUntil) subtitlePlate.gameObject.SetActive(false);
+        UpdateBanner();
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;
@@ -438,7 +450,7 @@ public class GameUI : MonoBehaviour
 
     void BuildBossBar()
     {
-        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -150), new Vector2(904, 30));
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -115), new Vector2(904, 30));
         frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
         RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
         back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
@@ -463,10 +475,9 @@ public class GameUI : MonoBehaviour
         return rect;
     }
 
-    public void SetScore(int score, int highScore)
+    public void SetScore(int score)
     {
         scoreText.SetText("{0:000000}", score);
-        highScoreText.SetText("{0:000000}", highScore);
     }
 
     public void SetStage(int stage, int stageCount, int round, int roundCount)
@@ -487,40 +498,58 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    public void ShowOverlay(string title, string body, Color titleColor)
+    // A stage or round announcement across the middle of the screen. Unlike a full-screen overlay it leaves the
+    // playfield visible above and below, and it fades in and out rather than popping.
+    public void ShowBanner(string title, string body, Color titleColor)
     {
-        overlayTitle.text = title;
-        overlayTitle.color = titleColor;
-        overlayBody.text = body;
-        overlay.SetActive(true);
+        bannerTitle.text = title;
+        bannerTitle.color = titleColor;
+        bannerBody.text = body;
+        bannerBody.gameObject.SetActive(!string.IsNullOrEmpty(body));
+        bannerShown = true;
+        banner.gameObject.SetActive(true);
     }
 
-    public void HideOverlay()
+    public void HideBanner()
     {
-        overlay.SetActive(false);
+        bannerShown = false;
     }
 
-    void BuildOverlay()
+    void BuildBanner()
     {
-        RectTransform panel = CreateRect("Overlay", transform, Vector2.zero, Vector2.zero, Vector2.zero);
-        panel.anchorMin = Vector2.zero;
-        panel.anchorMax = Vector2.one;
-        panel.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0.05f, 0.75f);
-        overlay = panel.gameObject;
-
+        RectTransform panel = CreateRect("Banner", transform, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1400, 300));
+        banner = panel.gameObject.AddComponent<CanvasGroup>();
+        banner.alpha = 0f;
+        banner.blocksRaycasts = false;
+        Image image = panel.gameObject.AddComponent<Image>();
+        image.raycastTarget = false;
         if (overlayBanner != null)
         {
-            RectTransform banner = CreateRect("Banner", panel, new Vector2(0.5f, 0.5f), new Vector2(0, 20), new Vector2(1560, 500));
-            Image image = banner.gameObject.AddComponent<Image>();
             image.sprite = overlayBanner;
             image.type = Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = GetComponent<Canvas>().referencePixelsPerUnit / overlayBanner.pixelsPerUnit / overlayBannerPixelScale;
         }
+        else
+        {
+            image.color = new Color(0.02f, 0.01f, 0.04f, 0.8f);
+        }
 
-        overlayTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 140), new Vector2(1600, 180), 110, TextAlignmentOptions.Center, panel);
-        Style(overlayTitle, TextStyle.Title);
-        overlayBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(1400, 360), 36, TextAlignmentOptions.Top, panel);
-        Style(overlayBody, TextStyle.Body);
+        bannerTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 45), new Vector2(1300, 140), 96, TextAlignmentOptions.Center, panel);
+        bannerTitle.textWrappingMode = TextWrappingModes.NoWrap;
+        Style(bannerTitle, TextStyle.Title);
+        bannerBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -70), new Vector2(1200, 100), 38, TextAlignmentOptions.Center, panel);
+        bannerBody.color = new Color(0.95f, 0.92f, 0.86f);
+        Style(bannerBody, TextStyle.Body);
+        panel.gameObject.SetActive(false);
+    }
+
+    // Fades the banner, with a slight scale-in so it lands rather than appears.
+    void UpdateBanner()
+    {
+        if (!banner.gameObject.activeSelf) return;
+        banner.alpha = Mathf.MoveTowards(banner.alpha, bannerShown ? 1f : 0f, Time.unscaledDeltaTime / 0.25f);
+        banner.transform.localScale = Vector3.one * (1.06f - 0.06f * EaseOut(banner.alpha));
+        if (!bannerShown && banner.alpha <= 0f) banner.gameObject.SetActive(false);
     }
 
     GameObject CreateLifeIcon(int index)

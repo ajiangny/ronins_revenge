@@ -20,10 +20,10 @@ public class ElementArt
     public Sprite portrait;
 }
 
-// Owns the game flow: title screen -> stages of rounds -> win/lose screen, plus score, lives, souls and boons.
+// Owns the game flow: title menu -> stages of rounds -> win/lose menu, plus pause, score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
-    enum State { Title, Transition, Playing, Choosing, GameOver }
+    enum State { Title, Transition, Playing, Choosing, Paused, GameOver }
 
     const string HighScoreKey = "HighScore";
     static bool skipTitle;
@@ -141,6 +141,9 @@ public class GameManager : MonoBehaviour
     int lives;
     int score;
     int highScore;
+    // The best score before this run, so the end screen can tell a new record apart.
+    int highScoreAtStart;
+    MenuUI menu;
 
     RoninLoadout loadout;
     BoonEffects effects;
@@ -231,12 +234,14 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         if (boonChoice == null) boonChoice = ui.gameObject.AddComponent<BoonChoiceUI>();
-        boonChoice.Bind(ronin, ui.Font);
+        boonChoice.Bind(ronin, ui);
+        menu = ui.gameObject.AddComponent<MenuUI>();
+        menu.Bind(ui);
         baseRoninArt = ronin.art;
         ResetLoadout();
 
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
-        ui.SetScore(0, highScore);
+        ui.SetScore(0);
         ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
         ui.SetLives(startingLives);
         blockers.Rebuild();
@@ -249,37 +254,133 @@ public class GameManager : MonoBehaviour
         else
         {
             state = State.Title;
+            ronin.ControlsEnabled = false;
+            SetHudVisible(false);
             if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
-            ui.ShowOverlay("SHADOW BLADE",
-                "LEFT / RIGHT or A / D to move      SPACE to slash\n" +
-                "E or UP for the Spirit Shuriken      SHIFT or DOWN to parry arrows\n\n" +
-                $"Survive {stages.Length} {(stages.Length == 1 ? "stage" : "stages")} of three samurai armies each. A warlord waits at the end of every stage.\n" +
-                "Fallen samurai may drop spirit souls. Catch one to choose a boon.\n\n" +
-                "Press ENTER to start",
-                new Color(0.4f, 0.85f, 1f));
+            ShowTitleMenu();
         }
     }
 
     void Update()
     {
         Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
-        bool confirm = keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame;
-
-        if (state == State.Title && confirm)
-        {
-            StartGame();
-        }
-        else if (state == State.GameOver && confirm)
-        {
-            // Reload for a clean slate (arrows, debris, ronin), then jump straight into play.
-            skipTitle = true;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        Gamepad gamepad = Gamepad.current;
+        bool pause = (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame))
+            || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
+        if (state == State.Playing && pause) Pause();
 #if UNITY_EDITOR
-        DevHotkeys(keyboard);
+        if (keyboard != null) DevHotkeys(keyboard);
 #endif
         if (state == State.Playing) UpdateScouts();
+    }
+
+    // The menu pages. Each sub-page's Back returns to whichever page opened it.
+    void ShowTitleMenu()
+    {
+        var items = new List<MenuUI.Item>
+        {
+            MenuUI.Item.Button("START", () =>
+            {
+                menu.Hide();
+                SetHudVisible(true);
+                StartGame();
+            }),
+            MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
+            MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTitleMenu)),
+        };
+        if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
+        menu.Show("SHADOW BLADE",
+            $"<color=#FF6B5E>RONIN  VS.  SAMURAI</color>\n<size=30><color=#{ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour)}>HIGH SCORE  {highScore:000000}</color></size>",
+            items.ToArray(), null, true);
+    }
+
+    // The title screen keeps the playfield clear of score, lives and ability slots.
+    void SetHudVisible(bool visible)
+    {
+        ui.SetHudVisible(visible);
+        boonChoice.SetHudVisible(visible);
+    }
+
+    void ShowControls(System.Action back)
+    {
+        menu.Show("CONTROLS",
+            "<align=left>" +
+            ControlRow("Move", Key("A") + "  " + Key("D") + "    or    " + Key("←") + "  " + Key("→")) +
+            ControlRow("Slash", Key("SPACE")) +
+            ControlRow("Spirit Shuriken", Key("E") + "    or    " + Key("↑")) +
+            ControlRow("Parry arrows", Key("SHIFT") + "    or    " + Key("↓")) +
+            ControlRow("Pause", Key("ESC")) +
+            "</align>\n" +
+            $"Clear three samurai armies in each of the {stages.Length} stages.\nA warlord waits at the end of every stage.\n" +
+            "Fallen samurai may drop spirit souls. Catch one to choose a boon.",
+            new[] { MenuUI.Item.Button("BACK", back) }, back);
+    }
+
+    static string ControlRow(string action, string keys) =>
+        $"<pos=20%><color=#{ColorUtility.ToHtmlStringRGB(GameUI.MutedColour)}>{action}</color><pos=50%>{keys}\n";
+
+    static string Key(string key) => $"<mark=#FFFFFF2E padding=\"10,10,2,2\">{key}</mark>";
+
+    void ShowSettings(System.Action back)
+    {
+        menu.Show("SETTINGS", null, new[]
+        {
+            MenuUI.Item.Slider("MUSIC", () => Music.Volume, value => Music.Volume = value),
+            MenuUI.Item.Slider("SOUND", () => Sfx.Volume, value =>
+            {
+                Sfx.Volume = value;
+                Sfx.Play(Sfx.UiMove);
+            }),
+            MenuUI.Item.Button("BACK", back),
+        }, back);
+    }
+
+    // Freezes the fight under the pause menu. Only offered mid-play, never during a boon pick or a boss intro.
+    void Pause()
+    {
+        state = State.Paused;
+        ronin.ControlsEnabled = false;
+        Time.timeScale = 0f;
+        Music.Duck(0.35f, float.MaxValue);
+        ShowPauseMenu();
+    }
+
+    void ShowPauseMenu()
+    {
+        menu.Show("PAUSED", null, new[]
+        {
+            MenuUI.Item.Button("RESUME", Resume),
+            MenuUI.Item.Button("RESTART", () => Reload(true)),
+            MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowPauseMenu)),
+            MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowPauseMenu)),
+            MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)),
+        }, Resume);
+    }
+
+    // Always back to full speed: a parry's hit-stop that was cut off by the pause would otherwise never end.
+    void Resume()
+    {
+        menu.Hide();
+        Music.Duck(1f, 0f);
+        Time.timeScale = 1f;
+        ResumePlay();
+    }
+
+    // Reload for a clean slate (arrows, debris, ronin), straight into play or back to the title menu.
+    static void Reload(bool intoPlay)
+    {
+        skipTitle = intoPlay;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    static void Quit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
     // One scout at a time, every 15-25 seconds in rounds that have them.
@@ -294,7 +395,7 @@ public class GameManager : MonoBehaviour
     {
         score += scout.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
-        ui.SetScore(score, highScore);
+        ui.SetScore(score);
         if (state == State.Playing) MaybeDropSoul(scout.transform.position, true);
     }
 
@@ -324,12 +425,13 @@ public class GameManager : MonoBehaviour
     {
         lives = startingLives;
         score = 0;
+        highScoreAtStart = highScore;
         stageIndex = 0;
         roundIndex = 0;
         killsSinceSoul = 0;
         ResetLoadout();
         ui.SetLives(lives);
-        ui.SetScore(score, highScore);
+        ui.SetScore(score);
         StartCoroutine(BeginRound());
     }
 
@@ -345,15 +447,15 @@ public class GameManager : MonoBehaviour
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, Stage.rounds.Length);
         string body = roundIndex > 0 ? "Another army marches in."
-            : stageIndex == 0 ? $"{Stage.name}\n\nGet ready!"
-            : $"{Stage.name}\n\nThe next armies are bigger, faster and angrier.";
-        ui.ShowOverlay($"STAGE {stageIndex + 1}  -  ROUND {roundIndex + 1}", body, round.samuraiColor);
+            : stageIndex == 0 ? $"{Stage.name}  —  get ready!"
+            : $"{Stage.name}  —  bigger, faster, angrier armies.";
+        ui.ShowBanner($"STAGE {stageIndex + 1}  ·  ROUND {roundIndex + 1}", body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
 
         yield return new WaitForSeconds(roundIndex == 0 ? levelIntroTime : roundIntroTime);
 
-        ui.HideOverlay();
+        ui.HideBanner();
         state = State.Playing;
         ronin.ControlsEnabled = true;
         army.Advance();
@@ -364,7 +466,7 @@ public class GameManager : MonoBehaviour
     {
         score += samurai.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
-        ui.SetScore(score, highScore);
+        ui.SetScore(score);
 
         if (state != State.Playing) return;
         // Boon effects bring their own blasts and bolts; the ronin's own hits spark in his projectile's colour.
@@ -613,7 +715,7 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
         army.Clear();
         ClearProjectiles();
-        ui.HideOverlay();
+        ui.HideBanner();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
         // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi.
@@ -646,15 +748,15 @@ public class GameManager : MonoBehaviour
         BossVoice lines = VoiceFor(Stage.boss);
         if (lines.portrait != null && lines.closeup != null)
         {
-            voice.volume = voiceVolume;
+            voice.volume = voiceVolume * Sfx.Volume;
             yield return ui.PlayBossIntro(lines.portrait, lines.closeup, activeBoss.Title, activeBoss.Epithet, activeBoss.Colour,
                 voice, lines.intro, activeBoss.Line(BossLine.Intro));
         }
         else
         {
-            ui.ShowOverlay(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
+            ui.ShowBanner(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
             yield return new WaitForSeconds(2.2f);
-            ui.HideOverlay();
+            ui.HideBanner();
         }
 
         ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
@@ -740,7 +842,7 @@ public class GameManager : MonoBehaviour
         if (clip != null)
         {
             voice.Stop();
-            voice.volume = voiceVolume;
+            voice.volume = voiceVolume * Sfx.Volume;
             voice.clip = clip;
             voice.Play();
             speakingFullLine = full;
@@ -753,7 +855,7 @@ public class GameManager : MonoBehaviour
     {
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
-        ui.SetScore(score, highScore);
+        ui.SetScore(score);
         ui.SetBossHealth(activeBoss.HealthFraction);
         if (state != State.Playing || source == KillSource.Effect) return;
 
@@ -779,7 +881,7 @@ public class GameManager : MonoBehaviour
         if (state != State.Playing) return;
         score += 2000 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
-        ui.SetScore(score, highScore);
+        ui.SetScore(score);
         StartCoroutine(BossFell());
     }
 
@@ -856,9 +958,24 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
 
-        ui.ShowOverlay(title,
-            $"{message}\n\nScore {score}      High score {highScore}\nReached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}\n\nPress ENTER to play again",
-            color);
+        StartCoroutine(ShowEndMenu(title, message, color));
+    }
+
+    // A beat to watch the ronin fall (or the last army scatter) before the results come up.
+    IEnumerator ShowEndMenu(string title, string message, Color color)
+    {
+        yield return new WaitForSecondsRealtime(1.2f);
+        string muted = ColorUtility.ToHtmlStringRGB(GameUI.MutedColour);
+        string gold = ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour);
+        string body = $"{message}\n\n" +
+            $"<color=#{muted}>SCORE</color>  <size=48>{score:000000}</size>        <color=#{muted}>HIGH SCORE</color>  <size=48><color=#{gold}>{highScore:000000}</color></size>\n" +
+            $"<color=#{muted}>Reached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}</color>";
+        if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
+        menu.Show(title, body, new[]
+        {
+            MenuUI.Item.Button("PLAY AGAIN", () => Reload(true)),
+            MenuUI.Item.Button("TITLE", () => Reload(false)),
+        }, null, false, 0, color);
     }
 
     static void ClearProjectiles()

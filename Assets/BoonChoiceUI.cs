@@ -24,7 +24,6 @@ public class BoonChoiceUI : MonoBehaviour
         public Image glow;
         public Image icon;
         public TextMeshProUGUI letter;
-        public TextMeshProUGUI slot;
         public TextMeshProUGUI name;
         public TextMeshProUGUI rarity;
         public TextMeshProUGUI description;
@@ -62,6 +61,7 @@ public class BoonChoiceUI : MonoBehaviour
     [SerializeField] Sprite[] abilityIcons = new Sprite[3];
 
     Ronin ronin;
+    GameUI ui;
     TMP_FontAsset font;
     bool built;
 
@@ -91,10 +91,11 @@ public class BoonChoiceUI : MonoBehaviour
 
     public bool IsOpen => panel != null && panel.activeSelf;
 
-    public void Bind(Ronin owner, TMP_FontAsset uiFont)
+    public void Bind(Ronin owner, GameUI gameUI)
     {
         ronin = owner;
-        font = uiFont;
+        ui = gameUI;
+        font = gameUI.BodyFont;
         if (built) return;
         built = true;
         BuildHud();
@@ -147,6 +148,8 @@ public class BoonChoiceUI : MonoBehaviour
             cards[i].root.gameObject.SetActive(i < offers.Count);
             if (i < offers.Count) Fill(cards[i], offers[i]);
         }
+        // The ability slots would show through the footer's key hints.
+        SetHudVisible(false);
         panel.SetActive(true);
     }
 
@@ -155,10 +158,11 @@ public class BoonChoiceUI : MonoBehaviour
         BoonDefinition boon = offer.Boon;
         Color rarityColor = Boons.RarityColor(offer.Rarity);
         SetIcon(card.icon, card.letter, boon, Boons.Info(boon.Element).Color);
-        card.slot.text = boon.Slot.ToString().ToUpperInvariant();
         card.name.text = boon.Name;
         card.name.color = rarityColor;
-        card.rarity.text = offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString();
+        // The slot rides on the rarity line so the description can use the card's full width.
+        string rarity = offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString();
+        card.rarity.text = $"{rarity}  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}><size=26>·  {boon.Slot.ToString().ToUpperInvariant()}</size></color>";
         card.rarity.color = rarityColor;
         card.description.text = boon.Description;
 
@@ -226,6 +230,7 @@ public class BoonChoiceUI : MonoBehaviour
     {
         Sfx.Play(Sfx.UiConfirm);
         panel.SetActive(false);
+        SetHudVisible(true);
         Action<int> callback = chosen;
         chosen = null;
         callback?.Invoke(index);
@@ -295,7 +300,7 @@ public class BoonChoiceUI : MonoBehaviour
             RectTransform rect = GameUI.CreateRect("Passive" + passiveIcons.Count, passiveRow, new Vector2(1f, 0.5f),
                 new Vector2(-passiveIcons.Count * 52f, 0), new Vector2(46, 46));
             passiveIcons.Add(rect.gameObject.AddComponent<Image>());
-            GameUI.CreateText(rect, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(46, 46), 26, TextAlignmentOptions.Center);
+            ui.Style(GameUI.CreateText(rect, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(46, 46), 28, TextAlignmentOptions.Center), TextStyle.Hud);
         }
         for (int i = 0; i < passiveIcons.Count; i++)
         {
@@ -345,12 +350,13 @@ public class BoonChoiceUI : MonoBehaviour
         heldSoul.preserveAspect = true;
         heldSoulAnimator = heldSoul.gameObject.AddComponent<SpriteAnimatorUI>();
 
-        title = GameUI.CreateText(root, font, "Title", center, new Vector2(CardX, 425), new Vector2(1300, 90), 66, TextAlignmentOptions.Center);
-        title.characterSpacing = 38f;
+        title = GameUI.CreateText(root, font, "Title", center, new Vector2(CardX, 425), new Vector2(1300, 100), 76, TextAlignmentOptions.Center);
+        title.characterSpacing = 12f;
         title.fontStyle = FontStyles.UpperCase;
-        subtitle = GameUI.CreateText(root, font, "Subtitle", center, new Vector2(CardX, 362), new Vector2(1300, 50), 28, TextAlignmentOptions.Center);
-        subtitle.fontStyle = FontStyles.Italic;
+        ui.Style(title, TextStyle.Title);
+        subtitle = GameUI.CreateText(root, font, "Subtitle", center, new Vector2(CardX, 362), new Vector2(1300, 50), 32, TextAlignmentOptions.Center);
         subtitle.color = MutedText;
+        ui.Style(subtitle, TextStyle.Body);
         divider = CreateImage("Divider", root, center, new Vector2(CardX, 326), new Vector2(760, 3), null);
 
         float[] rows = { 175f, -40f, -255f };
@@ -367,8 +373,10 @@ public class BoonChoiceUI : MonoBehaviour
         quick.rectTransform.pivot = new Vector2(0f, 0.5f);
         quick.text = "1  2  3   Quick pick";
         quick.color = MutedText;
+        ui.Style(quick, TextStyle.Hint);
         TextMeshProUGUI hint = GameUI.CreateText(footer, font, "Hint", new Vector2(1f, 0.5f), new Vector2(-40, 0), new Vector2(900, 60), 30, TextAlignmentOptions.Right);
-        hint.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>Up / Down</color>  Select        <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>Enter</color>  Choose";
+        hint.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>↑ ↓</color>  Select        <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>Enter</color>  Choose";
+        ui.Style(hint, TextStyle.Hint);
     }
 
     Card BuildCard(RectTransform parent, Vector2 position, int index)
@@ -390,22 +398,33 @@ public class BoonChoiceUI : MonoBehaviour
         card.icon = CreateImage("Icon", frame.rectTransform, center, Vector2.zero, new Vector2(124, 124), null);
         card.icon.preserveAspect = true;
         card.letter = GameUI.CreateText(frame.rectTransform, font, "Letter", center, Vector2.zero, new Vector2(128, 128), 64, TextAlignmentOptions.Center);
-        card.slot = GameUI.CreateText(card.root, font, "Slot", center, new Vector2(400, 14), new Vector2(300, 28), 20, TextAlignmentOptions.Right);
-        card.slot.color = MutedText;
-        card.slot.characterSpacing = 8f;
+        ui.Style(card.letter, TextStyle.Heading);
 
-        card.name = GameUI.CreateText(card.root, font, "Name", center, new Vector2(-90, 46), new Vector2(640, 52), 42, TextAlignmentOptions.Left);
+        card.name = GameUI.CreateText(card.root, font, "Name", center, new Vector2(-90, 58), new Vector2(640, 56), 44, TextAlignmentOptions.Left);
         card.name.fontStyle = FontStyles.SmallCaps;
-        card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(400, 46), new Vector2(300, 52), 32, TextAlignmentOptions.Right);
+        ui.Style(card.name, TextStyle.Heading);
+        card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(340, 58), new Vector2(420, 56), 32, TextAlignmentOptions.Right);
         card.rarity.fontStyle = FontStyles.SmallCaps;
+        ui.Style(card.rarity, TextStyle.Heading);
         // Room for two lines under the name; the stat line sits below them.
-        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(-15, -10), new Vector2(790, 60), 26, TextAlignmentOptions.TopLeft);
+        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(70, -2), new Vector2(960, 64), 28, TextAlignmentOptions.TopLeft);
         card.description.color = new Color(0.9f, 0.88f, 0.84f);
-        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -47), new Vector2(960, 32), 26, TextAlignmentOptions.Left);
-        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -47), new Vector2(440, 32), 22, TextAlignmentOptions.Right);
+        ui.Style(card.description, TextStyle.Body);
+        // Two lines have to fit between the name and the stat line, above the card's gold border.
+        card.description.lineSpacing = -14f;
+        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -47), new Vector2(960, 34), 28, TextAlignmentOptions.Left);
+        ui.Style(card.stat, TextStyle.Hud);
+        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -47), new Vector2(440, 34), 26, TextAlignmentOptions.Right);
         card.note.color = new Color(1f, 0.75f, 0.55f, 0.85f);
-        card.note.fontStyle = FontStyles.Italic;
+        ui.Style(card.note, TextStyle.Hint);
         return card;
+    }
+
+    // The ability slots and passives; hidden behind the title menu.
+    public void SetHudVisible(bool visible)
+    {
+        foreach (HudSlot slot in hudSlots) slot.ring.gameObject.SetActive(visible);
+        passiveRow.gameObject.SetActive(visible);
     }
 
     // Bottom-right: the three ability slots (with cooldown sweeps) and a row of passive icons above them.
@@ -423,6 +442,7 @@ public class BoonChoiceUI : MonoBehaviour
             slot.icon = CreateImage("Icon", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70, 70), null);
             slot.icon.preserveAspect = true;
             slot.letter = GameUI.CreateText(slot.ring.rectTransform, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70, 70), 36, TextAlignmentOptions.Center);
+            ui.Style(slot.letter, TextStyle.Hud);
             slot.cooldown = CreateImage("Cooldown", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(88, 88), ProceduralSprites.Disc);
             slot.cooldown.color = new Color(0f, 0f, 0f, 0.65f);
             slot.cooldown.type = Image.Type.Filled;
@@ -430,9 +450,10 @@ public class BoonChoiceUI : MonoBehaviour
             slot.cooldown.fillOrigin = (int)Image.Origin360.Top;
             slot.cooldown.fillClockwise = false;
             slot.cooldown.fillAmount = 0f;
-            TextMeshProUGUI key = GameUI.CreateText(slot.ring.rectTransform, font, "Key", new Vector2(0.5f, 0f), new Vector2(0, -22), new Vector2(120, 30), 20, TextAlignmentOptions.Center);
+            TextMeshProUGUI key = GameUI.CreateText(slot.ring.rectTransform, font, "Key", new Vector2(0.5f, 0f), new Vector2(0, -26), new Vector2(140, 34), 26, TextAlignmentOptions.Center);
             key.text = keys[i];
             key.color = MutedText;
+            ui.Style(key, TextStyle.Hint);
             hudSlots[i] = slot;
         }
 

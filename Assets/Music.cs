@@ -13,6 +13,21 @@ public class Music : MonoBehaviour
     float duckLevel = 1f;
     float duckUntil;
 
+    // The player's music volume (0-1) from the settings menu, kept between sessions.
+    public static float Volume
+    {
+        get => savedVolume >= 0f ? savedVolume : savedVolume = PlayerPrefs.GetFloat(VolumeKey, 1f);
+        set
+        {
+            savedVolume = Mathf.Clamp01(value);
+            PlayerPrefs.SetFloat(VolumeKey, savedVolume);
+            PlayerPrefs.Save();
+        }
+    }
+
+    const string VolumeKey = "MusicVolume";
+    static float savedVolume = -1f;
+
     public static void Play(AudioClip clip, float volume, float fadeSeconds = 1f)
     {
         if (clip == null) return;
@@ -71,11 +86,13 @@ public class Music : MonoBehaviour
 
     void Update()
     {
+        // Applied here rather than baked into targets, so the settings slider works while a track plays.
+        float volumeSetting = Volume;
         for (int i = 0; i < 2; i++)
         {
             AudioSource deck = decks[i];
             if (!deck.isPlaying) continue;
-            float target = targets[i] * (Time.unscaledTime < duckUntil ? duckLevel : 1f);
+            float target = targets[i] * volumeSetting * (Time.unscaledTime < duckUntil ? duckLevel : 1f);
             // Ducking eases in and out quickly whatever the crossfade speed.
             deck.volume = Mathf.MoveTowards(deck.volume, target, Mathf.Max(fadeSpeed, 2f) * Time.unscaledDeltaTime);
             if (deck.volume <= 0f && targets[i] <= 0f) deck.Stop();

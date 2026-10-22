@@ -6,7 +6,7 @@ using UnityEngine;
 // The things a boss says out loud; GameManager plays the matching voice clip and subtitle. Intro, Phase and
 // Defeat are full lines; the rest are short barks that never cut one off.
 public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom,
-    KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern }
+    KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern, Midnight }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -261,12 +261,18 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     protected void Afterimage(Color color)
     {
+        Afterimage(sprite, color);
+    }
+
+    // A fading copy of any sprite where it stands now: dash trails, a falling weight's streak.
+    protected static void Afterimage(SpriteRenderer source, Color color)
+    {
         var ghost = new GameObject("Afterimage").AddComponent<SpriteRenderer>();
-        ghost.transform.SetPositionAndRotation(sprite.transform.position, sprite.transform.rotation);
-        ghost.transform.localScale = sprite.transform.lossyScale;
-        ghost.sprite = sprite.sprite;
-        ghost.flipX = sprite.flipX;
-        ghost.sortingOrder = sprite.sortingOrder - 1;
+        ghost.transform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
+        ghost.transform.localScale = source.transform.lossyScale;
+        ghost.sprite = source.sprite;
+        ghost.flipX = source.flipX;
+        ghost.sortingOrder = source.sortingOrder - 1;
         ghost.color = color;
         Fader.Fade(ghost, 0.4f);
     }

@@ -49,6 +49,12 @@ public static class FxSetup
         // The jam bursts from where its sparks start, high in the canvas, so the steam has room to rise.
         (Fx.UtsuGears, 16, false, new Vector2(30f / 61f, 1f - 16f / 52f)),
         (Fx.UtsuParts, 14, false, Centre),
+        (Fx.UtsuCharge, 16, false, Centre),
+        (Fx.UtsuBeamFlare, 14, true, Centre),
+        // Anchored on the hot spot where the beam lands, so the sparks and smoke rise above it.
+        (Fx.UtsuBeamHit, 16, true, new Vector2(0.5f, 1f - 32f / 40f)),
+        (Fx.UtsuScorch, 1, true, Centre),
+        (Fx.UtsuClockMark, 10, true, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

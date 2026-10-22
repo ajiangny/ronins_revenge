@@ -60,6 +60,30 @@ const SOUNDS = {
       "A wide metal disc thrown spinning through the air: a fast rising whirring whoosh with a faint metallic " +
       "hum and tiny jingling tassel weights, passing by. Video game sound effect, no music.",
   },
+  HatClang: {
+    seconds: 0.8,
+    prompt:
+      "A heavy metal hat knocked out of the air by a sword parry: a sharp bright clang and a ringing wobble as it " +
+      "tumbles away, with a faint jingle of small weights. Video game sound effect, no music.",
+  },
+  LanternCharge: {
+    seconds: 1.2,
+    prompt:
+      "A laser cannon charging up: a rising electric whine climbing in pitch with a crackle of gathering energy " +
+      "and a mechanical clockwork whir underneath, ending just before it fires. Video game sound effect, no music.",
+  },
+  LanternBeam: {
+    seconds: 3.5,
+    prompt:
+      "A sustained red laser beam burning: a steady deep humming buzz with a searing sizzle and a slight " +
+      "pulsing flutter, constant and seamless from start to end, no fade in or out. Video game sound effect, no music.",
+  },
+  MidnightChime: {
+    seconds: 2.5,
+    prompt:
+      "A single deep clock tower bell striking midnight: one heavy resonant bong with a long metallic ringing " +
+      "decay and a faint gear clunk before it. Dramatic, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

@@ -37,6 +37,10 @@ public static class Sfx
     public const string ClockTick = "ClockTick";
     public const string GearGrind = "GearGrind";
     public const string HatWhirr = "HatWhirr";
+    public const string HatClang = "HatClang";
+    public const string LanternCharge = "LanternCharge";
+    public const string LanternBeam = "LanternBeam";
+    public const string MidnightChime = "MidnightChime";
 
     const int VoiceCount = 16;
 
@@ -88,6 +92,26 @@ public static class Sfx
         voice.volume = sound.volume * volume;
         voice.pitch = finalPitch;
         voice.Play();
+    }
+
+    // A held sound on its own source (a beam's hum), looping until Stop. Needs the sound marked ownSource.
+    public static void PlayLoop(string id, float volume = 1f, float pitch = 1f)
+    {
+        SfxLibrary.Sound sound = Library != null ? Library.Find(id) : null;
+        if (sound == null || !sound.ownSource) return;
+        AudioSource source = OwnSource(id);
+        source.clip = sound.clips[Random.Range(0, sound.clips.Length)];
+        source.volume = sound.volume * volume;
+        source.pitch = pitch;
+        source.loop = true;
+        source.Play();
+    }
+
+    public static void Stop(string id)
+    {
+        if (!ownSources.TryGetValue(id, out AudioSource source) || source == null) return;
+        source.loop = false;
+        source.Stop();
     }
 
     // A voice whose sound has finished if there is one, otherwise the one that will finish soonest.

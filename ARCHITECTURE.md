@@ -92,13 +92,16 @@ match `BoonChoiceUI.boonIcons`.
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
 - `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (90 HP), a karakuri automaton that moves in ticking steps
-  (`Stride`). Moves: Kasa Wheel (its unbreakable hat zig-zags down and back, shedding tassel shots; hits deal double
-  while the hat is off via `Boss.DamageMultiplier`), Lace Lattice (a curtain of breakable diamonds with gaps that
+  (`Stride`). Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
+  `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
+  and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Escapement (the arm ticks down over the ronin then thrusts a reflectable
-  blade; parried, it jams and staggers, `OnStaggered`), Plumb Lines (weights swing on threads, flown with
-  `Arrow.Steer`), and in phase 2 the Heart Lantern (a core beam swept across the ground that only blockers stop, and
-  which burns them). Phase 2 at half health opens its core and speeds the clock. Fire burns the lace (`Burn`).
-  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr` and `GearGrind`.
+  blade; parried, it jams and staggers, `OnStaggered`), Plumb Lines (weights swing through the ronin's lane on threads, flown
+  with `Arrow.Steer` per physics step). Phase 2 at half health opens its core and is the laser phase (`NextMove` puts a
+  laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams
+  closing on a ground mark). Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
+  and hit the ronin where they cross his height (`HitIfCrossed`); the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
+  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam` and `MidnightChime`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`

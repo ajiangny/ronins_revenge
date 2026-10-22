@@ -15,7 +15,7 @@ public class Utsusemi : Boss
     static readonly Color Lace = new Color(0.92f, 0.94f, 1f, 0.95f);
     static readonly Color Gunmetal = new Color(0.28f, 0.3f, 0.36f);
 
-    enum Move { KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern }
+    enum Move { KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern, Midnight }
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
     float Recovery => secondPhase ? 0.8f : 1.5f;
@@ -39,6 +39,7 @@ public class Utsusemi : Boss
         BossLine.Escapement => "Tick...",
         BossLine.PlumbLines => "Swing.",
         BossLine.HeartLantern => "Behold... my heart.",
+        BossLine.Midnight => "Midnight.",
         _ => null,
     };
 
@@ -48,9 +49,13 @@ public class Utsusemi : Boss
     int hatsOut;
     Move? lastMove;
     int movesSinceEscapement;
+    // Phase 2 is the laser phase: a laser at least every other move, never the same one twice running.
+    int movesSinceLaser;
+    Move? lastLaser;
     SpriteRenderer eye;
     SpriteRenderer coreGlow;
     readonly List<Arrow> lattice = new List<Arrow>();
+    readonly List<Beam> beams = new List<Beam>();
     // Its idle with the hat off, for while the hat is out; null keeps the hatted idle.
     Sprite[] bareIdle;
 
@@ -93,6 +98,9 @@ public class Utsusemi : Boss
                 lastMove = move;
                 escapementUsed |= move == Move.Escapement;
                 movesSinceEscapement = move == Move.Escapement ? 0 : movesSinceEscapement + 1;
+                bool laser = move == Move.HeartLantern || move == Move.Midnight;
+                movesSinceLaser = laser ? 0 : movesSinceLaser + 1;
+                if (laser) lastLaser = move;
                 switch (move)
                 {
                     case Move.KasaWheel: yield return KasaWheel(); break;
@@ -100,20 +108,36 @@ public class Utsusemi : Boss
                     case Move.Escapement: yield return Escapement(); break;
                     case Move.PlumbLines: yield return PlumbLines(); break;
                     case Move.HeartLantern: yield return HeartLantern(); break;
+                    case Move.Midnight: yield return Midnight(); break;
                 }
             }
         }
     }
 
     // Never the same move twice in a row; the Escapement comes at most once a combo but at least every third move,
-    // so the parry rhythm stays part of the fight. The Heart Lantern only opens in the second phase.
+    // so the parry rhythm stays part of the fight. No new hat while one is still out. Once its core opens, the lasers
+    // (the Heart Lantern and Midnight) take over: one at least every other move, alternating, with the lace and the
+    // plumbs as rarer filler between them.
     Move NextMove(bool escapementUsed)
     {
+        if (secondPhase && movesSinceLaser >= 1)
+        {
+            if (lastLaser == Move.HeartLantern) return Move.Midnight;
+            if (lastLaser == Move.Midnight) return Move.HeartLantern;
+            return Random.value < 0.5f ? Move.HeartLantern : Move.Midnight;
+        }
         if (!escapementUsed && movesSinceEscapement >= 2 && lastMove != Move.Escapement) return Move.Escapement;
-        var options = new List<Move> { Move.KasaWheel, Move.Lattice, Move.PlumbLines };
+        var options = new List<Move> { Move.Lattice, Move.PlumbLines };
+        if (hatsOut == 0) options.Add(Move.KasaWheel);
         if (!escapementUsed) options.Add(Move.Escapement);
-        if (secondPhase) options.Add(Move.HeartLantern);
-        if (lastMove is Move last) options.Remove(last);
+        if (secondPhase)
+        {
+            // The hat and the blade count twice, so the lace and plumbs come up less often between lasers.
+            if (hatsOut == 0) options.Add(Move.KasaWheel);
+            if (!escapementUsed) options.Add(Move.Escapement);
+        }
+        if (lastMove is Move last) options.RemoveAll(m => m == last);
+        if (options.Count == 0) options.Add(Move.Lattice);
         return options[Random.Range(0, options.Count)];
     }
 
@@ -145,97 +169,152 @@ public class Utsusemi : Boss
         }
     }
 
-    // Kasa Wheel: it hurls its wide hat, which zig-zags down the field like the army's own march, rebounding off
-    // the screen edges and shedding tassel weights as it goes, then climbs back to its head. With the hat off, its
-    // slit-eye is exposed and hits deal double. In the second phase a phantom hat flies the mirror path.
+    // Kasa Wheel: it hurls its wide hat like a boomerang. A dotted gold trail shows the loop first: the hat curves
+    // down into the ronin's lane where he stands, skims along it, then curls back up to its head. The fight carries on
+    // meanwhile, with its slit-eye exposed and every hit doubled. In the second phase a phantom hat follows a beat
+    // later, aimed at wherever the ronin dodged to. A parried hat is knocked away, and the head stays bare longer.
     IEnumerator KasaWheel()
     {
         if (Random.value < 0.6f) Speak(BossLine.KasaWheel);
         PlayAction(art.parry);
         ElementFx.Glow(Head, Gold, 1f, 3f, 0.4f, transform);
         Sfx.Play(Sfx.ParrySwing, 0.8f, 0.6f);
+        HatPath path = AimHat();
+        List<SpriteRenderer> trail = TrailDots(path);
         // The hat leaves its hand on the throw clip's last frame.
         yield return Wait(0.55f);
 
-        float dir = ronin.Bounds.center.x < anchor.x ? -1f : 1f;
-        StartCoroutine(FlyHat(dir, false));
-        if (secondPhase) StartCoroutine(FlyHat(-dir, true));
+        StartCoroutine(FlyHat(path, trail, false));
+        if (secondPhase) StartCoroutine(ThrowPhantom(0.8f));
         ShowEye(true);
         Sfx.Play(Sfx.HatWhirr);
-
-        // It waits, head bare, for the hats to come home; the wait is part of the move, so it keeps the watchdog fed.
-        for (float t = 0; t < 12f && hatsOut > 0; t += Time.deltaTime)
-        {
-            Beat();
-            yield return null;
-        }
-        ShowEye(false);
     }
 
-    IEnumerator FlyHat(float dir, bool phantom)
+    IEnumerator ThrowPhantom(float delay)
+    {
+        hatsOut++;
+        yield return Wait(delay);
+        hatsOut--;
+        if (IsDead) yield break;
+        HatPath path = AimHat();
+        StartCoroutine(FlyHat(path, TrailDots(path), true));
+        Sfx.Play(Sfx.HatWhirr, 0.8f, 1.15f);
+    }
+
+    // The hat's loop: down into the lane at the ronin, along it, and back up. Each leg is a cubic curve, except the
+    // straight skim along the lane.
+    struct HatPath
+    {
+        public Vector3 a0, a1, a2, a3;
+        public Vector3 skimEnd;
+        public float sweepDir;
+    }
+
+    HatPath AimHat()
+    {
+        float laneY = ronin.Bounds.center.y;
+        float roninX = ronin.Bounds.center.x;
+        // It skims toward the side with more open ground, coming in steeply from the other side.
+        float sweepDir = roninX < CameraShake.Center.x ? 1f : -1f;
+        float bound = HalfWidth - 1.5f;
+        var path = new HatPath { sweepDir = sweepDir };
+        path.a0 = Head;
+        path.a1 = Head + new Vector3(-sweepDir * 5f, -1.5f, 0);
+        path.a2 = new Vector3(roninX - sweepDir * 2f, laneY + 4f, 0);
+        path.a3 = new Vector3(roninX, laneY, 0);
+        float skimX = Mathf.Clamp(roninX + sweepDir * 8f, CameraShake.Center.x - bound, CameraShake.Center.x + bound);
+        path.skimEnd = new Vector3(skimX, laneY, 0);
+        return path;
+    }
+
+    // The way back up, from the end of the skim to the head wherever the automaton now stands.
+    Vector3 HatReturn(HatPath path, float t)
+    {
+        Vector3 from = path.skimEnd;
+        Vector3 c1 = from + new Vector3(path.sweepDir * 2.5f, 4f, 0);
+        Vector3 c2 = new Vector3(from.x, Head.y + 1.5f, 0);
+        return Bezier(from, c1, c2, Head, t);
+    }
+
+    static Vector3 Bezier(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float t)
+    {
+        float u = 1f - t;
+        return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
+    }
+
+    // Faint gold dots along the whole loop, so the ronin can read where it will dip.
+    List<SpriteRenderer> TrailDots(HatPath path)
+    {
+        var dots = new List<SpriteRenderer>();
+        const int perLeg = 9;
+        for (int leg = 0; leg < 3; leg++)
+        {
+            for (int i = 0; i < perLeg; i++)
+            {
+                float t = (i + 0.5f) / perLeg;
+                Vector3 p = leg == 0 ? Bezier(path.a0, path.a1, path.a2, path.a3, t)
+                    : leg == 1 ? Vector3.Lerp(path.a3, path.skimEnd, t) : HatReturn(path, t);
+                SpriteRenderer dot = Bar(p, p + Vector3.right * 0.22f, 0.22f, new Color(Gold.r, Gold.g, Gold.b, 0.55f), 52);
+                dot.sprite = ProceduralSprites.Glow;
+                dots.Add(dot);
+            }
+        }
+        return dots;
+    }
+
+    IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool phantom)
     {
         hatsOut++;
         Arrow hat = Instantiate(arrowPrefab, Head, Quaternion.identity);
-        // Launched straight down so its heading stays level; Steer then flies it sideways without turning it.
+        // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
         hat.MakeUnbreakable(null);
         Sprite[] frames = Fx.Frames(Fx.UtsuKasa);
-        Color tint = phantom ? new Color(0.7f, 0.8f, 1f, 0.5f) : Color.white;
+        Color tint = phantom ? new Color(0.7f, 0.8f, 1f, 0.55f) : Color.white;
         if (frames != null) hat.Restyle(frames, 14f, tint, new Vector2(2.6f, 1.18f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
-        else hat.Restyle(ProceduralSprites.Disc, phantom ? new Color(0.4f, 0.45f, 0.55f, 0.5f) : Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
+        else hat.Restyle(ProceduralSprites.Disc, phantom ? new Color(0.4f, 0.45f, 0.55f, 0.55f) : Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
         transient.Add(hat.gameObject);
 
-        float speed = secondPhase ? 14f : 12f;
-        // Three passes: from its own height down to just over the cover, so the tassels it sheds rain on the ronin
-        // but the hat itself leaves the blockers standing for the Heart Lantern.
-        BlockerWall wall = FindAnyObjectByType<BlockerWall>();
-        float top = Head.y - 1f;
-        float bottom = (wall != null ? wall.TopY : ronin.TopY + 2f) + 1.4f;
-        int pass = 0;
-        bool dropping = false;
-        float nextY = top;
-        float nextTassel = Time.time + 0.4f;
-        float bound = HalfWidth - 1.3f;
-        while (hat != null && pass < 3)
+        float pace = secondPhase ? 0.85f : 1f;
+        float[] legSeconds = { 0.9f * pace, 0.7f * pace, 1f * pace };
+        float nextTassel = Time.time + 0.3f;
+        int dotsGone = 0;
+        float total = legSeconds[0] + legSeconds[1] + legSeconds[2];
+        bool knockedAway = false;
+        // Steered once per physics step, so the hat follows the curve exactly.
+        for (float t = 0; t < total; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.4f))
         {
-            Vector3 position = hat.transform.position;
-            float pace = Mathf.Max(Tempo, 0.4f);
-            if (dropping)
+            if (hat == null)
             {
-                hat.Steer(Vector3.down * (14f * pace));
-                if (position.y <= nextY) dropping = false;
+                knockedAway = true;
+                break;
             }
-            else
-            {
-                hat.Steer(Vector3.right * (dir * speed * pace));
-                bool atEdge = dir > 0 ? position.x >= CameraShake.Center.x + bound : position.x <= CameraShake.Center.x - bound;
-                if (atEdge)
-                {
-                    dir = -dir;
-                    pass++;
-                    nextY = Mathf.Lerp(top, bottom, pass / 2f);
-                    dropping = pass < 3;
-                    Tassel(position);
-                    Tick(0.6f);
-                }
-            }
-            if (Time.time >= nextTassel)
-            {
-                nextTassel = Time.time + (secondPhase ? 0.45f : 0.6f);
-                Tassel(position);
-            }
-            yield return null;
-        }
+            Vector3 target;
+            if (t < legSeconds[0]) target = Bezier(path.a0, path.a1, path.a2, path.a3, Mathf.SmoothStep(0, 1, t / legSeconds[0]));
+            else if (t < legSeconds[0] + legSeconds[1]) target = Vector3.Lerp(path.a3, path.skimEnd, (t - legSeconds[0]) / legSeconds[1]);
+            else target = HatReturn(path, Mathf.SmoothStep(0, 1, (t - legSeconds[0] - legSeconds[1]) / legSeconds[2]));
+            hat.Steer((target - hat.transform.position) / Time.fixedDeltaTime);
 
-        // Home again, straight to its head.
-        while (hat != null && !IsDead)
-        {
-            Vector3 toHead = Head - hat.transform.position;
-            if (toHead.magnitude < 0.6f) break;
-            hat.Steer(toHead.normalized * 18f);
-            yield return null;
+            // The trail fades out behind the hat as it flies.
+            int passed = Mathf.Min(trail.Count, Mathf.FloorToInt(trail.Count * t / total));
+            for (; dotsGone < passed; dotsGone++) RemoveTransient(trail[dotsGone]);
+            if (t < legSeconds[0] && Time.time >= nextTassel)
+            {
+                nextTassel = Time.time + (secondPhase ? 0.3f : 0.4f);
+                Tassel(hat.transform.position);
+            }
+            Beat();
+            yield return new WaitForFixedUpdate();
         }
-        if (hat != null)
+        for (; dotsGone < trail.Count; dotsGone++) RemoveTransient(trail[dotsGone]);
+
+        if (knockedAway)
+        {
+            // Parried (or it struck the ronin): the hat clatters off and the head stays bare a while longer.
+            Sfx.Play(Sfx.HatClang);
+            yield return Wait(2f);
+        }
+        else if (hat != null)
         {
             transient.Remove(hat.gameObject);
             Destroy(hat.gameObject);
@@ -243,7 +322,18 @@ public class Utsusemi : Boss
         }
         hatsOut--;
         // Hat back on its head.
-        if (hatsOut == 0 && !IsDead) PlayIdle();
+        if (hatsOut == 0 && !IsDead)
+        {
+            ShowEye(false);
+            PlayIdle();
+        }
+    }
+
+    void RemoveTransient(SpriteRenderer thing)
+    {
+        if (thing == null) return;
+        transient.Remove(thing.gameObject);
+        Destroy(thing.gameObject);
     }
 
     // A gold weight snapping off the hat's brim and dropping straight down.
@@ -342,18 +432,33 @@ public class Utsusemi : Boss
         float lowest = ronin.Bounds.center.y + 3.2f;
 
         SpriteRenderer arm = Bar(Shoulder, Shoulder, 0.16f, Gunmetal, 54);
-        SpriteRenderer guide = Bar(Shoulder, Shoulder, 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f));
+        var sight = new List<SpriteRenderer>();
         Vector3 tip = Shoulder;
         for (int i = 1; i <= ticks; i++)
         {
             tip = new Vector3(ronin.Bounds.center.x, Mathf.Lerp(Shoulder.y, lowest, i / (float)ticks), 0);
             Stretch(arm, Shoulder, tip, 0.16f);
-            Stretch(guide, tip, new Vector3(tip.x, GroundY, 0), 0.05f);
+            // A dashed red sight down to the ground, re-aimed and flared on every tick, white on the last.
+            foreach (SpriteRenderer dash in sight) RemoveTransient(dash);
+            bool last = i == ticks;
+            sight = Dashes(tip, new Vector3(tip.x, GroundY, 0), last ? Color.white : CoreRed, last ? 0.12f : 0.08f);
             ElementFx.Glow(Shoulder, CoreRed, 0.6f, 1.4f, tickTime * 0.6f);
-            ElementFx.Glow(tip, CoreRed, 0.4f, 1f, tickTime * 0.6f);
+            ElementFx.Glow(tip, last ? Color.white : CoreRed, 0.4f, 1.2f, tickTime * 0.6f);
             Tick(0.9f);
-            yield return Wait(tickTime);
+            for (float t = 0; t < tickTime; t += Time.deltaTime * Tempo)
+            {
+                float alpha = Mathf.Lerp(1f, 0.35f, t / tickTime);
+                foreach (SpriteRenderer dash in sight)
+                {
+                    if (dash == null) continue;
+                    Color c = dash.color;
+                    c.a = alpha;
+                    dash.color = c;
+                }
+                yield return null;
+            }
         }
+        foreach (SpriteRenderer dash in sight) RemoveTransient(dash);
 
         Thrust(tip);
         if (secondPhase)
@@ -367,11 +472,21 @@ public class Utsusemi : Boss
             Thrust(tip);
         }
         yield return Wait(0.3f);
-        foreach (SpriteRenderer bar in new[] { arm, guide })
+        RemoveTransient(arm);
+    }
+
+    // A dashed line, for sights and telegraphs.
+    List<SpriteRenderer> Dashes(Vector3 from, Vector3 to, Color color, float width)
+    {
+        var dashes = new List<SpriteRenderer>();
+        const float dash = 0.45f, gap = 0.3f;
+        float length = Vector3.Distance(from, to);
+        Vector3 along = (to - from).normalized;
+        for (float d = 0; d < length; d += dash + gap)
         {
-            transient.Remove(bar.gameObject);
-            Destroy(bar.gameObject);
+            dashes.Add(Bar(from + along * d, from + along * Mathf.Min(length, d + dash), width, color, 55));
         }
+        return dashes;
     }
 
     void Thrust(Vector3 tip)
@@ -386,19 +501,43 @@ public class Utsusemi : Boss
         CameraShake.Add(0.15f);
     }
 
-    // Plumb Lines: gold weights drop from its tassels on silk threads and swing as pendulums across the lower
-    // field. A hit on a weight cuts it loose.
+    // Plumb Lines: gold weights drop from its tassels on silk threads and swing as pendulums through the ronin's
+    // lane. One hangs right above him; the threads show their full reach for a moment before the weights fall.
+    // A hit on a weight cuts it loose.
     IEnumerator PlumbLines()
     {
         if (Random.value < 0.5f) Speak(BossLine.PlumbLines);
         int count = secondPhase ? 5 : Random.Range(3, 5);
+        int high = secondPhase ? 2 : 1;
         float pivotY = anchor.y - 0.5f;
+        float roninX = ronin.Bounds.center.x;
+        float margin = 2.5f;
+        // The first hangs over the ronin; the rest spread out either side of him.
         var pivots = new List<Vector3>();
         for (int i = 0; i < count; i++)
         {
-            float x = Mathf.Lerp(LeftEdge + 3f, RightEdge - 3f, (i + 0.5f) / count) + Random.Range(-1f, 1f);
+            float offset = i == 0 ? 0f : ((i + 1) / 2) * 4.5f * (i % 2 == 1 ? 1f : -1f) + Random.Range(-0.7f, 0.7f);
+            float x = Mathf.Clamp(roninX + offset, LeftEdge + margin, RightEdge - margin);
             pivots.Add(new Vector3(x, pivotY, 0));
-            ElementFx.Glow(pivots[i], Gold, 0.4f, 1.2f, 0.5f);
+            ElementFx.Glow(pivots[i], Gold, 0.4f, 1.2f, 1.6f);
+        }
+
+        // Each bottoms out just below the ronin's middle, so most of its arc crosses his height. The last few are
+        // short "high" swings that only clip the cover.
+        var lengths = new float[count];
+        var phases = new float[count];
+        for (int i = 0; i < count; i++)
+        {
+            float lowY = i >= count - high ? ronin.Bounds.center.y + 3.5f : ronin.Bounds.center.y - 0.6f;
+            lengths[i] = pivotY - lowY;
+            phases[i] = Random.Range(0f, Mathf.PI * 2f);
+        }
+
+        // The reach, shown first: faint threads at full length.
+        var threads = new SpriteRenderer[count];
+        for (int i = 0; i < count; i++)
+        {
+            threads[i] = Bar(pivots[i], pivots[i] + Vector3.down * lengths[i], 0.06f, new Color(Gold.r, Gold.g, Gold.b, 0.3f), 50);
         }
         Tick(0.6f);
         yield return Wait(0.3f);
@@ -406,24 +545,17 @@ public class Utsusemi : Boss
         yield return Wait(0.3f);
 
         var weights = new Arrow[count];
-        var threads = new SpriteRenderer[count];
-        var lengths = new float[count];
-        var phases = new float[count];
         Sprite[] frames = Fx.Frames(Fx.UtsuPlumb);
         for (int i = 0; i < count; i++)
         {
-            // Some swing low enough to reach the ronin, others only through the cover above him.
-            float lowY = ronin.Bounds.center.y + Random.Range(0f, 3f);
-            lengths[i] = pivotY - lowY;
-            phases[i] = Random.Range(0f, Mathf.PI * 2f);
             weights[i] = Shoot(pivots[i], Vector3.down * 0.1f);
             if (frames != null) weights[i].Restyle(frames, 8f, Color.white, new Vector2(0.9f, 1.07f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
-            threads[i] = Bar(pivots[i], pivots[i], 0.06f, new Color(0.95f, 0.95f, 1f, 0.6f), 50);
+            threads[i].color = new Color(0.95f, 0.95f, 1f, 0.6f);
         }
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
-        const float drop = 0.7f;
+        const float drop = 0.6f;
         const float amplitude = 28f * Mathf.Deg2Rad;
         float swing = secondPhase ? 4.5f : 4f;
         float omega = Mathf.PI * 2f / (secondPhase ? 2f : 2.4f);
@@ -443,6 +575,8 @@ public class Utsusemi : Boss
                 Vector3 target = pivots[i] + new Vector3(Mathf.Sin(angle), -Mathf.Cos(angle), 0) * length;
                 weights[i].Steer((target - weights[i].transform.position) / Time.fixedDeltaTime);
                 Stretch(threads[i], pivots[i], weights[i].transform.position, 0.06f);
+                // A gold streak trails each weight as it drops.
+                if (t < drop && Random.value < 0.5f) Afterimage(weights[i].Art, new Color(Gold.r, Gold.g, Gold.b, 0.5f));
             }
             yield return new WaitForFixedUpdate();
         }
@@ -451,24 +585,18 @@ public class Utsusemi : Boss
         for (int i = 0; i < count; i++)
         {
             if (weights[i] != null) weights[i].Steer(Vector3.down * 9f);
-            transient.Remove(threads[i].gameObject);
-            Destroy(threads[i].gameObject);
+            RemoveTransient(threads[i]);
         }
         Sfx.Play(Sfx.WardShatter, 0.5f, 1.5f);
     }
 
-    // Heart Lantern (second phase only): the core charges and a slow beam sweeps the ground from one side to the
-    // other. Only cover stops it, and it burns through the cover it hits.
+    // Heart Lantern (second phase only): sparks pour into the core as it charges, then a beam sweeps the ground from
+    // one side to the other, flashes a warning and sweeps back. Only cover stops it, and it burns the cover it hits.
     IEnumerator HeartLantern()
     {
         yield return Stride(CameraShake.Center.x);
         Speak(BossLine.HeartLantern);
-        ElementFx.Glow(Core, CoreRed, 0.5f, 4f, 0.8f, transform);
-        for (int i = 0; i < 3; i++)
-        {
-            Tick(0.7f);
-            yield return Wait(0.2f);
-        }
+        yield return Charge();
 
         float dir = Random.value < 0.5f ? 1f : -1f;
         float from = dir > 0 ? LeftEdge + 0.5f : RightEdge - 0.5f;
@@ -481,52 +609,261 @@ public class Utsusemi : Boss
             Stretch(guide, Core, BeamEnd(Mathf.Lerp(from, to, t / 0.7f), out _), 0.06f);
             yield return null;
         }
-        transient.Remove(guide.gameObject);
-        Destroy(guide.gameObject);
+        RemoveTransient(guide);
         yield return Wait(0.3f);
 
         PlayAction(art.attack);
-        SpriteRenderer beam = Bar(Core, Core, 0.5f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.8f));
-        SpriteRenderer heart = Bar(Core, Core, 0.16f, new Color(1f, 0.9f, 0.85f), 56);
-        const float sweep = 3.2f;
-        float nextBurn = 0f;
-        float nextHum = 0f;
-        for (float t = 0; t < sweep; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        Beam beam = MakeBeam();
+        Sfx.PlayLoop(Sfx.LanternBeam);
+        yield return SweepBeam(beam, from, to, 3.2f);
+        // The warning: the beam flickers white at the edge, then turns back.
+        for (float t = 0; t < 0.4f; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
         {
+            DrawBeam(beam, Core, BeamEnd(to, out _), Mathf.PingPong(t * 10f, 1f) > 0.5f, false);
             Beat();
-            float x = Mathf.Lerp(from, to, t / sweep);
-            Vector3 end = BeamEnd(x, out Blocker cover);
-            Stretch(beam, Core, end, 0.5f + 0.1f * Mathf.Sin(t * 40f));
-            Stretch(heart, Core, end, 0.16f);
-            if (cover != null)
-            {
-                if (Time.time >= nextBurn)
-                {
-                    nextBurn = Time.time + 0.25f;
-                    cover.Hit(end);
-                }
-            }
-            else
-            {
-                // Where the beam crosses the ronin's height, it burns him.
-                Vector3 ground = new Vector3(x, GroundY, 0);
-                float k = Mathf.InverseLerp(Core.y, ground.y, ronin.Bounds.center.y);
-                float beamX = Mathf.Lerp(Core.x, ground.x, k);
-                if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) ronin.TakeHit(new Vector3(beamX, ronin.Bounds.center.y, 0));
-            }
-            if (Time.time >= nextHum)
-            {
-                nextHum = Time.time + 0.3f;
-                Sfx.Play(Sfx.FireBlast, 0.35f, 0.6f);
-                Fx.Play(Fx.Impact, end, CoreRed, 0.7f);
-            }
             yield return null;
         }
-        foreach (SpriteRenderer bar in new[] { beam, heart })
+        Tick(0.8f);
+        yield return SweepBeam(beam, to, from, 2.4f);
+        EndBeam(beam);
+        Sfx.Stop(Sfx.LanternBeam);
+    }
+
+    IEnumerator SweepBeam(Beam beam, float from, float to, float seconds)
+    {
+        for (float t = 0; t < seconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
         {
-            transient.Remove(bar.gameObject);
-            Destroy(bar.gameObject);
+            Beat();
+            float x = Mathf.Lerp(from, to, t / seconds);
+            Vector3 end = BeamEnd(x, out Blocker cover);
+            DrawBeam(beam, Core, end, false, cover == null);
+            if (cover != null) BurnCover(beam, cover, end);
+            else HitIfCrossed(Core, end);
+            yield return null;
         }
+    }
+
+    // Midnight (second phase only): a gold clock mark appears on the ground away from the ronin, and two clock-hand
+    // beams sweep in from the screen's edges, closing on it from both sides. The mark is the one open ground they
+    // never cross; cover stops them too. As they meet, a bell strikes and they flash, then snap back out. Below a
+    // quarter of its health there are two marks, so the ronin must run to the second between strikes.
+    IEnumerator Midnight()
+    {
+        yield return Stride(CameraShake.Center.x);
+        Speak(BossLine.Midnight);
+        int strikes = HealthFraction <= 0.25f ? 2 : 1;
+        float markX = MarkAwayFrom(ronin.Bounds.center.x);
+        GameObject mark = ClockMark(markX);
+        yield return Charge();
+
+        PlayAction(art.attack);
+        Beam left = MakeBeam(), right = MakeBeam();
+        Sfx.PlayLoop(Sfx.LanternBeam, 1f, 0.9f);
+        float leftEdge = LeftEdge + 0.3f, rightEdge = RightEdge - 0.3f;
+        // The hands stop this far either side of the mark: the gap they leave is the safe spot.
+        const float gap = 1.1f;
+        for (int strike = 0; strike < strikes; strike++)
+        {
+            // Close: slow at first, quickening as they near twelve.
+            for (float t = 0; t < 1.6f; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+            {
+                Beat();
+                float k = t / 1.6f;
+                k *= k;
+                DrawHand(left, Mathf.Lerp(leftEdge, markX - gap, k), false);
+                DrawHand(right, Mathf.Lerp(rightEdge, markX + gap, k), false);
+                yield return null;
+            }
+            // Strike: the bell and a white flash, held a moment.
+            Sfx.Play(Sfx.MidnightChime);
+            CameraShake.Add(0.3f);
+            ElementFx.Glow(new Vector3(markX, GroundY + 0.5f, 0), Gold, 1f, 4f, 0.5f);
+            for (float t = 0; t < 0.4f; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+            {
+                Beat();
+                DrawHand(left, markX - gap, true);
+                DrawHand(right, markX + gap, true);
+                yield return null;
+            }
+
+            // A second mark appears as they open, so there's time to run to it.
+            float fromX = markX;
+            if (strike + 1 < strikes)
+            {
+                Destroy(mark);
+                markX = MarkAwayFrom(fromX);
+                mark = ClockMark(markX);
+                Tick(0.8f);
+            }
+            // Open: back out to the edges, faster.
+            for (float t = 0; t < 0.9f; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+            {
+                Beat();
+                float k = Mathf.SmoothStep(0, 1, t / 0.9f);
+                DrawHand(left, Mathf.Lerp(fromX - gap, leftEdge, k), false);
+                DrawHand(right, Mathf.Lerp(fromX + gap, rightEdge, k), false);
+                yield return null;
+            }
+        }
+        EndBeam(left);
+        EndBeam(right);
+        Sfx.Stop(Sfx.LanternBeam);
+        Destroy(mark);
+    }
+
+    // One hand of the clock: a beam from the core to the ground at x, stopped by cover, burning the ronin it crosses.
+    void DrawHand(Beam hand, float x, bool flash)
+    {
+        Vector3 end = BeamEnd(x, out Blocker cover);
+        DrawBeam(hand, Core, end, flash, cover == null);
+        if (cover != null) BurnCover(hand, cover, end);
+        else HitIfCrossed(Core, end);
+    }
+
+    // A spot on the ground at least 4 units from x, inside the screen.
+    float MarkAwayFrom(float x)
+    {
+        float lo = LeftEdge + 3f, hi = RightEdge - 3f;
+        for (int i = 0; i < 12; i++)
+        {
+            float candidate = Random.Range(lo, hi);
+            if (Mathf.Abs(candidate - x) >= 4f) return candidate;
+        }
+        return x < CameraShake.Center.x ? hi : lo;
+    }
+
+    // The gold clock face on the ground marking where the hands will meet.
+    GameObject ClockMark(float x)
+    {
+        Vector3 at = new Vector3(x, GroundY + 0.35f, 0);
+        FxPlayer face = Fx.Play(Fx.UtsuClockMark, at, Color.white, 1.6f, null, 3);
+        if (face != null)
+        {
+            transient.Add(face.gameObject);
+            return face.gameObject;
+        }
+        SpriteRenderer ring = Bar(at + Vector3.left * 1f, at + Vector3.right * 1f, 0.6f, new Color(Gold.r, Gold.g, Gold.b, 0.6f), 3);
+        ring.sprite = ProceduralSprites.Glow;
+        return ring.gameObject;
+    }
+
+    // Sparks pour into the core while it whines up to full power.
+    IEnumerator Charge()
+    {
+        if (Fx.Play(Fx.UtsuCharge, Core, Color.white, 2.2f, transform) == null) ElementFx.Glow(Core, CoreRed, 2f, 0.5f, 0.7f, transform);
+        ElementFx.Glow(Core, CoreRed, 0.5f, 4f, 0.9f, transform);
+        Sfx.Play(Sfx.LanternCharge);
+        CameraShake.Add(0.15f);
+        for (int i = 0; i < 3; i++)
+        {
+            Tick(0.7f);
+            yield return Wait(0.25f);
+        }
+    }
+
+    // A laser in three layers redrawn every frame (a soft red glow, a flickering red body, a white-hot core), with a
+    // flare at the core, sparks where it lands and scorch marks it leaves on the ground.
+    class Beam
+    {
+        public SpriteRenderer glow, body, core;
+        public FxPlayer flare, hit;
+        public float nextScorch, nextBurn, nextSpark;
+    }
+
+    Beam MakeBeam()
+    {
+        var beam = new Beam
+        {
+            glow = Bar(Core, Core, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f), 53),
+            body = Bar(Core, Core, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f), 55),
+            core = Bar(Core, Core, 1f, new Color(1f, 0.92f, 0.88f), 56),
+            flare = Fx.Play(Fx.UtsuBeamFlare, Core, Color.white, 1.6f, transform, 57),
+            hit = Fx.Play(Fx.UtsuBeamHit, Core, Color.white, 1.3f, null, 57),
+        };
+        beam.glow.sprite = ProceduralSprites.Glow;
+        // Cleared with the rest of the attack if it's cut short.
+        if (beam.flare != null) transient.Add(beam.flare.gameObject);
+        if (beam.hit != null) transient.Add(beam.hit.gameObject);
+        beams.Add(beam);
+        return beam;
+    }
+
+    // An interrupted laser (a stagger, its defeat, the ronin falling) loses its bars with the attack; its hum goes too.
+    void LateUpdate()
+    {
+        if (beams.Count == 0) return;
+        beams.RemoveAll(b => b.body == null);
+        if (beams.Count == 0) Sfx.Stop(Sfx.LanternBeam);
+    }
+
+    void DrawBeam(Beam beam, Vector3 from, Vector3 to, bool flash, bool onGround)
+    {
+        float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
+        Stretch(beam.glow, from, to, 1.6f * flicker);
+        Stretch(beam.body, from, to, 0.42f * flicker);
+        Stretch(beam.core, from, to, 0.14f);
+        beam.body.color = flash ? Color.white : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f);
+        beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f);
+        if (beam.hit != null) beam.hit.transform.position = to + Vector3.back * 0.3f;
+        else if (Time.time >= beam.nextSpark)
+        {
+            beam.nextSpark = Time.time + 0.12f;
+            Fx.Play(Fx.Impact, to, CoreRed, 0.7f);
+        }
+        if (onGround && Time.time >= beam.nextScorch)
+        {
+            beam.nextScorch = Time.time + 0.12f;
+            Scorch(to);
+        }
+    }
+
+    // A dark burn left on the ground under the beam, fading over a couple of seconds.
+    static void Scorch(Vector3 at)
+    {
+        Sprite[] frames = Fx.Frames(Fx.UtsuScorch);
+        var mark = new GameObject("Scorch").AddComponent<SpriteRenderer>();
+        mark.transform.position = at + Vector3.forward * 0.1f;
+        mark.sortingOrder = 1;
+        if (frames != null)
+        {
+            mark.sprite = frames[0];
+            mark.color = Color.white;
+            mark.transform.localScale = Vector3.one * (1.1f / frames[0].bounds.size.x);
+        }
+        else
+        {
+            mark.sprite = ProceduralSprites.Glow;
+            mark.color = new Color(0.12f, 0.05f, 0.04f, 0.6f);
+            mark.transform.localScale = new Vector3(1f, 0.45f, 1f);
+        }
+        Fader.Fade(mark, 2f);
+    }
+
+    void BurnCover(Beam beam, Blocker cover, Vector3 at)
+    {
+        if (Time.time < beam.nextBurn) return;
+        beam.nextBurn = Time.time + 0.25f;
+        cover.Hit(at);
+        Sfx.Play(Sfx.BlockerHit, 0.5f, 1.6f);
+    }
+
+    // Where a beam from `from` to `end` crosses the ronin's height, it burns him (unless cover stopped it above him).
+    void HitIfCrossed(Vector3 from, Vector3 end)
+    {
+        float y = ronin.Bounds.center.y;
+        if (end.y > y + 0.2f) return;
+        float beamX = Mathf.Lerp(from.x, end.x, Mathf.InverseLerp(from.y, end.y, y));
+        if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) ronin.TakeHit(new Vector3(beamX, y, 0));
+    }
+
+    void EndBeam(Beam beam)
+    {
+        beams.Remove(beam);
+        RemoveTransient(beam.glow);
+        RemoveTransient(beam.body);
+        RemoveTransient(beam.core);
+        if (beam.flare != null) beam.flare.Stop();
+        if (beam.hit != null) beam.hit.Stop();
     }
 
     // Where a beam from the core aimed at x on the ground stops: on the nearest blocker in the way, or the ground.
@@ -595,6 +932,15 @@ public class Utsusemi : Boss
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
         bodyTint = Color.Lerp(bodyTint, new Color(0.75f, 0.7f, 0.8f), 0.5f);
         AddCore();
+        // The core opens with a radial burst of light: phase 2 fights with lasers.
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3 ray = Quaternion.Euler(0, 0, i * 45f + 22.5f) * Vector3.right * 22f;
+            SpriteRenderer flash = Bar(Core, Core + ray, 0.25f, new Color(1f, 0.85f, 0.8f, 0.9f), 57);
+            transient.Remove(flash.gameObject);
+            Fader.Fade(flash, 0.35f);
+        }
+        Sfx.Play(Sfx.LanternCharge, 1f, 1.3f);
         Speak(BossLine.Phase);
         yield return new WaitForSeconds(1.8f);
         breaking = false;

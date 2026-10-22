@@ -10,12 +10,28 @@ public class BlockerWall : MonoBehaviour
         public string name = "Bush";
         [Tooltip("From intact to nearly broken.")]
         public Sprite[] damageStates;
+        [Tooltip("Other looks for the same blocker, so a row isn't all identical. Each blocker built picks one of these or damageStates at random.")]
+        public Look[] variants;
         public Sprite[] debris;
         public int health = 6;
         [Tooltip("Drawn height in world units; the width follows the art.")]
         public float height = 1f;
         [Tooltip("Hitbox as a fraction of the drawn size, so shots can graze the edges.")]
         public Vector2 hitbox = new Vector2(0.85f, 0.85f);
+
+        // One of its looks at random: damage states from intact to nearly broken.
+        public Sprite[] PickLook()
+        {
+            int pick = variants == null ? 0 : Random.Range(0, variants.Length + 1);
+            return pick == 0 || variants[pick - 1].damageStates == null || variants[pick - 1].damageStates.Length == 0
+                ? damageStates : variants[pick - 1].damageStates;
+        }
+    }
+
+    [System.Serializable]
+    public class Look
+    {
+        public Sprite[] damageStates;
     }
 
     [Header("Inscribed")]
@@ -26,6 +42,11 @@ public class BlockerWall : MonoBehaviour
     [SerializeField] float gap = 0.05f;
 
     float healthMultiplier = 1f;
+    // The set Rebuild builds from: the courtyard's own, unless the map on show brought its own (Use).
+    BlockerType[] activeTypes;
+    string activePattern;
+    BlockerType[] ActiveTypes => activeTypes ?? types;
+    string ActivePattern => activePattern ?? pattern;
     readonly System.Collections.Generic.List<Vector3> built = new System.Collections.Generic.List<Vector3>();
 
     // Centres of the blockers made by the last Rebuild (the old ones are still being destroyed this frame).
@@ -37,9 +58,17 @@ public class BlockerWall : MonoBehaviour
         get
         {
             float tallest = 0f;
-            foreach (BlockerType type in types) tallest = Mathf.Max(tallest, type.height);
+            foreach (BlockerType type in ActiveTypes) tallest = Mathf.Max(tallest, type.height);
             return transform.position.y + tallest;
         }
+    }
+
+    // Builds from a map's own blockers from the next Rebuild on; null (or an empty set) goes back to the courtyard's.
+    public void Use(BlockerType[] mapTypes, string mapPattern)
+    {
+        bool own = mapTypes != null && mapTypes.Length > 0 && !string.IsNullOrEmpty(mapPattern);
+        activeTypes = own ? mapTypes : null;
+        activePattern = own ? mapPattern : null;
     }
 
     // healthMultiplier toughens every blocker (Glacier Wall).
@@ -65,55 +94,58 @@ public class BlockerWall : MonoBehaviour
 
     void BuildSite(float centerX)
     {
-        var row = new BlockerType[pattern.Length];
-        float rowWidth = gap * (pattern.Length - 1);
-        for (int i = 0; i < pattern.Length; i++)
+        string sitePattern = ActivePattern;
+        var row = new BlockerType[sitePattern.Length];
+        var looks = new Sprite[sitePattern.Length][];
+        float rowWidth = gap * (sitePattern.Length - 1);
+        for (int i = 0; i < sitePattern.Length; i++)
         {
-            row[i] = TypeFor(pattern[i]);
-            rowWidth += WidthOf(row[i]);
+            row[i] = TypeFor(sitePattern[i]);
+            looks[i] = row[i].PickLook();
+            rowWidth += WidthOf(row[i], looks[i]);
         }
 
         float x = centerX - rowWidth / 2f;
-        foreach (BlockerType type in row)
+        for (int i = 0; i < row.Length; i++)
         {
-            float w = WidthOf(type);
-            CreateBlocker(type, new Vector3(x + w / 2f, transform.position.y + type.height / 2f, 0));
+            float w = WidthOf(row[i], looks[i]);
+            CreateBlocker(row[i], looks[i], new Vector3(x + w / 2f, transform.position.y + row[i].height / 2f, 0));
             x += w + gap;
         }
     }
 
     BlockerType TypeFor(char code)
     {
-        foreach (BlockerType type in types)
+        foreach (BlockerType type in ActiveTypes)
         {
             if (char.ToUpperInvariant(type.name[0]) == char.ToUpperInvariant(code)) return type;
         }
-        throw new System.ArgumentException($"No blocker type starts with '{code}' (pattern \"{pattern}\").");
+        throw new System.ArgumentException($"No blocker type starts with '{code}' (pattern \"{ActivePattern}\").");
     }
 
-    static float WidthOf(BlockerType type)
+    static float WidthOf(BlockerType type, Sprite[] look)
     {
-        Vector3 size = type.damageStates[0].bounds.size;
+        Vector3 size = look[0].bounds.size;
         return type.height * size.x / size.y;
     }
 
-    void CreateBlocker(BlockerType type, Vector3 center)
+    void CreateBlocker(BlockerType type, Sprite[] look, Vector3 center)
     {
         var blocker = new GameObject(type.name);
         blocker.transform.SetParent(transform);
         blocker.transform.position = center;
         built.Add(center);
-        float w = WidthOf(type);
+        float w = WidthOf(type, look);
         blocker.AddComponent<BoxCollider>().size = new Vector3(w * type.hitbox.x, type.height * type.hitbox.y, 0.5f);
 
         // The sprite sits on a child scaled to the blocker's drawn height.
         var art = new GameObject("Sprite").AddComponent<SpriteRenderer>();
         art.transform.SetParent(blocker.transform, false);
-        art.sprite = type.damageStates[0];
+        art.sprite = look[0];
         // Glacier Wall's tougher blockers are sheathed in ice.
         if (healthMultiplier > 1f) art.color = new Color(0.75f, 0.9f, 1f);
         art.transform.localScale = Vector3.one * (type.height / art.sprite.bounds.size.y);
 
-        blocker.AddComponent<Blocker>().Init(Mathf.CeilToInt(type.health * healthMultiplier), art, type.damageStates, type.debris);
+        blocker.AddComponent<Blocker>().Init(Mathf.CeilToInt(type.health * healthMultiplier), art, look, type.debris);
     }
 }

@@ -423,7 +423,10 @@ public class GameManager : MonoBehaviour
             // Straight to the last stage's boss, or its last round when it has none.
             stageIndex = stages.Length - 1;
             roundIndex = Stage.rounds.Length - 1;
-            if (backdrop != null) backdrop.Show(Stage.boss != BossKind.None ? BossMap : Stage.roundsMap);
+            Backdrop.Map map = Stage.boss != BossKind.None ? BossMap : Stage.roundsMap;
+            if (backdrop != null) backdrop.Show(map);
+            blockers.Use(map?.blockers, map?.blockerPattern);
+            blockers.Rebuild(loadout.BlockerHealthMultiplier);
             StartCoroutine(Stage.boss != BossKind.None ? BeginBoss() : BeginRound());
         }
     }
@@ -970,6 +973,7 @@ public class GameManager : MonoBehaviour
         yield return leaving;
 
         if (backdrop != null) backdrop.Show(map);
+        blockers.Use(map?.blockers, map?.blockerPattern);
         blockers.Rebuild(loadout.BlockerHealthMultiplier);
         ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
         yield return new WaitForSeconds(0.3f);

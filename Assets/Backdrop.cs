@@ -13,6 +13,10 @@ public class Backdrop : MonoBehaviour
         [Tooltip("Leave empty to keep the sakura petals.")]
         public Sprite petal;
         public Color petalTint = new Color(1f, 1f, 1f, 0.8f);
+        [Tooltip("This map's cover. Leave empty to keep the courtyard's bushes and lanterns.")]
+        public BlockerWall.BlockerType[] blockers;
+        [Tooltip("Blockers at each site, left to right, by each type's first letter.")]
+        public string blockerPattern;
     }
 
     [Header("Inscribed")]

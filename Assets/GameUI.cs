@@ -74,8 +74,7 @@ public class GameUI : MonoBehaviour
         BuildFade();
     }
 
-    // A black cover over the whole screen for moving between maps. Built last so it sits over the HUD; the boss intro
-    // and menus are built later and stay above it.
+    // A black cover over the whole screen for moving between maps, raised over the rest of the canvas while it fades.
     void BuildFade()
     {
         fade = Stretch(CreateRect("Fade", transform, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
@@ -86,6 +85,8 @@ public class GameUI : MonoBehaviour
     // Fades the black cover to the given opacity, in real time so a hit-stop can't stall it.
     public IEnumerator FadeTo(float alpha, float seconds)
     {
+        // The boon slots are added to the canvas after the HUD, so bring the cover back over them.
+        fade.transform.SetAsLastSibling();
         float from = fade.color.a;
         for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
         {

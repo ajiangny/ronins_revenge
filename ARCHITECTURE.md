@@ -154,13 +154,15 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   (Glacier Wall uses the multiplier for ice blockers). A `Backdrop.Map` can bring its own `blockers` and
   `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
   Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),
-  so a row isn't all identical; the courtyard has three looks of each too (`BushB/C`, `LanternB/C`, wired by `Apply Backdrop And Blockers Only`). Map sets: Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
+  so a row isn't all identical; the courtyard has three looks of each too (`BushB/C`, `LanternB/C`, wired by `Apply Backdrop And Blockers Only`). Map sets: Bamboo Road = roadside stones and bamboo clumps (`SBS`), Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
   komainu (`MKM`), Utsusemi = gear piles and clock pillars (`GCG`), three looks each, art in `Art/Sprites/Blockers/`
   as `<Name>_0..2`, `<Name>B_0..2`, `<Name>C_0..2` (from PixelLab), wired by `Ninja/Apply Maps`.
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
   ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
-  `CourtyardGrass` (stage 1), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
-  `Arena_Utsusemi` (clockwork temple floor), generated with PixelLab.
+  `BambooRoad_Stage1` (a dirt road with bamboo only at the edges), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
+  `Arena_Utsusemi` (clockwork temple floor), generated with PixelLab. `CourtyardGrass` with its bushes and lanterns
+  is the fallback for any stage without a rounds map in `NinjaArtSetup.RoundsGrounds`, kept for a third stage.
+  `GameManager.Start` shows stage 1's map (behind the title menu too).
 
 ## UI
 

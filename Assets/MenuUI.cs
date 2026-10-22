@@ -66,7 +66,6 @@ public class MenuUI : MonoBehaviour
     bool light;
     Image paper;
     Image titleArt;
-    TextMeshProUGUI footerText;
     Image figure;
     SpriteAnimatorUI figureAnimator;
     int selected;
@@ -130,8 +129,8 @@ public class MenuUI : MonoBehaviour
     }
 
     // The title screen: the game's logo large on the left of a paper-white page, a slim menu column on the right
-    // with a hairline under each item, and a footer line. Without logo art the title is set in the header font.
-    public void ShowTitle(string title, string footer, Item[] pageItems)
+    // with a hairline under each item. Without logo art the title is set in the header font.
+    public void ShowTitle(string title, Item[] pageItems)
     {
         items = pageItems;
         back = null;
@@ -149,7 +148,6 @@ public class MenuUI : MonoBehaviour
         titleText.fontSize = 120;
         titleText.color = Ink;
         titleText.fontSharedMaterial = titleText.font.material;
-        footerText.text = footer ?? "";
         hintText.text = $"↑ ↓  Select      Enter  Confirm";
 
         rowsRoot.anchoredPosition = new Vector2(600f, items.Length * LightRowHeight / 2f - 20f);
@@ -180,7 +178,6 @@ public class MenuUI : MonoBehaviour
     {
         light = on;
         paper.gameObject.SetActive(on);
-        footerText.gameObject.SetActive(on);
         if (!on)
         {
             titleArt.gameObject.SetActive(false);
@@ -423,11 +420,6 @@ public class MenuUI : MonoBehaviour
         figure.raycastTarget = false;
         figureAnimator = figure.gameObject.AddComponent<SpriteAnimatorUI>();
         figure.gameObject.SetActive(false);
-        // Centred under the logo, clear of the menu's key hints on the right.
-        footerText = GameUI.CreateText(page, ui.BodyFont, "Footer", new Vector2(0.5f, 0f), new Vector2(LogoCentre.x, 40f), new Vector2(1100f, 50f),
-            28, TextAlignmentOptions.Bottom);
-        footerText.richText = true;
-        footerText.color = new Color(Ink.r, Ink.g, Ink.b, 0.7f);
 
         // The title sits in a mask, so it can be cropped cleanly.
         titleReveal = GameUI.CreateRect("TitleReveal", page, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1800f, 260f));
@@ -454,7 +446,6 @@ public class MenuUI : MonoBehaviour
 
         paper.gameObject.SetActive(false);
         titleArt.gameObject.SetActive(false);
-        footerText.gameObject.SetActive(false);
         page.gameObject.SetActive(false);
     }
 

@@ -318,7 +318,7 @@ public class GameManager : MonoBehaviour
         };
         if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
-        menu.ShowTitle("RONIN'S REVENGE", $"RONIN  VS.  SAMURAI        HIGH SCORE  {highScore:000000}", items.ToArray());
+        menu.ShowTitle("RONIN'S REVENGE", items.ToArray());
         ShowTitleRonin();
     }
 

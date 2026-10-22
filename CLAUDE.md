@@ -25,7 +25,7 @@ player-facing feature changes.
   after changing art/audio instead of wiring by hand. `Ninja/Apply Sprite Art` regenerates prefab child
   fileIDs, so ID-only diffs after it are expected.
 - After script edits, check the Unity console for compile errors before using new types.
-- Dev tools (Editor and development builds): DEV TOOLS on the title/pause menu or **F3** jumps to any stage or
+- Dev tools (Editor, development builds, and release builds while `GameManager.devToolsInRelease` is on): DEV TOOLS on the title/pause menu or **F3** jumps to any stage or
   boss; **F4** toggles god mode; **F1** kills the army, **F2** jumps to the last stage's boss.
 - Serialized defaults in code (e.g. `GameManager.stages`) are only initial values; the scene's saved values win.
 

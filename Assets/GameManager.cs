@@ -50,6 +50,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameUI ui;
     [SerializeField] int startingLives = 3;
     [SerializeField] float levelIntroTime = 2.5f;
+    [Tooltip("Keep DEV TOOLS and the F1-F4 hotkeys in release builds, for friends play-testing. Development builds always have them.")]
+    [SerializeField] bool devToolsInRelease = true;
 
     [Header("Souls and boons")]
     [Tooltip("Built on the Canvas at runtime if left empty.")]
@@ -294,6 +296,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    bool DevToolsOn => Debug.isDebugBuild || devToolsInRelease;
+
     void Update()
     {
         Keyboard keyboard = Keyboard.current;
@@ -301,7 +305,7 @@ public class GameManager : MonoBehaviour
         bool pause = (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame))
             || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
         if (state == State.Playing && pause) Pause();
-        if (Debug.isDebugBuild && keyboard != null) DevHotkeys(keyboard);
+        if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing) UpdateScouts();
     }
 
@@ -319,7 +323,7 @@ public class GameManager : MonoBehaviour
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTitleMenu)),
         };
-        if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
+        if (DevToolsOn) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
         menu.ShowTitle("RONIN'S REVENGE", items.ToArray());
         ShowTitleRonin();
@@ -407,7 +411,7 @@ public class GameManager : MonoBehaviour
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowPauseMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowPauseMenu)),
         };
-        if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowPauseMenu)));
+        if (DevToolsOn) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowPauseMenu)));
         items.Add(MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)));
         menu.Show("PAUSED", null, items.ToArray(), Resume);
     }

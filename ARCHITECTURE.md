@@ -37,7 +37,7 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   `Ronin.Home`. Used before every boss (`StageCleared`) and every later stage (`EnterStage`). F2 swaps the map at once.
 - Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
   without it.
-- **Dev tools (Editor and development builds, `Debug.isDebugBuild`):** a DEV TOOLS page (`ShowDevMenu`) on the
+- **Dev tools (Editor and development builds, `Debug.isDebugBuild`, or release builds while `devToolsInRelease` is on; both via `DevToolsOn`):** a DEV TOOLS page (`ShowDevMenu`) on the
   title and pause menus, or F3, lists every stage's round 1 and boss; `DevJump` stores the pick in statics,
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an

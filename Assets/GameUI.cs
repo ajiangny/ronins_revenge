@@ -6,7 +6,11 @@ using UnityEngine.InputSystem;
 using UnityEngine.TextCore.LowLevel;
 using UnityEngine.UI;
 
-// Builds the HUD (score, level, lives) and the full-screen overlay used for the title/level/end screens.
+// How a piece of text is drawn: Title in the brush font, the rest in the clean body font, all outlined and shadowed.
+public enum TextStyle { Title, Heading, Hud, Body, Hint }
+
+// Builds the HUD (score, stage, lives, boss bar, subtitles), the boss intro and the full-screen overlay, and owns
+// the text styles every other screen uses.
 [RequireComponent(typeof(Canvas))]
 public class GameUI : MonoBehaviour
 {
@@ -22,10 +26,18 @@ public class GameUI : MonoBehaviour
     [SerializeField] Font cardNameFont;
     [Tooltip("Chunky outlined font for a boss's epithet on her title card. Without it the card uses the HUD font.")]
     [SerializeField] Font cardTagFont;
+    [Tooltip("Clean, readable font for the HUD, menus and body text. Without it they use the pixel font.")]
+    [SerializeField] Font bodyFont;
 
     public TMP_FontAsset Font => font;
+    public TMP_FontAsset BodyFont => BuildFont(bodyFont, ref bodyAsset, 72, 12);
+    public TMP_FontAsset TitleFont => BuildFont(cardNameFont, ref cardNameAsset, 90, 16);
+
+    public static readonly Color MutedColour = new Color(0.8f, 0.77f, 0.72f);
+    public static readonly Color HighScoreColour = new Color(1f, 0.84f, 0.42f);
 
     TextMeshProUGUI scoreText;
+    TextMeshProUGUI highScoreText;
     TextMeshProUGUI levelText;
     RectTransform livesRow;
     readonly List<GameObject> lifeIcons = new List<GameObject>();
@@ -41,31 +53,100 @@ public class GameUI : MonoBehaviour
     float shownBossHealth = 1f;
     float bossHealth = 1f;
 
+    RectTransform subtitlePlate;
+    TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
     float subtitleUntil;
 
     TMP_FontAsset cardNameAsset;
     TMP_FontAsset cardTagAsset;
+    TMP_FontAsset bodyAsset;
+    readonly Dictionary<TextStyle, Material> styleMaterials = new Dictionary<TextStyle, Material>();
 
     void Awake()
     {
-        scoreText = CreateText("Score", new Vector2(0.5f, 1f), new Vector2(0, -20), new Vector2(800, 50), 36, TextAlignmentOptions.Top);
-        levelText = CreateText("Level", new Vector2(1f, 1f), new Vector2(-30, -20), new Vector2(600, 50), 36, TextAlignmentOptions.TopRight);
-
-        TextMeshProUGUI livesLabel = CreateText("LivesLabel", new Vector2(0f, 0f), new Vector2(30, 20), new Vector2(150, 50), 36, TextAlignmentOptions.BottomLeft);
-        livesLabel.text = "Lives";
-        livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(140, 26), new Vector2(400, 40));
-
+        BuildHud();
         BuildBossBar();
-        subtitle = CreateText("Subtitle", new Vector2(0.5f, 0f), new Vector2(0, 110), new Vector2(1400, 90), 34, TextAlignmentOptions.Bottom);
-        subtitle.fontStyle = FontStyles.Italic;
-        subtitle.gameObject.SetActive(false);
+        BuildSubtitle();
         BuildOverlay();
+    }
+
+    // Arcade layout: score top left, high score top centre, stage and samurai left top right, lives bottom left.
+    // Small dim labels sit over big bright numbers, on a shade that fades out before the army's top row.
+    void BuildHud()
+    {
+        RectTransform shade = CreateRect("HudShade", transform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 150));
+        shade.anchorMin = new Vector2(0f, 1f);
+        shade.anchorMax = new Vector2(1f, 1f);
+        Image shadeImage = shade.gameObject.AddComponent<Image>();
+        shadeImage.sprite = ProceduralSprites.FadeDown;
+        shadeImage.color = new Color(0.02f, 0.01f, 0.04f, 0.7f);
+        shadeImage.raycastTarget = false;
+
+        HudLabel("ScoreLabel", "SCORE", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft);
+        scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -42), TextAlignmentOptions.TopLeft, Color.white);
+        HudLabel("HighLabel", "HIGH SCORE", new Vector2(0.5f, 1f), new Vector2(0, -14), TextAlignmentOptions.Top);
+        highScoreText = HudValue("HighScore", new Vector2(0.5f, 1f), new Vector2(0, -42), TextAlignmentOptions.Top, HighScoreColour);
+        levelText = HudValue("Level", new Vector2(1f, 1f), new Vector2(-36, -14), TextAlignmentOptions.TopRight, Color.white);
+        levelText.fontSize = 36;
+
+        // The samurai counter is the one HUD text authored in the scene; it joins the stage block on the right.
+        SamuraiCounter counter = FindAnyObjectByType<SamuraiCounter>();
+        if (counter != null && counter.TryGetComponent(out TextMeshProUGUI counterText))
+        {
+            RectTransform rect = counterText.rectTransform;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1f, 1f);
+            rect.anchoredPosition = new Vector2(-36, -62);
+            rect.sizeDelta = new Vector2(500, 50);
+            counterText.alignment = TextAlignmentOptions.TopRight;
+            counterText.fontSize = 30;
+            counterText.color = MutedColour;
+            Style(counterText, TextStyle.Hud);
+        }
+
+        TextMeshProUGUI livesLabel = HudLabel("LivesLabel", "LIVES", new Vector2(0f, 0f), new Vector2(36, 76), TextAlignmentOptions.BottomLeft);
+        livesLabel.rectTransform.sizeDelta = new Vector2(200, 36);
+        livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(24, 24), new Vector2(400, 52));
+    }
+
+    TextMeshProUGUI HudLabel(string name, string label, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment)
+    {
+        TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(500, 36), 28, alignment);
+        text.text = label;
+        text.color = MutedColour;
+        text.characterSpacing = 8;
+        Style(text, TextStyle.Hint);
+        return text;
+    }
+
+    TextMeshProUGUI HudValue(string name, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment, Color colour)
+    {
+        TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(600, 64), 50, alignment);
+        text.color = colour;
+        Style(text, TextStyle.Hud);
+        return text;
+    }
+
+    // A spoken line sits on a dark plate sized to fit it, with the speaker's name above.
+    void BuildSubtitle()
+    {
+        subtitlePlate = CreateRect("Subtitle", transform, new Vector2(0.5f, 0f), new Vector2(0, 150), new Vector2(1200, 100));
+        subtitlePlate.pivot = new Vector2(0.5f, 0f);
+        Image plate = subtitlePlate.gameObject.AddComponent<Image>();
+        plate.color = new Color(0.02f, 0.01f, 0.04f, 0.68f);
+        plate.raycastTarget = false;
+
+        subtitleSpeaker = CreateText("Speaker", new Vector2(0.5f, 1f), new Vector2(0, 40), new Vector2(1200, 40), 30, TextAlignmentOptions.Bottom, subtitlePlate);
+        subtitleSpeaker.characterSpacing = 6;
+        Style(subtitleSpeaker, TextStyle.Heading);
+        subtitle = CreateText("Line", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200, 100), 34, TextAlignmentOptions.Center, subtitlePlate);
+        Style(subtitle, TextStyle.Body);
+        subtitlePlate.gameObject.SetActive(false);
     }
 
     void Update()
     {
-        if (subtitle.gameObject.activeSelf && Time.unscaledTime > subtitleUntil) subtitle.gameObject.SetActive(false);
+        if (subtitlePlate.gameObject.activeSelf && Time.unscaledTime > subtitleUntil) subtitlePlate.gameObject.SetActive(false);
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;
@@ -90,13 +171,20 @@ public class GameUI : MonoBehaviour
         bossHealth = Mathf.Clamp01(fraction);
     }
 
-    // A spoken line shown along the bottom of the screen for `seconds`.
-    public void ShowSubtitle(string text, Color colour, float seconds)
+    // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour.
+    public void ShowSubtitle(string speaker, string text, Color colour, float seconds)
     {
+        subtitleSpeaker.text = speaker != null ? speaker.ToUpperInvariant() : "";
+        subtitleSpeaker.color = Color.Lerp(colour, Color.white, 0.25f);
         subtitle.text = text;
-        subtitle.color = Color.Lerp(colour, Color.white, 0.35f);
+        subtitle.color = Color.white;
+        // Fit the plate to the line, wrapping past 1100 wide.
+        Vector2 size = subtitle.GetPreferredValues(text, 1100f, 0f);
+        size = new Vector2(Mathf.Min(size.x, 1100f) + 64f, size.y + 28f);
+        subtitlePlate.sizeDelta = size;
+        subtitle.rectTransform.sizeDelta = size;
         subtitleUntil = Time.unscaledTime + seconds;
-        subtitle.gameObject.SetActive(true);
+        subtitlePlate.gameObject.SetActive(true);
     }
 
     // A boss's entrance, in two beats. The screen darkens under a slash of her colour and her full-body art slides
@@ -170,9 +258,9 @@ public class GameUI : MonoBehaviour
         // Letterbox bars, with her line subtitled in the lower one.
         CreateRect("TopBar", card, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(4000f, 70f)).gameObject.AddComponent<Image>().color = Color.black;
         CreateRect("BottomBar", card, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(4000f, 130f)).gameObject.AddComponent<Image>().color = Color.black;
-        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(1600, 110), 32, TextAlignmentOptions.Center, card);
+        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(1600, 110), 34, TextAlignmentOptions.Center, card);
         said.text = lineText ?? "";
-        said.fontStyle = FontStyles.Italic;
+        Style(said, TextStyle.Body);
         said.maxVisibleCharacters = 0;
 
         Image flash = Stretch(CreateRect("Flash", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
@@ -245,11 +333,59 @@ public class GameUI : MonoBehaviour
         Destroy(root.gameObject);
     }
 
-    // The title card's fonts are built from their TTFs on first use; without one the card uses the HUD font.
-    TMP_FontAsset CardFont(Font source, ref TMP_FontAsset asset)
+    TMP_FontAsset CardFont(Font source, ref TMP_FontAsset asset) => BuildFont(source, ref asset, 90, 16);
+
+    // TTF fonts are turned into TMP fonts on first use; without one the text uses the pixel font. The printable
+    // ASCII set is added up front so the atlas is real before any material is copied from it.
+    TMP_FontAsset BuildFont(Font source, ref TMP_FontAsset asset, int samplingSize, int padding)
     {
-        if (asset == null && source != null) asset = TMP_FontAsset.CreateFontAsset(source, 90, 16, GlyphRenderMode.SDFAA, 1024, 1024);
+        if (asset == null && source != null)
+        {
+            asset = TMP_FontAsset.CreateFontAsset(source, samplingSize, padding, GlyphRenderMode.SDFAA, 1024, 1024);
+            if (asset != null) asset.TryAddCharacters(PrintableCharacters);
+        }
         return asset != null ? asset : font;
+    }
+
+    const string PrintableCharacters =
+        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•–—…←↑→↓";
+
+    // Gives text its font and a shared outline-and-shadow material, so it stays readable over the busy playfield.
+    // Titles use the brush font; everything else the clean body font. Colour and size are left to the caller.
+    public void Style(TMP_Text text, TextStyle style)
+    {
+        TMP_FontAsset styleFont = style == TextStyle.Title ? TitleFont : BodyFont;
+        text.font = styleFont;
+        text.fontStyle &= ~FontStyles.Italic;
+        text.fontSharedMaterial = StyleMaterial(style, styleFont);
+        if (style == TextStyle.Body) text.lineSpacing = 12f;
+    }
+
+    Material StyleMaterial(TextStyle style, TMP_FontAsset styleFont)
+    {
+        if (styleMaterials.TryGetValue(style, out Material material) && material != null)
+        {
+            // A dynamic font can grow a new atlas; keep the copy pointing at the live one.
+            if (material.mainTexture != styleFont.atlasTexture) material.mainTexture = styleFont.atlasTexture;
+            return material;
+        }
+
+        material = new Material(styleFont.material) { name = styleFont.name + " " + style };
+        // Headings and titles get a heavier ink edge; hints stay light so they read as secondary.
+        float outline = style == TextStyle.Title ? 0.24f : style == TextStyle.Hint ? 0.12f : 0.18f;
+        material.EnableKeyword(ShaderUtilities.Keyword_Outline);
+        material.SetFloat(ShaderUtilities.ID_OutlineWidth, outline);
+        material.SetColor(ShaderUtilities.ID_OutlineColor, new Color32(14, 6, 12, 255));
+        // The outline eats half into each letter, so fatten the face back up.
+        material.SetFloat(ShaderUtilities.ID_FaceDilate, outline * 0.6f);
+        material.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+        material.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.75f));
+        material.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.6f);
+        material.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.6f);
+        material.SetFloat(ShaderUtilities.ID_UnderlayDilate, outline);
+        material.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.15f);
+        styleMaterials[style] = material;
+        return material;
     }
 
     // A dark ink outline and a hard drop shadow, like the lettering on a Borderlands card.
@@ -302,7 +438,7 @@ public class GameUI : MonoBehaviour
 
     void BuildBossBar()
     {
-        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -115), new Vector2(904, 30));
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -150), new Vector2(904, 30));
         frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
         RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
         back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
@@ -310,8 +446,9 @@ public class GameUI : MonoBehaviour
         bossTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
         bossFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossFillImage = bossFill.gameObject.AddComponent<Image>();
-        bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(904, 44), 34, TextAlignmentOptions.Bottom, frame);
-        bossName.fontStyle = FontStyles.Bold;
+        bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 32), new Vector2(904, 48), 38, TextAlignmentOptions.Bottom, frame);
+        bossName.characterSpacing = 4;
+        Style(bossName, TextStyle.Heading);
         bossBar = frame.gameObject;
         bossBar.SetActive(false);
     }
@@ -328,12 +465,13 @@ public class GameUI : MonoBehaviour
 
     public void SetScore(int score, int highScore)
     {
-        scoreText.text = $"Score {score:000000}      High {highScore:000000}";
+        scoreText.SetText("{0:000000}", score);
+        highScoreText.SetText("{0:000000}", highScore);
     }
 
     public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
-        levelText.text = $"Stage {stage}/{stageCount}   Round {round}/{roundCount}";
+        levelText.text = $"STAGE {stage}/{stageCount}  ·  ROUND {round}/{roundCount}";
     }
 
     // One heart icon per remaining life.
@@ -380,13 +518,14 @@ public class GameUI : MonoBehaviour
         }
 
         overlayTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 140), new Vector2(1600, 180), 110, TextAlignmentOptions.Center, panel);
-        overlayTitle.fontStyle = FontStyles.Bold;
-        overlayBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(1400, 360), 34, TextAlignmentOptions.Top, panel);
+        Style(overlayTitle, TextStyle.Title);
+        overlayBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -110), new Vector2(1400, 360), 36, TextAlignmentOptions.Top, panel);
+        Style(overlayBody, TextStyle.Body);
     }
 
     GameObject CreateLifeIcon(int index)
     {
-        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * 54 + 24, 0), new Vector2(48, 48));
+        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * 58 + 12, 0), new Vector2(52, 52));
         Image image = icon.gameObject.AddComponent<Image>();
         image.sprite = lifeIcon;
         image.preserveAspect = true;

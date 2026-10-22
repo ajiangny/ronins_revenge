@@ -738,7 +738,7 @@ public class GameManager : MonoBehaviour
             speakingFullLine = full;
             if (full) Music.Duck(0.3f, seconds + 0.3f);
         }
-        if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(text, boss.Colour, seconds + 0.6f);
+        if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(boss.Title, text, boss.Colour, seconds + 0.6f);
     }
 
     void OnBossDamaged(Vector3 point, KillSource source)

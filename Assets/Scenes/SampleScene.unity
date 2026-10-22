@@ -1131,6 +1131,7 @@ MonoBehaviour:
   overlayBannerPixelScale: 2
   cardNameFont: {fileID: 12800000, guid: ba81d006cda8d44f99edfb70089a44fa, type: 3}
   cardTagFont: {fileID: 12800000, guid: 35adec606171e4975a412c6c1f83f02c, type: 3}
+  bodyFont: {fileID: 12800000, guid: e9feec424839347c69d26f3737dfda03, type: 3}
 --- !u!114 &2080831156
 MonoBehaviour:
   m_ObjectHideFlags: 0

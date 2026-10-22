@@ -8,6 +8,21 @@ public static class ProceduralSprites
     static Sprite glow;
     static Sprite disc;
     static Sprite arrowDown;
+    static Sprite fadeDown;
+
+    static Sprite BuildFadeDown(int height)
+    {
+        var texture = new Texture2D(1, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[height];
+        for (int y = 0; y < height; y++)
+        {
+            float k = (y + 0.5f) / height;
+            pixels[y] = new Color32(255, 255, 255, (byte)(k * k * 255));
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, 1, height), new Vector2(0.5f, 0.5f), height);
+    }
 
     public static Sprite White => white != null ? white : white = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
 
@@ -16,6 +31,9 @@ public static class ProceduralSprites
 
     // A hard-edged pixel disc, used for round UI medallions until the art is in.
     public static Sprite Disc => disc != null ? disc : disc = Circle(64, soft: false);
+
+    // Opaque at the top fading to clear at the bottom, for shading behind the HUD.
+    public static Sprite FadeDown => fadeDown != null ? fadeDown : fadeDown = BuildFadeDown(32);
 
     // A hard-edged arrow pointing down, standing in for the soul hint's art.
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);

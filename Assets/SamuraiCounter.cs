@@ -14,6 +14,6 @@ public class SamuraiCounter : MonoBehaviour
     // Called by the army only when the count changes, instead of rebuilding the string every frame.
     public void SetCount(int remaining)
     {
-        uiText.SetText("Samurai Left: {0}", remaining);
+        uiText.SetText("Samurai left  {0}", remaining);
     }
 }

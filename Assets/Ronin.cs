@@ -40,7 +40,8 @@ public class Ronin : MonoBehaviour
 
     [Header("Parry (Shift / Down)")]
     [SerializeField] float parryWindow = 0.25f;
-    [SerializeField] float parryCooldown = 1.5f;
+    [Tooltip("Cooldown after a parry that deflects nothing. A parry that lands is ready again at once, so parries chain.")]
+    [SerializeField] float parryMissCooldown = 2f;
     [Tooltip("Arrows inside this radius around the ronin's upper body are deflected during the parry.")]
     [SerializeField] float parryRadius = 1.1f;
 
@@ -65,7 +66,7 @@ public class Ronin : MonoBehaviour
     const float FeetAbovePivotPx = 7f;
     // 0 right after use, 1 when ready. Shown on the HUD.
     public float ShurikenCharge => Charge(lastShuriken, shurikenCooldown);
-    public float ParryCharge => Charge(lastParry, parryCooldown);
+    public float ParryCharge => Charge(lastParry, parryMissCooldown);
     // The colours his attacks spark in, for effects elsewhere (hit sparks on kills).
     public Color AttackGlow => attackGlow;
     public Color ShurikenGlow => shurikenGlow;
@@ -348,6 +349,8 @@ public class Ronin : MonoBehaviour
 
         if (parryLanded) return;
         parryLanded = true;
+        // A landed parry is ready again straight away, so a well-timed one can answer the next arrow too.
+        lastParry = float.NegativeInfinity;
         Sfx.Play(Sfx.ParryClang);
         Parried?.Invoke();
     }

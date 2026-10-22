@@ -92,7 +92,7 @@ public class BoonChoiceUI : MonoBehaviour
     readonly List<Image> passiveIcons = new List<Image>();
     readonly List<TextMeshProUGUI> passiveTips = new List<TextMeshProUGUI>();
     CanvasGroup tips;
-    static readonly string[] SlotKeys = { "Space", "E", "Shift" };
+    static readonly string[] SlotKeys = { "Space", "W", "Shift" };
     static readonly string[] SlotNames = { "Slash", "Spirit Shuriken", "Parry" };
     const float SlotSize = 68f;
     const float SlotGap = 12f;

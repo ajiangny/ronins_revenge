@@ -43,7 +43,7 @@ public class Ronin : MonoBehaviour
     [Tooltip("Seconds per bob of the spirit wisps.")]
     [SerializeField] float wispPeriod = 1.8f;
 
-    [Header("Spirit Shuriken (E / Up)")]
+    [Header("Spirit Shuriken (W / Up)")]
     [Tooltip("Leave empty to throw a big spinning kunai until the shuriken art is in.")]
     [SerializeField] Sprite shurikenSprite;
     [SerializeField] float shurikenCooldown = 6f;
@@ -51,7 +51,7 @@ public class Ronin : MonoBehaviour
     [SerializeField] float shurikenScale = 2.6f;
     [SerializeField] float shurikenSpeed = 0.75f;
 
-    [Header("Parry (Shift / Down)")]
+    [Header("Parry (Shift / Down / Right Click)")]
     [SerializeField] float parryWindow = 0.25f;
     [Tooltip("Cooldown after a parry that deflects nothing. A parry that lands is ready again at once, so parries chain.")]
     [SerializeField] float parryMissCooldown = 2f;
@@ -160,20 +160,24 @@ public class Ronin : MonoBehaviour
         sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : Color.white;
 
         Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
         if (ControlsEnabled && keyboard != null)
         {
             if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
             if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
 
-            if (keyboard.spaceKey.isPressed && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
+            bool slash = keyboard.spaceKey.isPressed || (mouse != null && mouse.leftButton.isPressed);
+            bool parry = keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame
+                || (mouse != null && mouse.rightButton.wasPressedThisFrame);
+            if (slash && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
             {
                 Attack();
             }
-            if ((keyboard.eKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && ShurikenCharge >= 1f)
+            if ((keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && ShurikenCharge >= 1f)
             {
                 ThrowShuriken();
             }
-            if ((keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame) && ParryCharge >= 1f)
+            if (parry && ParryCharge >= 1f)
             {
                 StartParry();
             }

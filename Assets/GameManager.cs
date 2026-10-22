@@ -398,9 +398,9 @@ public class GameManager : MonoBehaviour
         menu.Show("CONTROLS",
             "<align=left>" +
             Row("Move", Key("A") + "  " + Key("D") + "    or    " + Key("←") + "  " + Key("→")) +
-            Row("Slash", Key("SPACE")) +
-            Row("Spirit Shuriken", Key("E") + "    or    " + Key("↑")) +
-            Row("Parry arrows", Key("SHIFT") + "    or    " + Key("↓")) +
+            Row("Slash", Key("SPACE") + "    or    " + Key("LEFT CLICK")) +
+            Row("Spirit Shuriken", Key("W") + "    or    " + Key("↑")) +
+            Row("Parry arrows", Key("SHIFT") + "  " + Key("↓") + "    or    " + Key("RIGHT CLICK")) +
             Row("Show ability names", "hold " + Key("TAB")) +
             Row("Pause", Key("ESC")) +
             "</align>\n" +

@@ -744,6 +744,7 @@ public class GameManager : MonoBehaviour
         activeBoss.Spoke += OnBossSpoke;
         effects.Boss = activeBoss;
         yield return activeBoss.Enter(post, 1.6f);
+        yield return activeBoss.Entrance();
 
         Fx.Play(Fx.SlashArc, post, activeBoss.Colour, 6f);
         if (Stage.boss == BossKind.Benibana) Fx.Play(Fx.BeniPetals, post, Color.white, 3f);

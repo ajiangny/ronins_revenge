@@ -98,8 +98,8 @@ match `BoonChoiceUI.boonIcons`.
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
 - `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (90 HP), a karakuri automaton that moves in ticking steps
-  (`Stride`). Before its first move `RazeCover` sweeps a beam from its `Eye` along the foot of the blocker row,
-  demolishing every `Blocker` (cosmetic for the ronin). Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
+  (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
+  `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
   and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze

@@ -118,6 +118,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         anchor = post;
     }
 
+    // A set piece played once she has descended, before her title card and before the fight begins.
+    public virtual IEnumerator Entrance()
+    {
+        yield break;
+    }
+
     public void Begin(Ronin target, Arrow arrows)
     {
         ronin = target;

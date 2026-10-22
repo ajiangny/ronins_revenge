@@ -45,7 +45,6 @@ public class Utsusemi : Boss
 
     bool secondPhase;
     bool breaking;
-    bool razed;
     bool tock;
     int hatsOut;
     Move? lastMove;
@@ -90,11 +89,6 @@ public class Utsusemi : Boss
             swordOut = false;
             plantedSword = null;
             PlayIdle();
-        }
-        if (!razed)
-        {
-            razed = true;
-            yield return RazeCover();
         }
         while (true)
         {
@@ -186,10 +180,12 @@ public class Utsusemi : Boss
         }
     }
 
-    // Its entrance: before its first move, the slit-eye under its hat brim charges and a thin red beam rakes the row of
-    // blockers from end to end, burning a line of fire along it, and every blocker it touches bursts apart. A show
-    // of force that can't hurt the ronin; from here on the only cover in this duel is the sword it throws before its
-    // heart's beam.
+    // Its entrance: once it has descended, before its title card, the slit-eye under its hat brim charges and a thin
+    // red beam rakes the row of blockers from end to end, burning a line of fire along it, and every blocker it
+    // touches bursts apart. A show of force that can't hurt the ronin; from here on the only cover in this duel is the
+    // sword it throws before its lasers.
+    public override IEnumerator Entrance() => RazeCover();
+
     IEnumerator RazeCover()
     {
         var cover = new List<Blocker>(FindObjectsByType<Blocker>());

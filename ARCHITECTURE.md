@@ -151,7 +151,8 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 ## Environment
 
 - `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild(healthMultiplier)`
-  (Glacier Wall uses the multiplier for ice blockers). A `Backdrop.Map` can bring its own `blockers` and
+  (Glacier Wall uses the multiplier for ice blockers); sites are spread across the view minus `sideInset` at each side, so
+  the outer ones stay off a map's edge scenery. A `Backdrop.Map` can bring its own `blockers` and
   `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
   Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),
   so a row isn't all identical; the courtyard has three looks of each too (`BushB/C`, `LanternB/C`, wired by `Apply Backdrop And Blockers Only`). Map sets: Bamboo Road = roadside stones and bamboo clumps (`SBS`), Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and

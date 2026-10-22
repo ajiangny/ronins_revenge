@@ -39,6 +39,8 @@ public class BlockerWall : MonoBehaviour
     [Tooltip("Blockers at each site, left to right, by each type's first letter (e.g. BLB = bush, lantern, bush).")]
     [SerializeField] string pattern = "BLB";
     [SerializeField] int siteCount = 4;
+    [Tooltip("World units kept clear at each side of the view, so the outer sites stand on open ground rather than the map's edge scenery.")]
+    [SerializeField] float sideInset = 2.5f;
     [SerializeField] float gap = 0.05f;
 
     float healthMultiplier = 1f;
@@ -82,7 +84,7 @@ public class BlockerWall : MonoBehaviour
         }
 
         Camera cam = Camera.main;
-        float width = 2f * cam.orthographicSize * cam.aspect;
+        float width = 2f * cam.orthographicSize * cam.aspect - 2f * sideInset;
         float spacing = width / siteCount;
         float left = CameraShake.Center.x - width / 2f;
 

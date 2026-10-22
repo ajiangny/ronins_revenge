@@ -18,8 +18,8 @@ public class Utsusemi : Boss
     enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight }
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
-    float Recovery => secondPhase ? 0.8f : 1.5f;
-    float ComboChance => secondPhase ? 0.75f : 0.5f;
+    float Recovery => secondPhase ? 0.45f : 0.9f;
+    float ComboChance => secondPhase ? 0.85f : 0.65f;
     int MaxCombo => secondPhase ? 3 : 2;
     float StepTime => secondPhase ? 0.11f : 0.16f;
     const float StepLength = 0.9f;
@@ -47,8 +47,8 @@ public class Utsusemi : Boss
     bool breaking;
     bool tock;
     int hatsOut;
-    // The Kasa Wheel's sword in the second phase: wheeling from the throw until it's back (the fight waits for it,
-    // since every other move has the sword in hand), and thrown once it has left its hand.
+    // The Kasa Wheel's sword in the second phase: wheeling from the throw until it's back (meanwhile it fights on
+    // with only the bladeless moves), and thrown once it has left its hand.
     bool swordWheeling, swordThrown;
     // Hat off and sword out at once, patched together from its other idles; built the first time it's needed.
     Sprite[] bareUnarmedIdle;
@@ -129,16 +129,9 @@ public class Utsusemi : Boss
             bool hourStruck = false;
             for (int i = 0; i < combo; i++)
             {
-                // Every move has the sword in hand (or throws it), so it stands empty-handed until the wheeling
-                // sword is home.
-                while (swordWheeling)
-                {
-                    Beat();
-                    yield return null;
-                }
                 Beat();
                 yield return Stride(RandomX(2.5f));
-                yield return Wait(0.15f);
+                yield return Wait(0.05f);
 
                 Move move = NextMove(hourStruck);
                 lastMove = move;
@@ -166,6 +159,9 @@ public class Utsusemi : Boss
     // plumbs as rarer filler between them.
     Move NextMove(bool hourStruck)
     {
+        // While its sword wheels it fights on with the moves that need no blade: the lace and the plumbs.
+        if (swordWheeling) return lastMove == Move.PlumbLines ? Move.Lattice : lastMove == Move.Lattice ? Move.PlumbLines
+            : Random.value < 0.5f ? Move.Lattice : Move.PlumbLines;
         if (secondPhase && movesSinceLaser >= 1)
         {
             if (lastLaser == Move.HeartLantern) return Move.Midnight;
@@ -211,7 +207,7 @@ public class Utsusemi : Boss
             }
             anchor = to;
             Tick(0.3f);
-            yield return Wait(0.06f);
+            yield return Wait(0.03f);
         }
     }
 
@@ -503,15 +499,16 @@ public class Utsusemi : Boss
     IEnumerator LaceLattice()
     {
         if (Random.value < 0.5f) Speak(BossLine.Lattice);
-        PlayAction(art.attack);
+        // Its attack clip has the sword in hand; with the sword wheeling it flares its shroud from its stance.
+        if (!swordThrown) PlayAction(art.attack);
         ElementFx.Glow(Centre, Lace, 1f, 5f, 0.5f, transform);
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.8f);
-        yield return Wait(0.5f);
+        yield return Wait(0.35f);
 
         int layers = secondPhase ? 2 : 1;
         for (int layer = 0; layer < layers; layer++)
         {
-            if (layer > 0) yield return Wait(0.8f);
+            if (layer > 0) yield return Wait(0.6f);
             SpinLattice(layer * 0.55f, secondPhase ? 1 : 2);
             Sfx.Play(Sfx.WardShatter, 0.5f, 1.8f);
         }
@@ -814,7 +811,7 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.MidnightChime, 0.6f, 1.4f);
         CameraShake.Add(0.35f);
         ElementFx.Glow(from, Color.white, 0.8f, 3f, 0.25f);
-        yield return Wait(0.6f);
+        yield return Wait(0.4f);
     }
 
     // Fast, but it turns as fast as the ronin runs: there's no outrunning it, only parrying it.
@@ -1020,11 +1017,13 @@ public class Utsusemi : Boss
         const float amplitude = 28f * Mathf.Deg2Rad;
         // Each swings this far behind its left-hand neighbour, so a ripple runs along the row.
         const float waveStep = 0.7f;
-        float swing = secondPhase ? 4.5f : 4f;
+        float swing = secondPhase ? 3.6f : 3.2f;
         float omega = Mathf.PI * 2f / (secondPhase ? 2f : 2.4f);
         float halfPeriod = Mathf.PI / omega;
         float nextTick = drop + halfPeriod * 0.5f;
         float total = drop + swing + damp + reel;
+        // It doesn't stand and watch the pendulums: it keeps striding to fresh spots under them.
+        pacing = StartCoroutine(Pace(drop + swing));
         // Steered once per physics step: a velocity worked out from a render frame's delta overshoots the next step.
         for (float t = 0; t < total; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
         {
@@ -1067,6 +1066,7 @@ public class Utsusemi : Boss
             yield return new WaitForFixedUpdate();
         }
 
+        StopPacing();
         // Back in: each weight vanishes into its portal with a glint, and the portals close.
         for (int i = 0; i < count; i++)
         {
@@ -1137,6 +1137,28 @@ public class Utsusemi : Boss
 
     // The portals and their threads sit just behind the automaton's own sprite.
     const int PortalOrder = 4;
+
+    Coroutine pacing;
+
+    // Strides about while an attack plays out by itself, so it isn't a still target. Started beside the fight, so a
+    // stagger (OnStaggered) or the attack's end stops it.
+    IEnumerator Pace(float seconds)
+    {
+        float until = Time.time + seconds;
+        yield return Wait(0.4f);
+        while (Time.time < until - 0.5f)
+        {
+            yield return Stride(RandomX(2.5f));
+            yield return Wait(Random.Range(0.25f, 0.5f));
+        }
+        pacing = null;
+    }
+
+    void StopPacing()
+    {
+        if (pacing != null) StopCoroutine(pacing);
+        pacing = null;
+    }
     const float PortalSize = 1.3f;
 
     // Out fast, a touch past full length, then settling back.
@@ -1692,6 +1714,7 @@ public class Utsusemi : Boss
     // A parried thrust jams the gears: sparks and a grinding shudder.
     protected override void OnStaggered()
     {
+        StopPacing();
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 2f) == null) Fx.Play(Fx.Impact, Centre, Gold, 2f);
         Debris.BurstSprites(Centre, art.deathParticles, Gold, 12, 0.8f, 7f);
         Sfx.Play(Sfx.GearGrind);

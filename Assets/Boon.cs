@@ -22,7 +22,7 @@ public enum BoonId
     FlameBlade, FrostBlade, StormBlade,
     InfernoShuriken, GlacialShuriken, ThunderShuriken,
     BurningRiposte, FrozenRiposte, ThunderRiposte,
-    BlazingHands, InfernoFan,
+    BlazingHands, Kindling,
     TidalRenewal, GlacierWall,
     StormStep, StaticCharge,
     ThermalShock, PlasmaArc, Superconductor,
@@ -164,9 +164,9 @@ public static class Boons
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
             Description = "You <b>Slash</b> faster.",
             StatLabel = "Slash cooldown:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },
-        new BoonDefinition { Id = BoonId.InfernoFan, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Inferno Fan",
-            Description = "You send extra <b>Slashes</b> in a spread.",
-            StatLabel = "Extra slashes:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
+        new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
+            Description = "Every few <b>Slash</b> kills, the embers catch: a great fire blast bursts from the fallen samurai.",
+            StatLabel = "Kills per blast:", Values = new[] { 5f, 4f, 3f }, Format = v => $"{v:0}" },
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",

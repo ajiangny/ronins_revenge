@@ -95,7 +95,6 @@ public sealed class RoninLoadout
     public float AttackCooldownMultiplier => 1f - Value(BoonId.BlazingHands);
     public float MoveSpeedMultiplier => 1f + Value(BoonId.StormStep);
     public float AbilityCooldownMultiplier => 1f - Value(BoonId.StaticCharge);
-    public int ExtraProjectiles => (int)Value(BoonId.InfernoFan);
     public float BlockerHealthMultiplier => 1f + Value(BoonId.GlacierWall);
     // Still Water: freezes last longer and the army's march quickens half as much as it thins.
     public float FreezeMultiplier => 1f + Value(BoonId.StillWater);

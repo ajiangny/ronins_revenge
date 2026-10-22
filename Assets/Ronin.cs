@@ -237,10 +237,9 @@ public class Ronin : MonoBehaviour
         PlayAction(art.attack);
     }
 
-    // Inferno Fan adds projectiles either side of the straight one.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
-        int count = 1 + Loadout.ExtraProjectiles;
+        int count = 1;
         var sent = new Kunai[count];
         for (int i = 0; i < count; i++)
         {

@@ -196,6 +196,12 @@ public static class NinjaArtSetup
     // Each map's own cover, matching its ground. The courtyard keeps the bushes and lanterns above.
     static readonly Dictionary<string, (BlockerSpec[] types, string pattern)> MapBlockers = new()
     {
+        // Roadside stones either side of a clump of bamboo.
+        ["BambooRoad_Stage1"] = (new[]
+        {
+            new BlockerSpec("Stone", "Blockers/Stone", "Effects/StoneChip", 5, 1.1f, 3),
+            new BlockerSpec("Bamboo", "Blockers/Bamboo", "Effects/Leaf", 8, 1.8f, 3),
+        }, "SBS"),
         // Mountain boulders flanking a roadside Jizo statue.
         ["Pass_Stage2"] = (new[]
         {
@@ -295,7 +301,14 @@ public static class NinjaArtSetup
         EditorUtility.SetDirty(ronin);
     }
 
-    // Stage 1 keeps the courtyard; later stages fight on Background/Pass_Stage<n>, and each boss waits on Background/Arena_<boss>.
+    // Each stage fights on its RoundsGrounds entry, and each boss waits on Background/Arena_<boss>.
+    // Each stage's rounds ground, in stage order, with the tint of the leaves drifting over it.
+    static readonly (string ground, Color leaves)[] RoundsGrounds =
+    {
+        ("Background/BambooRoad_Stage1", new Color(0.65f, 0.85f, 0.45f, 0.6f)),
+        ("Background/Pass_Stage2", new Color(0.85f, 0.75f, 0.5f, 0.6f)),
+    };
+
     static void SetUpMaps(GameManager manager)
     {
         var so = new SerializedObject(manager);
@@ -304,8 +317,10 @@ public static class NinjaArtSetup
         {
             SerializedProperty stage = stages.GetArrayElementAtIndex(i);
             var boss = (BossKind)stage.FindPropertyRelative("boss").enumValueIndex;
-            SetMap(stage.FindPropertyRelative("roundsMap"), i == 0 ? null : $"Background/Pass_Stage{i + 1}", Color.white,
-                "Effects/Leaf", new Color(0.85f, 0.75f, 0.5f, 0.6f));
+            // Stages past the listed grounds fight in the moonlit courtyard, whose bushes and lanterns are kept for them.
+            string ground = i < RoundsGrounds.Length ? RoundsGrounds[i].ground : null;
+            Color leaves = i < RoundsGrounds.Length ? RoundsGrounds[i].leaves : Color.white;
+            SetMap(stage.FindPropertyRelative("roundsMap"), ground, Color.white, "Effects/Leaf", leaves);
             // Benibana's maple leaves are bright; dimmed so her crimson shots still stand out on them.
             SetMap(stage.FindPropertyRelative("bossMap"), boss == BossKind.None ? null : $"Background/Arena_{boss}",
                 boss == BossKind.Benibana ? new Color(0.7f, 0.66f, 0.7f) : Color.white,

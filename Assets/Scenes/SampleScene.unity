@@ -650,12 +650,50 @@ MonoBehaviour:
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     boss: 1
     roundsMap:
-      ground: {fileID: 0}
+      ground: {fileID: 21300000, guid: 89bcb0932d60e4de4921715cde773608, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
-      petal: {fileID: 0}
-      petalTint: {r: 0.85, g: 0.75, b: 0.5, a: 0.6}
-      blockers: []
-      blockerPattern: 
+      petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
+      petalTint: {r: 0.65, g: 0.85, b: 0.45, a: 0.6}
+      blockers:
+      - name: Stone
+        damageStates:
+        - {fileID: 21300000, guid: dbb8c0aee0eff41b0b072b5d5360bbf1, type: 3}
+        - {fileID: 21300000, guid: 402e60121bc2042ae9e2348ca07e5e62, type: 3}
+        - {fileID: 21300000, guid: bd6415259ae1f491d94c5e627fac9cb5, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: fbeb7c4a9bc364d84b4977c0ff9b15fa, type: 3}
+          - {fileID: 21300000, guid: fb50a95de0f2941ba8564a2e96c6939f, type: 3}
+          - {fileID: 21300000, guid: a603f889cdf044f0784ab4ac0574878b, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 3bd2c72162a01423bbf0c44b2ae443c6, type: 3}
+          - {fileID: 21300000, guid: 7e54453bc5fcd499a8972603a0f227bc, type: 3}
+          - {fileID: 21300000, guid: aa9457fd5b9f443a1b1b8a9f84631866, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 5
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Bamboo
+        damageStates:
+        - {fileID: 21300000, guid: ffdc335538a884e48a1fd7f8ca636e57, type: 3}
+        - {fileID: 21300000, guid: cc7509a6aab5a4134ac9630b24aec3d9, type: 3}
+        - {fileID: 21300000, guid: 1863dec3919ac4b5d9da687f1e4aa8c1, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: d01cf8a66c3a94191899aaed56a23a2b, type: 3}
+          - {fileID: 21300000, guid: bca282207b0464dd187d3b4fc90d153d, type: 3}
+          - {fileID: 21300000, guid: 1f301991068914a26aea7262423af3fb, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 7657668049ada4bfc92d6def17faf23a, type: 3}
+          - {fileID: 21300000, guid: c819d2d05d77a483fab62908376a61c8, type: 3}
+          - {fileID: 21300000, guid: c688b77b8f4be4cceab8f52d1f58b8c6, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
+        health: 8
+        height: 1.8
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: SBS
     bossMap:
       ground: {fileID: 21300000, guid: 8c1ef5039a9f8499d9c102a30497bb6b, type: 3}
       groundTint: {r: 0.7, g: 0.66, b: 0.7, a: 1}

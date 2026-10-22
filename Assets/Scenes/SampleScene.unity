@@ -488,6 +488,10 @@ MonoBehaviour:
   soulPityKills: 15
   soulElementBias: 0.5
   soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
+  scrollChanceFromScout: 0.4
+  scrollChancePerKill: 0.005
+  maxScrollsPerRun: 2
+  scrollSprite: {fileID: 21300000, guid: 58074e3ad066342478ea1bb0ac61dc08, type: 3}
   heartDropChance: 0.2
   titleFluteFrames:
   - {fileID: 21300000, guid: 5b5e752b773b04742ad3c376d61a6708, type: 3}
@@ -1464,7 +1468,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 3d3393d8dec024d788436bbc5bc9fbb6, type: 3}
   - {fileID: 21300000, guid: 558945e7b8a9549f889d2e498b0a30c1, type: 3}
   - {fileID: 21300000, guid: 9753b16a215f04eb0926269a235f2c01, type: 3}
-  - {fileID: 21300000, guid: a1c93c271458e433d930db192281c00e, type: 3}
+  - {fileID: 21300000, guid: 4af9954aaf64c4c43ab5116ac467c9a8, type: 3}
   - {fileID: 21300000, guid: c0c9473812fae4f24b49d297107bbfdd, type: 3}
   - {fileID: 21300000, guid: 4377baa7389d34ed492436b7849858c6, type: 3}
   - {fileID: 21300000, guid: fd8b3b820261f47328b0910782fcdf1a, type: 3}
@@ -1475,6 +1479,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f48d5b22cb0214044b55ec250e7e55b7, type: 3}
   - {fileID: 21300000, guid: b9fff857f43ea45e5a934abe5ba212e3, type: 3}
   - {fileID: 21300000, guid: 91207a421e73d48738446d8e67510da3, type: 3}
+  - {fileID: 21300000, guid: 9085c952fbaed4f03a2da7369a620440, type: 3}
+  - {fileID: 21300000, guid: f434844fce5ba4f4b9cb9874941b0f4a, type: 3}
+  - {fileID: 21300000, guid: 6e727abde0b314be7a1d832ef6a187b9, type: 3}
+  - {fileID: 21300000, guid: 6a89580cb9d654cbf959711d3de2fc2f, type: 3}
   - {fileID: 21300000, guid: 0f428897711e04425b91bb5ab05790a2, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}

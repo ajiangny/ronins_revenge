@@ -20,6 +20,8 @@ public class CharacterArt : ScriptableObject
     public Sprite[] walkUp;
     [Tooltip("The ronin's spirit wisps, one per sprite on a canvas matching his frames; layered on and bobbed in code.")]
     public Sprite[] wisps;
+    [Tooltip("Frames that already draw the spirit wisps themselves, so the layered ones hide on them.")]
+    public Sprite[] framesWithWisps;
 
     [Tooltip("Frames per second for the looping idle/march clip.")]
     public float idleFps = 6f;

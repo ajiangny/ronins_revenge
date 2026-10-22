@@ -171,14 +171,20 @@ public class Ronin : MonoBehaviour
             }
         }
         UpdateLoopClip();
+    }
+
+    // After the animator has picked this frame's sprite.
+    void LateUpdate()
+    {
         UpdateWisps();
     }
 
-    // His animation frames were drawn without the spirit wisps from his base art, so they're layered on here,
-    // each bobbing out of step with the other, snapped to whole art pixels.
+    // Some of his clips (idle, parry, walk) were drawn without the spirit wisps from his base art, so they're layered
+    // on here, each bobbing out of step with the other, snapped to whole art pixels. Frames that draw their own skip them.
     void UpdateWisps()
     {
         Sprite[] frames = art.wisps ?? Array.Empty<Sprite>();
+        bool drawnInFrame = art.framesWithWisps != null && Array.IndexOf(art.framesWithWisps, sprite.sprite) >= 0;
         while (wisps.Count < frames.Length)
         {
             var wisp = new GameObject("Wisp").AddComponent<SpriteRenderer>();
@@ -190,7 +196,7 @@ public class Ronin : MonoBehaviour
         {
             SpriteRenderer wisp = wisps[i];
             wisp.sprite = i < frames.Length ? frames[i] : null;
-            wisp.enabled = sprite.enabled && wisp.sprite != null;
+            wisp.enabled = sprite.enabled && wisp.sprite != null && !drawnInFrame;
             wisp.color = sprite.color;
             if (wisp.sprite == null) continue;
             float bob = Mathf.Round(Mathf.Sin((Time.time / wispPeriod + i * 0.5f) * Mathf.PI * 2f) * wispBobPixels);

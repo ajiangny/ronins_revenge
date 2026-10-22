@@ -38,6 +38,7 @@ public static class BoonArtSetup
         if (wisps.Length > 0)
         {
             baseRonin.wisps = wisps;
+            baseRonin.framesWithWisps = FramesWithWisps(baseRonin);
             EditorUtility.SetDirty(baseRonin);
         }
 
@@ -118,6 +119,7 @@ public static class BoonArtSetup
         art.runRight = Recolor(source.runRight, suffix, hue, boost);
         art.walkUp = Recolor(source.walkUp, suffix, hue, boost);
         art.wisps = Recolor(source.wisps, suffix, hue, boost);
+        art.framesWithWisps = Recolor(source.framesWithWisps, suffix, hue, boost);
         art.idleFps = source.idleFps;
         art.actionFps = source.actionFps;
         art.runFps = source.runFps;
@@ -308,6 +310,40 @@ public static class BoonArtSetup
             sprites[w] = AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
         }
         return sprites;
+    }
+
+    // The run, hit, throw and early slash frames draw his wisps themselves: enough flame-green in the upper part of
+    // the canvas, above the jade knee guards.
+    const float WispZoneBottom = 0.45f;
+    const int MinDrawnWispPixels = 8;
+
+    static Sprite[] FramesWithWisps(CharacterArt art)
+    {
+        var found = new List<Sprite>();
+        var clips = new[] { art.idle, art.attack, art.hit, art.death, art.parry, art.slash, art.runLeft, art.runRight, art.walkUp };
+        foreach (Sprite[] clip in clips)
+        {
+            if (clip == null) continue;
+            foreach (Sprite frame in clip)
+            {
+                if (frame == null || found.Contains(frame)) continue;
+                var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                texture.LoadImage(File.ReadAllBytes(AssetDatabase.GetAssetPath(frame)));
+                Color32[] pixels = texture.GetPixels32();
+                int width = texture.width, bottom = Mathf.RoundToInt(texture.height * WispZoneBottom);
+                Object.DestroyImmediate(texture);
+
+                int green = 0;
+                for (int i = bottom * width; i < pixels.Length; i++)
+                {
+                    if (pixels[i].a == 0) continue;
+                    Color.RGBToHSV(pixels[i], out float h, out float s, out float _);
+                    if (h >= FlameHueMin && h <= FlameHueMax && s >= 0.15f) green++;
+                }
+                if (green >= MinDrawnWispPixels) found.Add(frame);
+            }
+        }
+        return found.ToArray();
     }
 
     // Every numbered frame <prefix>0, <prefix>1, ... that exists.

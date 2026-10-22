@@ -1014,10 +1014,9 @@ public class Utsusemi : Boss
         IgnoreEachOther(new List<Arrow>(weights));
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
-        const float drop = 0.6f, fadeIn = 0.8f, damp = 0.6f, reel = 0.5f, snapBack = 0.3f;
-        // When each weight was cut loose, if it was.
-        var cutAt = new float[count];
-        for (int i = 0; i < count; i++) cutAt[i] = -1f;
+        const float drop = 0.6f, fadeIn = 0.8f, damp = 0.6f, reel = 0.5f;
+        // Where each weight hung last, so a cut thread snaps where it was.
+        var lastHang = new Vector3[count];
         const float amplitude = 28f * Mathf.Deg2Rad;
         // Each swings this far behind its left-hand neighbour, so a ripple runs along the row.
         const float waveStep = 0.7f;
@@ -1050,19 +1049,14 @@ public class Utsusemi : Boss
                 Vector3 hang = new Vector3(Mathf.Sin(angle), -Mathf.Cos(angle), 0) * length * reach;
                 if (weights[i] == null)
                 {
-                    // Cut loose: its empty thread snaps back up into the portal, which closes after it.
+                    // Cut loose: the thread snaps and whips back up into its portal, which closes after it.
                     if (threads[i] == null) continue;
-                    if (cutAt[i] < 0) cutAt[i] = t;
-                    float left = 1f - (t - cutAt[i]) / snapBack;
-                    if (left > 0) Stretch(threads[i], pivots[i], pivots[i] + Vector3.down * length * left * left, 0.05f);
-                    else
-                    {
-                        RemoveTransient(threads[i]);
-                        StartCoroutine(ClosePortal(portals[i]));
-                        portals[i] = null;
-                    }
+                    StartCoroutine(SnapThread(threads[i], pivots[i], lastHang[i], portals[i]));
+                    threads[i] = null;
+                    portals[i] = null;
                     continue;
                 }
+                lastHang[i] = weights[i].transform.position;
                 Vector3 target = pivots[i] + hang;
                 weights[i].Steer((target - weights[i].transform.position) / Time.fixedDeltaTime);
                 weights[i].Art.transform.localRotation = Quaternion.Euler(0, 0, angle * Mathf.Rad2Deg);
@@ -1089,6 +1083,56 @@ public class Utsusemi : Boss
             StartCoroutine(ClosePortal(portals[i]));
             yield return Wait(0.06f);
         }
+    }
+
+    // A cut thread: it parts at `at` with a spray of gold and a high ting, the loose end drops away tumbling, and the
+    // rest whips back up into its portal, wriggling as it goes, and the portal flares as it swallows it and closes.
+    IEnumerator SnapThread(SpriteRenderer thread, Vector3 pivot, Vector3 at, Transform portal)
+    {
+        Fx.Play(Fx.Impact, at, Gold, 0.7f);
+        ElementFx.Glow(at, Gold, 0.3f, 1.2f, 0.2f);
+        Debris.BurstSprites(at, art.deathParticles, Gold, 5, 0.4f, 3.5f);
+        Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
+        StartCoroutine(DropLooseEnd(at, at - pivot));
+
+        Vector3 reach = at - pivot;
+        Vector3 across = new Vector3(-reach.y, reach.x, 0).normalized;
+        const float seconds = 0.35f;
+        for (float t = 0; t < seconds && thread != null; t += Time.deltaTime)
+        {
+            float k = t / seconds;
+            float left = (1f - k) * (1f - k);
+            // A dying wriggle sideways, like a cut string recoiling.
+            Vector3 tip = pivot + reach * left + across * Mathf.Sin(k * Mathf.PI * 4f) * 0.3f * (1f - k);
+            Stretch(thread, pivot, tip, 0.05f);
+            if (Random.value < 0.5f) Afterimage(thread, new Color(Gold.r, Gold.g, Gold.b, 0.3f));
+            yield return null;
+        }
+        RemoveTransient(thread);
+        ElementFx.Glow(pivot, Gold, 0.4f, 1.6f, 0.25f);
+        Fx.Play(Fx.Impact, pivot, Gold, 0.5f);
+        Tick(0.35f);
+        yield return ClosePortal(portal);
+    }
+
+    // The thread's loose end below the cut: a short gold strand that tumbles down and fades.
+    IEnumerator DropLooseEnd(Vector3 at, Vector3 along)
+    {
+        Vector3 piece = along.normalized * 0.6f;
+        SpriteRenderer end = Bar(at, at - piece, 0.05f, new Color(0.95f, 0.95f, 1f, 0.6f), PortalOrder);
+        Vector3 velocity = new Vector3(Random.Range(-1.5f, 1.5f), 1.5f, 0);
+        float spin = Random.Range(-540f, 540f);
+        const float seconds = 0.5f;
+        for (float t = 0; t < seconds && end != null; t += Time.deltaTime)
+        {
+            velocity += Vector3.down * 18f * Time.deltaTime;
+            end.transform.position += velocity * Time.deltaTime;
+            end.transform.Rotate(0, 0, spin * Time.deltaTime);
+            Color c = end.color;
+            end.color = new Color(c.r, c.g, c.b, 0.6f * (1f - t / seconds));
+            yield return null;
+        }
+        RemoveTransient(end);
     }
 
     // The portals and their threads sit just behind the automaton's own sprite.

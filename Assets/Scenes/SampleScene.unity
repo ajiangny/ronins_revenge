@@ -870,7 +870,15 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 75566cb64cb084a0bb19267116d2460f, type: 3}
     - {fileID: 21300000, guid: d0ac77b7e7eeb412fbc9d9ab017fb5e8, type: 3}
     - {fileID: 21300000, guid: b10f165aa75424c70b8f465d8c23dddb, type: 3}
-    variants: []
+    variants:
+    - damageStates:
+      - {fileID: 21300000, guid: de1cba53d8d854c3f911102580c296f2, type: 3}
+      - {fileID: 21300000, guid: fe8d37c97f47d4f6c9491f24025b394a, type: 3}
+      - {fileID: 21300000, guid: 7b135d19ceba74b8c872742f3697dead, type: 3}
+    - damageStates:
+      - {fileID: 21300000, guid: 68888f666a9444bb281ada404ad9308e, type: 3}
+      - {fileID: 21300000, guid: a051f3cbb434c43cfadbdd526f338cb4, type: 3}
+      - {fileID: 21300000, guid: 9fccdde3ad20c455a85a007194c45d25, type: 3}
     debris:
     - {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
     health: 5
@@ -881,7 +889,15 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 62c904f5cb25a49dfb088e053b1946d5, type: 3}
     - {fileID: 21300000, guid: 054e607206efd4acebaf7465909496e9, type: 3}
     - {fileID: 21300000, guid: 20f3c73148f584d118617d74e875451e, type: 3}
-    variants: []
+    variants:
+    - damageStates:
+      - {fileID: 21300000, guid: b6a619d58556841e286c7c454201ab94, type: 3}
+      - {fileID: 21300000, guid: 05bec4eb51b1042a18c46b0181870da6, type: 3}
+      - {fileID: 21300000, guid: a8d9581727560450e982874c6c409821, type: 3}
+    - damageStates:
+      - {fileID: 21300000, guid: f86688f0f86c248f896c244fb8d5aceb, type: 3}
+      - {fileID: 21300000, guid: a5b3ccddd4f1040dcacf8f9492506d43, type: 3}
+      - {fileID: 21300000, guid: 90a71cc1a5e99476f8ad769db7854553, type: 3}
     debris:
     - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
     health: 8

@@ -149,8 +149,8 @@ public static class NinjaArtSetup
         var so = new SerializedObject(wall);
         FillBlockerTypes(so.FindProperty("types"), new[]
         {
-            new BlockerSpec("Bush", "Blockers/Bush", "Effects/Leaf", 5, 1.2f),
-            new BlockerSpec("Lantern", "Blockers/Lantern", "Effects/StoneChip", 8, 1.8f),
+            new BlockerSpec("Bush", "Blockers/Bush", "Effects/Leaf", 5, 1.2f, 3),
+            new BlockerSpec("Lantern", "Blockers/Lantern", "Effects/StoneChip", 8, 1.8f, 3),
         });
         so.FindProperty("pattern").stringValue = "BLB";
         so.ApplyModifiedPropertiesWithoutUndo();

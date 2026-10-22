@@ -148,7 +148,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   (Glacier Wall uses the multiplier for ice blockers). A `Backdrop.Map` can bring its own `blockers` and
   `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
   Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),
-  so a row isn't all identical. Map sets: Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
+  so a row isn't all identical; the courtyard has three looks of each too (`BushB/C`, `LanternB/C`, wired by `Apply Backdrop And Blockers Only`). Map sets: Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
   komainu (`MKM`), Utsusemi = gear piles and clock pillars (`GCG`), three looks each, art in `Art/Sprites/Blockers/`
   as `<Name>_0..2`, `<Name>B_0..2`, `<Name>C_0..2` (from PixelLab), wired by `Ninja/Apply Maps`.
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's

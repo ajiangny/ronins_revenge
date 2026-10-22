@@ -211,6 +211,16 @@ public class Arrow : MonoBehaviour
         Destroy(gameObject);
     }
 
+    // Wildfire: a fire blast burns the arrow away.
+    public void Burn(Color fire)
+    {
+        if (deflected) return;
+        deflected = true;
+        Fx.Play(Fx.Impact, transform.position, fire, 0.9f);
+        gameObject.SetActive(false);
+        Destroy(gameObject);
+    }
+
     // A parried Iaido meeting the next one breaks it in a burst of crimson.
     void Shatter()
     {

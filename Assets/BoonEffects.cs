@@ -12,12 +12,15 @@ public class BoonEffects
     const float BossShardFreezeSeconds = 0.5f;
     // Frost Blade freezes the boss for a quarter of its freeze time, and no more often than this.
     const float BossFrostCooldown = 4f;
+    // Raijin's Drum strikes this many columns (or the boss this many times) on each beat.
+    const int DrumStrikes = 3;
 
     readonly SamuraiArmy army;
     readonly Ronin ronin;
     readonly RoninLoadout loadout;
     readonly Material boltMaterial;
     float nextBossFrost;
+    int drumHits;
 
     // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
     public Boss Boss { get; set; }
@@ -49,7 +52,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
-                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Encase(value);
+                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Encase(value * loadout.FreezeMultiplier);
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
                     Sfx.Play(Sfx.FrostChill);
                 }
@@ -63,6 +66,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value);
                 break;
         }
+        if (source != KillSource.Effect) BeatDrum();
     }
 
     // The kill effects, triggered by hits on the boss: fire bursts on her (and burns her smoke), frost slows her,
@@ -87,7 +91,7 @@ public class BoonEffects
                     else if (Time.time >= nextBossFrost)
                     {
                         nextBossFrost = Time.time + BossFrostCooldown;
-                        Boss.Freeze(value * 0.25f);
+                        Boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
                         Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
                         Sfx.Play(Sfx.FrostChill);
                     }
@@ -98,6 +102,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
                 break;
         }
+        if (source != KillSource.Effect) BeatDrum();
     }
 
     // A fireball or ice shard sent back by a parry has struck something.
@@ -111,10 +116,10 @@ public class BoonEffects
         }
         if (loadout.Has(BoonId.FrozenRiposte, out _))
         {
-            if (target is Samurai samurai) samurai.Encase(ShardFreezeSeconds);
+            if (target is Samurai samurai) samurai.Encase(ShardFreezeSeconds * loadout.FreezeMultiplier);
             else if (BossFight && ReferenceEquals(target, Boss))
             {
-                Boss.Freeze(BossShardFreezeSeconds);
+                Boss.Freeze(BossShardFreezeSeconds * loadout.FreezeMultiplier);
                 Fx.Play(Fx.IceBurst, point, Color.white, 1f);
             }
         }
@@ -131,7 +136,7 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
-            army.Freeze(value);
+            army.Freeze(value * loadout.FreezeMultiplier);
             // A wave of frost rolls across the army, and every samurai's armour cracks with ice.
             if (Fx.Play(Fx.FrostWave, army.Centre, Color.white, 3.5f) == null) ElementFx.Glow(muzzle, Frost, 1f, 6f, 0.4f);
             foreach (Samurai soldier in army.Soldiers)
@@ -157,7 +162,7 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
-            Boss.Freeze(value);
+            Boss.Freeze(value * loadout.FreezeMultiplier);
             if (Fx.Play(Fx.FrostWave, Boss.Centre, Color.white, 3f) == null) ElementFx.Glow(Boss.Centre, Frost, 1f, 5f, 0.4f);
             CameraShake.Add(0.2f);
             Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
@@ -173,7 +178,10 @@ public class BoonEffects
         float value;
         if (BossFight)
         {
-            if (loadout.Has(BoonId.ThunderRiposte, out _)) Strike(ronin.Bounds.center, Boss.Centre, Boss);
+            if (loadout.Has(BoonId.ThunderRiposte, out value))
+            {
+                for (int i = 0; i < (int)value; i++) Strike(ronin.Bounds.center, Boss.Centre + (Vector3)Random.insideUnitCircle * 0.5f, Boss);
+            }
             return;
         }
         if (loadout.Has(BoonId.ThunderRiposte, out value))
@@ -209,25 +217,43 @@ public class BoonEffects
     // Flame Kunai, Inferno Shuriken and Burning Riposte: everything within the radius burns.
     void Blast(Vector3 position, float radius)
     {
+        radius += loadout.Value(BoonId.Wildfire);
         // The explosion art is about 0.9 units across at full size.
         if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
         else Debris.BurstSprites(position, ronin.art.deathParticles, Fire, 8, 0.9f, 4f + 4f * radius);
         CameraShake.Add(0.12f);
         Sfx.Play(Sfx.FireBlast);
+        // Thermal Shock: ice cracks under the heat.
+        bool thermal = loadout.Has(BoonId.ThermalShock, out float iceDamage);
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
-            target.TakeHit(1, KillSource.Effect);
+            target.TakeHit(thermal && (target.Encased || army.Frozen) ? (int)iceDamage : 1, KillSource.Effect);
+        }
+        BurnArrows(position, radius);
+    }
+
+    // Wildfire: breakable enemy arrows inside a blast burn away. Spears, and the boss slashes only a parry
+    // answers, keep flying.
+    void BurnArrows(Vector3 position, float radius)
+    {
+        if (loadout.Find(BoonId.Wildfire) == null) return;
+        foreach (Arrow arrow in Object.FindObjectsByType<Arrow>())
+        {
+            if (arrow.Unbreakable || arrow.Reflectable) continue;
+            if ((arrow.transform.position - position).sqrMagnitude <= radius * radius) arrow.Burn(Fire);
         }
     }
 
     // Fire on the boss: the burst, plus one point of damage and a hole burnt in any smoke around her.
     void BossBlast(Vector3 position, float radius)
     {
+        radius += loadout.Value(BoonId.Wildfire);
         if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
         CameraShake.Add(0.12f);
         Sfx.Play(Sfx.FireBlast);
         Boss.Burn(position, radius);
-        Boss.TakeHit(1, KillSource.Effect);
+        BurnArrows(position, radius);
+        Boss.TakeHit(Boss.Frozen && loadout.Find(BoonId.ThermalShock) != null ? 2 : 1, KillSource.Effect);
     }
 
     // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.
@@ -236,13 +262,60 @@ public class BoonEffects
         Strike(from, target.transform.position, target);
     }
 
-    void Strike(Vector3 from, Vector3 to, IHittable target)
+    // arcs is false for Superconductor's own arcs, so they never arc again.
+    void Strike(Vector3 from, Vector3 to, IHittable target, bool arcs = true)
     {
         ElementFx.Bolt(from, to, Storm, boltMaterial);
         Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
         CameraShake.Add(0.1f);
         Sfx.Play(Sfx.LightningStrike);
+
+        bool onBoss = BossFight && ReferenceEquals(target, Boss);
+        if (onBoss)
+        {
+            // Plasma Arc burns as it strikes; Superconductor doubles through a frozen boss.
+            int damage = loadout.Find(BoonId.PlasmaArc) != null ? 2 : 1;
+            if (Boss.Frozen && loadout.Find(BoonId.Superconductor) != null) damage *= 2;
+            target.TakeHit(damage, KillSource.Effect);
+            return;
+        }
+
+        bool iced = target is Samurai samurai && samurai.Encased;
         target.TakeHit(1, KillSource.Effect);
+        if (loadout.Has(BoonId.PlasmaArc, out float plasma)) Blast(to, plasma);
+        if (arcs && iced && loadout.Has(BoonId.Superconductor, out float arcCount))
+        {
+            int arced = 0;
+            foreach (Samurai next in army.SamuraiWithin(to, ChainRange))
+            {
+                if (arced >= (int)arcCount) break;
+                if (ReferenceEquals(next, target) || next.IsDead || !next.Encased) continue;
+                Strike(to, next.transform.position, next, false);
+                arced++;
+            }
+        }
+    }
+
+    // Raijin's Drum: every few of the ronin's own hits, lightning falls on the front of the nearest columns.
+    void BeatDrum()
+    {
+        if (!loadout.Has(BoonId.RaijinsDrum, out float hitsPerBeat)) return;
+        if (++drumHits < (int)hitsPerBeat) return;
+        drumHits = 0;
+        if (BossFight)
+        {
+            for (int i = 0; i < DrumStrikes; i++) Strike(Boss.Centre + new Vector3((i - 1) * 1.5f, 6f, 0), Boss.Centre, Boss);
+            return;
+        }
+        if (army.Remaining == 0) return;
+        int own = army.ClosestColumnTo(ronin.transform.position.x);
+        var columns = NearestColumns(own, DrumStrikes - 1);
+        columns.Insert(0, own);
+        foreach (int column in columns)
+        {
+            Samurai front = army.FrontSamuraiInColumn(column);
+            if (front != null && !front.IsDead) Strike(front.transform.position + Vector3.up * 6f, front);
+        }
     }
 
     // The other occupied columns closest to `column`, nearest first.

@@ -165,18 +165,27 @@ public class BoonChoiceUI : MonoBehaviour
     void Fill(Card card, BoonOffer offer)
     {
         BoonDefinition boon = offer.Boon;
-        Color rarityColor = Boons.RarityColor(offer.Rarity);
+        Color rarityColor = Boons.KindColor(boon.Kind, offer.Rarity);
         Color element = Boons.Info(boon.Element).Color;
+        // A Duo's wash takes its partner's colour, so the card shows both elements.
+        Color wash = boon.Partner is Element partner ? Boons.Info(partner).Color : element;
         SetIcon(card.icon, card.letter, boon, element);
         card.ring.color = new Color(element.r, element.g, element.b, 0.85f);
-        card.selectInk.color = new Color(element.r, element.g, element.b, 0.22f);
+        card.selectInk.color = new Color(wash.r, wash.g, wash.b, 0.22f);
         card.marker.GetComponent<Image>().color = element;
         foreach (Image mark in card.rule.GetComponentsInChildren<Image>()) mark.color = Color.Lerp(element, Color.white, 0.35f);
         card.name.text = boon.Name;
         card.name.color = rarityColor;
         // The slot rides on the rarity line so the description can use the card's full width.
-        string rarity = offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString();
-        card.rarity.text = $"{rarity}  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}><size=26>·  {boon.Slot.ToString().ToUpperInvariant()}</size></color>";
+        string rarity = boon.Kind switch
+        {
+            BoonKind.Duo => $"Duo  ·  {Boons.Info(boon.Element).Name} + {Boons.Info(boon.Partner.Value).Name}",
+            BoonKind.Legendary => "Legendary",
+            BoonKind.Offering => "Offering",
+            _ => offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString(),
+        };
+        string slot = boon.Kind == BoonKind.Offering ? "" : $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}><size=26>·  {boon.Slot.ToString().ToUpperInvariant()}</size></color>";
+        card.rarity.text = rarity + slot;
         card.rarity.color = rarityColor;
         card.description.text = boon.Description;
 

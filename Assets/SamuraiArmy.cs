@@ -95,7 +95,9 @@ public class SamuraiArmy : MonoBehaviour
             return sum / soldiers.Count;
         }
     }
-    bool Frozen => Time.time < frozenUntil;
+    public bool Frozen => Time.time < frozenUntil;
+    // How much of the speed-up as the army thins it actually gets (Still Water halves it).
+    public float SpeedUpScale { get; set; } = 1f;
 
     void Awake()
     {
@@ -215,7 +217,7 @@ public class SamuraiArmy : MonoBehaviour
     float CurrentSpeed()
     {
         float killedFraction = startingCount > 1 ? (float)(startingCount - soldiers.Count) / (startingCount - 1) : 1f;
-        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction);
+        return level.baseSpeed * Mathf.Lerp(1f, level.maxSpeedMultiplier, killedFraction * SpeedUpScale);
     }
 
     void FixedUpdate()

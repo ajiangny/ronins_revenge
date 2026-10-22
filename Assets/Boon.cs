@@ -12,6 +12,10 @@ public enum BoonSlot { Attack, Special, Parry, Passive }
 
 public enum Rarity { Common, Rare, Epic }
 
+// Duo and Legendary boons are capstones, offered once their prerequisite boons are held and never upgraded.
+// An Offering stands in when a soul's element has nothing left to give.
+public enum BoonKind { Normal, Duo, Legendary, Offering }
+
 // Indexes the icon array, so keep the order in step with BoonChoiceUI.boonIcons.
 public enum BoonId
 {
@@ -21,6 +25,9 @@ public enum BoonId
     BlazingHands, InfernoFan,
     TidalRenewal, GlacierWall,
     StormStep, StaticCharge,
+    ThermalShock, PlasmaArc, Superconductor,
+    Wildfire, StillWater, RaijinsDrum,
+    SpiritOffering,
 }
 
 public sealed class BoonDefinition
@@ -37,6 +44,14 @@ public sealed class BoonDefinition
     public Func<float, string> Format;
     // Applied once when taken, instead of being kept in the loadout (Tidal Renewal).
     public bool Instant;
+    public BoonKind Kind;
+    // A Duo's second element: a soul of either element can offer it.
+    public Element? Partner;
+    // What the ronin must hold before a capstone is offered.
+    public Func<RoninLoadout, bool> Requires;
+
+    public bool IsCapstone => Kind == BoonKind.Duo || Kind == BoonKind.Legendary;
+    public bool Offers(Element element) => Element == element || Partner == element;
 
     public float ValueAt(Rarity rarity) => Values[(int)rarity];
 }
@@ -96,6 +111,32 @@ public static class Boons
         _ => new Color(0.95f, 0.95f, 0.95f),
     };
 
+    // Hades' colours: green for a Duo, orange for a Legendary.
+    public static Color KindColor(BoonKind kind, Rarity rarity) => kind switch
+    {
+        BoonKind.Duo => new Color(0.55f, 0.95f, 0.45f),
+        BoonKind.Legendary => new Color(1f, 0.6f, 0.2f),
+        BoonKind.Offering => new Color(1f, 0.85f, 0.5f),
+        _ => RarityColor(rarity),
+    };
+
+    // The core slot boons each capstone builds on: fire blasts, ice, and lightning strikes.
+    static readonly BoonId[] BlastBoons = { BoonId.FlameBlade, BoonId.InfernoShuriken, BoonId.BurningRiposte };
+    static readonly BoonId[] IceBoons = { BoonId.FrostBlade, BoonId.GlacialShuriken, BoonId.FrozenRiposte };
+    static readonly BoonId[] StrikeBoons = { BoonId.StormBlade, BoonId.ThunderShuriken, BoonId.ThunderRiposte };
+
+    static bool HoldsAny(RoninLoadout loadout, BoonId[] ids) => Array.Exists(ids, id => loadout.Find(id) != null);
+
+    static bool TwoSlotsOf(RoninLoadout loadout, Element element)
+    {
+        int count = 0;
+        foreach (BoonSlot slot in new[] { BoonSlot.Attack, BoonSlot.Special, BoonSlot.Parry })
+        {
+            if (loadout.SlotElement(slot) == element) count++;
+        }
+        return count >= 2;
+    }
+
     static string Plus(float v) => $"+{v:0.#}";
     static string Percent(float v) => $"+{v * 100:0}%";
     static string MinusPercent(float v) => $"-{v * 100:0}%";
@@ -132,7 +173,7 @@ public static class Boons
             Description = "Arrows you <b>Parry</b> burst into homing ice shards that freeze what they hit.",
             StatLabel = "Ice shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
-            Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
+            Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5). From Rare, every lost life heals too.",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
         new BoonDefinition { Id = BoonId.GlacierWall, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Wall",
             Description = "Rebuild every <b>Blocker</b> now, sheathed in ice, and for every stage after.",
@@ -141,7 +182,7 @@ public static class Boons
         // Lightning: jolt. Chains and speed.
         new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",
             Description = "A <b>Slash</b> kill may arc lightning to the nearest samurai.",
-            StatLabel = "Chain chance:", Values = new[] { 0.25f, 0.35f, 0.5f }, Format = Percent },
+            StatLabel = "Chain chance:", Values = new[] { 0.35f, 0.5f, 0.7f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderShuriken, Element = Element.Lightning, Slot = BoonSlot.Special, Name = "Thunder Shuriken",
             Description = "Your <b>Shuriken</b> calls lightning on the front samurai of nearby columns.",
             StatLabel = "Extra columns:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
@@ -154,17 +195,79 @@ public static class Boons
         new BoonDefinition { Id = BoonId.StaticCharge, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Static Charge",
             Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster.",
             StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },
+
+        // Duos: one core boon from each of two elements.
+        new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Thermal Shock",
+            Description = "Your fire <b>Blasts</b> deal double damage to samurai held in ice, or to the whole army while it's frozen.",
+            StatLabel = "Blast damage on ice:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => HoldsAny(l, BlastBoons) && HoldsAny(l, IceBoons) },
+        new BoonDefinition { Id = BoonId.PlasmaArc, Element = Element.Fire, Partner = Element.Lightning, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Plasma Arc",
+            Description = "Every <b>Lightning</b> strike bursts into a fire blast around its target.",
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 1.8f, 1.8f }, Format = Plus,
+            Requires = l => HoldsAny(l, BlastBoons) && HoldsAny(l, StrikeBoons) },
+        new BoonDefinition { Id = BoonId.Superconductor, Element = Element.Water, Partner = Element.Lightning, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Superconductor",
+            Description = "<b>Lightning</b> that strikes a samurai held in ice arcs on to others held in ice. Strikes on a frozen boss deal double.",
+            StatLabel = "Extra arcs:", Values = new[] { 3f, 3f, 3f }, Format = Plus,
+            Requires = l => HoldsAny(l, IceBoons) && HoldsAny(l, StrikeBoons) },
+
+        // Legendaries: two core slots of one element.
+        new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
+            Name = "Wildfire",
+            Description = "Your fire <b>Blasts</b> grow wider and burn away the enemy arrows inside them.",
+            StatLabel = "Blast radius:", Values = new[] { 0.6f, 0.6f, 0.6f }, Format = Plus,
+            Requires = l => TwoSlotsOf(l, Element.Fire) },
+        new BoonDefinition { Id = BoonId.StillWater, Element = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
+            Name = "Still Water",
+            Description = "The army quickens only half as much as its ranks thin, and your <b>Freezes</b> last longer.",
+            StatLabel = "Freeze time:", Values = new[] { 0.5f, 0.5f, 0.5f }, Format = Percent,
+            Requires = l => TwoSlotsOf(l, Element.Water) },
+        new BoonDefinition { Id = BoonId.RaijinsDrum, Element = Element.Lightning, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
+            Name = "Raijin's Drum",
+            Description = "Every few hits beat the thunder drum: <b>Lightning</b> strikes the front samurai of the 3 columns nearest you.",
+            StatLabel = "Hits per beat:", Values = new[] { 8f, 8f, 8f }, Format = v => $"{v:0}",
+            Requires = l => TwoSlotsOf(l, Element.Lightning) },
     };
+
+    // Stands in when a soul's element has nothing left to offer, so a caught soul is never wasted.
+    static BoonDefinition Offering(Element element) => new BoonDefinition
+    {
+        Id = BoonId.SpiritOffering, Element = element, Slot = BoonSlot.Passive, Kind = BoonKind.Offering, Instant = true,
+        Name = "Spirit Offering",
+        Description = "This spirit has no more boons to give. It mends you instead: heal a life, or take points at full health.",
+        StatLabel = "Heal:", Values = new[] { 1f, 1f, 1f }, Format = v => $"+{v:0} life",
+    };
+
+    // Capstones the ronin could take right now, of any element.
+    public static List<BoonDefinition> EligibleCapstones(RoninLoadout loadout)
+    {
+        var eligible = new List<BoonDefinition>();
+        foreach (BoonDefinition boon in All)
+        {
+            if (boon.IsCapstone && loadout.Find(boon.Id) == null && boon.Requires(loadout)) eligible.Add(boon);
+        }
+        return eligible;
+    }
 
     public static BoonDefinition Get(BoonId id) => All[Array.FindIndex(All, b => b.Id == id)];
 
     // Up to count distinct boons of one element. Like Hades, the first boon of a run is always a core slot boon.
-    public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int maxLives)
+    // ensureCapstone puts an eligible Duo or Legendary in the offer (the stage boon), and no card rolls below minRarity.
+    public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int maxLives,
+        bool ensureCapstone = false, Rarity minRarity = Rarity.Common)
     {
         var pool = new List<BoonDefinition>();
+        var capstones = new List<BoonDefinition>();
         foreach (BoonDefinition boon in All)
         {
-            if (boon.Element != element) continue;
+            if (!boon.Offers(element)) continue;
+            if (boon.IsCapstone)
+            {
+                if (loadout.Find(boon.Id) == null && boon.Requires(loadout)) capstones.Add(boon);
+                continue;
+            }
             if (loadout.BoonCount == 0 && boon.Slot == BoonSlot.Passive) continue;
             if (loadout.Find(boon.Id) is { Rarity: Rarity.Epic }) continue;
             if (boon.Id == BoonId.TidalRenewal && maxLives >= MaxLives) continue;
@@ -172,16 +275,31 @@ public static class Boons
         }
 
         var offers = new List<BoonOffer>();
+        if (ensureCapstone && capstones.Count > 0)
+        {
+            BoonDefinition capstone = capstones[UnityEngine.Random.Range(0, capstones.Count)];
+            capstones.Remove(capstone);
+            offers.Add(new BoonOffer(capstone, Rarity.Common, false, null));
+        }
+        pool.AddRange(capstones);
+
         while (offers.Count < count && pool.Count > 0)
         {
             BoonDefinition boon = pool[UnityEngine.Random.Range(0, pool.Count)];
             pool.Remove(boon);
 
+            if (boon.IsCapstone)
+            {
+                offers.Add(new BoonOffer(boon, Rarity.Common, false, null));
+                continue;
+            }
             EquippedBoon held = loadout.Find(boon.Id);
             EquippedBoon replaces = boon.Slot == BoonSlot.Passive || held != null ? null : loadout.InSlot(boon.Slot);
-            Rarity rarity = held != null ? held.Rarity + 1 : RollRarity();
+            Rarity rolled = RollRarity();
+            Rarity rarity = held != null ? held.Rarity + 1 : rolled > minRarity ? rolled : minRarity;
             offers.Add(new BoonOffer(boon, rarity, held != null, replaces));
         }
+        if (offers.Count == 0) offers.Add(new BoonOffer(Offering(element), Rarity.Common, false, null));
         return offers;
     }
 

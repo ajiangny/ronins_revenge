@@ -50,6 +50,8 @@ public sealed class RoninLoadout
     // Takes the offered boon: upgrades it if held, otherwise fills (or replaces) its slot or joins the passives.
     public void Take(BoonOffer offer)
     {
+        // An Offering is a heal, not a boon: it doesn't count toward the ronin's elements.
+        if (offer.Boon.Kind == BoonKind.Offering) return;
         BoonCount++;
         elementCounts[(int)offer.Boon.Element]++;
         LastElement = offer.Boon.Element;
@@ -86,6 +88,8 @@ public sealed class RoninLoadout
         }
     }
 
+    public int ElementCount(Element element) => elementCounts[(int)element];
+
     public Element? SlotElement(BoonSlot slot) => InSlot(slot)?.Boon.Element;
 
     public float AttackCooldownMultiplier => 1f - Value(BoonId.BlazingHands);
@@ -93,5 +97,8 @@ public sealed class RoninLoadout
     public float AbilityCooldownMultiplier => 1f - Value(BoonId.StaticCharge);
     public int ExtraProjectiles => (int)Value(BoonId.InfernoFan);
     public float BlockerHealthMultiplier => 1f + Value(BoonId.GlacierWall);
+    // Still Water: freezes last longer and the army's march quickens half as much as it thins.
+    public float FreezeMultiplier => 1f + Value(BoonId.StillWater);
+    public float MarchSpeedUpScale => Find(BoonId.StillWater) != null ? 0.5f : 1f;
 
 }

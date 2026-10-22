@@ -350,6 +350,57 @@ public static class NinjaArtSetup
             types.arraySize = 0;
             map.FindPropertyRelative("blockerPattern").stringValue = "";
         }
+
+        SetAtmosphere(map.FindPropertyRelative("atmosphere"),
+            groundSprite != null && Moods.TryGetValue(groundSprite.name, out var mood) ? mood : new Atmosphere.Settings());
+    }
+
+    // Each map's mood, by its ground. Moonlight always pools from the top-left, where the boss moon rises.
+    static readonly Dictionary<string, Atmosphere.Settings> Moods = new()
+    {
+        // Big slow cloud shadows sliding down the road, bright moonlight and fireflies in the bamboo.
+        ["BambooRoad_Stage1"] = new Atmosphere.Settings
+        {
+            clouds = 4, cloudShadow = new Color(0.01f, 0.02f, 0.06f, 0.45f), wind = new Vector2(0.7f, -0.45f),
+            moonlight = new Color(0.78f, 0.9f, 1f, 0.12f), shade = 0.4f, vignette = 0.35f,
+            motes = 16, moteColor = new Color(0.8f, 1f, 0.45f, 0.85f),
+        },
+        // A windswept mountain pass: quicker clouds, low mist rolling over the stones, a thin moon.
+        ["Pass_Stage2"] = new Atmosphere.Settings
+        {
+            clouds = 3, cloudShadow = new Color(0.02f, 0.02f, 0.05f, 0.28f), wind = new Vector2(1.4f, -0.2f),
+            moonlight = new Color(0.75f, 0.82f, 1f, 0.08f), shade = 0.35f, vignette = 0.4f,
+            mist = 5, mistColor = new Color(0.72f, 0.78f, 0.88f, 0.1f),
+        },
+        // The shrine under the blood moon: drifting embers and warm, heavy dark at the edges.
+        ["Arena_Benibana"] = new Atmosphere.Settings
+        {
+            clouds = 2, cloudShadow = new Color(0.06f, 0.0f, 0.02f, 0.3f), wind = new Vector2(0.5f, -0.3f),
+            moonlight = new Color(1f, 0.75f, 0.75f, 0.08f), shade = 0.4f, vignette = 0.45f,
+            motes = 14, moteColor = new Color(1f, 0.5f, 0.3f, 0.85f),
+        },
+        // The clockwork temple: still air, dust hanging in a cold shaft of moonlight, a creeping floor mist.
+        ["Arena_Utsusemi"] = new Atmosphere.Settings
+        {
+            clouds = 0, wind = new Vector2(0.25f, 0f),
+            moonlight = new Color(0.7f, 0.8f, 1f, 0.14f), shade = 0.45f, vignette = 0.45f,
+            mist = 2, mistColor = new Color(0.65f, 0.75f, 0.95f, 0.08f),
+            motes = 22, moteColor = new Color(0.8f, 0.85f, 1f, 0.55f),
+        },
+    };
+
+    static void SetAtmosphere(SerializedProperty property, Atmosphere.Settings mood)
+    {
+        property.FindPropertyRelative("clouds").intValue = mood.clouds;
+        property.FindPropertyRelative("cloudShadow").colorValue = mood.cloudShadow;
+        property.FindPropertyRelative("wind").vector2Value = mood.wind;
+        property.FindPropertyRelative("moonlight").colorValue = mood.moonlight;
+        property.FindPropertyRelative("vignette").floatValue = mood.vignette;
+        property.FindPropertyRelative("shade").floatValue = mood.shade;
+        property.FindPropertyRelative("mist").intValue = mood.mist;
+        property.FindPropertyRelative("mistColor").colorValue = mood.mistColor;
+        property.FindPropertyRelative("motes").intValue = mood.motes;
+        property.FindPropertyRelative("moteColor").colorValue = mood.moteColor;
     }
 
     static CharacterArt SamuraiArt(string name, Sprite[] particles)

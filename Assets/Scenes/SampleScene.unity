@@ -694,6 +694,17 @@ MonoBehaviour:
         height: 1.8
         hitbox: {x: 0.85, y: 0.85}
       blockerPattern: SBS
+      atmosphere:
+        clouds: 4
+        cloudShadow: {r: 0.01, g: 0.02, b: 0.06, a: 0.45}
+        wind: {x: 0.7, y: -0.45}
+        moonlight: {r: 0.78, g: 0.9, b: 1, a: 0.12}
+        shade: 0.4
+        vignette: 0.35
+        mist: 0
+        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
+        motes: 16
+        moteColor: {r: 0.8, g: 1, b: 0.45, a: 0.85}
     bossMap:
       ground: {fileID: 21300000, guid: 8c1ef5039a9f8499d9c102a30497bb6b, type: 3}
       groundTint: {r: 0.7, g: 0.66, b: 0.7, a: 1}
@@ -739,6 +750,17 @@ MonoBehaviour:
         height: 1.7
         hitbox: {x: 0.85, y: 0.85}
       blockerPattern: MKM
+      atmosphere:
+        clouds: 2
+        cloudShadow: {r: 0.06, g: 0, b: 0.02, a: 0.3}
+        wind: {x: 0.5, y: -0.3}
+        moonlight: {r: 1, g: 0.75, b: 0.75, a: 0.08}
+        shade: 0.4
+        vignette: 0.45
+        mist: 0
+        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
+        motes: 14
+        moteColor: {r: 1, g: 0.5, b: 0.3, a: 0.85}
   - name: The Pilgrim's Pass
     rounds:
     - columns: 10
@@ -823,6 +845,17 @@ MonoBehaviour:
         height: 1.7
         hitbox: {x: 0.85, y: 0.85}
       blockerPattern: RJR
+      atmosphere:
+        clouds: 3
+        cloudShadow: {r: 0.02, g: 0.02, b: 0.05, a: 0.28}
+        wind: {x: 1.4, y: -0.2}
+        moonlight: {r: 0.75, g: 0.82, b: 1, a: 0.08}
+        shade: 0.35
+        vignette: 0.4
+        mist: 5
+        mistColor: {r: 0.72, g: 0.78, b: 0.88, a: 0.1}
+        motes: 0
+        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
     bossMap:
       ground: {fileID: 21300000, guid: 7239893d78a2f4e9dab992992f62c22e, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
@@ -868,6 +901,17 @@ MonoBehaviour:
         height: 1.8
         hitbox: {x: 0.85, y: 0.85}
       blockerPattern: GCG
+      atmosphere:
+        clouds: 0
+        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
+        wind: {x: 0.25, y: 0}
+        moonlight: {r: 0.7, g: 0.8, b: 1, a: 0.14}
+        shade: 0.45
+        vignette: 0.45
+        mist: 2
+        mistColor: {r: 0.65, g: 0.75, b: 0.95, a: 0.08}
+        motes: 22
+        moteColor: {r: 0.8, g: 0.85, b: 1, a: 0.55}
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0
@@ -953,6 +997,7 @@ MonoBehaviour:
     hitbox: {x: 0.85, y: 0.85}
   pattern: BLB
   siteCount: 4
+  sideInset: 2.5
   gap: 0.05
 --- !u!1 &900000007
 GameObject:
@@ -1006,6 +1051,17 @@ MonoBehaviour:
   fallSpeedRange: {x: 0.6, y: 1.6}
   swayAmount: 0.6
   petalTint: {r: 1, g: 1, b: 1, a: 0.8}
+  courtyardAtmosphere:
+    clouds: 3
+    cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
+    wind: {x: 0.8, y: -0.3}
+    moonlight: {r: 0.8, g: 0.88, b: 1, a: 0.1}
+    shade: 0.35
+    vignette: 0.3
+    mist: 0
+    mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
+    motes: 0
+    moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
 --- !u!114 &900000010 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: -8270462056835086372, guid: 34725686c1348b247a77b3f974763d41, type: 3}

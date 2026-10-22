@@ -38,7 +38,8 @@ public static class Fx
     public const string UtsuBeamFlare = "Utsu_BeamFlare";
     public const string UtsuBeamHit = "Utsu_BeamHit";
     public const string UtsuBurn = "Utsu_Burn";
-    public const string UtsuStab = "Utsu_Stab";
+    public const string UtsuChop = "Utsu_Chop";
+    public const string UtsuHourSlash = "Utsu_HourSlash";
     public const string UtsuClockMark = "Utsu_ClockMark";
 
     // Effects drawn above characters; auras pass a lower order to sit behind them.

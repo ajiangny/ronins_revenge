@@ -95,14 +95,16 @@ match `BoonChoiceUI.boonIcons`.
   (`Stride`). Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
   and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
-  drifts through cover, `Arrow.PassesCover`), Escapement (a code-drawn jointed `SwordArm` unfolds from the shoulder, found with `OnSprite`
-  on the thrust frame that holds the arm tucked away, ticks down over the ronin and thrusts a reflectable blade; parried,
-  it jams and staggers, `OnStaggered`), Plumb Lines (weights swing through the ronin's lane on threads, flown
+  drifts through cover, `Arrow.PassesCover`), Hour Strikes (`HourMark` numerals drawn from bars; it `Dash`es down from its row onto
+  each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
+  unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
+  staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
+  `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights swing through the ronin's lane on threads, flown
   with `Arrow.Steer` per physics step). Phase 2 at half health opens its core and is the laser phase (`NextMove` puts a
   laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams
   closing on a ground mark). Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
   and hit the ronin where they cross his height (`HitIfCrossed`), leaving `GroundFire` patches burning along the ground; the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
-  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam` and `MidnightChime`.
+  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop` and `HourSlash`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`

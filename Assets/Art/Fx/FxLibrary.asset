@@ -421,17 +421,30 @@ MonoBehaviour:
     - {fileID: 21300000, guid: fa9f5d92424e940ff9a335765343df59, type: 3}
     fps: 12
     loop: 1
-  - id: Utsu_Stab
+  - id: Utsu_Chop
     frames:
-    - {fileID: 21300000, guid: 59f99d04977da47148f139e5ddf1c79b, type: 3}
-    - {fileID: 21300000, guid: 09fc240f5525b4bfa94f404efd18c832, type: 3}
-    - {fileID: 21300000, guid: f4cee666a1e2f445eb8f84d28b1daad1, type: 3}
-    - {fileID: 21300000, guid: 64b22ab60c790409396a3393ba36520e, type: 3}
-    - {fileID: 21300000, guid: 6416cfdbdb26c42979ff66a5c8a6f0d9, type: 3}
-    - {fileID: 21300000, guid: dfba6366b7fb247619e8df9396e1a1c5, type: 3}
-    - {fileID: 21300000, guid: 61726b83e4a8943e4852cb512258120b, type: 3}
+    - {fileID: 21300000, guid: 10611e6aa049d4ddc9aecf1afee5fa30, type: 3}
+    - {fileID: 21300000, guid: 39ad0f2b25afd4eb7900b27d7d1be5a7, type: 3}
+    - {fileID: 21300000, guid: c1ae1a3cf09804cde9c0a23fa3b9e45c, type: 3}
+    - {fileID: 21300000, guid: 807149638e8c24025a2277299c913cf8, type: 3}
+    - {fileID: 21300000, guid: 1fc69a75d116e42368874a17312c46d7, type: 3}
+    - {fileID: 21300000, guid: 92896d27803904b158e762ca7d706411, type: 3}
+    - {fileID: 21300000, guid: a8b79b2b904764799b4cc729e214e2f0, type: 3}
+    - {fileID: 21300000, guid: 67e087baecb024a8e912140d4dbe4a3c, type: 3}
+    - {fileID: 21300000, guid: 79932abb1bc184442999d1cf1e0214a5, type: 3}
+    - {fileID: 21300000, guid: 1246226d14fb34116b4897bb9a853b59, type: 3}
     fps: 16
     loop: 0
+  - id: Utsu_HourSlash
+    frames:
+    - {fileID: 21300000, guid: 988ec715841ff4087b5cd18cae78cb3a, type: 3}
+    - {fileID: 21300000, guid: e59aac14da1504b3e9a987eada18a93c, type: 3}
+    - {fileID: 21300000, guid: 82faefba57dfa47b988fa81004f45725, type: 3}
+    - {fileID: 21300000, guid: 3cc4a6a90922e448c853126dc529e55c, type: 3}
+    - {fileID: 21300000, guid: 03e053fb9182449a5abff8c46ff7531f, type: 3}
+    - {fileID: 21300000, guid: e92ebc1beee0647e2ac4eb899734112e, type: 3}
+    fps: 14
+    loop: 1
   - id: Utsu_ClockMark
     frames:
     - {fileID: 21300000, guid: 48f6e732f920f4876a0ab1b7b7d8042a, type: 3}

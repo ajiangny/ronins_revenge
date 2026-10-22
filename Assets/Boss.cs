@@ -6,7 +6,7 @@ using UnityEngine;
 // The things a boss says out loud; GameManager plays the matching voice clip and subtitle. Intro, Phase and
 // Defeat are full lines; the rest are short barks that never cut one off.
 public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom,
-    KasaWheel, Lattice, Escapement, PlumbLines, HeartLantern, Midnight }
+    KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,

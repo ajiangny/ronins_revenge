@@ -53,9 +53,11 @@ public static class FxSetup
         (Fx.UtsuBeamFlare, 14, true, Centre),
         // Anchored on the hot spot where the beam lands, so the sparks and smoke rise above it.
         (Fx.UtsuBeamHit, 16, true, new Vector2(0.5f, 1f - 32f / 40f)),
-        // The ground fire stands on its base line; the stab streak hangs from where the blade leaves the hand.
+        // The ground fire stands on its base line.
         (Fx.UtsuBurn, 12, true, new Vector2(0.5f, 1f - 30f / 35f)),
-        (Fx.UtsuStab, 16, false, new Vector2(9f / 16f, 1f - 4f / 59f)),
+        (Fx.UtsuChop, 16, false, Centre),
+        // The hour slash flies from the belly of its crescent, its leading edge, where the hitbox sits.
+        (Fx.UtsuHourSlash, 14, true, new Vector2(0.5f, 1f - 48f / 64f)),
         (Fx.UtsuClockMark, 10, true, Centre),
     };
 

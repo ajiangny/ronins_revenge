@@ -73,10 +73,10 @@ public static class BossArtSetup
         {
             so.FindProperty("utsusemiArt").objectReferenceValue = utsusemi;
             so.FindProperty("utsusemiScale").floatValue = UtsusemiScale;
-            Sprite[] bare = TryFrames("Utsusemi", "BareIdle");
-            SerializedProperty bareIdle = so.FindProperty("utsusemiBareIdle");
-            bareIdle.arraySize = bare?.Length ?? 0;
-            for (int i = 0; i < bareIdle.arraySize; i++) bareIdle.GetArrayElementAtIndex(i).objectReferenceValue = bare[i];
+            SetFrames(so.FindProperty("utsusemiBareIdle"), TryFrames("Utsusemi", "BareIdle"));
+            SetFrames(so.FindProperty("utsusemiDash"), TryFrames("Utsusemi", "Dash"));
+            SetFrames(so.FindProperty("utsusemiChop"), TryFrames("Utsusemi", "Chop"));
+            SetFrames(so.FindProperty("utsusemiHourSlash"), TryFrames("Utsusemi", "HourSlash"));
         }
         so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
         so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");
@@ -157,6 +157,12 @@ public static class BossArtSetup
     }
 
     // The clip's frames, or null when it hasn't been made yet.
+    static void SetFrames(SerializedProperty list, Sprite[] frames)
+    {
+        list.arraySize = frames?.Length ?? 0;
+        for (int i = 0; i < list.arraySize; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = frames[i];
+    }
+
     static Sprite[] TryFrames(string character, string clip)
     {
         var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}{character}/{character}_{clip}_0.png");

@@ -81,6 +81,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] float utsusemiScale = 3.6f;
     [Tooltip("Utsusemi's idle with its hat off, played while the hat is thrown.")]
     [SerializeField] Sprite[] utsusemiBareIdle;
+    [Tooltip("Utsusemi's Hour Strikes frames: the dash between its row and the marks, the ground chop, and the hour slash.")]
+    [SerializeField] Sprite[] utsusemiDash;
+    [SerializeField] Sprite[] utsusemiChop;
+    [SerializeField] Sprite[] utsusemiHourSlash;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [SerializeField] AudioClip utsusemiIntroLine;
@@ -668,7 +672,11 @@ public class GameManager : MonoBehaviour
                 bool noArt = utsusemiArt == null;
                 Utsusemi automaton = Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Utsusemi.StartingHealth,
                     position, noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
-                if (!noArt) automaton.SetBareIdle(utsusemiBareIdle);
+                if (!noArt)
+                {
+                    automaton.SetBareIdle(utsusemiBareIdle);
+                    automaton.SetSwordFrames(utsusemiDash, utsusemiChop, utsusemiHourSlash);
+                }
                 return automaton;
             default:
                 bool standIn = benibanaArt == null;
@@ -696,7 +704,7 @@ public class GameManager : MonoBehaviour
             BossLine.Iaido => iaido,
             BossLine.RosaryBloom => rosaryBloom,
             BossLine.KasaWheel => kasaWheel,
-            BossLine.Escapement => escapement,
+            BossLine.HourStrikes => escapement,
             _ => null,
         };
     }

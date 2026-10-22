@@ -41,6 +41,8 @@ public static class Sfx
     public const string LanternCharge = "LanternCharge";
     public const string LanternBeam = "LanternBeam";
     public const string MidnightChime = "MidnightChime";
+    public const string BladeChop = "BladeChop";
+    public const string HourSlash = "HourSlash";
 
     const int VoiceCount = 16;
 

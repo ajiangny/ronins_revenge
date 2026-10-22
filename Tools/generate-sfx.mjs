@@ -84,6 +84,18 @@ const SOUNDS = {
       "A single deep clock tower bell striking midnight: one heavy resonant bong with a long metallic ringing " +
       "decay and a faint gear clunk before it. Dramatic, no music.",
   },
+  BladeChop: {
+    seconds: 0.6,
+    prompt:
+      "A heavy mechanical sword chop slamming into packed earth: a fast steel whoosh, a hard ringing blade thud " +
+      "into the ground and a sharp clockwork gear clack, punchy and short, video game sound effect, no music.",
+  },
+  HourSlash: {
+    seconds: 1.6,
+    prompt:
+      "A colossal sword slash: a deep rising steel whoosh that ends in a huge resonant clang, like a clock bell " +
+      "struck by a blade, with a shimmering metallic ring-out. Epic boss attack, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

@@ -79,6 +79,12 @@ public class Arrow : MonoBehaviour
         ReflectTarget = target;
     }
 
+    // Unbreakable in its own look, for a boss shot that draws itself (Utsusemi's hour cleave).
+    public void MakeUnbreakable()
+    {
+        Unbreakable = true;
+    }
+
     // Swaps in the Taisho's yari and gives it a pulsing crimson halo so it reads as a different threat from plain arrows.
     // Without spear art, a darkened, bigger arrow stands in.
     public void MakeUnbreakable(Sprite spear)

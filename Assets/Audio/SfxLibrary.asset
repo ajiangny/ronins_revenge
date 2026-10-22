@@ -394,6 +394,28 @@ MonoBehaviour:
     - 1.9804761
     - 1.4704309
     ownSource: 0
+  - id: BladeChop
+    clips:
+    - {fileID: 8300000, guid: 8e863a9d6275b4776814fb8dd54e895a, type: 3}
+    - {fileID: 8300000, guid: 08943bb2cbf3345408b7deb0e8b9ffc5, type: 3}
+    volume: 0.9
+    pitchJitter: 0.08
+    minInterval: 0.08
+    audible:
+    - 0.53294784
+    - 0.46315193
+    ownSource: 0
+  - id: HourSlash
+    clips:
+    - {fileID: 8300000, guid: 39d93973b5eab4f6a84e04fdf1229c3c, type: 3}
+    - {fileID: 8300000, guid: 56e51b6cd78f1454b87aae1a56bc606e, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.5
+    audible:
+    - 1.0675057
+    - 0.93546486
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

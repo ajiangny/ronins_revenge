@@ -9,19 +9,25 @@ Shadow Blade is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System
 `GameManager` owns the run and is the hub everything reports to.
 
 ```
-Title ──Enter──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─▶ Boss ─▶ stage boon ─▶ next stage / Victory
+Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─▶ Boss ─▶ stage boon ─▶ next stage / Victory
                                    │  (soul caught → Choosing: boon screen, time paused)            │
+                                   │  (Esc / P / Start → Paused: pause menu, time paused)            │
                                    └──── ronin out of lives / army reaches ronin ──▶ GameOver ◀─────┘
 ```
 
-- States: `GameManager.State { Title, Transition, Playing, Choosing, GameOver }`.
+- States: `GameManager.State { Title, Transition, Playing, Choosing, Paused, GameOver }`.
+- Menu pages are built in `GameManager` (`ShowTitleMenu`, `ShowPauseMenu`, `ShowControls`, `ShowSettings`,
+  `ShowEndMenu`) and shown by `MenuUI`. Sub-pages take a `back` callback so Controls/Settings return to
+  whichever page opened them. `Pause` only fires in `Playing`; `Resume` always restores `timeScale = 1`
+  (a pause can cut off a parry hit-stop).
 - Content is data: `GameManager.stages` is a `StageConfig[]` (`StageConfig.cs`). Each stage has a name,
   `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Two stages: "The Bamboo Road" (three
   rounds, then Benibana) and "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi). The default array in code is only the initial value; the scene's serialized
   copy wins, so edit it in the Inspector (or keep both in step).
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `StageCleared` → `BeginBoss` / `OfferStageBoon`,
   `NextStage`, `EndGame`. Blockers are rebuilt only when a stage starts, so they wear down across its rounds.
-- Restart reloads the scene with `skipTitle` set.
+- Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
+  without it.
 - **Dev hotkeys (Editor only, `GameManager.DevHotkeys`):** F1 kills the current army, F2 jumps to the last
   stage's boss (or last round if it has none).
 
@@ -128,8 +134,18 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 
 ## UI
 
-- `GameUI.cs` — HUD (score, stage/round, lives), overlay screens (title, stage intro, win/lose), boss bar,
-  subtitles, boss intro. Builds its pieces in code on the Canvas.
+- `GameUI.cs` — HUD (score, stage/round, samurai left, lives; no high score, so the top centre stays free for
+  the boss bar), the fading stage/round banner (`ShowBanner`), boss bar, subtitles on a plate with the
+  speaker's name, boss intro. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the
+  title menu.
+- **Text styles:** `GameUI.Style(text, TextStyle)` gives text its font and a shared outline-and-shadow material
+  (`Title` = Shojumaru brush font; `Heading`/`Hud`/`Body`/`Hint` = Zen Kaku Gothic New Bold, `GameUI.bodyFont`).
+  TTFs are turned into TMP fonts at runtime (`BuildFont`); a missing one falls back to the pixel font. Keep new
+  text at 26px or more (1080p reference) and give it a style rather than raw TMP settings.
+- `MenuUI.cs` — one full-screen menu page at a time: title, optional rich-text body, a list of
+  `MenuUI.Item.Button` / `MenuUI.Item.Slider` rows. Keyboard (arrows/WASD, Enter/Space, Esc/Backspace), mouse
+  (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the
+  Canvas by `GameManager.Start`.
 - `TitleCardArt.cs` — generates the painted paper backdrop (ink band, scratches, paint splatter) for boss title cards.
 - `BoonChoiceUI.cs` — see Boons. `SpriteAnimatorUI.cs` animates UI images in unscaled time.
 
@@ -145,6 +161,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 | Parry hit-stop | `GameManager.HitStop` |
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`). A pool voice is free once its clip's audible part has played (`Sound.audible`, measured by Apply Audio, since the generated clips carry long silent tails); the march beat has its own source (`Sound.ownSource`) |
 | Music crossfade and ducking | `Music.cs` |
+| Player volume settings (`PlayerPrefs` `MusicVolume`, `SfxVolume`) | `Music.Volume` (applied every frame, so the slider works live), `Sfx.Volume` (also scales boss voice lines) |
 | Boss voicelines | `GameManager.voice` AudioSource (its own `BossVoice` child, with the chorus/echo/distortion machine-voice filters `CreateMachineVoice` turns on for Utsusemi), clips in `Audio/Voice/`; `BossLine` full lines (intro/phase/defeat) vs. barks (hurt, stagger, move callouts) in `OnBossSpoke` |
 
 Missing libraries or clips fall back gracefully (simple glows, silence), so the game runs before art/audio is wired.
@@ -170,6 +187,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager; title-card fonts → GameUI |
+| Apply UI Fonts | `Editor/UiSetup.cs` | Body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
 | Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
 | Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |

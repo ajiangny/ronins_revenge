@@ -1102,7 +1102,7 @@ public class Utsusemi : Boss
         Beam beam = MakeBeam();
         Sfx.PlayLoop(Sfx.LanternBeam);
         // Out at a brisk sweep, then back very fast: the ronin must already be in the sword's shade.
-        yield return SweepBeam(beam, from, to, 2.6f);
+        yield return SweepBeam(beam, from, to, 2f);
         // The warning: the beam flickers white at the edge, then turns back.
         for (float t = 0; t < 0.4f; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
         {
@@ -1111,7 +1111,7 @@ public class Utsusemi : Boss
             yield return null;
         }
         Tick(0.8f);
-        yield return SweepBeam(beam, to, from, 1.2f);
+        yield return SweepBeam(beam, to, from, 0.5f);
         EndBeam(beam);
         Sfx.Stop(Sfx.LanternBeam);
         yield return ReclaimSword();
@@ -1289,6 +1289,7 @@ public class Utsusemi : Boss
 
     IEnumerator SweepBeam(Beam beam, float from, float to, float seconds)
     {
+        float lastX = from;
         for (float t = 0; t < seconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
         {
             Beat();
@@ -1296,10 +1297,19 @@ public class Utsusemi : Boss
             Vector3 end = BeamEnd(x, out Blocker cover);
             DrawBeam(beam, Core, end, false, cover == null);
             if (cover != null) BurnCover(beam, cover, end);
-            else HitIfCrossed(Core, end);
+            // A fast sweep moves further in a frame than the ronin is wide, so the ground it skipped is checked too.
+            for (float step = 0; step <= 1f; step += SweepCheckStep / Mathf.Max(Mathf.Abs(x - lastX), SweepCheckStep))
+            {
+                Vector3 between = BeamEnd(Mathf.Lerp(lastX, x, step), out Blocker shade);
+                if (shade == null) HitIfCrossed(Core, between);
+            }
+            lastX = x;
             yield return null;
         }
     }
+
+    // How finely a sweep's path between frames is checked against the ronin.
+    const float SweepCheckStep = 0.3f;
 
     // Midnight (second phase only): it hurls its sword at the ronin and the sword plants itself there, then two
     // clock-hand beams sweep in from the screen's edges, closing on the sword from both sides. Beside the sword is the

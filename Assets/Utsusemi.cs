@@ -7,7 +7,7 @@ using UnityEngine;
 // Strikes, ends in a giant cleave that only a parry answers; sent back, it jams the gears.
 public class Utsusemi : Boss
 {
-    public const int StartingHealth = 90;
+    public const int StartingHealth = 120;
 
     static readonly Color Steel = new Color(0.55f, 0.68f, 0.95f);
     static readonly Color Gold = new Color(0.9f, 0.75f, 0.4f);
@@ -537,6 +537,8 @@ public class Utsusemi : Boss
 
     bool armored;
     protected override bool SuperArmor => armored;
+    // Its armour shrugs off 95% of every blow.
+    protected override float ArmorDamageTaken => 0.05f;
 
     // The armour's look: a gold outline, made of solid gold silhouettes of its sprite nudged one sprite pixel out in
     // eight directions and drawn just behind it, so only a thin gold edge shows around the figure.

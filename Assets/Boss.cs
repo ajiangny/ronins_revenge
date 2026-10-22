@@ -40,6 +40,8 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public int Health { get; private set; }
     public int MaxHealth { get; private set; }
+    // Damage let through super armour that hasn't yet added up to a whole hit point.
+    float armorChip;
     public float HealthFraction => (float)Health / MaxHealth;
     public bool IsDead { get; private set; }
     public Vector3 Centre => sprite.bounds.center;
@@ -161,8 +163,11 @@ public abstract class Boss : MonoBehaviour, IHittable
         lastBeat = Time.time;
     }
 
-    // While true, nothing breaks its stance: no stagger, no freeze. Hits still deal damage.
+    // While true, nothing breaks its stance: no stagger, no freeze. Hits deal only ArmorDamageTaken of their damage.
     protected virtual bool SuperArmor => false;
+
+    // The share of each hit's damage that gets through super armour.
+    protected virtual float ArmorDamageTaken => 1f;
 
     // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
     protected virtual bool Busy => false;
@@ -374,12 +379,19 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead || Time.time < invulnerableUntil) return;
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
+        if (SuperArmor)
+        {
+            // Only a sliver gets through; slivers add up until they're worth a whole hit point.
+            armorChip += damage * ArmorDamageTaken;
+            damage = Mathf.FloorToInt(armorChip);
+            armorChip -= damage;
+        }
         Health = Mathf.Max(0, Health - damage);
 
         Vector3 point = Centre;
         HitFlash.Flash(sprite, 0.1f);
         Sfx.Play(Sfx.BossHit);
-        // Armoured hits still hurt, but glance off with a ring of steel instead of breaking its stance.
+        // Armoured hits barely hurt, and glance off with a ring of steel instead of breaking its stance.
         if (SuperArmor)
         {
             Fx.Play(Fx.Impact, point, new Color(1f, 0.85f, 0.4f), 1.2f);

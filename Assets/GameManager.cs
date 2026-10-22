@@ -952,7 +952,7 @@ public class GameManager : MonoBehaviour
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed like Benibana: filling the right half, its hat near the top edge, the brim running just off the
             // right side and the body off the bottom.
-            closeupHeight = 2250f, closeupFocus = new Vector2(0.47f, 0.21f), closeupAt = new Vector2(440f, 320f),
+            closeupHeight = 2700f, closeupFocus = new Vector2(0.47f, 0.21f), closeupAt = new Vector2(460f, 290f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },

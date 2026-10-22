@@ -1101,7 +1101,8 @@ public class Utsusemi : Boss
         if (!swordOut) PlayAction(art.attack);
         Beam beam = MakeBeam();
         Sfx.PlayLoop(Sfx.LanternBeam);
-        yield return SweepBeam(beam, from, to, 3.2f);
+        // Out at a brisk sweep, then back very fast: the ronin must already be in the sword's shade.
+        yield return SweepBeam(beam, from, to, 2.6f);
         // The warning: the beam flickers white at the edge, then turns back.
         for (float t = 0; t < 0.4f; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
         {
@@ -1110,7 +1111,7 @@ public class Utsusemi : Boss
             yield return null;
         }
         Tick(0.8f);
-        yield return SweepBeam(beam, to, from, 2.4f);
+        yield return SweepBeam(beam, to, from, 1.2f);
         EndBeam(beam);
         Sfx.Stop(Sfx.LanternBeam);
         yield return ReclaimSword();

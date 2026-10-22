@@ -102,7 +102,8 @@ match `BoonChoiceUI.boonIcons`.
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
   and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze
-  while `HoldArmor` shows a gold `ArmorShell`; `HourMark` numerals drawn from bars are shown one by one, then hidden; it `Dash`es
+  while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
+  `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars are shown one by one, then hidden; it `Dash`es
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via

@@ -477,23 +477,36 @@ public class Utsusemi : Boss
     bool armored;
     protected override bool SuperArmor => armored;
 
-    // The armour's look: a gold rim (a slightly larger copy of its sprite behind it) and a faint gold sheen over it.
-    // Both are tinted copies with the normal sprite material, since the flash shader can't take a colour.
+    // The armour's look: a gold outline, made of solid gold silhouettes of its sprite nudged one sprite pixel out in
+    // eight directions and drawn just behind it, so only a thin gold edge shows around the figure.
+    static readonly Vector2[] OutlineOffsets =
+    {
+        new Vector2(1, 0), new Vector2(-1, 0), new Vector2(0, 1), new Vector2(0, -1),
+        new Vector2(1, 1), new Vector2(1, -1), new Vector2(-1, 1), new Vector2(-1, -1),
+    };
+
     SpriteRenderer[] ArmorShell()
     {
-        var shell = new SpriteRenderer[2];
-        for (int i = 0; i < 2; i++)
+        Material flat = Fx.Library != null ? Fx.Library.flashMaterial : null;
+        if (flat == null) return new SpriteRenderer[0];
+        float pixel = 1f / (sprite.sprite != null ? sprite.sprite.pixelsPerUnit : 48f);
+        var shell = new SpriteRenderer[OutlineOffsets.Length];
+        for (int i = 0; i < shell.Length; i++)
         {
-            shell[i] = new GameObject(i == 0 ? "ArmorRim" : "ArmorSheen").AddComponent<SpriteRenderer>();
+            shell[i] = new GameObject("ArmorOutline").AddComponent<SpriteRenderer>();
             shell[i].transform.SetParent(sprite.transform, false);
-            shell[i].sharedMaterial = sprite.sharedMaterial;
-            shell[i].sortingOrder = sprite.sortingOrder + (i == 0 ? -1 : 1);
-            if (i == 0) shell[i].transform.localScale = Vector3.one * 1.08f;
+            shell[i].transform.localPosition = (Vector3)(OutlineOffsets[i] * pixel);
+            shell[i].sharedMaterial = flat;
+            shell[i].sortingOrder = sprite.sortingOrder - 1;
             transient.Add(shell[i].gameObject);
         }
         ElementFx.Glow(Centre, Gold, 1f, 3.5f, 0.4f, transform);
         return shell;
     }
+
+    // Made on first use: Unity won't build one in a field initializer.
+    MaterialPropertyBlock outlineColour;
+    static readonly int FlashColor = Shader.PropertyToID("_FlashColor");
 
     // Real time, not boss time: the armour ignores a freeze.
     IEnumerator HoldArmor(SpriteRenderer[] shell, float seconds)
@@ -501,13 +514,16 @@ public class Utsusemi : Boss
         for (float t = 0; t < seconds; t += Time.deltaTime)
         {
             Beat();
-            float pulse = Mathf.Sin(Time.time * 12f);
-            for (int i = 0; i < shell.Length; i++)
+            // A shimmer between deep gold and pale gold.
+            float shimmer = 0.5f + 0.5f * Mathf.Sin(Time.time * 10f);
+            if (outlineColour == null) outlineColour = new MaterialPropertyBlock();
+            outlineColour.SetColor(FlashColor, Color.Lerp(new Color(1f, 0.7f, 0.15f), new Color(1f, 0.93f, 0.6f), shimmer));
+            foreach (SpriteRenderer edge in shell)
             {
-                if (shell[i] == null) continue;
-                shell[i].sprite = sprite.sprite;
-                shell[i].flipX = sprite.flipX;
-                shell[i].color = i == 0 ? new Color(1f, 0.78f, 0.25f, 0.75f + 0.2f * pulse) : new Color(1f, 0.82f, 0.35f, 0.22f + 0.08f * pulse);
+                if (edge == null) continue;
+                edge.sprite = sprite.sprite;
+                edge.flipX = sprite.flipX;
+                edge.SetPropertyBlock(outlineColour);
             }
             yield return null;
         }

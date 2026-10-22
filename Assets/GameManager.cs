@@ -106,6 +106,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] float roundIntroTime = 1.2f;
     [Tooltip("Seconds a new army takes to march down into the field. The round starts once it is in place and the intro time is up.")]
     [SerializeField] float armyMarchInTime = 1.6f;
+    [Tooltip("How fast the ronin walks off the field and into the next map.")]
+    [SerializeField] float travelWalkSpeed = 9f;
+    [Tooltip("Seconds the screen takes to fade to black, and back, between maps.")]
+    [SerializeField] float travelFadeTime = 0.6f;
     [Tooltip("Pause after a stage's last army falls, before its boon is offered.")]
     [SerializeField] float stageClearPause = 1f;
 
@@ -419,6 +423,7 @@ public class GameManager : MonoBehaviour
             // Straight to the last stage's boss, or its last round when it has none.
             stageIndex = stages.Length - 1;
             roundIndex = Stage.rounds.Length - 1;
+            if (backdrop != null) backdrop.Show(Stage.boss != BossKind.None ? BossMap : Stage.roundsMap);
             StartCoroutine(Stage.boss != BossKind.None ? BeginBoss() : BeginRound());
         }
     }
@@ -426,6 +431,8 @@ public class GameManager : MonoBehaviour
 
     StageConfig Stage => stages[stageIndex];
     LevelConfig Round => Stage.rounds[roundIndex];
+    // The boss waits on its own ground; without art for it the duel is fought where the rounds were.
+    Backdrop.Map BossMap => Stage.bossMap?.ground != null ? Stage.bossMap : Stage.roundsMap;
 
     void StartGame()
     {
@@ -701,6 +708,7 @@ public class GameManager : MonoBehaviour
 
         if (Stage.boss != BossKind.None)
         {
+            yield return TravelTo(BossMap);
             StartCoroutine(BeginBoss());
         }
         else
@@ -928,12 +936,46 @@ public class GameManager : MonoBehaviour
         {
             stageIndex++;
             roundIndex = 0;
-            StartCoroutine(BeginRound());
+            StartCoroutine(EnterStage());
         }
         else
         {
             EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f), Sfx.VictorySting);
         }
+    }
+
+    IEnumerator EnterStage()
+    {
+        yield return TravelTo(Stage.roundsMap);
+        yield return BeginRound();
+    }
+
+    // The ronin walks off the top of the field and the screen fades to black; the next map fades in with fresh cover
+    // and he walks up into place from below.
+    IEnumerator TravelTo(Backdrop.Map map)
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        ClearProjectiles();
+        Music.Stop(1.5f);
+        Camera cam = Camera.main;
+        float top = CameraShake.Center.y + cam.orthographicSize;
+        float bottom = CameraShake.Center.y - cam.orthographicSize;
+        Vector3 from = ronin.transform.position;
+
+        Coroutine leaving = StartCoroutine(ronin.WalkTo(new Vector3(from.x, top + 2f, from.z), travelWalkSpeed));
+        // The fade starts as he nears the top, so he's gone into the dark just as it closes.
+        yield return new WaitUntil(() => ronin.transform.position.y > top - 4f);
+        yield return ui.FadeTo(1f, travelFadeTime);
+        yield return leaving;
+
+        if (backdrop != null) backdrop.Show(map);
+        blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
+        yield return new WaitForSeconds(0.3f);
+
+        StartCoroutine(ui.FadeTo(0f, travelFadeTime));
+        yield return ronin.WalkTo(ronin.Home, travelWalkSpeed);
     }
 
     void OnArmyReachedRonin()

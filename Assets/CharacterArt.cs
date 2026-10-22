@@ -16,6 +16,8 @@ public class CharacterArt : ScriptableObject
     [Tooltip("Sprint loops played while moving left/right. Leave empty to keep the idle clip while moving.")]
     public Sprite[] runLeft;
     public Sprite[] runRight;
+    [Tooltip("The ronin walking away up the screen, between maps. Leave empty to bob on the idle clip instead.")]
+    public Sprite[] walkUp;
 
     [Tooltip("Frames per second for the looping idle/march clip.")]
     public float idleFps = 6f;
@@ -23,6 +25,8 @@ public class CharacterArt : ScriptableObject
     public float actionFps = 12f;
     [Tooltip("Frames per second for the sprint loops.")]
     public float runFps = 14f;
+    [Tooltip("Frames per second for the walk-up loop.")]
+    public float walkFps = 8f;
 
     [Tooltip("Small pieces burst out on death (sakura petals, smoke).")]
     public Sprite[] deathParticles;

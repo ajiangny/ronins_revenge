@@ -1,3 +1,5 @@
+using UnityEngine;
+
 // The warlord fought after a stage's last round.
 public enum BossKind { None, Benibana, Utsusemi }
 
@@ -9,4 +11,8 @@ public class StageConfig
     public string name = "Stage";
     public LevelConfig[] rounds;
     public BossKind boss;
+    [Tooltip("Ground the stage's rounds are fought on. Empty keeps the moonlit courtyard.")]
+    public Backdrop.Map roundsMap;
+    [Tooltip("Ground the ronin walks into for the boss fight. Empty keeps the stage's own ground.")]
+    public Backdrop.Map bossMap;
 }

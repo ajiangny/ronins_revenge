@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -72,6 +73,8 @@ public class Ronin : MonoBehaviour
     public Color ShurikenGlow => shurikenGlow;
     public Color ParryColor => parryColor;
     public int SpriteOrder => sprite.sortingOrder;
+    // Where he stands when a run starts; he walks back here after crossing to a new map.
+    public Vector3 Home { get; private set; }
 
     Rigidbody body;
     SpriteRenderer sprite;
@@ -89,6 +92,7 @@ public class Ronin : MonoBehaviour
     float moveInput;
     Sprite[] loopClip;
     bool actionPlaying;
+    bool walking;
 
     // The current elemental look: art set, projectile sprites and colours.
     Sprite kunaiSprite;
@@ -102,6 +106,7 @@ public class Ronin : MonoBehaviour
     void Awake()
     {
         body = GetComponent<Rigidbody>();
+        Home = transform.position;
         sprite = GetComponentInChildren<SpriteRenderer>();
         animator = sprite.GetComponent<SpriteAnimator>();
         cam = Camera.main;
@@ -264,6 +269,7 @@ public class Ronin : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (walking) return;
         if (Parrying) DeflectNearbyArrows();
 
         Vector3 position = body.position;
@@ -276,6 +282,45 @@ public class Ronin : MonoBehaviour
             centerX - halfWidth + screenMargin - minOffsetX,
             centerX + halfWidth - screenMargin - maxOffsetX);
         body.MovePosition(position);
+    }
+
+    // Walks him to a spot on his own while his controls are off, to leave one map and enter the next. He passes
+    // through cover, and nothing can hit him on the way.
+    public IEnumerator WalkTo(Vector3 target, float walkSpeed)
+    {
+        walking = true;
+        actionPlaying = true;
+        SetTouchable(false);
+        // Without walk frames he bobs along on his idle loop.
+        bool bob = art.walkUp == null || art.walkUp.Length == 0;
+        animator.Play(bob ? art.idle : art.walkUp, true, null, bob ? art.idleFps : art.walkFps);
+        Transform look = sprite.transform;
+        Vector3 rest = look.localPosition;
+        Vector3 at = body.position;
+        for (float t = 0f; at != target;)
+        {
+            yield return new WaitForFixedUpdate();
+            t += Time.fixedDeltaTime;
+            at = Vector3.MoveTowards(at, target, walkSpeed * Time.fixedDeltaTime);
+            body.MovePosition(at);
+            if (bob) look.localPosition = rest + Vector3.up * (Mathf.Abs(Mathf.Sin(t * 9f)) * 0.12f / transform.lossyScale.y);
+        }
+        look.localPosition = rest;
+        SetTouchable(true);
+        walking = false;
+        EndAction();
+    }
+
+    // Moves him at once, e.g. to just below the view before he walks into a new map.
+    public void PlaceAt(Vector3 position)
+    {
+        body.position = position;
+        transform.position = position;
+    }
+
+    void SetTouchable(bool touchable)
+    {
+        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = touchable;
     }
 
     void DeflectNearbyArrows()

@@ -3,6 +3,18 @@ using UnityEngine;
 // Top-down backdrop behind the play area: the moonlit courtyard the samurai march across, with sakura petals drifting over it.
 public class Backdrop : MonoBehaviour
 {
+    // Another place to fight: its own ground and drifting petals (or flakes, leaves...). Set per stage and per boss.
+    [System.Serializable]
+    public class Map
+    {
+        public Sprite ground;
+        [Tooltip("Darkens the ground so the samurai and ronin stand out against it.")]
+        public Color groundTint = Color.white;
+        [Tooltip("Leave empty to keep the sakura petals.")]
+        public Sprite petal;
+        public Color petalTint = new Color(1f, 1f, 1f, 0.8f);
+    }
+
     [Header("Inscribed")]
     [SerializeField] Sprite ground;
     [Tooltip("Darkens the ground so the samurai and ronin stand out against it.")]
@@ -21,7 +33,9 @@ public class Backdrop : MonoBehaviour
     }
 
     Petal[] petals;
-    float halfWidth, halfHeight, centerX, centerY;
+    float halfWidth, halfHeight, centerX, centerY, viewWidth, viewHeight;
+    // The tints of the map on show, which the boss moon blends from.
+    Color shownGroundTint, shownPetalTint;
 
     // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
     static readonly Color BloodGround = new Color(0.95f, 0.42f, 0.42f);
@@ -49,9 +63,12 @@ public class Backdrop : MonoBehaviour
         centerY = CameraShake.Center.y;
 
         // Fit the ground to the real view (not the petals' overscan) so the courtyard isn't cropped more than needed.
-        float viewHeight = 2f * halfHeight, viewWidth = viewHeight * cam.aspect;
-        float scale = Mathf.Max(viewWidth / ground.bounds.size.x, viewHeight / ground.bounds.size.y);
-        groundRenderer = CreateSprite("Ground", ground, new Vector3(centerX, centerY, 0), scale, 0, groundTint);
+        viewHeight = 2f * halfHeight;
+        viewWidth = viewHeight * cam.aspect;
+        groundRenderer = CreateSprite("Ground", ground, new Vector3(centerX, centerY, 0), 1f, 0, groundTint);
+        FitGround();
+        shownGroundTint = groundTint;
+        shownPetalTint = petalTint;
 
         // The blood moon hangs in the top-left corner, hidden until a boss fight raises it.
         Vector3 moonSpot = new Vector3(centerX - viewWidth * 0.36f, centerY + viewHeight * 0.3f, 0);
@@ -80,13 +97,33 @@ public class Backdrop : MonoBehaviour
         }
     }
 
+    // Scales the ground to cover the view, whatever size its art is.
+    void FitGround()
+    {
+        Vector2 size = groundRenderer.sprite.bounds.size;
+        groundRenderer.transform.localScale = Vector3.one * Mathf.Max(viewWidth / size.x, viewHeight / size.y);
+    }
+
+    // Swaps to another map's ground and petals; null (or a map without ground art) brings back the courtyard.
+    public void Show(Map map)
+    {
+        bool own = map != null && map.ground != null;
+        groundRenderer.sprite = own ? map.ground : ground;
+        FitGround();
+        shownGroundTint = own ? map.groundTint : groundTint;
+        bool ownPetals = own && map.petal != null;
+        shownPetalTint = ownPetals ? map.petalTint : petalTint;
+        foreach (SpriteRenderer r in petalRenderers) r.sprite = ownPetals ? map.petal : petal;
+        UpdateBloodMoon(0f);
+    }
+
     // Eases the whole scene toward (or away from) the blood moon over about two seconds.
     void UpdateBloodMoon(float dt)
     {
         blood = Mathf.MoveTowards(blood, bloodTarget, dt * 0.5f);
         bool steel = look == MoonLook.Steel;
-        groundRenderer.color = Color.Lerp(groundTint, groundTint * (steel ? SteelGround : BloodGround), blood);
-        Color petalColour = Color.Lerp(petalTint, steel ? SteelPetal : BloodPetal, blood);
+        groundRenderer.color = Color.Lerp(shownGroundTint, shownGroundTint * (steel ? SteelGround : BloodGround), blood);
+        Color petalColour = Color.Lerp(shownPetalTint, steel ? SteelPetal : BloodPetal, blood);
         foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
         moon.color = steel ? new Color(0.85f, 0.9f, 1f, blood) : new Color(0.85f, 0.1f, 0.12f, blood);
         moonHalo.color = steel ? new Color(0.6f, 0.75f, 1f, 0.45f * blood) : new Color(1f, 0.15f, 0.15f, 0.5f * blood);

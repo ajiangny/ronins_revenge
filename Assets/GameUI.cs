@@ -58,6 +58,7 @@ public class GameUI : MonoBehaviour
     TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
     float subtitleUntil;
+    Image fade;
 
     TMP_FontAsset cardNameAsset;
     TMP_FontAsset cardTagAsset;
@@ -70,6 +71,28 @@ public class GameUI : MonoBehaviour
         BuildBossBar();
         BuildSubtitle();
         BuildBanner();
+        BuildFade();
+    }
+
+    // A black cover over the whole screen for moving between maps. Built last so it sits over the HUD; the boss intro
+    // and menus are built later and stay above it.
+    void BuildFade()
+    {
+        fade = Stretch(CreateRect("Fade", transform, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        fade.color = Color.clear;
+        fade.raycastTarget = false;
+    }
+
+    // Fades the black cover to the given opacity, in real time so a hit-stop can't stall it.
+    public IEnumerator FadeTo(float alpha, float seconds)
+    {
+        float from = fade.color.a;
+        for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+        {
+            fade.color = new Color(0f, 0f, 0f, Mathf.Lerp(from, alpha, t / seconds));
+            yield return null;
+        }
+        fade.color = new Color(0f, 0f, 0f, alpha);
     }
 
     // Arcade layout: score top left, stage and samurai left top right, lives bottom left. The top centre stays clear

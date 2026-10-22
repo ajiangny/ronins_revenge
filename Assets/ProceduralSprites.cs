@@ -7,6 +7,7 @@ public static class ProceduralSprites
     static Sprite white;
     static Sprite glow;
     static Sprite softGlow;
+    static Sprite shadow;
     static Sprite disc;
     static Sprite arrowDown;
     static Sprite fadeDown;
@@ -33,6 +34,9 @@ public static class ProceduralSprites
     // The same glow, smoothly filtered, for big painted-looking washes of light where pixel steps would show.
     public static Sprite SoftGlow => softGlow != null ? softGlow : softGlow = Circle(64, soft: true, FilterMode.Bilinear);
 
+    // A smooth disc that stays solid through its middle and only fades over its outer part, for shading behind text.
+    public static Sprite Shadow => shadow != null ? shadow : shadow = BuildShadow(64);
+
     // A hard-edged pixel disc, used for round UI medallions until the art is in.
     public static Sprite Disc => disc != null ? disc : disc = Circle(64, soft: false);
 
@@ -56,6 +60,25 @@ public static class ProceduralSprites
                 bool head = y < size / 2 && fromCentre <= y + 0.5f;
                 bool shaft = y >= size / 2 && fromCentre <= shaftHalf;
                 pixels[y * size + x] = head || shaft ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
+    static Sprite BuildShadow(int size)
+    {
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[size * size];
+        float r = size / 2f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)) / r;
+                float a = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.35f, 1f, d));
+                pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
             }
         }
         texture.SetPixels32(pixels);

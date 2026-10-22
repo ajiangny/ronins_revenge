@@ -288,6 +288,11 @@ public class GameUI : MonoBehaviour
         shadeImage.sprite = ProceduralSprites.FadeDown;
         shadeImage.color = new Color(0.02f, 0.01f, 0.03f, 0f);
 
+        // A soft dark wash right behind the title block, feathered on every side so it reads as shadow, not a box.
+        Image titleWash = CreateRect("TitleWash", root, new Vector2(0.5f, 0f), new Vector2(0, 20f), new Vector2(1900f, 480f)).gameObject.AddComponent<Image>();
+        titleWash.sprite = ProceduralSprites.Shadow;
+        titleWash.color = Color.clear;
+
         // The lower third: epithet, a rule that draws out from the centre, then her name a size down.
         TextMeshProUGUI epithetText = CreateText("Epithet", new Vector2(0.5f, 0f), new Vector2(0, 262f), new Vector2(1800f, 120f), 88, TextAlignmentOptions.Bottom, root);
         epithetText.textWrappingMode = TextWrappingModes.NoWrap;
@@ -354,6 +359,7 @@ public class GameUI : MonoBehaviour
             portraitImage.color = new Color(1f, 1f, 1f, fadeToCard);
             portrait.localScale = Vector3.one * (1.06f - 0.06f * EaseOut(fadeToCard) + 0.04f * hold);
             shadeImage.color = new Color(0.02f, 0.01f, 0.03f, 0.9f * fadeToCard);
+            titleWash.color = new Color(0.01f, 0f, 0.02f, 0.6f * fadeToCard);
 
             float ruleIn = EaseOut(Mathf.Clamp01((since - 0.2f) / 0.5f));
             rule.sizeDelta = new Vector2(1180f * ruleIn, 5f);

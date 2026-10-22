@@ -13,10 +13,14 @@ const OUT_DIR = new URL("../Assets/Audio/Music/", import.meta.url);
 const TRACKS = {
   TitleMusic: {
     lengthMs: 90_000,
+    // Peaceful and nostalgic, in the spirit of classic JRPG title themes and cozy MMO town music, led by the
+    // flute the ronin plays on the title screen.
     prompt:
-      "Calm, atmospheric feudal Japan title theme for a pixel-art ninja game. Solo shakuhachi flute melody over " +
-      "gentle koto arpeggios, soft taiko pulses and temple wind ambience. Mysterious and serene, slow tempo, " +
-      "instrumental only. Seamless loop: the ending flows straight back into the opening with no fade out.",
+      "Peaceful, nostalgic title theme for a fantasy samurai adventure game, in the style of a classic 1990s JRPG " +
+      "prelude and a cozy 2D MMORPG village theme. A warm, breathy bamboo flute plays a gentle, singable lead " +
+      "melody over flowing harp arpeggios, soft koto plucks, a warm string pad and light wind chimes. No drums, " +
+      "about 72 BPM, tender, hopeful and a little wistful, like a quiet evening by a mountain shrine. " +
+      "Instrumental only. Seamless loop: the ending flows straight back into the opening with no fade out.",
   },
   BattleMusic: {
     lengthMs: 120_000,

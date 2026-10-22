@@ -301,11 +301,12 @@ public class Ronin : MonoBehaviour
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
-        // Homing shots curve, so they get longer to reach a far target.
+        // Homing shots curve, so they get longer to reach a far target. Boss slashes are drawn leading downwards, so
+        // like a parried arrow the copy is flipped to lead the way back.
         if (reflect)
         {
             Kunai riposte = SpawnProjectile(kunaiPrefab, position);
-            riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, scale: 2.4f, lifetimeMultiplier: 2f);
+            riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, flipSprite: true, scale: 2.4f, lifetimeMultiplier: 2f);
             riposte.Tint(arrowColor, arrowColor);
             riposte.Home(() => target);
             riposte.Mimic(arrowArt);

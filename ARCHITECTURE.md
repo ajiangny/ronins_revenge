@@ -9,7 +9,7 @@ Shadow Blade is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System
 `GameManager` owns the run and is the hub everything reports to.
 
 ```
-Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─▶ Boss ─▶ stage boon ─▶ next stage / Victory
+Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─travel─▶ Boss ─▶ stage boon ─travel─▶ next stage / Victory
                                    │  (soul caught → Choosing: boon screen, time paused)            │
                                    │  (Esc / P / Start → Paused: pause menu, time paused)            │
                                    └──── ronin out of lives / army reaches ronin ──▶ GameOver ◀─────┘
@@ -25,7 +25,16 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   rounds, then Benibana) and "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi). The default array in code is only the initial value; the scene's serialized
   copy wins, so edit it in the Inspector (or keep both in step).
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `StageCleared` → `BeginBoss` / `OfferStageBoon`,
-  `NextStage`, `EndGame`. Blockers are rebuilt only when a stage starts, so they wear down across its rounds.
+  `NextStage` → `EnterStage`, `EndGame`. Blockers are rebuilt only when a stage starts (or on a new map), so they
+  wear down across its rounds.
+- **Rounds:** `BeginRound` spawns the army above the view and `SamuraiArmy.MarchIn` marches it down to its slots
+  under the banner (`armyMarchInTime`). Until `Advance` the army is `Entering`: its colliders are off, `TakeHit`/`Kill`
+  do nothing, and `Soldiers` and the boon queries read it as empty, so nothing from the last round can touch it.
+- **Maps and travel:** each `StageConfig` has an optional `roundsMap` and `bossMap` (`Backdrop.Map`: ground, tint,
+  petal sprite/tint; empty = the courtyard, and a boss without its own map fights on the stage's). `TravelTo(map)`
+  walks the ronin off the top (`Ronin.WalkTo`, collider off, `CharacterArt.walkUp` or an idle bob), fades to black
+  (`GameUI.FadeTo`), swaps the ground (`Backdrop.Show`), rebuilds the blockers and walks him up from below to
+  `Ronin.Home`. Used before every boss (`StageCleared`) and every later stage (`EnterStage`). F2 swaps the map at once.
 - Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
   without it.
 - **Dev hotkeys (Editor only, `GameManager.DevHotkeys`):** F1 kills the current army, F2 jumps to the last
@@ -137,7 +146,10 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 
 - `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild(healthMultiplier)`
   (Glacier Wall uses the multiplier for ice blockers).
-- `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights.
+- `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
+  ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
+  `CourtyardGrass` (stage 1), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
+  `Arena_Utsusemi` (clockwork temple floor), generated with PixelLab.
 
 ## UI
 
@@ -164,6 +176,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 | Code-built glows, blasts, lightning bolts | `ElementFx.cs`, `ProceduralSprites.cs` |
 | Debris bursts (petals, chips, sparks) | `Debris.cs` |
 | Screen shake (read `CameraShake.Center`, never the camera, for layout) | `CameraShake.cs` |
+| Fade to black between maps | `GameUI.FadeTo` (unscaled time) |
 | White hit flash | `HitFlash.cs` + `Art/Fx/SpriteFlash.shader` |
 | Parry hit-stop | `GameManager.HitStop` |
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`). A pool voice is free once its clip's audible part has played (`Sound.audible`, measured by Apply Audio, since the generated clips carry long silent tails); the march beat has its own source (`Sound.ownSource`) |
@@ -176,7 +189,7 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 ## Sprites and animation
 
 - `CharacterArt` ScriptableObject (`Art/Characters/*.asset`): clips `idle`, `attack`, `hit`, `death`, `parry`,
-  `runLeft`, `runRight` and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
+  `runLeft`, `runRight`, `walkUp` (the ronin walking away between maps) and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
   Benibana, Utsusemi. A boss can rest in a different loop by overriding `Boss.IdleClip` (Utsusemi's bare-headed
   idle, `GameManager.utsusemiBareIdle`, while its hat is thrown, and its unarmed stance while its sword is planted).
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
@@ -192,6 +205,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 |---|---|---|
 | Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
+| Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager; title-card fonts → GameUI |
 | Apply UI Fonts | `Editor/UiSetup.cs` | Body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |

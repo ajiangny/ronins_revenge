@@ -85,7 +85,7 @@ public static class BoonArtSetup
         managerSo.FindProperty("soulHintArrow").objectReferenceValue = Load("UI/SoulArrow");
         managerSo.ApplyModifiedPropertiesWithoutUndo();
 
-        // The spiked ice shell drawn over frozen samurai and ice statues.
+        // The spiked ice shell drawn over ice statues.
         var army = Object.FindAnyObjectByType<SamuraiArmy>();
         var armySo = new SerializedObject(army);
         armySo.FindProperty("iceShell").objectReferenceValue = Load("Effects/IceShell");

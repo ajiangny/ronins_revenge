@@ -132,9 +132,15 @@ public class Samurai : MonoBehaviour, IHittable
         animator.Renderer.color = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
     }
 
+    // Off while the army marches in: shots and blasts pass straight through until the round starts.
+    public void SetTouchable(bool touchable)
+    {
+        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = touchable;
+    }
+
     public void TakeHit(int damage, KillSource source)
     {
-        if (IsDead) return;
+        if (IsDead || army.Entering) return;
         // Ice is brittle: any of the ronin's own hits shatters an encased samurai outright.
         if (Encased && source != KillSource.Effect) damage = health;
         health -= damage;
@@ -161,7 +167,7 @@ public class Samurai : MonoBehaviour, IHittable
 
     public void Kill(KillSource source)
     {
-        if (IsDead) return;
+        if (IsDead || army.Entering) return;
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
         IsDead = true;

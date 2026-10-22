@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -25,6 +26,8 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] int taishoHealth = 2;
     [Tooltip("Shieldbearers take this many hits to fall.")]
     [SerializeField] int shieldHealth = 2;
+    [Tooltip("How far above the top of the view the army's front rank starts before it marches in.")]
+    [SerializeField] float entryMargin = 1f;
 
     [Header("Divers")]
     [Tooltip("Seconds a diver flashes in place before it breaks formation.")]
@@ -68,6 +71,7 @@ public class SamuraiArmy : MonoBehaviour
     float frozenUntil;
     float shownFrost;
     float marchTravel;
+    float entryOffset;
     int marchBeat;
     bool advancing;
 
@@ -75,7 +79,10 @@ public class SamuraiArmy : MonoBehaviour
     static readonly float[] MarchPitches = { 1f, 0.94f, 0.89f, 0.84f };
 
     public int Remaining => soldiers.Count;
-    public IReadOnlyList<Samurai> Soldiers => soldiers;
+    // An army still marching into the field can't be hit or targeted, so it reads as empty to everything outside.
+    public IReadOnlyList<Samurai> Soldiers => Entering ? (IReadOnlyList<Samurai>)Array.Empty<Samurai>() : soldiers;
+    // True from SpawnStage until Advance: the army is marching in and untouchable.
+    public bool Entering { get; private set; }
 
     // Middle of the living army, for effects that wash over all of it.
     public Vector3 Centre
@@ -109,15 +116,20 @@ public class SamuraiArmy : MonoBehaviour
         shownFrost = 0f;
 
         float spacingX = Mathf.Min(maxSpacingX, 0.6f * 2f * HalfWidth() / Mathf.Max(1, config.columns - 1));
+        // The formation starts with its front rank just above the view, then MarchIn brings it down to its slots.
+        float frontRowY = config.topRowY - (config.rows - 1) * spacingY;
+        entryOffset = Mathf.Max(0f, CameraShake.Center.y + cam.orthographicSize + entryMargin + samuraiRadius - frontRowY);
+        Entering = true;
         for (int col = 0; col < config.columns; col++)
         {
             for (int row = 0; row < config.rows; row++)
             {
-                Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY, 0);
+                Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY + entryOffset, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
                 soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
                     kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth : 1);
+                soldier.SetTouchable(false);
                 soldiers.Add(soldier);
             }
         }
@@ -125,8 +137,31 @@ public class SamuraiArmy : MonoBehaviour
         samuraiCounter.SetCount(soldiers.Count);
     }
 
+    // Marches the new formation down from above the view into its slots, to the drum. Nothing can hit it on the way.
+    public IEnumerator MarchIn(float seconds)
+    {
+        float travelled = 0f;
+        for (float t = 0f; t < seconds && soldiers.Count > 0;)
+        {
+            yield return new WaitForFixedUpdate();
+            t += Time.fixedDeltaTime;
+            // Eases out so the ranks slow into place rather than stopping dead.
+            float u = Mathf.Clamp01(t / seconds);
+            float target = entryOffset * (1f - (1f - u) * (1f - u));
+            float step = target - travelled;
+            travelled = target;
+            MarchBeat(step);
+            foreach (Samurai soldier in soldiers) soldier.Body.MovePosition(soldier.Body.position + Vector3.down * step);
+        }
+    }
+
     public void Advance()
     {
+        if (Entering)
+        {
+            Entering = false;
+            foreach (Samurai soldier in soldiers) soldier.SetTouchable(true);
+        }
         advancing = true;
         nextShotTime = Time.time + level.fireInterval;
         nextSpearTime = Time.time + spearInterval;
@@ -147,6 +182,7 @@ public class SamuraiArmy : MonoBehaviour
         soldiers.Clear();
         dives.Clear();
         advancing = false;
+        Entering = false;
         samuraiCounter.SetCount(0);
     }
 
@@ -411,6 +447,7 @@ public class SamuraiArmy : MonoBehaviour
 
     public int ClosestColumnTo(float x)
     {
+        if (soldiers.Count == 0) return 0;
         Samurai closest = soldiers[0];
         foreach (Samurai soldier in soldiers)
         {
@@ -441,6 +478,7 @@ public class SamuraiArmy : MonoBehaviour
     public Samurai FrontSamuraiInColumn(int column)
     {
         Samurai front = null;
+        if (Entering) return null;
         foreach (Samurai soldier in soldiers)
         {
             if (soldier.Column == column && !IsDiving(soldier) && (front == null || soldier.Body.position.y < front.Body.position.y))
@@ -454,6 +492,7 @@ public class SamuraiArmy : MonoBehaviour
     public Samurai NearestSamurai(Vector3 position, float maxDistance)
     {
         Samurai nearest = null;
+        if (Entering) return null;
         float best = maxDistance * maxDistance;
         foreach (Samurai soldier in soldiers)
         {
@@ -471,6 +510,7 @@ public class SamuraiArmy : MonoBehaviour
     public List<Samurai> SamuraiWithin(Vector3 position, float radius)
     {
         var found = new List<Samurai>();
+        if (Entering) return found;
         foreach (Samurai soldier in soldiers)
         {
             if ((soldier.Body.position - position).sqrMagnitude <= radius * radius) found.Add(soldier);

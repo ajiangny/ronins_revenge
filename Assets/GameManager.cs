@@ -104,6 +104,8 @@ public class GameManager : MonoBehaviour
 
     [Tooltip("Intro time for the second and later rounds of a stage; the first round uses levelIntroTime.")]
     [SerializeField] float roundIntroTime = 1.2f;
+    [Tooltip("Seconds a new army takes to march down into the field. The round starts once it is in place and the intro time is up.")]
+    [SerializeField] float armyMarchInTime = 1.6f;
     [Tooltip("Pause after a stage's last army falls, before its boon is offered.")]
     [SerializeField] float stageClearPause = 1f;
 
@@ -457,7 +459,10 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
 
-        yield return new WaitForSeconds(roundIndex == 0 ? levelIntroTime : roundIntroTime);
+        // The new army marches in under the banner; the round starts once both are done.
+        float introEnds = Time.time + (roundIndex == 0 ? levelIntroTime : roundIntroTime);
+        yield return army.MarchIn(armyMarchInTime);
+        if (Time.time < introEnds) yield return new WaitForSeconds(introEnds - Time.time);
 
         ui.HideBanner();
         state = State.Playing;

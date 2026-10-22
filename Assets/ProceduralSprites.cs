@@ -95,6 +95,108 @@ public static class ProceduralSprites
         ? notes[kind % NotePatterns.Length]
         : notes[kind % NotePatterns.Length] = FromPattern(NotePatterns[kind % NotePatterns.Length]);
 
+    // A dark horizontal brush stroke, drawn white to be tinted: feathered where the brush lands on the left, uneven
+    // along its top and bottom, and breaking into dry-brush bristle streaks at its right tail. The game's shared
+    // panel shape, behind stage cards, boon cards and menu selections.
+    public static Sprite InkStroke => inkStroke != null ? inkStroke : inkStroke = BuildInkStroke(1024, 256);
+
+    // A thin brush line that swells in the middle and tapers to points at both ends, for dividers.
+    public static Sprite BrushLine => brushLine != null ? brushLine : brushLine = BuildBrushLine(256, 16);
+
+    static Sprite inkStroke;
+    static Sprite brushLine;
+
+    static Sprite BuildInkStroke(int width, int height)
+    {
+        // A fixed seed, so the stroke is the same shape every run.
+        var random = new System.Random(381);
+        float[] top = Noise(random, 9), bottom = Noise(random, 9), start = Noise(random, 5), reach = Noise(random, 12);
+
+        // Every row is a bristle: it runs out of ink at its own length, carries a little more or less ink, and, if
+        // it's a dry one, skips along its tail. Neighbouring rows are blended so the bristles come in loose bunches.
+        var length = new float[height];
+        var tone = new float[height];
+        var dryness = new float[height];
+        var skips = new float[height][];
+        float lastLength = 0f, lastTone = 1f, lastDry = 0f;
+        for (int y = 0; y < height; y++)
+        {
+            float v = (y + 0.5f) / height;
+            lastLength = Mathf.Lerp(lastLength, (float)random.NextDouble(), y == 0 ? 1f : 0.45f);
+            lastTone = Mathf.Lerp(lastTone, 0.9f + 0.1f * (float)random.NextDouble(), 0.5f);
+            lastDry = Mathf.Lerp(lastDry, (float)random.NextDouble(), 0.4f);
+            length[y] = 0.74f + 0.14f * Sample(reach, v) + 0.12f * lastLength;
+            tone[y] = lastTone;
+            dryness[y] = lastDry;
+            skips[y] = Noise(random, 14);
+        }
+
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            float v = (y + 0.5f) / height;
+            for (int x = 0; x < width; x++)
+            {
+                float u = (x + 0.5f) / width;
+                // Ragged top and bottom edges that wander a little along the stroke.
+                float low = 0.1f + 0.06f * Sample(bottom, u);
+                float high = 0.9f - 0.06f * Sample(top, u);
+                float a = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(low, low + 0.02f, v))
+                    * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(high, high - 0.02f, v));
+                // Feathered where the brush first touched the paper.
+                float land = 0.02f + 0.04f * Sample(start, v);
+                a *= Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(land - 0.01f, land + 0.015f, u));
+                // The bristle thins to a point as its ink runs out.
+                float fade = Mathf.InverseLerp(length[y] - 0.1f, length[y], u);
+                a *= 1f - fade * fade;
+                // Dry bristles skip towards the tail, leaving streaks of bare paper.
+                float dry = dryness[y] * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.5f, 0.92f, u));
+                a *= Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(dry - 0.08f, dry, Sample(skips[y], u)));
+                a *= tone[y];
+                pixels[y * width + x] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(a) * 255));
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), height);
+    }
+
+    static Sprite BuildBrushLine(int width, int height)
+    {
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            float fromMiddle = Mathf.Abs((y + 0.5f) / height - 0.5f) * 2f;
+            for (int x = 0; x < width; x++)
+            {
+                // Full thickness in the middle, tapering to a point at each end.
+                float thickness = Mathf.Pow(Mathf.Sin(Mathf.PI * (x + 0.5f) / width), 0.7f);
+                float a = Mathf.Clamp01((thickness - fromMiddle) * height * 0.5f);
+                pixels[y * width + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), height);
+    }
+
+    // A few random points from 0 to 1, smoothly interpolated by Sample, for gently wandering edges.
+    static float[] Noise(System.Random random, int points)
+    {
+        var values = new float[points];
+        for (int i = 0; i < points; i++) values[i] = (float)random.NextDouble();
+        return values;
+    }
+
+    static float Sample(float[] noise, float u)
+    {
+        float at = Mathf.Clamp01(u) * (noise.Length - 1);
+        int i = Mathf.Min((int)at, noise.Length - 2);
+        return Mathf.Lerp(noise[i], noise[i + 1], Mathf.SmoothStep(0f, 1f, at - i));
+    }
+
     // A hard-edged arrow pointing down, standing in for the soul hint's art.
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);
 

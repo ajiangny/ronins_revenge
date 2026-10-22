@@ -19,10 +19,6 @@ public class GameUI : MonoBehaviour
     [SerializeField] TMP_FontAsset font;
     [Tooltip("Heart shown once per remaining life.")]
     [SerializeField] Sprite lifeIcon;
-    [Tooltip("9-sliced panel drawn behind the stage and round announcements.")]
-    [SerializeField] Sprite overlayBanner;
-    [Tooltip("Screen pixels per art pixel for the banner's border, so the pixel art stays chunky and even.")]
-    [SerializeField] float overlayBannerPixelScale = 2f;
     [Tooltip("Roman-capital font for titles and headers: menus, banners and boss cards. Without it they use the pixel font.")]
     [SerializeField, FormerlySerializedAs("cardNameFont")] Font headerFont;
     [Tooltip("The game's logo for the title menu. Without it the menu sets the name in the header font.")]
@@ -45,9 +41,13 @@ public class GameUI : MonoBehaviour
     readonly List<GameObject> hudParts = new List<GameObject>();
 
     CanvasGroup banner;
+    Image bannerInk;
+    TextMeshProUGUI bannerOverline;
     TextMeshProUGUI bannerTitle;
+    RectTransform bannerRule;
     TextMeshProUGUI bannerBody;
     bool bannerShown;
+    float bannerShownAt;
 
     GameObject bossBar;
     TextMeshProUGUI bossName;
@@ -384,12 +384,49 @@ public class GameUI : MonoBehaviour
 
     // A title line fades in, sliding onto its resting height `y` from `side` (1 above, -1 below) as its letter
     // spacing closes up.
-    static void Reveal(TMP_Text text, float since, float y, float side)
+    internal static void Reveal(TMP_Text text, float since, float y, float side, float spacing = 6f)
     {
         float k = EaseOut(Mathf.Clamp01(since / 0.6f));
         text.alpha = k;
-        text.characterSpacing = Mathf.Lerp(26f, 6f, k);
-        text.rectTransform.anchoredPosition = new Vector2(0, y + side * 14f * (1f - k));
+        text.characterSpacing = Mathf.Lerp(spacing + 20f, spacing, k);
+        text.rectTransform.anchoredPosition = new Vector2(text.rectTransform.anchoredPosition.x, y + side * 14f * (1f - k));
+    }
+
+    // The game's divider: a brush line that tapers at both ends, with a small diamond (the menus' selection marker)
+    // at its middle. AnimateRule draws it out from the centre.
+    internal static RectTransform CreateRule(Transform parent, Vector2 anchor, Vector2 position, Color colour)
+    {
+        RectTransform rule = CreateRect("Rule", parent, anchor, position, new Vector2(0f, 6f));
+        Image line = rule.gameObject.AddComponent<Image>();
+        line.sprite = ProceduralSprites.BrushLine;
+        line.color = colour;
+        line.raycastTarget = false;
+        RectTransform diamond = CreateRect("Diamond", rule, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(14f, 14f));
+        diamond.localRotation = Quaternion.Euler(0, 0, 45f);
+        Image mark = diamond.gameObject.AddComponent<Image>();
+        mark.color = colour;
+        mark.raycastTarget = false;
+        return rule;
+    }
+
+    // `k` runs from 0 (not drawn) to 1 (drawn out to `width`).
+    internal static void AnimateRule(RectTransform rule, float width, float k)
+    {
+        rule.sizeDelta = new Vector2(width * k, rule.sizeDelta.y);
+        rule.GetChild(0).localScale = Vector3.one * k;
+    }
+
+    // A brush stroke of ink behind text. It is a horizontal fill, so raising fillAmount paints it on from the left.
+    internal static Image CreateInk(Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Color colour)
+    {
+        Image ink = CreateRect("Ink", parent, anchor, position, size).gameObject.AddComponent<Image>();
+        ink.sprite = ProceduralSprites.InkStroke;
+        ink.type = Image.Type.Filled;
+        ink.fillMethod = Image.FillMethod.Horizontal;
+        ink.fillOrigin = (int)Image.OriginHorizontal.Left;
+        ink.color = colour;
+        ink.raycastTarget = false;
+        return ink;
     }
 
     // TTF fonts are turned into TMP fonts on first use; without one the text uses the pixel font. The printable
@@ -447,7 +484,7 @@ public class GameUI : MonoBehaviour
         return material;
     }
 
-    static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);
+    internal static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);
 
     public void HideBossBar()
     {
@@ -504,16 +541,21 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    // A stage or round announcement across the middle of the screen. Unlike a full-screen overlay it leaves the
-    // playfield visible above and below, and it fades in and out rather than popping.
-    public void ShowBanner(string title, string body, Color titleColor)
+    // A stage or round card across the middle of the screen: a stroke of ink paints on from the left, then a small
+    // overline, a large title, a brush rule in the accent colour and a line of body text rise in one after another,
+    // like the boss cards' lower third. The playfield stays visible above and below, and it all fades out together.
+    public void ShowBanner(string overline, string title, string body, Color accent)
     {
+        bannerOverline.text = overline;
         bannerTitle.text = title;
-        bannerTitle.color = titleColor;
         bannerBody.text = body;
         bannerBody.gameObject.SetActive(!string.IsNullOrEmpty(body));
+        foreach (Image mark in bannerRule.GetComponentsInChildren<Image>()) mark.color = Color.Lerp(accent, Color.white, 0.35f);
         bannerShown = true;
+        bannerShownAt = Time.unscaledTime;
+        banner.alpha = 1f;
         banner.gameObject.SetActive(true);
+        UpdateBanner();
     }
 
     public void HideBanner()
@@ -521,41 +563,44 @@ public class GameUI : MonoBehaviour
         bannerShown = false;
     }
 
+    const float BannerRuleWidth = 820f;
+
     void BuildBanner()
     {
-        RectTransform panel = CreateRect("Banner", transform, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1400, 300));
+        RectTransform panel = CreateRect("Banner", transform, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1700, 340));
         banner = panel.gameObject.AddComponent<CanvasGroup>();
-        banner.alpha = 0f;
         banner.blocksRaycasts = false;
-        Image image = panel.gameObject.AddComponent<Image>();
-        image.raycastTarget = false;
-        if (overlayBanner != null)
-        {
-            image.sprite = overlayBanner;
-            image.type = Image.Type.Sliced;
-            image.pixelsPerUnitMultiplier = GetComponent<Canvas>().referencePixelsPerUnit / overlayBanner.pixelsPerUnit / overlayBannerPixelScale;
-        }
-        else
-        {
-            image.color = new Color(0.02f, 0.01f, 0.04f, 0.8f);
-        }
+        // The stroke's dry tail is on the right, so it sits a little right of centre to look centred.
+        bannerInk = CreateInk(panel, new Vector2(0.5f, 0.5f), new Vector2(70, 0), new Vector2(1760, 340), new Color(0.03f, 0.02f, 0.04f, 0.9f));
 
-        bannerTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 45), new Vector2(1300, 140), 96, TextAlignmentOptions.Center, panel);
+        bannerOverline = CreateText("Overline", new Vector2(0.5f, 0.5f), new Vector2(0, 100), new Vector2(1300, 50), 34, TextAlignmentOptions.Center, panel);
+        bannerOverline.textWrappingMode = TextWrappingModes.NoWrap;
+        bannerOverline.color = MutedColour;
+        Style(bannerOverline, TextStyle.Title);
+        bannerTitle = CreateText("Title", new Vector2(0.5f, 0.5f), new Vector2(0, 28), new Vector2(1500, 120), 96, TextAlignmentOptions.Center, panel);
         bannerTitle.textWrappingMode = TextWrappingModes.NoWrap;
+        bannerTitle.color = new Color(0.97f, 0.94f, 0.88f);
         Style(bannerTitle, TextStyle.Title);
-        bannerBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -70), new Vector2(1200, 100), 38, TextAlignmentOptions.Center, panel);
-        bannerBody.color = new Color(0.95f, 0.92f, 0.86f);
+        bannerRule = CreateRule(panel, new Vector2(0.5f, 0.5f), new Vector2(0, -40), Color.white);
+        bannerBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, -88), new Vector2(1300, 60), 34, TextAlignmentOptions.Center, panel);
+        bannerBody.color = new Color(0.93f, 0.9f, 0.85f);
         Style(bannerBody, TextStyle.Body);
         panel.gameObject.SetActive(false);
     }
 
-    // Fades the banner, with a slight scale-in so it lands rather than appears.
+    // Paints the card in on unscaled time, then fades it out once hidden.
     void UpdateBanner()
     {
         if (!banner.gameObject.activeSelf) return;
-        banner.alpha = Mathf.MoveTowards(banner.alpha, bannerShown ? 1f : 0f, Time.unscaledDeltaTime / 0.25f);
-        banner.transform.localScale = Vector3.one * (1.06f - 0.06f * EaseOut(banner.alpha));
-        if (!bannerShown && banner.alpha <= 0f) banner.gameObject.SetActive(false);
+        float since = Time.unscaledTime - bannerShownAt;
+        bannerInk.fillAmount = EaseOut(Mathf.Clamp01(since / 0.45f));
+        Reveal(bannerOverline, since - 0.15f, 100f, -1f, 12f);
+        Reveal(bannerTitle, since - 0.25f, 28f, -1f);
+        AnimateRule(bannerRule, BannerRuleWidth, EaseOut(Mathf.Clamp01((since - 0.35f) / 0.5f)));
+        Reveal(bannerBody, since - 0.5f, -88f, -1f, 0f);
+        if (bannerShown) return;
+        banner.alpha = Mathf.MoveTowards(banner.alpha, 0f, Time.unscaledDeltaTime / 0.3f);
+        if (banner.alpha <= 0f) banner.gameObject.SetActive(false);
     }
 
     GameObject CreateLifeIcon(int index)

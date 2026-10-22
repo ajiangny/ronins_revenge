@@ -575,6 +575,9 @@ public class GameManager : MonoBehaviour
         StartAt(stage, boss);
     }
 
+    // Stage numbers in Roman numerals, to suit the Roman-capital titles.
+    static string Roman(int n) => n switch { 1 => "I", 2 => "II", 3 => "III", 4 => "IV", 5 => "V", 6 => "VI", 7 => "VII", 8 => "VIII", _ => n.ToString() };
+
     IEnumerator BeginRound()
     {
         state = State.Transition;
@@ -587,9 +590,9 @@ public class GameManager : MonoBehaviour
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, Stage.rounds.Length);
         string body = roundIndex > 0 ? "Another army marches in."
-            : stageIndex == 0 ? $"{Stage.name}  —  get ready!"
-            : $"{Stage.name}  —  bigger, faster, angrier armies.";
-        ui.ShowBanner($"STAGE {stageIndex + 1}  ·  ROUND {roundIndex + 1}", body, round.samuraiColor);
+            : stageIndex == 0 ? "Get ready!"
+            : "Bigger, faster, angrier armies.";
+        ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
 
@@ -899,7 +902,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            ui.ShowBanner(activeBoss.Title, activeBoss.Epithet, activeBoss.Colour);
+            ui.ShowBanner(activeBoss.Epithet, System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(activeBoss.Title.ToLowerInvariant()), "", activeBoss.Colour);
             yield return new WaitForSeconds(2.2f);
             ui.HideBanner();
         }

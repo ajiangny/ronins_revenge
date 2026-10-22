@@ -47,6 +47,8 @@ public class Utsusemi : Boss
     bool breaking;
     bool tock;
     int hatsOut;
+    // Its sword wheeling out on the Kasa Wheel's loop in the second phase.
+    bool swordWheeling;
     Move? lastMove;
     int movesSinceHours;
     // Phase 2 is the laser phase: a laser at least every other move, never the same one twice running.
@@ -68,8 +70,9 @@ public class Utsusemi : Boss
     protected override float StaggerSeconds => secondPhase ? 2f : 2.5f;
     // Its slit-eye is only exposed while the hat is off.
     protected override int DamageMultiplier => hatsOut > 0 ? 2 : 1;
-    protected override Sprite[] IdleClip => swordOut && unarmedIdle != null ? unarmedIdle
-        : hatsOut > 0 && bareIdle != null ? bareIdle : art.idle;
+    // The bare head wins while both are out: the missing hat is what the ronin is watching for.
+    protected override Sprite[] IdleClip => hatsOut > 0 && bareIdle != null ? bareIdle
+        : (swordOut || swordWheeling) && unarmedIdle != null ? unarmedIdle : art.idle;
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     float LeftEdge => CameraShake.Center.x - HalfWidth;
@@ -110,6 +113,12 @@ public class Utsusemi : Boss
                 hourStruck |= move == Move.HourStrikes;
                 movesSinceHours = move == Move.HourStrikes ? 0 : movesSinceHours + 1;
                 bool laser = move == Move.HeartLantern || move == Move.Midnight;
+                // Both lasers throw the sword, so they wait for it to wheel home.
+                while (laser && swordWheeling)
+                {
+                    Beat();
+                    yield return null;
+                }
                 movesSinceLaser = laser ? 0 : movesSinceLaser + 1;
                 if (laser) lastLaser = move;
                 switch (move)
@@ -233,8 +242,9 @@ public class Utsusemi : Boss
 
     // Kasa Wheel: it hurls its wide hat like a boomerang. A dotted gold trail shows the loop first: the hat curves
     // down into the ronin's lane where he stands, skims along it, then curls back up to its head. The fight carries on
-    // meanwhile, with its slit-eye exposed and every hit doubled. In the second phase a phantom hat follows a beat
-    // later, aimed at wherever the ronin dodged to. A parried hat is knocked away, and the head stays bare longer.
+    // meanwhile, with its slit-eye exposed and every hit doubled. In the second phase its sword wheels after it a beat
+    // later on its own loop, aimed at wherever the ronin dodged to. A parried hat or sword flies back and circles it,
+    // and only comes home once that riposte is gone.
     IEnumerator KasaWheel()
     {
         if (Random.value < 0.6f) Speak(BossLine.KasaWheel);
@@ -247,20 +257,19 @@ public class Utsusemi : Boss
         yield return Wait(0.55f);
 
         StartCoroutine(FlyHat(path, trail, false));
-        if (secondPhase) StartCoroutine(ThrowPhantom(0.8f));
+        if (secondPhase) StartCoroutine(ThrowSwordWheel(0.8f));
         ShowEye(true);
         Sfx.Play(Sfx.HatWhirr);
     }
 
-    IEnumerator ThrowPhantom(float delay)
+    IEnumerator ThrowSwordWheel(float delay)
     {
-        hatsOut++;
+        swordWheeling = true;
         yield return Wait(delay);
-        hatsOut--;
         if (IsDead) yield break;
         HatPath path = AimHat();
         StartCoroutine(FlyHat(path, TrailDots(path), true));
-        Sfx.Play(Sfx.HatWhirr, 0.8f, 1.15f);
+        Sfx.Play(Sfx.SwordWhirl, 0.8f, 1.15f);
     }
 
     // The hat's loop: down into the lane at the ronin, along it, and back up. Each leg is a cubic curve, except the
@@ -324,17 +333,27 @@ public class Utsusemi : Boss
         return dots;
     }
 
-    IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool phantom)
+    // The hat (or, with sword set, the sword wheeling end over end) flown around the loop as an unbreakable shot.
+    IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool sword)
     {
-        hatsOut++;
+        if (sword) swordWheeling = true;
+        else hatsOut++;
         Arrow hat = Instantiate(arrowPrefab, Head, Quaternion.identity);
         // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
         hat.MakeUnbreakable(null);
-        Sprite[] frames = Fx.Frames(Fx.UtsuKasa);
-        Color tint = phantom ? new Color(0.7f, 0.8f, 1f, 0.55f) : Color.white;
-        if (frames != null) hat.Restyle(frames, 14f, tint, new Vector2(2.6f, 1.18f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
-        else hat.Restyle(ProceduralSprites.Disc, phantom ? new Color(0.4f, 0.45f, 0.55f, 0.55f) : Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
+        Sprite[] frames = Fx.Frames(sword ? Fx.UtsuSword : Fx.UtsuKasa);
+        Vector3 bladeMiddle = Vector3.zero;
+        if (sword)
+        {
+            Sprite blade = frames != null ? frames[0] : ProceduralSprites.White;
+            Vector2 size = frames != null ? (Vector2)blade.bounds.size * SwordScale : new Vector2(0.15f, SwordCoverHeight);
+            hat.Restyle(blade, frames != null ? Color.white : Lace, size, 0.6f, new Color(Steel.r, Steel.g, Steel.b, 0.4f), 2.2f);
+            // The sword art pivots where the blade meets the ground; it wheels about its middle instead.
+            bladeMiddle = Vector3.Scale(blade.bounds.center, hat.Art.transform.lossyScale);
+        }
+        else if (frames != null) hat.Restyle(frames, 14f, Color.white, new Vector2(2.6f, 1.18f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
+        else hat.Restyle(ProceduralSprites.Disc, Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
         transient.Add(hat.gameObject);
 
         float pace = secondPhase ? 0.85f : 1f;
@@ -356,11 +375,17 @@ public class Utsusemi : Boss
             else if (t < legSeconds[0] + legSeconds[1]) target = Vector3.Lerp(path.a3, path.skimEnd, (t - legSeconds[0]) / legSeconds[1]);
             else target = HatReturn(path, Mathf.SmoothStep(0, 1, (t - legSeconds[0] - legSeconds[1]) / legSeconds[2]));
             hat.Steer((target - hat.transform.position) / Time.fixedDeltaTime);
+            if (sword)
+            {
+                Quaternion spin = Quaternion.Euler(0, 0, -720f * t);
+                hat.Art.transform.SetPositionAndRotation(hat.transform.position - spin * bladeMiddle, spin);
+                if (Random.value < 0.4f) Afterimage(hat.Art, new Color(Steel.r, Steel.g, Steel.b, 0.4f));
+            }
 
             // The trail fades out behind the hat as it flies.
             int passed = Mathf.Min(trail.Count, Mathf.FloorToInt(trail.Count * t / total));
             for (; dotsGone < passed; dotsGone++) RemoveTransient(trail[dotsGone]);
-            if (t < legSeconds[0] && Time.time >= nextTassel)
+            if (!sword && t < legSeconds[0] && Time.time >= nextTassel)
             {
                 nextTassel = Time.time + (secondPhase ? 0.3f : 0.4f);
                 Tassel(hat.transform.position);
@@ -372,9 +397,19 @@ public class Utsusemi : Boss
 
         if (knockedAway)
         {
-            // Parried (or it struck the ronin): the hat clatters off and the head stays bare a while longer.
-            Sfx.Play(Sfx.HatClang);
-            yield return Wait(2f);
+            Sfx.Play(sword ? Sfx.ParryClang : Sfx.HatClang);
+            // Parried: it circles the automaton as the ronin's riposte, and is only back once that fades. (The
+            // destroyed arrow still holds what replaced it.) Struck the ronin or cut short: a while bare instead.
+            Kunai riposte = hat.Riposte;
+            if (riposte != null)
+            {
+                while (riposte != null) yield return null;
+            }
+            else
+            {
+                yield return Wait(2f);
+            }
+            if (!IsDead) Fx.Play(Fx.Impact, sword ? Shoulder : Head, sword ? Steel : Gold, 0.9f);
         }
         else if (hat != null)
         {
@@ -382,13 +417,17 @@ public class Utsusemi : Boss
             Destroy(hat.gameObject);
             Tick(0.7f);
         }
-        hatsOut--;
-        // Hat back on its head.
-        if (hatsOut == 0 && !IsDead)
+        if (sword)
         {
-            ShowEye(false);
-            PlayIdle();
+            swordWheeling = false;
         }
+        else
+        {
+            hatsOut--;
+            if (hatsOut == 0) ShowEye(false);
+        }
+        // Back on its head, or in its hand.
+        if (!IsDead) PlayIdle();
     }
 
     void RemoveTransient(SpriteRenderer thing)
@@ -1326,9 +1365,13 @@ public class Utsusemi : Boss
         int strikes = HealthFraction <= 0.25f ? 2 : 1;
         yield return ThrowSword(AtRonin(3f));
         float markX = plantedSword != null ? plantedSword.transform.position.x : ronin.Bounds.center.x;
+        // The slit-eye flares as the core charges, so the second source is no surprise.
+        ElementFx.Glow(Eye, CoreRed, 0.4f, 2.5f, 0.9f, transform);
         yield return Charge();
 
-        Beam left = MakeBeam(), right = MakeBeam();
+        // One hand burns from its slit-eye, the other from its heart.
+        Beam left = MakeBeam(Eye, 1.1f), right = MakeBeam();
+        left.fromEye = true;
         Sfx.PlayLoop(Sfx.LanternBeam, 1f, 0.9f);
         float leftEdge = LeftEdge + 0.3f, rightEdge = RightEdge - 0.3f;
         // The hands stop this far either side of the sword: the gap they leave is the safe spot.
@@ -1404,13 +1447,15 @@ public class Utsusemi : Boss
         }
     }
 
-    // One hand of the clock: a beam from the core to the ground at x, stopped by cover, burning the ronin it crosses.
+    // One hand of the clock: a beam from the core (or eye) to the ground at x, stopped by cover, burning the ronin
+    // it crosses.
     void DrawHand(Beam hand, float x, bool flash)
     {
-        Vector3 end = BeamEnd(x, out Blocker cover);
-        DrawBeam(hand, Core, end, flash, cover == null);
+        Vector3 from = hand.fromEye ? Eye : Core;
+        Vector3 end = BeamEnd(from, x, out Blocker cover);
+        DrawBeam(hand, from, end, flash, cover == null);
         if (cover != null) BurnCover(hand, cover, end);
-        else HitIfCrossed(Core, end);
+        else HitIfCrossed(from, end);
     }
 
     // The ronin's spot on the ground, kept at least margin inside the screen.
@@ -1437,6 +1482,8 @@ public class Utsusemi : Boss
         public SpriteRenderer glow, body, core;
         public FxPlayer flare, hit;
         public float nextFire, nextBurn, nextSpark, lastFireX;
+        // Fired from the slit-eye rather than the core.
+        public bool fromEye;
     }
 
     Beam MakeBeam() => MakeBeam(Core, 1.6f);

@@ -29,6 +29,8 @@ public class Arrow : MonoBehaviour
     public bool Unbreakable { get; private set; }
     // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
     public bool PassesCover { get; set; }
+    // What a parry sent back in its place (the first, for a spread), so its thrower can tell when that's gone.
+    public Kunai Riposte { get; set; }
 
     void Awake()
     {

@@ -118,7 +118,7 @@ match `BoonChoiceUI.boonIcons`.
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
   `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
-  and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
+  and a parried hat circles it as the ronin's riposte, back on its head only once that riposte is gone: `Arrow.Riposte`, set by `Ronin.Deflect`; in phase 2 the sword wheels round a second loop, `ThrowSwordWheel`/`swordWheeling`, and lasers wait for it), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze and lets only `ArmorDamageTaken`, 5%, of each hit's damage through
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
   `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, placed by `PlaceHours` in spread spots numbered in a `ZigZag` order, are shown one by one, then hidden; it `Dash`es
@@ -133,7 +133,7 @@ match `BoonChoiceUI.boonIcons`.
   and throws again). Both open with `ThrowSword` (the `FlySword` flight, then `PlantSword`: a never-breaking
   `Blocker` with the `Utsu_Sword` loop, which beams only spark off in `BurnCover`) and end with `ReclaimSword` (a
   `Dash` down and a `Chop` at the sword). While the sword is out it rests in `GameManager.utsusemiUnarmedIdle`, and
-  the throw wind-up is `utsusemiSwordThrow`, both via `SetThrowFrames`. The beams fire from `Core`, its heart. Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
+  the throw wind-up is `utsusemiSwordThrow`, both via `SetThrowFrames`. The beams fire from `Core`, its heart, except Midnight's left hand, which fires from its `Eye` (`Beam.fromEye`). Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
   and hit the ronin where they cross his height (`HitIfCrossed`), leaving `GroundFire` patches burning along the ground; the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
   Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop`, `HourSlash`, `SwordWhirl` and `SwordPlant`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),

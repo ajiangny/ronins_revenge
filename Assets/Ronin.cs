@@ -387,6 +387,7 @@ public class Ronin : MonoBehaviour
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
+        Kunai sent;
         // Homing shots curve, so they get longer to reach a far target. Boss slashes are drawn leading downwards, so
         // like a parried arrow the copy is flipped to lead the way back.
         if (reflect)
@@ -398,26 +399,29 @@ public class Ronin : MonoBehaviour
             riposte.Mimic(arrowArt);
             riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
             CameraShake.Add(0.25f);
+            sent = riposte;
         }
         else if (Loadout.Has(BoonId.BurningRiposte, out _))
         {
             Color fire = Boons.Info(Element.Fire).Color;
             Kunai fireball = SpawnRiposte(position, Vector3.up, heavy ? 2 : 0, 2.2f, Fx.Fireball, FireballSize, arrowArt, fire);
             fireball.Impacted += OnRiposteImpact;
+            sent = fireball;
         }
         else if (Loadout.Has(BoonId.FrozenRiposte, out float shards))
         {
             Color frost = Boons.Info(Element.Water).Color;
             int count = (int)shards;
-            var sent = new Kunai[count];
+            var spread = new Kunai[count];
             for (int i = 0; i < count; i++)
             {
                 float angle = count > 1 ? Mathf.Lerp(-ShardSpread, ShardSpread, i / (count - 1f)) : 0f;
                 Kunai shard = SpawnRiposte(position, Quaternion.Euler(0, 0, angle) * Vector3.up, 0, 1.2f, Fx.IceShard, ShardSize, arrowArt, frost);
                 shard.Impacted += OnRiposteImpact;
-                for (int j = 0; j < i; j++) shard.IgnoreCollisionsWith(sent[j]);
-                sent[i] = shard;
+                for (int j = 0; j < i; j++) shard.IgnoreCollisionsWith(spread[j]);
+                spread[i] = shard;
             }
+            sent = count > 0 ? spread[0] : null;
         }
         else
         {
@@ -429,7 +433,9 @@ public class Ronin : MonoBehaviour
             riposte.Home(RiposteTarget);
             riposte.Mimic(arrowArt);
             riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
+            sent = riposte;
         }
+        arrow.Riposte = sent;
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);

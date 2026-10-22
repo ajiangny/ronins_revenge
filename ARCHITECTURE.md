@@ -114,7 +114,7 @@ match `BoonChoiceUI.boonIcons`.
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
-- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (120 HP), a karakuri automaton that moves in ticking steps
+- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (120 HP), a karakuri automaton that moves in ticking steps, trailing digital afterimages (`DigitalGhost`: steel-blue and gold `SpriteFlash` silhouettes, faded by `GlitchFade`)
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
   `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
@@ -125,7 +125,7 @@ match `BoonChoiceUI.boonIcons`.
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
-  `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights hang from `Utsu_PlumbPortal` portals opened above and behind it; a cut thread plays `SnapThread`/`DropLooseEnd`, built in code; it `Pace`s about while they swing,
+  `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights hang from `Utsu_PlumbPortal` portals opened above and behind it; a cut thread plays `SnapThread`/`DropLooseEnd`, built in code; it `Pace`s about from the first portal until the swings die,
   `OpenPortal`/`ClosePortal`, and swing through the ronin's lane as a pendulum wave before being reeled back in, flown
   with `Arrow.Steer` per physics step). Phase 2 at half health opens its core and is the laser phase (`NextMove` puts a
   laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams

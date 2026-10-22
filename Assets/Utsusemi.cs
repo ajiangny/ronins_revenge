@@ -14,6 +14,9 @@ public class Utsusemi : Boss
     static readonly Color CoreRed = new Color(1f, 0.22f, 0.18f);
     static readonly Color Lace = new Color(0.92f, 0.94f, 1f, 0.95f);
     static readonly Color Gunmetal = new Color(0.28f, 0.3f, 0.36f);
+    // Its digital afterimages split into its own steel blue and gold, like a signal out of register.
+    static readonly Color GhostBlue = new Color(0.4f, 0.62f, 1f);
+    static readonly Color GhostGold = new Color(1f, 0.8f, 0.35f);
 
     enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight }
 
@@ -200,9 +203,17 @@ public class Utsusemi : Boss
         {
             Vector3 from = anchor;
             Vector3 to = from + Vector3.right * step;
+            // Two digital afterimages a step: one as it sets off and one halfway.
+            DigitalGhost(0.3f);
+            bool halfway = false;
             for (float t = 0; t < StepTime; t += Time.deltaTime * Tempo)
             {
                 anchor = Vector3.Lerp(from, to, Mathf.SmoothStep(0, 1, t / StepTime));
+                if (!halfway && t >= StepTime / 2f)
+                {
+                    halfway = true;
+                    DigitalGhost(0.22f);
+                }
                 yield return null;
             }
             anchor = to;
@@ -560,7 +571,7 @@ public class Utsusemi : Boss
     IEnumerator HourStrikes()
     {
         int count = secondPhase ? 5 : 3;
-        float beat = secondPhase ? 0.32f : 0.5f;
+        float beat = secondPhase ? 0.3f : 0.4f;
         Vector3 row = anchor;
 
         // The announcement, in super armour: it calls the move and stands its ground in a gold shell while the
@@ -570,17 +581,17 @@ public class Utsusemi : Boss
         SpriteRenderer[] shell = ArmorShell();
         Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
         List<HourMark> marks = PlaceHours(count);
-        yield return HoldArmor(shell, 0.5f);
+        yield return HoldArmor(shell, 0.3f);
         foreach (HourMark mark in marks)
         {
             mark.Show(Gold);
             Tick(0.7f);
             yield return HoldArmor(shell, secondPhase ? 0.4f : 0.55f);
         }
-        yield return HoldArmor(shell, 0.45f);
+        yield return HoldArmor(shell, 0.3f);
         foreach (HourMark mark in marks) mark.Hide(0.3f);
         Tick(0.4f);
-        yield return HoldArmor(shell, 0.35f);
+        yield return HoldArmor(shell, 0.25f);
         armored = false;
         foreach (SpriteRenderer part in shell) RemoveTransient(part);
         // A phase break the armour held off lands now.
@@ -596,7 +607,7 @@ public class Utsusemi : Boss
             yield return Chop(mark);
             yield return Dash(row);
             PlayIdle();
-            yield return Wait(beat * 0.4f);
+            yield return Wait(beat * 0.15f);
         }
 
         Beat();
@@ -718,7 +729,7 @@ public class Utsusemi : Boss
         return new Vector3(b.min.x + u * b.size.x, b.min.y + v * b.size.y, 0);
     }
 
-    // A straight clockwork dash, eased hard into a dead stop, leaving steel afterimages along the way.
+    // A straight clockwork dash, eased hard into a dead stop, leaving digital afterimages along the way.
     IEnumerator Dash(Vector3 to)
     {
         const float seconds = 0.2f;
@@ -731,7 +742,7 @@ public class Utsusemi : Boss
             float k = t / seconds;
             if (k >= ghosts / 3f && ghosts < 3)
             {
-                Afterimage(new Color(Steel.r, Steel.g, Steel.b, 0.5f - ghosts * 0.12f));
+                DigitalGhost(0.38f - ghosts * 0.08f);
                 ghosts++;
             }
             anchor = Vector3.Lerp(from, to, 1f - (1f - k) * (1f - k) * (1f - k));
@@ -739,6 +750,78 @@ public class Utsusemi : Boss
         }
         anchor = to;
         Tick(0.6f);
+    }
+
+    // A digital afterimage where it stands now: a flat silhouette split into steel blue and gold a few pixels apart,
+    // nudged sideways a pixel or two like a bad signal, that blinks and fades out in hard steps. Without the flash
+    // material a plain blue-tinted copy stands in.
+    void DigitalGhost(float alpha)
+    {
+        Material flat = Fx.Library != null ? Fx.Library.flashMaterial : null;
+        if (flat == null || sprite.sprite == null)
+        {
+            Afterimage(new Color(GhostBlue.r, GhostBlue.g, GhostBlue.b, alpha));
+            return;
+        }
+        float pixel = sprite.transform.lossyScale.x / sprite.sprite.pixelsPerUnit;
+        float jitter = Random.Range(-2, 3) * pixel;
+        SpawnGhost(flat, GhostBlue, alpha, jitter - 3f * pixel, pixel);
+        SpawnGhost(flat, GhostGold, alpha * 0.7f, jitter + 3f * pixel, pixel);
+    }
+
+    void SpawnGhost(Material flat, Color color, float alpha, float offsetX, float pixel)
+    {
+        var ghost = new GameObject("DigitalGhost").AddComponent<SpriteRenderer>();
+        ghost.transform.SetPositionAndRotation(sprite.transform.position + Vector3.right * offsetX, sprite.transform.rotation);
+        ghost.transform.localScale = sprite.transform.lossyScale;
+        ghost.sprite = sprite.sprite;
+        ghost.flipX = sprite.flipX;
+        ghost.sharedMaterial = flat;
+        ghost.sortingOrder = sprite.sortingOrder - 1;
+        ghost.gameObject.AddComponent<GlitchFade>().Begin(color, alpha, 0.35f, pixel);
+    }
+
+    // Fades a digital afterimage in three hard steps, dropping out for a frame now and then and tearing a couple of
+    // pixels sideways, like a bad signal.
+    class GlitchFade : MonoBehaviour
+    {
+        SpriteRenderer target;
+        MaterialPropertyBlock block;
+        Color color;
+        float alpha, seconds, age, pixel;
+        Vector3 home;
+
+        public void Begin(Color tint, float startAlpha, float lifetime, float pixelSize)
+        {
+            target = GetComponent<SpriteRenderer>();
+            block = new MaterialPropertyBlock();
+            color = tint;
+            alpha = startAlpha;
+            seconds = lifetime;
+            pixel = pixelSize;
+            home = transform.position;
+            Apply();
+        }
+
+        void Update()
+        {
+            age += Time.deltaTime;
+            if (age >= seconds)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Apply();
+        }
+
+        void Apply()
+        {
+            float stepped = Mathf.Ceil((1f - age / seconds) * 3f) / 3f;
+            bool dropped = Random.value < 0.15f;
+            transform.position = home + Vector3.right * (Random.value < 0.25f ? Random.Range(-2, 3) * pixel : 0f);
+            block.SetColor(FlashColor, new Color(color.r, color.g, color.b, dropped ? 0f : alpha * stepped));
+            target.SetPropertyBlock(block);
+        }
     }
 
     const float ChopReach = 0.95f;
@@ -966,6 +1049,11 @@ public class Utsusemi : Boss
         float roninX = ronin.Bounds.center.x;
         const float margin = 2.5f;
         // The first hangs over the ronin; the rest spread out either side of him. Left to right, for the wave.
+        // It doesn't stand and watch: it strides to fresh spots under the portals from the moment they open until the
+        // swings die down.
+        float swing = secondPhase ? 3.6f : 3.2f;
+        const float drop = 0.6f, fadeIn = 0.8f, damp = 0.6f, reel = 0.5f;
+        pacing = StartCoroutine(Pace(count * 0.12f + 0.6f + drop + swing + damp));
         var xs = new List<float>();
         for (int i = 0; i < count; i++)
         {
@@ -1011,19 +1099,15 @@ public class Utsusemi : Boss
         IgnoreEachOther(new List<Arrow>(weights));
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
-        const float drop = 0.6f, fadeIn = 0.8f, damp = 0.6f, reel = 0.5f;
         // Where each weight hung last, so a cut thread snaps where it was.
         var lastHang = new Vector3[count];
         const float amplitude = 28f * Mathf.Deg2Rad;
         // Each swings this far behind its left-hand neighbour, so a ripple runs along the row.
         const float waveStep = 0.7f;
-        float swing = secondPhase ? 3.6f : 3.2f;
         float omega = Mathf.PI * 2f / (secondPhase ? 2f : 2.4f);
         float halfPeriod = Mathf.PI / omega;
         float nextTick = drop + halfPeriod * 0.5f;
         float total = drop + swing + damp + reel;
-        // It doesn't stand and watch the pendulums: it keeps striding to fresh spots under them.
-        pacing = StartCoroutine(Pace(drop + swing));
         // Steered once per physics step: a velocity worked out from a render frame's delta overshoots the next step.
         for (float t = 0; t < total; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
         {
@@ -1145,8 +1229,8 @@ public class Utsusemi : Boss
     IEnumerator Pace(float seconds)
     {
         float until = Time.time + seconds;
-        yield return Wait(0.4f);
-        while (Time.time < until - 0.5f)
+        yield return Wait(0.2f);
+        while (Time.time < until - 0.3f)
         {
             yield return Stride(RandomX(2.5f));
             yield return Wait(Random.Range(0.25f, 0.5f));

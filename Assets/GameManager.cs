@@ -379,6 +379,7 @@ public class GameManager : MonoBehaviour
             Row("Slash", Key("SPACE")) +
             Row("Spirit Shuriken", Key("E") + "    or    " + Key("↑")) +
             Row("Parry arrows", Key("SHIFT") + "    or    " + Key("↓")) +
+            Row("Show ability names", "hold " + Key("TAB")) +
             Row("Pause", Key("ESC")) +
             "</align>\n" +
             $"Clear three samurai armies in each of the {stages.Length} stages.\nA warlord waits at the end of every stage.\n" +

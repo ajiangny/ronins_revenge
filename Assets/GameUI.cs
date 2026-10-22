@@ -100,7 +100,8 @@ public class GameUI : MonoBehaviour
         fade.color = new Color(0f, 0f, 0f, alpha);
     }
 
-    // Arcade layout: score top left, stage and samurai left top right, lives bottom left. The top centre stays clear
+    // Arcade layout: score top left, stage and samurai left top right, lives in a thin strip along the very bottom
+    // left, below the ronin's feet so he's never hidden behind them. The top centre stays clear
     // for the boss bar; the high score is shown on the title and end menus instead. Small dim labels sit over big
     // bright numbers, on a shade that fades out before the army's top row.
     void BuildHud()
@@ -134,9 +135,7 @@ public class GameUI : MonoBehaviour
             hudParts.Add(counterText.gameObject);
         }
 
-        TextMeshProUGUI livesLabel = HudLabel("LivesLabel", "LIVES", new Vector2(0f, 0f), new Vector2(36, 76), TextAlignmentOptions.BottomLeft);
-        livesLabel.rectTransform.sizeDelta = new Vector2(200, 36);
-        livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(24, 24), new Vector2(400, 52));
+        livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(20, 6), new Vector2(400, LifeIconSize));
         hudParts.Add(livesRow.gameObject);
     }
 
@@ -152,7 +151,7 @@ public class GameUI : MonoBehaviour
         if (godModeTag == null)
         {
             if (!on) return;
-            godModeTag = CreateText("GodMode", new Vector2(0f, 0f), new Vector2(36, 124), new Vector2(500, 36), 28, TextAlignmentOptions.BottomLeft);
+            godModeTag = CreateText("GodMode", new Vector2(0f, 0f), new Vector2(24, 46), new Vector2(500, 36), 28, TextAlignmentOptions.BottomLeft);
             godModeTag.text = "GOD MODE";
             godModeTag.color = HighScoreColour;
             godModeTag.characterSpacing = 8;
@@ -612,9 +611,11 @@ public class GameUI : MonoBehaviour
         if (banner.alpha <= 0f) banner.gameObject.SetActive(false);
     }
 
+    const float LifeIconSize = 34f;
+
     GameObject CreateLifeIcon(int index)
     {
-        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * 58 + 12, 0), new Vector2(52, 52));
+        RectTransform icon = CreateRect("Life" + index, livesRow, new Vector2(0f, 0.5f), new Vector2(index * (LifeIconSize + 6f), 0), new Vector2(LifeIconSize, LifeIconSize));
         Image image = icon.gameObject.AddComponent<Image>();
         image.sprite = lifeIcon;
         image.preserveAspect = true;

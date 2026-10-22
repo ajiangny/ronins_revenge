@@ -44,6 +44,7 @@ public class BoonChoiceUI : MonoBehaviour
         public Image icon;
         public TextMeshProUGUI letter;
         public Image cooldown;
+        public TextMeshProUGUI tip;
     }
 
     const float PortraitPixelScale = 6f;
@@ -89,6 +90,12 @@ public class BoonChoiceUI : MonoBehaviour
     readonly HudSlot[] hudSlots = new HudSlot[3];
     RectTransform passiveRow;
     readonly List<Image> passiveIcons = new List<Image>();
+    readonly List<TextMeshProUGUI> passiveTips = new List<TextMeshProUGUI>();
+    CanvasGroup tips;
+    static readonly string[] SlotKeys = { "Space", "E", "Shift" };
+    static readonly string[] SlotNames = { "Slash", "Spirit Shuriken", "Parry" };
+    const float SlotSize = 68f;
+    const float SlotGap = 12f;
 
     public bool IsOpen => panel != null && panel.activeSelf;
 
@@ -285,6 +292,11 @@ public class BoonChoiceUI : MonoBehaviour
     {
         hudSlots[(int)BoonSlot.Special].cooldown.fillAmount = 1f - ronin.ShurikenCharge;
         hudSlots[(int)BoonSlot.Parry].cooldown.fillAmount = 1f - ronin.ParryCharge;
+
+        // Names and keys stay hidden so the column is small; holding Tab (or the gamepad's View button) shows them.
+        bool held = (Keyboard.current != null && Keyboard.current.tabKey.isPressed)
+            || (Gamepad.current != null && Gamepad.current.selectButton.isPressed);
+        tips.alpha = Mathf.MoveTowards(tips.alpha, held ? 1f : 0f, Time.unscaledDeltaTime / 0.12f);
     }
 
     // Called whenever the loadout changes: slot medallions take the boon's icon and its element's colour.
@@ -300,6 +312,7 @@ public class BoonChoiceUI : MonoBehaviour
                 Color color = Boons.Info(held.Boon.Element).Color;
                 SetIcon(slot.icon, slot.letter, held.Boon, color);
                 slot.ring.color = color;
+                slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {held.Boon.Name}";
             }
             else
             {
@@ -308,23 +321,28 @@ public class BoonChoiceUI : MonoBehaviour
                 slot.icon.color = ability != null ? Color.white : new Color(0.25f, 0.25f, 0.3f);
                 slot.letter.text = ability != null ? "" : new[] { "B", "S", "P" }[i];
                 slot.ring.color = new Color(0.55f, 0.55f, 0.6f);
+                slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {SlotNames[i]}";
             }
         }
 
         while (passiveIcons.Count < loadout.Passives.Count)
         {
-            RectTransform rect = GameUI.CreateRect("Passive" + passiveIcons.Count, passiveRow, new Vector2(1f, 0.5f),
-                new Vector2(-passiveIcons.Count * 52f, 0), new Vector2(46, 46));
+            // Passives stack up the column above the ability slots.
+            RectTransform rect = GameUI.CreateRect("Passive" + passiveIcons.Count, passiveRow, new Vector2(0.5f, 0f),
+                new Vector2(0, passiveIcons.Count * 52f), new Vector2(46, 46));
             passiveIcons.Add(rect.gameObject.AddComponent<Image>());
             ui.Style(GameUI.CreateText(rect, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(46, 46), 28, TextAlignmentOptions.Center), TextStyle.Hud);
+            passiveTips.Add(CreateTip(passiveRow.anchoredPosition + new Vector2(60f, 23f + (passiveIcons.Count - 1) * 52f)));
         }
         for (int i = 0; i < passiveIcons.Count; i++)
         {
             bool shown = i < loadout.Passives.Count;
             passiveIcons[i].gameObject.SetActive(shown);
+            passiveTips[i].gameObject.SetActive(shown);
             if (!shown) continue;
             BoonDefinition boon = loadout.Passives[i].Boon;
             SetIcon(passiveIcons[i], passiveIcons[i].GetComponentInChildren<TextMeshProUGUI>(), boon, Boons.Info(boon.Element).Color);
+            passiveTips[i].text = boon.Name;
         }
     }
 
@@ -449,40 +467,59 @@ public class BoonChoiceUI : MonoBehaviour
     {
         foreach (HudSlot slot in hudSlots) slot.ring.gameObject.SetActive(visible);
         passiveRow.gameObject.SetActive(visible);
+        tips.gameObject.SetActive(visible);
     }
 
-    // Bottom-right: the three ability slots (with cooldown sweeps) and a row of passive icons above them.
+    // A column up the left edge: the three ability slots (with cooldown sweeps), then the passives above them. It
+    // starts above the ronin's head, so he's never hidden behind it when he walks into the corner.
     void BuildHud()
     {
-        Vector2 corner = new Vector2(1f, 0f);
-        string[] keys = { "Space", "E", "Shift" };
+        Vector2 corner = Vector2.zero;
+        tips = GameUI.CreateRect("Tooltips", transform, Vector2.zero, Vector2.zero, Vector2.zero).gameObject.AddComponent<CanvasGroup>();
+        RectTransform tipsRect = (RectTransform)tips.transform;
+        tipsRect.anchorMin = Vector2.zero;
+        tipsRect.anchorMax = Vector2.one;
+        tipsRect.sizeDelta = Vector2.zero;
+        tips.alpha = 0f;
+        tips.blocksRaycasts = false;
+
+        float inner = SlotSize - 10f;
         for (int i = 0; i < hudSlots.Length; i++)
         {
-            Vector2 position = new Vector2(-250 + i * 100, 64);
+            // Attack on top, then Shuriken, then Parry nearest the ronin.
+            Vector2 position = new Vector2(24f, 170f + (hudSlots.Length - 1 - i) * (SlotSize + SlotGap));
             var slot = new HudSlot();
-            slot.ring = CreateImage("Slot" + i, transform, corner, position, new Vector2(88, 88), ProceduralSprites.Disc);
-            Image inner = CreateImage("Inner", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(78, 78), ProceduralSprites.Disc);
-            inner.color = new Color(0.06f, 0.04f, 0.09f);
-            slot.icon = CreateImage("Icon", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70, 70), null);
+            slot.ring = CreateImage("Slot" + i, transform, corner, position, new Vector2(SlotSize, SlotSize), ProceduralSprites.Disc);
+            Image back = CreateImage("Inner", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(inner, inner), ProceduralSprites.Disc);
+            back.color = new Color(0.06f, 0.04f, 0.09f);
+            slot.icon = CreateImage("Icon", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(inner - 6f, inner - 6f), null);
             slot.icon.preserveAspect = true;
-            slot.letter = GameUI.CreateText(slot.ring.rectTransform, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(70, 70), 36, TextAlignmentOptions.Center);
+            slot.letter = GameUI.CreateText(slot.ring.rectTransform, font, "Letter", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(inner, inner), 30, TextAlignmentOptions.Center);
             ui.Style(slot.letter, TextStyle.Hud);
-            slot.cooldown = CreateImage("Cooldown", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(88, 88), ProceduralSprites.Disc);
+            slot.cooldown = CreateImage("Cooldown", slot.ring.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(SlotSize, SlotSize), ProceduralSprites.Disc);
             slot.cooldown.color = new Color(0f, 0f, 0f, 0.65f);
             slot.cooldown.type = Image.Type.Filled;
             slot.cooldown.fillMethod = Image.FillMethod.Radial360;
             slot.cooldown.fillOrigin = (int)Image.Origin360.Top;
             slot.cooldown.fillClockwise = false;
             slot.cooldown.fillAmount = 0f;
-            TextMeshProUGUI key = GameUI.CreateText(slot.ring.rectTransform, font, "Key", new Vector2(0.5f, 0f), new Vector2(0, -26), new Vector2(140, 34), 26, TextAlignmentOptions.Center);
-            key.text = MenuUI.KeyCap(keys[i], false);
-            key.color = MutedText;
-            ui.Style(key, TextStyle.Hint);
+            slot.tip = CreateTip(position + new Vector2(SlotSize + 14f, SlotSize / 2f));
+            slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {SlotNames[i]}";
             hudSlots[i] = slot;
         }
 
-        passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(-30, 192), new Vector2(400, 50));
-        passiveRow.pivot = new Vector2(1f, 0.5f);
+        passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(35f, 170f + hudSlots.Length * (SlotSize + SlotGap)), new Vector2(46, 400));
+    }
+
+    // A key and name to the right of a HUD icon, shown while the player holds Tab. `position` is from the screen's
+    // bottom-left corner to the text's left edge.
+    TextMeshProUGUI CreateTip(Vector2 position)
+    {
+        TextMeshProUGUI tip = GameUI.CreateText(tips.transform, font, "Tip", Vector2.zero, position, new Vector2(520, 44), 28, TextAlignmentOptions.Left);
+        tip.rectTransform.pivot = new Vector2(0f, 0.5f);
+        tip.textWrappingMode = TextWrappingModes.NoWrap;
+        ui.Style(tip, TextStyle.Hud);
+        return tip;
     }
 
     static Image CreateImage(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Sprite sprite)

@@ -74,7 +74,7 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | Lives are health: `GameManager.lives` out of `maxLives`, which only Tidal Renewal raises (to `Boons.MaxLives`). The HUD shows an empty heart per lost life (`GameUI.SetLives`, outline built by `ProceduralSprites.Hollow`) | `GameManager`, `GameUI` |
 | Heart drops (`heartDropChance`, 20%) heal one lost life; at full health a heart can't be taken (`GameManager.CanHeal`) and survives `ClearProjectiles` | `Blocker.Broken` (hits only, not trampling or a boss razing) → `GameManager.OnBlockerBroken` / `OnHeartCollected`; art is `GameUI.LifeIcon` |
 | Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul`. Until the first soul of a run is caught, `Soul.ShowHint` adds the bobbing `GameManager.soulHintArrow` (`UI/SoulArrow`, wired by Apply Boon Art) |
-| Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
+| Boon pick screen + HUD slot medallions (left-edge column; hold Tab for key/name tips) | `BoonChoiceUI.cs` (built entirely in code) |
 
 Rule: kills from `KillSource.Effect` never trigger further effects (no chain reactions). `BoonId` order must
 match `BoonChoiceUI.boonIcons`.

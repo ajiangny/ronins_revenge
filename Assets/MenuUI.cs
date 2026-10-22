@@ -366,7 +366,8 @@ public class MenuUI : MonoBehaviour
                 continue;
             }
             row.root.localScale = Vector3.one * (1f + 0.08f * k);
-            row.bar.rectTransform.sizeDelta = new Vector2(RowWidth * k, row.bar.rectTransform.sizeDelta.y);
+            if (row.bar.type == Image.Type.Filled) row.bar.fillAmount = k;
+            else row.bar.rectTransform.sizeDelta = new Vector2(RowWidth * k, row.bar.rectTransform.sizeDelta.y);
             row.label.color = onPaper ? Color.Lerp(Ink, InkAccent, k) : Color.Lerp(Idle, Color.white, k);
             // On the red selection bar a red fill would vanish, so it turns white.
             // On paper the bar is a pale wash, so the fill stays red.
@@ -395,10 +396,20 @@ public class MenuUI : MonoBehaviour
             row.root.pivot = new Vector2(0.5f, 0.5f);
             row.root.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
 
-            row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, RowHeight - 14f)).gameObject.AddComponent<Image>();
-            row.bar.sprite = ProceduralSprites.White;
-            row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : onPaper ? 0.14f : 0.32f);
-            row.bar.raycastTarget = false;
+            if (light || onPaper)
+            {
+                row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, RowHeight - 14f)).gameObject.AddComponent<Image>();
+                row.bar.sprite = ProceduralSprites.White;
+                row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.14f);
+                row.bar.raycastTarget = false;
+            }
+            else
+            {
+                // Over the dimmed game the selection is a stroke of red ink, like the stage and boon cards; it paints
+                // on from the left as the marker arrives.
+                row.bar = GameUI.CreateInk(row.root, new Vector2(0.5f, 0.5f), new Vector2(30f, 0), new Vector2(RowWidth + 60f, RowHeight + 10f),
+                    new Color(Accent.r, Accent.g, Accent.b, 0.38f));
+            }
 
             // A small diamond to the left of the selected label.
             row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-RowWidth / 2f + 46f, 0), new Vector2(20, 20));

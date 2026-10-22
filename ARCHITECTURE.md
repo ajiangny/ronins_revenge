@@ -178,8 +178,8 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   (`ProceduralSprites.InkStroke`) that paints on through its horizontal fill. `GameUI.CreateRule`/`AnimateRule`
   is the divider: a tapered brush line (`ProceduralSprites.BrushLine`) with the menus' diamond at its middle,
   drawn out from the centre. `GameUI.Reveal` makes a title line rise in as its letter spacing closes up. Key
-  hints use `MenuUI.KeyCap`. The stage card and the boon screen use all four; the boss intro keeps its own rule
-  and wash.
+  hints use `MenuUI.KeyCap`. The stage card and the boon screen use all four, and dark `MenuUI` pages use the ink stroke as the
+  selection bar (paper pages keep a flat wash); the boss intro keeps its own rule and wash.
 - `MenuUI.cs` — one full-screen menu page at a time: title, optional rich-text body, a list of
   `MenuUI.Item.Button` / `MenuUI.Item.Slider` rows. Keyboard (arrows/WASD, Enter/Space, Esc/Backspace), mouse
   (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the

@@ -26,6 +26,8 @@ public class GameManager : MonoBehaviour
     enum State { Title, Transition, Playing, Choosing, Paused, GameOver }
 
     const string HighScoreKey = "HighScore";
+    // A Spirit Offering taken at full health gives these points, times the stage number.
+    const int OfferingPoints = 500;
     static bool skipTitle;
     // Dev menu testing aids. Statics, so god mode and a pending jump survive the scene reload that starts the run.
     static bool godMode;
@@ -60,6 +62,8 @@ public class GameManager : MonoBehaviour
     [SerializeField, Range(0, 1)] float soulDropChance = 0.07f;
     [Tooltip("A soul always drops after this many kills without one.")]
     [SerializeField] int soulPityKills = 15;
+    [Tooltip("Once the ronin holds a boon, the chance a soul takes one of his elements (weighted by how many boons of each he holds) instead of a random one.")]
+    [SerializeField, Range(0, 1)] float soulElementBias = 0.5f;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
     [Tooltip("Chance that a blocker worn down by hits drops a heart, which heals a lost life.")]
@@ -188,6 +192,8 @@ public class GameManager : MonoBehaviour
     // A soul that reached the ronin while the round was wrapping up; its boons are offered before the next round.
     Element? gatheredSoul;
     int killsSinceSoul;
+    // The element F5's next soul brings.
+    int devSoulElement;
     // Souls carry a hint arrow until the player has caught one this run.
     bool soulCaught;
     FxPlayer aura;
@@ -445,7 +451,7 @@ public class GameManager : MonoBehaviour
         }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
-        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode</color></size>",
+        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul</color></size>",
             items.ToArray(), back, startIndex, paper: OnPaper);
     }
 
@@ -508,7 +514,8 @@ public class GameManager : MonoBehaviour
     }
 
     // Testing shortcuts (Editor and development builds): F1 wipes out the current army, F2 skips to the last
-    // stage's boss, F3 opens the dev menu, F4 toggles god mode.
+    // stage's boss, F3 opens the dev menu, F4 toggles god mode, F5 drops a soul (Fire, Frost, Storm in turn) at the
+    // ronin's feet.
     void DevHotkeys(Keyboard keyboard)
     {
         if (keyboard.f4Key.wasPressedThisFrame) SetGodMode(!godMode);
@@ -525,6 +532,10 @@ public class GameManager : MonoBehaviour
         if (keyboard.f1Key.wasPressedThisFrame)
         {
             KillArmy();
+        }
+        else if (keyboard.f5Key.wasPressedThisFrame && activeSoul == null)
+        {
+            SpawnSoul(ronin.Feet + Vector3.up * 2f, (Element)(devSoulElement++ % 3));
         }
         else if (keyboard.f2Key.wasPressedThisFrame && activeBoss == null)
         {
@@ -691,6 +702,7 @@ public class GameManager : MonoBehaviour
         soulCaught = false;
         ronin.Loadout = loadout;
         effects = new BoonEffects(army, ronin, loadout);
+        army.SpeedUpScale = loadout.MarchSpeedUpScale;
         shownElement = null;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
@@ -705,9 +717,26 @@ public class GameManager : MonoBehaviour
         if (!guaranteed && Random.value >= soulDropChance && killsSinceSoul < soulPityKills) return;
 
         killsSinceSoul = 0;
-        var element = (Element)Random.Range(0, 3);
+        SpawnSoul(position, PickSoulElement());
+    }
+
+    void SpawnSoul(Vector3 position, Element element)
+    {
         activeSoul = Soul.Spawn(position, element, ArtFor(element)?.soulFrames, ronin, OnSoulCollected);
         if (!soulCaught) activeSoul.ShowHint(soulHintArrow);
+    }
+
+    // Like the gods a Hades run keeps meeting, souls lean toward the elements the ronin already carries.
+    Element PickSoulElement()
+    {
+        if (loadout.BoonCount == 0 || Random.value >= soulElementBias) return (Element)Random.Range(0, 3);
+        float roll = Random.value * loadout.BoonCount;
+        for (int i = 0; i < 3; i++)
+        {
+            roll -= loadout.ElementCount((Element)i);
+            if (roll < 0f) return (Element)i;
+        }
+        return loadout.DominantElement ?? Element.Fire;
     }
 
     // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades. One gathered at the
@@ -767,11 +796,11 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = true;
     }
 
-    // Pauses on the boon screen and runs afterPick once a boon is taken. False (and nothing shown) when the element
-    // has nothing left to offer.
-    bool OfferBoons(Element element, System.Action afterPick)
+    // Pauses on the boon screen and runs afterPick once a boon is taken. An element with nothing left to give
+    // offers a Spirit Offering instead. False (and nothing shown) only when nothing could be drawn.
+    bool OfferBoons(Element element, System.Action afterPick, bool ensureCapstone = false, Rarity minRarity = Rarity.Common)
     {
-        var offers = Boons.Draw(element, 3, loadout, maxLives);
+        var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity);
         if (offers.Count == 0) return false;
 
         state = State.Choosing;
@@ -801,7 +830,22 @@ public class GameManager : MonoBehaviour
                 int gained = Mathf.Min((int)value, Boons.MaxLives - maxLives);
                 maxLives += gained;
                 lives += gained;
+                // From Rare, the pond also mends every life already lost.
+                if (offer.Rarity >= Rarity.Rare) lives = maxLives;
                 ui.SetLives(lives, maxLives);
+                break;
+            case BoonId.SpiritOffering:
+                if (lives < maxLives)
+                {
+                    lives++;
+                    ui.SetLives(lives, maxLives);
+                }
+                else
+                {
+                    score += OfferingPoints * (stageIndex + 1);
+                    highScore = Mathf.Max(highScore, score);
+                    ui.SetScore(score);
+                }
                 break;
             case BoonId.GlacierWall:
                 blockers.Rebuild(loadout.BlockerHealthMultiplier);
@@ -811,6 +855,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
         }
+        army.SpeedUpScale = loadout.MarchSpeedUpScale;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
     }
@@ -915,12 +960,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // The stage's reward: a Duo or Legendary when one is within reach, like a boss chest evolving a weapon, and
+    // never below Rare.
     void OfferStageBoon()
     {
-        var element = (Element)Random.Range(0, 3);
+        List<BoonDefinition> capstones = Boons.EligibleCapstones(loadout);
+        Element element = PickSoulElement();
+        if (capstones.Count > 0)
+        {
+            BoonDefinition capstone = capstones[Random.Range(0, capstones.Count)];
+            element = capstone.Partner is Element partner && Random.value < 0.5f ? partner : capstone.Element;
+        }
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
         Sfx.Play(Sfx.SoulCollect);
-        if (!OfferBoons(element, NextStage)) NextStage();
+        if (!OfferBoons(element, NextStage, true, Rarity.Rare)) NextStage();
     }
 
     // The music cuts out, smoke rolls in across the top of the screen, and the stage's warlord descends.

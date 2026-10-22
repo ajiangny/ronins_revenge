@@ -18,6 +18,8 @@ public class CharacterArt : ScriptableObject
     public Sprite[] runRight;
     [Tooltip("The ronin walking away up the screen, between maps. Leave empty to bob on the idle clip instead.")]
     public Sprite[] walkUp;
+    [Tooltip("The ronin's spirit wisps, one per sprite on a canvas matching his frames; layered on and bobbed in code.")]
+    public Sprite[] wisps;
 
     [Tooltip("Frames per second for the looping idle/march clip.")]
     public float idleFps = 6f;

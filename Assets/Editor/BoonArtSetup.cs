@@ -34,6 +34,12 @@ public static class BoonArtSetup
             baseRonin.parry = parry;
             EditorUtility.SetDirty(baseRonin);
         }
+        Sprite[] wisps = ExtractWisps(Load("Characters/Ronin/Ronin_Base"));
+        if (wisps.Length > 0)
+        {
+            baseRonin.wisps = wisps;
+            EditorUtility.SetDirty(baseRonin);
+        }
 
         Sprite shuriken = Load("Projectiles/Shuriken");
         if (shuriken != null)
@@ -111,6 +117,7 @@ public static class BoonArtSetup
         art.runLeft = Recolor(source.runLeft, suffix, hue, boost);
         art.runRight = Recolor(source.runRight, suffix, hue, boost);
         art.walkUp = Recolor(source.walkUp, suffix, hue, boost);
+        art.wisps = Recolor(source.wisps, suffix, hue, boost);
         art.idleFps = source.idleFps;
         art.actionFps = source.actionFps;
         art.runFps = source.runFps;
@@ -228,6 +235,79 @@ public static class BoonArtSetup
         Object.DestroyImmediate(texture);
         AssetDatabase.ImportAsset(targetPath);
         return AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
+    }
+
+    // Only his base pose has the two spirit wisps floating beside him; his animation frames were drawn without them.
+    // Cuts each wisp (a patch of flame-green) onto its own canvas the size of his frames, left to right, as
+    // <name>_Wisp_<n>.png next to the source, so the Ronin can layer them on and bob them.
+    const int MinWispPixels = 4;
+
+    static Sprite[] ExtractWisps(Sprite source)
+    {
+        if (source == null) return new Sprite[0];
+        string sourcePath = AssetDatabase.GetAssetPath(source);
+        string folder = Path.GetDirectoryName(sourcePath).Replace('\\', '/');
+        string name = Path.GetFileNameWithoutExtension(sourcePath).Replace("_Base", "");
+
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+        texture.LoadImage(File.ReadAllBytes(sourcePath));
+        int width = texture.width, height = texture.height;
+        Color32[] pixels = texture.GetPixels32();
+        Object.DestroyImmediate(texture);
+
+        var flame = new bool[pixels.Length];
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            if (pixels[i].a == 0) continue;
+            Color.RGBToHSV(pixels[i], out float h, out float s, out float _);
+            flame[i] = h >= FlameHueMin && h <= FlameHueMax && s >= 0.15f;
+        }
+
+        var patches = new List<(int left, List<int> pixels)>();
+        var seen = new bool[pixels.Length];
+        var stack = new Stack<int>();
+        for (int start = 0; start < pixels.Length; start++)
+        {
+            if (!flame[start] || seen[start]) continue;
+            var patch = new List<int>();
+            int left = width;
+            stack.Push(start);
+            seen[start] = true;
+            while (stack.Count > 0)
+            {
+                int i = stack.Pop();
+                patch.Add(i);
+                int x = i % width, y = i / width;
+                left = Mathf.Min(left, x);
+                for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    int nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    int n = ny * width + nx;
+                    if (!flame[n] || seen[n]) continue;
+                    seen[n] = true;
+                    stack.Push(n);
+                }
+            }
+            if (patch.Count >= MinWispPixels) patches.Add((left, patch));
+        }
+        patches.Sort((a, b) => a.left.CompareTo(b.left));
+
+        var sprites = new Sprite[patches.Count];
+        for (int w = 0; w < patches.Count; w++)
+        {
+            var canvas = new Color32[pixels.Length];
+            foreach (int i in patches[w].pixels) canvas[i] = pixels[i];
+            var wisp = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            wisp.SetPixels32(canvas);
+            string targetPath = $"{folder}/{name}_Wisp_{w}.png";
+            File.WriteAllBytes(targetPath, wisp.EncodeToPNG());
+            Object.DestroyImmediate(wisp);
+            AssetDatabase.ImportAsset(targetPath);
+            sprites[w] = AssetDatabase.LoadAssetAtPath<Sprite>(targetPath);
+        }
+        return sprites;
     }
 
     // Every numbered frame <prefix>0, <prefix>1, ... that exists.

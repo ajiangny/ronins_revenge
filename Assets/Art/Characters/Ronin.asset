@@ -64,6 +64,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 104cb72596adc41d682b9dabbd871a8e, type: 3}
   - {fileID: 21300000, guid: 7bb3573287cf84c4b8a59c85b4c46ca6, type: 3}
   - {fileID: 21300000, guid: 9e19f9e58f0c44d69902831a228fd69c, type: 3}
+  wisps:
+  - {fileID: 21300000, guid: f7f9f1f3b110043ce8947429eadcf89f, type: 3}
+  - {fileID: 21300000, guid: a612441dccf25446da65a90073968e47, type: 3}
   idleFps: 5
   actionFps: 12
   runFps: 14

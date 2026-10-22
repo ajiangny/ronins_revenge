@@ -30,6 +30,10 @@ public class Ronin : MonoBehaviour
     [SerializeField] float screenMargin = 0.2f;
     [Tooltip("Degrees between slashes (or kunai) when Inferno Fan sends several at once.")]
     [SerializeField] float fanAngle = 9f;
+    [Tooltip("Art pixels the spirit wisps bob up and down.")]
+    [SerializeField] float wispBobPixels = 1.5f;
+    [Tooltip("Seconds per bob of the spirit wisps.")]
+    [SerializeField] float wispPeriod = 1.8f;
 
     [Header("Spirit Shuriken (E / Up)")]
     [Tooltip("Leave empty to throw a big spinning kunai until the shuriken art is in.")]
@@ -84,6 +88,7 @@ public class Ronin : MonoBehaviour
     Rigidbody body;
     SpriteRenderer sprite;
     SpriteRenderer aura;
+    readonly System.Collections.Generic.List<SpriteRenderer> wisps = new System.Collections.Generic.List<SpriteRenderer>();
     SpriteAnimator animator;
     Camera cam;
     readonly Collider[] parryBuffer = new Collider[16];
@@ -166,6 +171,31 @@ public class Ronin : MonoBehaviour
             }
         }
         UpdateLoopClip();
+        UpdateWisps();
+    }
+
+    // His animation frames were drawn without the spirit wisps from his base art, so they're layered on here,
+    // each bobbing out of step with the other, snapped to whole art pixels.
+    void UpdateWisps()
+    {
+        Sprite[] frames = art.wisps ?? Array.Empty<Sprite>();
+        while (wisps.Count < frames.Length)
+        {
+            var wisp = new GameObject("Wisp").AddComponent<SpriteRenderer>();
+            wisp.transform.SetParent(sprite.transform, false);
+            wisp.sortingOrder = sprite.sortingOrder + 1;
+            wisps.Add(wisp);
+        }
+        for (int i = 0; i < wisps.Count; i++)
+        {
+            SpriteRenderer wisp = wisps[i];
+            wisp.sprite = i < frames.Length ? frames[i] : null;
+            wisp.enabled = sprite.enabled && wisp.sprite != null;
+            wisp.color = sprite.color;
+            if (wisp.sprite == null) continue;
+            float bob = Mathf.Round(Mathf.Sin((Time.time / wispPeriod + i * 0.5f) * Mathf.PI * 2f) * wispBobPixels);
+            wisp.transform.localPosition = Vector3.up * (bob / wisp.sprite.pixelsPerUnit);
+        }
     }
 
     bool Parrying => Time.time < parryUntil;

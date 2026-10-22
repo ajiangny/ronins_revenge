@@ -92,7 +92,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip utsusemiDefeatLine;
     [SerializeField] AudioClip utsusemiStaggerLine;
     [SerializeField] AudioClip utsusemiKasaLine;
-    [SerializeField] AudioClip utsusemiEscapementLine;
+    [FormerlySerializedAs("utsusemiEscapementLine")]
+    [SerializeField] AudioClip utsusemiHourStrikesLine;
     [SerializeField] AudioClip[] utsusemiHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
@@ -791,7 +792,7 @@ public class GameManager : MonoBehaviour
     struct BossVoice
     {
         public Sprite portrait, closeup;
-        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, escapement;
+        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes;
         public AudioClip[] hurt;
 
         public AudioClip Clip(BossLine line) => line switch
@@ -806,7 +807,7 @@ public class GameManager : MonoBehaviour
             BossLine.Iaido => iaido,
             BossLine.RosaryBloom => rosaryBloom,
             BossLine.KasaWheel => kasaWheel,
-            BossLine.HourStrikes => escapement,
+            BossLine.HourStrikes => hourStrikes,
             _ => null,
         };
     }
@@ -824,7 +825,7 @@ public class GameManager : MonoBehaviour
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
-            stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, escapement = utsusemiEscapementLine, hurt = utsusemiHurtLines,
+            stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },
         _ => default,
     };

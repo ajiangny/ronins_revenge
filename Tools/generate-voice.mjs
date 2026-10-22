@@ -30,7 +30,7 @@ const LINES = {
   Utsusemi_Defeat: [UTSUSEMI, "[slowing down, fading away] The bell... has... stopped..."],
   Utsusemi_Stagger: [UTSUSEMI, "[startled, faltering] Gears... seized..."],
   Utsusemi_Kasa: [UTSUSEMI, "[cold, clipped] Kasa."],
-  Utsusemi_Escapement: [UTSUSEMI, "[slow, deliberate whisper] Tick..."],
+  Utsusemi_HourStrikes: [UTSUSEMI, "[cold, deliberate, counting] Remember the hours... [quietly menacing] one... by one."],
   Utsusemi_Hurt: [UTSUSEMI, "[short mechanical grunt] Hngh."],
   Utsusemi_Hurt_2: [UTSUSEMI, "[sharp, irritated] Kh!"],
   Utsusemi_Hurt_3: [UTSUSEMI, "[low pained exhale] Hah..."],

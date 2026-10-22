@@ -155,6 +155,9 @@ public abstract class Boss : MonoBehaviour, IHittable
         lastBeat = Time.time;
     }
 
+    // While true, nothing breaks its stance: no stagger, no freeze. Hits still deal damage.
+    protected virtual bool SuperArmor => false;
+
     // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
     protected virtual bool Busy => false;
 
@@ -325,13 +328,14 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public void Freeze(float seconds)
     {
+        if (SuperArmor) return;
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
     }
 
     // Broken stance: the boss stops dead and takes double damage for a moment.
     public void Stagger(float seconds)
     {
-        if (IsDead) return;
+        if (IsDead || SuperArmor) return;
         Interrupt();
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
@@ -369,6 +373,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         Vector3 point = Centre;
         HitFlash.Flash(sprite, 0.1f);
         Sfx.Play(Sfx.BossHit);
+        // Armoured hits still hurt, but glance off with a ring of steel instead of breaking its stance.
+        if (SuperArmor)
+        {
+            Fx.Play(Fx.Impact, point, new Color(1f, 0.85f, 0.4f), 1.2f);
+            Sfx.Play(Sfx.ParryClang, 0.5f, 1.3f);
+        }
         Damaged?.Invoke(point, source);
         if (IsDead) return;
 

@@ -36,7 +36,7 @@ public class Utsusemi : Boss
         BossLine.Stagger => "Gears... seized...",
         BossLine.KasaWheel => "Kasa.",
         BossLine.Lattice => "Unravel.",
-        BossLine.HourStrikes => "Tick...",
+        BossLine.HourStrikes => "Remember the hours... one... by one.",
         BossLine.PlumbLines => "Swing.",
         BossLine.HeartLantern => "Behold... my heart.",
         BossLine.Midnight => "Midnight.",
@@ -79,6 +79,7 @@ public class Utsusemi : Boss
 
     protected override IEnumerator Fight()
     {
+        armored = false;
         while (true)
         {
             while (breaking) yield return null;
@@ -428,24 +429,37 @@ public class Utsusemi : Boss
     // sent back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
     IEnumerator HourStrikes()
     {
-        // Always named: the callout is the cue to start counting.
-        Speak(BossLine.HourStrikes);
         int count = secondPhase ? 5 : 3;
         float beat = secondPhase ? 0.32f : 0.5f;
         Vector3 row = anchor;
 
+        // The announcement, in super armour: it calls the move and stands its ground in a gold shell while the
+        // hours light up one at a time, then go dark. Nothing staggers or freezes it until the shell drops.
+        Speak(BossLine.HourStrikes);
+        armored = true;
+        SpriteRenderer[] shell = ArmorShell();
+        Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
         List<HourMark> marks = PlaceHours(count);
+        yield return HoldArmor(shell, 0.5f);
         foreach (HourMark mark in marks)
         {
-            mark.Show();
-            Tick(0.5f);
-            yield return Wait(0.18f);
+            mark.Show(Gold);
+            Tick(0.7f);
+            yield return HoldArmor(shell, secondPhase ? 0.4f : 0.55f);
         }
+        yield return HoldArmor(shell, 0.45f);
+        foreach (HourMark mark in marks) mark.Hide(0.3f);
+        Tick(0.4f);
+        yield return HoldArmor(shell, 0.35f);
+        armored = false;
+        foreach (SpriteRenderer part in shell) RemoveTransient(part);
+        // A phase break the armour held off lands now.
+        OnDamaged();
 
+        // The dashes: from memory now.
         foreach (HourMark mark in marks)
         {
             Beat();
-            mark.Arm();
             Tick(0.9f);
             yield return Wait(beat);
             yield return Dash(new Vector3(mark.x, Landing(), row.z));
@@ -460,19 +474,73 @@ public class Utsusemi : Boss
         PlayIdle();
     }
 
-    // Each hour after the first lands 2.2 to 4 units from the last, turning back at the screen's edges.
+    bool armored;
+    protected override bool SuperArmor => armored;
+
+    // The armour's look: a gold rim (a slightly larger copy of its sprite behind it) and a faint gold sheen over it.
+    // Both are tinted copies with the normal sprite material, since the flash shader can't take a colour.
+    SpriteRenderer[] ArmorShell()
+    {
+        var shell = new SpriteRenderer[2];
+        for (int i = 0; i < 2; i++)
+        {
+            shell[i] = new GameObject(i == 0 ? "ArmorRim" : "ArmorSheen").AddComponent<SpriteRenderer>();
+            shell[i].transform.SetParent(sprite.transform, false);
+            shell[i].sharedMaterial = sprite.sharedMaterial;
+            shell[i].sortingOrder = sprite.sortingOrder + (i == 0 ? -1 : 1);
+            if (i == 0) shell[i].transform.localScale = Vector3.one * 1.08f;
+            transient.Add(shell[i].gameObject);
+        }
+        ElementFx.Glow(Centre, Gold, 1f, 3.5f, 0.4f, transform);
+        return shell;
+    }
+
+    // Real time, not boss time: the armour ignores a freeze.
+    IEnumerator HoldArmor(SpriteRenderer[] shell, float seconds)
+    {
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            Beat();
+            float pulse = Mathf.Sin(Time.time * 12f);
+            for (int i = 0; i < shell.Length; i++)
+            {
+                if (shell[i] == null) continue;
+                shell[i].sprite = sprite.sprite;
+                shell[i].flipX = sprite.flipX;
+                shell[i].color = i == 0 ? new Color(1f, 0.78f, 0.25f, 0.75f + 0.2f * pulse) : new Color(1f, 0.82f, 0.35f, 0.22f + 0.08f * pulse);
+            }
+            yield return null;
+        }
+    }
+
+    // Each hour after the first lands 3 to 5 units from the last and clear of every earlier one, so no two numerals
+    // share a spot and the order stays readable from memory.
     List<HourMark> PlaceHours(int count)
     {
         var marks = new List<HourMark>();
-        const float margin = 1.2f;
+        const float margin = 1.2f, apart = 2.8f;
         float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + margin, RightEdge - margin);
         for (int i = 0; i < count; i++)
         {
             if (i > 0)
             {
-                float step = Random.Range(2.2f, 4f) * (Random.value < 0.5f ? -1f : 1f);
-                if (x + step < LeftEdge + margin || x + step > RightEdge - margin) step = -step;
-                x = Mathf.Clamp(x + step, LeftEdge + margin, RightEdge - margin);
+                float best = float.NaN;
+                for (int attempt = 0; attempt < 12 && float.IsNaN(best); attempt++)
+                {
+                    float step = Random.Range(3f, 5f) * (Random.value < 0.5f ? -1f : 1f);
+                    float next = Mathf.Clamp(x + step, LeftEdge + margin, RightEdge - margin);
+                    if (marks.TrueForAll(m => Mathf.Abs(m.x - next) >= apart)) best = next;
+                }
+                // Boxed in: take the free spot across the lane that's nearest a 4-unit step.
+                if (float.IsNaN(best))
+                {
+                    for (float next = LeftEdge + margin; next <= RightEdge - margin; next += 0.25f)
+                    {
+                        if (!marks.TrueForAll(m => Mathf.Abs(m.x - next) >= apart)) continue;
+                        if (float.IsNaN(best) || Mathf.Abs(Mathf.Abs(next - x) - 4f) < Mathf.Abs(Mathf.Abs(best - x) - 4f)) best = next;
+                    }
+                }
+                if (!float.IsNaN(best)) x = best;
             }
             marks.Add(new HourMark(this, i + 1, x));
         }
@@ -644,7 +712,7 @@ public class Utsusemi : Boss
     }
 
     // A gold Roman numeral standing on the ground over a soft pool of light, drawn from bars: I and V strokes are all
-    // the first six hours need. It burns red when it's next, and fades once struck.
+    // the first six hours need. Shown during the announcement and then hidden; it flashes red again when struck.
     class HourMark
     {
         const float Height = 0.8f;
@@ -661,10 +729,11 @@ public class Utsusemi : Boss
             this.x = x;
         }
 
-        public void Show()
+        public void Show(Color colour)
         {
+            Hide(0f);
             Vector3 foot = new Vector3(x, owner.GroundY + 0.15f, 0);
-            pool = owner.Bar(foot, foot, 1f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 6);
+            pool = owner.Bar(foot, foot, 1f, new Color(colour.r, colour.g, colour.b, 0.45f), 6);
             pool.sprite = ProceduralSprites.Glow;
             pool.transform.rotation = Quaternion.identity;
             pool.transform.localScale = new Vector3(ChopReach * 2.2f, 0.45f, 1f);
@@ -680,46 +749,50 @@ public class Utsusemi : Boss
             {
                 if (c == 'V')
                 {
-                    Stroke(new Vector3(left, top, 0), new Vector3(left + vWidth / 2f, bottom, 0), stroke);
-                    Stroke(new Vector3(left + vWidth, top, 0), new Vector3(left + vWidth / 2f, bottom, 0), stroke);
+                    Stroke(new Vector3(left, top, 0), new Vector3(left + vWidth / 2f, bottom, 0), stroke, colour);
+                    Stroke(new Vector3(left + vWidth, top, 0), new Vector3(left + vWidth / 2f, bottom, 0), stroke, colour);
                     left += vWidth + gap;
                 }
                 else
                 {
-                    Stroke(new Vector3(left + stroke / 2f, top, 0), new Vector3(left + stroke / 2f, bottom, 0), stroke);
+                    Stroke(new Vector3(left + stroke / 2f, top, 0), new Vector3(left + stroke / 2f, bottom, 0), stroke, colour);
                     left += stroke + gap;
                 }
             }
-            ElementFx.Glow(new Vector3(x, bottom + Height / 2f, 0), Gold, 0.4f, 1.4f, 0.3f);
+            ElementFx.Glow(new Vector3(x, bottom + Height / 2f, 0), colour, 0.4f, 1.4f, 0.3f);
         }
 
         static string Roman(int n) => n switch { 1 => "I", 2 => "II", 3 => "III", 4 => "IV", 5 => "V", _ => "VI" };
 
         // A gold stroke on a dark outline, so it reads against the grass.
-        void Stroke(Vector3 from, Vector3 to, float width)
+        void Stroke(Vector3 from, Vector3 to, float width, Color colour)
         {
             Vector3 along = (to - from).normalized * width * 0.5f;
             strokes.Add(owner.Bar(from - along, to + along, width * 2f, new Color(0.08f, 0.06f, 0.04f, 0.9f), 7));
-            strokes.Add(owner.Bar(from, to, width, Gold, 8));
+            strokes.Add(owner.Bar(from, to, width, colour, 8));
         }
 
-        public void Arm()
-        {
-            for (int i = 1; i < strokes.Count; i += 2) strokes[i].color = CoreRed;
-            if (pool != null) pool.color = new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.6f);
-        }
-
+        // The hour it was: it flashes up red under the blow, then fades.
         public void Struck()
         {
-            foreach (SpriteRenderer part in strokes) Fade(part);
-            Fade(pool);
+            Show(CoreRed);
+            Hide(0.5f);
         }
 
-        void Fade(SpriteRenderer part)
+        public void Hide(float seconds)
+        {
+            foreach (SpriteRenderer part in strokes) Fade(part, seconds);
+            Fade(pool, seconds);
+            strokes.Clear();
+            pool = null;
+        }
+
+        void Fade(SpriteRenderer part, float seconds)
         {
             if (part == null) return;
             owner.transient.Remove(part.gameObject);
-            Fader.Fade(part, 0.35f);
+            if (seconds > 0) Fader.Fade(part, seconds);
+            else Destroy(part.gameObject);
         }
     }
 
@@ -1116,7 +1189,7 @@ public class Utsusemi : Boss
 
     protected override void OnDamaged()
     {
-        if (!secondPhase && HealthFraction <= 0.5f) StartCoroutine(PhaseBreak());
+        if (!secondPhase && !armored && !breaking && HealthFraction <= 0.5f) StartCoroutine(PhaseBreak());
     }
 
     // At half health the mainspring snaps: the shroud tears, the chest opens on its glowing core, and the clock

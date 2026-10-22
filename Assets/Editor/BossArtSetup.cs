@@ -85,7 +85,7 @@ public static class BossArtSetup
         so.FindProperty("utsusemiDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Defeat.mp3");
         so.FindProperty("utsusemiStaggerLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Stagger.mp3");
         so.FindProperty("utsusemiKasaLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Kasa.mp3");
-        so.FindProperty("utsusemiEscapementLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Escapement.mp3");
+        so.FindProperty("utsusemiHourStrikesLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_HourStrikes.mp3");
         SetTakes(so.FindProperty("utsusemiHurtLines"), "Utsusemi_Hurt");
         so.ApplyModifiedProperties();
 

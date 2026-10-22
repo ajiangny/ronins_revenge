@@ -61,6 +61,7 @@ public static class FxSetup
         (Fx.UtsuClockMark, 10, true, Centre),
         // The thrown sword stands planted where its blade meets the ground.
         (Fx.UtsuSword, 8, true, new Vector2(0.5f, 1f - 72f / 88f)),
+        (Fx.UtsuPlumbPortal, 10, true, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

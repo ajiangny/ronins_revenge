@@ -121,7 +121,8 @@ match `BoonChoiceUI.boonIcons`.
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
-  `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights swing through the ronin's lane on threads, flown
+  `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights hang from `Utsu_PlumbPortal` portals opened above and behind it,
+  `OpenPortal`/`ClosePortal`, and swing through the ronin's lane as a pendulum wave before being reeled back in, flown
   with `Arrow.Steer` per physics step). Phase 2 at half health opens its core and is the laser phase (`NextMove` puts a
   laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams
   closing on the planted sword; at low health `HoldingHands` keeps them burning at the edges while it `RecallSword`s

@@ -882,43 +882,45 @@ public class Utsusemi : Boss
         }
     }
 
-    // Plumb Lines: gold weights drop from its tassels on silk threads and swing as pendulums through the ronin's
-    // lane. One hangs right above him; the threads show their full reach for a moment before the weights fall.
-    // A hit on a weight cuts it loose.
+    // Plumb Lines: gold clockwork portals open in its row, one by one, behind it. Threads show their full reach, then
+    // a gold weight drops from each and swings as a pendulum through the ronin's lane, the swings rippling along the
+    // row like a pendulum-wave toy. One hangs right above him. A hit on a weight cuts it loose; when the time is up
+    // the swings die down and the rest are reeled back up into their portals, which close behind them.
     IEnumerator PlumbLines()
     {
         if (Random.value < 0.5f) Speak(BossLine.PlumbLines);
         int count = secondPhase ? 5 : Random.Range(3, 5);
-        int high = secondPhase ? 2 : 1;
-        float pivotY = anchor.y - 0.5f;
+        // The portals hang just above its hat, whose brim tops out near this row of its frames.
+        float pivotY = OnSprite(58f, 28f).y + 0.35f;
         float roninX = ronin.Bounds.center.x;
-        float margin = 2.5f;
-        // The first hangs over the ronin; the rest spread out either side of him.
-        var pivots = new List<Vector3>();
+        const float margin = 2.5f;
+        // The first hangs over the ronin; the rest spread out either side of him. Left to right, for the wave.
+        var xs = new List<float>();
         for (int i = 0; i < count; i++)
         {
             float offset = i == 0 ? 0f : ((i + 1) / 2) * 4.5f * (i % 2 == 1 ? 1f : -1f) + Random.Range(-0.7f, 0.7f);
-            float x = Mathf.Clamp(roninX + offset, LeftEdge + margin, RightEdge - margin);
-            pivots.Add(new Vector3(x, pivotY, 0));
-            ElementFx.Glow(pivots[i], Gold, 0.4f, 1.2f, 1.6f);
+            xs.Add(Mathf.Clamp(roninX + offset, LeftEdge + margin, RightEdge - margin));
         }
+        xs.Sort();
+        var pivots = new Vector3[count];
+        for (int i = 0; i < count; i++) pivots[i] = new Vector3(xs[i], pivotY, 0);
 
-        // Each bottoms out just below the ronin's middle, so most of its arc crosses his height. The last few are
-        // short "high" swings that only clip the cover.
-        var lengths = new float[count];
-        var phases = new float[count];
+        // The portals open in turn, behind it.
+        var portals = new Transform[count];
         for (int i = 0; i < count; i++)
         {
-            float lowY = i >= count - high ? ronin.Bounds.center.y + 3.5f : ronin.Bounds.center.y - 0.6f;
-            lengths[i] = pivotY - lowY;
-            phases[i] = Random.Range(0f, Mathf.PI * 2f);
+            portals[i] = OpenPortal(pivots[i]);
+            Tick(0.5f);
+            yield return Wait(0.12f);
         }
 
-        // The reach, shown first: faint threads at full length.
+        // Every thread is the same length, bottoming out just below the ronin's middle, so each swing crosses his
+        // height over most of its arc.
+        float length = pivotY - (ronin.Bounds.center.y - 0.6f);
         var threads = new SpriteRenderer[count];
         for (int i = 0; i < count; i++)
         {
-            threads[i] = Bar(pivots[i], pivots[i] + Vector3.down * lengths[i], 0.06f, new Color(Gold.r, Gold.g, Gold.b, 0.3f), 50);
+            threads[i] = Bar(pivots[i], pivots[i] + Vector3.down * length, 0.06f, new Color(Gold.r, Gold.g, Gold.b, 0.3f), PortalOrder);
         }
         Tick(0.6f);
         yield return Wait(0.3f);
@@ -934,27 +936,62 @@ public class Utsusemi : Boss
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
             threads[i].color = new Color(0.95f, 0.95f, 1f, 0.6f);
         }
+        // Neighbours' arcs cross, and shots break each other, so the weights must pass through one another.
+        IgnoreEachOther(new List<Arrow>(weights));
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
-        const float drop = 0.6f;
+        const float drop = 0.6f, fadeIn = 0.8f, damp = 0.6f, reel = 0.5f, snapBack = 0.3f;
+        // When each weight was cut loose, if it was.
+        var cutAt = new float[count];
+        for (int i = 0; i < count; i++) cutAt[i] = -1f;
         const float amplitude = 28f * Mathf.Deg2Rad;
+        // Each swings this far behind its left-hand neighbour, so a ripple runs along the row.
+        const float waveStep = 0.7f;
         float swing = secondPhase ? 4.5f : 4f;
         float omega = Mathf.PI * 2f / (secondPhase ? 2f : 2.4f);
+        float halfPeriod = Mathf.PI / omega;
+        float nextTick = drop + halfPeriod * 0.5f;
+        float total = drop + swing + damp + reel;
         // Steered once per physics step: a velocity worked out from a render frame's delta overshoots the next step.
-        for (float t = 0; t < drop + swing; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
+        for (float t = 0; t < total; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
         {
             Beat();
+            float swingT = t - drop;
+            // Faded in smoothly after the drop, and damped to a stop before the reel.
+            float envelope = Mathf.SmoothStep(0, 1, swingT / fadeIn) * (1f - Mathf.SmoothStep(0, 1, (swingT - swing) / damp));
+            // Out with a slight settle at the bottom; wound back in at the end.
+            float reach;
+            if (t < drop) reach = DropEase(t / drop);
+            else if (swingT < swing + damp) reach = 1f;
+            else reach = 1f - Mathf.Pow(Mathf.Clamp01((swingT - swing - damp) / reel), 2f);
+            // The lead weight's tick at each end of its swing keeps the clock's time.
+            if (swingT > 0 && t >= nextTick && swingT < swing)
+            {
+                nextTick += halfPeriod;
+                Tick(0.3f);
+            }
             for (int i = 0; i < count; i++)
             {
+                float angle = t < drop ? 0f : amplitude * envelope * Mathf.Sin(omega * swingT - i * waveStep);
+                Vector3 hang = new Vector3(Mathf.Sin(angle), -Mathf.Cos(angle), 0) * length * reach;
                 if (weights[i] == null)
                 {
-                    if (threads[i] != null) threads[i].gameObject.SetActive(false);
+                    // Cut loose: its empty thread snaps back up into the portal, which closes after it.
+                    if (threads[i] == null) continue;
+                    if (cutAt[i] < 0) cutAt[i] = t;
+                    float left = 1f - (t - cutAt[i]) / snapBack;
+                    if (left > 0) Stretch(threads[i], pivots[i], pivots[i] + Vector3.down * length * left * left, 0.05f);
+                    else
+                    {
+                        RemoveTransient(threads[i]);
+                        StartCoroutine(ClosePortal(portals[i]));
+                        portals[i] = null;
+                    }
                     continue;
                 }
-                float length = lengths[i] * Mathf.Clamp01(t / drop);
-                float angle = t < drop ? 0f : amplitude * Mathf.Sin(omega * (t - drop) + phases[i]) * Mathf.Clamp01((t - drop) / 0.6f);
-                Vector3 target = pivots[i] + new Vector3(Mathf.Sin(angle), -Mathf.Cos(angle), 0) * length;
+                Vector3 target = pivots[i] + hang;
                 weights[i].Steer((target - weights[i].transform.position) / Time.fixedDeltaTime);
+                weights[i].Art.transform.localRotation = Quaternion.Euler(0, 0, angle * Mathf.Rad2Deg);
                 Stretch(threads[i], pivots[i], weights[i].transform.position, 0.06f);
                 // A gold streak trails each weight as it drops.
                 if (t < drop && Random.value < 0.5f) Afterimage(weights[i].Art, new Color(Gold.r, Gold.g, Gold.b, 0.5f));
@@ -962,13 +999,77 @@ public class Utsusemi : Boss
             yield return new WaitForFixedUpdate();
         }
 
-        // The threads snap and the weights fall.
+        // Back in: each weight vanishes into its portal with a glint, and the portals close.
         for (int i = 0; i < count; i++)
         {
-            if (weights[i] != null) weights[i].Steer(Vector3.down * 9f);
+            if (weights[i] != null)
+            {
+                ElementFx.Glow(pivots[i], Gold, 0.6f, 1.4f, 0.25f);
+                Destroy(weights[i].gameObject);
+            }
             RemoveTransient(threads[i]);
         }
-        Sfx.Play(Sfx.WardShatter, 0.5f, 1.5f);
+        Sfx.Play(Sfx.HatClang, 0.35f, 1.6f);
+        for (int i = 0; i < count; i++)
+        {
+            StartCoroutine(ClosePortal(portals[i]));
+            yield return Wait(0.06f);
+        }
+    }
+
+    // The portals and their threads sit just behind the automaton's own sprite.
+    const int PortalOrder = 4;
+    const float PortalSize = 1.3f;
+
+    // Out fast, a touch past full length, then settling back.
+    static float DropEase(float k)
+    {
+        k = Mathf.Clamp01(k);
+        float overshoot = 1.06f;
+        return k < 0.8f ? overshoot * (1f - Mathf.Pow(1f - k / 0.8f, 3f)) : Mathf.Lerp(overshoot, 1f, (k - 0.8f) / 0.2f);
+    }
+
+    // A gold clockwork portal opening in the air: it grows from a point with a small flash.
+    Transform OpenPortal(Vector3 at)
+    {
+        FxPlayer portal = Fx.Play(Fx.UtsuPlumbPortal, at, Color.white, PortalSize, null, PortalOrder);
+        Transform shape;
+        if (portal != null) shape = portal.transform;
+        else
+        {
+            SpriteRenderer disc = new GameObject("Portal").AddComponent<SpriteRenderer>();
+            disc.sprite = ProceduralSprites.Glow;
+            disc.color = new Color(Gold.r, Gold.g, Gold.b, 0.8f);
+            disc.sortingOrder = PortalOrder;
+            disc.transform.position = new Vector3(at.x, at.y, -1f);
+            shape = disc.transform;
+        }
+        transient.Add(shape.gameObject);
+        ElementFx.Glow(at, Gold, 0.5f, 1.6f, 0.3f);
+        StartCoroutine(ScalePortal(shape, 0f, shape.localScale.x, 0.2f, false));
+        return shape;
+    }
+
+    IEnumerator ClosePortal(Transform portal)
+    {
+        if (portal == null) yield break;
+        yield return ScalePortal(portal, portal.localScale.x, 0f, 0.2f, true);
+    }
+
+    IEnumerator ScalePortal(Transform portal, float from, float to, float seconds, bool remove)
+    {
+        for (float t = 0; t < seconds && portal != null; t += Time.deltaTime)
+        {
+            portal.localScale = Vector3.one * Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, t / seconds));
+            yield return null;
+        }
+        if (portal == null) yield break;
+        portal.localScale = Vector3.one * to;
+        if (remove)
+        {
+            transient.Remove(portal.gameObject);
+            Destroy(portal.gameObject);
+        }
     }
 
     // Heart Lantern (second phase only): first it hurls its sword at the ronin, and the sword plants itself in the

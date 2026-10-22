@@ -467,4 +467,16 @@ MonoBehaviour:
     - {fileID: 21300000, guid: bb8231f129d1144aa99ce5aa6e814677, type: 3}
     fps: 8
     loop: 1
+  - id: Utsu_PlumbPortal
+    frames:
+    - {fileID: 21300000, guid: 1dfbf83e74b4540c0bc299fe81af413b, type: 3}
+    - {fileID: 21300000, guid: 6294b9c7ec48d41979924a1801d26c1a, type: 3}
+    - {fileID: 21300000, guid: 171e92e01aa28470b8ec468abcb15652, type: 3}
+    - {fileID: 21300000, guid: 192d32c09a63f452bb4ea09cfdbf74f5, type: 3}
+    - {fileID: 21300000, guid: 6563bf8cb10a946be800a20fb2079de3, type: 3}
+    - {fileID: 21300000, guid: 55c8274448f2f4b0a95548f3d424f3eb, type: 3}
+    - {fileID: 21300000, guid: 105c16e26c66b4bdbbdec122ef1ea0c8, type: 3}
+    - {fileID: 21300000, guid: ef674024c35c54dcfa9667801c7d3422, type: 3}
+    fps: 10
+    loop: 1
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

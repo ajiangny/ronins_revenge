@@ -42,6 +42,7 @@ public static class Fx
     public const string UtsuHourSlash = "Utsu_HourSlash";
     public const string UtsuClockMark = "Utsu_ClockMark";
     public const string UtsuSword = "Utsu_Sword";
+    public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
 
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;

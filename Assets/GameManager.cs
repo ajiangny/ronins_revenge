@@ -273,6 +273,9 @@ public class GameManager : MonoBehaviour
         ui.SetScore(0);
         ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
         ui.SetLives(startingLives);
+        // The run opens on the first stage's own ground and cover, behind the title menu too.
+        if (backdrop != null) backdrop.Show(stages[0].roundsMap);
+        blockers.Use(stages[0].roundsMap?.blockers, stages[0].roundsMap?.blockerPattern);
         blockers.Rebuild();
         SetGodMode(godMode);
 

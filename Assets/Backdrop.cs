@@ -40,6 +40,9 @@ public class Backdrop : MonoBehaviour
     float halfWidth, halfHeight, centerX, centerY, viewWidth, viewHeight;
     // The tints of the map on show, which the boss moon blends from.
     Color shownGroundTint, shownPetalTint;
+    // A map asked for before Start has built the scene (the GameManager can start first); shown once it's built.
+    Map pendingMap;
+    bool mapPending;
 
     // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
     static readonly Color BloodGround = new Color(0.95f, 0.42f, 0.42f);
@@ -99,6 +102,7 @@ public class Backdrop : MonoBehaviour
             p.transform.position = new Vector3(p.baseX, centerY + Random.Range(-halfHeight, halfHeight), p.transform.position.z);
             petals[i] = p;
         }
+        if (mapPending) Show(pendingMap);
     }
 
     // Scales the ground to cover the view, whatever size its art is.
@@ -111,6 +115,12 @@ public class Backdrop : MonoBehaviour
     // Swaps to another map's ground and petals; null (or a map without ground art) brings back the courtyard.
     public void Show(Map map)
     {
+        if (groundRenderer == null)
+        {
+            pendingMap = map;
+            mapPending = true;
+            return;
+        }
         bool own = map != null && map.ground != null;
         groundRenderer.sprite = own ? map.ground : ground;
         FitGround();

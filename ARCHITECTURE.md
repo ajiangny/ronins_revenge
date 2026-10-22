@@ -177,6 +177,9 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   `MenuUI.Item.Button` / `MenuUI.Item.Slider` rows. Keyboard (arrows/WASD, Enter/Space, Esc/Backspace), mouse
   (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the
   Canvas by `GameManager.Start`.
+  `ShowTitle` is the title screen's own light layout (paper page, `GameUI.titleLogo` on the left, a hairline menu
+  column on the right, a footer); `ShowFigure` loops a sprite on it, used by `GameManager.ShowTitleRonin` to sit the
+  ronin on his row at his in-game pixel scale (`GameManager.titleFluteFrames`, falling back to his idle).
 - `BoonChoiceUI.cs` — see Boons. `SpriteAnimatorUI.cs` animates UI images in unscaled time.
 
 ## VFX, feel and audio
@@ -219,7 +222,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
-| Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) → `GameUI.headerFont`, body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |
+| Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) → `GameUI.headerFont`, body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont`, `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames` |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
 | Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
 | Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |

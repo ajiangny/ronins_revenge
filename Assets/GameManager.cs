@@ -60,6 +60,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] int soulPityKills = 15;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
+    [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
+    [SerializeField] Sprite[] titleFluteFrames;
+    [Tooltip("Frames per second for the title screen's flute loop.")]
+    [SerializeField] float titleFluteFps = 4f;
     [Tooltip("One entry per element: Fire, Water, Lightning.")]
     [SerializeField] ElementArt[] elementArt = new ElementArt[3];
 
@@ -314,9 +318,22 @@ public class GameManager : MonoBehaviour
         };
         if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
-        menu.Show("RONIN'S REVENGE",
-            $"<color=#FF6B5E>RONIN  VS.  SAMURAI</color>\n<size=30><color=#{ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour)}>HIGH SCORE  {highScore:000000}</color></size>",
-            items.ToArray(), null, true);
+        menu.ShowTitle("RONIN'S REVENGE", $"RONIN  VS.  SAMURAI        HIGH SCORE  {highScore:000000}", items.ToArray());
+        ShowTitleRonin();
+    }
+
+    // The ronin sits in the bottom-left corner of the title page, on the row he fights from, drawn at the same pixel
+    // size as in play.
+    void ShowTitleRonin()
+    {
+        Sprite[] frames = titleFluteFrames != null && titleFluteFrames.Length > 0 ? titleFluteFrames : baseRoninArt != null ? baseRoninArt.idle : null;
+        Camera cam = Camera.main;
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        Vector3 seat = new Vector3(CameraShake.Center.x - halfWidth + 1.8f, ronin.ArtBounds.min.y, 0f);
+        var canvas = (RectTransform)ui.transform;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, cam.WorldToScreenPoint(seat), null, out Vector2 feet);
+        float canvasPerWorld = canvas.rect.height / (2f * cam.orthographicSize);
+        menu.ShowFigure(frames, titleFluteFps, feet, ronin.ArtPixelSize * canvasPerWorld);
     }
 
     // The title screen keeps the playfield clear of score, lives and ability slots.
@@ -405,7 +422,7 @@ public class GameManager : MonoBehaviour
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = ColorUtility.ToHtmlStringRGB(GameUI.MutedColour);
         menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode</color></size>",
-            items.ToArray(), back, false, startIndex);
+            items.ToArray(), back, startIndex);
     }
 
     // A jump restarts the run from a clean scene, then StartGame drops it into the chosen fight.
@@ -1143,7 +1160,7 @@ public class GameManager : MonoBehaviour
         {
             MenuUI.Item.Button("PLAY AGAIN", () => Reload(true)),
             MenuUI.Item.Button("TITLE", () => Reload(false)),
-        }, null, false, 0, color);
+        }, null, 0, color);
     }
 
     static void ClearProjectiles()

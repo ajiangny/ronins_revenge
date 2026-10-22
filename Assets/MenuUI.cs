@@ -7,7 +7,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
 // A full-screen menu page: a title, an optional block of text, and a vertical list of buttons and sliders.
-// Used for the title screen, pause, settings, controls and game over. Keyboard, mouse and gamepad all drive it,
+// Used for pause, settings, controls and game over; the title screen has its own light layout (ShowTitle). Keyboard, mouse and gamepad all drive it,
 // and it runs on unscaled time so it works while the game is paused.
 public class MenuUI : MonoBehaviour
 {
@@ -31,11 +31,18 @@ public class MenuUI : MonoBehaviour
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
     static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
+    // The title screen is ink on paper, like a Final Fantasy title: dark labels, a deep red for the selection.
+    const float LightRowWidth = 460f;
+    const float LightRowHeight = 78f;
+    static readonly Color Paper = new Color(0.975f, 0.963f, 0.945f);
+    static readonly Color Ink = new Color(0.17f, 0.13f, 0.15f);
+    static readonly Color InkAccent = new Color(0.72f, 0.1f, 0.08f);
 
     class Row
     {
         public RectTransform root;
         public Image bar;
+        public Image rule;
         public RectTransform marker;
         public TextMeshProUGUI label;
         public RectTransform track;
@@ -50,14 +57,18 @@ public class MenuUI : MonoBehaviour
     Image dim;
     RectTransform titleReveal;
     TextMeshProUGUI titleText;
-    Image logoImage;
     TextMeshProUGUI bodyText;
     TextMeshProUGUI hintText;
     RectTransform rowsRoot;
     readonly List<Row> rows = new List<Row>();
     Item[] items = Array.Empty<Item>();
     Action back;
-    bool logo;
+    bool light;
+    Image paper;
+    Image titleArt;
+    TextMeshProUGUI footerText;
+    Image figure;
+    SpriteAnimatorUI figureAnimator;
     int selected;
     int heardSelection;
     float shownAt;
@@ -71,24 +82,18 @@ public class MenuUI : MonoBehaviour
     }
 
     // Opens a page, replacing whatever page was showing. `back` runs on Esc / gamepad B; null means Esc does nothing.
-    // A `logo` page has a big brushed-on title over a lighter dim, so the scene shows through. The title is white
-    // unless given a colour.
-    public void Show(string title, string body, Item[] pageItems, Action onBack, bool isLogo = false, int startIndex = 0,
-        Color titleColour = default)
+    // The title is white unless given a colour.
+    public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default)
     {
         items = pageItems;
         back = onBack;
-        logo = isLogo;
+        SetLight(false);
         selected = heardSelection = Mathf.Clamp(startIndex, 0, items.Length - 1);
         shownAt = Time.unscaledTime;
 
         titleText.text = title;
         titleText.color = titleColour.a > 0f ? titleColour : Color.white;
-        titleText.fontSize = logo ? 132 : 96;
-        // A logo page shows the game's logo art when there is some, in place of the set title.
-        bool art = logo && ui.TitleLogo != null;
-        logoImage.gameObject.SetActive(art);
-        titleText.gameObject.SetActive(!art);
+        titleText.fontSize = 96;
         bodyText.text = body ?? "";
         bodyText.gameObject.SetActive(!string.IsNullOrEmpty(body));
         hintText.text = Hint("↑ ↓", "Select")
@@ -97,7 +102,7 @@ public class MenuUI : MonoBehaviour
             + (onBack != null ? Hint("Esc", "Back") : "");
 
         // Stack title, body and rows down from the top, then centre the whole block on screen.
-        float titleHeight = logo ? 230f : 150f;
+        const float titleHeight = 150f;
         float bodyHeight = bodyText.gameObject.activeSelf ? bodyText.GetPreferredValues(bodyText.text, 1200f, 0f).y : 0f;
         float rowsHeight = items.Length * RowHeight;
         float gap = 36f;
@@ -105,7 +110,7 @@ public class MenuUI : MonoBehaviour
         float y = total / 2f + 30f;
 
         titleReveal.anchoredPosition = new Vector2(0, y - titleHeight / 2f);
-        titleReveal.sizeDelta = new Vector2(logo ? 0f : 1800f, titleHeight + 60f);
+        titleReveal.sizeDelta = new Vector2(1800f, titleHeight + 60f);
         titleText.rectTransform.sizeDelta = new Vector2(1800f, titleHeight + 60f);
         y -= titleHeight + gap;
         if (bodyHeight > 0f)
@@ -117,11 +122,79 @@ public class MenuUI : MonoBehaviour
         rowsRoot.anchoredPosition = new Vector2(0, y);
 
         // Active before the rows are built, so their labels can be measured to place the markers.
-        dim.color = new Color(0.02f, 0.01f, 0.04f, logo ? 0.45f : 0.8f);
+        dim.color = new Color(0.02f, 0.01f, 0.04f, 0.8f);
         page.SetAsLastSibling();
         page.gameObject.SetActive(true);
         BuildRows();
         Animate(0f);
+    }
+
+    // The title screen: the game's logo large on the left of a paper-white page, a slim menu column on the right
+    // with a hairline under each item, and a footer line. Without logo art the title is set in the header font.
+    public void ShowTitle(string title, string footer, Item[] pageItems)
+    {
+        items = pageItems;
+        back = null;
+        selected = heardSelection = 0;
+        shownAt = Time.unscaledTime;
+        SetLight(true);
+
+        bool art = ui.TitleLogo != null;
+        titleArt.gameObject.SetActive(art);
+        titleReveal.gameObject.SetActive(!art);
+        titleReveal.anchoredPosition = LogoCentre;
+        titleReveal.sizeDelta = new Vector2(1100f, 300f);
+        titleText.rectTransform.sizeDelta = new Vector2(1100f, 300f);
+        titleText.text = title;
+        titleText.fontSize = 120;
+        titleText.color = Ink;
+        titleText.fontSharedMaterial = titleText.font.material;
+        footerText.text = footer ?? "";
+        hintText.text = $"↑ ↓  Select      Enter  Confirm";
+
+        rowsRoot.anchoredPosition = new Vector2(600f, items.Length * LightRowHeight / 2f - 20f);
+        dim.color = Color.clear;
+        page.SetAsLastSibling();
+        page.gameObject.SetActive(true);
+        BuildRows();
+        Animate(0f);
+    }
+
+    // A figure standing (or sitting) on the title page, its feet at `feet` in page coordinates and each art pixel
+    // `pixelSize` page units across, looping `frames`. Null or empty frames hide it.
+    public void ShowFigure(Sprite[] frames, float fps, Vector2 feet, float pixelSize)
+    {
+        bool shown = frames != null && frames.Length > 0;
+        figure.gameObject.SetActive(shown);
+        if (!shown) return;
+        figure.sprite = frames[0];
+        figure.rectTransform.anchoredPosition = feet;
+        figure.rectTransform.sizeDelta = frames[0].rect.size * pixelSize;
+        figureAnimator.Play(frames, fps);
+    }
+
+    static readonly Vector2 LogoCentre = new Vector2(-330f, 110f);
+
+    // Switches between the dark overlay pages and the light title page.
+    void SetLight(bool on)
+    {
+        light = on;
+        paper.gameObject.SetActive(on);
+        footerText.gameObject.SetActive(on);
+        if (!on)
+        {
+            titleArt.gameObject.SetActive(false);
+            figure.gameObject.SetActive(false);
+            titleReveal.gameObject.SetActive(true);
+            ui.Style(titleText, TextStyle.Title);
+            rowsRoot.anchoredPosition = new Vector2(0, rowsRoot.anchoredPosition.y);
+        }
+        if (on) bodyText.gameObject.SetActive(false);
+        hintText.color = on ? new Color(Ink.r, Ink.g, Ink.b, 0.55f) : GameUI.MutedColour;
+        hintText.fontSharedMaterial = on ? hintText.font.material : null;
+        if (!on) ui.Style(hintText, TextStyle.Hint);
+        hintText.rectTransform.anchoredPosition = on ? new Vector2(600f, 40f) : new Vector2(0, 40f);
+        hintText.rectTransform.sizeDelta = on ? new Vector2(LightRowWidth + 200f, 50f) : new Vector2(1600f, 50f);
     }
 
     static string Hint(string key, string action) => $"<mark=#FFFFFF26 padding=\"12,12,2,2\">{key}</mark>  {action}       ";
@@ -212,25 +285,42 @@ public class MenuUI : MonoBehaviour
     }
 
     // Rows slide up into place one after another; the selected one gets a red brush bar, a marker and a nudge
-    // forward, so it reads by shape and position as well as colour. A logo title is wiped on from the centre.
+    // forward, so it reads by shape and position as well as colour. On the title page the logo fades up instead.
     void Animate(float elapsed)
     {
         float dt = Time.unscaledDeltaTime;
-        if (logo) titleReveal.sizeDelta = new Vector2(1800f * EaseOut(Mathf.Clamp01((elapsed - 0.1f) / 0.7f)), titleReveal.sizeDelta.y);
+        if (light)
+        {
+            // The logo settles in from slightly large while it fades up.
+            float rise = EaseOut(Mathf.Clamp01(elapsed / 0.9f));
+            titleArt.color = new Color(1f, 1f, 1f, rise);
+            titleArt.rectTransform.localScale = Vector3.one * (1.04f - 0.04f * rise);
+            figure.color = new Color(1f, 1f, 1f, rise);
+        }
+        float rowHeight = light ? LightRowHeight : RowHeight;
 
         for (int i = 0; i < rows.Count; i++)
         {
             Row row = rows[i];
             float enter = EaseOut(Mathf.Clamp01((elapsed - 0.05f * i) / 0.25f));
-            row.root.anchoredPosition = new Vector2(0, -RowHeight * (i + 0.5f) - 24f * (1f - enter));
+            row.root.anchoredPosition = new Vector2(0, -rowHeight * (i + 0.5f) - 24f * (1f - enter));
             row.root.GetComponent<CanvasGroup>().alpha = enter;
 
             float target = i == selected ? 1f : 0f;
             row.shownSelect = Mathf.MoveTowards(row.shownSelect, target, dt / 0.12f);
             float k = EaseOut(row.shownSelect);
+            row.marker.localScale = Vector3.one * k;
+            if (light)
+            {
+                // Ink turns red and the hairline under it darkens and draws out to full width.
+                row.root.localScale = Vector3.one * (1f + 0.05f * k);
+                row.label.color = Color.Lerp(Ink, InkAccent, k);
+                row.rule.color = Color.Lerp(new Color(Ink.r, Ink.g, Ink.b, 0.2f), InkAccent, k);
+                row.rule.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(LightRowWidth * 0.8f, LightRowWidth, k), 2f);
+                continue;
+            }
             row.root.localScale = Vector3.one * (1f + 0.08f * k);
             row.bar.rectTransform.sizeDelta = new Vector2(RowWidth * k, row.bar.rectTransform.sizeDelta.y);
-            row.marker.localScale = Vector3.one * k;
             row.label.color = Color.Lerp(Idle, Color.white, k);
             // On the red selection bar a red fill would vanish, so it turns white.
             if (row.fillImage != null) row.fillImage.color = Color.Lerp(Accent, Color.white, k);
@@ -249,32 +339,42 @@ public class MenuUI : MonoBehaviour
         foreach (Row row in rows) Destroy(row.root.gameObject);
         rows.Clear();
 
+        float rowWidth = light ? LightRowWidth : RowWidth;
+        float rowHeight = light ? LightRowHeight : RowHeight;
         for (int i = 0; i < items.Length; i++)
         {
             var row = new Row();
-            row.root = GameUI.CreateRect("Item" + i, rowsRoot, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(RowWidth, RowHeight - 8f));
+            row.root = GameUI.CreateRect("Item" + i, rowsRoot, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(rowWidth, rowHeight - 8f));
             row.root.pivot = new Vector2(0.5f, 0.5f);
             row.root.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
 
             row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, RowHeight - 14f)).gameObject.AddComponent<Image>();
             row.bar.sprite = ProceduralSprites.White;
-            row.bar.color = new Color(Accent.r, Accent.g, Accent.b, 0.32f);
+            row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.32f);
             row.bar.raycastTarget = false;
+            if (light)
+            {
+                row.rule = GameUI.CreateRect("Rule", row.root, new Vector2(0.5f, 0f), new Vector2(0, -4f), new Vector2(rowWidth, 2f)).gameObject.AddComponent<Image>();
+                row.rule.sprite = ProceduralSprites.SoftGlow;
+                row.rule.raycastTarget = false;
+            }
 
             // A small diamond to the left of the selected label.
             row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-RowWidth / 2f + 46f, 0), new Vector2(20, 20));
             row.marker.localRotation = Quaternion.Euler(0, 0, 45f);
             Image marker = row.marker.gameObject.AddComponent<Image>();
-            marker.color = Accent;
+            marker.color = light ? InkAccent : Accent;
             marker.raycastTarget = false;
 
             bool slider = items[i].IsSlider;
             row.label = GameUI.CreateText(row.root, ui.BodyFont, "Label", new Vector2(slider ? 0f : 0.5f, 0.5f),
-                slider ? new Vector2(76f, 0) : Vector2.zero, new Vector2(slider ? 300f : RowWidth, RowHeight), 44,
+                slider ? new Vector2(76f, 0) : Vector2.zero, new Vector2(slider ? 300f : rowWidth, rowHeight), light ? 38 : 44,
                 slider ? TextAlignmentOptions.Left : TextAlignmentOptions.Center);
             row.label.text = items[i].label;
             row.label.characterSpacing = 6;
             ui.Style(row.label, TextStyle.Heading);
+            // Ink on paper needs no outline or shadow.
+            if (light) row.label.fontSharedMaterial = row.label.font.material;
             // A button's marker sits just left of its centred label.
             if (!slider)
             {
@@ -311,7 +411,25 @@ public class MenuUI : MonoBehaviour
         dim = page.gameObject.AddComponent<Image>();
         dim.raycastTarget = false;
 
-        // The title sits in a mask that a logo page grows out from the centre, like a brushstroke spreading.
+        paper = Stretch(GameUI.CreateRect("Paper", page, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        paper.color = Paper;
+        paper.raycastTarget = false;
+        titleArt = GameUI.CreateRect("TitleLogo", page, new Vector2(0.5f, 0.5f), LogoCentre, new Vector2(1180f, 680f)).gameObject.AddComponent<Image>();
+        titleArt.sprite = ui.TitleLogo;
+        titleArt.preserveAspect = true;
+        titleArt.raycastTarget = false;
+        figure = GameUI.CreateRect("Figure", page, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+        figure.rectTransform.pivot = new Vector2(0.5f, 0f);
+        figure.raycastTarget = false;
+        figureAnimator = figure.gameObject.AddComponent<SpriteAnimatorUI>();
+        figure.gameObject.SetActive(false);
+        // Centred under the logo, clear of the menu's key hints on the right.
+        footerText = GameUI.CreateText(page, ui.BodyFont, "Footer", new Vector2(0.5f, 0f), new Vector2(LogoCentre.x, 40f), new Vector2(1100f, 50f),
+            28, TextAlignmentOptions.Bottom);
+        footerText.richText = true;
+        footerText.color = new Color(Ink.r, Ink.g, Ink.b, 0.7f);
+
+        // The title sits in a mask, so it can be cropped cleanly.
         titleReveal = GameUI.CreateRect("TitleReveal", page, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1800f, 260f));
         titleReveal.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(120, 0);
         titleText = GameUI.CreateText(titleReveal, ui.TitleFont, "Title", new Vector2(0.5f, 0.5f), Vector2.zero,
@@ -319,10 +437,6 @@ public class MenuUI : MonoBehaviour
         titleText.textWrappingMode = TextWrappingModes.NoWrap;
         titleText.color = Color.white;
         ui.Style(titleText, TextStyle.Title);
-        logoImage = GameUI.CreateRect("Logo", titleReveal, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1500f, 300f)).gameObject.AddComponent<Image>();
-        logoImage.sprite = ui.TitleLogo;
-        logoImage.preserveAspect = true;
-        logoImage.raycastTarget = false;
 
         bodyText = GameUI.CreateText(page, ui.BodyFont, "Body", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200f, 200f),
             36, TextAlignmentOptions.Top);
@@ -338,7 +452,19 @@ public class MenuUI : MonoBehaviour
         hintText.color = GameUI.MutedColour;
         ui.Style(hintText, TextStyle.Hint);
 
+        paper.gameObject.SetActive(false);
+        titleArt.gameObject.SetActive(false);
+        footerText.gameObject.SetActive(false);
         page.gameObject.SetActive(false);
+    }
+
+    static RectTransform Stretch(RectTransform rect)
+    {
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.sizeDelta = Vector2.zero;
+        rect.anchoredPosition = Vector2.zero;
+        return rect;
     }
 
     static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);

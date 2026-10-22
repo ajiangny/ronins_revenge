@@ -486,6 +486,8 @@ MonoBehaviour:
   soulDropChance: 0.07
   soulPityKills: 15
   soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
+  titleFluteFrames: []
+  titleFluteFps: 4
   elementArt:
   - element: 0
     soulFrames:
@@ -1331,7 +1333,7 @@ MonoBehaviour:
   overlayBanner: {fileID: 21300000, guid: 67f054b675f2c4b658d5619a39573a46, type: 3}
   overlayBannerPixelScale: 2
   headerFont: {fileID: 12800000, guid: 474219aa14217421ca560b1d77db70a1, type: 3}
-  titleLogo: {fileID: 0}
+  titleLogo: {fileID: 21300000, guid: 06c3d80d55df644028ecf3a97893987a, type: 3}
   bodyFont: {fileID: 12800000, guid: e9feec424839347c69d26f3737dfda03, type: 3}
 --- !u!114 &2080831156
 MonoBehaviour:

@@ -64,6 +64,9 @@ public class Ronin : MonoBehaviour
     public Bounds Bounds => sprite.bounds;
     // Where his feet touch the ground: the art is drawn standing 7px above the bottom of its canvas, which is the
     // sprite's pivot, so effects anchored here (aura, frost wave, boon pillar) line up with him.
+    // The drawn sprite's extent, and the world size of one of its art pixels, for drawing him elsewhere at the same scale.
+    public Bounds ArtBounds => sprite.bounds;
+    public float ArtPixelSize => sprite.transform.lossyScale.y / sprite.sprite.pixelsPerUnit;
     public Vector3 Feet => sprite.transform.position + Vector3.up * (FeetAbovePivotPx / sprite.sprite.pixelsPerUnit * sprite.transform.lossyScale.y);
 
     const float FeetAbovePivotPx = 7f;

@@ -169,8 +169,10 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   shade deepening away from the moon's top-left corner, low mist banks, drifting motes (fireflies, embers, dust) and a
   vignette. Cloud shadows sort at 20, over everything standing in the field (characters, bosses, cover, arrows at 0-5)
   but under effects (40+); mist and light lie on the ground (-95..-93); motes and the vignette float over the field
-  (58, 60). Textures are built in code with full-rect meshes; cloud shapes are cut at a level that leaves about two
-  fifths in shadow (`Cloud`), giving dappled patches with gaps. `Backdrop` tints the moonlight with the boss moon (`TintMoon`). Each
+  (58, 60). Textures are built in code with full-rect meshes; all of a map's clouds are painted into one seamless
+  tile (`CloudLayer`, spread on a jittered grid, overlaps kept at the darker cloud rather than stacked) that a tiled
+  sprite scrolls with the wind, so shadows never double up; each shape is cut to leave about two fifths in shadow
+  (`CloudShape`), giving dappled patches with gaps. `Backdrop` tints the moonlight with the boss moon (`TintMoon`). Each
   map's mood is set in `NinjaArtSetup.Moods` and wired by `Ninja/Apply Maps`.
 
 ## UI

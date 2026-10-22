@@ -19,7 +19,7 @@ public class Atmosphere : MonoBehaviour
     [System.Serializable]
     public class Settings
     {
-        [Tooltip("Cloud shadows drifting over the field at once; they darken everything standing in it.")]
+        [Tooltip("Clouds in each stretch of sky that drifts over the field; their shadows darken everything standing in it.")]
         public int clouds;
         public Color cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.3f);
         [Tooltip("The wind: world units per second that clouds and mist drift.")]
@@ -45,11 +45,14 @@ public class Atmosphere : MonoBehaviour
         public float phase, rate, alpha, size;
     }
 
-    readonly List<Drifter> clouds = new List<Drifter>();
     readonly List<Drifter> mists = new List<Drifter>();
     readonly List<Drifter> motes = new List<Drifter>();
     Settings settings;
     SpriteRenderer moonlight;
+    // All the clouds share one tiling layer that scrolls with the wind, so overlapping clouds never darken twice.
+    SpriteRenderer cloudLayer;
+    Vector2 cloudOffset;
+    Vector2 cloudTile;
     SpriteRenderer shade;
     SpriteRenderer vignette;
     Color moonTint = Color.white;
@@ -57,7 +60,6 @@ public class Atmosphere : MonoBehaviour
     float halfWidth, halfHeight;
     float z;
 
-    static Sprite[] cloudSprites;
     static Sprite mistSprite, lightSprite, shadeSprite, vignetteSprite;
 
     public void Init(Vector2 viewCentre, float viewHalfWidth, float viewHalfHeight, float depth)
@@ -72,19 +74,22 @@ public class Atmosphere : MonoBehaviour
     public void Apply(Settings mood)
     {
         foreach (Transform child in transform) Destroy(child.gameObject);
-        clouds.Clear();
         mists.Clear();
         motes.Clear();
-        moonlight = shade = vignette = null;
+        moonlight = shade = vignette = cloudLayer = null;
         settings = mood ?? new Settings();
         BuildSprites();
 
-        for (int i = 0; i < settings.clouds; i++)
+        if (settings.clouds > 0)
         {
-            // Spread over the field to start, so the sky isn't empty while the first ones drift in.
-            var cloud = Spawn(clouds, "CloudShadow", cloudSprites[i % cloudSprites.Length], ShadowOrder, Random.Range(0.9f, 1.3f), settings.cloudShadow);
-            cloud.velocity = settings.wind * Random.Range(0.8f, 1.2f);
-            cloud.sprite.flipX = Random.value < 0.5f;
+            Sprite sky = CloudLayer(settings.clouds, Random.Range(0f, 100f));
+            cloudTile = sky.bounds.size;
+            cloudOffset = new Vector2(Random.Range(0f, cloudTile.x), Random.Range(0f, cloudTile.y));
+            cloudLayer = Create("CloudShadows", sky, centre, ShadowOrder);
+            cloudLayer.drawMode = SpriteDrawMode.Tiled;
+            cloudLayer.size = new Vector2(2f * halfWidth, 2f * halfHeight) + cloudTile;
+            cloudLayer.color = settings.cloudShadow;
+            PlaceClouds();
         }
         for (int i = 0; i < settings.mist; i++)
         {
@@ -159,7 +164,11 @@ public class Atmosphere : MonoBehaviour
         float dt = Time.deltaTime;
         float t = Time.time;
 
-        foreach (Drifter cloud in clouds) Drift(cloud, cloud.velocity * dt);
+        if (cloudLayer != null)
+        {
+            cloudOffset += settings.wind * dt;
+            PlaceClouds();
+        }
         foreach (Drifter bank in mists)
         {
             Drift(bank, bank.velocity * dt);
@@ -187,6 +196,16 @@ public class Atmosphere : MonoBehaviour
         }
     }
 
+    // Slides the tiled cloud layer with the wind. It spans the view plus one tile, so any offset within a tile keeps the
+    // view covered, and wrapping by a whole tile is seamless.
+    void PlaceClouds()
+    {
+        cloudOffset = new Vector2(Mathf.Repeat(cloudOffset.x, cloudTile.x), Mathf.Repeat(cloudOffset.y, cloudTile.y));
+        Vector2 size = cloudLayer.size;
+        Vector2 corner = centre - new Vector2(halfWidth, halfHeight) - cloudTile + cloudOffset;
+        cloudLayer.transform.position = new Vector3(corner.x + size.x / 2f, corner.y + size.y / 2f, z);
+    }
+
     // Moves a drifter and wraps it to the far side once it has fully left the field.
     void Drift(Drifter drifter, Vector2 step)
     {
@@ -206,18 +225,47 @@ public class Atmosphere : MonoBehaviour
     // screen-wide light, shade and vignette are stepped finely, since coarse steps there show as hard edges.
     static void BuildSprites()
     {
-        if (cloudSprites != null) return;
-        cloudSprites = new Sprite[3];
-        for (int i = 0; i < cloudSprites.Length; i++) cloudSprites[i] = Cloud(128, 88, 7.3f * (i + 1), 4f);
+        if (mistSprite != null) return;
         mistSprite = Noise(128, 32, 41.7f, 4f, 6);
         lightSprite = Radial(64, 64, 32, 1.6f, 4f);
         vignetteSprite = Edges(64, 36, 32, 2f);
         shadeSprite = AwayFromMoon(64, 36, 32);
     }
 
-    // A cloud's shadow as it lands on the ground: dappled patches with a firm, slightly soft edge and gaps where light
-    // breaks through, thinning out towards the rim.
-    static Sprite Cloud(int width, int height, float seed, float pixelsPerUnit)
+    // A stretch of sky that tiles seamlessly, with the clouds spread over a jittered grid so they don't bunch up.
+    // Where two clouds meet the darker of them wins, so an overlap is never darker than a single cloud.
+    static Sprite CloudLayer(int count, float seed)
+    {
+        const int width = 192, height = 112, cloudWidth = 96, cloudHeight = 64;
+        var alpha = new float[width * height];
+        int columns = Mathf.CeilToInt(Mathf.Sqrt(count * (float)width / height));
+        int rows = Mathf.CeilToInt(count / (float)columns);
+        for (int i = 0; i < count; i++)
+        {
+            float cx = (i % columns + Random.Range(0.3f, 0.7f)) * width / columns;
+            float cy = (i / columns + Random.Range(0.3f, 0.7f)) * height / rows;
+            float[] shape = CloudShape(cloudWidth, cloudHeight, seed + 7.3f * (i + 1));
+            for (int y = 0; y < cloudHeight; y++)
+            {
+                for (int x = 0; x < cloudWidth; x++)
+                {
+                    int tx = (int)Mathf.Repeat(cx - cloudWidth / 2f + x, width), ty = (int)Mathf.Repeat(cy - cloudHeight / 2f + y, height);
+                    int k = ty * width + tx;
+                    alpha[k] = Mathf.Max(alpha[k], shape[y * cloudWidth + x]);
+                }
+            }
+        }
+
+        var texture = NewTexture(width, height);
+        texture.wrapMode = TextureWrapMode.Repeat;
+        for (int k = 0; k < alpha.Length; k++) texture.SetPixel(k % width, k / width, new Color(1f, 1f, 1f, Band(alpha[k], 4)));
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 4f, 0, SpriteMeshType.FullRect);
+    }
+
+    // One cloud's shadow as it lands on the ground: dappled patches with a firm, slightly soft edge and gaps where light
+    // breaks through, cut at the level that leaves about two fifths of its canvas in shadow, whatever the noise came out as.
+    static float[] CloudShape(int width, int height, float seed)
     {
         var shape = new float[width * height];
         for (int y = 0; y < height; y++)
@@ -237,19 +285,11 @@ public class Atmosphere : MonoBehaviour
             }
         }
 
-        // Cut at the level that leaves about two fifths of the canvas in shadow, whatever the noise came out as.
         var sorted = (float[])shape.Clone();
         System.Array.Sort(sorted);
         float cut = sorted[(int)(sorted.Length * 0.6f)];
-
-        var texture = NewTexture(width, height);
-        for (int i = 0; i < shape.Length; i++)
-        {
-            float a = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(cut - 0.03f, cut + 0.03f, shape[i]));
-            texture.SetPixel(i % width, i / width, new Color(1f, 1f, 1f, Band(a, 4)));
-        }
-        texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.FullRect);
+        for (int i = 0; i < shape.Length; i++) shape[i] = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(cut - 0.03f, cut + 0.03f, shape[i]));
+        return shape;
     }
 
     // A mist-like blob: layered noise faded out towards an ellipse's rim.

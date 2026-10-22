@@ -314,7 +314,7 @@ public class GameManager : MonoBehaviour
         };
         if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
-        menu.Show("SHADOW BLADE",
+        menu.Show("RONIN'S REVENGE",
             $"<color=#FF6B5E>RONIN  VS.  SAMURAI</color>\n<size=30><color=#{ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour)}>HIGH SCORE  {highScore:000000}</color></size>",
             items.ToArray(), null, true);
     }
@@ -869,8 +869,8 @@ public class GameManager : MonoBehaviour
         if (lines.portrait != null && lines.closeup != null)
         {
             voice.volume = voiceVolume * Sfx.Volume;
-            yield return ui.PlayBossIntro(lines.portrait, lines.closeup, activeBoss.Title, activeBoss.Epithet, activeBoss.Colour,
-                voice, lines.intro, activeBoss.Line(BossLine.Intro));
+            yield return ui.PlayBossIntro(lines.portrait, lines.closeup, lines.closeupHeight, lines.closeupFocus, lines.closeupAt,
+                activeBoss.Title, activeBoss.Epithet, activeBoss.Colour, voice, lines.intro, activeBoss.Line(BossLine.Intro));
         }
         else
         {
@@ -912,6 +912,10 @@ public class GameManager : MonoBehaviour
     struct BossVoice
     {
         public Sprite portrait, closeup;
+        // How the intro frames the close-up: its height on screen, the point of the art to centre on (0-1 across and
+        // down), and where that point sits on screen.
+        public float closeupHeight;
+        public Vector2 closeupFocus, closeupAt;
         public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes;
         public AudioClip[] hurt;
 
@@ -937,6 +941,8 @@ public class GameManager : MonoBehaviour
         BossKind.Benibana => new BossVoice
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
+            // Her face, high and right of centre.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.48f, 0.25f), closeupAt = new Vector2(420f, 200f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
@@ -944,6 +950,8 @@ public class GameManager : MonoBehaviour
         BossKind.Utsusemi => new BossVoice
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
+            // Zoomed in from the hat's crown to its chest, the slit-eye high and just right of centre.
+            closeupHeight = 2400f, closeupFocus = new Vector2(0.47f, 0.21f), closeupAt = new Vector2(130f, 180f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },

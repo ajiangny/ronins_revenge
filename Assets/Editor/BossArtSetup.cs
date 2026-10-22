@@ -13,7 +13,6 @@ public static class BossArtSetup
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
     const string PortraitRoot = "Assets/Art/Portraits/";
     const string VoiceRoot = "Assets/Audio/Voice/";
-    const string FontRoot = "Assets/Art/Fonts/";
     // About twice a samurai's height, so she reads as the warlord the moment she lands.
     const float BenibanaScale = 2.3f;
     // Utsusemi stands taller than her, stilts and hat brim included.
@@ -91,11 +90,6 @@ public static class BossArtSetup
         SetTakes(so.FindProperty("utsusemiHurtLines"), "Utsusemi_Hurt");
         so.ApplyModifiedProperties();
 
-        // The fonts for the bosses' Borderlands-style title cards.
-        var ui = new SerializedObject(Object.FindAnyObjectByType<GameUI>());
-        ui.FindProperty("cardNameFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Shojumaru-Regular.ttf");
-        ui.FindProperty("cardTagFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Bangers-Regular.ttf");
-        ui.ApplyModifiedProperties();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();

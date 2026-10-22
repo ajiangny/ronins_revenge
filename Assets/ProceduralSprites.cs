@@ -6,6 +6,7 @@ public static class ProceduralSprites
 {
     static Sprite white;
     static Sprite glow;
+    static Sprite softGlow;
     static Sprite disc;
     static Sprite arrowDown;
     static Sprite fadeDown;
@@ -28,6 +29,9 @@ public static class ProceduralSprites
 
     // A disc whose alpha fades from the centre to the edge.
     public static Sprite Glow => glow != null ? glow : glow = Circle(64, soft: true);
+
+    // The same glow, smoothly filtered, for big painted-looking washes of light where pixel steps would show.
+    public static Sprite SoftGlow => softGlow != null ? softGlow : softGlow = Circle(64, soft: true, FilterMode.Bilinear);
 
     // A hard-edged pixel disc, used for round UI medallions until the art is in.
     public static Sprite Disc => disc != null ? disc : disc = Circle(64, soft: false);
@@ -59,9 +63,9 @@ public static class ProceduralSprites
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
     }
 
-    static Sprite Circle(int size, bool soft)
+    static Sprite Circle(int size, bool soft, FilterMode filter = FilterMode.Point)
     {
-        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = filter, wrapMode = TextureWrapMode.Clamp };
         var pixels = new Color32[size * size];
         float r = size / 2f;
         for (int y = 0; y < size; y++)

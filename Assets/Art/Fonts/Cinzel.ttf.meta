@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ba81d006cda8d44f99edfb70089a44fa
+guid: 474219aa14217421ca560b1d77db70a1
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Shojumaru
+  - Cinzel
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

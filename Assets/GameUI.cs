@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.TextCore.LowLevel;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // How a piece of text is drawn: Title in the brush font, the rest in the clean body font, all outlined and shadowed.
@@ -22,16 +23,17 @@ public class GameUI : MonoBehaviour
     [SerializeField] Sprite overlayBanner;
     [Tooltip("Screen pixels per art pixel for the banner's border, so the pixel art stays chunky and even.")]
     [SerializeField] float overlayBannerPixelScale = 2f;
-    [Tooltip("Hand-lettered font for a boss's name on her title card. Without it the card uses the HUD font.")]
-    [SerializeField] Font cardNameFont;
-    [Tooltip("Chunky outlined font for a boss's epithet on her title card. Without it the card uses the HUD font.")]
-    [SerializeField] Font cardTagFont;
+    [Tooltip("Roman-capital font for titles and headers: menus, banners and boss cards. Without it they use the pixel font.")]
+    [SerializeField, FormerlySerializedAs("cardNameFont")] Font headerFont;
+    [Tooltip("The game's logo for the title menu. Without it the menu sets the name in the header font.")]
+    [SerializeField] Sprite titleLogo;
     [Tooltip("Clean, readable font for the HUD, menus and body text. Without it they use the pixel font.")]
     [SerializeField] Font bodyFont;
 
     public TMP_FontAsset Font => font;
     public TMP_FontAsset BodyFont => BuildFont(bodyFont, ref bodyAsset, 72, 12);
-    public TMP_FontAsset TitleFont => BuildFont(cardNameFont, ref cardNameAsset, 90, 16);
+    public TMP_FontAsset TitleFont => BuildFont(headerFont, ref headerAsset, 90, 16);
+    public Sprite TitleLogo => titleLogo;
 
     public static readonly Color MutedColour = new Color(0.8f, 0.77f, 0.72f);
     public static readonly Color HighScoreColour = new Color(1f, 0.84f, 0.42f);
@@ -61,8 +63,7 @@ public class GameUI : MonoBehaviour
     float subtitleUntil;
     Image fade;
 
-    TMP_FontAsset cardNameAsset;
-    TMP_FontAsset cardTagAsset;
+    TMP_FontAsset headerAsset;
     TMP_FontAsset bodyAsset;
     readonly Dictionary<TextStyle, Material> styleMaterials = new Dictionary<TextStyle, Material>();
 
@@ -239,118 +240,107 @@ public class GameUI : MonoBehaviour
         subtitlePlate.gameObject.SetActive(true);
     }
 
-    // A boss's entrance, in two beats. The screen darkens under a slash of her colour and her full-body art slides
-    // in; then it cuts to a Borderlands-style title card (her close-up on painted paper, her name brushed across it,
-    // letterboxed) while she speaks her line. Runs on unscaled time; ENTER or SPACE skips to the fight.
-    public IEnumerator PlayBossIntro(Sprite full, Sprite closeUp, string title, string epithet, Color colour,
-        AudioSource voice, AudioClip line, string lineText)
+    // A boss's entrance, in two beats, like a Final Fantasy XIV boss card. Her full-body art fades up on a dark stage
+    // lit in her colour; then it cross-fades to her close-up while a lower-third title rises in: her epithet over a
+    // thin rule, her name under it, in Roman capitals, and her spoken line beneath. The close-up is `closeUpHeight`
+    // tall with its `focus` point (0-1 across and down the art) at `focusAt` on screen. Runs on unscaled time; ENTER
+    // or SPACE skips to the fight.
+    public IEnumerator PlayBossIntro(Sprite full, Sprite closeUp, float closeUpHeight, Vector2 focus, Vector2 focusAt,
+        string title, string epithet, Color colour, AudioSource voice, AudioClip line, string lineText)
     {
         RectTransform root = Stretch(CreateRect("BossIntro", transform, Vector2.zero, Vector2.zero, Vector2.zero));
         root.pivot = new Vector2(0.5f, 0.5f);
         root.SetAsLastSibling();
         CanvasGroup group = root.gameObject.AddComponent<CanvasGroup>();
         group.blocksRaycasts = false;
+        group.alpha = 0f;
 
-        Image dim = Stretch(CreateRect("Dim", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
-        dim.color = Color.clear;
+        // A near-black stage with a wash of her colour behind wherever she stands.
+        Image stage = Stretch(CreateRect("Stage", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        stage.color = new Color(0.03f, 0.02f, 0.04f, 1f);
+        Image glow = CreateRect("Glow", root, new Vector2(0.5f, 0.5f), new Vector2(260f, 60f), new Vector2(1700f, 1700f)).gameObject.AddComponent<Image>();
+        glow.sprite = ProceduralSprites.SoftGlow;
+        glow.color = new Color(colour.r, colour.g, colour.b, 0.5f);
 
-        RectTransform slash = CreateRect("Slash", root, new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(0, 44));
-        slash.localRotation = Quaternion.Euler(0, 0, -16f);
-        Image slashImage = slash.gameObject.AddComponent<Image>();
-        slashImage.color = colour;
-
-        // Her full-body art on the right, sized to the screen's height.
-        RectTransform art = CreateRect("FullArt", root, new Vector2(1f, 0.5f), Vector2.zero, new Vector2(1060f * full.rect.width / full.rect.height, 1060f));
+        // Beat one: her full-body art, sized to the screen's height, right of centre.
+        RectTransform art = CreateRect("FullArt", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f * full.rect.width / full.rect.height, 1000f));
         Image artImage = art.gameObject.AddComponent<Image>();
         artImage.sprite = full;
         artImage.preserveAspect = true;
-        const float artRestX = -140f, artStartX = 760f;
+        artImage.color = Color.clear;
+        const float artRestX = 300f, artStartX = 400f;
 
-        // The title card, built up front and hidden until the cut.
-        RectTransform card = Stretch(CreateRect("TitleCard", root, Vector2.zero, Vector2.zero, Vector2.zero));
-        CanvasGroup cardGroup = card.gameObject.AddComponent<CanvasGroup>();
-        cardGroup.alpha = 0f;
-        RawImage paper = Stretch(CreateRect("Paper", card, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<RawImage>();
-        paper.texture = TitleCardArt.Backdrop(colour);
-        paper.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        // Beat two: her close-up, framed per boss so the art's cut-off edges sit off screen.
+        Vector2 portraitSize = new Vector2(closeUpHeight * closeUp.rect.width / closeUp.rect.height, closeUpHeight);
+        Vector2 portraitRest = focusAt - new Vector2((focus.x - 0.5f) * portraitSize.x, (0.5f - focus.y) * portraitSize.y);
+        RectTransform portrait = CreateRect("Portrait", root, new Vector2(0.5f, 0.5f), portraitRest, portraitSize);
+        Image portraitImage = portrait.gameObject.AddComponent<Image>();
+        portraitImage.sprite = closeUp;
+        portraitImage.color = Color.clear;
 
-        // Her close-up fills the right of the card, face high and right of centre, over a hard drop shadow.
-        const float portraitHeight = 1500f;
-        Vector2 portraitSize = new Vector2(portraitHeight * closeUp.rect.width / closeUp.rect.height, portraitHeight);
-        // Her face sits about 48% across and 25% down the close-up.
-        Vector2 portraitRest = new Vector2(430f, 150f) - new Vector2((0.48f - 0.5f) * portraitSize.x, (0.5f - 0.25f) * portraitSize.y);
-        RectTransform portrait = CreateRect("Portrait", card, new Vector2(0.5f, 0.5f), portraitRest, portraitSize);
-        Image shadow = CreateRect("Shadow", portrait, new Vector2(0.5f, 0.5f), new Vector2(-22f, -14f), portraitSize).gameObject.AddComponent<Image>();
-        shadow.sprite = closeUp;
-        shadow.color = new Color(0.05f, 0f, 0.02f, 0.55f);
-        CreateRect("Art", portrait, new Vector2(0.5f, 0.5f), Vector2.zero, portraitSize).gameObject.AddComponent<Image>().sprite = closeUp;
+        // Darkness rising from the bottom, so the title reads over her art.
+        RectTransform shade = CreateRect("Shade", root, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 560f));
+        shade.anchorMin = Vector2.zero;
+        shade.anchorMax = new Vector2(1f, 0f);
+        shade.localScale = new Vector3(1f, -1f, 1f);
+        shade.pivot = new Vector2(0.5f, 1f);
+        Image shadeImage = shade.gameObject.AddComponent<Image>();
+        shadeImage.sprite = ProceduralSprites.FadeDown;
+        shadeImage.color = new Color(0.02f, 0.01f, 0.03f, 0f);
 
-        // Her name, hand-lettered at a rising angle and wiped on left to right as if brushed in. The mask isn't
-        // rotated, so a RectMask2D can do the wipe.
-        RectTransform nameReveal = CreateRect("NameReveal", card, new Vector2(0f, 0.5f), new Vector2(70f, 170f), new Vector2(0f, 800f));
-        nameReveal.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(80, 0);
-        TextMeshProUGUI name = CreateText(nameReveal, CardFont(cardNameFont, ref cardNameAsset), "Name", new Vector2(0f, 0.5f),
-            new Vector2(40f, 0f), new Vector2(1150f, 260f), 150, TextAlignmentOptions.Left);
-        name.textWrappingMode = TextWrappingModes.NoWrap;
-        name.rectTransform.localRotation = Quaternion.Euler(0, 0, 9f);
-        name.text = title;
-        name.color = colour;
-        Ink(name, 0.22f);
-        ScatterLetters(name, title.GetHashCode());
-
-        TextMeshProUGUI epithetText = CreateText(card, CardFont(cardTagFont, ref cardTagAsset), "Epithet", new Vector2(0f, 0.5f),
-            new Vector2(260f, -70f), new Vector2(1000f, 120f), 84, TextAlignmentOptions.Left);
+        // The lower third: epithet, a rule that draws out from the centre, then her name.
+        TextMeshProUGUI epithetText = CreateText("Epithet", new Vector2(0.5f, 0f), new Vector2(0, 262f), new Vector2(1600f, 90f), 66, TextAlignmentOptions.Bottom, root);
         epithetText.textWrappingMode = TextWrappingModes.NoWrap;
-        epithetText.rectTransform.localRotation = Quaternion.Euler(0, 0, 6f);
-        epithetText.fontStyle = FontStyles.UpperCase;
         epithetText.text = epithet;
-        Ink(epithetText, 0.3f);
-        epithetText.color = Color.clear;
+        Style(epithetText, TextStyle.Title);
+        epithetText.alpha = 0f;
+        RectTransform rule = CreateRect("Rule", root, new Vector2(0.5f, 0f), new Vector2(0, 248f), new Vector2(0f, 5f));
+        Image ruleImage = rule.gameObject.AddComponent<Image>();
+        // The glow sprite stretched thin gives a rule that's brightest in the middle and fades out at the ends.
+        ruleImage.sprite = ProceduralSprites.SoftGlow;
+        Color ruleColour = Color.Lerp(colour, Color.white, 0.55f);
+        TextMeshProUGUI nameText = CreateText("Name", new Vector2(0.5f, 0f), new Vector2(0, 158f), new Vector2(1600f, 86f), 58, TextAlignmentOptions.Top, root);
+        nameText.textWrappingMode = TextWrappingModes.NoWrap;
+        // Title case, so the Roman capitals set the rest of the name in small caps.
+        nameText.text = System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(title.ToLowerInvariant());
+        Style(nameText, TextStyle.Title);
+        nameText.alpha = 0f;
 
-        // Letterbox bars, with her line subtitled in the lower one.
-        CreateRect("TopBar", card, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(4000f, 70f)).gameObject.AddComponent<Image>().color = Color.black;
-        CreateRect("BottomBar", card, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(4000f, 130f)).gameObject.AddComponent<Image>().color = Color.black;
-        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0f), new Vector2(0, 10), new Vector2(1600, 110), 34, TextAlignmentOptions.Center, card);
+        TextMeshProUGUI said = CreateText("Line", new Vector2(0.5f, 0f), new Vector2(0, 26f), new Vector2(1640f, 112f), 32, TextAlignmentOptions.Center, root);
         said.text = lineText ?? "";
+        said.color = new Color(0.93f, 0.9f, 0.85f);
         Style(said, TextStyle.Body);
         said.maxVisibleCharacters = 0;
 
-        Image flash = Stretch(CreateRect("Flash", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
-        flash.color = Color.clear;
-
-        const float cardAt = 1.3f;
+        const float cardAt = 1.6f;
+        const float crossFade = 0.35f;
         float lineLength = line != null ? line.length : 3f;
-        float end = cardAt + lineLength + 0.8f;
+        float end = cardAt + Mathf.Max(lineLength + 0.6f, 2.6f);
         bool cut = false;
         for (float t = 0; t < end; t += Time.unscaledDeltaTime)
         {
             Keyboard keyboard = Keyboard.current;
             if (t > 0.3f && keyboard != null && (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)) break;
 
-            if (!cut)
-            {
-                dim.color = new Color(0.03f, 0f, 0.02f, 0.85f * Mathf.Clamp01(t / 0.25f));
-                slash.sizeDelta = new Vector2(Mathf.Lerp(0, 2700, EaseOut(Mathf.Clamp01(t / 0.22f))), 44);
-                slashImage.color = new Color(colour.r, colour.g, colour.b, 1f - Mathf.Clamp01((t - 0.6f) / 0.5f));
-                float slide = EaseOut(Mathf.Clamp01((t - 0.2f) / 0.4f));
-                art.anchoredPosition = new Vector2(Mathf.Lerp(artStartX, artRestX, slide), -10f);
-                art.localScale = Vector3.one * (1f + 0.04f * Mathf.Clamp01((t - 0.6f) / (cardAt - 0.6f)));
-            }
+            group.alpha = Mathf.Clamp01(t / 0.3f);
 
-            // The cut to the card lands with her line.
+            // Beat one: she fades up and drifts in, then keeps creeping closer until the cut.
+            float rise = EaseOut(Mathf.Clamp01((t - 0.15f) / 0.6f));
+            float fadeToCard = Mathf.Clamp01((t - cardAt) / crossFade);
+            artImage.color = new Color(1f, 1f, 1f, rise * (1f - fadeToCard));
+            art.anchoredPosition = new Vector2(Mathf.Lerp(artStartX, artRestX, rise), -20f);
+            art.localScale = Vector3.one * (1f + 0.04f * Mathf.Clamp01(t / cardAt) + 0.06f * fadeToCard);
+
+            // The cut lands with her line.
             if (!cut && t >= cardAt)
             {
                 cut = true;
-                cardGroup.alpha = 1f;
-                art.gameObject.SetActive(false);
-                slash.gameObject.SetActive(false);
                 if (voice != null && line != null)
                 {
                     voice.clip = line;
                     voice.Play();
                 }
-                CameraShake.Add(0.35f);
-                Sfx.Play(Sfx.ParrySwing, 1f, 0.55f);
+                Sfx.Play(Sfx.ParrySwing, 0.8f, 0.55f);
             }
             if (!cut)
             {
@@ -358,34 +348,43 @@ public class GameUI : MonoBehaviour
                 continue;
             }
 
+            // Beat two: the close-up settles in from slightly too close, then drifts closer while she talks.
             float since = t - cardAt;
             float hold = Mathf.Clamp01(since / (end - cardAt));
-            // The card punches in, then everything drifts slowly closer while she talks.
-            paper.rectTransform.localScale = Vector3.one * (1.12f - 0.12f * EaseOut(Mathf.Clamp01(since / 0.25f)) + 0.03f * hold);
-            portrait.anchoredPosition = Vector2.Lerp(portraitRest + Vector2.right * 260f, portraitRest, EaseOut(Mathf.Clamp01(since / 0.3f)));
-            portrait.localScale = Vector3.one * (1f + 0.05f * hold);
-            nameReveal.sizeDelta = new Vector2(1500f * EaseOut(Mathf.Clamp01((since - 0.15f) / 0.45f)), nameReveal.sizeDelta.y);
-            float slam = Mathf.Clamp01((since - 0.65f) / 0.15f);
-            epithetText.color = new Color(1f, 1f, 1f, slam);
-            epithetText.rectTransform.localScale = Vector3.one * Mathf.Lerp(1.5f, 1f, EaseOut(slam));
-            flash.color = new Color(1f, 1f, 1f, 0.85f * (1f - Mathf.Clamp01(since / 0.25f)));
-            said.maxVisibleCharacters = Mathf.RoundToInt(said.text.Length * Mathf.Clamp01((since - 0.2f) / (lineLength * 0.85f)));
+            portraitImage.color = new Color(1f, 1f, 1f, fadeToCard);
+            portrait.localScale = Vector3.one * (1.06f - 0.06f * EaseOut(fadeToCard) + 0.04f * hold);
+            shadeImage.color = new Color(0.02f, 0.01f, 0.03f, 0.9f * fadeToCard);
+
+            float ruleIn = EaseOut(Mathf.Clamp01((since - 0.2f) / 0.5f));
+            rule.sizeDelta = new Vector2(1180f * ruleIn, 5f);
+            ruleImage.color = new Color(ruleColour.r, ruleColour.g, ruleColour.b, ruleIn);
+            Reveal(epithetText, since - 0.4f, 262f, 1f);
+            Reveal(nameText, since - 0.6f, 158f, -1f);
+            said.maxVisibleCharacters = Mathf.RoundToInt(said.text.Length * Mathf.Clamp01((since - 0.3f) / (lineLength * 0.85f)));
             yield return null;
         }
         if (voice != null && voice.isPlaying) voice.Stop();
 
-        // Wipe everything off to the left.
-        for (float t = 0; t < 0.35f; t += Time.unscaledDeltaTime)
+        // Fade out, drifting slightly closer.
+        for (float t = 0; t < 0.4f; t += Time.unscaledDeltaTime)
         {
-            float k = t / 0.35f;
-            root.anchoredPosition = new Vector2(-2200f * k * k, 0);
+            float k = t / 0.4f;
             group.alpha = 1f - k;
+            root.localScale = Vector3.one * (1f + 0.03f * k);
             yield return null;
         }
         Destroy(root.gameObject);
     }
 
-    TMP_FontAsset CardFont(Font source, ref TMP_FontAsset asset) => BuildFont(source, ref asset, 90, 16);
+    // A title line fades in, sliding onto its resting height `y` from `side` (1 above, -1 below) as its letter
+    // spacing closes up.
+    static void Reveal(TMP_Text text, float since, float y, float side)
+    {
+        float k = EaseOut(Mathf.Clamp01(since / 0.6f));
+        text.alpha = k;
+        text.characterSpacing = Mathf.Lerp(26f, 6f, k);
+        text.rectTransform.anchoredPosition = new Vector2(0, y + side * 14f * (1f - k));
+    }
 
     // TTF fonts are turned into TMP fonts on first use; without one the text uses the pixel font. The printable
     // ASCII set is added up front so the atlas is real before any material is copied from it.
@@ -403,7 +402,8 @@ public class GameUI : MonoBehaviour
         " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•–—…←↑→↓";
 
     // Gives text its font and a shared outline-and-shadow material, so it stays readable over the busy playfield.
-    // Titles use the brush font; everything else the clean body font. Colour and size are left to the caller.
+    // Titles use the Roman-capital header font; everything else the clean body font. Colour and size are left to
+    // the caller.
     public void Style(TMP_Text text, TextStyle style)
     {
         TMP_FontAsset styleFont = style == TextStyle.Title ? TitleFont : BodyFont;
@@ -423,8 +423,9 @@ public class GameUI : MonoBehaviour
         }
 
         material = new Material(styleFont.material) { name = styleFont.name + " " + style };
-        // Headings and titles get a heavier ink edge; hints stay light so they read as secondary.
-        float outline = style == TextStyle.Title ? 0.24f : style == TextStyle.Hint ? 0.12f : 0.18f;
+        // Titles are fine Roman capitals, so they get a hairline edge and lean on a soft shadow; hints stay light so
+        // they read as secondary.
+        float outline = style == TextStyle.Title ? 0.08f : style == TextStyle.Hint ? 0.12f : 0.18f;
         material.EnableKeyword(ShaderUtilities.Keyword_Outline);
         material.SetFloat(ShaderUtilities.ID_OutlineWidth, outline);
         material.SetColor(ShaderUtilities.ID_OutlineColor, new Color32(14, 6, 12, 255));
@@ -434,51 +435,10 @@ public class GameUI : MonoBehaviour
         material.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.75f));
         material.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.6f);
         material.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.6f);
-        material.SetFloat(ShaderUtilities.ID_UnderlayDilate, outline);
-        material.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.15f);
+        material.SetFloat(ShaderUtilities.ID_UnderlayDilate, style == TextStyle.Title ? 0.35f : outline);
+        material.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style == TextStyle.Title ? 0.45f : 0.15f);
         styleMaterials[style] = material;
         return material;
-    }
-
-    // A dark ink outline and a hard drop shadow, like the lettering on a Borderlands card.
-    static void Ink(TMP_Text text, float width)
-    {
-        // Lay the text out first: a fresh dynamic font only gets its real atlas once it adds the glyphs, and the
-        // material instance below would otherwise keep the placeholder texture.
-        text.ForceMeshUpdate(true);
-        text.outlineWidth = width;
-        text.outlineColor = new Color32(22, 6, 10, 255);
-        Material material = text.fontMaterial;
-        material.EnableKeyword(ShaderUtilities.Keyword_Outline);
-        material.EnableKeyword(ShaderUtilities.Keyword_Underlay);
-        material.SetColor("_UnderlayColor", new Color(0f, 0f, 0f, 0.7f));
-        material.SetFloat("_UnderlayOffsetX", 0.7f);
-        material.SetFloat("_UnderlayOffsetY", -0.7f);
-        material.SetFloat("_UnderlaySoftness", 0.1f);
-    }
-
-    // Knocks each letter a little off the line (lifted, tilted, resized) so the name reads as hand-lettered.
-    // Seeded, so a boss's name is lettered the same way every time.
-    static void ScatterLetters(TMP_Text text, int seed)
-    {
-        text.ForceMeshUpdate(true);
-        var rng = new System.Random(seed);
-        TMP_TextInfo info = text.textInfo;
-        for (int i = 0; i < info.characterCount; i++)
-        {
-            TMP_CharacterInfo letter = info.characterInfo[i];
-            if (!letter.isVisible) continue;
-            Vector3[] vertices = info.meshInfo[letter.materialReferenceIndex].vertices;
-            Vector3 mid = (vertices[letter.vertexIndex] + vertices[letter.vertexIndex + 2]) / 2f;
-            Quaternion tilt = Quaternion.Euler(0, 0, (float)rng.NextDouble() * 14f - 7f);
-            Vector3 lift = Vector3.up * ((float)rng.NextDouble() * 26f - 13f);
-            float scale = 0.9f + (float)rng.NextDouble() * 0.22f;
-            for (int v = 0; v < 4; v++)
-            {
-                vertices[letter.vertexIndex + v] = mid + lift + tilt * ((vertices[letter.vertexIndex + v] - mid) * scale);
-            }
-        }
-        text.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices);
     }
 
     static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);

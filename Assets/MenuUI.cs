@@ -50,6 +50,7 @@ public class MenuUI : MonoBehaviour
     Image dim;
     RectTransform titleReveal;
     TextMeshProUGUI titleText;
+    Image logoImage;
     TextMeshProUGUI bodyText;
     TextMeshProUGUI hintText;
     RectTransform rowsRoot;
@@ -83,7 +84,11 @@ public class MenuUI : MonoBehaviour
 
         titleText.text = title;
         titleText.color = titleColour.a > 0f ? titleColour : Color.white;
-        titleText.fontSize = logo ? 170 : 104;
+        titleText.fontSize = logo ? 132 : 96;
+        // A logo page shows the game's logo art when there is some, in place of the set title.
+        bool art = logo && ui.TitleLogo != null;
+        logoImage.gameObject.SetActive(art);
+        titleText.gameObject.SetActive(!art);
         bodyText.text = body ?? "";
         bodyText.gameObject.SetActive(!string.IsNullOrEmpty(body));
         hintText.text = Hint("↑ ↓", "Select")
@@ -314,6 +319,10 @@ public class MenuUI : MonoBehaviour
         titleText.textWrappingMode = TextWrappingModes.NoWrap;
         titleText.color = Color.white;
         ui.Style(titleText, TextStyle.Title);
+        logoImage = GameUI.CreateRect("Logo", titleReveal, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1500f, 300f)).gameObject.AddComponent<Image>();
+        logoImage.sprite = ui.TitleLogo;
+        logoImage.preserveAspect = true;
+        logoImage.raycastTarget = false;
 
         bodyText = GameUI.CreateText(page, ui.BodyFont, "Body", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200f, 200f),
             36, TextAlignmentOptions.Top);

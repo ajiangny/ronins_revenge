@@ -135,9 +135,10 @@ match `BoonChoiceUI.boonIcons`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`
-  (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`). The intro's Borderlands-style title card
-  paints its backdrop with `TitleCardArt.Backdrop(colour)` and letters the name/epithet with `GameUI.cardNameFont`
-  / `cardTagFont` (TTFs turned into TMP fonts at runtime; HUD font if unset).
+  (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`). The intro is two beats on an opaque dark
+  stage lit by a wash of the boss's colour (`ProceduralSprites.SoftGlow`): the full-body portrait fades up, then
+  cross-fades to the close-up while a lower-third title (epithet, a rule, name; Title style) rises in, with the
+  spoken line typed on beneath.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`).
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
@@ -168,14 +169,14 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   speaker's name, boss intro. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the
   title menu.
 - **Text styles:** `GameUI.Style(text, TextStyle)` gives text its font and a shared outline-and-shadow material
-  (`Title` = Shojumaru brush font; `Heading`/`Hud`/`Body`/`Hint` = Zen Kaku Gothic New Bold, `GameUI.bodyFont`).
+  (`Title` = Cinzel Roman capitals, `GameUI.headerFont`; `Heading`/`Hud`/`Body`/`Hint` = Zen Kaku Gothic New
+  Bold, `GameUI.bodyFont`). `GameUI.titleLogo`, when set, replaces the set title on the title menu.
   TTFs are turned into TMP fonts at runtime (`BuildFont`); a missing one falls back to the pixel font. Keep new
   text at 26px or more (1080p reference) and give it a style rather than raw TMP settings.
 - `MenuUI.cs` — one full-screen menu page at a time: title, optional rich-text body, a list of
   `MenuUI.Item.Button` / `MenuUI.Item.Slider` rows. Keyboard (arrows/WASD, Enter/Space, Esc/Backspace), mouse
   (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the
   Canvas by `GameManager.Start`.
-- `TitleCardArt.cs` — generates the painted paper backdrop (ink band, scratches, paint splatter) for boss title cards.
 - `BoonChoiceUI.cs` — see Boons. `SpriteAnimatorUI.cs` animates UI images in unscaled time.
 
 ## VFX, feel and audio
@@ -205,7 +206,7 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
 - Raw frames live in `Art/Sprites/{Characters,Projectiles,Fx,Effects,Blockers,Background,UI}`;
   `Editor/PixelArtImporter.cs` imports them as point-filtered pixel sprites automatically.
-- Boss intro paintings: `Art/Portraits/`. Fonts: `Art/Fonts/` (pixel HUD font; Shojumaru and Bangers for title cards).
+- Boss intro paintings: `Art/Portraits/`. Fonts: `Art/Fonts/` (Cinzel headers, Zen Kaku Gothic New body, pixel fallback font).
 
 ## Editor menu commands (`Ninja/…`)
 
@@ -217,8 +218,8 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
 | Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
-| Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager; title-card fonts → GameUI |
-| Apply UI Fonts | `Editor/UiSetup.cs` | Body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |
+| Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
+| Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) → `GameUI.headerFont`, body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
 | Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
 | Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |

@@ -16,6 +16,7 @@ public static class UiSetup
 
         var ui = new SerializedObject(Object.FindAnyObjectByType<GameUI>());
         ui.FindProperty("bodyFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "ZenKakuGothicNew-Bold.ttf");
+        ui.FindProperty("headerFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Cinzel.ttf");
         ui.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);

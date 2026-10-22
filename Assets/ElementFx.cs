@@ -8,6 +8,7 @@ public class ElementFx : MonoBehaviour
     LineRenderer line;
     Vector3 boltFrom, boltTo;
     float rejag;
+    float jag = 0.35f;
     Color color;
     float startScale;
     float endScale;
@@ -42,7 +43,19 @@ public class ElementFx : MonoBehaviour
         Glow(to, color, 0.6f, 1.8f, 0.25f);
     }
 
-    static void BoltLayer(Vector3 from, Vector3 to, Color color, Material material, float width, int order)
+    // Lightning arcing sideways from one target to the next: two crackling strands and a white core that linger long
+    // enough to follow, with a flash where it leaves and where it lands.
+    public static void Chain(Vector3 from, Vector3 to, Color color, Material material)
+    {
+        BoltLayer(from, to, color, material, 0.42f, 50, 0.45f, 16, 0.45f);
+        BoltLayer(from, to, Color.Lerp(color, Color.white, 0.4f), material, 0.16f, 51, 0.45f, 16, 0.6f);
+        BoltLayer(from, to, Color.white, material, 0.07f, 52, 0.4f, 16, 0.3f);
+        Glow(from, color, 0.8f, 1.6f, 0.3f);
+        Glow(to, color, 0.8f, 2.2f, 0.35f);
+    }
+
+    static void BoltLayer(Vector3 from, Vector3 to, Color color, Material material, float width, int order,
+        float seconds = 0.28f, int points = 10, float jag = 0.35f)
     {
         var go = new GameObject("Bolt");
         var fx = go.AddComponent<ElementFx>();
@@ -51,11 +64,12 @@ public class ElementFx : MonoBehaviour
         fx.line.useWorldSpace = true;
         fx.line.sortingOrder = order;
         fx.line.widthMultiplier = width;
-        fx.line.positionCount = 10;
+        fx.line.positionCount = points;
         fx.boltFrom = from;
         fx.boltTo = to;
+        fx.jag = jag;
         fx.Jag();
-        fx.Begin(color, 1f, 1f, 0.28f);
+        fx.Begin(color, 1f, 1f, seconds);
     }
 
     void Jag()
@@ -64,7 +78,7 @@ public class ElementFx : MonoBehaviour
         Vector3 side = Vector3.Cross(boltTo - boltFrom, Vector3.forward).normalized;
         for (int i = 0; i <= last; i++)
         {
-            float jitter = i == 0 || i == last ? 0f : Random.Range(-0.35f, 0.35f);
+            float jitter = i == 0 || i == last ? 0f : Random.Range(-jag, jag);
             line.SetPosition(i, Vector3.Lerp(boltFrom, boltTo, i / (float)last) + side * jitter + Vector3.back);
         }
     }

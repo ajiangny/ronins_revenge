@@ -16,6 +16,8 @@ public class Ronin : MonoBehaviour
     const float FireballSize = 1.3f;
     const float ShardSize = 0.8f;
     const float ShardSpread = 25f;
+    // How long a Frozen Riposte shard holds the samurai it hits in ice.
+    const float RiposteShardFreeze = 1.5f;
 
     [Header("Inscribed")]
     [Tooltip("Thrown kunai, and the Spirit Shuriken and parry ripostes, which reuse the same projectile.")]
@@ -308,6 +310,31 @@ public class Ronin : MonoBehaviour
 
     void OnRiposteImpact(Vector3 point, IHittable target) => RiposteImpact?.Invoke(point, target);
 
+    // A shard of a shattered ice statue, homing on whatever picker returns. It hits one samurai and stops there,
+    // holding it in ice first so a shard that cuts it down freezes it into a statue too.
+    public void LaunchIceShard(Vector3 from, Func<Transform> picker, float freezeSeconds)
+    {
+        Color frost = Boons.Info(Element.Water).Color;
+        Transform first = picker();
+        Vector3 direction = first != null ? (first.position - from).normalized : Vector3.up;
+        Kunai shard = SpawnProjectile(kunaiPrefab, from);
+        shard.Launch(direction, 0.8f, 0, KillSource.Effect, scale: 1.1f, lifetimeMultiplier: 2f);
+        shard.Home(picker);
+        Sprite[] frames = Fx.Frames(Fx.IceShard);
+        if (frames != null && frames.Length > 0)
+        {
+            shard.Animate(frames, 14f, ShardSize);
+            shard.Tint(Color.white, frost);
+        }
+        else
+        {
+            shard.Tint(Color.Lerp(Color.white, frost, 0.6f), frost);
+        }
+        // The parry aura's trail of afterimages makes each shard's path easy to follow.
+        shard.ParryAura(Color.Lerp(Color.white, frost, 0.6f));
+        shard.FreezeOnHit = freezeSeconds;
+    }
+
     void FixedUpdate()
     {
         if (walking) return;
@@ -417,6 +444,7 @@ public class Ronin : MonoBehaviour
             {
                 float angle = count > 1 ? Mathf.Lerp(-ShardSpread, ShardSpread, i / (count - 1f)) : 0f;
                 Kunai shard = SpawnRiposte(position, Quaternion.Euler(0, 0, angle) * Vector3.up, 0, 1.2f, Fx.IceShard, ShardSize, arrowArt, frost);
+                shard.FreezeOnHit = RiposteShardFreeze * Loadout.FreezeMultiplier;
                 shard.Impacted += OnRiposteImpact;
                 for (int j = 0; j < i; j++) shard.IgnoreCollisionsWith(spread[j]);
                 spread[i] = shard;

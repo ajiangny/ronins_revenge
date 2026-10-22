@@ -32,6 +32,8 @@ public class Kunai : MonoBehaviour
     public KillSource Source { get; private set; } = KillSource.Kunai;
     // Raised with the contact point whenever this shot damages something (fireball and ice shard ripostes).
     public event Action<Vector3, IHittable> Impacted;
+    // Ice shards encase a samurai before they hit it, so one they cut down freezes into an ice statue.
+    public float FreezeOnHit { get; set; }
 
     Rigidbody body;
     SpriteRenderer art;
@@ -246,6 +248,7 @@ public class Kunai : MonoBehaviour
         IHittable target = coll.collider.GetComponentInParent<IHittable>();
         if (target != null)
         {
+            if (FreezeOnHit > 0f && target is Samurai samurai) samurai.Encase(FreezeOnHit);
             target.TakeHit(Damage.Of(Source), Source);
             Impacted?.Invoke(transform.position, target);
             if (pierceLeft > 0)

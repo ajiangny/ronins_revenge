@@ -42,8 +42,6 @@ public class BoonEffects
     public void OnKill(Samurai samurai, KillSource source)
     {
         Vector3 position = samurai.transform.position;
-        // Whatever froze it, an encased samurai cut down by the ronin bursts into shards.
-        if (samurai.Encased && source != KillSource.Effect) Shatter(position);
         float value;
         switch (source)
         {
@@ -59,7 +57,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value)
                 {
                     Samurai next = army.NearestSamurai(position, ChainRange);
-                    if (next != null) Strike(position, next);
+                    if (next != null) Chain(position, next);
                 }
                 break;
             case KillSource.Shuriken:
@@ -114,10 +112,10 @@ public class BoonEffects
             if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, value);
             else if (!BossFight) Blast(point, value);
         }
+        // Frozen Riposte shards encase the samurai they hit themselves (Kunai.FreezeOnHit); only the boss is left.
         if (loadout.Has(BoonId.FrozenRiposte, out _))
         {
-            if (target is Samurai samurai) samurai.Encase(ShardFreezeSeconds * loadout.FreezeMultiplier);
-            else if (BossFight && ReferenceEquals(target, Boss))
+            if (BossFight && ReferenceEquals(target, Boss))
             {
                 Boss.Freeze(BossShardFreezeSeconds * loadout.FreezeMultiplier);
                 Fx.Play(Fx.IceBurst, point, Color.white, 1f);
@@ -180,7 +178,7 @@ public class BoonEffects
         {
             if (loadout.Has(BoonId.ThunderRiposte, out value))
             {
-                for (int i = 0; i < (int)value; i++) Strike(ronin.Bounds.center, Boss.Centre + (Vector3)Random.insideUnitCircle * 0.5f, Boss);
+                for (int i = 0; i < (int)value; i++) Strike(ronin.Bounds.center, Boss.Centre + (Vector3)Random.insideUnitCircle * 0.5f, Boss, chain: true);
             }
             return;
         }
@@ -191,19 +189,38 @@ public class BoonEffects
             targets.Sort((a, b) => (a.Body.position - origin).sqrMagnitude.CompareTo((b.Body.position - origin).sqrMagnitude));
             for (int i = 0; i < targets.Count && i < (int)value; i++)
             {
-                Strike(origin, targets[i]);
+                Chain(origin, targets[i]);
             }
         }
     }
 
-    // An encased samurai bursts into ice shards that cut the samurai around it.
-    void Shatter(Vector3 position)
+    // The ronin broke an ice statue: it bursts into shards (more with a better Frost Blade), each homing on one of the
+    // nearest samurai. A shard stops at the samurai it hits, and holds it in ice first, so a kill freezes into a statue.
+    public void OnStatueShattered(Vector3 position)
     {
-        ShatterFx(position, 1.3f);
-        foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+        if (BossFight || army.Remaining == 0) return;
+        EquippedBoon blade = loadout.Find(BoonId.FrostBlade);
+        int count = blade != null ? Boons.IceShardsAt(blade.Rarity) : Boons.IceShardsAt(Rarity.Common);
+
+        var targets = new List<Samurai>(army.Soldiers);
+        targets.RemoveAll(s => s.IsDead);
+        targets.Sort((a, b) => (a.Body.position - position).sqrMagnitude.CompareTo((b.Body.position - position).sqrMagnitude));
+        if (targets.Count == 0) return;
+        float freeze = ShardFreezeSeconds * loadout.FreezeMultiplier;
+        for (int i = 0; i < count; i++)
         {
-            target.TakeHit(1, KillSource.Effect);
+            // More shards than samurai nearby: the spares go round again.
+            Samurai target = targets[i % Mathf.Min(count, targets.Count)];
+            ronin.LaunchIceShard(position, () => ShardTarget(target, position), freeze);
         }
+    }
+
+    // A shard keeps after its samurai; if another shard got there first, it turns on the nearest one left.
+    Transform ShardTarget(Samurai target, Vector3 from)
+    {
+        if (target != null && !target.IsDead) return target.transform;
+        Samurai next = army.NearestSamurai(from, float.MaxValue);
+        return next != null ? next.transform : null;
     }
 
     void ShatterFx(Vector3 position, float scale)
@@ -262,13 +279,31 @@ public class BoonEffects
         Strike(from, target.transform.position, target);
     }
 
-    // arcs is false for Superconductor's own arcs, so they never arc again.
-    void Strike(Vector3 from, Vector3 to, IHittable target, bool arcs = true)
+    // Lightning that jumps sideways from one samurai to the next (Storm Blade, Thunder Riposte, Superconductor),
+    // drawn as an arc between them rather than a bolt from the sky.
+    void Chain(Vector3 from, Samurai target)
     {
-        ElementFx.Bolt(from, to, Storm, boltMaterial);
-        Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
-        CameraShake.Add(0.1f);
-        Sfx.Play(Sfx.LightningStrike);
+        Strike(from, target.transform.position, target, chain: true);
+    }
+
+    // arcs is false for Superconductor's own arcs, so they never arc again. chain draws a crackling arc from
+    // `from` instead of the strike from the sky.
+    void Strike(Vector3 from, Vector3 to, IHittable target, bool arcs = true, bool chain = false)
+    {
+        if (chain)
+        {
+            ElementFx.Chain(from, to, Storm, boltMaterial);
+            Fx.Play(Fx.Impact, to, Color.Lerp(Color.white, Storm, 0.5f), 1f);
+            CameraShake.Add(0.06f);
+            Sfx.Play(Sfx.LightningStrike, 0.7f, 1.3f);
+        }
+        else
+        {
+            ElementFx.Bolt(from, to, Storm, boltMaterial);
+            Fx.Play(Fx.LightningStrike, to + Vector3.down * 0.3f, Color.white, 1f);
+            CameraShake.Add(0.1f);
+            Sfx.Play(Sfx.LightningStrike);
+        }
 
         bool onBoss = BossFight && ReferenceEquals(target, Boss);
         if (onBoss)
@@ -290,7 +325,7 @@ public class BoonEffects
             {
                 if (arced >= (int)arcCount) break;
                 if (ReferenceEquals(next, target) || next.IsDead || !next.Encased) continue;
-                Strike(to, next.transform.position, next, false);
+                Strike(to, next.transform.position, next, false, chain: true);
                 arced++;
             }
         }

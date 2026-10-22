@@ -192,6 +192,12 @@ public class BoonChoiceUI : MonoBehaviour
         string value = boon.Format(boon.ValueAt(offer.Rarity));
         if (offer.IsUpgrade) value += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {boon.Format(boon.ValueAt(offer.Rarity - 1))})</color>";
         card.stat.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>- {boon.StatLabel}</color>   <color={StatGreen}>{value}</color>";
+        if (boon.ExtraValues != null)
+        {
+            string extra = $"{boon.ExtraValues[(int)offer.Rarity]:0}";
+            if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {boon.ExtraValues[(int)offer.Rarity - 1]:0})</color>";
+            card.stat.text += $"     <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>{boon.ExtraLabel}</color>   <color={StatGreen}>{extra}</color>";
+        }
         card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";
         card.slide = 0f;
         // Hidden until AnimatePanel paints it in, so it never flashes at full opacity on the first frame.

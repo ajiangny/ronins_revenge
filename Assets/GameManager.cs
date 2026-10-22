@@ -261,6 +261,7 @@ public class GameManager : MonoBehaviour
         ronin.RiposteImpact += OnRiposteImpact;
         ronin.RiposteTarget = RandomEnemy;
         Blocker.Broken += OnBlockerBroken;
+        IceStatue.Shattered += OnStatueShattered;
     }
 
     void OnDisable()
@@ -273,6 +274,7 @@ public class GameManager : MonoBehaviour
         ronin.Parried -= OnParried;
         ronin.RiposteImpact -= OnRiposteImpact;
         Blocker.Broken -= OnBlockerBroken;
+        IceStatue.Shattered -= OnStatueShattered;
     }
 
     void Start()
@@ -666,6 +668,11 @@ public class GameManager : MonoBehaviour
         if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(parryHitStop));
     }
 
+    void OnStatueShattered(Vector3 position)
+    {
+        if (state == State.Playing) effects.OnStatueShattered(position);
+    }
+
     void OnRiposteImpact(Vector3 point, IHittable target)
     {
         if (state == State.Playing) effects.OnRiposteImpact(point, target);
@@ -929,6 +936,7 @@ public class GameManager : MonoBehaviour
     {
         state = State.Transition;
         ronin.ControlsEnabled = false;
+        IceStatue.CrumbleAll();
         yield return GatherDrops();
 
         if (roundIndex + 1 < Stage.rounds.Length)
@@ -1306,6 +1314,10 @@ public class GameManager : MonoBehaviour
         foreach (Arrow arrow in FindObjectsByType<Arrow>())
         {
             Destroy(arrow.gameObject);
+        }
+        foreach (IceStatue statue in FindObjectsByType<IceStatue>())
+        {
+            Destroy(statue.gameObject);
         }
         foreach (Soul soul in FindObjectsByType<Soul>())
         {

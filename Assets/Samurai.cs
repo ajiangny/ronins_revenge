@@ -171,10 +171,20 @@ public class Samurai : MonoBehaviour, IHittable
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
         IsDead = true;
+        // Cut down while held in ice, it freezes solid where it stood instead of falling.
+        bool frozen = Encased;
         Thaw();
         foreach (Collider c in GetComponentsInChildren<Collider>())
         {
             c.enabled = false;
+        }
+        if (frozen)
+        {
+            IceStatue.Create(animator.Renderer, gameObject.layer, art.deathParticles);
+            Sfx.Play(Sfx.SamuraiDeath);
+            army.OnSamuraiKilled(this, source);
+            Destroy(gameObject);
+            return;
         }
         Debris.BurstSprites(transform.position, art.deathParticles, Color.white, 8, 1f, 6f);
         Fx.Play(Fx.SmokePuff, transform.position + Vector3.up * 0.2f, new Color(1f, 1f, 1f, 0.8f), 0.9f);

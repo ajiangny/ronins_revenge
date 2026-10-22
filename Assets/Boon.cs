@@ -42,6 +42,9 @@ public sealed class BoonDefinition
     public float[] Values;
     // Formats one value for the stat line, e.g. v => $"+{v:0.#}".
     public Func<float, string> Format;
+    // An optional second stat on the same line (Frost Blade's ice shards), indexed by Rarity and shown as a count.
+    public string ExtraLabel;
+    public float[] ExtraValues;
     // Applied once when taken, instead of being kept in the loadout (Tidal Renewal).
     public bool Instant;
     public BoonKind Kind;
@@ -104,6 +107,9 @@ public static class Boons
 
     public static ElementInfo Info(Element element) => Elements[(int)element];
 
+    // How many shards an ice statue bursts into: Frost Blade's shard count, or its Common count without it.
+    public static int IceShardsAt(Rarity rarity) => (int)Get(BoonId.FrostBlade).ExtraValues[(int)rarity];
+
     public static Color RarityColor(Rarity rarity) => rarity switch
     {
         Rarity.Rare => new Color(0.35f, 0.65f, 1f),
@@ -164,8 +170,9 @@ public static class Boons
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
-            Description = "A <b>Slash</b> kill encases nearby samurai in ice: they can't shoot, and your next hit <b>Shatters</b> them into shards that cut their neighbours.",
-            StatLabel = "Freeze time:", Values = new[] { 2f, 3f, 4f }, Format = Seconds },
+            Description = "A <b>Slash</b> kill encases nearby samurai in ice. Cut one down and it freezes where it stands; strike the ice to <b>Shatter</b> it into shards.",
+            StatLabel = "Freeze time:", Values = new[] { 2f, 3f, 4f }, Format = Seconds,
+            ExtraLabel = "Shards:", ExtraValues = new[] { 2f, 3f, 4f } },
         new BoonDefinition { Id = BoonId.GlacialShuriken, Element = Element.Water, Slot = BoonSlot.Special, Name = "Glacial Shuriken",
             Description = "Your <b>Shuriken</b> freezes the whole army: no marching, no arrows.",
             StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds },

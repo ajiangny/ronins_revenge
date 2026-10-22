@@ -137,7 +137,7 @@ public class Benibana : Boss
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.8f);
     }
 
-    // Rosary Lash: a silver line marks a column, then her cross-chain slams down it, smashing blockers. It hangs
+    // Rosary Lash: a red line marks a column, then her cross-chain slams down it, smashing blockers. It hangs
     // there as a wall for a moment before its crosses break off and fall. Two columns in her second phase.
     IEnumerator RosaryLash()
     {
@@ -148,14 +148,16 @@ public class Benibana : Boss
         if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
         if (Random.value < 0.5f) Speak(BossLine.RosaryLash);
 
+        // A red warning line on each column that brightens with every beat, so the strike lands on the last one.
         var tells = new List<SpriteRenderer>();
         foreach (float x in columns)
         {
-            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 0.08f, new Color(Silver.r, Silver.g, Silver.b, 0.4f)));
+            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 0.1f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.35f)));
         }
-        float beatTime = secondPhase ? 0.15f : 0.2f;
+        float beatTime = secondPhase ? 0.22f : 0.3f;
         for (int beat = 0; beat < 3; beat++)
         {
+            foreach (SpriteRenderer tell in tells) tell.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.35f + beat * 0.25f);
             Sfx.Play(Sfx.BlockerHit, 0.45f, 1.9f);
             yield return Wait(beatTime);
         }

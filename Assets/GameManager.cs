@@ -85,6 +85,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] utsusemiDash;
     [SerializeField] Sprite[] utsusemiChop;
     [SerializeField] Sprite[] utsusemiHourSlash;
+    [Tooltip("Utsusemi raising its sword to throw it before the Heart Lantern, and its stance with the sword planted.")]
+    [SerializeField] Sprite[] utsusemiSwordThrow;
+    [SerializeField] Sprite[] utsusemiUnarmedIdle;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [SerializeField] AudioClip utsusemiIntroLine;
@@ -779,6 +782,7 @@ public class GameManager : MonoBehaviour
                 {
                     automaton.SetBareIdle(utsusemiBareIdle);
                     automaton.SetSwordFrames(utsusemiDash, utsusemiChop, utsusemiHourSlash);
+                    automaton.SetThrowFrames(utsusemiSwordThrow, utsusemiUnarmedIdle);
                 }
                 return automaton;
             default:

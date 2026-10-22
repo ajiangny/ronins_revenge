@@ -457,4 +457,14 @@ MonoBehaviour:
     - {fileID: 21300000, guid: f53e82103eb8f482ab631735ea99edd2, type: 3}
     fps: 10
     loop: 1
+  - id: Utsu_Sword
+    frames:
+    - {fileID: 21300000, guid: 862afb721b6194b6fa6f25935e270622, type: 3}
+    - {fileID: 21300000, guid: 85f5927b5951f466da39103d1ca721ac, type: 3}
+    - {fileID: 21300000, guid: 09018822a4c504c27b80826062a44919, type: 3}
+    - {fileID: 21300000, guid: 61a5aac5cf90f403aa1d0031fe4b6955, type: 3}
+    - {fileID: 21300000, guid: cb3134713466d4aae80f99cbecc9f388, type: 3}
+    - {fileID: 21300000, guid: bb8231f129d1144aa99ce5aa6e814677, type: 3}
+    fps: 8
+    loop: 1
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

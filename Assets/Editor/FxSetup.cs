@@ -59,6 +59,8 @@ public static class FxSetup
         // The hour slash flies from the belly of its crescent, its leading edge, where the hitbox sits.
         (Fx.UtsuHourSlash, 14, true, new Vector2(0.5f, 1f - 48f / 64f)),
         (Fx.UtsuClockMark, 10, true, Centre),
+        // The thrown sword stands planted where its blade meets the ground.
+        (Fx.UtsuSword, 8, true, new Vector2(0.5f, 1f - 72f / 88f)),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

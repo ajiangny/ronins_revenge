@@ -45,6 +45,7 @@ public class Utsusemi : Boss
 
     bool secondPhase;
     bool breaking;
+    bool razed;
     bool tock;
     int hatsOut;
     Move? lastMove;
@@ -68,18 +69,33 @@ public class Utsusemi : Boss
     protected override float StaggerSeconds => secondPhase ? 2f : 2.5f;
     // Its slit-eye is only exposed while the hat is off.
     protected override int DamageMultiplier => hatsOut > 0 ? 2 : 1;
-    protected override Sprite[] IdleClip => hatsOut > 0 && bareIdle != null ? bareIdle : art.idle;
+    protected override Sprite[] IdleClip => swordOut && unarmedIdle != null ? unarmedIdle
+        : hatsOut > 0 && bareIdle != null ? bareIdle : art.idle;
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     float LeftEdge => CameraShake.Center.x - HalfWidth;
     float RightEdge => CameraShake.Center.x + HalfWidth;
     Vector3 Head => new Vector3(Centre.x, sprite.bounds.max.y - sprite.bounds.size.y * 0.12f, 0);
-    Vector3 Core => Centre + Vector3.up * sprite.bounds.size.y * 0.12f;
+    // The red slit-eye under the hat brim and the lantern heart in its chest, where its frames draw them.
+    Vector3 Eye => OnSprite(57.5f, 38.5f);
+    Vector3 Core => OnSprite(58f, 50.5f);
     Vector3 Shoulder => Centre + new Vector3(sprite.bounds.extents.x * 0.5f, sprite.bounds.size.y * 0.1f, 0);
 
     protected override IEnumerator Fight()
     {
         armored = false;
+        // A fight restarted mid-laser (a stagger) clears the planted sword with the attack: it's back in hand.
+        if (swordOut)
+        {
+            swordOut = false;
+            plantedSword = null;
+            PlayIdle();
+        }
+        if (!razed)
+        {
+            razed = true;
+            yield return RazeCover();
+        }
         while (true)
         {
             while (breaking) yield return null;
@@ -168,6 +184,55 @@ public class Utsusemi : Boss
             Tick(0.3f);
             yield return Wait(0.06f);
         }
+    }
+
+    // Its entrance: before its first move, the slit-eye under its hat brim charges and a thin red beam rakes the row of
+    // blockers from end to end, burning a line of fire along it, and every blocker it touches bursts apart. A show
+    // of force that can't hurt the ronin; from here on the only cover in this duel is the sword it throws before its
+    // heart's beam.
+    IEnumerator RazeCover()
+    {
+        var cover = new List<Blocker>(FindObjectsByType<Blocker>());
+        if (cover.Count == 0) yield break;
+        // The beam runs along the foot of the row, where the blockers stand: their wall's own height.
+        Transform wall = cover[0].transform.parent;
+        float rowY = wall != null ? wall.position.y : cover[0].transform.position.y;
+        ElementFx.Glow(Eye, CoreRed, 1.2f, 3.5f, 0.8f, transform);
+        Sfx.Play(Sfx.LanternCharge, 0.8f, 1.25f);
+        for (int i = 0; i < 3; i++)
+        {
+            Beat();
+            Tick(0.7f);
+            yield return Wait(0.25f);
+        }
+
+        float dir = Random.value < 0.5f ? 1f : -1f;
+        float from = dir > 0 ? LeftEdge + 0.3f : RightEdge - 0.3f;
+        float to = dir > 0 ? RightEdge - 0.3f : LeftEdge + 0.3f;
+        Beam beam = MakeBeam(Eye, 1f);
+        Sfx.PlayLoop(Sfx.LanternBeam, 0.8f, 1.2f);
+        const float seconds = 1.8f;
+        for (float t = 0; t < seconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        {
+            Beat();
+            Vector3 end = BeamEnd(Eye, new Vector3(Mathf.Lerp(from, to, t / seconds), rowY, 0), out Blocker hit);
+            DrawBeam(beam, Eye, end, false, hit == null);
+            if (hit != null)
+            {
+                hit.Demolish();
+                GroundFire.Light(new Vector3(end.x, rowY, 0));
+                CameraShake.Add(0.12f);
+            }
+            yield return null;
+        }
+        EndBeam(beam);
+        Sfx.Stop(Sfx.LanternBeam);
+        // Anything the sweep's angle couldn't reach goes too.
+        foreach (Blocker left in cover)
+        {
+            if (left != null) left.Demolish();
+        }
+        yield return Wait(0.4f);
     }
 
     // Kasa Wheel: it hurls its wide hat like a boomerang. A dotted gold trail shows the loop first: the hat curves
@@ -421,7 +486,7 @@ public class Utsusemi : Boss
         lattice.RemoveAll(a => a == null);
     }
 
-    // Hour Strikes: gold hour numerals (I, II, III...) appear along the ground, the first right under the ronin. In
+    // Hour Strikes: gold hour numerals (I, II, III...) appear along the ground out of order, so the dashes zig-zag. In
     // turn, each burns red; it dashes down out of its row onto that hour, chops it with a ground-cracking blow and
     // dashes back up, so he weaves between the marks. Then, back in its row, it strikes the hour: a clock mark settles
     // under the ronin and follows him while its core glows and the blade draws back over three ticks, and a giant
@@ -529,38 +594,45 @@ public class Utsusemi : Boss
         }
     }
 
-    // Each hour after the first lands 3 to 5 units from the last and clear of every earlier one, so no two numerals
-    // share a spot and the order stays readable from memory.
+    // The hours stand in evenly spread spots around the ronin, but they're numbered out of order: the dashes zig-zag
+    // back and forth across the lane (3 1 5 2 4, never 1 2 3 4 5), so the order has to be remembered, not guessed.
     List<HourMark> PlaceHours(int count)
     {
-        var marks = new List<HourMark>();
-        const float margin = 1.2f, apart = 2.8f;
-        float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + margin, RightEdge - margin);
+        const float margin = 1.2f, spacing = 5f, jitter = 0.5f;
+        float lo = LeftEdge + margin, hi = RightEdge - margin;
+        float span = Mathf.Min((count - 1) * spacing, hi - lo);
+        float left = Mathf.Clamp(ronin.Bounds.center.x - span / 2f, lo, hi - span);
+        var spots = new float[count];
         for (int i = 0; i < count; i++)
         {
-            if (i > 0)
-            {
-                float best = float.NaN;
-                for (int attempt = 0; attempt < 12 && float.IsNaN(best); attempt++)
-                {
-                    float step = Random.Range(3f, 5f) * (Random.value < 0.5f ? -1f : 1f);
-                    float next = Mathf.Clamp(x + step, LeftEdge + margin, RightEdge - margin);
-                    if (marks.TrueForAll(m => Mathf.Abs(m.x - next) >= apart)) best = next;
-                }
-                // Boxed in: take the free spot across the lane that's nearest a 4-unit step.
-                if (float.IsNaN(best))
-                {
-                    for (float next = LeftEdge + margin; next <= RightEdge - margin; next += 0.25f)
-                    {
-                        if (!marks.TrueForAll(m => Mathf.Abs(m.x - next) >= apart)) continue;
-                        if (float.IsNaN(best) || Mathf.Abs(Mathf.Abs(next - x) - 4f) < Mathf.Abs(Mathf.Abs(best - x) - 4f)) best = next;
-                    }
-                }
-                if (!float.IsNaN(best)) x = best;
-            }
-            marks.Add(new HourMark(this, i + 1, x));
+            float x = left + (count > 1 ? span * i / (count - 1) : 0f);
+            spots[i] = Mathf.Clamp(x + Random.Range(-jitter, jitter), lo, hi);
         }
+
+        int[] order = ZigZag(count);
+        var marks = new List<HourMark>();
+        for (int hour = 0; hour < count; hour++) marks.Add(new HourMark(this, hour + 1, spots[order[hour]]));
         return marks;
+    }
+
+    // A random order of the spots 0..count-1 whose every step turns back the other way, so no three hours run in a
+    // line. Found by shuffling until one fits; with five spots about one shuffle in seven does.
+    static int[] ZigZag(int count)
+    {
+        var order = new int[count];
+        for (int i = 0; i < count; i++) order[i] = i;
+        for (int attempt = 0; attempt < 200; attempt++)
+        {
+            for (int i = count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (order[i], order[j]) = (order[j], order[i]);
+            }
+            bool turns = true;
+            for (int i = 2; i < count && turns; i++) turns = (order[i] - order[i - 1]) * (order[i - 1] - order[i - 2]) < 0;
+            if (turns) return order;
+        }
+        return order;
     }
 
     // The feet in its frames stand on this row of the 116-px canvas.
@@ -606,22 +678,24 @@ public class Utsusemi : Boss
     // The chop's blade meets the ground on this frame.
     const int ChopImpactFrame = 5;
 
-    IEnumerator Chop(HourMark mark)
+    IEnumerator Chop(HourMark mark) => Chop(mark.x, mark);
+
+    IEnumerator Chop(float x, HourMark mark)
     {
         const float fps = 20f;
         PlayFrames(chopFrames, 1, -1, true, fps);
         yield return Wait(chopFrames != null ? (ChopImpactFrame - 1) / fps : 0.2f);
 
-        Vector3 point = new Vector3(mark.x, GroundY + 0.15f, 0);
-        if (Mathf.Abs(ronin.Bounds.center.x - mark.x) < ChopReach)
+        Vector3 point = new Vector3(x, GroundY + 0.15f, 0);
+        if (Mathf.Abs(ronin.Bounds.center.x - x) < ChopReach)
         {
-            ronin.TakeHit(new Vector3(mark.x, ronin.Bounds.center.y, 0));
+            ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
         }
         if (Fx.Play(Fx.UtsuChop, point, Color.white, 2.4f) == null) Fx.Play(Fx.Impact, point, CoreRed, 1.2f);
         ElementFx.Glow(point, Color.white, 0.6f, 1.8f, 0.15f);
         Sfx.Play(Sfx.BladeChop, 1f, Random.Range(0.92f, 1.08f));
         CameraShake.Add(0.2f);
-        mark.Struck();
+        mark?.Struck();
         yield return Wait(0.18f);
     }
 
@@ -901,12 +975,15 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.WardShatter, 0.5f, 1.5f);
     }
 
-    // Heart Lantern (second phase only): sparks pour into the core as it charges, then a beam sweeps the ground from
-    // one side to the other, flashes a warning and sweeps back. Only cover stops it, and it burns the cover it hits.
+    // Heart Lantern (second phase only): first it hurls its sword at the ronin, and the sword plants itself in the
+    // ground as the one piece of cover there is. Sparks pour into the core as it charges, then a beam sweeps the
+    // ground from one side to the other, flashes a warning and sweeps back; only the sword (or a blocker) stops it.
+    // Then it dashes down to the sword and wrenches it out with a strike, so the ronin must leave its shelter.
     IEnumerator HeartLantern()
     {
         yield return Stride(CameraShake.Center.x);
         Speak(BossLine.HeartLantern);
+        yield return ThrowSword(SwordLanding());
         yield return Charge();
 
         float dir = Random.value < 0.5f ? 1f : -1f;
@@ -923,7 +1000,8 @@ public class Utsusemi : Boss
         RemoveTransient(guide);
         yield return Wait(0.3f);
 
-        PlayAction(art.attack);
+        // Its attack clip has the sword in hand; with the sword planted it fires from its unarmed stance.
+        if (!swordOut) PlayAction(art.attack);
         Beam beam = MakeBeam();
         Sfx.PlayLoop(Sfx.LanternBeam);
         yield return SweepBeam(beam, from, to, 3.2f);
@@ -938,6 +1016,177 @@ public class Utsusemi : Boss
         yield return SweepBeam(beam, to, from, 2.4f);
         EndBeam(beam);
         Sfx.Stop(Sfx.LanternBeam);
+        yield return ReclaimSword();
+    }
+
+    // The planted sword's cover: the steel ward shimmering round it, wider than the blade itself, and tall enough
+    // that the shade it casts away from the core leaves the ronin room to stand in.
+    const float SwordCoverWidth = 1.6f, SwordCoverHeight = 2.6f;
+    // The thrown sword's frames are drawn this many world units tall.
+    const float SwordScale = 2f;
+    // The throw clip lets the sword go on this frame, with the blade high overhead.
+    const int SwordReleaseFrame = 4;
+
+    // Its sword while it lies planted as cover; null while it's in hand.
+    Blocker plantedSword;
+    bool swordOut;
+    Sprite[] swordThrowFrames, unarmedIdle;
+
+    public void SetThrowFrames(Sprite[] throwFrames, Sprite[] unarmed)
+    {
+        swordThrowFrames = throwFrames != null && throwFrames.Length > SwordReleaseFrame ? throwFrames : null;
+        unarmedIdle = unarmed != null && unarmed.Length > 0 ? unarmed : null;
+    }
+
+    // Where it throws: at the ronin, but never right under its core, where a blade's shadow would be too thin to hide in.
+    float SwordLanding()
+    {
+        const float offCentre = 3.5f;
+        float x = AtRonin(2f);
+        if (Mathf.Abs(x - CameraShake.Center.x) < offCentre) x = CameraShake.Center.x + (x < CameraShake.Center.x ? -offCentre : offCentre);
+        return x;
+    }
+
+    // The sword hurled at the ronin: a steel glint shows where it will land, it raises the blade overhead and throws,
+    // and the sword wheels end over end to plant itself point-down there, cutting him if he hasn't moved.
+    IEnumerator ThrowSword(float x)
+    {
+        Vector3 ground = new Vector3(x, GroundY + 0.15f, 0);
+        SpriteRenderer glint = Bar(ground, ground, 1f, new Color(Steel.r, Steel.g, Steel.b, 0.7f), 6);
+        glint.sprite = ProceduralSprites.Glow;
+        glint.transform.rotation = Quaternion.identity;
+        glint.transform.localScale = new Vector3(1.8f, 0.5f, 1f);
+        const float fps = 12f;
+        PlayFrames(swordThrowFrames, 0, SwordReleaseFrame, true, fps);
+        Sfx.Play(Sfx.ParrySwing, 0.7f, 0.7f);
+        Tick(0.8f);
+        yield return Wait(swordThrowFrames != null ? (SwordReleaseFrame + 1) / fps : 0.45f);
+
+        swordOut = true;
+        PlayIdle();
+        Sfx.Play(Sfx.SwordWhirl);
+        yield return FlySword(Head + Vector3.up * 0.8f, ground, 0.55f, 2f, 1.2f);
+        RemoveTransient(glint);
+
+        plantedSword = PlantSword(ground);
+        if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.6f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+        if (Fx.Play(Fx.UtsuChop, ground, Color.white, 1.8f) == null) Fx.Play(Fx.Impact, ground, Steel, 1f);
+        Debris.BurstSprites(ground, art.deathParticles, new Color(0.6f, 0.55f, 0.45f), 6, 0.6f, 4f);
+        ElementFx.Glow(ground + Vector3.up * 1.2f, Color.white, 0.8f, 2.5f, 0.25f);
+        Sfx.Play(Sfx.SwordPlant);
+        CameraShake.Add(0.3f);
+        yield return Wait(0.3f);
+    }
+
+    // The sword in flight, wheeling end over end from `start` to where its blade meets the ground at `to` (or, for a
+    // sword pulled back up, to its hand), on an arc rising `lift` above the straight line, trailing steel afterimages.
+    IEnumerator FlySword(Vector3 start, Vector3 to, float seconds, float turns, float lift, bool planting = true)
+    {
+        Sprite[] frames = Fx.Frames(Fx.UtsuSword);
+        var flying = new GameObject("ThrownSword").AddComponent<SpriteRenderer>();
+        flying.sortingOrder = 50;
+        transient.Add(flying.gameObject);
+        if (frames != null)
+        {
+            flying.sprite = frames[0];
+            flying.transform.localScale = Vector3.one * SwordScale;
+        }
+        else
+        {
+            flying.sprite = ProceduralSprites.White;
+            flying.color = Lace;
+            flying.transform.localScale = new Vector3(0.15f, SwordCoverHeight, 1f);
+        }
+        // The sprite pivots where the blade meets the ground; it spins about its middle as it flies.
+        float pivotToMiddle = frames != null ? (72f - 44f) / 48f * SwordScale : 0f;
+        Vector3 end = planting ? to + Vector3.up * pivotToMiddle : to;
+        for (float t = 0; t < seconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
+        {
+            Beat();
+            float k = t / seconds;
+            Vector3 middle = Vector3.Lerp(start, end, k) + Vector3.up * Mathf.Sin(k * Mathf.PI) * lift;
+            Quaternion spin = Quaternion.Euler(0, 0, -360f * turns * Mathf.SmoothStep(0, 1, k));
+            flying.transform.SetPositionAndRotation(middle - spin * Vector3.up * pivotToMiddle, spin);
+            if (Random.value < 0.6f) Afterimage(flying, new Color(Steel.r, Steel.g, Steel.b, 0.45f));
+            yield return null;
+        }
+        RemoveTransient(flying);
+    }
+
+    // The planted sword wrenches itself out of the ground and wheels back up to its hand.
+    IEnumerator RecallSword()
+    {
+        if (plantedSword == null) yield break;
+        Vector3 from = plantedSword.transform.position;
+        Destroy(plantedSword.gameObject);
+        transient.Remove(plantedSword.gameObject);
+        plantedSword = null;
+        Sfx.Play(Sfx.SwordWhirl, 0.8f, 1.15f);
+        Fx.Play(Fx.Impact, new Vector3(from.x, GroundY + 0.15f, 0), Steel, 0.8f);
+        yield return FlySword(from, Head + Vector3.up * 0.8f, 0.4f, -1f, 0.6f, false);
+        Tick(0.8f);
+    }
+
+    // The planted sword is a blocker that never breaks: it stops beams and shots alike, and the beam only strikes
+    // sparks off it.
+    Blocker PlantSword(Vector3 ground)
+    {
+        var sword = new GameObject("PlantedSword");
+        sword.transform.position = ground + Vector3.up * SwordCoverHeight / 2f;
+        sword.AddComponent<BoxCollider>().size = new Vector3(SwordCoverWidth, SwordCoverHeight, 0.5f);
+        transient.Add(sword.gameObject);
+
+        FxPlayer planted = Fx.Play(Fx.UtsuSword, ground, Color.white, SwordScale, null, 4);
+        SpriteRenderer look;
+        if (planted != null)
+        {
+            planted.transform.SetParent(sword.transform, true);
+            look = planted.GetComponent<SpriteRenderer>();
+        }
+        else
+        {
+            look = new GameObject("Blade").AddComponent<SpriteRenderer>();
+            look.transform.SetParent(sword.transform, false);
+            look.transform.localScale = new Vector3(0.15f, SwordCoverHeight, 1f);
+            look.sprite = ProceduralSprites.White;
+            look.color = Lace;
+            look.sortingOrder = 4;
+        }
+        // A steel ward round the blade, showing how far its cover reaches.
+        SpriteRenderer ward = Kunai.CreateGlow(sword.transform, 1f, 3, new Color(Steel.r, Steel.g, Steel.b, 0.5f));
+        ward.transform.localScale = new Vector3(SwordCoverWidth * 1.6f, SwordCoverHeight * 1.3f, 1f);
+
+        Blocker cover = sword.AddComponent<Blocker>();
+        cover.Init(int.MaxValue, look, new[] { look.sprite }, art.deathParticles);
+        return cover;
+    }
+
+    // It takes its sword back: the blade glints, it dashes down onto it, wrenches it out of the ground with a strike
+    // that cuts anyone still sheltering there, and dashes back to its row.
+    IEnumerator ReclaimSword()
+    {
+        if (plantedSword == null)
+        {
+            swordOut = false;
+            PlayIdle();
+            yield break;
+        }
+        Vector3 row = anchor;
+        float x = plantedSword.transform.position.x;
+        ElementFx.Glow(plantedSword.transform.position, Color.white, 0.9f, 2.5f, 0.4f);
+        Sfx.Play(Sfx.ParryClang, 0.5f, 1.6f);
+        Tick(0.9f);
+        yield return Wait(secondPhase ? 0.45f : 0.55f);
+
+        Beat();
+        yield return Dash(new Vector3(x, Landing(), row.z));
+        Destroy(plantedSword.gameObject);
+        transient.Remove(plantedSword.gameObject);
+        plantedSword = null;
+        swordOut = false;
+        yield return Chop(x, null);
+        yield return Dash(row);
+        PlayIdle();
     }
 
     IEnumerator SweepBeam(Beam beam, float from, float to, float seconds)
@@ -954,24 +1203,25 @@ public class Utsusemi : Boss
         }
     }
 
-    // Midnight (second phase only): a gold clock mark appears on the ground away from the ronin, and two clock-hand
-    // beams sweep in from the screen's edges, closing on it from both sides. The mark is the one open ground they
-    // never cross; cover stops them too. As they meet, a bell strikes and they flash, then snap back out. Below a
-    // quarter of its health there are two marks, so the ronin must run to the second between strikes.
+    // Midnight (second phase only): it hurls its sword at the ronin and the sword plants itself there, then two
+    // clock-hand beams sweep in from the screen's edges, closing on the sword from both sides. Beside the sword is the
+    // one ground they never cross (it's cover too). As they meet, a bell strikes and they flash, then snap back out.
+    // Below a quarter of its health they meet twice: with the hands held at the edges it wrenches the sword back to
+    // its hand and throws it again at wherever the ronin ran, so he must dodge it and get beside it again. Then it
+    // dashes down and takes its sword back, as after the Heart Lantern.
     IEnumerator Midnight()
     {
         yield return Stride(CameraShake.Center.x);
         Speak(BossLine.Midnight);
         int strikes = HealthFraction <= 0.25f ? 2 : 1;
-        float markX = MarkAwayFrom(ronin.Bounds.center.x);
-        GameObject mark = ClockMark(markX);
+        yield return ThrowSword(AtRonin(3f));
+        float markX = plantedSword != null ? plantedSword.transform.position.x : ronin.Bounds.center.x;
         yield return Charge();
 
-        PlayAction(art.attack);
         Beam left = MakeBeam(), right = MakeBeam();
         Sfx.PlayLoop(Sfx.LanternBeam, 1f, 0.9f);
         float leftEdge = LeftEdge + 0.3f, rightEdge = RightEdge - 0.3f;
-        // The hands stop this far either side of the mark: the gap they leave is the safe spot.
+        // The hands stop this far either side of the sword: the gap they leave is the safe spot.
         const float gap = 1.1f;
         for (int strike = 0; strike < strikes; strike++)
         {
@@ -996,30 +1246,52 @@ public class Utsusemi : Boss
                 DrawHand(right, markX + gap, true);
                 yield return null;
             }
-
-            // A second mark appears as they open, so there's time to run to it.
-            float fromX = markX;
-            if (strike + 1 < strikes)
-            {
-                Destroy(mark);
-                markX = MarkAwayFrom(fromX);
-                mark = ClockMark(markX);
-                Tick(0.8f);
-            }
             // Open: back out to the edges, faster.
             for (float t = 0; t < 0.9f; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
             {
                 Beat();
                 float k = Mathf.SmoothStep(0, 1, t / 0.9f);
-                DrawHand(left, Mathf.Lerp(fromX - gap, leftEdge, k), false);
-                DrawHand(right, Mathf.Lerp(fromX + gap, rightEdge, k), false);
+                DrawHand(left, Mathf.Lerp(markX - gap, leftEdge, k), false);
+                DrawHand(right, Mathf.Lerp(markX + gap, rightEdge, k), false);
                 yield return null;
+            }
+            // Another hour to strike: the sword comes back and goes out again while the hands wait at the edges.
+            if (strike + 1 < strikes)
+            {
+                yield return HoldingHands(RecallSword(), left, right, leftEdge, rightEdge);
+                yield return HoldingHands(ThrowSword(AtRonin(3f)), left, right, leftEdge, rightEdge);
+                if (plantedSword != null) markX = plantedSword.transform.position.x;
             }
         }
         EndBeam(left);
         EndBeam(right);
         Sfx.Stop(Sfx.LanternBeam);
-        Destroy(mark);
+        yield return ReclaimSword();
+    }
+
+    // Runs a step of the attack (and everything it waits on) while both hands keep burning at the given spots.
+    IEnumerator HoldingHands(IEnumerator step, Beam left, Beam right, float leftX, float rightX)
+    {
+        var steps = new Stack<IEnumerator>();
+        steps.Push(step);
+        while (steps.Count > 0)
+        {
+            IEnumerator top = steps.Peek();
+            if (!top.MoveNext())
+            {
+                steps.Pop();
+                continue;
+            }
+            if (top.Current is IEnumerator inner)
+            {
+                steps.Push(inner);
+                continue;
+            }
+            Beat();
+            DrawHand(left, leftX, false);
+            DrawHand(right, rightX, false);
+            yield return top.Current;
+        }
     }
 
     // One hand of the clock: a beam from the core to the ground at x, stopped by cover, burning the ronin it crosses.
@@ -1031,32 +1303,8 @@ public class Utsusemi : Boss
         else HitIfCrossed(Core, end);
     }
 
-    // A spot on the ground at least 4 units from x, inside the screen.
-    float MarkAwayFrom(float x)
-    {
-        float lo = LeftEdge + 3f, hi = RightEdge - 3f;
-        for (int i = 0; i < 12; i++)
-        {
-            float candidate = Random.Range(lo, hi);
-            if (Mathf.Abs(candidate - x) >= 4f) return candidate;
-        }
-        return x < CameraShake.Center.x ? hi : lo;
-    }
-
-    // The gold clock face on the ground marking where the hands will meet.
-    GameObject ClockMark(float x)
-    {
-        Vector3 at = new Vector3(x, GroundY + 0.35f, 0);
-        FxPlayer face = Fx.Play(Fx.UtsuClockMark, at, Color.white, 1.6f, null, 3);
-        if (face != null)
-        {
-            transient.Add(face.gameObject);
-            return face.gameObject;
-        }
-        SpriteRenderer ring = Bar(at + Vector3.left * 1f, at + Vector3.right * 1f, 0.6f, new Color(Gold.r, Gold.g, Gold.b, 0.6f), 3);
-        ring.sprite = ProceduralSprites.Glow;
-        return ring.gameObject;
-    }
+    // The ronin's spot on the ground, kept at least margin inside the screen.
+    float AtRonin(float margin) => Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + margin, RightEdge - margin);
 
     // Sparks pour into the core while it whines up to full power.
     IEnumerator Charge()
@@ -1081,15 +1329,17 @@ public class Utsusemi : Boss
         public float nextFire, nextBurn, nextSpark, lastFireX;
     }
 
-    Beam MakeBeam()
+    Beam MakeBeam() => MakeBeam(Core, 1.6f);
+
+    Beam MakeBeam(Vector3 from, float flareSize)
     {
         var beam = new Beam
         {
-            glow = Bar(Core, Core, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f), 53),
-            body = Bar(Core, Core, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f), 55),
-            core = Bar(Core, Core, 1f, new Color(1f, 0.92f, 0.88f), 56),
-            flare = Fx.Play(Fx.UtsuBeamFlare, Core, Color.white, 1.6f, transform, 57),
-            hit = Fx.Play(Fx.UtsuBeamHit, Core, Color.white, 1.3f, null, 57),
+            glow = Bar(from, from, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f), 53),
+            body = Bar(from, from, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f), 55),
+            core = Bar(from, from, 1f, new Color(1f, 0.92f, 0.88f), 56),
+            flare = Fx.Play(Fx.UtsuBeamFlare, from, Color.white, flareSize, transform, 57),
+            hit = Fx.Play(Fx.UtsuBeamHit, from, Color.white, 1.3f, null, 57),
         };
         beam.glow.sprite = ProceduralSprites.Glow;
         // Cleared with the rest of the attack if it's cut short.
@@ -1135,6 +1385,13 @@ public class Utsusemi : Boss
     {
         if (Time.time < beam.nextBurn) return;
         beam.nextBurn = Time.time + 0.25f;
+        // The sword can't burn: the beam only strikes sparks off its steel.
+        if (cover == plantedSword)
+        {
+            Fx.Play(Fx.Impact, at, Color.white, 0.7f);
+            Sfx.Play(Sfx.ParryClang, 0.25f, 1.8f);
+            return;
+        }
         cover.Hit(at);
         Sfx.Play(Sfx.BlockerHit, 0.5f, 1.6f);
     }
@@ -1159,13 +1416,16 @@ public class Utsusemi : Boss
     }
 
     // Where a beam from the core aimed at x on the ground stops: on the nearest blocker in the way, or the ground.
-    Vector3 BeamEnd(float x, out Blocker cover)
+    Vector3 BeamEnd(float x, out Blocker cover) => BeamEnd(Core, x, out cover);
+
+    Vector3 BeamEnd(Vector3 from, float x, out Blocker cover) => BeamEnd(from, new Vector3(x, GroundY, 0), out cover);
+
+    Vector3 BeamEnd(Vector3 from, Vector3 ground, out Blocker cover)
     {
         cover = null;
-        Vector3 ground = new Vector3(x, GroundY, 0);
-        Vector3 delta = ground - Core;
+        Vector3 delta = ground - from;
         float nearest = delta.magnitude;
-        foreach (RaycastHit hit in Physics.RaycastAll(Core, delta.normalized, delta.magnitude))
+        foreach (RaycastHit hit in Physics.RaycastAll(from, delta.normalized, delta.magnitude))
         {
             if (hit.distance < nearest && hit.collider.TryGetComponent(out Blocker blocker))
             {
@@ -1173,7 +1433,7 @@ public class Utsusemi : Boss
                 cover = blocker;
             }
         }
-        return Core + delta.normalized * nearest;
+        return from + delta.normalized * nearest;
     }
 
     static void Stretch(SpriteRenderer bar, Vector3 from, Vector3 to, float width)

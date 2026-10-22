@@ -572,6 +572,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 498f5461edd3748f5975d62960b39ce7, type: 3}
   - {fileID: 21300000, guid: 3276a8fd624ae402195a716b5fbcae2a, type: 3}
   - {fileID: 21300000, guid: 56132ba9322554037933bebd89eb6a0d, type: 3}
+  utsusemiSwordThrow:
+  - {fileID: 21300000, guid: db4c7dce5324140cea6eb77968fdb069, type: 3}
+  - {fileID: 21300000, guid: 08066e67396584217917303a76cfda1b, type: 3}
+  - {fileID: 21300000, guid: 22cc75c77ecb045eabb167d0c972682a, type: 3}
+  - {fileID: 21300000, guid: bcb917f93e00f4eb68f94a0100dc75ad, type: 3}
+  - {fileID: 21300000, guid: b83b859c6cb92478582319d288ec94d6, type: 3}
+  utsusemiUnarmedIdle:
+  - {fileID: 21300000, guid: 55f4a8c3c717746d3887327e5a64b33d, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
   utsusemiIntroLine: {fileID: 8300000, guid: a56e622e912b24336a5dd663a2e52f19, type: 3}

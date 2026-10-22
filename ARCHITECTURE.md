@@ -98,21 +98,26 @@ match `BoonChoiceUI.boonIcons`.
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
 - `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (90 HP), a karakuri automaton that moves in ticking steps
-  (`Stride`). Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
+  (`Stride`). Before its first move `RazeCover` sweeps a beam from its `Eye` along the foot of the blocker row,
+  demolishing every `Blocker` (cosmetic for the ronin). Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
   and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
-  `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars are shown one by one, then hidden; it `Dash`es
+  `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, placed by `PlaceHours` in spread spots numbered in a `ZigZag` order, are shown one by one, then hidden; it `Dash`es
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
   `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights swing through the ronin's lane on threads, flown
   with `Arrow.Steer` per physics step). Phase 2 at half health opens its core and is the laser phase (`NextMove` puts a
   laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams
-  closing on a ground mark). Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
+  closing on the planted sword; at low health `HoldingHands` keeps them burning at the edges while it `RecallSword`s
+  and throws again). Both open with `ThrowSword` (the `FlySword` flight, then `PlantSword`: a never-breaking
+  `Blocker` with the `Utsu_Sword` loop, which beams only spark off in `BurnCover`) and end with `ReclaimSword` (a
+  `Dash` down and a `Chop` at the sword). While the sword is out it rests in `GameManager.utsusemiUnarmedIdle`, and
+  the throw wind-up is `utsusemiSwordThrow`, both via `SetThrowFrames`. The beams fire from `Core`, its heart. Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
   and hit the ronin where they cross his height (`HitIfCrossed`), leaving `GroundFire` patches burning along the ground; the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
-  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop` and `HourSlash`.
+  Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop`, `HourSlash`, `SwordWhirl` and `SwordPlant`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`
@@ -173,7 +178,7 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 - `CharacterArt` ScriptableObject (`Art/Characters/*.asset`): clips `idle`, `attack`, `hit`, `death`, `parry`,
   `runLeft`, `runRight` and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
   Benibana, Utsusemi. A boss can rest in a different loop by overriding `Boss.IdleClip` (Utsusemi's bare-headed
-  idle, `GameManager.utsusemiBareIdle`, while its hat is thrown).
+  idle, `GameManager.utsusemiBareIdle`, while its hat is thrown, and its unarmed stance while its sword is planted).
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
 - Raw frames live in `Art/Sprites/{Characters,Projectiles,Fx,Effects,Blockers,Background,UI}`;
   `Editor/PixelArtImporter.cs` imports them as point-filtered pixel sprites automatically.

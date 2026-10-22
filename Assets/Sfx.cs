@@ -43,6 +43,8 @@ public static class Sfx
     public const string MidnightChime = "MidnightChime";
     public const string BladeChop = "BladeChop";
     public const string HourSlash = "HourSlash";
+    public const string SwordWhirl = "SwordWhirl";
+    public const string SwordPlant = "SwordPlant";
 
     const int VoiceCount = 16;
 

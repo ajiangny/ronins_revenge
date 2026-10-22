@@ -96,6 +96,18 @@ const SOUNDS = {
       "A colossal sword slash: a deep rising steel whoosh that ends in a huge resonant clang, like a clock bell " +
       "struck by a blade, with a shimmering metallic ring-out. Epic boss attack, video game sound effect, no music.",
   },
+  SwordWhirl: {
+    seconds: 1,
+    prompt:
+      "A long steel katana thrown end over end through the air: a fast rhythmic whooshing whirr of a spinning " +
+      "blade cutting the wind, with a thin metallic ring, passing by. Video game sound effect, no music.",
+  },
+  SwordPlant: {
+    seconds: 1.4,
+    prompt:
+      "A long sword stabbing deep into stone ground from above: a heavy sharp crunching impact of steel into rock " +
+      "with debris, then the blade left standing hums with a long shimmering metallic ring. Video game, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

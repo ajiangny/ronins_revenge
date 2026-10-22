@@ -77,6 +77,8 @@ public static class BossArtSetup
             SetFrames(so.FindProperty("utsusemiDash"), TryFrames("Utsusemi", "Dash"));
             SetFrames(so.FindProperty("utsusemiChop"), TryFrames("Utsusemi", "Chop"));
             SetFrames(so.FindProperty("utsusemiHourSlash"), TryFrames("Utsusemi", "HourSlash"));
+            SetFrames(so.FindProperty("utsusemiSwordThrow"), TryFrames("Utsusemi", "SwordThrow"));
+            SetFrames(so.FindProperty("utsusemiUnarmedIdle"), TryFrames("Utsusemi", "UnarmedIdle"));
         }
         so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
         so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");

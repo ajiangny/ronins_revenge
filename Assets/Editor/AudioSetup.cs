@@ -63,6 +63,8 @@ public static class AudioSetup
         (Sfx.MidnightChime, 1f, 0f, 0.5f),
         (Sfx.BladeChop, 0.9f, 0.08f, 0.08f),
         (Sfx.HourSlash, 1f, 0f, 0.5f),
+        (Sfx.SwordWhirl, 0.8f, 0.04f, 0.3f),
+        (Sfx.SwordPlant, 1f, 0f, 0.3f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

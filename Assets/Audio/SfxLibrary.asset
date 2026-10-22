@@ -416,6 +416,28 @@ MonoBehaviour:
     - 1.0675057
     - 0.93546486
     ownSource: 0
+  - id: SwordWhirl
+    clips:
+    - {fileID: 8300000, guid: 11458383dc28a4ad48364917747918e7, type: 3}
+    - {fileID: 8300000, guid: aad7f59a67ecb481abe53eccc7206772, type: 3}
+    volume: 0.8
+    pitchJitter: 0.04
+    minInterval: 0.3
+    audible:
+    - 0.57773244
+    - 0.5483447
+    ownSource: 0
+  - id: SwordPlant
+    clips:
+    - {fileID: 8300000, guid: 5855aead7b01148e38c0b4baa1259779, type: 3}
+    - {fileID: 8300000, guid: 6c597205cda0a4c4d8bf75004cd60139, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.3
+    audible:
+    - 1.4367347
+    - 1.4367347
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

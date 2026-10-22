@@ -188,11 +188,11 @@ public static class Boons
 
         // Lightning: jolt. Chains and speed.
         new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",
-            Description = "A <b>Slash</b> kill may arc lightning to the nearest samurai.",
+            Description = "A <b>Slash</b> kill may arc lightning to a samurai further off in the ranks.",
             StatLabel = "Chain chance:", Values = new[] { 0.35f, 0.5f, 0.7f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderShuriken, Element = Element.Lightning, Slot = BoonSlot.Special, Name = "Thunder Shuriken",
-            Description = "Your <b>Shuriken</b> calls lightning on the front samurai of nearby columns.",
-            StatLabel = "Extra columns:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
+            Description = "Your <b>Shuriken</b> flies much faster, and may arc lightning into each samurai it passes near.",
+            StatLabel = "Chain chance:", Values = new[] { 0.3f, 0.45f, 0.6f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderRiposte, Element = Element.Lightning, Slot = BoonSlot.Parry, Name = "Thunder Riposte",
             Description = "A successful <b>Parry</b> strikes the samurai nearest above you with lightning.",
             StatLabel = "Strikes:", Values = new[] { 1f, 2f, 3f }, Format = Plus },

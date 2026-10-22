@@ -16,6 +16,7 @@ public class Ronin : MonoBehaviour
     const float FireballSize = 1.3f;
     const float ShardSize = 0.8f;
     const float ShardSpread = 25f;
+    const float ThunderShurikenSpeed = 1.9f;
     // How long a Frozen Riposte shard holds the samurai it hits in ice.
     const float RiposteShardFreeze = 1.5f;
 
@@ -53,7 +54,7 @@ public class Ronin : MonoBehaviour
     [SerializeField] float parryRadius = 1.1f;
 
     public event Action Hit;
-    public event Action<Vector3> ShurikenThrown;
+    public event Action<Vector3, Kunai> ShurikenThrown;
     // Raised once per parry, on the first arrow it deflects.
     public event Action Parried;
 
@@ -257,13 +258,15 @@ public class Ronin : MonoBehaviour
     {
         Kunai shuriken = SpawnProjectile(kunaiPrefab, Muzzle);
         bool hasArt = shurikenSprite != null;
-        shuriken.Launch(Vector3.up, shurikenSpeed, int.MaxValue, KillSource.Shuriken,
+        // Thunder Shuriken hurls it far faster.
+        float speed = shurikenSpeed * (Loadout.Has(BoonId.ThunderShuriken, out _) ? ThunderShurikenSpeed : 1f);
+        shuriken.Launch(Vector3.up, speed, int.MaxValue, KillSource.Shuriken,
             hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
         shuriken.Tint(shurikenTint, shurikenGlow);
         lastShuriken = Time.time;
         Sfx.Play(Sfx.ShurikenThrow);
         PlayAction(art.attack);
-        ShurikenThrown?.Invoke(Muzzle);
+        ShurikenThrown?.Invoke(Muzzle, shuriken);
     }
 
     void StartParry()

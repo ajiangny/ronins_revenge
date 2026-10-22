@@ -6,6 +6,10 @@ using UnityEngine;
 public class BoonEffects
 {
     const float ChainRange = 3f;
+    // Storm Blade's arc leaps to a random samurai this far away, not just the one beside the kill.
+    const float StormBladeRange = 6.5f;
+    // Thunder Shuriken: how close a samurai must come to the flying blade for the lightning to reach it.
+    const float ShurikenArcRadius = 2.6f;
     // Samurai stand 2 apart across and 1.75 apart down, so this reaches the ones beside, above and below.
     const float IceRadius = 2.1f;
     const float ShardFreezeSeconds = 1.5f;
@@ -56,8 +60,9 @@ public class BoonEffects
                 }
                 if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value)
                 {
-                    Samurai next = army.NearestSamurai(position, ChainRange);
-                    if (next != null) Chain(position, next);
+                    List<Samurai> reach = army.SamuraiWithin(position, StormBladeRange);
+                    reach.RemoveAll(s => s.IsDead || s == samurai);
+                    if (reach.Count > 0) Chain(position, reach[Random.Range(0, reach.Count)]);
                 }
                 break;
             case KillSource.Shuriken:
@@ -123,8 +128,14 @@ public class BoonEffects
         }
     }
 
-    public void OnShurikenThrown(Vector3 muzzle)
+    public void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
     {
+        // Thunder Shuriken: lightning arcs off the blade into what it flies past, boss included.
+        if (loadout.Has(BoonId.ThunderShuriken, out float arcChance) && shuriken != null)
+        {
+            shuriken.gameObject.AddComponent<ShurikenStorm>().Begin(army, () => BossFight ? Boss : null, ShurikenArcRadius, arcChance,
+                (from, target, point) => Strike(from, point, target, chain: true));
+        }
         if (BossFight)
         {
             OnShurikenThrownAtBoss();
@@ -144,15 +155,6 @@ public class BoonEffects
             CameraShake.Add(0.2f);
             Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
         }
-        if (loadout.Has(BoonId.ThunderShuriken, out value))
-        {
-            int own = army.ClosestColumnTo(muzzle.x);
-            foreach (int column in NearestColumns(own, (int)value))
-            {
-                Samurai front = army.FrontSamuraiInColumn(column);
-                if (front != null) Strike(front.transform.position + Vector3.up * 6f, front);
-            }
-        }
     }
 
     void OnShurikenThrownAtBoss()
@@ -164,10 +166,6 @@ public class BoonEffects
             if (Fx.Play(Fx.FrostWave, Boss.Centre, Color.white, 3f) == null) ElementFx.Glow(Boss.Centre, Frost, 1f, 5f, 0.4f);
             CameraShake.Add(0.2f);
             Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
-        }
-        if (loadout.Has(BoonId.ThunderShuriken, out value))
-        {
-            for (int i = 0; i < (int)value; i++) Strike(Boss.Centre + new Vector3((i - (value - 1) / 2f) * 1.5f, 6f, 0), Boss.Centre, Boss);
         }
     }
 

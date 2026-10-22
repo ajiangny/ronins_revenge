@@ -654,9 +654,9 @@ public class GameManager : MonoBehaviour
         MaybeDropSoul(samurai.transform.position);
     }
 
-    void OnShurikenThrown(Vector3 muzzle)
+    void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
     {
-        if (state == State.Playing) effects.OnShurikenThrown(muzzle);
+        if (state == State.Playing) effects.OnShurikenThrown(muzzle, shuriken);
     }
 
     void OnParried()

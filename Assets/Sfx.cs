@@ -43,7 +43,10 @@ public static class Sfx
     public static SfxLibrary Library { get; set; }
 
     static AudioSource[] voices;
-    static int nextVoice;
+    // When each voice's sound has finished being heard (unscaled time); after that it can be reused even while its
+    // clip's silent tail is still playing.
+    static float[] busyUntil;
+    static readonly Dictionary<string, AudioSource> ownSources = new Dictionary<string, AudioSource>();
     static readonly Dictionary<string, float> lastPlayed = new Dictionary<string, float>();
 
     public static void Play(string id, float volume = 1f, float pitch = 1f)
@@ -55,29 +58,49 @@ public static class Sfx
         if (lastPlayed.TryGetValue(id, out float last) && now - last < sound.minInterval) return;
         lastPlayed[id] = now;
 
-        AudioSource voice = NextVoice();
-        voice.clip = sound.clips[Random.Range(0, sound.clips.Length)];
+        int pick = Random.Range(0, sound.clips.Length);
+        float finalPitch = pitch * (1f + Random.Range(-sound.pitchJitter, sound.pitchJitter));
+        AudioSource voice;
+        if (sound.ownSource)
+        {
+            voice = OwnSource(id);
+        }
+        else
+        {
+            int index = NextVoice(now);
+            voice = voices[index];
+            // A lower pitch plays the clip slower, so its sound lasts longer.
+            busyUntil[index] = now + sound.AudibleLength(pick) / Mathf.Max(0.1f, finalPitch);
+        }
+        voice.clip = sound.clips[pick];
         voice.volume = sound.volume * volume;
-        voice.pitch = pitch * (1f + Random.Range(-sound.pitchJitter, sound.pitchJitter));
+        voice.pitch = finalPitch;
         voice.Play();
     }
 
-    // A free voice if there is one, otherwise the one that started longest ago.
-    static AudioSource NextVoice()
+    // A voice whose sound has finished if there is one, otherwise the one that will finish soonest.
+    static int NextVoice(float now)
     {
         if (voices == null || voices[0] == null) CreateVoices();
+        int soonest = 0;
         for (int i = 0; i < VoiceCount; i++)
         {
-            AudioSource voice = voices[(nextVoice + i) % VoiceCount];
-            if (!voice.isPlaying)
-            {
-                nextVoice = (nextVoice + i + 1) % VoiceCount;
-                return voice;
-            }
+            if (busyUntil[i] <= now || !voices[i].isPlaying) return i;
+            if (busyUntil[i] < busyUntil[soonest]) soonest = i;
         }
-        AudioSource oldest = voices[nextVoice];
-        nextVoice = (nextVoice + 1) % VoiceCount;
-        return oldest;
+        return soonest;
+    }
+
+    static AudioSource OwnSource(string id)
+    {
+        if (voices == null || voices[0] == null) CreateVoices();
+        if (!ownSources.TryGetValue(id, out AudioSource source) || source == null)
+        {
+            source = voices[0].gameObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            ownSources[id] = source;
+        }
+        return source;
     }
 
     static void CreateVoices()
@@ -85,6 +108,8 @@ public static class Sfx
         var go = new GameObject("Sfx");
         Object.DontDestroyOnLoad(go);
         voices = new AudioSource[VoiceCount];
+        busyUntil = new float[VoiceCount];
+        ownSources.Clear();
         for (int i = 0; i < VoiceCount; i++)
         {
             voices[i] = go.AddComponent<AudioSource>();

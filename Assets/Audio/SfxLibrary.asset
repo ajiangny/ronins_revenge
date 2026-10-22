@@ -20,6 +20,10 @@ MonoBehaviour:
     volume: 0.55
     pitchJitter: 0.08
     minInterval: 0.05
+    audible:
+    - 0.4170975
+    - 0.5187982
+    ownSource: 0
   - id: KunaiThrow
     clips:
     - {fileID: 8300000, guid: 593e7bd861b264cf88e093c158e8348a, type: 3}
@@ -27,6 +31,10 @@ MonoBehaviour:
     volume: 0.55
     pitchJitter: 0.08
     minInterval: 0.05
+    audible:
+    - 0.31566894
+    - 0.52562356
+    ownSource: 0
   - id: ShurikenThrow
     clips:
     - {fileID: 8300000, guid: d8e6b6839af83411f8b83cc69cca7b03, type: 3}
@@ -34,18 +42,28 @@ MonoBehaviour:
     volume: 0.8
     pitchJitter: 0.04
     minInterval: 0.1
+    audible:
+    - 0.9785714
+    - 1.8279592
+    ownSource: 0
   - id: ParrySwing
     clips:
     - {fileID: 8300000, guid: 8d43c9655c2dd47ceb8a10e1e677c7ee, type: 3}
     volume: 0.7
     pitchJitter: 0.06
     minInterval: 0.05
+    audible:
+    - 2.009229
+    ownSource: 0
   - id: Deflect
     clips:
     - {fileID: 8300000, guid: 451031da2efe94d6794052a6a5fd68d5, type: 3}
     volume: 0.85
     pitchJitter: 0.06
     minInterval: 0.04
+    audible:
+    - 0.69884354
+    ownSource: 0
   - id: ArrowFire
     clips:
     - {fileID: 8300000, guid: cb73a06634f154d0cbefae6a7c1fc951, type: 3}
@@ -53,6 +71,10 @@ MonoBehaviour:
     volume: 0.5
     pitchJitter: 0.1
     minInterval: 0.08
+    audible:
+    - 0.47435373
+    - 0.5717007
+    ownSource: 0
   - id: SamuraiDeath
     clips:
     - {fileID: 8300000, guid: 3113cd3da99e54d88af121d0aa611193, type: 3}
@@ -60,6 +82,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0.1
     minInterval: 0.04
+    audible:
+    - 1.176576
+    - 0.67126983
+    ownSource: 0
   - id: PlayerHit
     clips:
     - {fileID: 8300000, guid: f2e163b25eb5a47a191a5f827bf8854e, type: 3}
@@ -67,6 +93,10 @@ MonoBehaviour:
     volume: 1
     pitchJitter: 0.03
     minInterval: 0.2
+    audible:
+    - 1.792585
+    - 0.6603855
+    ownSource: 0
   - id: WardShatter
     clips:
     - {fileID: 8300000, guid: 3617eb935fea64f24b1ef85456c7c38f, type: 3}
@@ -74,6 +104,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0.03
     minInterval: 0.2
+    audible:
+    - 0.9816553
+    - 0.8421542
+    ownSource: 0
   - id: PlayerDeath
     clips:
     - {fileID: 8300000, guid: 83c505eae1a3145b39ba339e42893fac, type: 3}
@@ -81,6 +115,10 @@ MonoBehaviour:
     volume: 1
     pitchJitter: 0
     minInterval: 0.5
+    audible:
+    - 0.92834467
+    - 0.74716556
+    ownSource: 0
   - id: BlockerHit
     clips:
     - {fileID: 8300000, guid: 7a5218d0827ca4c61bdfc64b31be6fae, type: 3}
@@ -88,6 +126,10 @@ MonoBehaviour:
     volume: 0.5
     pitchJitter: 0.1
     minInterval: 0.05
+    audible:
+    - 0.64956915
+    - 0.39156464
+    ownSource: 0
   - id: BlockerBreak
     clips:
     - {fileID: 8300000, guid: 3e944ccbaafe04362b50fbaa2f6d0a49, type: 3}
@@ -95,6 +137,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0.08
     minInterval: 0.08
+    audible:
+    - 0.8452381
+    - 1.8901134
+    ownSource: 0
   - id: SoulSpawn
     clips:
     - {fileID: 8300000, guid: ef396377c3af049bbbf51754745a5c1a, type: 3}
@@ -102,6 +148,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0.03
     minInterval: 0.2
+    audible:
+    - 0.6921315
+    - 0.41077098
+    ownSource: 0
   - id: SoulCollect
     clips:
     - {fileID: 8300000, guid: d85e64d1ee3ba4b18b207deb44857f04, type: 3}
@@ -109,6 +159,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0
     minInterval: 0.2
+    audible:
+    - 1.3965306
+    - 1.5712018
+    ownSource: 0
   - id: FireBlast
     clips:
     - {fileID: 8300000, guid: 2d0c7978414af4139bf24a0fa2adfa97, type: 3}
@@ -116,6 +170,10 @@ MonoBehaviour:
     volume: 0.75
     pitchJitter: 0.08
     minInterval: 0.06
+    audible:
+    - 0.65276647
+    - 0.6302041
+    ownSource: 0
   - id: LightningStrike
     clips:
     - {fileID: 8300000, guid: 7ec0f78babcca4312999e408a94f0ac6, type: 3}
@@ -123,6 +181,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0.08
     minInterval: 0.06
+    audible:
+    - 0.7474603
+    - 1.2645124
+    ownSource: 0
   - id: FrostChill
     clips:
     - {fileID: 8300000, guid: d6920d3e89d504a458b303e01d9362bc, type: 3}
@@ -130,6 +192,10 @@ MonoBehaviour:
     volume: 0.6
     pitchJitter: 0.06
     minInterval: 0.08
+    audible:
+    - 0.78417236
+    - 1.4713832
+    ownSource: 0
   - id: UiMove
     clips:
     - {fileID: 8300000, guid: 202d2fbc49c2546938dbf99b053e46f8, type: 3}
@@ -137,6 +203,10 @@ MonoBehaviour:
     volume: 0.6
     pitchJitter: 0.04
     minInterval: 0.03
+    audible:
+    - 0.25995466
+    - 0.2014059
+    ownSource: 0
   - id: UiConfirm
     clips:
     - {fileID: 8300000, guid: 773ee1fe125a34a53aa2fc0ec32c23d7, type: 3}
@@ -144,6 +214,10 @@ MonoBehaviour:
     volume: 0.8
     pitchJitter: 0
     minInterval: 0.1
+    audible:
+    - 0.77183676
+    - 0.70256233
+    ownSource: 0
   - id: StageStart
     clips:
     - {fileID: 8300000, guid: 3d585b08125574d90816ce300f3c4707, type: 3}
@@ -151,6 +225,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0
     minInterval: 0.5
+    audible:
+    - 0.8060771
+    - 0.967415
+    ownSource: 0
   - id: VictorySting
     clips:
     - {fileID: 8300000, guid: a77507972685e402ba1635ce93aa70fd, type: 3}
@@ -158,6 +236,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0
     minInterval: 1
+    audible:
+    - 0.65879816
+    - 1.1250794
+    ownSource: 0
   - id: DefeatSting
     clips:
     - {fileID: 8300000, guid: 130ea73c51d5d46a3a53e5631aa06e15, type: 3}
@@ -165,6 +247,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0
     minInterval: 1
+    audible:
+    - 1.82161
+    - 2.4344218
+    ownSource: 0
   - id: MarchStep
     clips:
     - {fileID: 8300000, guid: 3d13893519d964a35a886ba14d09d0aa, type: 3}
@@ -172,6 +258,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0
     minInterval: 0.1
+    audible:
+    - 0.5252381
+    - 1.1382313
+    ownSource: 1
   - id: ParryClang
     clips:
     - {fileID: 8300000, guid: 7f31628903d2e492d8633731ceafb0a6, type: 3}
@@ -179,6 +269,10 @@ MonoBehaviour:
     volume: 1
     pitchJitter: 0.05
     minInterval: 0.1
+    audible:
+    - 0.4900907
+    - 0.46725625
+    ownSource: 0
   - id: SamuraiCry
     clips:
     - {fileID: 8300000, guid: dbc5e24b812434ffca02cf6aa524c24f, type: 3}
@@ -186,6 +280,10 @@ MonoBehaviour:
     volume: 0.55
     pitchJitter: 0.12
     minInterval: 0.12
+    audible:
+    - 0.5807256
+    - 0.5355329
+    ownSource: 0
   - id: PlayerHurt
     clips:
     - {fileID: 8300000, guid: abe64c67d54c441fd89c4fbd6e1227c0, type: 3}
@@ -193,6 +291,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0.05
     minInterval: 0.2
+    audible:
+    - 0.36687076
+    - 0.5485714
+    ownSource: 0
   - id: BossHit
     clips:
     - {fileID: 8300000, guid: eea96f1967a274cfb951e8dd297e40c1, type: 3}
@@ -200,6 +302,10 @@ MonoBehaviour:
     volume: 0.75
     pitchJitter: 0.08
     minInterval: 0.05
+    audible:
+    - 0.41594103
+    - 0.43340135
+    ownSource: 0
   - id: BossStagger
     clips:
     - {fileID: 8300000, guid: 066b661cecf4f4135b6c7a3173fd57fe, type: 3}
@@ -207,6 +313,10 @@ MonoBehaviour:
     volume: 1
     pitchJitter: 0
     minInterval: 0.5
+    audible:
+    - 1.3830159
+    - 0.47022676
+    ownSource: 0
   - id: ClockTick
     clips:
     - {fileID: 8300000, guid: 389e1e549e4ab44e7820a84a2c4bea45, type: 3}
@@ -214,6 +324,10 @@ MonoBehaviour:
     volume: 0.6
     pitchJitter: 0
     minInterval: 0.04
+    audible:
+    - 0.2030839
+    - 0.1979365
+    ownSource: 0
   - id: GearGrind
     clips:
     - {fileID: 8300000, guid: afa41bd2510d847eda616c2e2e79bb82, type: 3}
@@ -221,6 +335,10 @@ MonoBehaviour:
     volume: 0.9
     pitchJitter: 0.05
     minInterval: 0.4
+    audible:
+    - 1.3728571
+    - 1.4093424
+    ownSource: 0
   - id: HatWhirr
     clips:
     - {fileID: 8300000, guid: efb7eb1021d8c481cb2978501af4969c, type: 3}
@@ -228,6 +346,10 @@ MonoBehaviour:
     volume: 0.7
     pitchJitter: 0.05
     minInterval: 0.2
+    audible:
+    - 0.76947844
+    - 0.6307256
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

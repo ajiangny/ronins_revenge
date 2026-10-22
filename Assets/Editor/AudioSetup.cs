@@ -12,6 +12,14 @@ public static class AudioSetup
     const string LibraryPath = "Assets/Audio/SfxLibrary.asset";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
+    // Below this a sample counts as silence when measuring where a clip's sound ends.
+    const float SilenceLevel = 0.02f;
+    // Kept after the last loud sample so a fading tail isn't clipped.
+    const float TailPadding = 0.08f;
+
+    // The march beat comes up to ten times a second; on a source of its own it can't crowd out every other sound.
+    static readonly HashSet<string> OwnSource = new HashSet<string> { Sfx.MarchStep };
+
     // id, starting volume, pitch jitter, and the real seconds before it can repeat.
     static readonly (string id, float volume, float jitter, float minInterval)[] Sounds =
     {
@@ -71,6 +79,8 @@ public static class AudioSetup
             }
             SfxLibrary.Sound sound = library.Find(id) ?? new SfxLibrary.Sound { id = id, volume = volume, pitchJitter = jitter, minInterval = minInterval };
             sound.clips = clips;
+            sound.audible = System.Array.ConvertAll(clips, AudibleSeconds);
+            sound.ownSource = OwnSource.Contains(id);
             sounds.Add(sound);
         }
         library.sounds = sounds.ToArray();
@@ -101,6 +111,17 @@ public static class AudioSetup
             clips.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(path));
         }
         return clips.ToArray();
+    }
+
+    // Where the clip's sound actually ends: the generated clips are padded with silence to ElevenLabs' minimum lengths.
+    static float AudibleSeconds(AudioClip clip)
+    {
+        if (clip.loadState != AudioDataLoadState.Loaded) clip.LoadAudioData();
+        var samples = new float[clip.samples * clip.channels];
+        if (!clip.GetData(samples, 0)) return clip.length;
+        int last = samples.Length - 1;
+        while (last > 0 && Mathf.Abs(samples[last]) < SilenceLevel) last--;
+        return Mathf.Min(clip.length, (float)last / clip.channels / clip.frequency + TailPadding);
     }
 
     // Music streams from disk so long tracks don't sit decompressed in memory.

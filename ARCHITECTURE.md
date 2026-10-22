@@ -165,7 +165,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 ## UI
 
 - `GameUI.cs` — HUD (score, stage/round, samurai left, lives; no high score, so the top centre stays free for
-  the boss bar), the fading stage/round banner (`ShowBanner`), boss bar, subtitles on a plate with the
+  the boss bar), the stage/round card (`ShowBanner(overline, title, body, accent)`), boss bar, subtitles on a plate with the
   speaker's name, boss intro. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the
   title menu.
 - **Text styles:** `GameUI.Style(text, TextStyle)` gives text its font and a shared outline-and-shadow material
@@ -173,6 +173,13 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   Bold, `GameUI.bodyFont`). `GameUI.titleLogo`, when set, replaces the set title on the title menu.
   TTFs are turned into TMP fonts at runtime (`BuildFont`); a missing one falls back to the pixel font. Keep new
   text at 26px or more (1080p reference) and give it a style rather than raw TMP settings.
+- **Shared "minimal ink" parts:** every screen except the paper title page is built from the same pieces, so new
+  UI should reuse them rather than add framed panels. `GameUI.CreateInk` is a dark dry-brush stroke
+  (`ProceduralSprites.InkStroke`) that paints on through its horizontal fill. `GameUI.CreateRule`/`AnimateRule`
+  is the divider: a tapered brush line (`ProceduralSprites.BrushLine`) with the menus' diamond at its middle,
+  drawn out from the centre. `GameUI.Reveal` makes a title line rise in as its letter spacing closes up. Key
+  hints use `MenuUI.KeyCap`. The stage card and the boon screen use all four; the boss intro keeps its own rule
+  and wash.
 - `MenuUI.cs` — one full-screen menu page at a time: title, optional rich-text body, a list of
   `MenuUI.Item.Button` / `MenuUI.Item.Slider` rows. Keyboard (arrows/WASD, Enter/Space, Esc/Backspace), mouse
   (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the
@@ -223,7 +230,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
 | Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
-| Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
+| Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul and boon icon wiring |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
 | Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) → `GameUI.headerFont`, body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont`, `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames` |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |

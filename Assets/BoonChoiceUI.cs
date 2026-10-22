@@ -13,15 +13,21 @@ public class BoonChoiceUI : MonoBehaviour
 {
     const float InputDelay = 0.3f;
     const float CardSlide = 34f;
-    static readonly Color CardColor = new Color(0.05f, 0.03f, 0.08f, 0.94f);
+    static readonly Color CardColor = new Color(0.03f, 0.02f, 0.05f, 0.97f);
     static readonly Color MutedText = new Color(0.78f, 0.74f, 0.68f);
-    static readonly string StatGreen = "#8CF55A";
+    static readonly string StatGreen = "#A8E07C";
+    const float CardRuleWidth = 980f;
 
     class Card
     {
         public RectTransform root;
         public CanvasGroup group;
-        public Image glow;
+        public Image ink;
+        public Image selectInk;
+        public RectTransform marker;
+        public RectTransform rule;
+        public CanvasGroup content;
+        public Image ring;
         public Image icon;
         public TextMeshProUGUI letter;
         public TextMeshProUGUI name;
@@ -51,12 +57,6 @@ public class BoonChoiceUI : MonoBehaviour
     [SerializeField] float heldSoulScale = 0.67f;
     [Tooltip("One icon per boon, in BoonId order.")]
     [SerializeField] Sprite[] boonIcons;
-    [Tooltip("9-sliced dark ink panel behind each boon card.")]
-    [SerializeField] Sprite cardSprite;
-    [Tooltip("9-sliced white border drawn around the selected card, tinted in the element's colour.")]
-    [SerializeField] Sprite cardGlowSprite;
-    [Tooltip("Screen pixels per art pixel for the card borders.")]
-    [SerializeField] float cardPixelScale = 2f;
     [Tooltip("Default icons for the Attack (sword), Shuriken and Parry slots before they hold a boon.")]
     [SerializeField] Sprite[] abilityIcons = new Sprite[3];
 
@@ -73,9 +73,10 @@ public class BoonChoiceUI : MonoBehaviour
     Image heldSoul;
     Image heldSoulGlow;
     SpriteAnimatorUI heldSoulAnimator;
+    TextMeshProUGUI overline;
     TextMeshProUGUI title;
     TextMeshProUGUI subtitle;
-    Image divider;
+    RectTransform divider;
     readonly Card[] cards = new Card[3];
 
     List<BoonOffer> offers;
@@ -116,7 +117,8 @@ public class BoonChoiceUI : MonoBehaviour
         title.text = $"Boons of {info.Name}";
         title.color = elementColor;
         subtitle.text = info.Subtitle;
-        divider.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.7f);
+        Color ruleColour = Color.Lerp(elementColor, Color.white, 0.35f);
+        foreach (Image mark in divider.GetComponentsInChildren<Image>()) mark.color = ruleColour;
 
         bool hasSoul = soulFrames != null && soulFrames.Length > 0;
         if (roninPortrait != null)
@@ -157,7 +159,12 @@ public class BoonChoiceUI : MonoBehaviour
     {
         BoonDefinition boon = offer.Boon;
         Color rarityColor = Boons.RarityColor(offer.Rarity);
-        SetIcon(card.icon, card.letter, boon, Boons.Info(boon.Element).Color);
+        Color element = Boons.Info(boon.Element).Color;
+        SetIcon(card.icon, card.letter, boon, element);
+        card.ring.color = new Color(element.r, element.g, element.b, 0.85f);
+        card.selectInk.color = new Color(element.r, element.g, element.b, 0.22f);
+        card.marker.GetComponent<Image>().color = element;
+        foreach (Image mark in card.rule.GetComponentsInChildren<Image>()) mark.color = Color.Lerp(element, Color.white, 0.35f);
         card.name.text = boon.Name;
         card.name.color = rarityColor;
         // The slot rides on the rarity line so the description can use the card's full width.
@@ -171,9 +178,9 @@ public class BoonChoiceUI : MonoBehaviour
         card.stat.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>- {boon.StatLabel}</color>   <color={StatGreen}>{value}</color>";
         card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";
         card.slide = 0f;
-        // Hidden until AnimatePanel slides it in, so it never flashes at full opacity on the first frame.
+        // Hidden until AnimatePanel paints it in, so it never flashes at full opacity on the first frame.
         card.group.alpha = 0f;
-        card.glow.color = Color.clear;
+        card.ink.fillAmount = 0f;
     }
 
     void SetIcon(Image icon, TextMeshProUGUI letter, BoonDefinition boon, Color color)
@@ -236,11 +243,16 @@ public class BoonChoiceUI : MonoBehaviour
         callback?.Invoke(index);
     }
 
-    // Cards slide in one after another; the selected one glows and sits slightly forward.
+    // Each card's ink paints on from the left one after another and its text rises in behind it. The selected card
+    // gets the menus' diamond marker, a wash of the element's colour and a brush rule, and steps slightly forward.
     void AnimatePanel(float elapsed)
     {
         float dt = Time.unscaledDeltaTime;
         float pulse = 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 5f);
+        GameUI.Reveal(overline, elapsed - 0.05f, 488f, -1f, 10f);
+        GameUI.Reveal(title, elapsed - 0.12f, 425f, -1f);
+        GameUI.Reveal(subtitle, elapsed - 0.3f, 362f, -1f, 0f);
+        GameUI.AnimateRule(divider, 760f, GameUI.EaseOut(Mathf.Clamp01((elapsed - 0.2f) / 0.5f)));
         portraitGlow.rectTransform.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(Time.unscaledTime * 2.5f));
         // The ronin slides in from the left, then breathes gently while the player chooses.
         float enter = Mathf.Clamp01(elapsed / 0.3f);
@@ -256,12 +268,16 @@ public class BoonChoiceUI : MonoBehaviour
         for (int i = 0; i < offers.Count; i++)
         {
             Card card = cards[i];
-            float appear = Mathf.Clamp01((elapsed - i * 0.07f) / 0.25f);
-            float ease = 1f - (1f - appear) * (1f - appear);
+            float since = elapsed - 0.1f - i * 0.09f;
+            card.group.alpha = Mathf.Clamp01(since / 0.1f);
+            card.ink.fillAmount = GameUI.EaseOut(Mathf.Clamp01(since / 0.4f));
+            card.content.alpha = GameUI.EaseOut(Mathf.Clamp01((since - 0.15f) / 0.3f));
             card.slide = Mathf.MoveTowards(card.slide, i == selected ? 1f : 0f, dt * 8f);
-            card.root.anchoredPosition = new Vector2(CardX + (1f - ease) * 260f + card.slide * CardSlide, card.root.anchoredPosition.y);
-            card.group.alpha = ease;
-            card.glow.color = new Color(elementColor.r, elementColor.g, elementColor.b, i == selected ? pulse : 0f);
+            float k = GameUI.EaseOut(card.slide);
+            card.root.anchoredPosition = new Vector2(CardX + k * CardSlide, card.root.anchoredPosition.y);
+            card.selectInk.fillAmount = k;
+            card.marker.localScale = Vector3.one * k;
+            GameUI.AnimateRule(card.rule, CardRuleWidth, k);
         }
     }
 
@@ -323,7 +339,7 @@ public class BoonChoiceUI : MonoBehaviour
         RectTransform root = GameUI.CreateRect("BoonChoice", transform, Vector2.zero, Vector2.zero, Vector2.zero);
         root.anchorMin = Vector2.zero;
         root.anchorMax = Vector2.one;
-        root.gameObject.AddComponent<Image>().color = new Color(0.02f, 0.01f, 0.04f, 0.72f);
+        root.gameObject.AddComponent<Image>().color = new Color(0.02f, 0.01f, 0.04f, 0.82f);
         panel = root.gameObject;
 
         Vector2 center = new Vector2(0.5f, 0.5f);
@@ -350,14 +366,18 @@ public class BoonChoiceUI : MonoBehaviour
         heldSoul.preserveAspect = true;
         heldSoulAnimator = heldSoul.gameObject.AddComponent<SpriteAnimatorUI>();
 
+        // The header follows the stage and boss cards: a small overline, a large title, then a brush rule.
+        overline = GameUI.CreateText(root, font, "Overline", center, new Vector2(CardX, 488), new Vector2(1300, 44), 30, TextAlignmentOptions.Center);
+        overline.text = "A soul offers its power";
+        overline.color = MutedText;
+        ui.Style(overline, TextStyle.Title);
         title = GameUI.CreateText(root, font, "Title", center, new Vector2(CardX, 425), new Vector2(1300, 100), 76, TextAlignmentOptions.Center);
-        title.characterSpacing = 12f;
-        title.fontStyle = FontStyles.UpperCase;
+        title.textWrappingMode = TextWrappingModes.NoWrap;
         ui.Style(title, TextStyle.Title);
         subtitle = GameUI.CreateText(root, font, "Subtitle", center, new Vector2(CardX, 362), new Vector2(1300, 50), 32, TextAlignmentOptions.Center);
         subtitle.color = MutedText;
         ui.Style(subtitle, TextStyle.Body);
-        divider = CreateImage("Divider", root, center, new Vector2(CardX, 326), new Vector2(760, 3), null);
+        divider = GameUI.CreateRule(root, center, new Vector2(CardX, 326), Color.white);
 
         float[] rows = { 175f, -40f, -255f };
         for (int i = 0; i < cards.Length; i++)
@@ -365,17 +385,10 @@ public class BoonChoiceUI : MonoBehaviour
             cards[i] = BuildCard(root, new Vector2(CardX, rows[i]), i);
         }
 
-        RectTransform footer = GameUI.CreateRect("Footer", root, new Vector2(0.5f, 0f), new Vector2(0, 0), new Vector2(0, 76));
-        footer.anchorMin = new Vector2(0f, 0f);
-        footer.anchorMax = new Vector2(1f, 0f);
-        footer.gameObject.AddComponent<Image>().color = new Color(0f, 0f, 0f, 0.55f);
-        TextMeshProUGUI quick = GameUI.CreateText(footer, font, "QuickPick", new Vector2(0f, 0.5f), new Vector2(40, 0), new Vector2(700, 60), 30, TextAlignmentOptions.Left);
-        quick.rectTransform.pivot = new Vector2(0f, 0.5f);
-        quick.text = "1  2  3   Quick pick";
-        quick.color = MutedText;
-        ui.Style(quick, TextStyle.Hint);
-        TextMeshProUGUI hint = GameUI.CreateText(footer, font, "Hint", new Vector2(1f, 0.5f), new Vector2(-40, 0), new Vector2(900, 60), 30, TextAlignmentOptions.Right);
-        hint.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>↑ ↓</color>  Select        <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>Enter</color>  Choose";
+        // Key hints in the menus' key caps, under the cards.
+        TextMeshProUGUI hint = GameUI.CreateText(root, font, "Hint", new Vector2(0.5f, 0f), new Vector2(CardX, 40), new Vector2(1300, 50), 30, TextAlignmentOptions.Center);
+        hint.text = $"{MenuUI.KeyCap("1 2 3", false)}  Quick pick       {MenuUI.KeyCap("↑ ↓", false)}  Select       {MenuUI.KeyCap("Enter", false)}  Choose";
+        hint.color = MutedText;
         ui.Style(hint, TextStyle.Hint);
     }
 
@@ -387,36 +400,47 @@ public class BoonChoiceUI : MonoBehaviour
         card.root = GameUI.CreateRect("Card" + index, parent, center, position, size);
         card.group = card.root.gameObject.AddComponent<CanvasGroup>();
 
-        // A white silhouette of the card, so the selection glow follows its ragged ink edge.
-        card.glow = CreateImage("Glow", card.root, center, Vector2.zero, size + new Vector2(24, 24), cardGlowSprite);
-        Image background = CreateImage("Panel", card.root, center, Vector2.zero, size, cardSprite);
-        if (cardSprite == null) background.color = CardColor;
+        // A stroke of ink for the card, its dry tail trailing off past the text on the right. The selected card gets
+        // a second, wider stroke in the element's colour behind it.
+        card.selectInk = GameUI.CreateInk(card.root, center, new Vector2(60, 0), new Vector2(1340, 250), Color.clear);
+        card.ink = GameUI.CreateInk(card.root, center, new Vector2(40, 0), new Vector2(1300, 220), CardColor);
 
-        // Round medallion on the left, like the god boon icons in Hades.
-        Image frame = CreateImage("IconFrame", card.root, center, new Vector2(-498, 0), new Vector2(142, 142), ProceduralSprites.Disc);
-        frame.color = new Color(0.12f, 0.09f, 0.16f);
+        // The menus' diamond marker, just left of the selected card.
+        card.marker = GameUI.CreateRect("Marker", card.root, center, new Vector2(-634, 0), new Vector2(20, 20));
+        card.marker.localRotation = Quaternion.Euler(0, 0, 45f);
+        card.marker.gameObject.AddComponent<Image>().raycastTarget = false;
+
+        RectTransform content = GameUI.CreateRect("Content", card.root, center, Vector2.zero, size);
+        card.content = content.gameObject.AddComponent<CanvasGroup>();
+
+        // Round medallion on the left, like the god boon icons in Hades, ringed in the element's colour.
+        card.ring = CreateImage("IconRing", content, center, new Vector2(-498, 0), new Vector2(150, 150), ProceduralSprites.Disc);
+        Image frame = CreateImage("IconFrame", card.ring.rectTransform, center, Vector2.zero, new Vector2(140, 140), ProceduralSprites.Disc);
+        frame.color = new Color(0.08f, 0.06f, 0.11f);
         card.icon = CreateImage("Icon", frame.rectTransform, center, Vector2.zero, new Vector2(124, 124), null);
         card.icon.preserveAspect = true;
         card.letter = GameUI.CreateText(frame.rectTransform, font, "Letter", center, Vector2.zero, new Vector2(128, 128), 64, TextAlignmentOptions.Center);
         ui.Style(card.letter, TextStyle.Heading);
 
-        card.name = GameUI.CreateText(card.root, font, "Name", center, new Vector2(-90, 58), new Vector2(640, 56), 44, TextAlignmentOptions.Left);
-        card.name.fontStyle = FontStyles.SmallCaps;
-        ui.Style(card.name, TextStyle.Heading);
-        card.rarity = GameUI.CreateText(card.root, font, "Rarity", center, new Vector2(340, 58), new Vector2(420, 56), 32, TextAlignmentOptions.Right);
+        card.name = GameUI.CreateText(content, font, "Name", center, new Vector2(-90, 62), new Vector2(640, 60), 44, TextAlignmentOptions.Left);
+        card.name.textWrappingMode = TextWrappingModes.NoWrap;
+        ui.Style(card.name, TextStyle.Title);
+        card.rarity = GameUI.CreateText(content, font, "Rarity", center, new Vector2(340, 64), new Vector2(420, 56), 32, TextAlignmentOptions.Right);
         card.rarity.fontStyle = FontStyles.SmallCaps;
         ui.Style(card.rarity, TextStyle.Heading);
         // Room for two lines under the name; the stat line sits below them.
-        card.description = GameUI.CreateText(card.root, font, "Description", center, new Vector2(70, -2), new Vector2(960, 64), 28, TextAlignmentOptions.TopLeft);
+        card.description = GameUI.CreateText(content, font, "Description", center, new Vector2(70, 4), new Vector2(960, 70), 28, TextAlignmentOptions.TopLeft);
         card.description.color = new Color(0.9f, 0.88f, 0.84f);
         ui.Style(card.description, TextStyle.Body);
-        // Two lines have to fit between the name and the stat line, above the card's gold border.
+        // Two lines have to fit between the name and the stat line.
         card.description.lineSpacing = -14f;
-        card.stat = GameUI.CreateText(card.root, font, "Stat", center, new Vector2(70, -47), new Vector2(960, 34), 28, TextAlignmentOptions.Left);
+        card.stat = GameUI.CreateText(content, font, "Stat", center, new Vector2(70, -60), new Vector2(960, 34), 28, TextAlignmentOptions.Left);
         ui.Style(card.stat, TextStyle.Hud);
-        card.note = GameUI.CreateText(card.root, font, "Note", center, new Vector2(330, -47), new Vector2(440, 34), 26, TextAlignmentOptions.Right);
+        card.note = GameUI.CreateText(content, font, "Note", center, new Vector2(330, -60), new Vector2(440, 34), 26, TextAlignmentOptions.Right);
         card.note.color = new Color(1f, 0.75f, 0.55f, 0.85f);
         ui.Style(card.note, TextStyle.Hint);
+        // The brush rule under the selected card's text.
+        card.rule = GameUI.CreateRule(content, center, new Vector2(70, -88), Color.white);
         return card;
     }
 
@@ -451,7 +475,7 @@ public class BoonChoiceUI : MonoBehaviour
             slot.cooldown.fillClockwise = false;
             slot.cooldown.fillAmount = 0f;
             TextMeshProUGUI key = GameUI.CreateText(slot.ring.rectTransform, font, "Key", new Vector2(0.5f, 0f), new Vector2(0, -26), new Vector2(140, 34), 26, TextAlignmentOptions.Center);
-            key.text = keys[i];
+            key.text = MenuUI.KeyCap(keys[i], false);
             key.color = MutedText;
             ui.Style(key, TextStyle.Hint);
             hudSlots[i] = slot;
@@ -461,16 +485,11 @@ public class BoonChoiceUI : MonoBehaviour
         passiveRow.pivot = new Vector2(1f, 0.5f);
     }
 
-    Image CreateImage(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Sprite sprite)
+    static Image CreateImage(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Sprite sprite)
     {
         Image image = GameUI.CreateRect(name, parent, anchor, position, size).gameObject.AddComponent<Image>();
         image.raycastTarget = false;
         image.sprite = sprite;
-        if (sprite != null && sprite.border != Vector4.zero)
-        {
-            image.type = Image.Type.Sliced;
-            image.pixelsPerUnitMultiplier = GetComponent<Canvas>().referencePixelsPerUnit / sprite.pixelsPerUnit / cardPixelScale;
-        }
         return image;
     }
 }

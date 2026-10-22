@@ -62,6 +62,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] int soulPityKills = 15;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
+    [Tooltip("Chance that a blocker worn down by hits drops a heart, worth a life.")]
+    [SerializeField, Range(0, 1)] float heartDropChance = 0.2f;
+    [Tooltip("Points for a heart caught with lives already full.")]
+    [SerializeField] int heartBonusPoints = 250;
     [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
     [SerializeField] Sprite[] titleFluteFrames;
     [Tooltip("Frames per second for the title screen's flute loop.")]
@@ -181,6 +185,8 @@ public class GameManager : MonoBehaviour
     CharacterArt baseRoninArt;
     Element? shownElement;
     Soul activeSoul;
+    // A soul that reached the ronin while the round was wrapping up; its boons are offered before the next round.
+    Element? gatheredSoul;
     int killsSinceSoul;
     // Souls carry a hint arrow until the player has caught one this run.
     bool soulCaught;
@@ -248,6 +254,7 @@ public class GameManager : MonoBehaviour
         ronin.Parried += OnParried;
         ronin.RiposteImpact += OnRiposteImpact;
         ronin.RiposteTarget = RandomEnemy;
+        Blocker.Broken += OnBlockerBroken;
     }
 
     void OnDisable()
@@ -259,6 +266,7 @@ public class GameManager : MonoBehaviour
         ronin.ShurikenThrown -= OnShurikenThrown;
         ronin.Parried -= OnParried;
         ronin.RiposteImpact -= OnRiposteImpact;
+        Blocker.Broken -= OnBlockerBroken;
     }
 
     void Start()
@@ -701,14 +709,63 @@ public class GameManager : MonoBehaviour
         if (!soulCaught) activeSoul.ShowHint(soulHintArrow);
     }
 
-    // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades.
+    // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades. One gathered at the
+    // end of a round waits for GatherDrops to offer it.
     void OnSoulCollected(Soul soul)
     {
-        if (state != State.Playing) return;
-        if (!OfferBoons(soul.Element, ResumePlay)) return;
+        if (state == State.Transition)
+        {
+            gatheredSoul = soul.Element;
+        }
+        else if (state != State.Playing || !OfferBoons(soul.Element, ResumePlay))
+        {
+            return;
+        }
         soulCaught = true;
         Fx.Play(Fx.Impact, soul.transform.position, Boons.Info(soul.Element).Color, 1.6f);
         Sfx.Play(Sfx.SoulCollect);
+    }
+
+    void OnBlockerBroken(Vector3 position)
+    {
+        if (state != State.Playing || Random.value >= heartDropChance) return;
+        Heart.Spawn(position, ui.LifeIcon, ronin, OnHeartCollected);
+    }
+
+    // A life back, or points once his lives are full.
+    void OnHeartCollected(Heart heart)
+    {
+        if (state == State.GameOver) return;
+        if (lives < Boons.MaxLives)
+        {
+            lives++;
+            ui.SetLives(lives);
+        }
+        else
+        {
+            score += heartBonusPoints * (stageIndex + 1);
+            highScore = Mathf.Max(highScore, score);
+            ui.SetScore(score);
+        }
+        Fx.Play(Fx.Impact, heart.transform.position, new Color(1f, 0.35f, 0.4f), 1.4f);
+        Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
+    }
+
+    // At the end of a round every soul and heart still out flies to the ronin. A soul caught on the way offers its
+    // boons before the game moves on.
+    IEnumerator GatherDrops()
+    {
+        Pickup.GatherAll();
+        float giveUp = Time.time + 2f;
+        while (Pickup.Count > 0 && Time.time < giveUp) yield return null;
+        Pickup.DestroyAll();
+
+        if (gatheredSoul is not Element element) yield break;
+        gatheredSoul = null;
+        bool picked = false;
+        if (!OfferBoons(element, () => picked = true)) yield break;
+        yield return new WaitUntil(() => picked);
+        state = State.Transition;
     }
 
     void ResumePlay()
@@ -824,6 +881,14 @@ public class GameManager : MonoBehaviour
     void OnArmyDefeated()
     {
         if (state != State.Playing) return;
+        StartCoroutine(EndRound());
+    }
+
+    IEnumerator EndRound()
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        yield return GatherDrops();
 
         if (roundIndex + 1 < Stage.rounds.Length)
         {
@@ -1056,13 +1121,14 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ui.HideBossBar();
-        ClearProjectiles();
+        ClearProjectiles(pickups: false);
         Music.Stop(1.5f);
         if (!hitStopping) StartCoroutine(HitStop(0.25f));
         Vector3 where = activeBoss.Centre;
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
         // working through the blow that felled her.
         yield return new WaitForSeconds(2.2f);
+        yield return GatherDrops();
         effects.Boss = null;
         activeBoss = null;
         // Her fall lifts the blood moon.
@@ -1181,7 +1247,8 @@ public class GameManager : MonoBehaviour
         }, null, 0, color);
     }
 
-    static void ClearProjectiles()
+    // Pickups go too unless the caller gathers them to the ronin first.
+    static void ClearProjectiles(bool pickups = true)
     {
         foreach (Kunai kunai in FindObjectsByType<Kunai>())
         {
@@ -1191,10 +1258,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(arrow.gameObject);
         }
-        foreach (Soul soul in FindObjectsByType<Soul>())
-        {
-            Destroy(soul.gameObject);
-        }
+        if (pickups) Pickup.DestroyAll();
         foreach (Scout scout in FindObjectsByType<Scout>())
         {
             Destroy(scout.gameObject);

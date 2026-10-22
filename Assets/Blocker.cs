@@ -1,8 +1,12 @@
+using System;
 using UnityEngine;
 
 // One courtyard blocker (a bush or stone lantern). Takes a few hits from either side before breaking apart.
 public class Blocker : MonoBehaviour
 {
+    // Raised when hits wear a blocker down (not when it's trampled or razed), so it may drop a heart.
+    public static event Action<Vector3> Broken;
+
     SpriteRenderer tile;
     Sprite[] damageStates;
     Sprite[] debris;
@@ -37,6 +41,7 @@ public class Blocker : MonoBehaviour
         if (health <= 0)
         {
             Demolish();
+            Broken?.Invoke(transform.position);
         }
         else
         {

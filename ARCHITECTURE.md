@@ -70,6 +70,8 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
 | What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`) |
 | Effects in play (blasts, encase/shatter, freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`, `OnRiposteImpact`). Any encased samurai killed by a non-`Effect` source `Shatter`s, hitting its neighbours |
+| Pickups: souls and hearts fall to the ronin's row and wait there; at a round's end (`GameManager.EndRound`, and `BossFell`) `GameManager.GatherDrops` flies every one still out to him (`Pickup.GatherAll`) and offers a soul caught that way | `Pickup.cs` (base: fall, rest, magnet, collect), `Soul.cs`, `Heart.cs` |
+| Heart drops (`heartDropChance`, 20%; a life, or `heartBonusPoints` with lives full) | `Blocker.Broken` (hits only, not trampling or a boss razing) → `GameManager.OnBlockerBroken` / `OnHeartCollected`; art is `GameUI.LifeIcon` |
 | Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul`. Until the first soul of a run is caught, `Soul.ShowHint` adds the bobbing `GameManager.soulHintArrow` (`UI/SoulArrow`, wired by Apply Boon Art) |
 | Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
 

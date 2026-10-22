@@ -27,6 +27,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] Font bodyFont;
 
     public TMP_FontAsset Font => font;
+    public Sprite LifeIcon => lifeIcon;
     public TMP_FontAsset BodyFont => BuildFont(bodyFont, ref bodyAsset, 72, 12);
     public TMP_FontAsset TitleFont => BuildFont(headerFont, ref headerAsset, 90, 16);
     public Sprite TitleLogo => titleLogo;

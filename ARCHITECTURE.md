@@ -145,7 +145,12 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 ## Environment
 
 - `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild(healthMultiplier)`
-  (Glacier Wall uses the multiplier for ice blockers).
+  (Glacier Wall uses the multiplier for ice blockers). A `Backdrop.Map` can bring its own `blockers` and
+  `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
+  Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),
+  so a row isn't all identical. Map sets: Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
+  komainu (`MKM`), Utsusemi = gear piles and clock pillars (`GCG`), three looks each, art in `Art/Sprites/Blockers/`
+  as `<Name>_0..2`, `<Name>B_0..2`, `<Name>C_0..2` (from PixelLab), wired by `Ninja/Apply Maps`.
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
   ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
   `CourtyardGrass` (stage 1), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
@@ -205,7 +210,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 |---|---|---|
 | Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
-| Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
+| Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Elemental ronin recolours, soul/boon/card art wiring |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager; title-card fonts → GameUI |
 | Apply UI Fonts | `Editor/UiSetup.cs` | Body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont` |

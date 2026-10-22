@@ -369,4 +369,61 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 1bea8d09349d34fbdbceed3f623ca721, type: 3}
     fps: 14
     loop: 0
+  - id: Utsu_Charge
+    frames:
+    - {fileID: 21300000, guid: da070d7aa6554431d96108b792fb1825, type: 3}
+    - {fileID: 21300000, guid: 88d04b900d2ef479ca0285d1d7edfec6, type: 3}
+    - {fileID: 21300000, guid: 9284d1e72d2964daebba781f9214d9d2, type: 3}
+    - {fileID: 21300000, guid: b726318135d06450e86f1afe8f487bce, type: 3}
+    - {fileID: 21300000, guid: 1212f6109627a4cf581f23130748629e, type: 3}
+    - {fileID: 21300000, guid: e50e868e6352f4ec688f9f4d94f61823, type: 3}
+    - {fileID: 21300000, guid: 7b38d1f2170c5499a965bb07dcc89d79, type: 3}
+    - {fileID: 21300000, guid: 82e797936a1df45b9905193e761d184b, type: 3}
+    - {fileID: 21300000, guid: 8e2350ca7cd3d4c95b26eb904760e75c, type: 3}
+    - {fileID: 21300000, guid: 3542c05866e664a7abc7d1f9d923b740, type: 3}
+    - {fileID: 21300000, guid: a3548dada5b834bfba3692ee7c3959fa, type: 3}
+    - {fileID: 21300000, guid: 412890fbf4be5411096df2279a99a2aa, type: 3}
+    fps: 16
+    loop: 0
+  - id: Utsu_BeamFlare
+    frames:
+    - {fileID: 21300000, guid: b15323438f00f4f4fa1df2ae866abdfd, type: 3}
+    - {fileID: 21300000, guid: 025b91ce17d2e43f4b60c4f41899a771, type: 3}
+    - {fileID: 21300000, guid: b85e09d68af894a45908e914f510f312, type: 3}
+    - {fileID: 21300000, guid: df72b8c88bc94416ca946c93cedac5cf, type: 3}
+    - {fileID: 21300000, guid: 801fc58135d7342b7a8c2b7185b65384, type: 3}
+    - {fileID: 21300000, guid: c7635bdb3bbee4fb18f9ec3f0f48594e, type: 3}
+    - {fileID: 21300000, guid: 3afcf1ed987de40908257a2f46f64a95, type: 3}
+    - {fileID: 21300000, guid: 556ddd848c50e48f59a0c7b6723f0500, type: 3}
+    fps: 14
+    loop: 1
+  - id: Utsu_BeamHit
+    frames:
+    - {fileID: 21300000, guid: b3002c59f073f4e1a9c6d7ca50e96908, type: 3}
+    - {fileID: 21300000, guid: fb8b23a3b808740279d8959434d29f9d, type: 3}
+    - {fileID: 21300000, guid: ee5c538b2de954bdea088f6a3ee439b7, type: 3}
+    - {fileID: 21300000, guid: b8d49f7b08b3041c39e623654b03e964, type: 3}
+    - {fileID: 21300000, guid: bb265c17d97f14a3cb1d1af765057d60, type: 3}
+    - {fileID: 21300000, guid: 859eb59cb1fff4170a5d13f6949eb7cc, type: 3}
+    - {fileID: 21300000, guid: 5da4a47cdf9c143fa9fdef83cb87f28a, type: 3}
+    - {fileID: 21300000, guid: c385305a675b141cfaab06d25f6ff228, type: 3}
+    fps: 16
+    loop: 1
+  - id: Utsu_Scorch
+    frames:
+    - {fileID: 21300000, guid: 824060966d8584da89c0c5a34c40c19c, type: 3}
+    fps: 1
+    loop: 1
+  - id: Utsu_ClockMark
+    frames:
+    - {fileID: 21300000, guid: 48f6e732f920f4876a0ab1b7b7d8042a, type: 3}
+    - {fileID: 21300000, guid: ff6a7ccf797e941c9a64e3eb334c8d3f, type: 3}
+    - {fileID: 21300000, guid: 52009e015a7254bdcb547bd08274c572, type: 3}
+    - {fileID: 21300000, guid: 81d8c48e3102f4190aa7fbfb1ff03ad8, type: 3}
+    - {fileID: 21300000, guid: a22f4c014bc0f4c44b54d251887039a7, type: 3}
+    - {fileID: 21300000, guid: a8eae5807218b4e57aad5bee272fed2e, type: 3}
+    - {fileID: 21300000, guid: 6fa25ca5fd2ad4a64b32d2f44fd3a78b, type: 3}
+    - {fileID: 21300000, guid: f53e82103eb8f482ab631735ea99edd2, type: 3}
+    fps: 10
+    loop: 1
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

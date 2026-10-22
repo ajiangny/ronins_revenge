@@ -350,6 +350,50 @@ MonoBehaviour:
     - 0.76947844
     - 0.6307256
     ownSource: 0
+  - id: HatClang
+    clips:
+    - {fileID: 8300000, guid: 7e5790c55ba5845ee86a6b92665ce76e, type: 3}
+    - {fileID: 8300000, guid: 9e030132ed733495480134cb4b7d577a, type: 3}
+    volume: 0.9
+    pitchJitter: 0.05
+    minInterval: 0.2
+    audible:
+    - 0.44408163
+    - 0.45133787
+    ownSource: 0
+  - id: LanternCharge
+    clips:
+    - {fileID: 8300000, guid: 57ddefb5f598d424994a0ff5f42efd72, type: 3}
+    - {fileID: 8300000, guid: 2c89599818428413da22b243b912afce, type: 3}
+    volume: 0.8
+    pitchJitter: 0
+    minInterval: 0.5
+    audible:
+    - 1.2538775
+    - 1.2538775
+    ownSource: 0
+  - id: LanternBeam
+    clips:
+    - {fileID: 8300000, guid: 07b22e545a4d3497eb96e22694baad7b, type: 3}
+    - {fileID: 8300000, guid: 57f40a3a98ce248d9b013e74d67a3277, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 0.1
+    audible:
+    - 3.552653
+    - 3.552653
+    ownSource: 1
+  - id: MidnightChime
+    clips:
+    - {fileID: 8300000, guid: d1341f9470e92495c995df083befd370, type: 3}
+    - {fileID: 8300000, guid: a83ca12aa6dcc4361be5f67df1d39182, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.5
+    audible:
+    - 1.9804761
+    - 1.4704309
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

@@ -54,7 +54,7 @@ MonoBehaviour:
   shotCooldown: 0.35
   invulnerableTime: 2
   screenMargin: 0.2
-  fanAngle: 9
+  splitAngle: 18
   wispBobPixels: 1.5
   wispPeriod: 1.8
   shurikenSprite: {fileID: 21300000, guid: b7db46bb0af00413d98c9b244a733d4a, type: 3}

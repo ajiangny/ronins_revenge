@@ -147,12 +147,77 @@ public static class NinjaArtSetup
     static void SetUpBlockers(BlockerWall wall)
     {
         var so = new SerializedObject(wall);
-        (string name, string sprite, string debris, int health, float height)[] specs =
+        FillBlockerTypes(so.FindProperty("types"), new[]
         {
-            ("Bush", "Blockers/Bush", "Effects/Leaf", 5, 1.2f),
-            ("Lantern", "Blockers/Lantern", "Effects/StoneChip", 8, 1.8f),
-        };
-        SerializedProperty types = so.FindProperty("types");
+            new BlockerSpec("Bush", "Blockers/Bush", "Effects/Leaf", 5, 1.2f),
+            new BlockerSpec("Lantern", "Blockers/Lantern", "Effects/StoneChip", 8, 1.8f),
+        });
+        so.FindProperty("pattern").stringValue = "BLB";
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // One kind of blocker: its first letter is its code in a site pattern, and its art is <sprite>_0..2 from intact to nearly
+    // broken. Extra looks follow as <sprite>B_0..2, <sprite>C_0..2 and so on, one picked at random per blocker.
+    struct BlockerSpec
+    {
+        public string name, sprite, debris;
+        public int health;
+        public float height;
+        public int looks;
+
+        public BlockerSpec(string name, string sprite, string debris, int health, float height, int looks = 1)
+        {
+            this.name = name;
+            this.sprite = sprite;
+            this.debris = debris;
+            this.health = health;
+            this.height = height;
+            this.looks = looks;
+        }
+
+        public string Look(int index) => index == 0 ? sprite : sprite + (char)('A' + index);
+
+        public bool HasArt
+        {
+            get
+            {
+                for (int look = 0; look < looks; look++)
+                {
+                    for (int d = 0; d < 3; d++)
+                    {
+                        if (AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}{Look(look)}_{d}.png") == null) return false;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+
+    // Each map's own cover, matching its ground. The courtyard keeps the bushes and lanterns above.
+    static readonly Dictionary<string, (BlockerSpec[] types, string pattern)> MapBlockers = new()
+    {
+        // Mountain boulders flanking a roadside Jizo statue.
+        ["Pass_Stage2"] = (new[]
+        {
+            new BlockerSpec("Rock", "Blockers/Rock", "Effects/StoneChip", 6, 1.1f, 3),
+            new BlockerSpec("Jizo", "Blockers/Jizo", "Effects/StoneChip", 8, 1.7f, 3),
+        }, "RJR"),
+        // Crimson maple shrubs either side of a stone komainu guardian.
+        ["Arena_Benibana"] = (new[]
+        {
+            new BlockerSpec("Maple", "Blockers/Maple", "Effects/Petal", 5, 1.2f, 3),
+            new BlockerSpec("Komainu", "Blockers/Komainu", "Effects/StoneChip", 8, 1.7f, 3),
+        }, "MKM"),
+        // Piles of brass gears either side of a bronze clock pillar.
+        ["Arena_Utsusemi"] = (new[]
+        {
+            new BlockerSpec("Gears", "Blockers/Gears", "Effects/Spark", 6, 1.1f, 3),
+            new BlockerSpec("Clock", "Blockers/Clock", "Effects/StoneChip", 8, 1.8f, 3),
+        }, "GCG"),
+    };
+
+    static void FillBlockerTypes(SerializedProperty types, BlockerSpec[] specs)
+    {
         types.arraySize = specs.Length;
         for (int i = 0; i < specs.Length; i++)
         {
@@ -164,6 +229,17 @@ public static class NinjaArtSetup
             {
                 states.GetArrayElementAtIndex(d).objectReferenceValue = Load($"{specs[i].sprite}_{d}");
             }
+            SerializedProperty variants = type.FindPropertyRelative("variants");
+            variants.arraySize = specs[i].looks - 1;
+            for (int v = 0; v < variants.arraySize; v++)
+            {
+                SerializedProperty look = variants.GetArrayElementAtIndex(v).FindPropertyRelative("damageStates");
+                look.arraySize = 3;
+                for (int d = 0; d < 3; d++)
+                {
+                    look.GetArrayElementAtIndex(d).objectReferenceValue = Load($"{specs[i].Look(v + 1)}_{d}");
+                }
+            }
             SerializedProperty debris = type.FindPropertyRelative("debris");
             debris.arraySize = 1;
             debris.GetArrayElementAtIndex(0).objectReferenceValue = Load(specs[i].debris);
@@ -171,8 +247,6 @@ public static class NinjaArtSetup
             type.FindPropertyRelative("height").floatValue = specs[i].height;
             type.FindPropertyRelative("hitbox").vector2Value = new Vector2(0.85f, 0.85f);
         }
-        so.FindProperty("pattern").stringValue = "BLB";
-        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Replaces the old starfield with the top-down courtyard backdrop on the same GameObject (z = 20, behind the play area).
@@ -248,6 +322,19 @@ public static class NinjaArtSetup
         map.FindPropertyRelative("groundTint").colorValue = groundTint;
         map.FindPropertyRelative("petal").objectReferenceValue = groundSprite != null && petal != null ? Load(petal) : null;
         map.FindPropertyRelative("petalTint").colorValue = petalTint;
+
+        // A map whose blocker art isn't all there yet keeps the courtyard's.
+        SerializedProperty types = map.FindPropertyRelative("blockers");
+        if (groundSprite != null && MapBlockers.TryGetValue(groundSprite.name, out var set) && System.Array.TrueForAll(set.types, t => t.HasArt))
+        {
+            FillBlockerTypes(types, set.types);
+            map.FindPropertyRelative("blockerPattern").stringValue = set.pattern;
+        }
+        else
+        {
+            types.arraySize = 0;
+            map.FindPropertyRelative("blockerPattern").stringValue = "";
+        }
     }
 
     static CharacterArt SamuraiArt(string name, Sprite[] particles)

@@ -644,11 +644,53 @@ MonoBehaviour:
       groundTint: {r: 1, g: 1, b: 1, a: 1}
       petal: {fileID: 0}
       petalTint: {r: 0.85, g: 0.75, b: 0.5, a: 0.6}
+      blockers: []
+      blockerPattern: 
     bossMap:
       ground: {fileID: 21300000, guid: 8c1ef5039a9f8499d9c102a30497bb6b, type: 3}
       groundTint: {r: 0.7, g: 0.66, b: 0.7, a: 1}
       petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
       petalTint: {r: 0.9, g: 0.2, b: 0.2, a: 0.85}
+      blockers:
+      - name: Maple
+        damageStates:
+        - {fileID: 21300000, guid: 47a80420b43d347eabfe502518101e5e, type: 3}
+        - {fileID: 21300000, guid: a2a5696a2b3df467d981a44071a27181, type: 3}
+        - {fileID: 21300000, guid: 15f3857f9a7e541358679c4794b43a73, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 3bfc39559651e49ed82a3a20406414c8, type: 3}
+          - {fileID: 21300000, guid: b9fbf7f53e23742df940341d2ffc2f37, type: 3}
+          - {fileID: 21300000, guid: c90b508dec5e8482f98717ae7b462345, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 3b2570cf0b05843f599ae894c0566912, type: 3}
+          - {fileID: 21300000, guid: 3be225718adac45ac8d062c9c09820db, type: 3}
+          - {fileID: 21300000, guid: 35aa28e3545ac4228a872fc015cc17b9, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
+        health: 5
+        height: 1.2
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Komainu
+        damageStates:
+        - {fileID: 21300000, guid: b8d674db623994900a19864bd4b9787e, type: 3}
+        - {fileID: 21300000, guid: 0cd0ec202e7b94281a332e7cb18d4698, type: 3}
+        - {fileID: 21300000, guid: 8b89a8ba79fb7433d8d353ff73cca0bf, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 11548a30cf88b4181b14f37c8de0e73b, type: 3}
+          - {fileID: 21300000, guid: 12d9fc31008e4477d94b399322e670c8, type: 3}
+          - {fileID: 21300000, guid: 8ecd86c6c037a4db6a705871822d6dcd, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 3ec180065b27a41518a8533fe9602a71, type: 3}
+          - {fileID: 21300000, guid: 9c83f04a16b004cf5bac3ccceca450b7, type: 3}
+          - {fileID: 21300000, guid: f78d6de08e8e8498d9851481a54369f5, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.7
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: MKM
   - name: The Pilgrim's Pass
     rounds:
     - columns: 10
@@ -693,11 +735,91 @@ MonoBehaviour:
       groundTint: {r: 1, g: 1, b: 1, a: 1}
       petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
       petalTint: {r: 0.85, g: 0.75, b: 0.5, a: 0.6}
+      blockers:
+      - name: Rock
+        damageStates:
+        - {fileID: 21300000, guid: af78685efaf624960b2d1291dbfff22b, type: 3}
+        - {fileID: 21300000, guid: 9c266db35c1e5431e83ade15ebd1662e, type: 3}
+        - {fileID: 21300000, guid: f9c99530ccd404458993f62dcea3f99e, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 88b8e2a79f382499e9dc7e61e08959dc, type: 3}
+          - {fileID: 21300000, guid: e3250f593efc44dd593d858410c5c8d1, type: 3}
+          - {fileID: 21300000, guid: a58bf3d869e934207b229c49896c9399, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 274dec19a90e2400fa70d4bfbd9aac27, type: 3}
+          - {fileID: 21300000, guid: a1bfd5d84f2154960b52732dc1de7034, type: 3}
+          - {fileID: 21300000, guid: f6c60318422514f568974c1abcc5f8cc, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 6
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Jizo
+        damageStates:
+        - {fileID: 21300000, guid: b6b4740d109e746cd84e785f573f88b8, type: 3}
+        - {fileID: 21300000, guid: 9e538c947098d4044b6d35eecfd3274d, type: 3}
+        - {fileID: 21300000, guid: 24b67af48bfb543ceb09817e7e2bcbe6, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: f3f230e325dc14147af9ff05e355da50, type: 3}
+          - {fileID: 21300000, guid: 08f118a4bb4564688985e20d76ba59b5, type: 3}
+          - {fileID: 21300000, guid: 6debeaf5eb28940189b097917833d2cd, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 9afbdb535c93f410d8095479a085982e, type: 3}
+          - {fileID: 21300000, guid: 04c7f4e1548224d7c8e6ed55c9e26c81, type: 3}
+          - {fileID: 21300000, guid: 5215ee3f5c9b0416a9aad221859c711c, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.7
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: RJR
     bossMap:
       ground: {fileID: 21300000, guid: 7239893d78a2f4e9dab992992f62c22e, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
       petal: {fileID: 0}
       petalTint: {r: 0.9, g: 0.2, b: 0.2, a: 0.85}
+      blockers:
+      - name: Gears
+        damageStates:
+        - {fileID: 21300000, guid: 42150ba76bcb64731aeb804f450282f1, type: 3}
+        - {fileID: 21300000, guid: 363ff71aacd054d2c823b627658fe485, type: 3}
+        - {fileID: 21300000, guid: a44d3e750f9634076b2b197a16ce472e, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: d29e2c55aeb7d4c81b85887e3f20aca4, type: 3}
+          - {fileID: 21300000, guid: 144c48671dbb948cda99b0e5c8b1c7e5, type: 3}
+          - {fileID: 21300000, guid: a64eb0f269bb9413eac3811e0eebcb99, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 03fa758388b8648949af1af058058271, type: 3}
+          - {fileID: 21300000, guid: 657c0063e111649ff9f40e32082f8b4c, type: 3}
+          - {fileID: 21300000, guid: c00d45931eede4386853a27872fb899c, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+        health: 6
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Clock
+        damageStates:
+        - {fileID: 21300000, guid: b87defa57f2d34d768b7f62bedb4d31e, type: 3}
+        - {fileID: 21300000, guid: fd3ece15ac1cf42f7938a6633a9f8fc4, type: 3}
+        - {fileID: 21300000, guid: e2cbbb556387b4614a87118196504e1f, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 7f8d9d510643741de8682fa38f224eb8, type: 3}
+          - {fileID: 21300000, guid: c19aa65151809498a836c3021aa6df3f, type: 3}
+          - {fileID: 21300000, guid: 35a691775407e4401ae85d9251acb410, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: f35b35bd7d74c4f909e63a6e2fe02cb7, type: 3}
+          - {fileID: 21300000, guid: 83fc8de11d1454ccf9306a91751f974a, type: 3}
+          - {fileID: 21300000, guid: 6de114f9f0fa84412b23c0cb66a98a06, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.8
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: GCG
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0
@@ -748,6 +870,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 75566cb64cb084a0bb19267116d2460f, type: 3}
     - {fileID: 21300000, guid: d0ac77b7e7eeb412fbc9d9ab017fb5e8, type: 3}
     - {fileID: 21300000, guid: b10f165aa75424c70b8f465d8c23dddb, type: 3}
+    variants: []
     debris:
     - {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
     health: 5
@@ -758,6 +881,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 62c904f5cb25a49dfb088e053b1946d5, type: 3}
     - {fileID: 21300000, guid: 054e607206efd4acebaf7465909496e9, type: 3}
     - {fileID: 21300000, guid: 20f3c73148f584d118617d74e875451e, type: 3}
+    variants: []
     debris:
     - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
     health: 8

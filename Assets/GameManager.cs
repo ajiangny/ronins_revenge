@@ -343,25 +343,27 @@ public class GameManager : MonoBehaviour
         boonChoice.SetHudVisible(visible);
     }
 
+    // Pages opened from the title screen stay on its white page; from the pause menu they sit over the dimmed fight.
+    bool OnPaper => state == State.Title;
+
     void ShowControls(System.Action back)
     {
+        bool paper = OnPaper;
+        string muted = MenuUI.MutedHex(paper);
+        string Key(string key) => MenuUI.KeyCap(key, paper);
+        string Row(string action, string keys) => $"<pos=20%><color=#{muted}>{action}</color><pos=50%>{keys}\n";
         menu.Show("CONTROLS",
             "<align=left>" +
-            ControlRow("Move", Key("A") + "  " + Key("D") + "    or    " + Key("←") + "  " + Key("→")) +
-            ControlRow("Slash", Key("SPACE")) +
-            ControlRow("Spirit Shuriken", Key("E") + "    or    " + Key("↑")) +
-            ControlRow("Parry arrows", Key("SHIFT") + "    or    " + Key("↓")) +
-            ControlRow("Pause", Key("ESC")) +
+            Row("Move", Key("A") + "  " + Key("D") + "    or    " + Key("←") + "  " + Key("→")) +
+            Row("Slash", Key("SPACE")) +
+            Row("Spirit Shuriken", Key("E") + "    or    " + Key("↑")) +
+            Row("Parry arrows", Key("SHIFT") + "    or    " + Key("↓")) +
+            Row("Pause", Key("ESC")) +
             "</align>\n" +
             $"Clear three samurai armies in each of the {stages.Length} stages.\nA warlord waits at the end of every stage.\n" +
             "Fallen samurai may drop spirit souls. Catch one to choose a boon.",
-            new[] { MenuUI.Item.Button("BACK", back) }, back);
+            new[] { MenuUI.Item.Button("BACK", back) }, back, paper: paper);
     }
-
-    static string ControlRow(string action, string keys) =>
-        $"<pos=20%><color=#{ColorUtility.ToHtmlStringRGB(GameUI.MutedColour)}>{action}</color><pos=50%>{keys}\n";
-
-    static string Key(string key) => $"<mark=#FFFFFF2E padding=\"10,10,2,2\">{key}</mark>";
 
     void ShowSettings(System.Action back)
     {
@@ -374,7 +376,7 @@ public class GameManager : MonoBehaviour
                 Sfx.Play(Sfx.UiMove);
             }),
             MenuUI.Item.Button("BACK", back),
-        }, back);
+        }, back, paper: OnPaper);
     }
 
     // Freezes the fight under the pause menu. Only offered mid-play, never during a boon pick or a boss intro.
@@ -420,9 +422,9 @@ public class GameManager : MonoBehaviour
             ShowDevMenu(back, godModeRow);
         }));
         items.Add(MenuUI.Item.Button("BACK", back));
-        string muted = ColorUtility.ToHtmlStringRGB(GameUI.MutedColour);
+        string muted = MenuUI.MutedHex(OnPaper);
         menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode</color></size>",
-            items.ToArray(), back, startIndex);
+            items.ToArray(), back, startIndex, paper: OnPaper);
     }
 
     // A jump restarts the run from a clean scene, then StartGame drops it into the chosen fight.

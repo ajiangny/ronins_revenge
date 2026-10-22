@@ -178,7 +178,9 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   (hover, click, drag sliders) and gamepad (d-pad/stick, South, East/Start); runs on unscaled time. Added to the
   Canvas by `GameManager.Start`.
   `ShowTitle` is the title screen's own light layout (paper page, `GameUI.titleLogo` centred high, a left-aligned
-  menu column under it); `ShowFigure` loops a sprite on it, used by `GameManager.ShowTitleRonin` to sit the
+  menu column under it); `Show(..., paper: true)` draws a regular page ink-on-paper, which
+  `GameManager.OnPaper` asks for while on the title (so Controls/Settings/Dev Tools match it; from pause they stay
+  dark). `ShowFigure` loops a sprite on it, used by `GameManager.ShowTitleRonin` to sit the
   ronin on his row at his in-game pixel scale (`GameManager.titleFluteFrames`, falling back to his idle).
 - `BoonChoiceUI.cs` — see Boons. `SpriteAnimatorUI.cs` animates UI images in unscaled time.
 

@@ -63,6 +63,8 @@ public class MenuUI : MonoBehaviour
     Item[] items = Array.Empty<Item>();
     Action back;
     bool light;
+    // A regular page drawn ink-on-paper, for pages opened from the title screen.
+    bool onPaper;
     Image paper;
     Image titleArt;
     Image figure;
@@ -80,17 +82,20 @@ public class MenuUI : MonoBehaviour
     }
 
     // Opens a page, replacing whatever page was showing. `back` runs on Esc / gamepad B; null means Esc does nothing.
-    // The title is white unless given a colour.
-    public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default)
+    // The title is white (ink on paper) unless given a colour. A `paper` page sits on the title screen's white page
+    // instead of over the dimmed game.
+    public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default,
+        bool paper = false)
     {
         items = pageItems;
         back = onBack;
         SetLight(false);
+        SetPaper(paper);
         selected = heardSelection = Mathf.Clamp(startIndex, 0, items.Length - 1);
         shownAt = Time.unscaledTime;
 
         titleText.text = title;
-        titleText.color = titleColour.a > 0f ? titleColour : Color.white;
+        titleText.color = titleColour.a > 0f ? titleColour : paper ? Ink : Color.white;
         titleText.fontSize = 96;
         bodyText.text = body ?? "";
         bodyText.gameObject.SetActive(!string.IsNullOrEmpty(body));
@@ -120,7 +125,7 @@ public class MenuUI : MonoBehaviour
         rowsRoot.anchoredPosition = new Vector2(0, y);
 
         // Active before the rows are built, so their labels can be measured to place the markers.
-        dim.color = new Color(0.02f, 0.01f, 0.04f, 0.8f);
+        dim.color = paper ? Color.clear : new Color(0.02f, 0.01f, 0.04f, 0.8f);
         page.SetAsLastSibling();
         page.gameObject.SetActive(true);
         BuildRows();
@@ -179,6 +184,7 @@ public class MenuUI : MonoBehaviour
     void SetLight(bool on)
     {
         light = on;
+        onPaper = false;
         paper.gameObject.SetActive(on);
         if (!on)
         {
@@ -196,7 +202,30 @@ public class MenuUI : MonoBehaviour
         hintText.rectTransform.sizeDelta = new Vector2(1600f, 50f);
     }
 
-    static string Hint(string key, string action) => $"<mark=#FFFFFF26 padding=\"12,12,2,2\">{key}</mark>  {action}       ";
+    // Ink on paper needs no outline or shadow, so paper pages draw their text with the font's plain material.
+    void SetPaper(bool on)
+    {
+        onPaper = on;
+        paper.gameObject.SetActive(on);
+        bodyText.color = on ? Ink : Color.white;
+        hintText.color = on ? new Color(Ink.r, Ink.g, Ink.b, 0.55f) : GameUI.MutedColour;
+        if (on)
+        {
+            titleText.fontSharedMaterial = titleText.font.material;
+            bodyText.fontSharedMaterial = bodyText.font.material;
+            hintText.fontSharedMaterial = hintText.font.material;
+        }
+        else
+        {
+            ui.Style(bodyText, TextStyle.Body);
+        }
+    }
+
+    // Colours for rich text on a page: a muted label colour and a key-cap tint that read on dark or on paper.
+    public static string MutedHex(bool paper) => paper ? "6E6268" : ColorUtility.ToHtmlStringRGB(GameUI.MutedColour);
+    public static string KeyCap(string key, bool paper) => $"<mark=#{(paper ? "0000001A" : "FFFFFF2E")} padding=\"10,10,2,2\">{key}</mark>";
+
+    string Hint(string key, string action) => $"<mark=#{(onPaper || light ? "00000014" : "FFFFFF26")} padding=\"12,12,2,2\">{key}</mark>  {action}       ";
 
     public void Hide()
     {
@@ -318,9 +347,10 @@ public class MenuUI : MonoBehaviour
             }
             row.root.localScale = Vector3.one * (1f + 0.08f * k);
             row.bar.rectTransform.sizeDelta = new Vector2(RowWidth * k, row.bar.rectTransform.sizeDelta.y);
-            row.label.color = Color.Lerp(Idle, Color.white, k);
+            row.label.color = onPaper ? Color.Lerp(Ink, InkAccent, k) : Color.Lerp(Idle, Color.white, k);
             // On the red selection bar a red fill would vanish, so it turns white.
-            if (row.fillImage != null) row.fillImage.color = Color.Lerp(Accent, Color.white, k);
+            // On paper the bar is a pale wash, so the fill stays red.
+            if (row.fillImage != null) row.fillImage.color = onPaper ? InkAccent : Color.Lerp(Accent, Color.white, k);
 
             if (items[i].IsSlider)
             {
@@ -347,14 +377,14 @@ public class MenuUI : MonoBehaviour
 
             row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, RowHeight - 14f)).gameObject.AddComponent<Image>();
             row.bar.sprite = ProceduralSprites.White;
-            row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.32f);
+            row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : onPaper ? 0.14f : 0.32f);
             row.bar.raycastTarget = false;
 
             // A small diamond to the left of the selected label.
             row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-RowWidth / 2f + 46f, 0), new Vector2(20, 20));
             row.marker.localRotation = Quaternion.Euler(0, 0, 45f);
             Image marker = row.marker.gameObject.AddComponent<Image>();
-            marker.color = light ? InkAccent : Accent;
+            marker.color = light || onPaper ? InkAccent : Accent;
             marker.raycastTarget = false;
 
             bool slider = items[i].IsSlider;
@@ -367,7 +397,7 @@ public class MenuUI : MonoBehaviour
             row.label.characterSpacing = 6;
             ui.Style(row.label, TextStyle.Heading);
             // Ink on paper needs no outline or shadow.
-            if (light) row.label.fontSharedMaterial = row.label.font.material;
+            if (light || onPaper) row.label.fontSharedMaterial = row.label.font.material;
             // A button's marker sits just left of its label.
             if (light)
             {
@@ -383,7 +413,7 @@ public class MenuUI : MonoBehaviour
             {
                 row.track = GameUI.CreateRect("Track", row.root, new Vector2(0f, 0.5f), new Vector2(330f, 0), new Vector2(280f, 16f));
                 Image track = row.track.gameObject.AddComponent<Image>();
-                track.color = new Color(0f, 0f, 0f, 0.45f);
+                track.color = new Color(0f, 0f, 0f, onPaper ? 0.15f : 0.45f);
                 track.raycastTarget = false;
                 row.fill = GameUI.CreateRect("Fill", row.track, Vector2.zero, Vector2.zero, Vector2.zero);
                 row.fill.anchorMin = Vector2.zero;
@@ -395,6 +425,11 @@ public class MenuUI : MonoBehaviour
                 row.value = GameUI.CreateText(row.root, ui.BodyFont, "Value", new Vector2(1f, 0.5f), new Vector2(-24f, 0),
                     new Vector2(130f, RowHeight), 36, TextAlignmentOptions.Right);
                 ui.Style(row.value, TextStyle.Hud);
+                if (onPaper)
+                {
+                    row.value.fontSharedMaterial = row.value.font.material;
+                    row.value.color = Ink;
+                }
             }
             rows.Add(row);
         }

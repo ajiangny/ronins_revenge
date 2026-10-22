@@ -26,7 +26,7 @@ what other roguelites do, what changed and why, and what's left for later. The c
    - Every soul and every stage boon was a random element, so committing to an element was luck.
    - Hades shows the god on the door before you choose a path, and gods you've met recur.
 3. **No capstones.** No Duo, Legendary or prerequisite boons, so nothing rewarded a plan or mixing two elements on purpose. In Hades these are what a run builds toward.
-4. **Passives were mostly stat sticks.** Blazing Hands, Storm Step and Static Charge only change numbers; Inferno Fan was the only one that changed how you play.
+4. **Passives were mostly stat sticks.** Blazing Hands, Storm Step and Static Charge only change numbers; Inferno Fan was the only one that changed how you play (it has since become Kindling).
 5. **Uneven against bosses.**
    - Flame Blade added +1 damage on every slash that hit a boss, doubling slash damage.
    - Storm Blade added 25–50% of one point.
@@ -193,6 +193,15 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
 - **Thunder Riposte:** on a boss it now strikes once per level, as it does against the army.
 - **Tidal Renewal:** Rare now also heals every lost life (Common +1, Rare +1 and a full heal, Epic +2).
 
+### Sword Arts (done since)
+
+- **The drop.** Hades' Daedalus Hammer became the **technique scroll**: a rare pickup, mostly from kite scouts (40%,
+  plus 0.5% from any kill), at most two a run. It opens a **Sword Arts** screen of arts not yet held.
+- **The arts:** Split Slash, Piercing Slash, Echo Slash and Crescent Moon. They reshape the slash itself and stack
+  with each other and with the element Blade boons.
+- **Kindling replaced Inferno Fan.** Inferno Fan's spread of slashes overlapped Split Slash. Kindling sets off a
+  great fire blast every few slash kills instead.
+
 ## 4. Later
 
 - **Shared statuses.**
@@ -200,8 +209,8 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
   - Chill: stacks that freeze at a threshold, then a short immunity.
   - Jolt: discharges on the samurai's next shot.
   - These would give each element one readable status across every slot, like Hades' gods.
-- **A post-boss Technique (Daedalus hammer).** A verb-changing pick: the shuriken splits into three lanes, or the
-  parry holds a stance that reflects every arrow for half a second.
+- **More Sword Arts.** Arts for the shuriken and parry: the shuriken splits into three lanes, or the parry holds a
+  stance that reflects every arrow for half a second.
 - **Cursed souls (Chaos).** For example the army marches 20% faster for two rounds, then the shuriken recharges
   30% faster for good.
 - **Run resources.**

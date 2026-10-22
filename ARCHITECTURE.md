@@ -164,6 +164,13 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   `Arena_Utsusemi` (clockwork temple floor), generated with PixelLab. `CourtyardGrass` with its bushes and lanterns
   is the fallback for any stage without a rounds map in `NinjaArtSetup.RoundsGrounds`, kept for a third stage.
   `GameManager.Start` shows stage 1's map (behind the title menu too).
+- `Atmosphere.cs` — each map's mood, built by `Backdrop` and swapped in `Show` (`Map.atmosphere`, `Atmosphere.Settings`;
+  the courtyard's is `Backdrop.courtyardAtmosphere`): cloud shadows drifting with the wind, a moonlight glow and a
+  shade deepening away from the moon's top-left corner, low mist banks, drifting motes (fireflies, embers, dust) and a
+  vignette. Shadows, mist and light sort just above the ground (-96..-93) so every character stays readable; motes
+  and the vignette float over the field (58, 60). Textures are built in code, clouds and mist stepped into bands for a
+  painted pixel look, with full-rect meshes. `Backdrop` tints the moonlight with the boss moon (`TintMoon`). Each
+  map's mood is set in `NinjaArtSetup.Moods` and wired by `Ninja/Apply Maps`.
 
 ## UI
 

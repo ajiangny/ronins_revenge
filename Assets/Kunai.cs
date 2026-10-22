@@ -34,6 +34,8 @@ public class Kunai : MonoBehaviour
     public event Action<Vector3, IHittable> Impacted;
     // Ice shards encase a samurai before they hit it, so one they cut down freezes into an ice statue.
     public float FreezeOnHit { get; set; }
+    // Piercing Slash: cuts through arrows (they break on it) instead of being stopped by them.
+    public bool CutsArrows { get; set; }
 
     Rigidbody body;
     SpriteRenderer art;
@@ -48,6 +50,8 @@ public class Kunai : MonoBehaviour
     SpriteRenderer parryAura;
     Color parryColor;
     float nextAfterimage;
+    Action<Kunai> split;
+    float splitAt;
 
     void Awake()
     {
@@ -190,7 +194,7 @@ public class Kunai : MonoBehaviour
         if (TargetAlive()) Steer(TargetPoint() - transform.position, homingTurnRate * Time.fixedDeltaTime);
     }
 
-    // Kunai thrown together (Inferno Fan) start on the same spot; they must not knock each other out.
+    // Slashes forked together (Split Slash) start on the same spot; they must not knock each other out.
     public void IgnoreCollisionsWith(Kunai other)
     {
         foreach (Collider mine in GetComponentsInChildren<Collider>())
@@ -202,8 +206,21 @@ public class Kunai : MonoBehaviour
         }
     }
 
+    // Split Slash: calls back once, this many seconds into the flight, so the ronin can fork it.
+    public void SplitAfter(float seconds, Action<Kunai> onSplit)
+    {
+        split = onSplit;
+        splitAt = Time.time + seconds;
+    }
+
     void Update()
     {
+        if (split != null && !spent && Time.time >= splitAt)
+        {
+            Action<Kunai> fork = split;
+            split = null;
+            fork(this);
+        }
         if (spinner != null)
         {
             spinner.Rotate(0, 0, -spinSpeed * Time.deltaTime);
@@ -260,6 +277,12 @@ public class Kunai : MonoBehaviour
         }
         // The shuriken and reflected slashes cut through arrows and don't chip the ronin's own blockers.
         else if (Source == KillSource.Shuriken || Source == KillSource.Reflected)
+        {
+            KeepFlying(coll.collider);
+            return;
+        }
+        // A piercing slash cuts through arrows (they break on it), but cover still stops it.
+        else if (CutsArrows && coll.collider.GetComponentInParent<Arrow>() != null)
         {
             KeepFlying(coll.collider);
             return;

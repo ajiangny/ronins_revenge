@@ -13,8 +13,9 @@ public enum BoonSlot { Attack, Special, Parry, Passive }
 public enum Rarity { Common, Rare, Epic }
 
 // Duo and Legendary boons are capstones, offered once their prerequisite boons are held and never upgraded.
-// An Offering stands in when a soul's element has nothing left to give.
-public enum BoonKind { Normal, Duo, Legendary, Offering }
+// An Offering stands in when a soul's element has nothing left to give. A Sword Art (from a Technique Scroll, like
+// Hades' Daedalus Hammer) reshapes the katana's slash itself; it belongs to no element and is never upgraded.
+public enum BoonKind { Normal, Duo, Legendary, Offering, Art }
 
 // Indexes the icon array, so keep the order in step with BoonChoiceUI.boonIcons.
 public enum BoonId
@@ -27,6 +28,7 @@ public enum BoonId
     StormStep, StaticCharge,
     ThermalShock, PlasmaArc, Superconductor,
     Wildfire, StillWater, RaijinsDrum,
+    SplitSlash, PiercingSlash, EchoSlash, CrescentMoon,
     SpiritOffering,
 }
 
@@ -123,8 +125,12 @@ public static class Boons
         BoonKind.Duo => new Color(0.55f, 0.95f, 0.45f),
         BoonKind.Legendary => new Color(1f, 0.6f, 0.2f),
         BoonKind.Offering => new Color(1f, 0.85f, 0.5f),
+        BoonKind.Art => ArtColor,
         _ => RarityColor(rarity),
     };
+
+    // Polished steel: the Sword Arts belong to the blade, not to any spirit.
+    public static readonly Color ArtColor = new Color(0.82f, 0.86f, 0.92f);
 
     // The core slot boons each capstone builds on: fire blasts, ice, and lightning strikes.
     static readonly BoonId[] BlastBoons = { BoonId.FlameBlade, BoonId.InfernoShuriken, BoonId.BurningRiposte };
@@ -236,6 +242,20 @@ public static class Boons
             Description = "Every few hits beat the thunder drum: <b>Lightning</b> strikes the front samurai of the 3 columns nearest you.",
             StatLabel = "Hits per beat:", Values = new[] { 8f, 8f, 8f }, Format = v => $"{v:0}",
             Requires = l => TwoSlotsOf(l, Element.Lightning) },
+
+        // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
+        new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",
+            Description = "A moment into its flight, every <b>Slash</b> splits: two smaller slashes peel off to either side.",
+            StatLabel = "Side slashes:", Values = new[] { 2f, 2f, 2f }, Format = Plus },
+        new BoonDefinition { Id = BoonId.PiercingSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Piercing Slash",
+            Description = "Your <b>Slash</b> cuts through samurai and arrows instead of stopping at the first.",
+            StatLabel = "Samurai pierced:", Values = new[] { 2f, 2f, 2f }, Format = v => $"{v:0}" },
+        new BoonDefinition { Id = BoonId.EchoSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Echo Slash",
+            Description = "A swing may send a ghostly second <b>Slash</b> that hunts down an enemy.",
+            StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
+        new BoonDefinition { Id = BoonId.CrescentMoon, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Crescent Moon",
+            Description = "Your <b>Slash</b> is a great crescent, wide enough to cut two columns and every arrow across them.",
+            StatLabel = "Slash width:", Values = new[] { 1.7f, 1.7f, 1.7f }, Format = v => $"x{v:0.#}" },
     };
 
     // Stands in when a soul's element has nothing left to offer, so a caught soul is never wasted.
@@ -246,6 +266,24 @@ public static class Boons
         Description = "This spirit has no more boons to give. It mends you instead: heal a life, or take points at full health.",
         StatLabel = "Heal:", Values = new[] { 1f, 1f, 1f }, Format = v => $"+{v:0} life",
     };
+
+    // Up to count Sword Arts the ronin doesn't hold yet, for a Technique Scroll.
+    public static List<BoonOffer> DrawArts(RoninLoadout loadout, int count)
+    {
+        var pool = new List<BoonDefinition>();
+        foreach (BoonDefinition boon in All)
+        {
+            if (boon.Kind == BoonKind.Art && loadout.Find(boon.Id) == null) pool.Add(boon);
+        }
+        var offers = new List<BoonOffer>();
+        while (offers.Count < count && pool.Count > 0)
+        {
+            BoonDefinition art = pool[UnityEngine.Random.Range(0, pool.Count)];
+            pool.Remove(art);
+            offers.Add(new BoonOffer(art, Rarity.Common, false, null));
+        }
+        return offers;
+    }
 
     // Capstones the ronin could take right now, of any element.
     public static List<BoonDefinition> EligibleCapstones(RoninLoadout loadout)
@@ -269,7 +307,7 @@ public static class Boons
         var capstones = new List<BoonDefinition>();
         foreach (BoonDefinition boon in All)
         {
-            if (!boon.Offers(element)) continue;
+            if (boon.Kind == BoonKind.Art || !boon.Offers(element)) continue;
             if (boon.IsCapstone)
             {
                 if (loadout.Find(boon.Id) == null && boon.Requires(loadout)) capstones.Add(boon);

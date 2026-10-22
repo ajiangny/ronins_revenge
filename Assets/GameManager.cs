@@ -66,6 +66,16 @@ public class GameManager : MonoBehaviour
     [SerializeField, Range(0, 1)] float soulElementBias = 0.5f;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
+
+    [Header("Technique scrolls (Sword Arts)")]
+    [Tooltip("Chance a downed kite scout also drops a technique scroll.")]
+    [SerializeField, Range(0, 1)] float scrollChanceFromScout = 0.4f;
+    [Tooltip("Chance any fallen samurai drops a technique scroll.")]
+    [SerializeField, Range(0, 1)] float scrollChancePerKill = 0.005f;
+    [Tooltip("Most technique scrolls that can drop in one run, like Hades' two Daedalus Hammers.")]
+    [SerializeField] int maxScrollsPerRun = 2;
+    [Tooltip("The technique scroll pickup. Wired by Ninja/Apply Boon Art; empty draws a parchment bar on a gold glow.")]
+    [SerializeField] Sprite scrollSprite;
     [Tooltip("Chance that a blocker worn down by hits drops a heart, which heals a lost life.")]
     [SerializeField, Range(0, 1)] float heartDropChance = 0.2f;
     [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
@@ -191,6 +201,10 @@ public class GameManager : MonoBehaviour
     Soul activeSoul;
     // A soul that reached the ronin while the round was wrapping up; its boons are offered before the next round.
     Element? gatheredSoul;
+    TechniqueScroll activeScroll;
+    // A scroll that reached the ronin while the round was wrapping up; its arts are offered before the next round.
+    bool gatheredScroll;
+    int scrollsDropped;
     int killsSinceSoul;
     // The element F5's next soul brings.
     int devSoulElement;
@@ -453,7 +467,7 @@ public class GameManager : MonoBehaviour
         }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
-        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul</color></size>",
+        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll</color></size>",
             items.ToArray(), back, startIndex, paper: OnPaper);
     }
 
@@ -513,6 +527,8 @@ public class GameManager : MonoBehaviour
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
         if (state == State.Playing) MaybeDropSoul(scout.transform.position, true);
+        // Scouts are where scrolls usually come from; it lands beside the soul rather than on it.
+        if (state == State.Playing) MaybeDropScroll(scout.transform.position + Vector3.right * 0.9f, scrollChanceFromScout);
     }
 
     // Testing shortcuts (Editor and development builds): F1 wipes out the current army, F2 skips to the last
@@ -538,6 +554,10 @@ public class GameManager : MonoBehaviour
         else if (keyboard.f5Key.wasPressedThisFrame && activeSoul == null)
         {
             SpawnSoul(ronin.Feet + Vector3.up * 2f, (Element)(devSoulElement++ % 3));
+        }
+        else if (keyboard.f6Key.wasPressedThisFrame && activeScroll == null && Boons.DrawArts(loadout, 1).Count > 0)
+        {
+            SpawnScroll(ronin.Feet + Vector3.up * 2f);
         }
         else if (keyboard.f2Key.wasPressedThisFrame && activeBoss == null)
         {
@@ -652,6 +672,7 @@ public class GameManager : MonoBehaviour
         }
         effects.OnKill(samurai, source);
         MaybeDropSoul(samurai.transform.position);
+        MaybeDropScroll(samurai.transform.position, scrollChancePerKill);
     }
 
     void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
@@ -707,6 +728,8 @@ public class GameManager : MonoBehaviour
     {
         loadout = new RoninLoadout();
         soulCaught = false;
+        scrollsDropped = 0;
+        gatheredScroll = false;
         ronin.Loadout = loadout;
         effects = new BoonEffects(army, ronin, loadout);
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
@@ -744,6 +767,55 @@ public class GameManager : MonoBehaviour
             if (roll < 0f) return (Element)i;
         }
         return loadout.DominantElement ?? Element.Fire;
+    }
+
+    // Rare, and at most maxScrollsPerRun a run; one on the field at a time, and none once every art is held. Never from
+    // the round's last samurai, like souls.
+    void MaybeDropScroll(Vector3 position, float chance)
+    {
+        if (activeScroll != null || scrollsDropped >= maxScrollsPerRun || army.Remaining == 0) return;
+        if (Random.value >= chance || Boons.DrawArts(loadout, 1).Count == 0) return;
+        scrollsDropped++;
+        SpawnScroll(position);
+    }
+
+    void SpawnScroll(Vector3 position)
+    {
+        activeScroll = TechniqueScroll.Spawn(position, scrollSprite, ronin, OnScrollCollected);
+        // The first scroll of a run carries the gold arrow, like the first soul.
+        if (scrollsDropped <= 1) activeScroll.ShowHint(soulHintArrow);
+    }
+
+    void OnScrollCollected(TechniqueScroll scroll)
+    {
+        if (state == State.Transition)
+        {
+            gatheredScroll = true;
+        }
+        else if (state != State.Playing || !OfferArts(ResumePlay))
+        {
+            return;
+        }
+        Fx.Play(Fx.Impact, scroll.transform.position, Boons.ArtColor, 1.8f);
+        Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
+    }
+
+    // The Sword Arts screen: up to three arts the ronin doesn't hold, like Daedalus's hammer in Hades.
+    bool OfferArts(System.Action afterPick)
+    {
+        var offers = Boons.DrawArts(loadout, 3);
+        if (offers.Count == 0) return false;
+
+        state = State.Choosing;
+        ronin.ControlsEnabled = false;
+        Time.timeScale = 0f;
+        boonChoice.ShowArts(offers, scrollSprite, index =>
+        {
+            TakeBoon(offers[index]);
+            Time.timeScale = 1f;
+            afterPick();
+        });
+        return true;
     }
 
     // Pauses the game and offers three boons of the soul's element, like a god's boon in Hades. One gathered at the
@@ -789,12 +861,26 @@ public class GameManager : MonoBehaviour
         while (Pickup.Gathering > 0 && Time.time < giveUp) yield return null;
         Pickup.StopGathering();
 
-        if (gatheredSoul is not Element element) yield break;
-        gatheredSoul = null;
         bool picked = false;
-        if (!OfferBoons(element, () => picked = true)) yield break;
-        yield return new WaitUntil(() => picked);
-        state = State.Transition;
+        if (gatheredSoul is Element element)
+        {
+            gatheredSoul = null;
+            if (OfferBoons(element, () => picked = true))
+            {
+                yield return new WaitUntil(() => picked);
+                state = State.Transition;
+            }
+        }
+        if (gatheredScroll)
+        {
+            gatheredScroll = false;
+            picked = false;
+            if (OfferArts(() => picked = true))
+            {
+                yield return new WaitUntil(() => picked);
+                state = State.Transition;
+            }
+        }
     }
 
     void ResumePlay()
@@ -827,7 +913,7 @@ public class GameManager : MonoBehaviour
     {
         loadout.Take(offer);
         float value = offer.Boon.ValueAt(offer.Rarity);
-        Color colour = Boons.Info(offer.Boon.Element).Color;
+        Color colour = offer.Boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(offer.Boon.Element).Color;
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
         Fx.Play(Fx.BoonPillar, ronin.Feet, new Color(pillar.r, pillar.g, pillar.b, 0.75f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
         switch (offer.Boon.Id)
@@ -1322,6 +1408,10 @@ public class GameManager : MonoBehaviour
         foreach (Soul soul in FindObjectsByType<Soul>())
         {
             Destroy(soul.gameObject);
+        }
+        foreach (TechniqueScroll scroll in FindObjectsByType<TechniqueScroll>())
+        {
+            Destroy(scroll.gameObject);
         }
         foreach (Scout scout in FindObjectsByType<Scout>())
         {

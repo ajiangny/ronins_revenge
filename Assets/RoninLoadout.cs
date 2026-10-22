@@ -52,6 +52,12 @@ public sealed class RoninLoadout
     {
         // An Offering is a heal, not a boon: it doesn't count toward the ronin's elements.
         if (offer.Boon.Kind == BoonKind.Offering) return;
+        // A Sword Art sits with the passives on the HUD but belongs to no element, so it doesn't steer souls.
+        if (offer.Boon.Kind == BoonKind.Art)
+        {
+            passives.Add(new EquippedBoon(offer.Boon, offer.Rarity));
+            return;
+        }
         BoonCount++;
         elementCounts[(int)offer.Boon.Element]++;
         LastElement = offer.Boon.Element;

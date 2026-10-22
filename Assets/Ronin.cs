@@ -17,6 +17,11 @@ public class Ronin : MonoBehaviour
     const float ShardSize = 0.8f;
     const float ShardSpread = 25f;
     const float ThunderShurikenSpeed = 1.9f;
+    // Split Slash forks this long into a slash's flight, into side slashes this much smaller.
+    const float SplitDelay = 0.22f;
+    const float SplitScale = 0.8f;
+    // Echo Slash's homing ghost is drawn a little smaller than the slash it echoes.
+    const float EchoScale = 0.9f;
     // How long a Frozen Riposte shard holds the samurai it hits in ice.
     const float RiposteShardFreeze = 1.5f;
 
@@ -31,8 +36,8 @@ public class Ronin : MonoBehaviour
     [SerializeField] float shotCooldown = 0.35f;
     [SerializeField] float invulnerableTime = 2f;
     [SerializeField] float screenMargin = 0.2f;
-    [Tooltip("Degrees between slashes (or kunai) when Inferno Fan sends several at once.")]
-    [SerializeField] float fanAngle = 9f;
+    [Tooltip("Degrees off its heading that each side slash of Split Slash peels away at.")]
+    [SerializeField] float splitAngle = 18f;
     [Tooltip("Art pixels the spirit wisps bob up and down.")]
     [SerializeField] float wispBobPixels = 1.5f;
     [Tooltip("Seconds per bob of the spirit wisps.")]
@@ -237,19 +242,42 @@ public class Ronin : MonoBehaviour
         PlayAction(art.attack);
     }
 
+    // One slash (or kunai) per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
+    // homing ghost, and Piercing Slash and Crescent Moon apply to every one of them.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
-        int count = 1;
-        var sent = new Kunai[count];
-        for (int i = 0; i < count; i++)
+        Kunai slash = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, 1f);
+        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, source, projectileSprite, parent));
+        if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
-            float angle = (i - (count - 1) / 2f) * fanAngle;
-            Kunai projectile = SpawnProjectile(prefab, Muzzle);
-            projectile.Launch(Quaternion.Euler(0, 0, angle) * Vector3.up, 1f, 0, source, projectileSprite);
-            projectile.Tint(attackTint, attackGlow);
-            for (int j = 0; j < i; j++) projectile.IgnoreCollisionsWith(sent[j]);
-            sent[i] = projectile;
+            Kunai ghost = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, EchoScale);
+            ghost.Home(RiposteTarget);
+            ghost.ParryAura(Color.Lerp(Color.white, attackGlow, 0.5f));
         }
+    }
+
+    Kunai LaunchSlash(GameObject prefab, Vector3 position, Vector3 direction, KillSource source, Sprite projectileSprite, float scale)
+    {
+        Kunai projectile = SpawnProjectile(prefab, position);
+        bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
+        float width = Loadout.Has(BoonId.CrescentMoon, out float crescent) ? crescent : 1f;
+        projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale * width);
+        projectile.CutsArrows = pierces;
+        projectile.Tint(attackTint, attackGlow);
+        return projectile;
+    }
+
+    // Split Slash: two smaller slashes peel off either side of the one in flight, which flies on.
+    void SplitOff(GameObject prefab, KillSource source, Sprite projectileSprite, Kunai parent)
+    {
+        Vector3 at = parent.transform.position;
+        Vector3 heading = parent.transform.up;
+        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, source, projectileSprite, SplitScale);
+        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, source, projectileSprite, SplitScale);
+        left.IgnoreCollisionsWith(parent);
+        right.IgnoreCollisionsWith(parent);
+        left.IgnoreCollisionsWith(right);
+        Fx.Play(Fx.Impact, at, Color.Lerp(Color.white, attackGlow, 0.6f), 0.7f);
     }
 
     // A big spinning blade that flies straight up through every samurai in its column.

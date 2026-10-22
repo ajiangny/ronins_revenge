@@ -85,6 +85,7 @@ public static class BoonArtSetup
         if (!ui.TryGetComponent(out BoonChoiceUI choice)) choice = ui.gameObject.AddComponent<BoonChoiceUI>();
         managerSo.FindProperty("boonChoice").objectReferenceValue = choice;
         managerSo.FindProperty("soulHintArrow").objectReferenceValue = Load("UI/SoulArrow");
+        managerSo.FindProperty("scrollSprite").objectReferenceValue = Load("Effects/TechniqueScroll");
         managerSo.ApplyModifiedPropertiesWithoutUndo();
 
         // The spiked ice shell drawn over ice statues.

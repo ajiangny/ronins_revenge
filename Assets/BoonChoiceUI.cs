@@ -114,16 +114,28 @@ public class BoonChoiceUI : MonoBehaviour
     // elementPortrait is the ronin with his wisps in the soul's colour; empty uses the default portrait.
     public void Show(Element element, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)
     {
+        ElementInfo info = Boons.Info(element);
+        Show($"Boons of {info.Name}", info.Subtitle, info.Color, boonOffers, soulFrames, elementPortrait, onChosen);
+    }
+
+    // The Sword Arts screen for a technique scroll: the same layout in polished steel, the scroll in the ronin's hand.
+    public void ShowArts(List<BoonOffer> artOffers, Sprite scroll, Action<int> onChosen)
+    {
+        Show("Sword Arts", "a secret technique of the blade, written by a master long dead.", Boons.ArtColor, artOffers,
+            scroll != null ? new[] { scroll } : null, null, onChosen);
+    }
+
+    void Show(string heading, string tagline, Color colour, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)
+    {
         offers = boonOffers;
         chosen = onChosen;
-        ElementInfo info = Boons.Info(element);
-        elementColor = info.Color;
+        elementColor = colour;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
 
-        title.text = $"Boons of {info.Name}";
+        title.text = heading;
         title.color = elementColor;
-        subtitle.text = info.Subtitle;
+        subtitle.text = tagline;
         Color ruleColour = Color.Lerp(elementColor, Color.white, 0.35f);
         foreach (Image mark in divider.GetComponentsInChildren<Image>()) mark.color = ruleColour;
 
@@ -166,7 +178,7 @@ public class BoonChoiceUI : MonoBehaviour
     {
         BoonDefinition boon = offer.Boon;
         Color rarityColor = Boons.KindColor(boon.Kind, offer.Rarity);
-        Color element = Boons.Info(boon.Element).Color;
+        Color element = ColorOf(boon);
         // A Duo's wash takes its partner's colour, so the card shows both elements.
         Color wash = boon.Partner is Element partner ? Boons.Info(partner).Color : element;
         SetIcon(card.icon, card.letter, boon, element);
@@ -182,6 +194,7 @@ public class BoonChoiceUI : MonoBehaviour
             BoonKind.Duo => $"Duo  ·  {Boons.Info(boon.Element).Name} + {Boons.Info(boon.Partner.Value).Name}",
             BoonKind.Legendary => "Legendary",
             BoonKind.Offering => "Offering",
+            BoonKind.Art => "Sword Art",
             _ => offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString(),
         };
         string slot = boon.Kind == BoonKind.Offering ? "" : $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}><size=26>·  {boon.Slot.ToString().ToUpperInvariant()}</size></color>";
@@ -204,6 +217,9 @@ public class BoonChoiceUI : MonoBehaviour
         card.group.alpha = 0f;
         card.ink.fillAmount = 0f;
     }
+
+    // A Sword Art is steel; every other boon wears its element's colour.
+    static Color ColorOf(BoonDefinition boon) => boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(boon.Element).Color;
 
     void SetIcon(Image icon, TextMeshProUGUI letter, BoonDefinition boon, Color color)
     {
@@ -356,7 +372,7 @@ public class BoonChoiceUI : MonoBehaviour
             passiveTips[i].gameObject.SetActive(shown);
             if (!shown) continue;
             BoonDefinition boon = loadout.Passives[i].Boon;
-            SetIcon(passiveIcons[i], passiveIcons[i].GetComponentInChildren<TextMeshProUGUI>(), boon, Boons.Info(boon.Element).Color);
+            SetIcon(passiveIcons[i], passiveIcons[i].GetComponentInChildren<TextMeshProUGUI>(), boon, ColorOf(boon));
             passiveTips[i].text = boon.Name;
         }
     }

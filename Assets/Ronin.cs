@@ -52,6 +52,8 @@ public class Ronin : MonoBehaviour
     public event Action Parried;
 
     public bool ControlsEnabled { get; set; }
+    // God mode from the dev menu: nothing can hurt him.
+    public bool Invincible { get; set; }
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
     public Func<Transform> RiposteTarget { get; set; }
     // A fireball or ice shard riposte struck something.
@@ -416,7 +418,7 @@ public class Ronin : MonoBehaviour
     // Damage that can't be parried, like a boss's chain lash. Invulnerability still applies.
     public void TakeHit(Vector3 contact)
     {
-        if (!ControlsEnabled || Time.time < invulnerableUntil) return;
+        if (!ControlsEnabled || Invincible || Time.time < invulnerableUntil) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
         HitFlash.Flash(sprite);

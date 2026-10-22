@@ -57,6 +57,7 @@ public class GameUI : MonoBehaviour
     RectTransform subtitlePlate;
     TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
+    TextMeshProUGUI godModeTag;
     float subtitleUntil;
     Image fade;
 
@@ -140,6 +141,21 @@ public class GameUI : MonoBehaviour
     public void SetHudVisible(bool visible)
     {
         foreach (GameObject part in hudParts) part.SetActive(visible);
+    }
+
+    // A reminder over the lives while the dev menu's god mode is on. Built the first time it's needed.
+    public void SetGodMode(bool on)
+    {
+        if (godModeTag == null)
+        {
+            if (!on) return;
+            godModeTag = CreateText("GodMode", new Vector2(0f, 0f), new Vector2(36, 124), new Vector2(500, 36), 28, TextAlignmentOptions.BottomLeft);
+            godModeTag.text = "GOD MODE";
+            godModeTag.color = HighScoreColour;
+            godModeTag.characterSpacing = 8;
+            Style(godModeTag, TextStyle.Hint);
+        }
+        godModeTag.gameObject.SetActive(on);
     }
 
     TextMeshProUGUI HudLabel(string name, string label, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment)

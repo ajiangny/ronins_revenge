@@ -27,6 +27,10 @@ public class GameManager : MonoBehaviour
 
     const string HighScoreKey = "HighScore";
     static bool skipTitle;
+    // Dev menu testing aids. Statics, so god mode and a pending jump survive the scene reload that starts the run.
+    static bool godMode;
+    static int devJumpStage = -1;
+    static bool devJumpBoss;
 
     [Header("Inscribed")]
     [SerializeField, FormerlySerializedAs("fleet")] SamuraiArmy army;
@@ -255,6 +259,7 @@ public class GameManager : MonoBehaviour
         ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
         ui.SetLives(startingLives);
         blockers.Rebuild();
+        SetGodMode(godMode);
 
         if (skipTitle)
         {
@@ -278,9 +283,7 @@ public class GameManager : MonoBehaviour
         bool pause = (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame))
             || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
         if (state == State.Playing && pause) Pause();
-#if UNITY_EDITOR
-        if (keyboard != null) DevHotkeys(keyboard);
-#endif
+        if (Debug.isDebugBuild && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing) UpdateScouts();
     }
 
@@ -298,6 +301,7 @@ public class GameManager : MonoBehaviour
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTitleMenu)),
         };
+        if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
         menu.Show("SHADOW BLADE",
             $"<color=#FF6B5E>RONIN  VS.  SAMURAI</color>\n<size=30><color=#{ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour)}>HIGH SCORE  {highScore:000000}</color></size>",
@@ -357,14 +361,56 @@ public class GameManager : MonoBehaviour
 
     void ShowPauseMenu()
     {
-        menu.Show("PAUSED", null, new[]
+        var items = new List<MenuUI.Item>
         {
             MenuUI.Item.Button("RESUME", Resume),
             MenuUI.Item.Button("RESTART", () => Reload(true)),
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowPauseMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowPauseMenu)),
-            MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)),
-        }, Resume);
+        };
+        if (Debug.isDebugBuild) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowPauseMenu)));
+        items.Add(MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)));
+        menu.Show("PAUSED", null, items.ToArray(), Resume);
+    }
+
+    // Testing tools, only in the Editor and development builds: start any stage's first round or boss fight
+    // directly, and toggle god mode.
+    void ShowDevMenu(System.Action back, int startIndex = 0)
+    {
+        var items = new List<MenuUI.Item>();
+        for (int i = 0; i < stages.Length; i++)
+        {
+            int stage = i;
+            items.Add(MenuUI.Item.Button($"STAGE {i + 1}  ·  ROUND 1", () => DevJump(stage, false)));
+            if (stages[i].boss != BossKind.None)
+                items.Add(MenuUI.Item.Button($"STAGE {i + 1}  ·  {stages[i].boss.ToString().ToUpper()}", () => DevJump(stage, true)));
+        }
+        int godModeRow = items.Count;
+        items.Add(MenuUI.Item.Button($"GOD MODE  {(godMode ? "ON" : "OFF")}", () =>
+        {
+            SetGodMode(!godMode);
+            ShowDevMenu(back, godModeRow);
+        }));
+        items.Add(MenuUI.Item.Button("BACK", back));
+        string muted = ColorUtility.ToHtmlStringRGB(GameUI.MutedColour);
+        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode</color></size>",
+            items.ToArray(), back, false, startIndex);
+    }
+
+    // A jump restarts the run from a clean scene, then StartGame drops it into the chosen fight.
+    static void DevJump(int stage, bool boss)
+    {
+        devJumpStage = stage;
+        devJumpBoss = boss;
+        Reload(true);
+    }
+
+    // The ronin takes no hits, and an army that lands is swept away instead of ending the run.
+    void SetGodMode(bool on)
+    {
+        godMode = on;
+        ronin.Invincible = on;
+        ui.SetGodMode(on);
     }
 
     // Always back to full speed: a parry's hit-stop that was cut off by the pause would otherwise never end.
@@ -409,28 +455,55 @@ public class GameManager : MonoBehaviour
         if (state == State.Playing) MaybeDropSoul(scout.transform.position, true);
     }
 
-#if UNITY_EDITOR
-    // Testing shortcuts: F1 wipes out the current army, F2 skips to the last round of the last stage.
+    // Testing shortcuts (Editor and development builds): F1 wipes out the current army, F2 skips to the last
+    // stage's boss, F3 opens the dev menu, F4 toggles god mode.
     void DevHotkeys(Keyboard keyboard)
     {
+        if (keyboard.f4Key.wasPressedThisFrame) SetGodMode(!godMode);
+        if (keyboard.f3Key.wasPressedThisFrame)
+        {
+            if (state == State.Title) ShowDevMenu(ShowTitleMenu);
+            else if (state == State.Playing)
+            {
+                Pause();
+                ShowDevMenu(ShowPauseMenu);
+            }
+        }
         if (state != State.Playing) return;
         if (keyboard.f1Key.wasPressedThisFrame)
         {
-            foreach (Samurai soldier in new List<Samurai>(army.Soldiers)) soldier.Kill(KillSource.Effect);
+            KillArmy();
         }
         else if (keyboard.f2Key.wasPressedThisFrame && activeBoss == null)
         {
             // Straight to the last stage's boss, or its last round when it has none.
-            stageIndex = stages.Length - 1;
-            roundIndex = Stage.rounds.Length - 1;
-            Backdrop.Map map = Stage.boss != BossKind.None ? BossMap : Stage.roundsMap;
-            if (backdrop != null) backdrop.Show(map);
-            blockers.Use(map?.blockers, map?.blockerPattern);
-            blockers.Rebuild(loadout.BlockerHealthMultiplier);
-            StartCoroutine(Stage.boss != BossKind.None ? BeginBoss() : BeginRound());
+            StageConfig last = stages[stages.Length - 1];
+            StartAt(stages.Length - 1, last.boss != BossKind.None);
         }
     }
-#endif
+
+    void KillArmy()
+    {
+        foreach (Samurai soldier in new List<Samurai>(army.Soldiers)) soldier.Kill(KillSource.Effect);
+    }
+
+    // Drops into a stage's boss fight, or its rounds, on that fight's own map. A boss jump counts as the last round.
+    void StartAt(int stage, bool boss)
+    {
+        stageIndex = stage;
+        boss &= Stage.boss != BossKind.None;
+        roundIndex = boss ? Stage.rounds.Length - 1 : 0;
+        ShowMap(boss ? BossMap : Stage.roundsMap);
+        StartCoroutine(boss ? BeginBoss() : BeginRound());
+    }
+
+    // Swaps the ground and builds that map's fresh cover.
+    void ShowMap(Backdrop.Map map)
+    {
+        if (backdrop != null) backdrop.Show(map);
+        blockers.Use(map?.blockers, map?.blockerPattern);
+        blockers.Rebuild(loadout.BlockerHealthMultiplier);
+    }
 
     StageConfig Stage => stages[stageIndex];
     LevelConfig Round => Stage.rounds[roundIndex];
@@ -448,6 +521,13 @@ public class GameManager : MonoBehaviour
         ResetLoadout();
         ui.SetLives(lives);
         ui.SetScore(score);
+        if (devJumpStage >= 0)
+        {
+            int stage = Mathf.Min(devJumpStage, stages.Length - 1);
+            devJumpStage = -1;
+            StartAt(stage, devJumpBoss);
+            return;
+        }
         StartCoroutine(BeginRound());
     }
 
@@ -972,9 +1052,7 @@ public class GameManager : MonoBehaviour
         yield return ui.FadeTo(1f, travelFadeTime);
         yield return leaving;
 
-        if (backdrop != null) backdrop.Show(map);
-        blockers.Use(map?.blockers, map?.blockerPattern);
-        blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        ShowMap(map);
         ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
         yield return new WaitForSeconds(0.3f);
 
@@ -985,6 +1063,11 @@ public class GameManager : MonoBehaviour
     void OnArmyReachedRonin()
     {
         if (state != State.Playing) return;
+        if (godMode)
+        {
+            KillArmy();
+            return;
+        }
         CameraShake.Add(0.6f);
         ronin.Explode();
         EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);

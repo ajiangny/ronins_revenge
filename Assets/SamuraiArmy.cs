@@ -11,6 +11,10 @@ public class SamuraiArmy : MonoBehaviour
     [FormerlySerializedAs("alienCounter")] public SamuraiCounter samuraiCounter;
     [Tooltip("Samurai art from the top rank down: Taisho, Bushi, Bushi, Ashigaru. Each SamuraiKind picks its look from here.")]
     public CharacterArt[] samuraiByRow;
+    [Tooltip("The spiked ice shell drawn over a samurai held in ice and over ice statues. Wired by Ninja/Apply Boon Art; empty keeps just the icy tint and halo.")]
+    [SerializeField] Sprite iceShell;
+
+    public Sprite IceShell => iceShell;
 
     [SerializeField] float maxSpacingX = 2f;
     [SerializeField] float spacingY = 1.6f;

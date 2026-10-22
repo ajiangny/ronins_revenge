@@ -482,10 +482,13 @@ MonoBehaviour:
   ui: {fileID: 2080831155}
   startingLives: 3
   levelIntroTime: 2.5
+  devToolsInRelease: 1
   boonChoice: {fileID: 2080831156}
   soulDropChance: 0.07
   soulPityKills: 15
+  soulElementBias: 0.5
   soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
+  heartDropChance: 0.2
   titleFluteFrames:
   - {fileID: 21300000, guid: 5b5e752b773b04742ad3c376d61a6708, type: 3}
   - {fileID: 21300000, guid: c0c1e3013bcda481bae1205f9a7ae8e6, type: 3}
@@ -1466,6 +1469,13 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4377baa7389d34ed492436b7849858c6, type: 3}
   - {fileID: 21300000, guid: fd8b3b820261f47328b0910782fcdf1a, type: 3}
   - {fileID: 21300000, guid: 7fa0d8193ca574d79964dd4e8bd7f641, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}
   - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}
@@ -1478,6 +1488,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8270462056835086372, guid: 34725686c1348b247a77b3f974763d41, type: 3}
+      propertyPath: iceShell
+      value: 
+      objectReference: {fileID: 21300000, guid: bce89d85e2d0a40ab816c7ec2b1f06bc, type: 3}
     - target: {fileID: -8270462056835086372, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: alienCounter
       value: 

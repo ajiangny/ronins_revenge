@@ -33,6 +33,7 @@ public class IceStatue : MonoBehaviour, IHittable
 
     SpriteRenderer body;
     SpriteRenderer glow;
+    SpriteRenderer shell;
     Sprite[] chips;
     bool broken;
     float age;
@@ -47,7 +48,7 @@ public class IceStatue : MonoBehaviour, IHittable
     bool melting;
 
     // chips are the bits of ice it breaks into (the samurai's death particles, tinted icy).
-    public static IceStatue Create(SpriteRenderer source, int layer, Sprite[] chips)
+    public static IceStatue Create(SpriteRenderer source, int layer, Sprite[] chips, Sprite shell)
     {
         var go = new GameObject("IceStatue") { layer = layer };
         go.transform.position = source.transform.position;
@@ -62,6 +63,8 @@ public class IceStatue : MonoBehaviour, IHittable
         statue.body.flipX = source.flipX;
         statue.body.sortingOrder = source.sortingOrder;
         statue.body.color = IceColor;
+        // The ice block is a child of the body, so it slumps and spreads with it as it melts.
+        statue.shell = Samurai.AddIceShell(statue.body, shell);
         statue.glow = Kunai.CreateGlow(go.transform, 1.8f, source.sortingOrder - 1, IceGlow);
 
         // The ronin's shots find it by its collider, sized to the frame it froze in.
@@ -128,6 +131,7 @@ public class IceStatue : MonoBehaviour, IHittable
         Color ice = Color.Lerp(IceColor, Meltwater, t);
         ice.a = Mathf.Lerp(1f, 0f, Mathf.Clamp01((t - 0.7f) / 0.3f));
         body.color = ice;
+        if (shell != null) shell.color = new Color(1f, 1f, 1f, ice.a);
         glow.color = new Color(IceGlow.r, IceGlow.g, IceGlow.b, 0.4f * (1f - t));
 
         float spread = Mathf.Lerp(0.4f, 1.6f, t) * Mathf.Max(halfWidth, 0.5f);

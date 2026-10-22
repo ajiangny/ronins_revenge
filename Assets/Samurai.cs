@@ -38,6 +38,7 @@ public class Samurai : MonoBehaviour, IHittable
     float frost;
     float encasedUntil;
     SpriteRenderer iceGlow;
+    SpriteRenderer iceShell;
 
     void Awake()
     {
@@ -93,6 +94,21 @@ public class Samurai : MonoBehaviour, IHittable
         Sfx.Play(Sfx.SamuraiCry, 0.7f, 1.2f);
     }
 
+    // A spiked shell of icicles drawn over a samurai's sprite (and the statue left when it dies frozen). The art's
+    // 48px frame is centred while samurai frames stand on their feet, so it's lifted half a unit and a little more.
+    // Null without art.
+    public static SpriteRenderer AddIceShell(SpriteRenderer body, Sprite shell)
+    {
+        if (shell == null) return null;
+        var ice = new GameObject("IceShell").AddComponent<SpriteRenderer>();
+        ice.transform.SetParent(body.transform, false);
+        ice.transform.localPosition = new Vector3(0f, 0.56f, -0.01f);
+        ice.transform.localScale = new Vector3(1.05f, 1.02f, 1f);
+        ice.sprite = shell;
+        ice.sortingOrder = body.sortingOrder + 1;
+        return ice;
+    }
+
     // Encases the samurai in ice for a while: full ice tint and a frozen pose.
     public void Encase(float seconds)
     {
@@ -100,6 +116,7 @@ public class Samurai : MonoBehaviour, IHittable
         encasedUntil = Mathf.Max(encasedUntil, Time.time + seconds);
         animator.enabled = false;
         if (iceGlow == null) iceGlow = Kunai.CreateGlow(transform, 1.6f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, IceGlow);
+        if (iceShell == null) iceShell = AddIceShell(animator.Renderer, army.IceShell);
         Fx.Play(Fx.IceBurst, transform.position, Color.white, 0.9f);
         SetFrost(frost);
     }
@@ -116,6 +133,8 @@ public class Samurai : MonoBehaviour, IHittable
         animator.enabled = true;
         if (iceGlow != null) Destroy(iceGlow.gameObject);
         iceGlow = null;
+        if (iceShell != null) Destroy(iceShell.gameObject);
+        iceShell = null;
     }
 
     // Tints the samurai towards ice blue while the army is frozen (0 = normal, 1 = fully frozen); being encased
@@ -180,7 +199,7 @@ public class Samurai : MonoBehaviour, IHittable
         }
         if (frozen)
         {
-            IceStatue.Create(animator.Renderer, gameObject.layer, art.deathParticles);
+            IceStatue.Create(animator.Renderer, gameObject.layer, art.deathParticles, army.IceShell);
             Sfx.Play(Sfx.SamuraiDeath);
             army.OnSamuraiKilled(this, source);
             Destroy(gameObject);

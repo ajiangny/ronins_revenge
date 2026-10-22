@@ -1,23 +1,25 @@
 using System;
 using UnityEngine;
 
-// A heart that sometimes falls out of a broken blocker. Like a soul it settles on the ronin's row; catching it
-// gives back a life.
+// A heart that sometimes falls out of a broken blocker. Like a soul it settles on the ronin's row; catching it heals
+// a lost life. At full health he can't take it, so it waits there until he's been hurt.
 public class Heart : Pickup
 {
     static readonly Color Red = new Color(1f, 0.3f, 0.35f);
 
+    Func<bool> canHeal;
     Action<Heart> collected;
     SpriteRenderer body;
     SpriteRenderer glow;
 
     // icon is the HUD's life heart; without it a red orb stands in.
-    public static Heart Spawn(Vector3 position, Sprite icon, Ronin ronin, Action<Heart> onCollected)
+    public static Heart Spawn(Vector3 position, Sprite icon, Ronin ronin, Func<bool> canHeal, Action<Heart> onCollected)
     {
         var go = new GameObject("Heart");
         go.transform.position = new Vector3(position.x, position.y, -0.5f);
         var heart = go.AddComponent<Heart>();
         heart.Begin(ronin, position);
+        heart.canHeal = canHeal;
         heart.collected = onCollected;
 
         heart.glow = CreateLayer(go.transform, "Glow", ProceduralSprites.Glow, 1.3f, 40);
@@ -29,6 +31,8 @@ public class Heart : Pickup
         Fx.Play(Fx.Impact, go.transform.position, Red, 0.8f);
         return heart;
     }
+
+    protected override bool CanCollect => canHeal == null || canHeal();
 
     protected override void Collect() => collected?.Invoke(this);
 

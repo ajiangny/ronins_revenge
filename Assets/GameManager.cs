@@ -62,10 +62,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] int soulPityKills = 15;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
-    [Tooltip("Chance that a blocker worn down by hits drops a heart, worth a life.")]
+    [Tooltip("Chance that a blocker worn down by hits drops a heart, which heals a lost life.")]
     [SerializeField, Range(0, 1)] float heartDropChance = 0.2f;
-    [Tooltip("Points for a heart caught with lives already full.")]
-    [SerializeField] int heartBonusPoints = 250;
     [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
     [SerializeField] Sprite[] titleFluteFrames;
     [Tooltip("Frames per second for the title screen's flute loop.")]
@@ -174,6 +172,8 @@ public class GameManager : MonoBehaviour
     int stageIndex;
     int roundIndex;
     int lives;
+    // Lives he can heal back up to; only Tidal Renewal raises it.
+    int maxLives;
     int score;
     int highScore;
     // The best score before this run, so the end screen can tell a new record apart.
@@ -282,7 +282,7 @@ public class GameManager : MonoBehaviour
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0);
         ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
-        ui.SetLives(startingLives);
+        ui.SetLives(startingLives, startingLives);
         // The run opens on the first stage's own ground and cover, behind the title menu too.
         if (backdrop != null) backdrop.Show(stages[0].roundsMap);
         blockers.Use(stages[0].roundsMap?.blockers, stages[0].roundsMap?.blockerPattern);
@@ -563,14 +563,14 @@ public class GameManager : MonoBehaviour
 
     void StartGame()
     {
-        lives = startingLives;
+        lives = maxLives = startingLives;
         score = 0;
         highScoreAtStart = highScore;
         stageIndex = 0;
         roundIndex = 0;
         killsSinceSoul = 0;
         ResetLoadout();
-        ui.SetLives(lives);
+        ui.SetLives(lives, maxLives);
         ui.SetScore(score);
         if (devJumpStage >= 0)
         {
@@ -729,36 +729,28 @@ public class GameManager : MonoBehaviour
     void OnBlockerBroken(Vector3 position)
     {
         if (state != State.Playing || Random.value >= heartDropChance) return;
-        Heart.Spawn(position, ui.LifeIcon, ronin, OnHeartCollected);
+        Heart.Spawn(position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
     }
 
-    // A life back, or points once his lives are full.
+    // Hearts only heal: at full health they wait on his row until he's lost a life.
+    bool CanHeal() => state != State.GameOver && lives < maxLives;
+
     void OnHeartCollected(Heart heart)
     {
-        if (state == State.GameOver) return;
-        if (lives < Boons.MaxLives)
-        {
-            lives++;
-            ui.SetLives(lives);
-        }
-        else
-        {
-            score += heartBonusPoints * (stageIndex + 1);
-            highScore = Mathf.Max(highScore, score);
-            ui.SetScore(score);
-        }
+        lives++;
+        ui.SetLives(lives, maxLives);
         Fx.Play(Fx.Impact, heart.transform.position, new Color(1f, 0.35f, 0.4f), 1.4f);
         Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
     }
 
-    // At the end of a round every soul and heart still out flies to the ronin. A soul caught on the way offers its
-    // boons before the game moves on.
+    // At the end of a round every soul still out, and every heart he can use, flies to the ronin. A soul caught on
+    // the way offers its boons before the game moves on; spare hearts stay on his row for later.
     IEnumerator GatherDrops()
     {
         Pickup.GatherAll();
         float giveUp = Time.time + 2f;
-        while (Pickup.Count > 0 && Time.time < giveUp) yield return null;
-        Pickup.DestroyAll();
+        while (Pickup.Gathering > 0 && Time.time < giveUp) yield return null;
+        Pickup.StopGathering();
 
         if (gatheredSoul is not Element element) yield break;
         gatheredSoul = null;
@@ -778,7 +770,7 @@ public class GameManager : MonoBehaviour
     // has nothing left to offer.
     bool OfferBoons(Element element, System.Action afterPick)
     {
-        var offers = Boons.Draw(element, 3, loadout, lives);
+        var offers = Boons.Draw(element, 3, loadout, maxLives);
         if (offers.Count == 0) return false;
 
         state = State.Choosing;
@@ -804,8 +796,11 @@ public class GameManager : MonoBehaviour
         switch (offer.Boon.Id)
         {
             case BoonId.TidalRenewal:
-                lives = Mathf.Min(lives + (int)value, Boons.MaxLives);
-                ui.SetLives(lives);
+                // New hearts arrive full; the ones already lost stay empty.
+                int gained = Mathf.Min((int)value, Boons.MaxLives - maxLives);
+                maxLives += gained;
+                lives += gained;
+                ui.SetLives(lives, maxLives);
                 break;
             case BoonId.GlacierWall:
                 blockers.Rebuild(loadout.BlockerHealthMultiplier);
@@ -1121,7 +1116,7 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ui.HideBossBar();
-        ClearProjectiles(pickups: false);
+        ClearProjectiles();
         Music.Stop(1.5f);
         if (!hitStopping) StartCoroutine(HitStop(0.25f));
         Vector3 where = activeBoss.Centre;
@@ -1207,7 +1202,7 @@ public class GameManager : MonoBehaviour
         if (state != State.Playing) return;
 
         lives--;
-        ui.SetLives(lives);
+        ui.SetLives(lives, maxLives);
         if (lives <= 0)
         {
             ronin.Explode();
@@ -1247,8 +1242,8 @@ public class GameManager : MonoBehaviour
         }, null, 0, color);
     }
 
-    // Pickups go too unless the caller gathers them to the ronin first.
-    static void ClearProjectiles(bool pickups = true)
+    // Hearts are kept: they wait on the ronin's row until he needs one.
+    static void ClearProjectiles()
     {
         foreach (Kunai kunai in FindObjectsByType<Kunai>())
         {
@@ -1258,7 +1253,10 @@ public class GameManager : MonoBehaviour
         {
             Destroy(arrow.gameObject);
         }
-        if (pickups) Pickup.DestroyAll();
+        foreach (Soul soul in FindObjectsByType<Soul>())
+        {
+            Destroy(soul.gameObject);
+        }
         foreach (Scout scout in FindObjectsByType<Scout>())
         {
             Destroy(scout.gameObject);

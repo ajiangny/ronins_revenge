@@ -70,8 +70,9 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
 | What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`) |
 | Effects in play (blasts, encase/shatter, freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`, `OnRiposteImpact`). Any encased samurai killed by a non-`Effect` source `Shatter`s, hitting its neighbours |
-| Pickups: souls and hearts fall to the ronin's row and wait there; at a round's end (`GameManager.EndRound`, and `BossFell`) `GameManager.GatherDrops` flies every one still out to him (`Pickup.GatherAll`) and offers a soul caught that way | `Pickup.cs` (base: fall, rest, magnet, collect), `Soul.cs`, `Heart.cs` |
-| Heart drops (`heartDropChance`, 20%; a life, or `heartBonusPoints` with lives full) | `Blocker.Broken` (hits only, not trampling or a boss razing) → `GameManager.OnBlockerBroken` / `OnHeartCollected`; art is `GameUI.LifeIcon` |
+| Pickups: souls and hearts fall to the ronin's row and wait there; at a round's end (`GameManager.EndRound`, and `BossFell`) `GameManager.GatherDrops` flies every one he can use to him (`Pickup.GatherAll`, `Pickup.CanCollect`) and offers a soul caught that way | `Pickup.cs` (base: fall, rest, magnet, collect), `Soul.cs`, `Heart.cs` |
+| Lives are health: `GameManager.lives` out of `maxLives`, which only Tidal Renewal raises (to `Boons.MaxLives`). The HUD shows an empty heart per lost life (`GameUI.SetLives`, outline built by `ProceduralSprites.Hollow`) | `GameManager`, `GameUI` |
+| Heart drops (`heartDropChance`, 20%) heal one lost life; at full health a heart can't be taken (`GameManager.CanHeal`) and survives `ClearProjectiles` | `Blocker.Broken` (hits only, not trampling or a boss razing) → `GameManager.OnBlockerBroken` / `OnHeartCollected`; art is `GameUI.LifeIcon` |
 | Soul drops (7%, pity after 15 kills, one at a time) | `Soul.cs`; drop logic in `GameManager.MaybeDropSoul`. Until the first soul of a run is caught, `Soul.ShowHint` adds the bobbing `GameManager.soulHintArrow` (`UI/SoulArrow`, wired by Apply Boon Art) |
 | Boon pick screen + HUD slot medallions | `BoonChoiceUI.cs` (built entirely in code) |
 
@@ -113,12 +114,12 @@ match `BoonChoiceUI.boonIcons`.
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 at half health: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
-- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (90 HP), a karakuri automaton that moves in ticking steps
+- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (120 HP), a karakuri automaton that moves in ticking steps
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
   `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,
   and a parried hat keeps the head bare longer), Lace Lattice (a curtain of breakable diamonds with gaps that
-  drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze
+  drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze and lets only `ArmorDamageTaken`, 5%, of each hit's damage through
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
   `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, placed by `PlaceHours` in spread spots numbered in a `ZigZag` order, are shown one by one, then hidden; it `Dash`es
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant

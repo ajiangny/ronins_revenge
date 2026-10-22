@@ -132,8 +132,8 @@ public static class Boons
             Description = "Arrows you <b>Parry</b> burst into homing ice shards that freeze what they hit.",
             StatLabel = "Ice shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
-            Description = "The temple pond restores your spirit. Gain <b>Lives</b> now (up to 5).",
-            StatLabel = "Lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
+            Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
+            StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
         new BoonDefinition { Id = BoonId.GlacierWall, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Wall",
             Description = "Rebuild every <b>Blocker</b> now, sheathed in ice, and for every stage after.",
             StatLabel = "Blocker health:", Values = new[] { 0.25f, 0.5f, 1f }, Format = Percent },
@@ -159,7 +159,7 @@ public static class Boons
     public static BoonDefinition Get(BoonId id) => All[Array.FindIndex(All, b => b.Id == id)];
 
     // Up to count distinct boons of one element. Like Hades, the first boon of a run is always a core slot boon.
-    public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int lives)
+    public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int maxLives)
     {
         var pool = new List<BoonDefinition>();
         foreach (BoonDefinition boon in All)
@@ -167,7 +167,7 @@ public static class Boons
             if (boon.Element != element) continue;
             if (loadout.BoonCount == 0 && boon.Slot == BoonSlot.Passive) continue;
             if (loadout.Find(boon.Id) is { Rarity: Rarity.Epic }) continue;
-            if (boon.Id == BoonId.TidalRenewal && lives >= MaxLives) continue;
+            if (boon.Id == BoonId.TidalRenewal && maxLives >= MaxLives) continue;
             pool.Add(boon);
         }
 

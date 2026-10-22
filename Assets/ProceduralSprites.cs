@@ -75,6 +75,42 @@ public static class ProceduralSprites
 
     public static Sprite White => white != null ? white : white = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
 
+    // Just the outline of a sprite's shape, drawn white to be tinted, with its inside filled in the given colour:
+    // an empty heart beside the full ones. The art is read back through the GPU so it needn't be marked readable.
+    public static Sprite Hollow(Sprite source, Color inside)
+    {
+        Rect rect = source.textureRect;
+        int width = (int)rect.width, height = (int)rect.height;
+        var target = RenderTexture.GetTemporary(source.texture.width, source.texture.height, 0, RenderTextureFormat.ARGB32);
+        Graphics.Blit(source.texture, target);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = target;
+        var copy = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        copy.ReadPixels(new Rect(rect.x, rect.y, width, height), 0, 0);
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(target);
+
+        // Only the shape matters, so the colours (and any colour-space shift in the copy) are thrown away.
+        Color32[] source32 = copy.GetPixels32();
+        bool Solid(int x, int y) => x >= 0 && y >= 0 && x < width && y < height && source32[y * width + x].a > 127;
+        var pixels = new Color32[width * height];
+        Color32 inside32 = inside;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (!Solid(x, y)) continue;
+                bool edge = !Solid(x - 1, y) || !Solid(x + 1, y) || !Solid(x, y - 1) || !Solid(x, y + 1);
+                pixels[y * width + x] = edge ? new Color32(255, 255, 255, 255) : inside32;
+            }
+        }
+        copy.SetPixels32(pixels);
+        copy.filterMode = FilterMode.Point;
+        copy.wrapMode = TextureWrapMode.Clamp;
+        copy.Apply();
+        return Sprite.Create(copy, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
+    }
+
     // A disc whose alpha fades from the centre to the edge.
     public static Sprite Glow => glow != null ? glow : glow = Circle(64, soft: true);
 

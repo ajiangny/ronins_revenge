@@ -42,7 +42,7 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).
-  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none).
+  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn).
 
 ## Player combat — the Ronin
 
@@ -67,7 +67,9 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 
 | What | Where |
 |---|---|
-| Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonId`, `Boons.All`, `Boons.Draw`) |
+| Elements, slots, rarities, every boon's numbers and text | `Boon.cs` (`Element`, `BoonSlot`, `Rarity`, `BoonKind`, `BoonId`, `Boons.All`, `Boons.Draw`) |
+| Capstones: Duos (`Partner` element, offered by either soul) and Legendaries, gated by `Requires` on the Blast / Ice / Strike families of core boons; never upgraded. `Boons.Draw` adds the eligible ones (`ensureCapstone` and `minRarity` for the stage boon) and returns a Spirit Offering (`BoonKind.Offering`, a heal or points in `GameManager.TakeBoon`) when an element is spent. Design notes in [BOON_DESIGN.md](BOON_DESIGN.md) | `Boon.cs` (`EligibleCapstones`), `BoonEffects` (`Blast`, `Strike`, `BeatDrum`, `BurnArrows` → `Arrow.Burn`), Still Water via `RoninLoadout.FreezeMultiplier` / `MarchSpeedUpScale` → `SamuraiArmy.SpeedUpScale` |
+| Soul elements lean toward held ones (`GameManager.soulElementBias`, `PickSoulElement`); the stage boon (`OfferStageBoon`) picks an eligible capstone's element | `GameManager` |
 | What the ronin holds and the stats they add up to | `RoninLoadout.cs` (`Take`, `Value`, `DominantElement`) |
 | Effects in play (blasts, encase/shatter, freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`, `OnRiposteImpact`). Any encased samurai killed by a non-`Effect` source `Shatter`s, hitting its neighbours |
 | Pickups: souls and hearts fall to the ronin's row and wait there; at a round's end (`GameManager.EndRound`, and `BossFell`) `GameManager.GatherDrops` flies every one he can use to him (`Pickup.GatherAll`, `Pickup.CanCollect`) and offers a soul caught that way | `Pickup.cs` (base: fall, rest, magnet, collect), `Soul.cs`, `Heart.cs` |

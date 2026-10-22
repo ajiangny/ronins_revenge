@@ -75,7 +75,9 @@ public static class BoonArtSetup
             entry.FindPropertyRelative("ronin").objectReferenceValue = BuildRoninVariant(baseRonin, suffix, hue, boost);
             entry.FindPropertyRelative("slash").objectReferenceValue = Recolor(Load("Projectiles/SlashWave"), suffix, hue, boost);
             entry.FindPropertyRelative("kunai").objectReferenceValue = Recolor(Load("Projectiles/Kunai"), suffix, hue, boost);
-            entry.FindPropertyRelative("shuriken").objectReferenceValue = Recolor(shuriken, suffix, hue, boost);
+            // Each element has its own drawn shuriken (PixelLab); without it the base one is recoloured.
+            Sprite elementShuriken = Load($"Projectiles/ShurikenArt_{suffix}");
+            entry.FindPropertyRelative("shuriken").objectReferenceValue = elementShuriken != null ? elementShuriken : Recolor(shuriken, suffix, hue, boost);
             entry.FindPropertyRelative("portrait").objectReferenceValue = RecolorPortrait(Load("UI/RoninPortrait"), suffix, hue, boost);
         }
 

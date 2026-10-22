@@ -49,6 +49,18 @@ public static class Sfx
     static readonly Dictionary<string, AudioSource> ownSources = new Dictionary<string, AudioSource>();
     static readonly Dictionary<string, float> lastPlayed = new Dictionary<string, float>();
 
+    // The project enters Play mode without a domain reload, so statics survive from the last session. Its
+    // timestamps are from a clock that has since restarted near zero and would hold every sound back until
+    // the new clock caught up, and its voices were destroyed with the old scene.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    static void ResetSession()
+    {
+        voices = null;
+        busyUntil = null;
+        ownSources.Clear();
+        lastPlayed.Clear();
+    }
+
     public static void Play(string id, float volume = 1f, float pitch = 1f)
     {
         SfxLibrary.Sound sound = Library != null ? Library.Find(id) : null;

@@ -361,7 +361,7 @@ public static class NinjaArtSetup
         // Big slow cloud shadows sliding down the road, bright moonlight and fireflies in the bamboo.
         ["BambooRoad_Stage1"] = new Atmosphere.Settings
         {
-            clouds = 4, cloudShadow = new Color(0.01f, 0.02f, 0.06f, 0.45f), wind = new Vector2(0.7f, -0.45f),
+            clouds = 4, cloudShadow = new Color(0.01f, 0.02f, 0.06f, 0.4f), wind = new Vector2(0.7f, -0.45f),
             moonlight = new Color(0.78f, 0.9f, 1f, 0.12f), shade = 0.4f, vignette = 0.35f,
             motes = 16, moteColor = new Color(0.8f, 1f, 0.45f, 0.85f),
         },

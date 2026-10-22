@@ -5,9 +5,10 @@ using UnityEngine;
 // mist, drifting motes (fireflies, embers, dust) and darkened edges. Every texture is built in code, so it needs no art.
 public class Atmosphere : MonoBehaviour
 {
-    // Shadows, mist and light lie on the ground under everything that moves, so the field stays readable; the motes and
-    // the vignette float over it.
-    const int ShadowOrder = -96;
+    // Cloud shadows fall across everything standing in the field (ronin, samurai, bosses at 0-5, cover, arrows) but under
+    // hit sparks, slashes and boss effects (40 and up), which give off their own light. Mist and moonlight lie on the
+    // ground; the motes and the vignette float over the field.
+    const int ShadowOrder = 20;
     const int MistOrder = -95;
     const int ShadeOrder = -94;
     const int LightOrder = -93;
@@ -18,7 +19,7 @@ public class Atmosphere : MonoBehaviour
     [System.Serializable]
     public class Settings
     {
-        [Tooltip("Cloud shadows drifting over the ground at once.")]
+        [Tooltip("Cloud shadows drifting over the field at once; they darken everything standing in it.")]
         public int clouds;
         public Color cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.3f);
         [Tooltip("The wind: world units per second that clouds and mist drift.")]
@@ -81,7 +82,7 @@ public class Atmosphere : MonoBehaviour
         for (int i = 0; i < settings.clouds; i++)
         {
             // Spread over the field to start, so the sky isn't empty while the first ones drift in.
-            var cloud = Spawn(clouds, "CloudShadow", cloudSprites[i % cloudSprites.Length], ShadowOrder, Random.Range(0.7f, 1.1f), settings.cloudShadow);
+            var cloud = Spawn(clouds, "CloudShadow", cloudSprites[i % cloudSprites.Length], ShadowOrder, Random.Range(0.9f, 1.3f), settings.cloudShadow);
             cloud.velocity = settings.wind * Random.Range(0.8f, 1.2f);
             cloud.sprite.flipX = Random.value < 0.5f;
         }
@@ -207,14 +208,51 @@ public class Atmosphere : MonoBehaviour
     {
         if (cloudSprites != null) return;
         cloudSprites = new Sprite[3];
-        for (int i = 0; i < cloudSprites.Length; i++) cloudSprites[i] = Noise(96, 64, 7.3f * (i + 1), 4f, 4);
+        for (int i = 0; i < cloudSprites.Length; i++) cloudSprites[i] = Cloud(128, 88, 7.3f * (i + 1), 4f);
         mistSprite = Noise(128, 32, 41.7f, 4f, 6);
         lightSprite = Radial(64, 64, 32, 1.6f, 4f);
         vignetteSprite = Edges(64, 36, 32, 2f);
         shadeSprite = AwayFromMoon(64, 36, 32);
     }
 
-    // A cloud-like blob: layered noise faded out towards an ellipse's rim.
+    // A cloud's shadow as it lands on the ground: dappled patches with a firm, slightly soft edge and gaps where light
+    // breaks through, thinning out towards the rim.
+    static Sprite Cloud(int width, int height, float seed, float pixelsPerUnit)
+    {
+        var shape = new float[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                float u = (x + 0.5f) / width * 2f - 1f, v = (y + 0.5f) / height * 2f - 1f;
+                float rim = Mathf.Clamp01(1f - (u * u + v * v));
+                float n = 0f, amp = 0.5f, freq = 2.5f;
+                for (int o = 0; o < 5; o++)
+                {
+                    n += amp * Mathf.PerlinNoise(seed + x * freq / width, seed * 0.5f + y * freq / width);
+                    amp *= 0.5f;
+                    freq *= 2f;
+                }
+                shape[y * width + x] = n * Mathf.Sqrt(rim);
+            }
+        }
+
+        // Cut at the level that leaves about two fifths of the canvas in shadow, whatever the noise came out as.
+        var sorted = (float[])shape.Clone();
+        System.Array.Sort(sorted);
+        float cut = sorted[(int)(sorted.Length * 0.6f)];
+
+        var texture = NewTexture(width, height);
+        for (int i = 0; i < shape.Length; i++)
+        {
+            float a = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(cut - 0.03f, cut + 0.03f, shape[i]));
+            texture.SetPixel(i % width, i / width, new Color(1f, 1f, 1f, Band(a, 4)));
+        }
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), pixelsPerUnit, 0, SpriteMeshType.FullRect);
+    }
+
+    // A mist-like blob: layered noise faded out towards an ellipse's rim.
     static Sprite Noise(int width, int height, float seed, float pixelsPerUnit, int bands)
     {
         var texture = NewTexture(width, height);

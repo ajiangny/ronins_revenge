@@ -696,7 +696,7 @@ MonoBehaviour:
       blockerPattern: SBS
       atmosphere:
         clouds: 4
-        cloudShadow: {r: 0.01, g: 0.02, b: 0.06, a: 0.45}
+        cloudShadow: {r: 0.01, g: 0.02, b: 0.06, a: 0.4}
         wind: {x: 0.7, y: -0.45}
         moonlight: {r: 0.78, g: 0.9, b: 1, a: 0.12}
         shade: 0.4

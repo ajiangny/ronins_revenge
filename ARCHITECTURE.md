@@ -167,9 +167,10 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 - `Atmosphere.cs` — each map's mood, built by `Backdrop` and swapped in `Show` (`Map.atmosphere`, `Atmosphere.Settings`;
   the courtyard's is `Backdrop.courtyardAtmosphere`): cloud shadows drifting with the wind, a moonlight glow and a
   shade deepening away from the moon's top-left corner, low mist banks, drifting motes (fireflies, embers, dust) and a
-  vignette. Shadows, mist and light sort just above the ground (-96..-93) so every character stays readable; motes
-  and the vignette float over the field (58, 60). Textures are built in code, clouds and mist stepped into bands for a
-  painted pixel look, with full-rect meshes. `Backdrop` tints the moonlight with the boss moon (`TintMoon`). Each
+  vignette. Cloud shadows sort at 20, over everything standing in the field (characters, bosses, cover, arrows at 0-5)
+  but under effects (40+); mist and light lie on the ground (-95..-93); motes and the vignette float over the field
+  (58, 60). Textures are built in code with full-rect meshes; cloud shapes are cut at a level that leaves about two
+  fifths in shadow (`Cloud`), giving dappled patches with gaps. `Backdrop` tints the moonlight with the boss moon (`TintMoon`). Each
   map's mood is set in `NinjaArtSetup.Moods` and wired by `Ninja/Apply Maps`.
 
 ## UI

@@ -579,12 +579,12 @@ public class Utsusemi : Boss
         lattice.RemoveAll(a => a == null);
     }
 
-    // Hour Strikes: one hour at a time, a thin red sight line runs from its eye to a spot on the ground, a gold hour
-    // numeral (I, II, III...) lights up there as the warning, and its eye lasers it, burning the ronin if he's on it.
-    // The hours come out of order, so the dashes zig-zag. Then the numerals fade, and in turn each burns red; it dashes down out of its row onto that hour, chops it with a ground-cracking
-    // blow and dashes back up, so he weaves between the marks. Then, back in its row, it strikes the hour: a clock mark settles
-    // under the ronin and follows him while its core glows and the blade draws back over three ticks, and a giant
-    // crescent cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it:
+    // Hour Strikes: one hour at a time, a thin red sight line from its eye tracks the ronin, then locks on where he
+    // stands; a gold hour numeral (I, II, III...) lights up there as the warning, and a moment later its eye lasers
+    // it, burning him if he hasn't stepped off. Then the numerals fade, and in turn each burns red; it dashes down
+    // out of its row onto that hour, chops it with a ground-cracking blow and dashes back up, so he weaves between
+    // the marks. Then, back in its row, it strikes the hour: a clock mark settles under the ronin and follows him
+    // while its core glows and the blade draws back over three ticks, and a giant crescent cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it:
     // sent back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
     IEnumerator HourStrikes()
     {
@@ -598,9 +598,9 @@ public class Utsusemi : Boss
         armored = true;
         SpriteRenderer[] shell = ArmorShell();
         Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
-        List<HourMark> marks = PlaceHours(count);
+        var marks = new List<HourMark>();
         yield return HoldArmor(shell, 0.3f);
-        foreach (HourMark mark in marks) yield return MarkHour(mark, shell);
+        for (int hour = 1; hour <= count; hour++) yield return MarkHour(hour, marks, shell);
         yield return HoldArmor(shell, 0.3f);
         foreach (HourMark mark in marks) mark.Hide(0.3f);
         Tick(0.4f);
@@ -626,19 +626,29 @@ public class Utsusemi : Boss
         PlayIdle();
     }
 
-    // One hour marked: a thin sight line from its eye to the spot, the numeral lighting up there as the warning,
-    // then its eye's laser striking it. The laser burns the ronin if he's standing on the hour, but leaves no fire,
-    // so the numerals stay clear to read.
-    IEnumerator MarkHour(HourMark mark, SpriteRenderer[] shell)
+    // One hour marked where the ronin stands: a thin sight line from its eye follows him, then locks on, and the
+    // numeral lights up there. He has a moment to step off it before its eye's laser strikes the spot. The laser
+    // burns him if he's still there but leaves no fire, so the numerals stay clear to read.
+    IEnumerator MarkHour(int hour, List<HourMark> marks, SpriteRenderer[] shell)
     {
-        Vector3 spot = new Vector3(mark.x, GroundY + 0.15f, 0);
-        SpriteRenderer sight = Bar(Eye, spot, 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.45f));
-        yield return HoldArmor(shell, secondPhase ? 0.25f : 0.35f, () => Stretch(sight, Eye, spot, 0.05f));
-        RemoveTransient(sight);
+        float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
+        float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
+        SpriteRenderer sight = Bar(Eye, Spot(x), 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.4f));
+        yield return HoldArmor(shell, secondPhase ? 0.45f : 0.6f, () =>
+        {
+            x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
+            Stretch(sight, Eye, Spot(x), 0.05f);
+        });
 
+        // Locked: the hour is set, the sight line brightens, and the dodge window opens.
+        var mark = new HourMark(this, hour, x);
+        marks.Add(mark);
         mark.Show(Gold);
         Tick(0.7f);
-        yield return HoldArmor(shell, secondPhase ? 0.2f : 0.3f);
+        Vector3 spot = Spot(x);
+        sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
+        yield return HoldArmor(shell, secondPhase ? 0.25f : 0.35f, () => Stretch(sight, Eye, spot, 0.07f));
+        RemoveTransient(sight);
 
         Beam beam = MakeBeam(Eye, 0.8f);
         Sfx.Play(Sfx.LanternCharge, 0.4f, 2f);
@@ -652,6 +662,8 @@ public class Utsusemi : Boss
         EndBeam(beam);
         yield return HoldArmor(shell, 0.1f);
     }
+
+    Vector3 Spot(float x) => new Vector3(x, GroundY + 0.15f, 0);
 
     bool armored;
     protected override bool SuperArmor => armored;
@@ -709,47 +721,6 @@ public class Utsusemi : Boss
             }
             yield return null;
         }
-    }
-
-    // The hours stand in evenly spread spots around the ronin, but they're numbered out of order: the dashes zig-zag
-    // back and forth across the lane (3 1 5 2 4, never 1 2 3 4 5), so the order has to be remembered, not guessed.
-    List<HourMark> PlaceHours(int count)
-    {
-        const float margin = 1.2f, spacing = 5f, jitter = 0.5f;
-        float lo = LeftEdge + margin, hi = RightEdge - margin;
-        float span = Mathf.Min((count - 1) * spacing, hi - lo);
-        float left = Mathf.Clamp(ronin.Bounds.center.x - span / 2f, lo, hi - span);
-        var spots = new float[count];
-        for (int i = 0; i < count; i++)
-        {
-            float x = left + (count > 1 ? span * i / (count - 1) : 0f);
-            spots[i] = Mathf.Clamp(x + Random.Range(-jitter, jitter), lo, hi);
-        }
-
-        int[] order = ZigZag(count);
-        var marks = new List<HourMark>();
-        for (int hour = 0; hour < count; hour++) marks.Add(new HourMark(this, hour + 1, spots[order[hour]]));
-        return marks;
-    }
-
-    // A random order of the spots 0..count-1 whose every step turns back the other way, so no three hours run in a
-    // line. Found by shuffling until one fits; with five spots about one shuffle in seven does.
-    static int[] ZigZag(int count)
-    {
-        var order = new int[count];
-        for (int i = 0; i < count; i++) order[i] = i;
-        for (int attempt = 0; attempt < 200; attempt++)
-        {
-            for (int i = count - 1; i > 0; i--)
-            {
-                int j = Random.Range(0, i + 1);
-                (order[i], order[j]) = (order[j], order[i]);
-            }
-            bool turns = true;
-            for (int i = 2; i < count && turns; i++) turns = (order[i] - order[i - 1]) * (order[i - 1] - order[i - 2]) < 0;
-            if (turns) return order;
-        }
-        return order;
     }
 
     // The feet in its frames stand on this row of the 116-px canvas.

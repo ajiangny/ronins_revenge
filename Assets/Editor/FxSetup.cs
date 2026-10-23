@@ -62,6 +62,13 @@ public static class FxSetup
         // The thrown sword stands planted where its blade meets the ground.
         (Fx.UtsuSword, 8, true, new Vector2(0.5f, 1f - 72f / 88f)),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
+        (Fx.ShiroCrescent, 14, true, Centre),
+        (Fx.ShiroSword, 10, true, Centre),
+        (Fx.ShiroOrb, 12, true, Centre),
+        (Fx.ShiroWolfCharge, 14, true, Centre),
+        (Fx.ShiroMist, 12, false, Centre),
+        (Fx.ShiroBeamFlare, 14, true, Centre),
+        (Fx.ShiroMoon, 8, true, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

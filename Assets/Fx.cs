@@ -44,6 +44,15 @@ public static class Fx
     public const string UtsuSword = "Utsu_Sword";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
 
+    // Shirogane's effects.
+    public const string ShiroCrescent = "Shiro_Crescent";
+    public const string ShiroSword = "Shiro_Sword";
+    public const string ShiroOrb = "Shiro_Orb";
+    public const string ShiroWolfCharge = "Shiro_WolfCharge";
+    public const string ShiroMist = "Shiro_Mist";
+    public const string ShiroBeamFlare = "Shiro_BeamFlare";
+    public const string ShiroMoon = "Shiro_Moon";
+
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;
 

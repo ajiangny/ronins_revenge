@@ -135,6 +135,27 @@ public class GameManager : MonoBehaviour
     [FormerlySerializedAs("utsusemiEscapementLine")]
     [SerializeField] AudioClip utsusemiHourStrikesLine;
     [SerializeField] AudioClip[] utsusemiHurtLines;
+    [Tooltip("Shirogane's sprite frames. Leave empty to use the Bushi art, tinted spirit blue, as a stand-in.")]
+    [SerializeField] CharacterArt shiroganeArt;
+    [SerializeField] float shiroganeScale = 3.4f;
+    [Tooltip("Shirogane's dash frames for the Moonlit Dash.")]
+    [SerializeField] Sprite[] shiroganeDash;
+    [Tooltip("Her spirit wolf's frames: resting beside her, howling, charging down a lane and dissolving into mist.")]
+    [SerializeField] Sprite[] shiroWolfIdle;
+    [SerializeField] Sprite[] shiroWolfHowl;
+    [SerializeField] Sprite[] shiroWolfCharge;
+    [SerializeField] Sprite[] shiroWolfVanish;
+    [SerializeField] Sprite shiroganePortrait;
+    [SerializeField] Sprite shiroganeCloseup;
+    [SerializeField] AudioClip shiroganeIntroLine;
+    [SerializeField] AudioClip shiroganePhaseLine;
+    [SerializeField] AudioClip shiroganeDefeatLine;
+    [SerializeField] AudioClip shiroganeDefeatFinalLine;
+    [SerializeField] AudioClip shiroganeStaggerLine;
+    [SerializeField] AudioClip shiroganeCrescentLine;
+    [SerializeField] AudioClip shiroganeBladeRainLine;
+    [SerializeField] AudioClip shiroganeEclipseLine;
+    [SerializeField] AudioClip[] shiroganeHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
     [SerializeField] float bossDepth = 3f;
@@ -235,7 +256,8 @@ public class GameManager : MonoBehaviour
     float nextScoutTime;
     Boss activeBoss;
     AudioSource voice;
-    // Utsusemi's machine voice: a doubled, ringing, slightly gritty layer over the recorded lines.
+    // The voice filters: Utsusemi's machine voice (a doubled, ringing, slightly gritty layer over the recorded
+    // lines) and Shirogane's spirit voice (a soft, hollow echo, as if from across water) retune the same three.
     Behaviour[] machineVoice;
     // Whether the voice source is playing a full line rather than a bark.
     bool speakingFullLine;
@@ -254,6 +276,26 @@ public class GameManager : MonoBehaviour
         voice.playOnAwake = false;
         voice.spatialBlend = 0f;
         machineVoice = CreateMachineVoice(voiceObject);
+    }
+
+    // Unity allows one of each filter per source, so each boss's voice is a retuning of the same three: the
+    // machine's tight metallic ring, or the ghost's long, quiet echo and slow drift with no grit. Off for Benibana.
+    void TuneVoice(BossKind boss)
+    {
+        var chorus = (AudioChorusFilter)machineVoice[0];
+        var ring = (AudioEchoFilter)machineVoice[1];
+        bool spirit = boss == BossKind.Shirogane;
+        chorus.dryMix = spirit ? 0.8f : 0.7f;
+        chorus.wetMix1 = chorus.wetMix2 = spirit ? 0.3f : 0.45f;
+        chorus.delay = spirit ? 30f : 14f;
+        chorus.rate = spirit ? 0.2f : 0.35f;
+        chorus.depth = spirit ? 0.1f : 0.06f;
+        ring.delay = spirit ? 140f : 16f;
+        ring.decayRatio = spirit ? 0.3f : 0.4f;
+        ring.wetMix = spirit ? 0.28f : 0.35f;
+        bool on = boss == BossKind.Utsusemi || spirit;
+        chorus.enabled = ring.enabled = on;
+        machineVoice[2].enabled = boss == BossKind.Utsusemi;
     }
 
     // The metallic ring: a chorus doubles the voice, a very short echo gives it a comb-filtered hollow ring, and a
@@ -1128,7 +1170,7 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.FrostChill, 0.8f, 0.5f);
 
         activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
-        foreach (Behaviour filter in machineVoice) filter.enabled = Stage.boss == BossKind.Utsusemi;
+        TuneVoice(Stage.boss);
         activeBoss.Damaged += OnBossDamaged;
         Boss boss = activeBoss;
         boss.Healed += () => ui.SetBossHealth(boss.HealthFraction);
@@ -1178,6 +1220,13 @@ public class GameManager : MonoBehaviour
                     automaton.SetThrowFrames(utsusemiSwordThrow, utsusemiUnarmedIdle);
                 }
                 return automaton;
+            case BossKind.Shirogane:
+                bool ghostly = shiroganeArt == null;
+                Shirogane blade = Boss.Create<Shirogane>(ghostly ? army.samuraiByRow[Mathf.Min(1, army.samuraiByRow.Length - 1)] : shiroganeArt,
+                    shiroganeScale, Shirogane.StartingHealth, position, ghostly ? new Color(0.6f, 0.9f, 1f) : Color.white);
+                if (!ghostly) blade.SetDashFrames(shiroganeDash);
+                blade.SetWolfFrames(shiroWolfIdle, shiroWolfHowl, shiroWolfCharge, shiroWolfVanish);
+                return blade;
             default:
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
@@ -1193,7 +1242,8 @@ public class GameManager : MonoBehaviour
         // down), and where that point sits on screen.
         public float closeupHeight;
         public Vector2 closeupFocus, closeupAt;
-        public AudioClip intro, phase, defeat, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes;
+        public AudioClip intro, phase, defeat, defeatFinal, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes,
+            crescentSlash, bladeRain, eclipseFang;
         public AudioClip[] hurt;
 
         public AudioClip Clip(BossLine line) => line switch
@@ -1209,6 +1259,10 @@ public class GameManager : MonoBehaviour
             BossLine.RosaryBloom => rosaryBloom,
             BossLine.KasaWheel => kasaWheel,
             BossLine.HourStrikes => hourStrikes,
+            BossLine.DefeatFinal => defeatFinal,
+            BossLine.CrescentSlash => crescentSlash,
+            BossLine.BladeRain => bladeRain,
+            BossLine.EclipseFang => eclipseFang,
             _ => null,
         };
     }
@@ -1233,6 +1287,15 @@ public class GameManager : MonoBehaviour
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },
+        BossKind.Shirogane => new BossVoice
+        {
+            portrait = shiroganePortrait, closeup = shiroganeCloseup,
+            // Framed like the others: her face high and right of centre, hair spilling off the edges.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.5f, 0.25f), closeupAt = new Vector2(440f, 210f),
+            intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
+            stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
+            eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,
+        },
         _ => default,
     };
 
@@ -1240,7 +1303,7 @@ public class GameManager : MonoBehaviour
     // callouts, gasps) never cut off a full line, and a hurt gasp never cuts off anything.
     void OnBossSpoke(Boss boss, BossLine line)
     {
-        bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat;
+        bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal;
         if (!full && voice.isPlaying && (speakingFullLine || line == BossLine.Hurt)) return;
 
         AudioClip clip = VoiceFor(Stage.boss).Clip(line);

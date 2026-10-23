@@ -45,6 +45,13 @@ public static class Sfx
     public const string HourSlash = "HourSlash";
     public const string SwordWhirl = "SwordWhirl";
     public const string SwordPlant = "SwordPlant";
+    // Shirogane and her wolf.
+    public const string WolfGrowl = "WolfGrowl";
+    public const string WolfHowl = "WolfHowl";
+    public const string BladeRing = "BladeRing";
+    public const string GhostSwordFall = "GhostSwordFall";
+    public const string SpiritBeam = "SpiritBeam";
+    public const string MistSwirl = "MistSwirl";
 
     const int VoiceCount = 16;
 

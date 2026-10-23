@@ -17,6 +17,8 @@ public static class BossArtSetup
     const float BenibanaScale = 2.3f;
     // Utsusemi stands taller than her, stilts and hat brim included.
     const float UtsusemiScale = 2.6f;
+    // Shirogane stands about Utsusemi's height; her hair and wolf fill out the rest.
+    const float ShiroganeScale = 2.5f;
     // Low enough that her ponytail clears the boss bar.
     const float BossDepth = 4.5f;
 
@@ -47,6 +49,16 @@ public static class BossArtSetup
             parry: TryFrames("Utsusemi", "Throw") ?? utsusemiIdle,
             hit: TryFrames("Utsusemi", "Hit") ?? utsusemiIdle,
             death: TryFrames("Utsusemi", "Defeat") ?? utsusemiIdle,
+            new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
+
+        // Shirogane: the blade-call (her swords wheeling about her) goes in the parry slot.
+        Sprite[] shiroganeIdle = TryFrames("Shirogane", "Idle");
+        CharacterArt shirogane = shiroganeIdle == null ? null : SaveArt("Shirogane",
+            idle: shiroganeIdle,
+            attack: TryFrames("Shirogane", "Slash") ?? shiroganeIdle,
+            parry: TryFrames("Shirogane", "BladeCall") ?? TryFrames("Shirogane", "Slash") ?? shiroganeIdle,
+            hit: TryFrames("Shirogane", "Hit") ?? shiroganeIdle,
+            death: TryFrames("Shirogane", "Defeat") ?? shiroganeIdle,
             new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
 
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
@@ -88,6 +100,29 @@ public static class BossArtSetup
         so.FindProperty("utsusemiKasaLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Kasa.mp3");
         so.FindProperty("utsusemiHourStrikesLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_HourStrikes.mp3");
         SetTakes(so.FindProperty("utsusemiHurtLines"), "Utsusemi_Hurt");
+
+        if (shirogane != null)
+        {
+            so.FindProperty("shiroganeArt").objectReferenceValue = shirogane;
+            so.FindProperty("shiroganeScale").floatValue = ShiroganeScale;
+            SetFrames(so.FindProperty("shiroganeDash"), TryFrames("Shirogane", "Dash"));
+        }
+        SetFrames(so.FindProperty("shiroWolfIdle"), TryFrames("SpiritWolf", "Idle"));
+        SetFrames(so.FindProperty("shiroWolfHowl"), TryFrames("SpiritWolf", "Howl"));
+        SetFrames(so.FindProperty("shiroWolfCharge"), TryFrames("SpiritWolf", "Charge"));
+        SetFrames(so.FindProperty("shiroWolfVanish"), TryFrames("SpiritWolf", "Vanish"));
+        so.FindProperty("shiroganePortrait").objectReferenceValue = Portrait("Shirogane_Full");
+        so.FindProperty("shiroganeCloseup").objectReferenceValue = Portrait("Shirogane_Closeup");
+        foreach (var (field, file) in new[]
+        {
+            ("shiroganeIntroLine", "Intro"), ("shiroganePhaseLine", "Phase"), ("shiroganeDefeatLine", "Defeat"),
+            ("shiroganeDefeatFinalLine", "DefeatFinal"), ("shiroganeStaggerLine", "Stagger"), ("shiroganeCrescentLine", "Crescent"),
+            ("shiroganeBladeRainLine", "BladeRain"), ("shiroganeEclipseLine", "Eclipse"),
+        })
+        {
+            so.FindProperty(field).objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Shirogane_" + file + ".mp3");
+        }
+        SetTakes(so.FindProperty("shiroganeHurtLines"), "Shirogane_Hurt");
         so.ApplyModifiedProperties();
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -98,6 +133,9 @@ public static class BossArtSetup
         Debug.Log(utsusemi == null ? "Utsusemi has no frames yet; portraits wired, stand-in art kept."
             : $"Utsusemi art applied: {utsusemi.idle.Length} idle, {utsusemi.attack.Length} thrust, {utsusemi.parry.Length} throw, " +
               $"{utsusemi.hit.Length} hit, {utsusemi.death.Length} defeat frames.");
+        Debug.Log(shirogane == null ? "Shirogane has no frames yet; portraits and voice wired, stand-in art kept."
+            : $"Shirogane art applied: {shirogane.idle.Length} idle, {shirogane.attack.Length} slash, {shirogane.parry.Length} blade-call, " +
+              $"{shirogane.hit.Length} hit, {shirogane.death.Length} defeat frames.");
     }
 
     // Every <prefix>*.mp3 take, so more can be added without touching this.

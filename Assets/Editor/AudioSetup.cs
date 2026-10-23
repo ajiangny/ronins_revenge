@@ -19,7 +19,7 @@ public static class AudioSetup
 
     // The march beat comes up to ten times a second; on a source of its own it can't crowd out every other sound.
     // The beam hum loops on its own source for as long as a laser burns.
-    static readonly HashSet<string> OwnSource = new HashSet<string> { Sfx.MarchStep, Sfx.LanternBeam };
+    static readonly HashSet<string> OwnSource = new HashSet<string> { Sfx.MarchStep, Sfx.LanternBeam, Sfx.SpiritBeam };
 
     // id, starting volume, pitch jitter, and the real seconds before it can repeat.
     static readonly (string id, float volume, float jitter, float minInterval)[] Sounds =
@@ -65,6 +65,13 @@ public static class AudioSetup
         (Sfx.HourSlash, 1f, 0f, 0.5f),
         (Sfx.SwordWhirl, 0.8f, 0.04f, 0.3f),
         (Sfx.SwordPlant, 1f, 0f, 0.3f),
+        (Sfx.WolfGrowl, 0.8f, 0.05f, 0.3f),
+        (Sfx.WolfHowl, 1f, 0f, 0.8f),
+        (Sfx.BladeRing, 0.7f, 0.06f, 0.1f),
+        // A rain of swords falls close together.
+        (Sfx.GhostSwordFall, 0.6f, 0.1f, 0.05f),
+        (Sfx.SpiritBeam, 0.7f, 0f, 0.1f),
+        (Sfx.MistSwirl, 0.6f, 0.08f, 0.15f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

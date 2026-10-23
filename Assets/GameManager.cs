@@ -273,6 +273,7 @@ public class GameManager : MonoBehaviour
         ronin.ShurikenThrown += OnShurikenThrown;
         ronin.Parried += OnParried;
         ronin.RiposteImpact += OnRiposteImpact;
+        ronin.FireballImpact += OnFireballImpact;
         ronin.RiposteTarget = RandomEnemy;
         Blocker.Broken += OnBlockerBroken;
         IceStatue.Shattered += OnStatueShattered;
@@ -287,6 +288,7 @@ public class GameManager : MonoBehaviour
         ronin.ShurikenThrown -= OnShurikenThrown;
         ronin.Parried -= OnParried;
         ronin.RiposteImpact -= OnRiposteImpact;
+        ronin.FireballImpact -= OnFireballImpact;
         Blocker.Broken -= OnBlockerBroken;
         IceStatue.Shattered -= OnStatueShattered;
     }
@@ -697,6 +699,11 @@ public class GameManager : MonoBehaviour
     void OnRiposteImpact(Vector3 point, IHittable target)
     {
         if (state == State.Playing) effects.OnRiposteImpact(point, target);
+    }
+
+    void OnFireballImpact(Vector3 point, IHittable target)
+    {
+        if (state == State.Playing) effects.OnFireballImpact(point, target);
     }
 
     // A brief freeze when a parry lands. It always undoes its own slow-down, and leaves the time scale alone

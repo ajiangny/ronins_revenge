@@ -171,8 +171,8 @@ public static class Boons
             Description = "You <b>Slash</b> faster.",
             StatLabel = "Slash cooldown:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = MinusPercent },
         new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
-            Description = "Every few <b>Slash</b> kills, the embers catch: a great fire blast bursts from the fallen samurai.",
-            StatLabel = "Kills per blast:", Values = new[] { 5f, 4f, 3f }, Format = v => $"{v:0}" },
+            Description = "Every few swings, you hurl a great <b>Fireball</b> instead of a <b>Slash</b>. It burns through arrows and bursts in a wide blast.",
+            StatLabel = "Swings per fireball:", Values = new[] { 5f, 4f, 3f }, Format = v => $"{v:0}" },
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
@@ -255,7 +255,7 @@ public static class Boons
             StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
         new BoonDefinition { Id = BoonId.CrescentMoon, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Crescent Moon",
             Description = "Your <b>Slash</b> is a great crescent, wide enough to cut two columns and every arrow across them.",
-            StatLabel = "Slash width:", Values = new[] { 1.7f, 1.7f, 1.7f }, Format = v => $"x{v:0.#}" },
+            StatLabel = "Slash width:", Values = new[] { 2.6f, 2.6f, 2.6f }, Format = v => $"x{v:0.#}" },
     };
 
     // Stands in when a soul's element has nothing left to offer, so a caught soul is never wasted.

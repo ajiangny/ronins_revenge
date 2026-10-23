@@ -17,11 +17,17 @@ public class Ronin : MonoBehaviour
     const float ShardSize = 0.8f;
     const float ShardSpread = 25f;
     const float ThunderShurikenSpeed = 1.9f;
+    // Kindling's fireball: hitbox scale, drawn size against a Burning Riposte fireball, and speed against a slash.
+    const float KindlingScale = 2.2f;
+    const float KindlingDrawScale = 2f;
+    const float KindlingSpeed = 0.75f;
     // Split Slash forks this long into a slash's flight, into side slashes this much smaller.
     const float SplitDelay = 0.22f;
     const float SplitScale = 0.8f;
     // Echo Slash's homing ghost is drawn a little smaller than the slash it echoes.
     const float EchoScale = 0.9f;
+    // Crescent Moon makes the slash only this much taller while it widens.
+    const float CrescentHeight = 1.15f;
     // How long a Frozen Riposte shard holds the samurai it hits in ice.
     const float RiposteShardFreeze = 1.5f;
 
@@ -70,6 +76,8 @@ public class Ronin : MonoBehaviour
     public Func<Transform> RiposteTarget { get; set; }
     // A fireball or ice shard riposte struck something.
     public event Action<Vector3, IHittable> RiposteImpact;
+    // Kindling's fireball has hit something.
+    public event Action<Vector3, IHittable> FireballImpact;
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
     // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
@@ -102,6 +110,8 @@ public class Ronin : MonoBehaviour
     readonly Collider[] parryBuffer = new Collider[16];
     float minOffsetX, maxOffsetX, centerOffsetX, topOffset;
     float lastShot = float.NegativeInfinity;
+    // Swings since Kindling's last fireball.
+    int swingsSinceFireball;
     float lastShuriken = float.NegativeInfinity;
     float lastParry = float.NegativeInfinity;
     float invulnerableUntil;
@@ -224,10 +234,42 @@ public class Ronin : MonoBehaviour
 
     void Attack()
     {
+        // Kindling: every few swings a great fireball goes up instead of the slash.
+        if (Loadout.Has(BoonId.Kindling, out float swingsPerFireball) && ++swingsSinceFireball >= (int)swingsPerFireball)
+        {
+            swingsSinceFireball = 0;
+            ThrowFireball();
+        }
         // Without the slash prefab (art not applied yet) the sword falls back to throwing kunai.
-        if (weapon == Weapon.Sword && slashPrefab != null) Slash();
+        else if (weapon == Weapon.Sword && slashPrefab != null) Slash();
         else ThrowKunai();
         lastShot = Time.time;
+    }
+
+    // Kindling's fireball: the Burning Riposte fireball drawn at twice its size, slower than a slash. It burns through
+    // arrows, and its hit counts as a slash (so Blade boons trigger) before it bursts in a great blast.
+    void ThrowFireball()
+    {
+        Color fire = Boons.Info(Element.Fire).Color;
+        Kunai fireball = SpawnProjectile(kunaiPrefab, Muzzle);
+        Sprite[] frames = Fx.Frames(Fx.Fireball);
+        bool hasArt = frames != null && frames.Length > 0;
+        fireball.Launch(Vector3.up, KindlingSpeed, 0, KillSource.Slash, hasArt ? null : kunaiSprite, scale: KindlingScale, lifetimeMultiplier: 2f);
+        if (hasArt)
+        {
+            fireball.Animate(frames, 14f, FireballSize * KindlingDrawScale);
+            fireball.Tint(Color.white, fire);
+        }
+        else
+        {
+            fireball.Tint(Color.Lerp(Color.white, fire, 0.7f), fire);
+        }
+        fireball.ParryAura(Color.Lerp(fire, Color.yellow, 0.3f));
+        fireball.CutsArrows = true;
+        fireball.Impacted += (point, target) => FireballImpact?.Invoke(point, target);
+        Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
+        Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, fire, 1f, transform);
+        PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
     }
 
     // Each swing of the katana sends a crescent of spirit energy up the screen.
@@ -264,8 +306,13 @@ public class Ronin : MonoBehaviour
     {
         Kunai projectile = SpawnProjectile(prefab, position);
         bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
-        float width = Loadout.Has(BoonId.CrescentMoon, out float crescent) ? crescent : 1f;
-        projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale * width);
+        projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale);
+        // Crescent Moon stretches the slash sideways (hitbox and art alike), only a little taller, so the extra
+        // reach reads as width.
+        if (Loadout.Has(BoonId.CrescentMoon, out float width))
+        {
+            projectile.transform.localScale = Vector3.Scale(projectile.transform.localScale, new Vector3(width, CrescentHeight, 1f));
+        }
         projectile.CutsArrows = pierces;
         projectile.Tint(attackTint, attackGlow);
         return projectile;

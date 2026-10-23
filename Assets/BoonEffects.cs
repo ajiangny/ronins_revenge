@@ -18,7 +18,7 @@ public class BoonEffects
     const float BossFrostCooldown = 4f;
     // Raijin's Drum strikes this many columns (or the boss this many times) on each beat.
     const int DrumStrikes = 3;
-    // Kindling's great blast reaches the diagonals and a ring beyond.
+    // Kindling's fireball bursts wide enough to reach the diagonals and a ring beyond.
     const float KindlingRadius = 2.7f;
 
     readonly SamuraiArmy army;
@@ -27,7 +27,6 @@ public class BoonEffects
     readonly Material boltMaterial;
     float nextBossFrost;
     int drumHits;
-    int kindlingCount;
 
     // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
     public Boss Boss { get; set; }
@@ -55,7 +54,6 @@ public class BoonEffects
             case KillSource.Slash:
             case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
-                if (Kindled()) Blast(position, KindlingRadius);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Encase(value * loadout.FreezeMultiplier);
@@ -87,7 +85,6 @@ public class BoonEffects
             case KillSource.Slash:
             case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameBlade, out value)) BossBlast(point, value);
-                if (Kindled()) BossBlast(point, KindlingRadius);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     // A blow on the frozen boss shatters the ice for an extra point of damage; otherwise she freezes.
@@ -334,13 +331,11 @@ public class BoonEffects
         }
     }
 
-    // Kindling: counts the ronin's slash kills (or slash hits on a boss) and says when the embers catch.
-    bool Kindled()
+    // Kindling's fireball has struck something: it bursts in a great blast (on the boss, a boss blast).
+    public void OnFireballImpact(Vector3 point, IHittable target)
     {
-        if (!loadout.Has(BoonId.Kindling, out float perBlast)) return false;
-        if (++kindlingCount < (int)perBlast) return false;
-        kindlingCount = 0;
-        return true;
+        if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, KindlingRadius);
+        else if (!BossFight) Blast(point, KindlingRadius);
     }
 
     // Raijin's Drum: every few of the ronin's own hits, lightning falls on the front of the nearest columns.

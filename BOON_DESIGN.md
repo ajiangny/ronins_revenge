@@ -199,8 +199,9 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
   plus 0.5% from any kill), at most two a run. It opens a **Sword Arts** screen of arts not yet held.
 - **The arts:** Split Slash, Piercing Slash, Echo Slash and Crescent Moon. They reshape the slash itself and stack
   with each other and with the element Blade boons.
-- **Kindling replaced Inferno Fan.** Inferno Fan's spread of slashes overlapped Split Slash. Kindling sets off a
-  great fire blast every few slash kills instead.
+- **Kindling replaced Inferno Fan.** Inferno Fan's spread of slashes overlapped Split Slash. Kindling first set off a
+  blast every few slash kills, which played too quietly. Now every few swings it throws a great fireball instead
+  of a slash, which bursts in a wide blast. It's something you see coming and can aim.
 
 ## 4. Later
 

@@ -65,9 +65,22 @@ public class Shirogane : Boss
     SpriteRenderer bladeGlow;
     // The dash frames from the GameManager, with her slash as the fallback.
     Sprite[] dashFrames;
+    // Her spirit wolf: a faint silhouette behind her until her first bar empties, then her partner in the fight.
+    SpiritWolf wolf;
+    // True through the Eclipse Fang, which must play out whole.
+    bool ultimate;
+    // Which lanes the last wolf pack took, so the next takes others.
+    readonly HashSet<int> lastPackLanes = new HashSet<int>();
+    FxPlayer auraFlames;
+    SpriteRenderer auraGlow;
 
-    protected override bool Busy => breaking;
+    protected override bool Busy => breaking || ultimate;
+    protected override bool HasSecondPhase => true;
     protected override float StaggerSeconds => secondPhase ? 1.6f : 2.2f;
+    // Her fall is a scene: the blades drop, the wolf comes to her, and she has two things to say.
+    public override float DefeatSeconds => 11f;
+    // Just above the wolf's head and at the mouth it howls from.
+    Vector3 WolfMouth => wolf != null ? wolf.Mouth : Centre;
     protected override int DamageMultiplier => exposed ? 2 : 1;
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
@@ -96,7 +109,12 @@ public class Shirogane : Boss
         bladeGlow = Kunai.CreateGlow(sprite.transform, 1.6f / transform.lossyScale.x, sprite.sortingOrder - 1, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
         bladeGlow.transform.localPosition = new Vector3(0f, -0.1f, 0.05f);
         StartCoroutine(PulseBlades());
+        wolf = SpiritWolf.Create(this, wolfIdle, wolfHowl, wolfCharge, wolfVanish, transform.lossyScale.x, sprite.sortingOrder - 1);
+        wolf.SetPresence(SpiritWolf.Presence.Silhouette);
     }
+
+    // Her wolf rests a little behind her and to the side, moving with her glides.
+    public Vector3 WolfRest => anchor + new Vector3(anchor.x < CameraShake.Center.x ? 2.4f : -2.4f, 0.2f, 0f);
 
     IEnumerator PulseBlades()
     {
@@ -146,6 +164,11 @@ public class Shirogane : Boss
                     case Move.BladeRain: yield return BladeRain(); break;
                     case Move.MoonlitDash: yield return MoonlitDash(); break;
                     case Move.BladeBarrage: yield return BladeBarrage(); break;
+                    case Move.WolfCharge: yield return WolfCharge(); break;
+                    case Move.Howl: yield return Howl(); break;
+                    case Move.TwinAssault: yield return TwinAssault(); break;
+                    case Move.WolfPack: yield return WolfPack(); break;
+                    case Move.EclipseFang: yield return EclipseFang(); break;
                 }
                 yield return Wait(secondPhase ? 0.15f : 0.25f);
             }
@@ -156,7 +179,23 @@ public class Shirogane : Boss
     // once the wolf is out her sword moves and its own alternate so the two never pile on at once.
     Move NextMove()
     {
-        var options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage };
+        List<Move> options;
+        if (!secondPhase)
+        {
+            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage };
+        }
+        else if (movesSinceEclipse >= 5 && lastMove != Move.EclipseFang)
+        {
+            return Move.EclipseFang;
+        }
+        else if (lastWasWolf)
+        {
+            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash };
+        }
+        else
+        {
+            options = new List<Move> { Move.WolfCharge, Move.WolfCharge, Move.Howl, Move.TwinAssault, Move.WolfPack };
+        }
         if (lastMove is Move last && repeats >= 2) options.RemoveAll(m => m == last);
         return options[Random.Range(0, options.Count)];
     }
@@ -225,6 +264,8 @@ public class Shirogane : Boss
     {
         StopRoaming();
         exposed = false;
+        ultimate = false;
+        if (wolf != null) wolf.Recall();
     }
 
     // --- Shots ---
@@ -257,6 +298,37 @@ public class Shirogane : Boss
         else blade.Restyle(ProceduralSprites.White, Frost, new Vector2(0.16f, 1.6f), 0.3f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 1.4f);
         blade.PassesCover = true;
         return blade;
+    }
+
+    // A slow orb of the wolf's spirit energy, big enough to see coming and easy to read between.
+    Arrow Orb(Vector3 from, Vector3 velocity)
+    {
+        Arrow orb = Shoot(from, velocity);
+        Sprite[] frames = Fx.Frames(Fx.ShiroOrb);
+        if (frames != null) orb.Restyle(frames, 12f, Color.white, new Vector2(1.1f, 1.1f), 0.35f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 1.8f);
+        else orb.Restyle(ProceduralSprites.Glow, new Color(0.6f, 0.95f, 1f), new Vector2(1f, 1f), 0.35f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.5f), 1.8f);
+        return orb;
+    }
+
+    // The wolf (or one of its pack) as a charge down a lane: unbreakable, it stops only on the ronin, and dissolves
+    // into mist where it meets the ground. Drawn from the charge art, or as a streak of spirit light.
+    Arrow Charge(Vector3 from, float speed, float size)
+    {
+        Arrow charge = Shoot(from, Vector3.down * speed);
+        charge.MakeUnbreakable();
+        Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
+        if (frames != null) charge.Restyle(frames, 14f, new Color(0.75f, 0.95f, 1f, 0.9f), new Vector2(size * 1.4f, size * 1.9f), size * 0.45f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f), size * 2.2f);
+        else charge.Restyle(ProceduralSprites.Glow, new Color(0.7f, 0.95f, 1f, 0.95f), new Vector2(size * 1.1f, size * 2.2f), size * 0.45f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), size * 2.2f);
+        StartCoroutine(DissolveAtGround(charge));
+        return charge;
+    }
+
+    IEnumerator DissolveAtGround(Arrow charge)
+    {
+        while (charge != null && charge.transform.position.y > GroundY) yield return null;
+        if (charge == null) yield break;
+        Puff(charge.transform.position, 1.8f);
+        Destroy(charge.gameObject);
     }
 
     // A ghost sword's picture, hanging where it will fall from; drawn in code when the art is missing.
@@ -515,12 +587,737 @@ public class Shirogane : Boss
         IgnoreEachOther(volley);
     }
 
+
+    // --- Phase 2: the wolf ---
+
+    // Spirit Wolf Charge: the wolf melts into mist and reappears over the ronin's lane, growling, a warning line
+    // under it; then it comes down the lane like a bolt and dissolves where it lands, and returns to her.
+    IEnumerator WolfCharge()
+    {
+        if (Random.value < 0.5f) Speak(BossLine.WolfCharge);
+        yield return wolf.Vanish();
+        yield return Wait(0.25f);
+        float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
+        Vector3 perch = new Vector3(x, TopOfScreen - 1.6f, 0);
+        yield return wolf.AppearAt(perch, true);
+        Sfx.Play(Sfx.WolfGrowl, 0.9f, 1f);
+        var tells = new List<SpriteRenderer> { LaneWarning(x) };
+        RoamMeanwhile(0.9f);
+        yield return Brighten(tells, 0.9f);
+        StopRoaming();
+        RemoveTells(tells);
+
+        wolf.Hide();
+        Charge(perch, 14f, 1.6f);
+        Puff(perch, 1.6f);
+        Sfx.Play(Sfx.MistSwirl, 0.7f, 0.8f);
+        yield return Wait(0.5f);
+        yield return wolf.AppearAt(WolfRest);
+    }
+
+    // Howl of the Departed: the wolf's eyes and jaws burn bright, then its howl sends seven orbs down in a wide
+    // fan, and a second wave a beat later between the first's paths. Near her end a third wave follows.
+    IEnumerator Howl()
+    {
+        if (Random.value < 0.5f) Speak(BossLine.Howl);
+        yield return wolf.Settle(WolfRest);
+        wolf.Glare(0.8f);
+        ElementFx.Glow(WolfMouth, Cyan, 0.6f, 2.4f, 0.8f, wolf.transform);
+        RoamMeanwhile(0.8f);
+        yield return Wait(0.8f);
+        StopRoaming();
+
+        wolf.PlayHowl();
+        Sfx.Play(Sfx.WolfHowl, 1f, 1f);
+        CameraShake.Add(0.15f);
+        int waves = HealthFraction < 0.3f ? 3 : 2;
+        for (int wave = 0; wave < waves; wave++)
+        {
+            if (wave > 0) yield return Wait(0.6f);
+            OrbFan(7, 60f, 4.5f, wave % 2 == 1);
+        }
+        yield return Wait(0.3f);
+    }
+
+    // One fan of orbs from the wolf's jaws, aimed straight down; an offset fan fills the last one's gaps.
+    void OrbFan(int count, float spread, float speed, bool offset)
+    {
+        float step = 2f * spread / (count - 1f);
+        var fan = new List<Arrow>();
+        for (int i = 0; i < count; i++)
+        {
+            float angle = Mathf.Lerp(-spread, spread, i / (count - 1f)) + (offset ? step / 2f : 0f);
+            fan.Add(Orb(WolfMouth, Quaternion.Euler(0, 0, angle) * Vector3.down * speed));
+        }
+        IgnoreEachOther(fan);
+    }
+
+    // Twin Spirit Assault: she takes the left of the field and the wolf the right; both glow, then her crescents
+    // sweep down and to the right while its orbs sweep down and to the left, crossing in the middle with gaps.
+    IEnumerator TwinAssault()
+    {
+        if (Random.value < 0.6f) Speak(BossLine.TwinAssault);
+        float quarter = HalfWidth * 0.5f;
+        bool herLeft = anchor.x <= CameraShake.Center.x;
+        float herX = CameraShake.Center.x + (herLeft ? -quarter : quarter);
+        Vector3 wolfSpot = new Vector3(CameraShake.Center.x + (herLeft ? quarter : -quarter), anchor.y + 0.2f, 0);
+        yield return wolf.Vanish();
+        yield return Glide(herX);
+        yield return wolf.AppearAt(wolfSpot, true);
+
+        ElementFx.Glow(Hands, Cyan, 0.8f, 2.6f, 0.6f, transform);
+        wolf.Glare(0.6f);
+        Sfx.Play(Sfx.BladeRing, 0.6f, 1.2f);
+        yield return Wait(0.6f);
+
+        PlayAction(art.attack);
+        Sfx.Play(Sfx.SwordSlash, 0.9f, 0.7f);
+        wolf.PlayHowl();
+        Sfx.Play(Sfx.WolfHowl, 0.7f, 1.2f);
+        // Positive angles turn a downward shot to the right, negative to the left.
+        float inward = herLeft ? 1f : -1f;
+        var volley = new List<Arrow>();
+        for (int i = 0; i < 5; i++)
+        {
+            float angle = Mathf.Lerp(20f, 60f, i / 4f);
+            volley.Add(Crescent(Hands, Quaternion.Euler(0, 0, angle * inward) * Vector3.down * 7.5f));
+            volley.Add(Orb(WolfMouth, Quaternion.Euler(0, 0, -angle * inward) * Vector3.down * 6.5f));
+            IgnoreEachOther(volley);
+            yield return Wait(0.15f);
+        }
+        yield return Wait(0.3f);
+        yield return wolf.Vanish();
+        yield return wolf.AppearAt(WolfRest);
+    }
+
+    // Phantom Wolf Pack: three smaller ghost wolves form over three of six lanes, each with its warning line,
+    // and charge down one after another. Never the same three lanes twice running.
+    IEnumerator WolfPack()
+    {
+        if (Random.value < 0.5f) Speak(BossLine.WolfPack);
+        wolf.PlayHowl();
+        Sfx.Play(Sfx.WolfHowl, 0.6f, 1.4f);
+        List<float> lanes = Lanes(6);
+        var picks = new List<int>();
+        while (picks.Count < 3)
+        {
+            int lane = Random.Range(0, lanes.Count);
+            if (!picks.Contains(lane) && !(lastPackLanes.Contains(lane) && Random.value < 0.7f)) picks.Add(lane);
+        }
+        lastPackLanes.Clear();
+        foreach (int lane in picks) lastPackLanes.Add(lane);
+
+        float perchY = TopOfScreen - 1.5f;
+        var tells = new List<SpriteRenderer>();
+        var pups = new List<SpriteRenderer>();
+        foreach (int lane in picks)
+        {
+            Vector3 perch = new Vector3(lanes[lane], perchY, 0);
+            tells.Add(LaneWarning(lanes[lane]));
+            pups.Add(wolf.Silhouette(perch, 0.6f, transient));
+            Puff(perch, 1.2f);
+        }
+        RoamMeanwhile(0.9f);
+        yield return Brighten(tells, 0.9f);
+        StopRoaming();
+
+        for (int i = 0; i < picks.Count; i++)
+        {
+            if (pups[i] != null)
+            {
+                transient.Remove(pups[i].gameObject);
+                Destroy(pups[i].gameObject);
+            }
+            if (tells[i] != null)
+            {
+                transient.Remove(tells[i].gameObject);
+                Destroy(tells[i].gameObject);
+            }
+            Charge(new Vector3(lanes[picks[i]], perchY, 0), 12f, 1.1f);
+            Sfx.Play(Sfx.WolfGrowl, 0.6f, 1.3f);
+            yield return Wait(0.35f);
+        }
+        yield return Wait(0.3f);
+    }
+
+    // Eclipse Fang, their strongest attack together: she takes the centre, the wolf looms up huge behind her under
+    // a spectral blue moon; two crescent waves, then the wolf's beam straight down a marked lane, then a last
+    // spread of swords. Afterwards she stands spent for two seconds, open to double damage.
+    IEnumerator EclipseFang()
+    {
+        Speak(BossLine.EclipseFang);
+        ultimate = true;
+        yield return wolf.Vanish();
+        yield return Glide(CameraShake.Center.x);
+        yield return wolf.AppearAt(anchor + new Vector3(0f, 0.9f, 0f), true);
+        SpriteRenderer moon = Moon(anchor + Vector3.up * 1.2f);
+        StartCoroutine(wolf.Grow(1.8f, 0.8f));
+        Sfx.Play(Sfx.WolfHowl, 1f, 0.8f);
+        CameraShake.Add(0.3f);
+        for (float t = 0; t < 0.8f; t += Time.deltaTime)
+        {
+            moon.color = new Color(0.6f, 0.9f, 1f, 0.55f * t / 0.8f);
+            yield return null;
+        }
+
+        // Two crescent waves, the second's blades between the first's, so the safe spot moves.
+        for (int wave = 0; wave < 2; wave++)
+        {
+            PlayAction(art.attack);
+            Sfx.Play(Sfx.SwordSlash, 0.9f, 0.65f);
+            var fan = new List<Arrow>();
+            for (int i = 0; i < 5; i++)
+            {
+                float angle = Mathf.Lerp(-44f, 44f, i / 4f) + (wave == 1 ? 11f : 0f);
+                fan.Add(Crescent(Hands, Quaternion.Euler(0, 0, angle) * Vector3.down * 7.5f));
+            }
+            IgnoreEachOther(fan);
+            yield return Wait(0.8f);
+        }
+
+        // The beam: the lane is marked where the ronin stands as the charge starts, so stepping off it is the dodge.
+        float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
+        SpriteRenderer warning = Bar(new Vector3(x, WolfMouth.y, 0), new Vector3(x, GroundY, 0), 2.2f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.15f));
+        wolf.Glare(1f);
+        ElementFx.Glow(WolfMouth, Frost, 0.5f, 3f, 1f, wolf.transform);
+        Sfx.Play(Sfx.MistSwirl, 0.8f, 0.6f);
+        for (float t = 0; t < 1f; t += Time.deltaTime)
+        {
+            warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.12f + 0.25f * Mathf.PingPong(t * 5f, 1f));
+            yield return null;
+        }
+        transient.Remove(warning.gameObject);
+        Destroy(warning.gameObject);
+
+        SpriteRenderer glow = Bar(WolfMouth, new Vector3(x, GroundY, 0), 2.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f), 53);
+        glow.sprite = ProceduralSprites.Glow;
+        SpriteRenderer body = Bar(WolfMouth, new Vector3(x, GroundY, 0), 1.1f, new Color(0.6f, 0.95f, 1f, 0.9f), 55);
+        SpriteRenderer core = Bar(WolfMouth, new Vector3(x, GroundY, 0), 0.35f, Color.white, 56);
+        FxPlayer flare = Fx.Play(Fx.ShiroBeamFlare, WolfMouth, Color.white, 2f, wolf.transform, 57);
+        if (flare != null) transient.Add(flare.gameObject);
+        Sfx.PlayLoop(Sfx.SpiritBeam, 0.8f, 1f);
+        CameraShake.Add(0.4f);
+        float nextSpark = 0f;
+        for (float t = 0; t < 0.5f; t += Time.deltaTime)
+        {
+            float flicker = 1f + 0.15f * Mathf.Sin(Time.time * 50f);
+            body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * flicker, 1f);
+            if (Mathf.Abs(ronin.Bounds.center.x - x) < 1.1f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            if (Time.time >= nextSpark)
+            {
+                nextSpark = Time.time + 0.1f;
+                Fx.Play(Fx.Impact, new Vector3(x, GroundY, 0), Cyan, 0.9f);
+            }
+            yield return null;
+        }
+        Sfx.Stop(Sfx.SpiritBeam);
+        foreach (SpriteRenderer part in new[] { glow, body, core })
+        {
+            transient.Remove(part.gameObject);
+            Destroy(part.gameObject);
+        }
+        if (flare != null) flare.Stop();
+
+        // The closing spread of swords, then she is spent.
+        PlayAction(art.parry);
+        Sfx.Play(Sfx.GhostSwordFall, 1f, 0.8f);
+        var swords = new List<Arrow>();
+        for (int i = 0; i < 7; i++)
+        {
+            float angle = Mathf.Lerp(-45f, 45f, i / 6f);
+            swords.Add(GhostSword(Hands, Quaternion.Euler(0, 0, angle) * Vector3.down * 9f));
+        }
+        IgnoreEachOther(swords);
+        StartCoroutine(wolf.Grow(1f, 0.6f));
+        transient.Remove(moon.gameObject);
+        Fader.Fade(moon, 0.8f);
+        ultimate = false;
+
+        exposed = true;
+        PlayIdle();
+        yield return Wait(2f);
+        exposed = false;
+        yield return wolf.Vanish();
+        yield return wolf.AppearAt(WolfRest);
+    }
+
+    // The spectral moon that rises behind them for the Eclipse Fang.
+    SpriteRenderer Moon(Vector3 at)
+    {
+        var moon = new GameObject("SpiritMoon").AddComponent<SpriteRenderer>();
+        moon.transform.position = at + Vector3.forward * 0.5f;
+        Sprite[] frames = Fx.Frames(Fx.ShiroMoon);
+        if (frames != null)
+        {
+            moon.sprite = frames[0];
+            moon.transform.localScale = Vector3.one * (6f / frames[0].bounds.size.x);
+            moon.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 8f);
+        }
+        else
+        {
+            moon.sprite = ProceduralSprites.SoftGlow;
+            moon.transform.localScale = Vector3.one * 7f;
+        }
+        moon.sortingOrder = 2;
+        moon.color = Color.clear;
+        transient.Add(moon.gameObject);
+        return moon;
+    }
+
+    // When her first bar empties she staggers to a knee and her blades go dark; mist spreads over the field, a
+    // howl sounds far off, two eyes open behind her and the wolf takes shape in a burst of blue flame. She rises
+    // wreathed in it, with her second bar.
+    protected override IEnumerator PhaseBreak()
+    {
+        breaking = true;
+        StopRoaming();
+        ultimate = false;
+        exposed = false;
+        animator.Play(art.hit, false, null, art.actionFps * 0.7f);
+        Sfx.Play(Sfx.BossStagger, 0.8f, 0.9f);
+        yield return new WaitForSeconds(0.5f);
+
+        for (int i = 0; i < 7; i++)
+        {
+            float x = CameraShake.Center.x + Mathf.Lerp(-HalfWidth, HalfWidth, i / 6f);
+            Puff(new Vector3(x, GroundY + Random.Range(0.5f, 2.5f), 0), 2.6f);
+        }
+        Sfx.Play(Sfx.MistSwirl, 1f, 0.6f);
+        yield return new WaitForSeconds(0.6f);
+        Sfx.Play(Sfx.WolfHowl, 0.5f, 0.85f);
+        yield return new WaitForSeconds(0.9f);
+
+        yield return wolf.OpenEyes(WolfRest, 0.6f);
+        CameraShake.Add(0.6f);
+        Fx.Play(Fx.Explosion, WolfRest, Cyan, 2.4f);
+        Debris.BurstSprites(WolfRest, art.deathParticles, Cyan, 24, 1.2f, 8f);
+        Sfx.Play(Sfx.WolfHowl, 1f, 1f);
+        Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
+        wolf.SetPresence(SpiritWolf.Presence.Present);
+        yield return wolf.AppearAt(WolfRest);
+
+        bodyTint = new Color(0.85f, 0.96f, 1f);
+        AddAura();
+        PlayIdle();
+        Speak(BossLine.Phase);
+        yield return new WaitForSeconds(2.2f);
+        breaking = false;
+    }
+
+    // Blue spirit flame licking up from her feet and a cold glow pulsing behind her.
+    void AddAura()
+    {
+        Vector3 feet = new Vector3(Centre.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0);
+        auraFlames = Fx.Play(Fx.Aura(Element.Water), feet, new Color(0.5f, 0.9f, 1f, 0.9f), 3.2f, transform, sprite.sortingOrder - 1);
+        auraGlow = Kunai.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
+        StartCoroutine(PulseAura(auraGlow));
+    }
+
+    IEnumerator PulseAura(SpriteRenderer glow)
+    {
+        while (glow != null && !IsDead)
+        {
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 3.5f);
+            glow.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.25f + 0.3f * pulse);
+            glow.transform.localScale = Vector3.one * (2f + 0.4f * pulse);
+            yield return null;
+        }
+        if (glow != null) Destroy(glow.gameObject);
+    }
+
+    // Her fall: the swords drop from her hands, she sinks to a knee and her flames fade; the wolf comes to stand
+    // by her and she rests a hand on its head; it dissolves into light, she speaks her last, and follows it.
     protected override IEnumerator Fall()
     {
         StopRoaming();
-        if (bladeGlow != null) Destroy(bladeGlow.gameObject);
-        Debris.BurstSprites(Centre, art.deathParticles, Cyan, 16, 0.9f, 8f);
+        ultimate = false;
+        exposed = false;
+        Sfx.Stop(Sfx.SpiritBeam);
+        if (auraFlames != null) auraFlames.Stop();
+        if (auraGlow != null) Destroy(auraGlow.gameObject);
+        CameraShake.Add(0.6f);
+        Debris.BurstSprites(Centre, art.deathParticles, Cyan, 24, 1f, 8f);
         Sfx.Play(Sfx.BladeRing, 1f, 0.6f);
-        return base.Fall();
+        DropBlade(Hands + Vector3.left * 0.6f, -1f);
+        DropBlade(Hands + Vector3.right * 0.6f, 1f);
+        if (bladeGlow != null) Fader.Fade(bladeGlow, 1.5f);
+        // The defeat clip plays down to her knee and holds there.
+        if (art.death != null && art.death.Length > 0) animator.Play(art.death, false, null, art.actionFps * 0.6f);
+        else sprite.transform.localRotation = Quaternion.Euler(0, 0, -10f);
+        Vector3 from = anchor;
+        for (float t = 0; t < 1f; t += Time.deltaTime)
+        {
+            anchor = from + Vector3.down * (0.25f * t);
+            body.MovePosition(anchor);
+            yield return null;
+        }
+
+        if (wolf != null)
+        {
+            wolf.SetPresence(SpiritWolf.Presence.Present);
+            if (!wolf.Visible) yield return wolf.AppearAt(WolfRest);
+            yield return wolf.WalkTo(anchor + new Vector3(anchor.x < CameraShake.Center.x ? 1.6f : -1.6f, -0.1f, 0f), 1.6f);
+        }
+        // Her Defeat line was spoken as she fell; this is the beat she rests her hand on its head.
+        yield return new WaitForSeconds(2.6f);
+        if (wolf != null)
+        {
+            Debris.BurstSprites(wolf.transform.position, art.deathParticles, Cyan, 30, 1.1f, 5f);
+            Sfx.Play(Sfx.SoulCollect, 0.8f, 0.8f);
+            yield return wolf.Dissolve(1.2f);
+        }
+        Speak(BossLine.DefeatFinal);
+        yield return new WaitForSeconds(2.4f);
+
+        Sfx.Play(Sfx.PlayerDeath, 0.8f, 0.9f);
+        for (float t = 0; t < 1.8f; t += Time.deltaTime)
+        {
+            float k = t / 1.8f;
+            Color c = bodyTint;
+            c.a = 1f - k;
+            sprite.color = c;
+            if (Random.value < 0.3f) Debris.BurstSprites(Centre + (Vector3)Random.insideUnitCircle * 0.6f, art.deathParticles, Cyan, 2, 0.9f, 2.5f);
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+
+    // A dropped katana: tumbles to the ground and fades.
+    void DropBlade(Vector3 from, float spin)
+    {
+        SpriteRenderer blade = SwordPicture(from, Random.Range(-20f, 20f));
+        transient.Remove(blade.gameObject);
+        StartCoroutine(Tumble(blade, spin));
+    }
+
+    IEnumerator Tumble(SpriteRenderer blade, float spin)
+    {
+        Vector3 velocity = new Vector3(spin * 1.2f, 1.5f, 0f);
+        float ground = GroundY + 0.4f;
+        while (blade != null && blade.transform.position.y > ground)
+        {
+            velocity += Vector3.down * 12f * Time.deltaTime;
+            blade.transform.position += velocity * Time.deltaTime;
+            blade.transform.Rotate(0, 0, spin * 400f * Time.deltaTime);
+            yield return null;
+        }
+        if (blade == null) yield break;
+        Sfx.Play(Sfx.Deflect, 0.5f, 0.8f);
+        Fader.Fade(blade, 2.5f);
+    }
+}
+
+// Shirogane's spirit wolf: a translucent body of blue spirit flame with burning cyan eyes. It has no body to hit;
+// everything it does to the ronin is an Arrow it throws. A faint silhouette behind her in her first phase; once
+// she calls it, it rests beside her and vanishes into mist to attack from wherever it reappears.
+public class SpiritWolf : MonoBehaviour
+{
+    public enum Presence { Silhouette, Present }
+
+    static readonly Color Body = new Color(0.6f, 0.9f, 1f);
+    static readonly Color EyeColour = new Color(0.4f, 1f, 1f);
+
+    Shirogane owner;
+    SpriteRenderer sprite;
+    SpriteAnimator animator;
+    SpriteRenderer glow;
+    SpriteRenderer[] eyes;
+    Sprite[] idle, howl, charge, vanish;
+    float scale;
+    Presence presence;
+    float shown;
+    float shownTarget;
+    float grown = 1f;
+    float glare;
+    Coroutine following;
+    bool hidden;
+
+    public bool Visible => shown > 0.05f && !hidden;
+    // Where its howls and beams come from: the jaws, a little below the top of the body.
+    public Vector3 Mouth => sprite != null && sprite.sprite != null
+        ? new Vector3(sprite.bounds.center.x, sprite.bounds.center.y + sprite.bounds.extents.y * 0.3f, 0)
+        : transform.position + Vector3.up * 0.4f;
+
+    public static SpiritWolf Create(Shirogane owner, Sprite[] idle, Sprite[] howl, Sprite[] charge, Sprite[] vanish, float scale, int order)
+    {
+        var go = new GameObject("SpiritWolf");
+        var wolf = go.AddComponent<SpiritWolf>();
+        wolf.owner = owner;
+        wolf.idle = idle;
+        wolf.howl = howl;
+        wolf.charge = charge;
+        wolf.vanish = vanish;
+        wolf.scale = scale;
+        go.transform.position = owner.WolfRest;
+        go.transform.localScale = Vector3.one * scale;
+
+        var view = new GameObject("Sprite");
+        view.transform.SetParent(go.transform, false);
+        wolf.sprite = view.AddComponent<SpriteRenderer>();
+        wolf.sprite.sortingOrder = order;
+        wolf.animator = view.AddComponent<SpriteAnimator>();
+        if (idle != null)
+        {
+            wolf.animator.Play(idle, true, null, 6f);
+            view.transform.localPosition = -wolf.sprite.sprite.bounds.center;
+        }
+        else
+        {
+            // Without art: a long soft body of light with two eyes.
+            wolf.sprite.sprite = ProceduralSprites.Glow;
+            view.transform.localScale = new Vector3(2.4f / scale, 1.4f / scale, 1f);
+            wolf.eyes = new SpriteRenderer[2];
+            for (int i = 0; i < 2; i++)
+            {
+                var eye = new GameObject("Eye").AddComponent<SpriteRenderer>();
+                eye.transform.SetParent(go.transform, false);
+                eye.transform.localPosition = new Vector3((i - 0.5f) * 0.5f / scale, 0.25f / scale, -0.05f);
+                eye.transform.localScale = Vector3.one * 0.16f / scale;
+                eye.sprite = ProceduralSprites.Disc;
+                eye.sortingOrder = order + 1;
+                wolf.eyes[i] = eye;
+            }
+        }
+        wolf.glow = Kunai.CreateGlow(go.transform, 2.6f / scale, order - 1, new Color(0.3f, 0.9f, 1f, 0.3f));
+        wolf.Apply();
+        return wolf;
+    }
+
+    public void SetPresence(Presence value)
+    {
+        presence = value;
+        shownTarget = value == Presence.Present ? 1f : 0.22f;
+        if (value == Presence.Present) Follow();
+        else StartCoroutine(Haunt());
+    }
+
+    // In her first phase it only flickers into sight now and then, a shadow at her back.
+    IEnumerator Haunt()
+    {
+        while (presence == Presence.Silhouette && this != null)
+        {
+            shownTarget = 0f;
+            yield return new WaitForSeconds(Random.Range(8f, 14f));
+            if (presence != Presence.Silhouette) yield break;
+            transform.position = owner.WolfRest;
+            shownTarget = 0.22f;
+            yield return new WaitForSeconds(1.2f);
+        }
+    }
+
+    // Keeps to its rest beside her as she glides.
+    void Follow()
+    {
+        if (following == null) following = StartCoroutine(Following());
+    }
+
+    IEnumerator Following()
+    {
+        while (true)
+        {
+            if (!hidden && presence == Presence.Present)
+            {
+                Vector3 rest = owner.WolfRest;
+                transform.position = Vector3.Lerp(transform.position, rest, 1f - Mathf.Exp(-Time.deltaTime * 4f));
+            }
+            yield return null;
+        }
+    }
+
+    void StopFollowing()
+    {
+        if (following != null) StopCoroutine(following);
+        following = null;
+    }
+
+    // Melts into mist where it stands.
+    public IEnumerator Vanish()
+    {
+        StopFollowing();
+        hidden = true;
+        if (vanish != null) animator.Play(vanish, false, null, 12f);
+        Fx.Play(Fx.SmokePuff, transform.position, new Color(0.55f, 0.85f, 1f, 0.7f), 1.8f);
+        for (float t = 0; t < 0.25f; t += Time.deltaTime)
+        {
+            shown = Mathf.Lerp(shownTarget, 0f, t / 0.25f);
+            Apply();
+            yield return null;
+        }
+        shown = 0f;
+        Apply();
+    }
+
+    // Takes shape again at a spot. Held, it stays there (a perch over a lane) instead of drifting back to her side.
+    public IEnumerator AppearAt(Vector3 at, bool hold = false)
+    {
+        StopFollowing();
+        transform.position = at;
+        hidden = false;
+        if (idle != null) animator.Play(idle, true, null, 6f);
+        Fx.Play(Fx.SmokePuff, at, new Color(0.55f, 0.85f, 1f, 0.7f), 1.8f);
+        for (float t = 0; t < 0.25f; t += Time.deltaTime)
+        {
+            shown = Mathf.Lerp(0f, shownTarget, t / 0.25f);
+            Apply();
+            yield return null;
+        }
+        shown = shownTarget;
+        Apply();
+        if (presence == Presence.Present && !hold) Follow();
+    }
+
+    // Beside her at once if it isn't already, for a move that fires from its rest.
+    public IEnumerator Settle(Vector3 rest)
+    {
+        if (!Visible) yield return AppearAt(rest);
+    }
+
+    // Gone in an instant: it has become the charge coming down the lane.
+    public void Hide()
+    {
+        StopFollowing();
+        hidden = true;
+        shown = 0f;
+        Apply();
+    }
+
+    // Back beside her without ceremony, when a stagger cuts a move short.
+    public void Recall()
+    {
+        StopAllCoroutines();
+        following = null;
+        hidden = false;
+        shown = shownTarget;
+        grown = 1f;
+        transform.position = owner.WolfRest;
+        Apply();
+        if (presence == Presence.Present) Follow();
+        else StartCoroutine(Haunt());
+    }
+
+    // Eyes and jaws burning bright for a moment: the warning before a howl or the beam.
+    public void Glare(float seconds)
+    {
+        glare = seconds;
+        StartCoroutine(Glaring(seconds));
+    }
+
+    IEnumerator Glaring(float seconds)
+    {
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            glare = 1f - t / seconds;
+            Apply();
+            yield return null;
+        }
+        glare = 0f;
+        Apply();
+    }
+
+    public void PlayHowl()
+    {
+        if (howl != null) animator.Play(howl, false, () => { if (idle != null) animator.Play(idle, true, null, 6f); }, 12f);
+    }
+
+    public IEnumerator Grow(float to, float seconds)
+    {
+        float from = grown;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            grown = Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, t / seconds));
+            Apply();
+            yield return null;
+        }
+        grown = to;
+        Apply();
+    }
+
+    // Two eyes open in the dark behind her, before the body takes shape.
+    public IEnumerator OpenEyes(Vector3 at, float seconds)
+    {
+        transform.position = at;
+        var pair = new SpriteRenderer[2];
+        for (int i = 0; i < 2; i++)
+        {
+            pair[i] = new GameObject("Eye").AddComponent<SpriteRenderer>();
+            pair[i].transform.position = at + new Vector3((i - 0.5f) * 0.5f, 0.3f, -0.1f);
+            pair[i].transform.localScale = Vector3.one * 0.2f;
+            pair[i].sprite = ProceduralSprites.Glow;
+            pair[i].sortingOrder = 45;
+        }
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            foreach (SpriteRenderer eye in pair) eye.color = new Color(EyeColour.r, EyeColour.g, EyeColour.b, t / seconds);
+            yield return null;
+        }
+        yield return new WaitForSeconds(0.5f);
+        foreach (SpriteRenderer eye in pair) Destroy(eye.gameObject);
+    }
+
+    // Pads over to a spot beside her at her fall.
+    public IEnumerator WalkTo(Vector3 at, float seconds)
+    {
+        StopFollowing();
+        Vector3 from = transform.position;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0, 1, t / seconds);
+            transform.position = Vector3.Lerp(from, at, k) + Vector3.up * (0.12f * Mathf.Abs(Mathf.Sin(t * 9f)) * (1f - k));
+            yield return null;
+        }
+        transform.position = at;
+    }
+
+    // Comes apart into light.
+    public IEnumerator Dissolve(float seconds)
+    {
+        StopFollowing();
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            shown = shownTarget * (1f - t / seconds);
+            Apply();
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+
+    // A small ghost of the wolf (one of its pack) hanging over a lane; the caller owns it through the given list.
+    public SpriteRenderer Silhouette(Vector3 at, float size, List<GameObject> owner)
+    {
+        var pup = new GameObject("WolfPup").AddComponent<SpriteRenderer>();
+        pup.transform.position = at + Vector3.back * 0.2f;
+        if (idle != null)
+        {
+            pup.sprite = idle[0];
+            pup.transform.localScale = Vector3.one * scale * size;
+            pup.gameObject.AddComponent<SpriteAnimator>().Play(idle, true, null, 6f);
+        }
+        else
+        {
+            pup.sprite = ProceduralSprites.Glow;
+            pup.transform.localScale = new Vector3(1.6f * size, 1f * size, 1f);
+        }
+        pup.sortingOrder = sprite.sortingOrder;
+        pup.color = new Color(Body.r, Body.g, Body.b, 0.6f);
+        owner.Add(pup.gameObject);
+        return pup;
+    }
+
+    void Update()
+    {
+        if (hidden) return;
+        shown = Mathf.MoveTowards(shown, shownTarget, Time.deltaTime * 1.5f);
+        Apply();
+    }
+
+    void Apply()
+    {
+        float a = hidden ? 0f : shown;
+        float flicker = 0.9f + 0.1f * Mathf.Sin(Time.time * 7f);
+        sprite.color = new Color(Body.r, Body.g, Body.b, a * 0.78f * flicker);
+        transform.localScale = Vector3.one * scale * grown;
+        glow.color = new Color(0.3f + 0.5f * glare, 0.9f, 1f, a * (0.3f + 0.4f * glare));
+        if (eyes == null) return;
+        foreach (SpriteRenderer eye in eyes) eye.color = new Color(EyeColour.r, EyeColour.g, EyeColour.b, Mathf.Min(1f, a * 1.6f + glare));
     }
 }

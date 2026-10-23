@@ -1366,8 +1366,8 @@ public class GameManager : MonoBehaviour
         if (!hitStopping) StartCoroutine(HitStop(0.25f));
         Vector3 where = activeBoss.Centre;
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
-        // working through the blow that felled her.
-        yield return new WaitForSeconds(2.2f);
+        // working through the blow that felled her. Each boss's fall takes its own time (Shirogane's is a scene).
+        yield return new WaitForSeconds(activeBoss.DefeatSeconds);
         yield return GatherDrops();
         effects.Boss = null;
         activeBoss = null;

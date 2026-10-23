@@ -196,6 +196,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // How long a reflected strike breaks the boss's stance.
     protected virtual float StaggerSeconds => 2f;
 
+    // How long the fall takes before the stage's boon is offered over it.
+    public virtual float DefeatSeconds => 2.2f;
+
     // An exception inside an attack silently ends its coroutine; rather than stand idle for the rest of the
     // fight, the boss notices it has stopped moving and starts over.
     void Update()

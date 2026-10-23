@@ -13,9 +13,12 @@ const IZUMI = "cENJycK4Wg62xVikqkaA";
 // Designed in ElevenLabs for Utsusemi: a deep, smooth machine villain with a dry, calm menace. Unity adds the
 // metallic ring on top (GameManager's voice filters).
 const UTSUSEMI = "nCaDofVjs6twTSKyrLJG";
+// Shirogane: ElevenLabs' Lily, a low, velvety actress's voice, read calm and mournful; Unity adds the ghostly
+// echo and drift (GameManager's spirit retune of the voice filters).
+const SHIROGANE = "pFZP5JQG7iQjIQuC4Bku";
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
-// with Benibana.Line / Utsusemi.Line, which show them as subtitles.
+// with Benibana.Line / Utsusemi.Line / Shirogane.Line, which show them as subtitles.
 const LINES = {
   Benibana_SmokeRings: [IZUMI, "[sultry, amused] Breathe it in..."],
   Benibana_RosaryLash: [IZUMI, "[commanding, sharp] Kneel!"],
@@ -34,6 +37,17 @@ const LINES = {
   Utsusemi_Hurt: [UTSUSEMI, "[short mechanical grunt] Hngh."],
   Utsusemi_Hurt_2: [UTSUSEMI, "[sharp, irritated] Kh!"],
   Utsusemi_Hurt_3: [UTSUSEMI, "[low pained exhale] Hah..."],
+  Shirogane_Intro: [SHIROGANE, "[calm, low, mournful] I remember your blade. [quiet, searching] Do you remember mine?"],
+  Shirogane_Phase: [SHIROGANE, "[quiet, sad] You still fight as you did before... [resolute, rising] Then let us remind you what you've forgotten."],
+  Shirogane_Defeat: [SHIROGANE, "[weak, tender, breathless] Even after all this time... you still wield the blade I remember."],
+  Shirogane_DefeatFinal: [SHIROGANE, "[gentle, fading, at peace] Go. Finish what we started."],
+  Shirogane_Stagger: [SHIROGANE, "[startled gasp, faltering] My stance..."],
+  Shirogane_Crescent: [SHIROGANE, "[calm, cold] Crescent Moon."],
+  Shirogane_BladeRain: [SHIROGANE, "[soft command] Blades... fall."],
+  Shirogane_Eclipse: [SHIROGANE, "[slow, intense, building] Eclipse... [fierce] Fang."],
+  Shirogane_Hurt: [SHIROGANE, "[short pained breath] Hh!"],
+  Shirogane_Hurt_2: [SHIROGANE, "[sharp wince] Ah!"],
+  Shirogane_Hurt_3: [SHIROGANE, "[quiet pained exhale] Nn..."],
 };
 
 const client = new ElevenLabsClient();

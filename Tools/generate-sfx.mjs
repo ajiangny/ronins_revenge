@@ -108,6 +108,43 @@ const SOUNDS = {
       "A long sword stabbing deep into stone ground from above: a heavy sharp crunching impact of steel into rock " +
       "with debris, then the blade left standing hums with a long shimmering metallic ring. Video game, no music.",
   },
+  // Shirogane and her spirit wolf.
+  WolfGrowl: {
+    seconds: 1,
+    prompt:
+      "A large ghostly wolf's low menacing growl, deep and rumbling with a faint hollow ethereal echo, as if " +
+      "heard from another world, short, video game sound effect, no music.",
+  },
+  WolfHowl: {
+    seconds: 2.2,
+    prompt:
+      "A single long haunting wolf howl, rising then falling, with a ghostly hollow reverb and a faint cold " +
+      "shimmer under it, as if a spirit wolf is howling at the moon. Video game sound effect, no music.",
+  },
+  BladeRing: {
+    seconds: 1,
+    prompt:
+      "Two katanas drawn and flaring with magical blue flame: a bright metallic shing of steel followed by a " +
+      "soft rising whoosh of cold fire with a crystalline shimmer. Video game sound effect, no music.",
+  },
+  GhostSwordFall: {
+    seconds: 0.7,
+    prompt:
+      "A ghostly sword plunging down through the air: a fast airy whoosh with an eerie thin whistling ring, " +
+      "ethereal and cold, short and punchy, video game sound effect, no music.",
+  },
+  SpiritBeam: {
+    seconds: 1.2,
+    prompt:
+      "A sustained beam of icy spirit energy: a steady hollow roaring hum with a high crystalline whine over it, " +
+      "cold and ghostly, loopable, video game sound effect, no music.",
+  },
+  MistSwirl: {
+    seconds: 1,
+    prompt:
+      "A swirl of cold spectral mist as a ghost vanishes: a soft airy whoosh with a breathy, frosty shimmer and " +
+      "a faint whispering reverb, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

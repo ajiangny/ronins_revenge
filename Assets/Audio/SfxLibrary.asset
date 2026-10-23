@@ -438,6 +438,72 @@ MonoBehaviour:
     - 1.4367347
     - 1.4367347
     ownSource: 0
+  - id: WolfGrowl
+    clips:
+    - {fileID: 8300000, guid: 2a7fbc67f314547bfb8a1ef29a67f4fe, type: 3}
+    - {fileID: 8300000, guid: 620e459d0365047fe9a21fca446704e4, type: 3}
+    volume: 0.8
+    pitchJitter: 0.05
+    minInterval: 0.3
+    audible:
+    - 0.85430837
+    - 0.84360546
+    ownSource: 0
+  - id: WolfHowl
+    clips:
+    - {fileID: 8300000, guid: 7e465a621ae5945a0b28754436bab10a, type: 3}
+    - {fileID: 8300000, guid: 9ddf98a661c69440fb03380ccf916e86, type: 3}
+    volume: 1
+    pitchJitter: 0
+    minInterval: 0.8
+    audible:
+    - 2.1156235
+    - 2.0998867
+    ownSource: 0
+  - id: BladeRing
+    clips:
+    - {fileID: 8300000, guid: 31955c352766a4abd800ba79ad25c2a2, type: 3}
+    - {fileID: 8300000, guid: f37c74c7fcafc41b390dd1527ae0df9a, type: 3}
+    volume: 0.7
+    pitchJitter: 0.06
+    minInterval: 0.1
+    audible:
+    - 0.73818594
+    - 0.83984125
+    ownSource: 0
+  - id: GhostSwordFall
+    clips:
+    - {fileID: 8300000, guid: 7f8230d4c906e43e093f9ca29ed63ee8, type: 3}
+    - {fileID: 8300000, guid: 610ae2c3de0db4007a9376130b1cfb55, type: 3}
+    volume: 0.6
+    pitchJitter: 0.1
+    minInterval: 0.05
+    audible:
+    - 0.45387754
+    - 0.44816327
+    ownSource: 0
+  - id: SpiritBeam
+    clips:
+    - {fileID: 8300000, guid: ba1521804be5d46568e30fa2ebc5989f, type: 3}
+    - {fileID: 8300000, guid: 2dc6f1d945c744aa39606c60b6a63d25, type: 3}
+    volume: 0.7
+    pitchJitter: 0
+    minInterval: 0.1
+    audible:
+    - 1.2538775
+    - 1.2538775
+    ownSource: 1
+  - id: MistSwirl
+    clips:
+    - {fileID: 8300000, guid: 441ee4c2aa16c4e75bb2302c1152c325, type: 3}
+    - {fileID: 8300000, guid: 8bb7e866e23064f01acecc27d1ede5cd, type: 3}
+    volume: 0.6
+    pitchJitter: 0.08
+    minInterval: 0.15
+    audible:
+    - 0.79986393
+    - 0.88673466
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   musicVolume: 0.45

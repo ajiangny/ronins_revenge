@@ -616,17 +616,20 @@ MonoBehaviour:
   shiroWolfHowl: []
   shiroWolfCharge: []
   shiroWolfVanish: []
-  shiroganePortrait: {fileID: 0}
-  shiroganeCloseup: {fileID: 0}
-  shiroganeIntroLine: {fileID: 0}
-  shiroganePhaseLine: {fileID: 0}
-  shiroganeDefeatLine: {fileID: 0}
-  shiroganeDefeatFinalLine: {fileID: 0}
-  shiroganeStaggerLine: {fileID: 0}
-  shiroganeCrescentLine: {fileID: 0}
-  shiroganeBladeRainLine: {fileID: 0}
-  shiroganeEclipseLine: {fileID: 0}
-  shiroganeHurtLines: []
+  shiroganePortrait: {fileID: 21300000, guid: 7060fe1074bf6444ea4d1715b72e7108, type: 3}
+  shiroganeCloseup: {fileID: 21300000, guid: e0e2e2ff5138a4f7096f36294d515e5d, type: 3}
+  shiroganeIntroLine: {fileID: 8300000, guid: 22b201e05a7d94010905e09e68d3805c, type: 3}
+  shiroganePhaseLine: {fileID: 8300000, guid: c947dbeb9ed7d4dfca27248a7b0c11e2, type: 3}
+  shiroganeDefeatLine: {fileID: 8300000, guid: 5faa645c5f2644f3ca075d7bf787808f, type: 3}
+  shiroganeDefeatFinalLine: {fileID: 8300000, guid: e88c86627e26c423a880234515dcb1d4, type: 3}
+  shiroganeStaggerLine: {fileID: 8300000, guid: 99e78cff73eda46709a81f8f60805ac8, type: 3}
+  shiroganeCrescentLine: {fileID: 8300000, guid: 7316bb481dc204102984169df7973526, type: 3}
+  shiroganeBladeRainLine: {fileID: 8300000, guid: ffe58a554e32747ed8a8c5fad0fd891e, type: 3}
+  shiroganeEclipseLine: {fileID: 8300000, guid: 74635955a71f441cfb3057b37c4bf616, type: 3}
+  shiroganeHurtLines:
+  - {fileID: 8300000, guid: 259c9bfe645a34460bfdc93f8a8ddc9e, type: 3}
+  - {fileID: 8300000, guid: b1acac455d56d49f7a06c0359bf14f8f, type: 3}
+  - {fileID: 8300000, guid: 4c3f7330c0ad7496b844bafe5898122b, type: 3}
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2

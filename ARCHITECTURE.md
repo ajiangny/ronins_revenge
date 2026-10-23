@@ -21,9 +21,11 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   whichever page opened them. `Pause` only fires in `Playing`; `Resume` always restores `timeScale = 1`
   (a pause can cut off a parry hit-stop).
 - Content is data: `GameManager.stages` is a `StageConfig[]` (`StageConfig.cs`). Each stage has a name,
-  `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Two stages: "The Bamboo Road" (three
-  rounds, then Benibana) and "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi). The default array in code is only the initial value; the scene's serialized
-  copy wins, so edit it in the Inspector (or keep both in step).
+  `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Three stages: "The Bamboo Road" (three
+  rounds, then Benibana), "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi) and "The
+  Frozen Shrine" (three rounds with Yurei ghosts and divers from the first, then Shirogane). The array is written in
+  `GameManager.DefaultStages()`; the scene's serialized copy wins at runtime, and `Ninja/Apply Stages` copies the
+  coded stages into it (and re-applies the maps), so add or retune a stage in code and re-run it.
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `StageCleared` → `BeginBoss` / `OfferStageBoon`,
   `NextStage` → `EnterStage`, `EndGame`. Blockers are rebuilt only when a stage starts (or on a new map), so they
   wear down across its rounds.
@@ -97,13 +99,16 @@ match `BoonChoiceUI.boonIcons`.
   (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
 - `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint, and `Encase` (ice from Frost Blade / Frozen Riposte: holds its fire, and the ronin's next hit kills it outright).
 - `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan), `Taisho` (2 HP, unbreakable spear
-  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front) and `Shieldbearer` (2 HP,
-  steel-tinted, never fires; `FrontShooterInColumn` lets the rank behind shoot over it). Rows pick a kind via
+  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front), `Shieldbearer` (2 HP,
+  steel-tinted, never fires; `FrontShooterInColumn` lets the rank behind shoot over it) and `Yurei` (a ghost in the
+  Bushi art, drawn translucent cyan over a spirit glow by `Samurai.SetFrost`; fires a parted pair of arrows with
+  `Arrow.PassesCover`, so cover doesn't stop them). Rows pick a kind via
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
-  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art).
+  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Yurei the Bushi's).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
   `MakeUnbreakable` makes the Taisho spear: it passes through slashes, kunai, arrows and blockers and only stops on the
-  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). Its yari art
+  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). `Tint` recolours a
+  plain arrow (the yurei's). Its yari art
   (`Art/Sprites/Projectiles/Spear.png`) reaches it through `Samurai.spearSprite`, wired by `Ninja/Apply Sprite Art`.
 - `SamuraiCounter.cs` — "Samurai Left" HUD text.
 
@@ -144,14 +149,33 @@ match `BoonChoiceUI.boonIcons`.
   the throw wind-up is `utsusemiSwordThrow`, both via `SetThrowFrames`. The beams fire from `Core`, its heart, except Midnight's left hand, which fires from its `Eye` (`Beam.fromEye`). Both draw with the three-layer `Beam` (`MakeBeam`/`DrawBeam`), stop on cover (`BeamEnd`)
   and hit the ronin where they cross his height (`HitIfCrossed`), leaving `GroundFire` patches burning along the ground; the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
   Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop`, `HourSlash`, `SwordWhirl` and `SwordPlant`.
-- Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, music),
+- `Shirogane.cs` — Stage 3 boss, "The Forsaken Blade" (two 140 HP bars), a ghost swordswoman with twin blue-flame
+  katanas and, from phase 2, her `SpiritWolf` (same file: a code-built body that follows her rest spot `WolfRest`,
+  `Vanish`/`AppearAt(at, hold)` through mist, `Glare`, `PlayHowl`, `Grow`, `OpenEyes`, `WalkTo`, `Dissolve`,
+  `Silhouette` for the pack; no collider, every hurt is an Arrow). She `Glide`s along her row (`Roam` between combos,
+  `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots: `Crescent` (breakable),
+  `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:
+  `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
+  Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
+  Barrage (`PlaceOrbiting`, `LooseRow`). Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
+  Spirit Assault, Phantom Wolf Pack (`lastPackLanes`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code
+  `Moon`, two crescent waves, a lane beam from the wolf's `Mouth`, a sword spread, then `exposed` doubles damage for
+  2 s via `DamageMultiplier`). `NextMove` weights the phase's signature twice, never repeats a move three times
+  (`repeats`), alternates sword and wolf moves in phase 2 (`lastWasWolf`) and forces the ultimate every fifth move.
+  `PhaseBreak` plays the wolf's arrival; `Fall` is an 11 s scene (`DefeatSeconds`, which `GameManager.BossFell`
+  waits for): blades `DropBlade`/`Tumble`, the wolf walks to her and dissolves, she speaks `BossLine.DefeatFinal`
+  (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips via
+  `SetWolfFrames`. Effects `Fx.Shiro*`; sounds `WolfGrowl`, `WolfHowl`, `BladeRing`, `GhostSwordFall`, `SpiritBeam`
+  (loop), `MistSwirl`.
+- Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, spirit blue for Shirogane, `Backdrop.MoonLook`/`Moons`; `TuneVoice` retunes the shared chorus/echo/distortion filters per boss),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`
   (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`). The intro is two beats on an opaque dark
   stage lit by a wash of the boss's colour (`ProceduralSprites.SoftGlow`): the full-body portrait fades up, then
   cross-fades to the close-up while a lower-third title (epithet, a rule, name; Title style) rises in, with the
   spoken line typed on beneath.
-- Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`).
+- Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
+  `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Portraits/<Boss>_Full/_Closeup.png`, `Audio/Voice/<Boss>_<Line>.mp3`.
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
 `Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized
@@ -168,13 +192,15 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
   Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),
   so a row isn't all identical; the courtyard has three looks of each too (`BushB/C`, `LanternB/C`, wired by `Apply Backdrop And Blockers Only`). Map sets: Bamboo Road = roadside stones and bamboo clumps (`SBS`), Pass = boulders and Jizo statues (`RJR`), Benibana = maple shrubs and
-  komainu (`MKM`), Utsusemi = gear piles and clock pillars (`GCG`), three looks each, art in `Art/Sprites/Blockers/`
+  komainu (`MKM`), Utsusemi = gear piles and clock pillars (`GCG`), Frozen Shrine = snow-capped stones and broken torii
+  posts (`STS`), Shirogane = frosted shrubs and shrine lanterns (`ISI`), three looks each, art in `Art/Sprites/Blockers/`
   as `<Name>_0..2`, `<Name>B_0..2`, `<Name>C_0..2` (from PixelLab), wired by `Ninja/Apply Maps`.
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
   ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
   `BambooRoad_Stage1` (a dirt road with bamboo only at the edges), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
   `Arena_Utsusemi` (clockwork temple floor), generated with PixelLab. `CourtyardGrass` with its bushes and lanterns
-  is the fallback for any stage without a rounds map in `NinjaArtSetup.RoundsGrounds`, kept for a third stage.
+  is the fallback for any stage without a rounds map in `NinjaArtSetup.RoundsGrounds` (`Shrine_Stage3` is stage 3's;
+  `Arena_Shirogane` her court).
   `GameManager.Start` shows stage 1's map (behind the title menu too).
 - `Atmosphere.cs` — each map's mood, built by `Backdrop` and swapped in `Show` (`Map.atmosphere`, `Atmosphere.Settings`;
   the courtyard's is `Backdrop.courtyardAtmosphere`): cloud shadows drifting with the wind, a moonlight glow and a
@@ -254,6 +280,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 |---|---|---|
 | Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
+| Apply Stages | `Editor/NinjaArtSetup.cs` | Copies `GameManager.DefaultStages()` into the scene's `stages` (names, bosses, every round's values), then the maps |
 | Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Ronin spirit wisps cut from his base art, elemental ronin recolours, soul and boon icon wiring (`UI/Boons/<BoonId>`), each element's shuriken (`Projectiles/ShurikenArt_<suffix>`, PixelLab; recoloured from the base when missing), the ice statue shell |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
@@ -272,5 +299,5 @@ Each object handles its own collision (projectiles only destroy themselves).
 ## Outside Unity
 
 - `Tools/generate-music.mjs` — regenerates music via ElevenLabs (`npm run music`, key in gitignored `.env.local`).
-- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, Benibana's mid-fight barks and all of Utsusemi's lines in its designed voice (`npm run sfx`, `npm run voice`).
+- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, Benibana's mid-fight barks, all of Utsusemi's lines in its designed voice and all of Shirogane's in Lily's (`npm run sfx`, `npm run voice`).
 - `README.md` — the assignment write-up (requirements, template fixes, features, balancing).

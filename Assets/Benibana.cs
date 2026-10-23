@@ -8,7 +8,7 @@ using UnityEngine;
 public class Benibana : Boss
 {
     // Per bar: she fights two, the second after her phase break.
-    public const int StartingHealth = 35;
+    public const int StartingHealth = 70;
 
     static readonly Color Crimson = new Color(0.95f, 0.15f, 0.22f);
     static readonly Color Silver = new Color(0.85f, 0.88f, 0.95f);

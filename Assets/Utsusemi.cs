@@ -8,7 +8,7 @@ using UnityEngine;
 public class Utsusemi : Boss
 {
     // Per bar: it fights two, the second after its phase break.
-    public const int StartingHealth = 60;
+    public const int StartingHealth = 120;
 
     static readonly Color Steel = new Color(0.55f, 0.68f, 0.95f);
     static readonly Color Gold = new Color(0.9f, 0.75f, 0.4f);

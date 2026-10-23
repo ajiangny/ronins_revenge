@@ -117,11 +117,11 @@ match `BoonChoiceUI.boonIcons`.
   `PhaseBreaking` makes it invincible and refills the bar, raising `Healed`, then starts phase 2 via `SecondPhase`),
   staggers, freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
   that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`.
-- `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (two 35 HP bars). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
+- `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (two 70 HP bars). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 once her first bar empties: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
-- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (two 60 HP bars), a karakuri automaton that moves in ticking steps, trailing digital afterimages (`DigitalGhost`: steel-blue and gold `SpriteFlash` silhouettes, faded by `GlitchFade`)
+- `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (two 120 HP bars), a karakuri automaton that moves in ticking steps, trailing digital afterimages (`DigitalGhost`: steel-blue and gold `SpriteFlash` silhouettes, faded by `GlitchFade`)
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
   `RazeCover`, a beam from its `Eye` swept along the foot of the blocker row, demolishing every `Blocker`. Moves: Kasa Wheel (its unbreakable hat flies a telegraphed boomerang loop through the ronin's lane,
   `AimHat`/`FlyHat`, while the fight carries on; hits deal double while the hat is off via `Boss.DamageMultiplier`,

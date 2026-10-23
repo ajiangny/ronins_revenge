@@ -1098,6 +1098,8 @@ public class GameManager : MonoBehaviour
         activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
         foreach (Behaviour filter in machineVoice) filter.enabled = Stage.boss == BossKind.Utsusemi;
         activeBoss.Damaged += OnBossDamaged;
+        Boss boss = activeBoss;
+        boss.Healed += () => ui.SetBossHealth(boss.HealthFraction);
         activeBoss.Defeated += OnBossDefeated;
         activeBoss.Spoke += OnBossSpoke;
         effects.Boss = activeBoss;

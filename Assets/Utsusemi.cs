@@ -7,7 +7,8 @@ using UnityEngine;
 // Strikes, ends in a giant cleave that only a parry answers; sent back, it jams the gears.
 public class Utsusemi : Boss
 {
-    public const int StartingHealth = 120;
+    // Per bar: it fights two, the second after its phase break.
+    public const int StartingHealth = 60;
 
     static readonly Color Steel = new Color(0.55f, 0.68f, 0.95f);
     static readonly Color Gold = new Color(0.9f, 0.75f, 0.4f);
@@ -46,7 +47,7 @@ public class Utsusemi : Boss
         _ => null,
     };
 
-    bool secondPhase;
+    bool secondPhase => SecondPhase;
     bool breaking;
     bool tock;
     int hatsOut;
@@ -594,8 +595,6 @@ public class Utsusemi : Boss
         yield return HoldArmor(shell, 0.25f);
         armored = false;
         foreach (SpriteRenderer part in shell) RemoveTransient(part);
-        // A phase break the armour held off lands now.
-        OnDamaged();
 
         // The dashes: from memory now.
         foreach (HourMark mark in marks)
@@ -1804,20 +1803,16 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.GearGrind);
     }
 
-    protected override void OnDamaged()
-    {
-        if (!secondPhase && !armored && !breaking && HealthFraction <= 0.5f) StartCoroutine(PhaseBreak());
-    }
+    protected override bool HasSecondPhase => true;
 
-    // At half health the mainspring snaps: the shroud tears, the chest opens on its glowing core, and the clock
-    // runs fast from then on.
-    IEnumerator PhaseBreak()
+    // When its first bar empties the mainspring snaps: the shroud tears, the chest opens on its glowing core, and the
+    // clock runs fast from then on.
+    protected override IEnumerator PhaseBreak()
     {
-        secondPhase = true;
         breaking = true;
-        Interrupt();
+        // A break mid-Hour Strikes drops the armour with the rest of the move.
+        armored = false;
         ShowEye(false);
-        SetInvulnerable(1.8f);
         CameraShake.Add(0.5f);
         Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
         Sfx.Play(Sfx.StageStart, 1f, 0.8f);
@@ -1837,7 +1832,6 @@ public class Utsusemi : Boss
         Speak(BossLine.Phase);
         yield return new WaitForSeconds(1.8f);
         breaking = false;
-        RestartFight();
     }
 
     void AddCore()

@@ -23,6 +23,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     const float HurtLineGap = 2.5f;
 
     public event Action<Vector3, KillSource> Damaged;
+    // Raised as the bar refills during a phase break.
+    public event Action Healed;
     public event Action Defeated;
     public event Action<Boss, BossLine> Spoke;
 
@@ -44,6 +46,14 @@ public abstract class Boss : MonoBehaviour, IHittable
     float armorChip;
     public float HealthFraction => (float)Health / MaxHealth;
     public bool IsDead { get; private set; }
+    // Bosses with a second phase have two bars: emptying the first starts a phase break that refills it.
+    protected virtual bool HasSecondPhase => false;
+    public bool SecondPhase { get; private set; }
+    // True from the moment the first bar empties until phase 2 begins; nothing hurts the boss meanwhile.
+    protected bool PhaseBreaking { get; private set; }
+    // How long the bar takes to refill, after the break's first beat.
+    const float RefillDelay = 0.4f;
+    const float RefillSeconds = 1.2f;
     public Vector3 Centre => sprite.bounds.center;
 
     protected Rigidbody body;
@@ -59,7 +69,6 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     float frozenUntil;
     float staggeredUntil;
-    float invulnerableUntil;
     float nextHurtLine;
     float age;
     Coroutine fight;
@@ -144,8 +153,14 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     protected abstract IEnumerator Fight();
 
-    // Called after every hit that leaves the boss standing, for phase changes.
+    // Called after every hit that leaves the boss standing.
     protected virtual void OnDamaged() { }
+
+    // The phase-break cutscene, played while the bar refills; the boss is invincible until it ends.
+    protected virtual IEnumerator PhaseBreak()
+    {
+        yield return new WaitForSeconds(RefillDelay + RefillSeconds);
+    }
 
     // Called when a reflected strike breaks the boss's stance, for its own reaction on top of the wobble.
     protected virtual void OnStaggered() { }
@@ -182,7 +197,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     // fight, the boss notices it has stopped moving and starts over.
     void Update()
     {
-        if (!fighting || IsDead || Busy || Staggered || Frozen)
+        if (!fighting || IsDead || PhaseBreaking || Busy || Staggered || Frozen)
         {
             lastBeat = Time.time;
             return;
@@ -235,11 +250,6 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected void PlayIdle()
     {
         animator.Play(IdleClip, true, null, art.idleFps);
-    }
-
-    protected void SetInvulnerable(float seconds)
-    {
-        invulnerableUntil = Time.time + seconds;
     }
 
     void FixedUpdate()
@@ -339,14 +349,14 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public void Freeze(float seconds)
     {
-        if (SuperArmor) return;
+        if (SuperArmor || PhaseBreaking) return;
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
     }
 
     // Broken stance: the boss stops dead and takes double damage for a moment.
     public void Stagger(float seconds)
     {
-        if (IsDead || SuperArmor) return;
+        if (IsDead || SuperArmor || PhaseBreaking) return;
         Interrupt();
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
@@ -362,6 +372,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         float tilt = 0;
         for (float t = 0; t < seconds; t += Time.deltaTime)
         {
+            // A phase break cuts the daze short and restarts the fight itself.
+            if (PhaseBreaking)
+            {
+                sprite.transform.localRotation = Quaternion.identity;
+                yield break;
+            }
             // A dazed wobble while her stance is broken.
             tilt = Mathf.Sin(t * 18f) * 6f * (1f - t / seconds);
             sprite.transform.localRotation = Quaternion.Euler(0, 0, tilt);
@@ -376,7 +392,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public void TakeHit(int damage, KillSource source)
     {
-        if (IsDead || Time.time < invulnerableUntil) return;
+        if (IsDead || PhaseBreaking) return;
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
         if (SuperArmor)
@@ -402,7 +418,8 @@ public abstract class Boss : MonoBehaviour, IHittable
 
         if (Health <= 0)
         {
-            Die();
+            if (HasSecondPhase && !SecondPhase) StartCoroutine(BreakPhase());
+            else Die();
             return;
         }
         if (source == KillSource.Reflected) Stagger(StaggerSeconds);
@@ -412,6 +429,39 @@ public abstract class Boss : MonoBehaviour, IHittable
             Speak(BossLine.Hurt);
         }
         OnDamaged();
+    }
+
+    // The first bar is empty: the fight stops, the cutscene plays while the bar fills back up, then phase 2 begins.
+    IEnumerator BreakPhase()
+    {
+        SecondPhase = true;
+        PhaseBreaking = true;
+        armorChip = 0;
+        staggeredUntil = frozenUntil = 0;
+        Interrupt();
+        IEnumerator scene = PhaseBreak();
+        bool sceneDone = false;
+        StartCoroutine(Run(scene, () => sceneDone = true));
+
+        yield return new WaitForSeconds(RefillDelay);
+        for (float t = 0; t < RefillSeconds; t += Time.deltaTime)
+        {
+            Health = Mathf.Max(Health, Mathf.CeilToInt(MaxHealth * Mathf.SmoothStep(0, 1, t / RefillSeconds)));
+            Healed?.Invoke();
+            yield return null;
+        }
+        Health = MaxHealth;
+        Healed?.Invoke();
+
+        while (!sceneDone) yield return null;
+        PhaseBreaking = false;
+        RestartFight();
+    }
+
+    IEnumerator Run(IEnumerator routine, Action done)
+    {
+        yield return routine;
+        done();
     }
 
     void Die()

@@ -7,7 +7,8 @@ using UnityEngine;
 // to break her stance.
 public class Benibana : Boss
 {
-    public const int StartingHealth = 70;
+    // Per bar: she fights two, the second after her phase break.
+    public const int StartingHealth = 35;
 
     static readonly Color Crimson = new Color(0.95f, 0.15f, 0.22f);
     static readonly Color Silver = new Color(0.85f, 0.88f, 0.95f);
@@ -38,7 +39,7 @@ public class Benibana : Boss
         _ => null,
     };
 
-    bool secondPhase;
+    bool secondPhase => SecondPhase;
     bool breaking;
     Move? lastMove;
     int movesSinceIaido;
@@ -346,19 +347,13 @@ public class Benibana : Boss
         }
     }
 
-    protected override void OnDamaged()
-    {
-        if (!secondPhase && HealthFraction <= 0.5f) StartCoroutine(PhaseBreak());
-    }
+    protected override bool HasSecondPhase => true;
 
-    // At half health her kimono tears and her hair comes loose; she exhales a veil of smoke over the top of the
-    // screen and fights on from inside it, only her eyes showing.
-    IEnumerator PhaseBreak()
+    // When her first bar empties her kimono tears and her hair comes loose; she exhales a veil of smoke over the top
+    // of the screen and fights on from inside it, only her eyes showing.
+    protected override IEnumerator PhaseBreak()
     {
-        secondPhase = true;
         breaking = true;
-        Interrupt();
-        SetInvulnerable(1.8f);
         CameraShake.Add(0.5f);
         Sfx.Play(Sfx.StageStart, 1f, 0.7f);
         Fx.Play(Fx.SlashArc, Centre, Crimson, 4f);
@@ -376,7 +371,6 @@ public class Benibana : Boss
         SpawnVeil();
         yield return new WaitForSeconds(1.2f);
         breaking = false;
-        RestartFight();
     }
 
     // Her killing intent made visible: crimson flames licking up from her feet and a red glow pulsing behind her.

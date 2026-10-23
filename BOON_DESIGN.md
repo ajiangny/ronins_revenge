@@ -197,8 +197,10 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
 
 - **The drop.** Hades' Daedalus Hammer became the **technique scroll**: a rare pickup, mostly from kite scouts (40%,
   plus 0.5% from any kill), at most two a run. It opens a **Sword Arts** screen of arts not yet held.
-- **The arts:** Split Slash, Piercing Slash, Echo Slash and Crescent Moon. They reshape the slash itself and stack
-  with each other and with the element Blade boons.
+- **The arts:** Split Slash, Piercing Slash, Echo Slash and Shadow Clone. They reshape the slash itself and stack
+  with each other and with the element Blade boons. Crescent Moon (a wider slash) was the first fourth art, but even at
+  2.6× as wide it felt weak next to the others. Shadow Clone replaced it: a mirrored shadow that slashes with you
+  doubles your coverage of the formation.
 - **Kindling replaced Inferno Fan.** Inferno Fan's spread of slashes overlapped Split Slash. Kindling first set off a
   blast every few slash kills, which played too quietly. Now every few swings it throws a great fireball instead
   of a slash, which bursts in a wide blast. It's something you see coming and can aim.

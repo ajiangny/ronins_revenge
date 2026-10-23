@@ -1482,7 +1482,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 9085c952fbaed4f03a2da7369a620440, type: 3}
   - {fileID: 21300000, guid: f434844fce5ba4f4b9cb9874941b0f4a, type: 3}
   - {fileID: 21300000, guid: 6e727abde0b314be7a1d832ef6a187b9, type: 3}
-  - {fileID: 21300000, guid: 6a89580cb9d654cbf959711d3de2fc2f, type: 3}
+  - {fileID: 21300000, guid: 17b6f686a00a64712a78857366f3c6fc, type: 3}
   - {fileID: 21300000, guid: 0f428897711e04425b91bb5ab05790a2, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}

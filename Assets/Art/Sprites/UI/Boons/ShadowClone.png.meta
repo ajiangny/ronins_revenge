@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 6a89580cb9d654cbf959711d3de2fc2f
+guid: 17b6f686a00a64712a78857366f3c6fc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5452458268544750743
-    second: CrescentMoon_0
+      213: -939682854926774355
+    second: ShadowClone_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +115,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CrescentMoon_0
+      name: ShadowClone_0
       rect:
         serializedVersion: 2
         x: 0
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 794504928e50bab40800000000000000
-      internalID: 5452458268544750743
+      spriteID: daf809e0c6395f2f0800000000000000
+      internalID: -939682854926774355
       vertices: []
       indices: 
       edges: []

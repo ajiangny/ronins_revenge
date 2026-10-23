@@ -28,7 +28,7 @@ public enum BoonId
     StormStep, StaticCharge,
     ThermalShock, PlasmaArc, Superconductor,
     Wildfire, StillWater, RaijinsDrum,
-    SplitSlash, PiercingSlash, EchoSlash, CrescentMoon,
+    SplitSlash, PiercingSlash, EchoSlash, ShadowClone,
     SpiritOffering,
 }
 
@@ -253,9 +253,9 @@ public static class Boons
         new BoonDefinition { Id = BoonId.EchoSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Echo Slash",
             Description = "A swing may send a ghostly second <b>Slash</b> that hunts down an enemy.",
             StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
-        new BoonDefinition { Id = BoonId.CrescentMoon, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Crescent Moon",
-            Description = "Your <b>Slash</b> is a great crescent, wide enough to cut two columns and every arrow across them.",
-            StatLabel = "Slash width:", Values = new[] { 2.6f, 2.6f, 2.6f }, Format = v => $"x{v:0.#}" },
+        new BoonDefinition { Id = BoonId.ShadowClone, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Shadow Clone",
+            Description = "Your shadow mirrors you across the field and <b>Slashes</b> whenever you do. Nothing can touch it.",
+            StatLabel = "Shadows:", Values = new[] { 1f, 1f, 1f }, Format = Plus },
     };
 
     // Stands in when a soul's element has nothing left to offer, so a caught soul is never wasted.

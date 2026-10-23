@@ -26,8 +26,9 @@ public class Ronin : MonoBehaviour
     const float SplitScale = 0.8f;
     // Echo Slash's homing ghost is drawn a little smaller than the slash it echoes.
     const float EchoScale = 0.9f;
-    // Crescent Moon makes the slash only this much taller while it widens.
-    const float CrescentHeight = 1.15f;
+    // Shadow Clone: the shadow's look, and the look of the slashes it sends.
+    static readonly Color ShadowTint = new Color(0.32f, 0.22f, 0.5f, 0.75f);
+    static readonly Color ShadowGlow = new Color(0.55f, 0.35f, 0.9f);
     // How long a Frozen Riposte shard holds the samurai it hits in ice.
     const float RiposteShardFreeze = 1.5f;
 
@@ -103,6 +104,8 @@ public class Ronin : MonoBehaviour
 
     Rigidbody body;
     SpriteRenderer sprite;
+    SpriteRenderer shadow;
+    SpriteRenderer shadowGlow;
     SpriteRenderer aura;
     readonly System.Collections.Generic.List<SpriteRenderer> wisps = new System.Collections.Generic.List<SpriteRenderer>();
     SpriteAnimator animator;
@@ -199,6 +202,38 @@ public class Ronin : MonoBehaviour
     void LateUpdate()
     {
         UpdateWisps();
+        UpdateShadowClone();
+    }
+
+    // Shadow Clone: the shadow mirrors him across the middle of the view (CameraShake.Center, so a shake doesn't move
+    // it), drawn from his own frame flipped and darkened. It's only a picture: nothing collides with it. It shows while
+    // he's in control, and puffs into being the first time.
+    void UpdateShadowClone()
+    {
+        bool show = ControlsEnabled && Loadout.Has(BoonId.ShadowClone, out _);
+        if (shadow == null)
+        {
+            if (!show) return;
+            shadow = new GameObject("ShadowClone").AddComponent<SpriteRenderer>();
+            shadowGlow = Kunai.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, new Color(ShadowGlow.r, ShadowGlow.g, ShadowGlow.b, 0.35f));
+            Fx.Play(Fx.SmokePuff, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y, 0f), ShadowGlow, 1.4f);
+        }
+        shadow.enabled = shadowGlow.enabled = show;
+        if (!show) return;
+        shadow.sprite = sprite.sprite;
+        shadow.flipX = !sprite.flipX;
+        shadow.color = ShadowTint;
+        shadow.sortingOrder = sprite.sortingOrder - 1;
+        Vector3 at = sprite.transform.position;
+        shadow.transform.position = new Vector3(MirrorX(at.x), at.y, at.z);
+        shadow.transform.localScale = sprite.transform.lossyScale;
+    }
+
+    float MirrorX(float x) => 2f * CameraShake.Center.x - x;
+
+    void OnDestroy()
+    {
+        if (shadow != null) Destroy(shadow.gameObject);
     }
 
     // Some of his clips (idle, parry, walk) were drawn without the spirit wisps from his base art, so they're layered
@@ -289,11 +324,19 @@ public class Ronin : MonoBehaviour
     }
 
     // One slash (or kunai) per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
-    // homing ghost, and Piercing Slash and Crescent Moon apply to every one of them.
+    // homing ghost, Piercing Slash applies to every one of them, and Shadow Clone's shadow swings with him.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
         Kunai slash = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, 1f);
         if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, source, projectileSprite, parent));
+        if (shadow != null && shadow.enabled)
+        {
+            // The shadow's slash is its own (it splits and pierces too) but never echoes, and wears the shadow's colours.
+            Kunai shade = LaunchSlash(prefab, new Vector3(MirrorX(Muzzle.x), Muzzle.y, 0f), Vector3.up, source, projectileSprite, 1f);
+            shade.Tint(Color.Lerp(attackTint, ShadowGlow, 0.6f), ShadowGlow);
+            if (Loadout.Has(BoonId.SplitSlash, out _)) shade.SplitAfter(SplitDelay, parent => SplitOff(prefab, source, projectileSprite, parent));
+            Fx.Play(Fx.SlashArc, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y + 0.35f, 0f), ShadowGlow, 0.8f);
+        }
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
             Kunai ghost = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, EchoScale);
@@ -307,12 +350,6 @@ public class Ronin : MonoBehaviour
         Kunai projectile = SpawnProjectile(prefab, position);
         bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
         projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale);
-        // Crescent Moon stretches the slash sideways (hitbox and art alike), only a little taller, so the extra
-        // reach reads as width.
-        if (Loadout.Has(BoonId.CrescentMoon, out float width))
-        {
-            projectile.transform.localScale = Vector3.Scale(projectile.transform.localScale, new Vector3(width, CrescentHeight, 1f));
-        }
         projectile.CutsArrows = pierces;
         projectile.Tint(attackTint, attackGlow);
         return projectile;

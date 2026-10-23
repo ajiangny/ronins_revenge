@@ -563,9 +563,10 @@ public class Utsusemi : Boss
         lattice.RemoveAll(a => a == null);
     }
 
-    // Hour Strikes: gold hour numerals (I, II, III...) appear along the ground out of order, so the dashes zig-zag. In
-    // turn, each burns red; it dashes down out of its row onto that hour, chops it with a ground-cracking blow and
-    // dashes back up, so he weaves between the marks. Then, back in its row, it strikes the hour: a clock mark settles
+    // Hour Strikes: one hour at a time, a thin red sight line runs from its eye to a spot on the ground, a gold hour
+    // numeral (I, II, III...) lights up there as the warning, and its eye lasers it, burning the ronin if he's on it.
+    // The hours come out of order, so the dashes zig-zag. Then the numerals fade, and in turn each burns red; it dashes down out of its row onto that hour, chops it with a ground-cracking
+    // blow and dashes back up, so he weaves between the marks. Then, back in its row, it strikes the hour: a clock mark settles
     // under the ronin and follows him while its core glows and the blade draws back over three ticks, and a giant
     // crescent cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it:
     // sent back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
@@ -575,20 +576,15 @@ public class Utsusemi : Boss
         float beat = secondPhase ? 0.3f : 0.4f;
         Vector3 row = anchor;
 
-        // The announcement, in super armour: it calls the move and stands its ground in a gold shell while the
-        // hours light up one at a time, then go dark. Nothing staggers or freezes it until the shell drops.
+        // The announcement, in super armour: it calls the move and stands its ground in a gold shell while it lasers
+        // the hours in one at a time, then they go dark. Nothing staggers or freezes it until the shell drops.
         Speak(BossLine.HourStrikes);
         armored = true;
         SpriteRenderer[] shell = ArmorShell();
         Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
         List<HourMark> marks = PlaceHours(count);
         yield return HoldArmor(shell, 0.3f);
-        foreach (HourMark mark in marks)
-        {
-            mark.Show(Gold);
-            Tick(0.7f);
-            yield return HoldArmor(shell, secondPhase ? 0.4f : 0.55f);
-        }
+        foreach (HourMark mark in marks) yield return MarkHour(mark, shell);
         yield return HoldArmor(shell, 0.3f);
         foreach (HourMark mark in marks) mark.Hide(0.3f);
         Tick(0.4f);
@@ -612,6 +608,33 @@ public class Utsusemi : Boss
         Beat();
         yield return StrikeTheHour();
         PlayIdle();
+    }
+
+    // One hour marked: a thin sight line from its eye to the spot, the numeral lighting up there as the warning,
+    // then its eye's laser striking it. The laser burns the ronin if he's standing on the hour, but leaves no fire,
+    // so the numerals stay clear to read.
+    IEnumerator MarkHour(HourMark mark, SpriteRenderer[] shell)
+    {
+        Vector3 spot = new Vector3(mark.x, GroundY + 0.15f, 0);
+        SpriteRenderer sight = Bar(Eye, spot, 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.45f));
+        yield return HoldArmor(shell, secondPhase ? 0.25f : 0.35f, () => Stretch(sight, Eye, spot, 0.05f));
+        RemoveTransient(sight);
+
+        mark.Show(Gold);
+        Tick(0.7f);
+        yield return HoldArmor(shell, secondPhase ? 0.2f : 0.3f);
+
+        Beam beam = MakeBeam(Eye, 0.8f);
+        Sfx.Play(Sfx.LanternCharge, 0.4f, 2f);
+        CameraShake.Add(0.1f);
+        yield return HoldArmor(shell, 0.3f, () =>
+        {
+            if (beam.body == null) return;
+            DrawBeam(beam, Eye, spot, false, false);
+            HitIfCrossed(Eye, spot);
+        });
+        EndBeam(beam);
+        yield return HoldArmor(shell, 0.1f);
     }
 
     bool armored;
@@ -651,11 +674,12 @@ public class Utsusemi : Boss
     static readonly int FlashColor = Shader.PropertyToID("_FlashColor");
 
     // Real time, not boss time: the armour ignores a freeze.
-    IEnumerator HoldArmor(SpriteRenderer[] shell, float seconds)
+    IEnumerator HoldArmor(SpriteRenderer[] shell, float seconds, System.Action eachFrame = null)
     {
         for (float t = 0; t < seconds; t += Time.deltaTime)
         {
             Beat();
+            eachFrame?.Invoke();
             // A shimmer between deep gold and pale gold.
             float shimmer = 0.5f + 0.5f * Mathf.Sin(Time.time * 10f);
             if (outlineColour == null) outlineColour = new MaterialPropertyBlock();

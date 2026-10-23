@@ -609,6 +609,24 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e261d72157c784654adb568f6fb473cc, type: 3}
   - {fileID: 8300000, guid: 6f1bad16c944d45799b48a0c9e46942c, type: 3}
   - {fileID: 8300000, guid: 48e4f08bad8644e05af5b1fa47db8893, type: 3}
+  shiroganeArt: {fileID: 0}
+  shiroganeScale: 3.4
+  shiroganeDash: []
+  shiroWolfIdle: []
+  shiroWolfHowl: []
+  shiroWolfCharge: []
+  shiroWolfVanish: []
+  shiroganePortrait: {fileID: 0}
+  shiroganeCloseup: {fileID: 0}
+  shiroganeIntroLine: {fileID: 0}
+  shiroganePhaseLine: {fileID: 0}
+  shiroganeDefeatLine: {fileID: 0}
+  shiroganeDefeatFinalLine: {fileID: 0}
+  shiroganeStaggerLine: {fileID: 0}
+  shiroganeCrescentLine: {fileID: 0}
+  shiroganeBladeRainLine: {fileID: 0}
+  shiroganeEclipseLine: {fileID: 0}
+  shiroganeHurtLines: []
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2
@@ -959,41 +977,117 @@ MonoBehaviour:
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     boss: 3
     roundsMap:
-      ground: {fileID: 0}
+      ground: {fileID: 21300000, guid: 35262676b660a43db96d40b166f136a0, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
-      petal: {fileID: 0}
+      petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
       petalTint: {r: 0.9, g: 0.96, b: 1, a: 0.75}
-      blockers: []
-      blockerPattern: 
+      blockers:
+      - name: Snowstone
+        damageStates:
+        - {fileID: 21300000, guid: 6c9ad23268a38451381d71d4bec2d41b, type: 3}
+        - {fileID: 21300000, guid: e1cb85a01ed2040d78b43c28ba82b409, type: 3}
+        - {fileID: 21300000, guid: e2ff85cf855804e81b5391e6f30db33f, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 0b819c1eeae74461a8c9ec73cb475d3a, type: 3}
+          - {fileID: 21300000, guid: 70c5947e37c7c42f8b3a1adf22680285, type: 3}
+          - {fileID: 21300000, guid: 7216a9efcfeee4134b617ba105a07dfa, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: ffec7f3c77a4b427f94fe8aeed9c65dc, type: 3}
+          - {fileID: 21300000, guid: b8233d7385e214327aa295b9aafa4428, type: 3}
+          - {fileID: 21300000, guid: 6c5504625d5724471a2813e88e6a3832, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 5
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Torii
+        damageStates:
+        - {fileID: 21300000, guid: dd2d5dbd6ce3747ecb491181cb0ee56c, type: 3}
+        - {fileID: 21300000, guid: ff8d36782881d4dcbb33bd32f1958e37, type: 3}
+        - {fileID: 21300000, guid: 6d053317a06eb4e98a823ad0f6e3866b, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 19e86c15b04654a85b15a4cd9b1ed3b5, type: 3}
+          - {fileID: 21300000, guid: dd72907c02e7b4a2daeed175785ac5db, type: 3}
+          - {fileID: 21300000, guid: c545fe03a4f2c4a3a90332045cae3b69, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: f4232dbf298c841348d95209ece8b098, type: 3}
+          - {fileID: 21300000, guid: 13d17931773124bb795f86ed08566de6, type: 3}
+          - {fileID: 21300000, guid: 65104fe538f0c4a6e88b780f0a1b5a67, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.8
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: STS
       atmosphere:
-        clouds: 0
-        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
-        wind: {x: 0.8, y: -0.3}
-        moonlight: {r: 0, g: 0, b: 0, a: 0}
-        shade: 0.35
-        vignette: 0.3
-        mist: 0
-        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
-        motes: 0
-        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
+        clouds: 3
+        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.32}
+        wind: {x: 0.5, y: -0.6}
+        moonlight: {r: 0.75, g: 0.85, b: 1, a: 0.12}
+        shade: 0.42
+        vignette: 0.42
+        mist: 4
+        mistColor: {r: 0.8, g: 0.88, b: 1, a: 0.1}
+        motes: 20
+        moteColor: {r: 0.95, g: 0.98, b: 1, a: 0.8}
     bossMap:
-      ground: {fileID: 0}
+      ground: {fileID: 21300000, guid: ef3f90180e1ca4b80aff09471a12f134, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
       petal: {fileID: 0}
       petalTint: {r: 0.9, g: 0.2, b: 0.2, a: 0.85}
-      blockers: []
-      blockerPattern: 
+      blockers:
+      - name: Icebloom
+        damageStates:
+        - {fileID: 21300000, guid: 2761ddbbeac91445392e3ad92cb76f3d, type: 3}
+        - {fileID: 21300000, guid: 0835796a825bf4c388866d85afb5724c, type: 3}
+        - {fileID: 21300000, guid: ba8fef77393fb4a92a1c6ba474f2c176, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: d67c5bd0340d241409fc9c46c235408f, type: 3}
+          - {fileID: 21300000, guid: 199b7aa11789c488695bb11495bab117, type: 3}
+          - {fileID: 21300000, guid: b0d6a3d0339f64765aff3f98e474c7ec, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: bb27a2a019cd240d082a325d9e29b1ca, type: 3}
+          - {fileID: 21300000, guid: b1896b603bf0f430088000eb4fb96af0, type: 3}
+          - {fileID: 21300000, guid: 3d420d088461e4386ad09f69ec663f4e, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
+        health: 5
+        height: 1.2
+        hitbox: {x: 0.85, y: 0.85}
+      - name: ShrineLantern
+        damageStates:
+        - {fileID: 21300000, guid: 79e145f22e4414a7f9e7841649f7e85e, type: 3}
+        - {fileID: 21300000, guid: 77c851218da2c4326806299029a0d996, type: 3}
+        - {fileID: 21300000, guid: 438bbfe3e8b064b0584e8cd4076b2b37, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: b437b90d6184f466192407fc5d89bf09, type: 3}
+          - {fileID: 21300000, guid: 707ecfed5eea24dba87959ed352100d5, type: 3}
+          - {fileID: 21300000, guid: 9ee4316d173534a4cbe6a4ccbafa96d8, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: f08d63c37afff445b82c0119686fdbff, type: 3}
+          - {fileID: 21300000, guid: 7d3bebe620780476385d2f208a1f5d94, type: 3}
+          - {fileID: 21300000, guid: b5b3953e25d584ca8b95956f765c9b04, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.7
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: ISI
       atmosphere:
         clouds: 0
         cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
-        wind: {x: 0.8, y: -0.3}
-        moonlight: {r: 0, g: 0, b: 0, a: 0}
-        shade: 0.35
-        vignette: 0.3
-        mist: 0
-        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
-        motes: 0
-        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
+        wind: {x: 0.2, y: -0.15}
+        moonlight: {r: 0.6, g: 0.85, b: 1, a: 0.16}
+        shade: 0.45
+        vignette: 0.5
+        mist: 6
+        mistColor: {r: 0.5, g: 0.85, b: 1, a: 0.1}
+        motes: 26
+        moteColor: {r: 0.55, g: 0.95, b: 1, a: 0.7}
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0

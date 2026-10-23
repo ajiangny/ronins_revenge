@@ -479,4 +479,80 @@ MonoBehaviour:
     - {fileID: 21300000, guid: ef674024c35c54dcfa9667801c7d3422, type: 3}
     fps: 10
     loop: 1
+  - id: Shiro_Crescent
+    frames:
+    - {fileID: 21300000, guid: 3312beff92a1645a09e6afbfa13adeb5, type: 3}
+    - {fileID: 21300000, guid: c04b9dba775654d798779fed387e4e11, type: 3}
+    - {fileID: 21300000, guid: 4cc423ba8be0d4cd0964cc0aee485fdb, type: 3}
+    - {fileID: 21300000, guid: 09d347445008a4fb89f9a449b656942f, type: 3}
+    - {fileID: 21300000, guid: eccfdbf25a0854318a6bfd2b23a3aead, type: 3}
+    fps: 14
+    loop: 1
+  - id: Shiro_Sword
+    frames:
+    - {fileID: 21300000, guid: 1311bb1d499f348d3b041e2205b93392, type: 3}
+    fps: 10
+    loop: 1
+  - id: Shiro_Orb
+    frames:
+    - {fileID: 21300000, guid: 82edef72a08514faabe793131c5b73fe, type: 3}
+    - {fileID: 21300000, guid: bca837a2397b544a9a958032dc8bf73f, type: 3}
+    - {fileID: 21300000, guid: d308ddfb83e8a415a803dd27d1efc93c, type: 3}
+    - {fileID: 21300000, guid: 1ad00c89cb43745589cf10ed1c46b6a4, type: 3}
+    - {fileID: 21300000, guid: ea4e8ed08381b4617be58b7ebfb3403c, type: 3}
+    - {fileID: 21300000, guid: d7ffe5320ddf94b04b8a043efe1814e3, type: 3}
+    - {fileID: 21300000, guid: 8d2855ab01b5d4fc7950dff300e253b4, type: 3}
+    - {fileID: 21300000, guid: 9cfc08cc54fe44e3eb6b10a6164d632b, type: 3}
+    fps: 12
+    loop: 1
+  - id: Shiro_WolfCharge
+    frames:
+    - {fileID: 21300000, guid: a24f86c06da7d48d99b32647bf50c91a, type: 3}
+    - {fileID: 21300000, guid: e3b51da4027ef45ddb68dd51d2ba12f3, type: 3}
+    - {fileID: 21300000, guid: 1eb1c2757d1034eb79968be71ed3fd18, type: 3}
+    - {fileID: 21300000, guid: 11cdea959773f4a769e77c58858c7ed3, type: 3}
+    fps: 14
+    loop: 1
+  - id: Shiro_Mist
+    frames:
+    - {fileID: 21300000, guid: f82745aa15ad443eb8fc4eef9de322c7, type: 3}
+    - {fileID: 21300000, guid: 5ba75e2591bf2447481c5c92cf8ba2e1, type: 3}
+    - {fileID: 21300000, guid: 28eefc4091d744446b6acc941fc019a9, type: 3}
+    - {fileID: 21300000, guid: a0b0e87258753424992fc831d36e8429, type: 3}
+    - {fileID: 21300000, guid: f6cba512751444533bdbab15f5b6da37, type: 3}
+    - {fileID: 21300000, guid: a822227fc1ccc4a419ddc6f06ffa178d, type: 3}
+    - {fileID: 21300000, guid: 034dbe95eb780417aa742cee23bc78af, type: 3}
+    - {fileID: 21300000, guid: 5053b57a456dd4840b5f11f24130a29d, type: 3}
+    - {fileID: 21300000, guid: bc7b7b64798d648afa5629430ad903bc, type: 3}
+    - {fileID: 21300000, guid: f62edd586b3654515817ef24bfc84c6d, type: 3}
+    fps: 12
+    loop: 0
+  - id: Shiro_BeamFlare
+    frames:
+    - {fileID: 21300000, guid: f0c145b488bd9462a9be34e8688e80d0, type: 3}
+    - {fileID: 21300000, guid: ffd4147810f304ac587f80038064f81b, type: 3}
+    - {fileID: 21300000, guid: a9156f21f7e914469b21997cbeb92b6b, type: 3}
+    - {fileID: 21300000, guid: 61e55db7bf49844f88a8f00dc9a0a40e, type: 3}
+    - {fileID: 21300000, guid: 980324503ea99493e9c5b7ba269f9eeb, type: 3}
+    - {fileID: 21300000, guid: a7618c68bd83049bc824e5246cd097bd, type: 3}
+    - {fileID: 21300000, guid: faa6a733629f146acb3bb35fbd25d292, type: 3}
+    - {fileID: 21300000, guid: b06d8f658c39745f2a13f38c2c462d2d, type: 3}
+    - {fileID: 21300000, guid: 187d83ca51ed742f1a41004dd406e45b, type: 3}
+    - {fileID: 21300000, guid: 5889d6b32955d49d79b80ded2e62b074, type: 3}
+    - {fileID: 21300000, guid: dc7cb530450af465eb5faff4f96bd7d0, type: 3}
+    - {fileID: 21300000, guid: 8332a481d17c2485b9db7860b022fc64, type: 3}
+    - {fileID: 21300000, guid: 0d49bd2ef0b61464daf6ee6d91e591c8, type: 3}
+    - {fileID: 21300000, guid: d3ad2897178b94e258452f2157931661, type: 3}
+    - {fileID: 21300000, guid: 14262fae5a15b459ba5ece4a7dae32e7, type: 3}
+    - {fileID: 21300000, guid: 076e82cf6d2124910b6f539a307b24d6, type: 3}
+    - {fileID: 21300000, guid: 4142d5e6cbb8b4011b72949dee8e2fb4, type: 3}
+    - {fileID: 21300000, guid: e6eb3536fb6e34710af75169127607d2, type: 3}
+    - {fileID: 21300000, guid: bf7ec328c28884a4998782f1385aed85, type: 3}
+    - {fileID: 21300000, guid: 0acad2a5dcc8d43a1a82a92625ff7953, type: 3}
+    - {fileID: 21300000, guid: 499a709a3858940b3b4c42425e681469, type: 3}
+    - {fileID: 21300000, guid: fd304afc797ce4a71bde014ad0775dc9, type: 3}
+    - {fileID: 21300000, guid: 0edde237b439c4370a4eb315c8f2dfb0, type: 3}
+    - {fileID: 21300000, guid: f79a2fd359f7e45d3a327c8ab0715f6d, type: 3}
+    fps: 14
+    loop: 1
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

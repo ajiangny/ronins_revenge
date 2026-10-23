@@ -134,14 +134,19 @@ public class Utsusemi : Boss
             for (int i = 0; i < combo; i++)
             {
                 Beat();
-                yield return Stride(RandomX(2.5f));
-                yield return Wait(0.05f);
-
                 Move move = NextMove(hourStruck);
+                // A short shuffle to a new spot before a move, not a long walk: the lasers walk to the centre
+                // themselves, and a combo's follow-ups often go straight in.
+                bool laser = move == Move.HeartLantern || move == Move.Midnight;
+                if (!laser && (i == 0 || Random.value < 0.5f))
+                {
+                    yield return Stride(NearX(1.8f, 3.6f));
+                    yield return Wait(0.05f);
+                }
+
                 lastMove = move;
                 hourStruck |= move == Move.HourStrikes;
                 movesSinceHours = move == Move.HourStrikes ? 0 : movesSinceHours + 1;
-                bool laser = move == Move.HeartLantern || move == Move.Midnight;
                 movesSinceLaser = laser ? 0 : movesSinceLaser + 1;
                 if (laser) lastLaser = move;
                 switch (move)
@@ -195,6 +200,17 @@ public class Utsusemi : Boss
     }
 
     // Stilt Stride: no blinking. It stalks to a new spot in stiff clockwork steps, one per tick.
+    // A spot minStep to maxStep from where it stands, kept inside the top band; it turns back from an edge.
+    float NearX(float minStep, float maxStep)
+    {
+        float range = HalfWidth - 2.5f;
+        float lo = CameraShake.Center.x - range, hi = CameraShake.Center.x + range;
+        float step = Random.Range(minStep, maxStep) * (Random.value < 0.5f ? -1f : 1f);
+        float x = anchor.x + step;
+        if (x < lo || x > hi) x = anchor.x - step;
+        return Mathf.Clamp(x, lo, hi);
+    }
+
     IEnumerator Stride(float x)
     {
         float distance = x - anchor.x;

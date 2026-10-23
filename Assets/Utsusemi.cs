@@ -589,7 +589,8 @@ public class Utsusemi : Boss
     IEnumerator HourStrikes()
     {
         int count = secondPhase ? 5 : 3;
-        float beat = secondPhase ? 0.3f : 0.4f;
+        // The dashes come fast: a short tick before each, and a quick blow.
+        float beat = secondPhase ? 0.18f : 0.24f;
         Vector3 row = anchor;
 
         // The announcement, in super armour: it calls the move and stands its ground in a gold shell while it lasers
@@ -614,11 +615,10 @@ public class Utsusemi : Boss
             Beat();
             Tick(0.9f);
             yield return Wait(beat);
-            yield return Dash(new Vector3(mark.x, Landing(), row.z));
-            yield return Chop(mark);
-            yield return Dash(row);
+            yield return Dash(new Vector3(mark.x, Landing(), row.z), HourDashTime);
+            yield return Chop(mark.x, mark, 36f, 0.08f);
+            yield return Dash(row, HourDashTime);
             PlayIdle();
-            yield return Wait(beat * 0.15f);
         }
 
         Beat();
@@ -740,9 +740,11 @@ public class Utsusemi : Boss
     }
 
     // A straight clockwork dash, eased hard into a dead stop, leaving digital afterimages along the way.
-    IEnumerator Dash(Vector3 to)
+    // How long each Hour Strikes dash takes, down to an hour or back up to the row.
+    const float HourDashTime = 0.11f;
+
+    IEnumerator Dash(Vector3 to, float seconds = 0.2f)
     {
-        const float seconds = 0.2f;
         Vector3 from = anchor;
         PlayFrames(dashFrames, 1, -1, true, 30f);
         Sfx.Play(Sfx.ParrySwing, 0.6f, 1.4f);
@@ -838,11 +840,9 @@ public class Utsusemi : Boss
     // The chop's blade meets the ground on this frame.
     const int ChopImpactFrame = 5;
 
-    IEnumerator Chop(HourMark mark) => Chop(mark.x, mark);
-
-    IEnumerator Chop(float x, HourMark mark)
+    // fps is how fast the chop clip plays, and so how soon the blow lands; recover is the pause after it.
+    IEnumerator Chop(float x, HourMark mark, float fps = 20f, float recover = 0.18f)
     {
-        const float fps = 20f;
         PlayFrames(chopFrames, 1, -1, true, fps);
         yield return Wait(chopFrames != null ? (ChopImpactFrame - 1) / fps : 0.2f);
 
@@ -856,7 +856,7 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.BladeChop, 1f, Random.Range(0.92f, 1.08f));
         CameraShake.Add(0.2f);
         mark?.Struck();
-        yield return Wait(0.18f);
+        yield return Wait(recover);
     }
 
     // The hour slash draws the blade back by this frame, holds it through the ticks, and lets the cleave go on the

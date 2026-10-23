@@ -203,15 +203,17 @@ public class SamuraiArmy : MonoBehaviour
     {
         SamuraiKind.Taisho => 60,
         SamuraiKind.Shieldbearer => 40,
+        SamuraiKind.Yurei => 35,
         SamuraiKind.Archer => 30,
         _ => row < 2 ? 20 : 10,
     };
 
     // Taisho wear the commander's look, archers the Bushi's and Ashigaru the foot soldier's, so each kind reads at a glance.
+    // Yurei are Bushi ghosts: the Bushi art, drawn translucent and cyan by the samurai itself.
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {
         SamuraiKind.Taisho => samuraiByRow[0],
-        SamuraiKind.Archer or SamuraiKind.Shieldbearer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
+        SamuraiKind.Archer or SamuraiKind.Shieldbearer or SamuraiKind.Yurei => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         _ => samuraiByRow[samuraiByRow.Length - 1],
     };
 

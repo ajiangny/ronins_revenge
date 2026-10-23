@@ -76,6 +76,13 @@ public class Arrow : MonoBehaviour
         animator.Play(frames, true, null, fps);
     }
 
+    // Recolours an ordinary arrow and its halo (a yurei's spirit arrows) without changing its shape or hitbox.
+    public void Tint(Color color, Color glowTint)
+    {
+        art.color = color;
+        glow.color = glowTint;
+    }
+
     public void MakeReflectable(Transform target)
     {
         ReflectTarget = target;

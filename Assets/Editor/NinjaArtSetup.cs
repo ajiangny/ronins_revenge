@@ -220,7 +220,68 @@ public static class NinjaArtSetup
             new BlockerSpec("Gears", "Blockers/Gears", "Effects/Spark", 6, 1.1f, 3),
             new BlockerSpec("Clock", "Blockers/Clock", "Effects/StoneChip", 8, 1.8f, 3),
         }, "GCG"),
+        // Snow-capped stones either side of a broken torii post.
+        ["Shrine_Stage3"] = (new[]
+        {
+            new BlockerSpec("Snowstone", "Blockers/Snowstone", "Effects/StoneChip", 5, 1.1f, 3),
+            new BlockerSpec("Torii", "Blockers/Torii", "Effects/StoneChip", 8, 1.8f, 3),
+        }, "STS"),
+        // Frosted shrubs either side of a snow-capped shrine lantern.
+        ["Arena_Shirogane"] = (new[]
+        {
+            new BlockerSpec("Icebloom", "Blockers/Icebloom", "Effects/Leaf", 5, 1.2f, 3),
+            new BlockerSpec("ShrineLantern", "Blockers/ShrineLantern", "Effects/StoneChip", 8, 1.7f, 3),
+        }, "ISI"),
     };
+
+    // Copies the stages written in GameManager.DefaultStages into the scene's own serialized copy (which wins at runtime),
+    // so a stage added in code reaches the game without a hand edit of the scene. Maps are left to Ninja/Apply Maps.
+    [MenuItem("Ninja/Apply Stages")]
+    public static void ApplyStages()
+    {
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
+        if (!scene.isLoaded)
+        {
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        }
+        var manager = Object.FindAnyObjectByType<GameManager>();
+        var so = new SerializedObject(manager);
+        SerializedProperty stages = so.FindProperty("stages");
+        StageConfig[] defaults = GameManager.DefaultStages();
+        stages.arraySize = defaults.Length;
+        for (int i = 0; i < defaults.Length; i++)
+        {
+            SerializedProperty stage = stages.GetArrayElementAtIndex(i);
+            stage.FindPropertyRelative("name").stringValue = defaults[i].name;
+            stage.FindPropertyRelative("boss").enumValueIndex = (int)defaults[i].boss;
+            SerializedProperty rounds = stage.FindPropertyRelative("rounds");
+            rounds.arraySize = defaults[i].rounds.Length;
+            for (int r = 0; r < defaults[i].rounds.Length; r++)
+            {
+                LevelConfig level = defaults[i].rounds[r];
+                SerializedProperty round = rounds.GetArrayElementAtIndex(r);
+                round.FindPropertyRelative("columns").intValue = level.columns;
+                round.FindPropertyRelative("rows").intValue = level.rows;
+                round.FindPropertyRelative("topRowY").floatValue = level.topRowY;
+                SerializedProperty kinds = round.FindPropertyRelative("rowKinds");
+                kinds.arraySize = level.rowKinds?.Length ?? 0;
+                for (int k = 0; k < kinds.arraySize; k++) kinds.GetArrayElementAtIndex(k).enumValueIndex = (int)level.rowKinds[k];
+                round.FindPropertyRelative("scouts").boolValue = level.scouts;
+                round.FindPropertyRelative("diveInterval").floatValue = level.diveInterval;
+                round.FindPropertyRelative("baseSpeed").floatValue = level.baseSpeed;
+                round.FindPropertyRelative("maxSpeedMultiplier").floatValue = level.maxSpeedMultiplier;
+                round.FindPropertyRelative("fireInterval").floatValue = level.fireInterval;
+                round.FindPropertyRelative("aimedShotChance").floatValue = level.aimedShotChance;
+                round.FindPropertyRelative("arrowSpeed").floatValue = level.arrowSpeed;
+                round.FindPropertyRelative("samuraiColor").colorValue = level.samuraiColor;
+            }
+        }
+        so.ApplyModifiedPropertiesWithoutUndo();
+        SetUpMaps(manager);
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log($"{defaults.Length} stages applied to the scene from GameManager.DefaultStages, with their maps.");
+    }
 
     static void FillBlockerTypes(SerializedProperty types, BlockerSpec[] specs)
     {
@@ -307,6 +368,8 @@ public static class NinjaArtSetup
     {
         ("Background/BambooRoad_Stage1", new Color(0.65f, 0.85f, 0.45f, 0.6f)),
         ("Background/Pass_Stage2", new Color(0.85f, 0.75f, 0.5f, 0.6f)),
+        // Snow, not leaves, drifts over the frozen shrine path.
+        ("Background/Shrine_Stage3", new Color(0.9f, 0.96f, 1f, 0.75f)),
     };
 
     static void SetUpMaps(GameManager manager)
@@ -386,6 +449,22 @@ public static class NinjaArtSetup
             moonlight = new Color(0.7f, 0.8f, 1f, 0.14f), shade = 0.45f, vignette = 0.45f,
             mist = 2, mistColor = new Color(0.65f, 0.75f, 0.95f, 0.08f),
             motes = 22, moteColor = new Color(0.8f, 0.85f, 1f, 0.55f),
+        },
+        // The frozen shrine path: heavy slow snow clouds, a cold hard moon, mist in the hollows and snowflakes in the air.
+        ["Shrine_Stage3"] = new Atmosphere.Settings
+        {
+            clouds = 3, cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.32f), wind = new Vector2(0.5f, -0.6f),
+            moonlight = new Color(0.75f, 0.85f, 1f, 0.12f), shade = 0.42f, vignette = 0.42f,
+            mist = 4, mistColor = new Color(0.8f, 0.88f, 1f, 0.1f),
+            motes = 20, moteColor = new Color(0.95f, 0.98f, 1f, 0.8f),
+        },
+        // Shirogane's court: dead still, spirit light pooling on the frost, a thick cyan mist and drifting spirit motes.
+        ["Arena_Shirogane"] = new Atmosphere.Settings
+        {
+            clouds = 0, wind = new Vector2(0.2f, -0.15f),
+            moonlight = new Color(0.6f, 0.85f, 1f, 0.16f), shade = 0.45f, vignette = 0.5f,
+            mist = 6, mistColor = new Color(0.5f, 0.85f, 1f, 0.1f),
+            motes = 26, moteColor = new Color(0.55f, 0.95f, 1f, 0.7f),
         },
     };
 

@@ -150,7 +150,11 @@ public class GameManager : MonoBehaviour
     [Tooltip("Pause after a stage's last army falls, before its boon is offered.")]
     [SerializeField] float stageClearPause = 1f;
 
-    [SerializeField] StageConfig[] stages =
+    [SerializeField] StageConfig[] stages = DefaultStages();
+
+    // The stages as written in code. The scene keeps its own serialized copy, which wins at runtime; Ninja/Apply Stages
+    // copies these into it (maps are wired separately by Ninja/Apply Maps).
+    public static StageConfig[] DefaultStages() => new[]
     {
         new StageConfig
         {
@@ -179,6 +183,21 @@ public class GameManager : MonoBehaviour
                     diveInterval = 5f, scouts = true },
             },
             boss = BossKind.Utsusemi,
+        },
+        new StageConfig
+        {
+            name = "The Frozen Shrine",
+            rounds = new[]
+            {
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.75f, aimedShotChance = 0.35f, arrowSpeed = 8.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 6f },
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.2f, maxSpeedMultiplier = 4.6f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 9f,   samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 5f, scouts = true },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.4f, maxSpeedMultiplier = 4.8f, fireInterval = 0.65f, aimedShotChance = 0.45f, arrowSpeed = 9.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
+                    diveInterval = 4f, scouts = true },
+            },
+            boss = BossKind.Shirogane,
         },
     };
 
@@ -642,7 +661,8 @@ public class GameManager : MonoBehaviour
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, Stage.rounds.Length);
         string body = roundIndex > 0 ? "Another army marches in."
             : stageIndex == 0 ? "Get ready!"
-            : "Bigger, faster, angrier armies.";
+            : stageIndex == 1 ? "Bigger, faster, angrier armies."
+            : "The dead march too.";
         ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
@@ -1087,8 +1107,13 @@ public class GameManager : MonoBehaviour
         ui.HideBanner();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
-        // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi.
-        if (backdrop != null) backdrop.SetBossMoon(true, Stage.boss == BossKind.Utsusemi ? Backdrop.MoonLook.Steel : Backdrop.MoonLook.Blood);
+        // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi, spirit blue for Shirogane.
+        if (backdrop != null) backdrop.SetBossMoon(true, Stage.boss switch
+        {
+            BossKind.Utsusemi => Backdrop.MoonLook.Steel,
+            BossKind.Shirogane => Backdrop.MoonLook.Spirit,
+            _ => Backdrop.MoonLook.Blood,
+        });
         yield return new WaitForSeconds(1f);
 
         Camera cam = Camera.main;

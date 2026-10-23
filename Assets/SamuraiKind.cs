@@ -8,4 +8,6 @@ public enum SamuraiKind
     Taisho,
     // A front-rank wall: takes two hits and never fires, while the ranks behind shoot over it.
     Shieldbearer,
+    // A ghost of a fallen samurai: translucent, and its paired arrows drift straight through cover.
+    Yurei,
 }

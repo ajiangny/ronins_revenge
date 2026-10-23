@@ -48,14 +48,37 @@ public class Backdrop : MonoBehaviour
     Map pendingMap;
     bool mapPending;
 
-    // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
-    static readonly Color BloodGround = new Color(0.95f, 0.42f, 0.42f);
-    static readonly Color BloodPetal = new Color(0.9f, 0.08f, 0.14f, 0.9f);
-    // Steel moon: Utsusemi's pass turns cold and pale, and the petals become drifting flakes of lace.
-    static readonly Color SteelGround = new Color(0.6f, 0.7f, 0.9f);
-    static readonly Color SteelPetal = new Color(0.9f, 0.93f, 1f, 0.85f);
+    public enum MoonLook { Blood, Steel, Spirit }
 
-    public enum MoonLook { Blood, Steel }
+    // How a boss moon colours the scene: the ground tint it multiplies in, what the petals become, the moon and its
+    // halo, and the tint the moonlight takes.
+    struct MoonColours
+    {
+        public Color ground, petal, moon, halo, light;
+    }
+
+    static readonly MoonColours[] Moons =
+    {
+        // Blood moon: during boss fights the courtyard bleeds red under a crimson moon and the petals turn red.
+        new MoonColours
+        {
+            ground = new Color(0.95f, 0.42f, 0.42f), petal = new Color(0.9f, 0.08f, 0.14f, 0.9f),
+            moon = new Color(0.85f, 0.1f, 0.12f), halo = new Color(1f, 0.15f, 0.15f, 0.5f), light = new Color(1f, 0.35f, 0.35f),
+        },
+        // Steel moon: Utsusemi's pass turns cold and pale, and the petals become drifting flakes of lace.
+        new MoonColours
+        {
+            ground = new Color(0.6f, 0.7f, 0.9f), petal = new Color(0.9f, 0.93f, 1f, 0.85f),
+            moon = new Color(0.85f, 0.9f, 1f), halo = new Color(0.6f, 0.75f, 1f, 0.45f), light = new Color(0.7f, 0.8f, 1f),
+        },
+        // Spirit moon: Shirogane's shrine glows an unearthly cyan, and the petals become drifting snow.
+        new MoonColours
+        {
+            ground = new Color(0.55f, 0.72f, 0.95f), petal = new Color(0.85f, 0.97f, 1f, 0.9f),
+            moon = new Color(0.7f, 0.95f, 1f), halo = new Color(0.35f, 0.85f, 1f, 0.5f), light = new Color(0.55f, 0.9f, 1f),
+        },
+    };
+
     MoonLook look;
     SpriteRenderer groundRenderer;
     SpriteRenderer[] petalRenderers;
@@ -146,13 +169,13 @@ public class Backdrop : MonoBehaviour
     void UpdateBloodMoon(float dt)
     {
         blood = Mathf.MoveTowards(blood, bloodTarget, dt * 0.5f);
-        bool steel = look == MoonLook.Steel;
-        groundRenderer.color = Color.Lerp(shownGroundTint, shownGroundTint * (steel ? SteelGround : BloodGround), blood);
-        Color petalColour = Color.Lerp(shownPetalTint, steel ? SteelPetal : BloodPetal, blood);
+        MoonColours colours = Moons[(int)look];
+        groundRenderer.color = Color.Lerp(shownGroundTint, shownGroundTint * colours.ground, blood);
+        Color petalColour = Color.Lerp(shownPetalTint, colours.petal, blood);
         foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
-        moon.color = steel ? new Color(0.85f, 0.9f, 1f, blood) : new Color(0.85f, 0.1f, 0.12f, blood);
-        moonHalo.color = steel ? new Color(0.6f, 0.75f, 1f, 0.45f * blood) : new Color(1f, 0.15f, 0.15f, 0.5f * blood);
-        atmosphere.TintMoon(steel ? new Color(0.7f, 0.8f, 1f) : new Color(1f, 0.35f, 0.35f), blood);
+        moon.color = new Color(colours.moon.r, colours.moon.g, colours.moon.b, blood);
+        moonHalo.color = new Color(colours.halo.r, colours.halo.g, colours.halo.b, colours.halo.a * blood);
+        atmosphere.TintMoon(colours.light, blood);
     }
 
     SpriteRenderer CreateSprite(string name, Sprite sprite, Vector3 position, float scale, int order, Color color)

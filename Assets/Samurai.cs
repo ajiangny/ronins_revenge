@@ -10,7 +10,13 @@ public class Samurai : MonoBehaviour, IHittable
     static readonly Color IceGlow = new Color(0.6f, 0.9f, 1f, 0.7f);
     // Shieldbearers wear steel-blue armour so the front wall reads apart from the archers behind it.
     static readonly Color ShieldColor = new Color(0.6f, 0.72f, 0.95f);
+    // Yurei are ghosts: a pale cyan, see-through body over a soft spirit glow, so they read as dead at a glance.
+    static readonly Color GhostColor = new Color(0.6f, 0.95f, 1f);
+    static readonly Color GhostGlow = new Color(0.4f, 0.9f, 1f, 0.45f);
+    static readonly Color GhostArrow = new Color(0.55f, 0.95f, 1f);
     const float ArcherSpread = 15f;
+    // A yurei's pair of arrows part just enough that one lane sits between them.
+    const float YureiSpread = 12f;
     // The spear is heavy: slower than an arrow, so there's time to see it and dodge or parry.
     const float SpearSpeedMultiplier = 0.8f;
 
@@ -38,6 +44,8 @@ public class Samurai : MonoBehaviour, IHittable
     float frost;
     float encasedUntil;
     SpriteRenderer iceGlow;
+    SpriteRenderer ghostGlow;
+    float ghostPhase;
 
     void Awake()
     {
@@ -55,6 +63,11 @@ public class Samurai : MonoBehaviour, IHittable
         Kind = kind;
         health = maxHealth = Mathf.Max(1, hitPoints);
 
+        if (kind == SamuraiKind.Yurei)
+        {
+            ghostGlow = Kunai.CreateGlow(transform, 1.5f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, GhostGlow);
+            ghostPhase = Random.value * Mathf.PI * 2f;
+        }
         SetFrost(0);
         animator.Play(art.idle, true, null, art.idleFps);
     }
@@ -69,6 +82,17 @@ public class Samurai : MonoBehaviour, IHittable
         if (Kind == SamuraiKind.Archer)
         {
             Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 3, ArcherSpread, arrowSpeed * 0.9f);
+        }
+        else if (Kind == SamuraiKind.Yurei)
+        {
+            // Spirit arrows: a parted pair that drifts through the blockers, so cover only shelters from the living.
+            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 2, YureiSpread, arrowSpeed * 0.85f))
+            {
+                arrow.PassesCover = true;
+                arrow.Tint(GhostArrow, GhostGlow);
+            }
+            Sfx.Play(Sfx.ArrowFire, 0.5f, 1.3f);
+            return;
         }
         else if (Kind == SamuraiKind.Taisho)
         {
@@ -121,6 +145,8 @@ public class Samurai : MonoBehaviour, IHittable
 
     void Update()
     {
+        // A ghost's body breathes in and out of sight, slowly, each on its own beat.
+        if (ghostGlow != null && !Encased && !IsDead) SetFrost(frost);
         if (iceGlow == null || Encased) return;
         Thaw();
         SetFrost(frost);
@@ -144,7 +170,13 @@ public class Samurai : MonoBehaviour, IHittable
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
-        animator.Renderer.color = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
+        Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
+        if (Kind == SamuraiKind.Yurei && !Encased)
+        {
+            body = Color.Lerp(body, GhostColor, 0.7f);
+            body.a = 0.65f + 0.15f * Mathf.Sin(Time.time * 2.2f + ghostPhase);
+        }
+        animator.Renderer.color = body;
     }
 
     // Off while the army marches in: shots and blasts pass straight through until the round starts.

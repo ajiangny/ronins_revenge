@@ -1290,8 +1290,9 @@ public class GameManager : MonoBehaviour
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Framed like the others: her face high and right of centre, hair spilling off the edges.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.5f, 0.25f), closeupAt = new Vector2(440f, 210f),
+            // Framed like the others: her face high and right of centre, hair spilling off the edges. The close-up is
+            // the top of her concept painting until a painted close-up replaces it, so the focus sits near its top.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.5f, 0.17f), closeupAt = new Vector2(440f, 210f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
             eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,

@@ -609,9 +609,15 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e261d72157c784654adb568f6fb473cc, type: 3}
   - {fileID: 8300000, guid: 6f1bad16c944d45799b48a0c9e46942c, type: 3}
   - {fileID: 8300000, guid: 48e4f08bad8644e05af5b1fa47db8893, type: 3}
-  shiroganeArt: {fileID: 0}
-  shiroganeScale: 3.4
-  shiroganeDash: []
+  shiroganeArt: {fileID: 11400000, guid: 2014927f202374307baf2514021087a9, type: 2}
+  shiroganeScale: 2.5
+  shiroganeDash:
+  - {fileID: 21300000, guid: 92429454d60bb45a8aba1fa206a7b39f, type: 3}
+  - {fileID: 21300000, guid: 5827d2d4d00e74d75b0380d996b9bbd6, type: 3}
+  - {fileID: 21300000, guid: f2109e014ef3b4b6682378869194a557, type: 3}
+  - {fileID: 21300000, guid: a7a04c1b58bca4c128829b1548c32bf3, type: 3}
+  - {fileID: 21300000, guid: 1f260add207424d438192aa7948873a7, type: 3}
+  - {fileID: 21300000, guid: 3d998ff0920294e29b82c1b566877aa9, type: 3}
   shiroWolfIdle:
   - {fileID: 21300000, guid: 48da7131cf26b48d7942776843b933cd, type: 3}
   - {fileID: 21300000, guid: 195ecaf4db36c426d8da6a5c00f0a4b7, type: 3}

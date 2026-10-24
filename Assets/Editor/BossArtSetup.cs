@@ -61,6 +61,16 @@ public static class BossArtSetup
             death: TryFrames("Shirogane", "Defeat") ?? shiroganeIdle,
             new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
 
+        // Her awakened form, worn from her phase break on; any clip it lacks falls back to her first form's.
+        Sprite[] awakenedIdle = shirogane == null ? null : TryFrames("ShiroganePhase2", "Idle");
+        CharacterArt shiroganePhase = awakenedIdle == null ? null : SaveArt("ShiroganePhase2",
+            idle: awakenedIdle,
+            attack: TryFrames("ShiroganePhase2", "Slash") ?? shirogane.attack,
+            parry: TryFrames("ShiroganePhase2", "BladeCall") ?? shirogane.parry,
+            hit: TryFrames("ShiroganePhase2", "Hit") ?? shirogane.hit,
+            death: TryFrames("ShiroganePhase2", "Defeat") ?? shirogane.death,
+            shirogane.deathParticles);
+
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
         if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         var manager = Object.FindAnyObjectByType<GameManager>();
@@ -111,14 +121,16 @@ public static class BossArtSetup
             so.FindProperty("shiroganeScale").floatValue = ShiroganeScale;
             SetFrames(so.FindProperty("shiroganeDash"), TryFrames("Shirogane", "Dash"));
         }
+        so.FindProperty("shiroganePhaseArt").objectReferenceValue = shiroganePhase;
+        SetFrames(so.FindProperty("shiroganePhaseDash"), shiroganePhase == null ? null : TryFrames("ShiroganePhase2", "Dash"));
         SetFrames(so.FindProperty("shiroWolfIdle"), TryFrames("SpiritWolf", "Idle"));
         SetFrames(so.FindProperty("shiroWolfHowl"), TryFrames("SpiritWolf", "Howl"));
         SetFrames(so.FindProperty("shiroWolfCharge"), TryFrames("SpiritWolf", "Charge"));
         SetFrames(so.FindProperty("shiroWolfVanish"), TryFrames("SpiritWolf", "Vanish"));
         so.FindProperty("shiroganePortrait").objectReferenceValue = Portrait("Shirogane_Full");
         so.FindProperty("shiroganeCloseup").objectReferenceValue = Portrait("Shirogane_Closeup");
-        so.FindProperty("shiroganeWolfPortrait").objectReferenceValue = Portrait("Shirogane_Wolf_Full");
-        so.FindProperty("shiroganeWolfCloseup").objectReferenceValue = Portrait("Shirogane_Wolf_Closeup");
+        so.FindProperty("shiroganePhasePortrait").objectReferenceValue = Portrait("Shirogane_Phase_Full");
+        so.FindProperty("shiroganePhaseCloseup").objectReferenceValue = Portrait("Shirogane_Phase_Closeup");
         foreach (var (field, file) in new[]
         {
             ("shiroganeIntroLine", "Intro"), ("shiroganePhaseLine", "Phase"), ("shiroganeDefeatLine", "Defeat"),

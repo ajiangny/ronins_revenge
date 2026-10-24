@@ -146,6 +146,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] float shiroganeScale = 3.4f;
     [Tooltip("Shirogane's dash frames for the Moonlit Dash.")]
     [SerializeField] Sprite[] shiroganeDash;
+    [Tooltip("Her awakened frames, spirit flame on her blades, worn from her phase break on. Leave empty to keep her first art.")]
+    [SerializeField] CharacterArt shiroganePhaseArt;
+    [SerializeField] Sprite[] shiroganePhaseDash;
     [Tooltip("Her spirit wolf's frames: resting beside her, howling, charging down a lane and dissolving into mist.")]
     [SerializeField] Sprite[] shiroWolfIdle;
     [SerializeField] Sprite[] shiroWolfHowl;
@@ -154,8 +157,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite shiroganePortrait;
     [SerializeField] Sprite shiroganeCloseup;
     [Tooltip("Her second-phase illustrations, with the wolf: the card that plays as it arrives. Without them her phase line is a subtitle.")]
-    [SerializeField] Sprite shiroganeWolfPortrait;
-    [SerializeField] Sprite shiroganeWolfCloseup;
+    [FormerlySerializedAs("shiroganeWolfPortrait")]
+    [SerializeField] Sprite shiroganePhasePortrait;
+    [FormerlySerializedAs("shiroganeWolfCloseup")]
+    [SerializeField] Sprite shiroganePhaseCloseup;
     [SerializeField] AudioClip shiroganeIntroLine;
     [SerializeField] AudioClip shiroganePhaseLine;
     [SerializeField] AudioClip shiroganeDefeatLine;
@@ -1247,7 +1252,11 @@ public class GameManager : MonoBehaviour
                 bool ghostly = shiroganeArt == null;
                 Shirogane blade = Boss.Create<Shirogane>(ghostly ? army.samuraiByRow[Mathf.Min(1, army.samuraiByRow.Length - 1)] : shiroganeArt,
                     shiroganeScale, Shirogane.StartingHealth, position, ghostly ? new Color(0.6f, 0.9f, 1f) : Color.white);
-                if (!ghostly) blade.SetDashFrames(shiroganeDash);
+                if (!ghostly)
+                {
+                    blade.SetDashFrames(shiroganeDash);
+                    blade.SetPhaseArt(shiroganePhaseArt, shiroganePhaseDash);
+                }
                 blade.SetWolfFrames(shiroWolfIdle, shiroWolfHowl, shiroWolfCharge, shiroWolfVanish);
                 return blade;
             default:
@@ -1328,7 +1337,7 @@ public class GameManager : MonoBehaviour
             // Taller than the others, since her face sits so high in the painting, so its top edge stays off screen.
             closeupHeight = 1800f, closeupFocus = new Vector2(0.45f, 0.2f), closeupAt = new Vector2(0f, 200f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
-            phasePortrait = shiroganeWolfPortrait, phaseCloseup = shiroganeWolfCloseup, phaseEpithet = Shirogane.OathEpithet,
+            phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
             phaseCloseupHeight = 1500f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(0f, 150f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,

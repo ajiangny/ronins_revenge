@@ -162,7 +162,8 @@ match `BoonChoiceUI.boonIcons`.
   `Moon`, two crescent waves, a lane beam from the wolf's `Mouth`, a sword spread, then `exposed` doubles damage for
   2 s via `DamageMultiplier`). `NextMove` weights the phase's signature twice, never repeats a move three times
   (`repeats`), alternates sword and wolf moves in phase 2 (`lastWasWolf`) and forces the ultimate every fifth move.
-  `PhaseBreak` plays the wolf's arrival; `Fall` is an 11 s scene (`DefeatSeconds`, which `GameManager.BossFell`
+  `PhaseBreak` plays the wolf's arrival and swaps her to her awakened frames (`SetPhaseArt`: a second `CharacterArt`, blades
+  burning, plus its dash clip; any clip it lacks is her first form's); `Fall` is an 11 s scene (`DefeatSeconds`, which `GameManager.BossFell`
   waits for): blades `DropBlade`/`Tumble`, the wolf walks to her and dissolves, she speaks `BossLine.DefeatFinal`
   (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips via
   `SetWolfFrames`. Effects `Fx.Shiro*`; sounds `WolfGrowl`, `WolfHowl`, `BladeRing`, `GhostSwordFall`, `SpiritBeam`
@@ -178,7 +179,8 @@ match `BoonChoiceUI.boonIcons`.
   `phaseEpithet` (`Benibana.PhaseEpithet`, `Utsusemi.PhaseEpithet`, `Shirogane.OathEpithet`) and Phase line;
   without that art the line falls back to a subtitle.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
-  `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Portraits/<Boss>_Full/_Closeup.png` (phase cards: `<Boss>_Phase_…`, Shirogane's `Shirogane_Wolf_…`; full-body art is cropped to the figure so all bosses fill the same height), `Audio/Voice/<Boss>_<Line>.mp3`.
+  `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Characters/ShiroganePhase2/ShiroganePhase2_<Clip>_<i>.png` (her awakened
+  form, `GameManager.shiroganePhaseArt`), `Portraits/<Boss>_Full/_Closeup.png` (phase cards: `<Boss>_Phase_…`; full-body art is cropped to the figure so all bosses fill the same height), `Audio/Voice/<Boss>_<Line>.mp3`.
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
 `Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized

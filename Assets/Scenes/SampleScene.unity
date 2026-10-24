@@ -622,6 +622,14 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a7a04c1b58bca4c128829b1548c32bf3, type: 3}
   - {fileID: 21300000, guid: 1f260add207424d438192aa7948873a7, type: 3}
   - {fileID: 21300000, guid: 3d998ff0920294e29b82c1b566877aa9, type: 3}
+  shiroganePhaseArt: {fileID: 11400000, guid: bd1a9403d5e664b7a950acaf9c4d053a, type: 2}
+  shiroganePhaseDash:
+  - {fileID: 21300000, guid: 90e62e1e14da417c9e51545dc22647cf, type: 3}
+  - {fileID: 21300000, guid: 520ff379af244970a2658f7b3027d70f, type: 3}
+  - {fileID: 21300000, guid: 1110f22256e44c32b879b79363b53f05, type: 3}
+  - {fileID: 21300000, guid: c90bb5d9352c41749ff82a65b163c857, type: 3}
+  - {fileID: 21300000, guid: deb9b8d024ed4e14a5eaba777571d088, type: 3}
+  - {fileID: 21300000, guid: b916f48bc59e464eba357d5d060eec5f, type: 3}
   shiroWolfIdle:
   - {fileID: 21300000, guid: 48da7131cf26b48d7942776843b933cd, type: 3}
   - {fileID: 21300000, guid: 195ecaf4db36c426d8da6a5c00f0a4b7, type: 3}
@@ -656,8 +664,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 95cc0cf8a8f3a42398bcac4151a79d1d, type: 3}
   shiroganePortrait: {fileID: 21300000, guid: 7060fe1074bf6444ea4d1715b72e7108, type: 3}
   shiroganeCloseup: {fileID: 21300000, guid: e0e2e2ff5138a4f7096f36294d515e5d, type: 3}
-  shiroganeWolfPortrait: {fileID: 21300000, guid: cdea3b138cbd149c684eab469b416de4, type: 3}
-  shiroganeWolfCloseup: {fileID: 21300000, guid: 59ab3921b39e54f0cb90e7150e96ee96, type: 3}
+  shiroganePhasePortrait: {fileID: 21300000, guid: cdea3b138cbd149c684eab469b416de4, type: 3}
+  shiroganePhaseCloseup: {fileID: 21300000, guid: 59ab3921b39e54f0cb90e7150e96ee96, type: 3}
   shiroganeIntroLine: {fileID: 8300000, guid: 22b201e05a7d94010905e09e68d3805c, type: 3}
   shiroganePhaseLine: {fileID: 8300000, guid: c947dbeb9ed7d4dfca27248a7b0c11e2, type: 3}
   shiroganeDefeatLine: {fileID: 8300000, guid: 5faa645c5f2644f3ca075d7bf787808f, type: 3}

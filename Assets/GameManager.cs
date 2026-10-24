@@ -1272,8 +1272,9 @@ public class GameManager : MonoBehaviour
         BossKind.Benibana => new BossVoice
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
-            // Her face, high and right of centre.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.48f, 0.25f), closeupAt = new Vector2(420f, 200f),
+            // The close-ups are landscape paintings with their own dark backdrop; each is framed on the face, high
+            // and right of centre, big enough that the painting's edges sit off screen.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(420f, 200f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
@@ -1281,18 +1282,16 @@ public class GameManager : MonoBehaviour
         BossKind.Utsusemi => new BossVoice
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
-            // Framed like Benibana: filling the right half, its hat near the top edge, the brim running just off the
-            // right side and the body off the bottom.
-            closeupHeight = 2700f, closeupFocus = new Vector2(0.47f, 0.21f), closeupAt = new Vector2(460f, 290f),
+            // Framed on its slit-eye under the hat brim, the brim running off the top right.
+            closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(440f, 230f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Framed like the others: her face high and right of centre, hair spilling off the edges. The close-up is
-            // the top of her concept painting until a painted close-up replaces it, so the focus sits near its top.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.5f, 0.17f), closeupAt = new Vector2(440f, 210f),
+            // Framed on her face, her hair and mask spilling off the top and left.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.58f, 0.34f), closeupAt = new Vector2(420f, 200f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
             eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,

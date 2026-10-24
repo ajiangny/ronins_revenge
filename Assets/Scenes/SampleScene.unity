@@ -536,6 +536,8 @@ MonoBehaviour:
   benibanaScale: 2.3
   benibanaPortrait: {fileID: 21300000, guid: f367c862def2d41b4a6a201c0a54c31b, type: 3}
   benibanaCloseup: {fileID: 21300000, guid: 1ae0a6736e5014f78874a08a4a7b3f45, type: 3}
+  benibanaPhasePortrait: {fileID: 21300000, guid: 63046e37a2c5242f09d33c547bbbda5b, type: 3}
+  benibanaPhaseCloseup: {fileID: 21300000, guid: e30ae502c349d4619b2c3d957ab38dc8, type: 3}
   benibanaIntroLine: {fileID: 8300000, guid: 126d0f563be954d7fbaa233b87797292, type: 3}
   benibanaPhaseLine: {fileID: 8300000, guid: 8973700f7b05041729a016aa2cb0fcf3, type: 3}
   benibanaDefeatLine: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
@@ -599,6 +601,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 55f4a8c3c717746d3887327e5a64b33d, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
+  utsusemiPhasePortrait: {fileID: 21300000, guid: 6f79b413cf9144dedbf9a160b5348d4f, type: 3}
+  utsusemiPhaseCloseup: {fileID: 21300000, guid: f5a4e33a518a4481f82865782daf4581, type: 3}
   utsusemiIntroLine: {fileID: 8300000, guid: a56e622e912b24336a5dd663a2e52f19, type: 3}
   utsusemiPhaseLine: {fileID: 8300000, guid: 1b30d9fbdb3de4d1da819f848d500919, type: 3}
   utsusemiDefeatLine: {fileID: 8300000, guid: 02a75a57046f8430b9af9a2e168c71ef, type: 3}

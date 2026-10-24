@@ -24,6 +24,7 @@ public class Benibana : Boss
 
     public override string Title => "BENIBANA";
     public override string Epithet => "The Crimson Smoke";
+    public const string PhaseEpithet = "The Crimson Unsealed";
     public override Color Colour => Crimson;
 
     public override string Line(BossLine line) => line switch
@@ -366,8 +367,13 @@ public class Benibana : Boss
         bodyTint = new Color(0.8f, 0.45f, 0.5f);
         AddEyes();
         AddAura();
-        Speak(BossLine.Phase);
-        yield return new WaitForSeconds(0.6f);
+        // Unsealed: a title card of her transformed, over which she speaks; without its art, a subtitle.
+        if (PhaseCard != null) yield return PhaseCard(this);
+        else
+        {
+            Speak(BossLine.Phase);
+            yield return new WaitForSeconds(0.6f);
+        }
         SpawnVeil();
         yield return new WaitForSeconds(1.2f);
         breaking = false;

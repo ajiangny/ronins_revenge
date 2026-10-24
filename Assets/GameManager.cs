@@ -102,6 +102,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Her full-body illustration and the close-up used in her intro. Without them she gets the plain title card.")]
     [SerializeField] Sprite benibanaPortrait;
     [SerializeField] Sprite benibanaCloseup;
+    [Tooltip("Her unsealed second-phase illustrations: the card that plays in her phase break. Without them her phase line is a subtitle.")]
+    [SerializeField] Sprite benibanaPhasePortrait;
+    [SerializeField] Sprite benibanaPhaseCloseup;
     [SerializeField] AudioClip benibanaIntroLine;
     [SerializeField] AudioClip benibanaPhaseLine;
     [SerializeField] AudioClip benibanaDefeatLine;
@@ -127,6 +130,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] utsusemiUnarmedIdle;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
+    [Tooltip("Its overdriven second-phase illustrations: the card that plays in its phase break. Without them its phase line is a subtitle.")]
+    [SerializeField] Sprite utsusemiPhasePortrait;
+    [SerializeField] Sprite utsusemiPhaseCloseup;
     [SerializeField] AudioClip utsusemiIntroLine;
     [SerializeField] AudioClip utsusemiPhaseLine;
     [SerializeField] AudioClip utsusemiDefeatLine;
@@ -1297,6 +1303,9 @@ public class GameManager : MonoBehaviour
             // Each close-up is framed on the face, on the centre line and high enough to clear the title block, big
             // enough that the painting's edges sit off screen.
             closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(0f, 200f),
+            // Unsealed: framed on her face, her loose hair and the drawn blade running off every edge.
+            phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
+            phaseCloseupHeight = 1700f, phaseCloseupFocus = new Vector2(0.46f, 0.22f), phaseCloseupAt = new Vector2(0f, 200f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
@@ -1306,6 +1315,9 @@ public class GameManager : MonoBehaviour
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed on its slit-eye under the hat brim, the brim running off the top right.
             closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(0f, 230f),
+            // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
+            phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
+            phaseCloseupHeight = 1500f, phaseCloseupFocus = new Vector2(0.45f, 0.25f), phaseCloseupAt = new Vector2(0f, 200f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },

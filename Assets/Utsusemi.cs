@@ -30,6 +30,7 @@ public class Utsusemi : Boss
 
     public override string Title => "UTSUSEMI";
     public override string Epithet => "The Hollow Pilgrim";
+    public const string PhaseEpithet = "The Unwound Hour";
     public override Color Colour => Steel;
 
     public override string Line(BossLine line) => line switch
@@ -1840,8 +1841,17 @@ public class Utsusemi : Boss
             Fader.Fade(flash, 0.35f);
         }
         Sfx.Play(Sfx.LanternCharge, 1f, 1.3f);
-        Speak(BossLine.Phase);
-        yield return new WaitForSeconds(1.8f);
+        // Overdriven: a title card of its broken form, over which it speaks; without its art, a subtitle.
+        if (PhaseCard != null)
+        {
+            yield return new WaitForSeconds(0.6f);
+            yield return PhaseCard(this);
+        }
+        else
+        {
+            Speak(BossLine.Phase);
+            yield return new WaitForSeconds(1.8f);
+        }
         breaking = false;
     }
 

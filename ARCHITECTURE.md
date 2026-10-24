@@ -173,9 +173,12 @@ match `BoonChoiceUI.boonIcons`.
   (`ShowBossBar`, `SetBossHealth`, `ShowSubtitle`, `PlayBossIntro`). The intro is two beats on an opaque dark
   stage lit by a wash of the boss's colour (`ProceduralSprites.SoftGlow`): the full-body portrait fades up, then
   cross-fades to the close-up while a lower-third title (epithet, a rule, name; Title style) rises in, with the
-  spoken line typed on beneath.
+  spoken line typed on beneath. Each boss's phase break replays it as a phase card (`Boss.PhaseCard`, set in
+  `BeginBoss` to `PlayPhaseCard` when `VoiceFor` has `phasePortrait`/`phaseCloseup`) with its transformed art,
+  `phaseEpithet` (`Benibana.PhaseEpithet`, `Utsusemi.PhaseEpithet`, `Shirogane.OathEpithet`) and Phase line;
+  without that art the line falls back to a subtitle.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
-  `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Portraits/<Boss>_Full/_Closeup.png`, `Audio/Voice/<Boss>_<Line>.mp3`.
+  `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Portraits/<Boss>_Full/_Closeup.png` (phase cards: `<Boss>_Phase_…`, Shirogane's `Shirogane_Wolf_…`; full-body art is cropped to the figure so all bosses fill the same height), `Audio/Voice/<Boss>_<Line>.mp3`.
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
 `Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized

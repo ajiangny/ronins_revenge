@@ -70,6 +70,8 @@ public static class BossArtSetup
         so.FindProperty("bossDepth").floatValue = BossDepth;
         so.FindProperty("benibanaPortrait").objectReferenceValue = Portrait("Benibana_Full");
         so.FindProperty("benibanaCloseup").objectReferenceValue = Portrait("Benibana_Closeup");
+        so.FindProperty("benibanaPhasePortrait").objectReferenceValue = Portrait("Benibana_Phase_Full");
+        so.FindProperty("benibanaPhaseCloseup").objectReferenceValue = Portrait("Benibana_Phase_Closeup");
         so.FindProperty("benibanaIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Intro.mp3");
         so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
         so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
@@ -93,6 +95,8 @@ public static class BossArtSetup
         }
         so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
         so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");
+        so.FindProperty("utsusemiPhasePortrait").objectReferenceValue = Portrait("Utsusemi_Phase_Full");
+        so.FindProperty("utsusemiPhaseCloseup").objectReferenceValue = Portrait("Utsusemi_Phase_Closeup");
         so.FindProperty("utsusemiIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Intro.mp3");
         so.FindProperty("utsusemiPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Phase.mp3");
         so.FindProperty("utsusemiDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Utsusemi_Defeat.mp3");

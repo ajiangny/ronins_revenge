@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: BenibanaPhase2
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 23c70d5e435a4cfc9aa8b00d34483142, type: 3}
+  - {fileID: 21300000, guid: 0d60b9cfd23a417884b1c6d26c11bb35, type: 3}
+  - {fileID: 21300000, guid: 0684ed2d78024f088e17739c9246c949, type: 3}
+  - {fileID: 21300000, guid: e7f7b18902684f70b2a87dc4a656075c, type: 3}
+  - {fileID: 21300000, guid: e8061549e86f4448afd89fa2f772c37e, type: 3}
+  - {fileID: 21300000, guid: 0cb51315de6c428f9eac4c8a8ede9f3f, type: 3}
+  - {fileID: 21300000, guid: 047aaa95f96243ee854759d6be9100f2, type: 3}
+  - {fileID: 21300000, guid: 89ec942de80641c9b91e49e58d5f571a, type: 3}
+  attack:
+  - {fileID: 21300000, guid: 1621b336fbb941e28756e401874ec382, type: 3}
+  - {fileID: 21300000, guid: 0147e32c084b496d8410aa1407fd192f, type: 3}
+  - {fileID: 21300000, guid: b189bd2a291c4e4d87048740cd05510f, type: 3}
+  - {fileID: 21300000, guid: 8dc79adc4291438ba04136aef5d6ac76, type: 3}
+  - {fileID: 21300000, guid: 47689a384c294e0a8a1d716c92fabb05, type: 3}
+  - {fileID: 21300000, guid: 53ee658fdfb143e7ac07e8b920caf203, type: 3}
+  - {fileID: 21300000, guid: 5d9d197162804ced9c77c9d9fc5f4331, type: 3}
+  - {fileID: 21300000, guid: 9838a412b4de491bb2182a5be75d3818, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 6e427ad76e3e46be9ac03f1493809ff7, type: 3}
+  - {fileID: 21300000, guid: cb742f38310840fdba6176b77c460770, type: 3}
+  - {fileID: 21300000, guid: 71da388396674070b7ff4a99f8771fa2, type: 3}
+  - {fileID: 21300000, guid: 7e4048a818f945698efb1fa10dfc26ac, type: 3}
+  - {fileID: 21300000, guid: efe54b16ebec4449b3c19855b52bbe23, type: 3}
+  - {fileID: 21300000, guid: ce5ddd3f80b744a2be25c59282fcffee, type: 3}
+  death:
+  - {fileID: 21300000, guid: 4cec59804ba841bbaa1eacac2e7b7da6, type: 3}
+  - {fileID: 21300000, guid: a627ebd31fbc410191fd58263fc24bdd, type: 3}
+  - {fileID: 21300000, guid: a90352bf1627490db33a6bb3c4485620, type: 3}
+  - {fileID: 21300000, guid: fb5bc57bfcb84402b5946aff3e246f7a, type: 3}
+  - {fileID: 21300000, guid: 9ccd36ef63284e7c8ad3b34c650968d2, type: 3}
+  - {fileID: 21300000, guid: b3a267f39c39436499c5850f13637255, type: 3}
+  - {fileID: 21300000, guid: 9b9444b0f9d4411287f7c89b991a99de, type: 3}
+  - {fileID: 21300000, guid: 296192dc90f44fc08cae372a02b306bd, type: 3}
+  parry:
+  - {fileID: 21300000, guid: f61e1766d9ae43de880f9dc5f869956c, type: 3}
+  - {fileID: 21300000, guid: 78718d92875a49b6bbd0f33b0adaa3ba, type: 3}
+  - {fileID: 21300000, guid: c9c851b87a41497386ba4dc770fb7811, type: 3}
+  - {fileID: 21300000, guid: a3b9e2dc256f44d9adc542cdefe37749, type: 3}
+  - {fileID: 21300000, guid: 4b15b67ed4524ffb9eccaf47296c439e, type: 3}
+  - {fileID: 21300000, guid: 6165acd4f399419c875b6f8e82af8850, type: 3}
+  - {fileID: 21300000, guid: 4177aa566f024d85bd301cbe5126b0d5, type: 3}
+  - {fileID: 21300000, guid: bfa51340920f4e66aaea6ef77a46b050, type: 3}
+  slash: []
+  runLeft: []
+  runRight: []
+  walkUp: []
+  wisps: []
+  framesWithWisps: []
+  idleFps: 6
+  actionFps: 11
+  runFps: 14
+  walkFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

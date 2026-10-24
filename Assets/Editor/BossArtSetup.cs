@@ -61,15 +61,10 @@ public static class BossArtSetup
             death: TryFrames("Shirogane", "Defeat") ?? shiroganeIdle,
             new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
 
-        // Her awakened form, worn from her phase break on; any clip it lacks falls back to her first form's.
-        Sprite[] awakenedIdle = shirogane == null ? null : TryFrames("ShiroganePhase2", "Idle");
-        CharacterArt shiroganePhase = awakenedIdle == null ? null : SaveArt("ShiroganePhase2",
-            idle: awakenedIdle,
-            attack: TryFrames("ShiroganePhase2", "Slash") ?? shirogane.attack,
-            parry: TryFrames("ShiroganePhase2", "BladeCall") ?? shirogane.parry,
-            hit: TryFrames("ShiroganePhase2", "Hit") ?? shirogane.hit,
-            death: TryFrames("ShiroganePhase2", "Defeat") ?? shirogane.death,
-            shirogane.deathParticles);
+        // Each boss's second-phase form, worn from its phase break on; any clip it lacks falls back to the first form's.
+        CharacterArt benibanaPhase = PhaseArt("BenibanaPhase2", benibana, "Slash", "Puff");
+        CharacterArt utsusemiPhase = PhaseArt("UtsusemiPhase2", utsusemi, "Thrust", "Throw");
+        CharacterArt shiroganePhase = PhaseArt("ShiroganePhase2", shirogane, "Slash", "BladeCall");
 
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
         if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -77,6 +72,7 @@ public static class BossArtSetup
         var so = new SerializedObject(manager);
         so.FindProperty("benibanaArt").objectReferenceValue = benibana;
         so.FindProperty("benibanaScale").floatValue = BenibanaScale;
+        so.FindProperty("benibanaPhaseArt").objectReferenceValue = benibanaPhase;
         so.FindProperty("bossDepth").floatValue = BossDepth;
         so.FindProperty("benibanaPortrait").objectReferenceValue = Portrait("Benibana_Full");
         so.FindProperty("benibanaCloseup").objectReferenceValue = Portrait("Benibana_Closeup");
@@ -102,6 +98,11 @@ public static class BossArtSetup
             SetFrames(so.FindProperty("utsusemiHourSlash"), TryFrames("Utsusemi", "HourSlash"));
             SetFrames(so.FindProperty("utsusemiSwordThrow"), TryFrames("Utsusemi", "SwordThrow"));
             SetFrames(so.FindProperty("utsusemiUnarmedIdle"), TryFrames("Utsusemi", "UnarmedIdle"));
+        }
+        so.FindProperty("utsusemiPhaseArt").objectReferenceValue = utsusemiPhase;
+        foreach (string clip in new[] { "BareIdle", "UnarmedIdle", "Dash", "Chop", "HourSlash", "SwordThrow" })
+        {
+            SetFrames(so.FindProperty("utsusemiPhase" + clip), utsusemiPhase == null ? null : TryFrames("UtsusemiPhase2", clip));
         }
         so.FindProperty("utsusemiPortrait").objectReferenceValue = Portrait("Utsusemi_Full");
         so.FindProperty("utsusemiCloseup").objectReferenceValue = Portrait("Utsusemi_Closeup");
@@ -206,6 +207,20 @@ public static class BossArtSetup
         art.actionFps = 11f;
         EditorUtility.SetDirty(art);
         return art;
+    }
+
+    // The boss's second-phase CharacterArt from its <name>_<Clip>_<i> frames, with the first form's clips filling any
+    // gap; null until its idle exists (or without a first form to fall back on).
+    static CharacterArt PhaseArt(string name, CharacterArt first, string attackClip, string parryClip)
+    {
+        Sprite[] idle = first == null ? null : TryFrames(name, "Idle");
+        return idle == null ? null : SaveArt(name,
+            idle: idle,
+            attack: TryFrames(name, attackClip) ?? first.attack,
+            parry: TryFrames(name, parryClip) ?? first.parry,
+            hit: TryFrames(name, "Hit") ?? first.hit,
+            death: TryFrames(name, "Defeat") ?? first.death,
+            first.deathParticles);
     }
 
     // The clip's frames, or null when it hasn't been made yet.

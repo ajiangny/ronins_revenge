@@ -98,6 +98,8 @@ public class GameManager : MonoBehaviour
     [Header("Bosses")]
     [Tooltip("Benibana's sprite frames. Leave empty to use the Taisho art, tinted crimson, as a stand-in.")]
     [SerializeField] CharacterArt benibanaArt;
+    [Tooltip("Her unsealed frames, worn from her phase break on. Leave empty to keep her first art.")]
+    [SerializeField] CharacterArt benibanaPhaseArt;
     [SerializeField] float benibanaScale = 3.4f;
     [Tooltip("Her full-body illustration and the close-up used in her intro. Without them she gets the plain title card.")]
     [SerializeField] Sprite benibanaPortrait;
@@ -128,6 +130,14 @@ public class GameManager : MonoBehaviour
     [Tooltip("Utsusemi raising its sword to throw it before the Heart Lantern, and its stance with the sword planted.")]
     [SerializeField] Sprite[] utsusemiSwordThrow;
     [SerializeField] Sprite[] utsusemiUnarmedIdle;
+    [Tooltip("Its overdriven frames, worn from its phase break on, with its extra clips in that form. Leave empty to keep its first art.")]
+    [SerializeField] CharacterArt utsusemiPhaseArt;
+    [SerializeField] Sprite[] utsusemiPhaseBareIdle;
+    [SerializeField] Sprite[] utsusemiPhaseUnarmedIdle;
+    [SerializeField] Sprite[] utsusemiPhaseDash;
+    [SerializeField] Sprite[] utsusemiPhaseChop;
+    [SerializeField] Sprite[] utsusemiPhaseHourSlash;
+    [SerializeField] Sprite[] utsusemiPhaseSwordThrow;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [Tooltip("Its overdriven second-phase illustrations: the card that plays in its phase break. Without them its phase line is a subtitle.")]
@@ -1246,6 +1256,9 @@ public class GameManager : MonoBehaviour
                     automaton.SetBareIdle(utsusemiBareIdle);
                     automaton.SetSwordFrames(utsusemiDash, utsusemiChop, utsusemiHourSlash);
                     automaton.SetThrowFrames(utsusemiSwordThrow, utsusemiUnarmedIdle);
+                    automaton.SetPhaseArt(utsusemiPhaseArt);
+                    automaton.SetPhaseFrames(utsusemiPhaseBareIdle, utsusemiPhaseUnarmedIdle, utsusemiPhaseDash, utsusemiPhaseChop,
+                        utsusemiPhaseHourSlash, utsusemiPhaseSwordThrow);
                 }
                 return automaton;
             case BossKind.Shirogane:
@@ -1255,7 +1268,8 @@ public class GameManager : MonoBehaviour
                 if (!ghostly)
                 {
                     blade.SetDashFrames(shiroganeDash);
-                    blade.SetPhaseArt(shiroganePhaseArt, shiroganePhaseDash);
+                    blade.SetPhaseArt(shiroganePhaseArt);
+                    blade.SetPhaseDash(shiroganePhaseDash);
                 }
                 blade.SetWolfFrames(shiroWolfIdle, shiroWolfHowl, shiroWolfCharge, shiroWolfVanish);
                 return blade;
@@ -1263,7 +1277,9 @@ public class GameManager : MonoBehaviour
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
                 Color tint = standIn ? new Color(1f, 0.55f, 0.6f) : Color.white;
-                return Boss.Create<Benibana>(art, benibanaScale, Benibana.StartingHealth, position, tint);
+                Benibana warlord = Boss.Create<Benibana>(art, benibanaScale, Benibana.StartingHealth, position, tint);
+                if (!standIn) warlord.SetPhaseArt(benibanaPhaseArt);
+                return warlord;
         }
     }
 

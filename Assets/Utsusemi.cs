@@ -69,6 +69,20 @@ public class Utsusemi : Boss
     // Its idle with the hat off, for while the hat is out; null keeps the hatted idle.
     Sprite[] bareIdle;
 
+    // Its overdriven versions of the extra clips, worn with the phase art; any that is missing keeps the first.
+    Sprite[] phaseBareIdle, phaseUnarmedIdle, phaseDash, phaseChop, phaseSlash, phaseSwordThrow;
+
+    public void SetPhaseFrames(Sprite[] bare, Sprite[] unarmed, Sprite[] dash, Sprite[] chop, Sprite[] slash, Sprite[] swordThrow)
+    {
+        Sprite[] Some(Sprite[] f, int min) => f != null && f.Length > min ? f : null;
+        phaseBareIdle = Some(bare, 0);
+        phaseUnarmedIdle = Some(unarmed, 0);
+        phaseDash = Some(dash, 1);
+        phaseChop = Some(chop, ChopImpactFrame);
+        phaseSlash = Some(slash, 0);
+        phaseSwordThrow = Some(swordThrow, SwordReleaseFrame);
+    }
+
     public void SetBareIdle(Sprite[] frames)
     {
         bareIdle = frames != null && frames.Length > 0 ? frames : null;
@@ -1831,6 +1845,16 @@ public class Utsusemi : Boss
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 3f) == null) Fx.Play(Fx.Explosion, Centre, Gold, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
         bodyTint = Color.Lerp(bodyTint, new Color(0.75f, 0.7f, 0.8f), 0.5f);
+        WearPhaseArt();
+        if (phaseBareIdle != null) bareIdle = phaseBareIdle;
+        if (phaseUnarmedIdle != null) unarmedIdle = phaseUnarmedIdle;
+        if (phaseDash != null) dashFrames = phaseDash;
+        if (phaseChop != null) chopFrames = phaseChop;
+        if (phaseSlash != null) slashFrames = phaseSlash;
+        if (phaseSwordThrow != null) swordThrowFrames = phaseSwordThrow;
+        // The patched bare-and-unarmed stance is built from the idles, so it is rebuilt from the new ones.
+        bareUnarmedIdle = null;
+        PlayIdle();
         AddCore();
         // The core opens with a radial burst of light: phase 2 fights with lasers.
         for (int i = 0; i < 8; i++)

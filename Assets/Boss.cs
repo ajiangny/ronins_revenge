@@ -67,6 +67,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected SpriteRenderer sprite;
     protected SpriteAnimator animator;
     protected CharacterArt art;
+    // Its transformed frames, worn from the phase break on; null keeps the first art.
+    CharacterArt phaseArt;
     protected Ronin ronin;
     protected Arrow arrowPrefab;
     protected Vector3 anchor;
@@ -256,6 +258,17 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     // The loop the boss rests in; a subclass can swap it for a different look (Utsusemi without its hat).
     protected virtual Sprite[] IdleClip => art.idle;
+
+    public void SetPhaseArt(CharacterArt awakened)
+    {
+        phaseArt = awakened;
+    }
+
+    // Puts on the second-phase art, if there is one. Phase breaks call it before their first PlayIdle.
+    protected void WearPhaseArt()
+    {
+        if (phaseArt != null) art = phaseArt;
+    }
 
     protected void PlayIdle()
     {

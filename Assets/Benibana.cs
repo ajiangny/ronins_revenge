@@ -365,6 +365,8 @@ public class Benibana : Boss
             Fx.Play(Fx.SmokePuff, Centre + (Vector3)Random.insideUnitCircle * 2f, Smoke, 2.5f);
         }
         bodyTint = new Color(0.8f, 0.45f, 0.5f);
+        WearPhaseArt();
+        PlayIdle();
         AddEyes();
         AddAura();
         // Unsealed: a title card of her transformed, over which she speaks; without its art, a subtitle.

@@ -95,13 +95,11 @@ public class Shirogane : Boss
         dashFrames = dash != null && dash.Length > 0 ? dash : null;
     }
 
-    // Her awakened frames, spirit flame on both blades, which she wears once the wolf arrives.
-    CharacterArt phaseArt;
+    // Her awakened dash, with spirit flame, for once the wolf arrives.
     Sprite[] phaseDash;
 
-    public void SetPhaseArt(CharacterArt awakened, Sprite[] dash)
+    public void SetPhaseDash(Sprite[] dash)
     {
-        phaseArt = awakened;
         phaseDash = dash != null && dash.Length > 0 ? dash : null;
     }
 
@@ -909,11 +907,8 @@ public class Shirogane : Boss
         yield return wolf.AppearAt(WolfRest);
 
         bodyTint = new Color(0.85f, 0.96f, 1f);
-        if (phaseArt != null)
-        {
-            art = phaseArt;
-            if (phaseDash != null) dashFrames = phaseDash;
-        }
+        WearPhaseArt();
+        if (phaseDash != null) dashFrames = phaseDash;
         AddAura();
         PlayIdle();
         // Her oath: a title card with her and the wolf, over which she speaks; without its art, a subtitle.

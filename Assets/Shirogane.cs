@@ -29,6 +29,8 @@ public class Shirogane : Boss
 
     public override string Title => "SHIROGANE";
     public override string Epithet => "The Forsaken Blade";
+    // The epithet on her phase-two card.
+    public const string OathEpithet = "Oath of the Spectral Wolf";
     public override Color Colour => Spirit;
 
     public override string Line(BossLine line) => line switch
@@ -899,8 +901,13 @@ public class Shirogane : Boss
         bodyTint = new Color(0.85f, 0.96f, 1f);
         AddAura();
         PlayIdle();
-        Speak(BossLine.Phase);
-        yield return new WaitForSeconds(2.2f);
+        // Her oath: a title card with her and the wolf, over which she speaks; without its art, a subtitle.
+        if (PhaseCard != null) yield return PhaseCard(this);
+        else
+        {
+            Speak(BossLine.Phase);
+            yield return new WaitForSeconds(2.2f);
+        }
         breaking = false;
     }
 

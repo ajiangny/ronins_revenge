@@ -652,6 +652,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 95cc0cf8a8f3a42398bcac4151a79d1d, type: 3}
   shiroganePortrait: {fileID: 21300000, guid: 7060fe1074bf6444ea4d1715b72e7108, type: 3}
   shiroganeCloseup: {fileID: 21300000, guid: e0e2e2ff5138a4f7096f36294d515e5d, type: 3}
+  shiroganeWolfPortrait: {fileID: 21300000, guid: cdea3b138cbd149c684eab469b416de4, type: 3}
+  shiroganeWolfCloseup: {fileID: 21300000, guid: 59ab3921b39e54f0cb90e7150e96ee96, type: 3}
   shiroganeIntroLine: {fileID: 8300000, guid: 22b201e05a7d94010905e09e68d3805c, type: 3}
   shiroganePhaseLine: {fileID: 8300000, guid: c947dbeb9ed7d4dfca27248a7b0c11e2, type: 3}
   shiroganeDefeatLine: {fileID: 8300000, guid: 5faa645c5f2644f3ca075d7bf787808f, type: 3}

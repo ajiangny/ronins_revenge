@@ -263,13 +263,13 @@ public class GameUI : MonoBehaviour
         glow.sprite = ProceduralSprites.SoftGlow;
         glow.color = new Color(colour.r, colour.g, colour.b, 0.5f);
 
-        // Beat one: her full-body art, sized to the screen's height, right of centre.
+        // Beat one: her full-body art, sized to the screen's height, centred, drifting in from the right.
         RectTransform art = CreateRect("FullArt", root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f * full.rect.width / full.rect.height, 1000f));
         Image artImage = art.gameObject.AddComponent<Image>();
         artImage.sprite = full;
         artImage.preserveAspect = true;
         artImage.color = Color.clear;
-        const float artRestX = 300f, artStartX = 400f;
+        const float artRestX = 0f, artStartX = 90f;
 
         // Beat two: her close-up, framed per boss so the art's cut-off edges sit off screen.
         Vector2 portraitSize = new Vector2(closeUpHeight * closeUp.rect.width / closeUp.rect.height, closeUpHeight);

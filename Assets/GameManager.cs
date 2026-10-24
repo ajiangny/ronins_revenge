@@ -147,6 +147,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] shiroWolfVanish;
     [SerializeField] Sprite shiroganePortrait;
     [SerializeField] Sprite shiroganeCloseup;
+    [Tooltip("Her second-phase illustrations, with the wolf: the card that plays as it arrives. Without them her phase line is a subtitle.")]
+    [SerializeField] Sprite shiroganeWolfPortrait;
+    [SerializeField] Sprite shiroganeWolfCloseup;
     [SerializeField] AudioClip shiroganeIntroLine;
     [SerializeField] AudioClip shiroganePhaseLine;
     [SerializeField] AudioClip shiroganeDefeatLine;
@@ -1199,10 +1202,24 @@ public class GameManager : MonoBehaviour
         }
 
         ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
+        // A boss with second-phase portraits gets a card for its arrival, played in its phase break.
+        Boss.PhaseCard = lines.phasePortrait != null && lines.phaseCloseup != null ? PlayPhaseCard : null;
         if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
         state = State.Playing;
         ronin.ControlsEnabled = true;
         activeBoss.Begin(ronin, army.samuraiPrefab.arrowPrefab);
+    }
+
+    // The second-phase title card: the same cinematic as the intro with the phase art, epithet and line. The music
+    // ducks under it as it would under the spoken line.
+    IEnumerator PlayPhaseCard(Boss boss)
+    {
+        BossVoice lines = VoiceFor(Stage.boss);
+        AudioClip clip = lines.phase;
+        Music.Duck(0.3f, (clip != null ? clip.length : 3f) + 2.5f);
+        voice.volume = voiceVolume * Sfx.Volume;
+        yield return ui.PlayBossIntro(lines.phasePortrait, lines.phaseCloseup, lines.phaseCloseupHeight, lines.phaseCloseupFocus,
+            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, boss.Colour, voice, clip, boss.Line(BossLine.Phase));
     }
 
     Boss CreateBoss(BossKind kind, Vector3 position)
@@ -1242,6 +1259,11 @@ public class GameManager : MonoBehaviour
         // down), and where that point sits on screen.
         public float closeupHeight;
         public Vector2 closeupFocus, closeupAt;
+        // A second card for the boss's second phase, framed the same way; both sprites or none.
+        public Sprite phasePortrait, phaseCloseup;
+        public string phaseEpithet;
+        public float phaseCloseupHeight;
+        public Vector2 phaseCloseupFocus, phaseCloseupAt;
         public AudioClip intro, phase, defeat, defeatFinal, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes,
             crescentSlash, bladeRain, eclipseFang;
         public AudioClip[] hurt;
@@ -1272,9 +1294,9 @@ public class GameManager : MonoBehaviour
         BossKind.Benibana => new BossVoice
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
-            // The close-ups are landscape paintings with their own dark backdrop; each is framed on the face, high
-            // and right of centre, big enough that the painting's edges sit off screen.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(420f, 200f),
+            // Each close-up is framed on the face, on the centre line and high enough to clear the title block, big
+            // enough that the painting's edges sit off screen.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(0f, 200f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
@@ -1283,15 +1305,19 @@ public class GameManager : MonoBehaviour
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed on its slit-eye under the hat brim, the brim running off the top right.
-            closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(440f, 230f),
+            closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(0f, 230f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Framed on her face, her hair and mask spilling off the top and left.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.58f, 0.34f), closeupAt = new Vector2(420f, 200f),
+            // Framed on her face, her hair spilling off the top and right.
+            // Taller than the others, since her face sits so high in the painting, so its top edge stays off screen.
+            closeupHeight = 1800f, closeupFocus = new Vector2(0.45f, 0.2f), closeupAt = new Vector2(0f, 200f),
+            // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
+            phasePortrait = shiroganeWolfPortrait, phaseCloseup = shiroganeWolfCloseup, phaseEpithet = Shirogane.OathEpithet,
+            phaseCloseupHeight = 1500f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(0f, 150f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
             eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,
@@ -1371,6 +1397,7 @@ public class GameManager : MonoBehaviour
         yield return GatherDrops();
         effects.Boss = null;
         activeBoss = null;
+        Boss.PhaseCard = null;
         // Her fall lifts the blood moon.
         if (backdrop != null) backdrop.SetBossMoon(false);
 

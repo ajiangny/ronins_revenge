@@ -37,11 +37,11 @@ public class Benibana : Boss
         _ => null,
     };
 
-    // Her callouts and her stagger, each recorded three ways; GameManager picks a take and shows its words.
+    // Her callouts, each recorded three ways, and her stagger, two; GameManager picks a take and shows its words.
     public override string Line(BossLine line, int take) => line switch
     {
-        // A parry turns her own draw back on her: only someone who knows it could.
-        BossLine.Stagger => Take(take, "What?! My own blade...", "You... know that draw?", "No one turns my blade!"),
+        // A parry turns her own attack back on her, and not for the first time: every fight is a rematch.
+        BossLine.Stagger => Take(take, "Ngh! Dirty trick!", "Agh! No one turns my blade!"),
         BossLine.SmokeRings => Take(take, "Breathe it in...", "Inhale...", "Lose yourself."),
         BossLine.RosaryLash => Take(take, "Kneel!", "Bow your head.", "Down!"),
         BossLine.Iaido => Take(take, "Crimson Iaido!", "Iaido.", "Too slow."),

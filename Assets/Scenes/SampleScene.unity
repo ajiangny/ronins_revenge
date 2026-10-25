@@ -544,7 +544,6 @@ MonoBehaviour:
   benibanaDefeatLine: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
   benibanaStaggerLines:
   - {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
-  - {fileID: 8300000, guid: eb3af3f3774304f9c8a50ddee342f8cc, type: 3}
   - {fileID: 8300000, guid: 5d7c70c1af1e04caa814b370ef56b944, type: 3}
   benibanaSmokeRingsLines:
   - {fileID: 8300000, guid: da5f91080559c4ec7b86b356f8307e5b, type: 3}

@@ -180,7 +180,9 @@ match `BoonChoiceUI.boonIcons`.
   `BeginBoss` to `PlayPhaseCard` when `VoiceFor` has `phasePortrait`/`phaseCloseup`) with its transformed art,
   `phaseEpithet` (`Benibana.PhaseEpithet`, `Utsusemi.PhaseEpithet`, `Shirogane.OathEpithet`) and Phase line, its wash
   in `phaseColour` when the transformed art needs one (Utsusemi's molten orange); after it `GameUI.RenameBossBar` gives the
-  bar the phase epithet;
+  bar the phase epithet. Before the card each boss stages an in-world lead-in in its `PhaseBreak` (Benibana: stagger,
+  pipe inhale, silence, crossing cut and reveal; Utsusemi: seizing shudder with quickening ticks, a bell, the burst open;
+  Shirogane: the wolf's arrival), shaking the body with `Boss.Tremble` and swapping to the phase art at the reveal;
   without that art the line falls back to a subtitle.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
   `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Characters/<Boss>Phase2/<Boss>Phase2_<Clip>_<i>.png` (each boss's

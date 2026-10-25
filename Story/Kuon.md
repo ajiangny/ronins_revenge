@@ -33,6 +33,7 @@ Maw (it rears, gathers an orb in its jaws and swallows it).
 | A faint shadow at her back in phase 1 | It has always been there; she only calls it when she must. |
 | It wards her (her damage is a tenth while it stands) | A guardian puts itself between its charge and the blade. |
 | It hunts beside her, on its own clock | It isn't her weapon. It fights for her, its own way. |
+| Spirit Lances: quick beams from its jaws | A guardian's snaps at whoever comes too close to her. |
 | Kuon's Maw: the gathered orb, the beam | Everything the shrine ever held, thrown at the one threatening her. |
 | Fang of the Oath parried back into it | Their shared oath, turned on the guardian: Oni's answer to both of them. |
 | Broken, it fades to a shadow at her side | It doesn't die. It stays beside her, too weak to guard her. |

@@ -20,7 +20,7 @@ public class Shirogane : Boss
     static readonly Color Trail = new Color(0.45f, 0.85f, 1f, 0.5f);
 
     enum Move { CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, MirrorMoon, Moonsplitter, OathFang, Moonfall,
-        WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang, SpiritMaw }
+        WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang, SpiritMaw, SpiritLances }
 
     // Each value is (phase 1, phase 2 with Kuon, phase 2 alone): with the wolf at her side she gives no quarter, and
     // without it she gives less still.
@@ -269,7 +269,7 @@ public class Shirogane : Boss
         return options[Random.Range(0, options.Count)];
     }
 
-    // Kuon's attack loop while it stands: a charge, a howl, the pack or its Maw, then a breath, then another. It holds back
+    // Kuon's attack loop while it stands: a charge, a howl, the pack, its lances or its Maw, then a breath, then another. It holds back
     // while she makes a move of their own, while it is dazed, and through her phase break.
     IEnumerator Hunt()
     {
@@ -288,6 +288,7 @@ public class Shirogane : Boss
                 case Move.Howl: yield return Howl(); break;
                 case Move.WolfPack: yield return WolfPack(); break;
                 case Move.SpiritMaw: yield return SpiritMaw(); break;
+                case Move.SpiritLances: yield return SpiritLances(); break;
             }
             wolfBusy = false;
             yield return Wait(Random.Range(1.2f, 1.8f));
@@ -298,7 +299,7 @@ public class Shirogane : Boss
 
     Move NextWolfMove()
     {
-        var options = new List<Move> { Move.WolfCharge, Move.WolfCharge, Move.Howl, Move.WolfPack, Move.SpiritMaw };
+        var options = new List<Move> { Move.WolfCharge, Move.WolfCharge, Move.Howl, Move.WolfPack, Move.SpiritMaw, Move.SpiritLances, Move.SpiritLances };
         // Its Maw is the big one: never twice running.
         if (lastWolfMove == Move.SpiritMaw) options.Remove(Move.SpiritMaw);
         if (lastWolfMove is Move last && wolfRepeats >= 2) options.RemoveAll(m => m == last);
@@ -808,29 +809,106 @@ public class Shirogane : Boss
 
     // --- Parry-only draws ---
 
-    // Moonsplitter Draw: she sheathes both blades and her flame drains into them while a sight line holds on the
-    // ronin, then one great crescent is drawn that turns with him and cuts through cover and slashes. There is no
-    // outrunning it: only a parry sends it back, and it breaks her stance.
+    // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent rises at each edge of
+    // the field at the ronin's height, while two lines run along the ground from them to his feet, following him,
+    // brightening, then flashing as they lock. The crescents sweep in from both sides like closing scissors, chasing
+    // him and trailing afterimages, and meet on him: there is nowhere to step, so the answer is a parry as they
+    // cross (two, a beat apart, if he is on the move). Parried, they fly back and break her stance.
     IEnumerator Moonsplitter()
     {
         Speak(BossLine.Moonsplitter);
-        yield return SightLine(Hands, DrawAim, Frost);
+        PlayAction(art.parry);
+        ElementFx.Glow(Hands, Frost, 0.9f, 3f, DrawAim, transform);
+        Sfx.Play(Sfx.BladeRing, 0.8f, 0.8f);
+
+        float height = ronin.Bounds.center.y;
+        Vector3[] starts = { new Vector3(LeftEdge + 0.8f, height, 0), new Vector3(RightEdge - 0.8f, height, 0) };
+        var ghosts = new List<SpriteRenderer>();
+        var lines = new List<SpriteRenderer>();
+        Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
+        for (int i = 0; i < 2; i++)
+        {
+            SpriteRenderer ghost = Glowing("MoonGhost", frames != null ? frames[0] : ProceduralSprites.Glow, 54);
+            ghost.transform.position = starts[i];
+            // Drawn facing down; turned to face across the field toward the ronin.
+            ghost.transform.rotation = Quaternion.FromToRotation(Vector3.down, i == 0 ? Vector3.right : Vector3.left);
+            float art = frames != null ? frames[0].bounds.size.x : 1f;
+            ghost.transform.localScale = Vector3.one * (3.2f / art);
+            ghosts.Add(ghost);
+            Puff(starts[i], 1.6f);
+            lines.Add(Bar(starts[i], ronin.Bounds.center, 0.06f, Color.clear));
+        }
+        Sfx.Play(Sfx.MistSwirl, 0.7f, 1.2f);
+
+        float rang = 0f;
+        for (float t = 0; t < DrawAim; t += Time.deltaTime * Tempo)
+        {
+            float k = t / DrawAim;
+            Vector3 feet = new Vector3(ronin.Bounds.center.x, height, 0);
+            for (int i = 0; i < 2; i++)
+            {
+                Vector3 delta = feet - starts[i];
+                lines[i].transform.position = (starts[i] + feet) / 2f + Vector3.back * 0.2f;
+                lines[i].transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
+                lines[i].transform.localScale = new Vector3(delta.magnitude, 0.05f + 0.08f * k, 1f);
+                lines[i].color = new Color(Frost.r, Frost.g, Frost.b, 0.3f + 0.5f * k);
+                ghosts[i].color = new Color(1f, 1f, 1f, 0.25f + 0.5f * k);
+            }
+            if (k > 0.5f && t - rang > 0.12f)
+            {
+                rang = t;
+                Sfx.Play(Sfx.BladeRing, 0.3f, 1.3f + k);
+            }
+            yield return null;
+        }
+        // The lock: the lines flash white, the beat to parry on is coming.
+        foreach (SpriteRenderer line in lines) line.color = Color.white;
+        yield return Wait(0.15f);
+        foreach (SpriteRenderer line in lines) Drop(line);
+        foreach (SpriteRenderer ghost in ghosts) Drop(ghost);
 
         PlayAction(art.attack);
-        Vector3 from = Hands;
-        if (Fx.Play(Fx.SlashArc, from, Frost, 4f) == null) ElementFx.Glow(from, Frost, 1f, 4f, 0.25f);
         Sfx.Play(Sfx.SwordSlash, 1f, 0.55f);
         Sfx.Play(Sfx.BladeRing, 0.9f, 0.7f);
         CameraShake.Add(0.3f);
-        Arrow cut = Fire(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
-        Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
-        Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
-        if (frames != null) cut.Restyle(frames, 14f, Color.white, new Vector2(4.4f, 2.8f), 0.9f, halo, 4.4f);
-        else cut.Restyle(ProceduralSprites.Glow, Frost, new Vector2(4f, 1.4f), 0.9f, halo, 4.4f);
-        cut.MakeUnbreakable();
-        cut.MakeReflectable(transform);
-        StartCoroutine(Pursue(cut, DrawSpeed * ShotSpeed));
-        yield return Wait(0.5f);
+        var pair = new List<Arrow>();
+        float speed = DrawSpeed * ShotSpeed * 0.9f;
+        for (int i = 0; i < 2; i++)
+        {
+            Vector3 inward = i == 0 ? Vector3.right : Vector3.left;
+            Arrow moon = Fire(starts[i], inward * DrawSpeed * 0.9f);
+            Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
+            if (frames != null) moon.Restyle(frames, 14f, Color.white, new Vector2(3.2f, 2.2f), 0.8f, halo, 3.6f);
+            else moon.Restyle(ProceduralSprites.Glow, Frost, new Vector2(1.4f, 3f), 0.8f, halo, 3.6f);
+            moon.MakeUnbreakable();
+            moon.MakeReflectable(transform);
+            if (Fx.Play(Fx.SlashArc, starts[i], Frost, 2.6f) == null) ElementFx.Glow(starts[i], Frost, 1f, 2.6f, 0.2f);
+            pair.Add(moon);
+            StartCoroutine(Close(moon, speed));
+        }
+        IgnoreEachOther(pair);
+        yield return Wait(0.6f);
+    }
+
+    // Flies a crossing moon at the ronin until it has passed him, trailing pale afterimages, then lets it fly on.
+    IEnumerator Close(Arrow moon, float speed)
+    {
+        float side = Mathf.Sign(ronin.Bounds.center.x - moon.transform.position.x);
+        float nextGhost = 0f;
+        while (moon != null && ronin != null)
+        {
+            Vector3 toward = ronin.Bounds.center - moon.transform.position;
+            toward.z = 0;
+            // Past him: it flies straight on.
+            if (Mathf.Sign(toward.x) != side) yield break;
+            moon.Turn(toward.normalized * speed);
+            if (Time.time >= nextGhost)
+            {
+                nextGhost = Time.time + 0.04f;
+                Afterimage(moon.Art, new Color(Frost.r, Frost.g, Frost.b, 0.45f));
+            }
+            yield return new WaitForFixedUpdate();
+        }
     }
 
     // Fang of the Oath: Kuon howls and she crosses her blades, and their spirit leaves as one bolt in the shape of a
@@ -1247,6 +1325,33 @@ public class Shirogane : Boss
         yield return wolf.AppearAt(WolfRest);
     }
 
+    // Spirit Lances: Kuon's quick beams. It stays at her side and spits thin beams one after another, each down the
+    // lane where the ronin stands as its warning opens, so standing still is the one way to be hit; four near her
+    // end. Each is the Maw's beam in small: a short trapezoid warning, a burst at the jaws and a splash.
+    IEnumerator SpiritLances()
+    {
+        yield return wolf.Settle(WolfRest);
+        wolf.Glare(0.5f);
+        Sfx.Play(Sfx.WolfGrowl, 0.8f, 1.3f);
+        int lances = HealthFraction < 0.5f ? 4 : 3;
+        for (int i = 0; i < lances; i++)
+        {
+            float lane = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1f, RightEdge - 1f);
+            BeamTell warning = MarkBeam(lane, LanceHalfWidth, LanceTell);
+            ElementFx.Glow(WolfMouth, Cyan, 0.5f, 1.8f, LanceTell, wolf.transform);
+            yield return Wait(LanceTell);
+            warning.Remove();
+            wolf.PlayHowl();
+            yield return MawBeam(lane, LanceHalfWidth, LanceBurn, heavy: false);
+            yield return Wait(0.12f);
+        }
+    }
+
+    // A lance's half width, how long its warning opens, and how long it burns.
+    const float LanceHalfWidth = 0.7f;
+    const float LanceTell = 0.5f;
+    const float LanceBurn = 0.25f;
+
     // How long Kuon's Maw gathers, how much damage on Kuon meanwhile bursts the orb, and what the burst costs it.
     const float MawGather = 1.6f;
     const int MawBreakDamage = 6;
@@ -1385,7 +1490,8 @@ public class Shirogane : Boss
     // The beam from Kuon's jaws down a lane; it burns the ronin while he stands within halfWidth of it. It bursts
     // from the jaws with a shockwave, snaps open wide, burns pulsing with spirit light streaming down it and
     // splashing where it lands, then pinches shut and the arena's dark lifts.
-    IEnumerator MawBeam(float x, float halfWidth, float seconds)
+    // A light one (Kuon's quick lances) leaves the arena lit and shakes it less.
+    IEnumerator MawBeam(float x, float halfWidth, float seconds, bool heavy = true)
     {
         Vector3 from = WolfMouth;
         Vector3 to = new Vector3(x, GroundY, 0);
@@ -1417,10 +1523,14 @@ public class Shirogane : Boss
         if (flare != null) transient.Add(flare.gameObject);
         FxPlayer splash = Fx.Play(Fx.ShiroMawHit, to, Color.white, 2.4f * w, null, 57);
         if (splash != null) transient.Add(splash.gameObject);
-        Sfx.PlayLoop(Sfx.SpiritBeam, 0.9f, 0.9f);
-        Sfx.Play(Sfx.FireBlast, 0.8f, 0.7f);
-        CameraShake.Add(0.6f * w);
-        Dim(0.45f, 0.1f);
+        Sfx.PlayLoop(Sfx.SpiritBeam, heavy ? 0.9f : 0.6f, heavy ? 0.9f : 1.3f);
+        if (heavy)
+        {
+            Sfx.Play(Sfx.FireBlast, 0.8f, 0.7f);
+            CameraShake.Add(0.6f * w);
+            Dim(0.45f, 0.1f);
+        }
+        else CameraShake.Add(0.15f);
 
         float nextSpark = 0f, nextRumble = 0f;
         for (float t = 0; t < seconds; t += Time.deltaTime)
@@ -1429,7 +1539,7 @@ public class Shirogane : Boss
             float open = t < 0.1f ? Mathf.Lerp(0.2f, 1.25f, t / 0.1f)
                 : t < 0.2f ? Mathf.Lerp(1.25f, 1f, (t - 0.1f) / 0.1f)
                 : 1f + 0.06f * Mathf.Sin(Time.time * 45f);
-            open *= Mathf.Clamp01((seconds - t) / 0.15f);
+            open *= Mathf.Clamp01((seconds - t) / Mathf.Min(0.15f, seconds * 0.4f));
             if (beam != null) beam.transform.localScale = new Vector3(beamScale * open, beamScale, 1f);
             if (body != null) body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * w * open, 1f);
             if (glow != null) glow.transform.localScale = new Vector3(glow.transform.localScale.x, 3.4f * w * open, 1f);
@@ -1442,7 +1552,7 @@ public class Shirogane : Boss
                 Vector3 side = Vector3.Cross(delta.normalized, Vector3.forward) * (halfWidth * 0.9f * (Random.value < 0.5f ? -1f : 1f));
                 Fx.Play(Fx.Impact, along + side, Cyan, 0.5f * w);
             }
-            if (Time.time >= nextRumble)
+            if (heavy && Time.time >= nextRumble)
             {
                 nextRumble = Time.time + 0.1f;
                 CameraShake.Add(0.08f * w);
@@ -1453,12 +1563,13 @@ public class Shirogane : Boss
         foreach (SpriteRenderer part in new[] { glow, body, core, beam }) Drop(part);
         if (flare != null) flare.Stop();
         if (splash != null) splash.Stop();
-        Dim(0f, 0.6f);
+        if (heavy) Dim(0f, 0.6f);
     }
 
-    // The warning for a Maw beam: a cone fanning out from Kuon's jaws to where the beam will land, which swells at
-    // the jaws over three ringing beats, brightening on each, until it is a wide rectangle over the beam's whole
-    // path; then it flickers white and the beam fills it. It follows the jaws as Kuon moves.
+    // The warning for a Maw beam: a trapezoid from Kuon's jaws, narrow there, to where the beam will land, wide
+    // there. Its outline shows at once; over three ringing beats its fill pours down from the jaws to the ground,
+    // brightening on each, and on the last beat its narrow end widens until it is a rectangle, the beam's shape,
+    // flickering white as the beam fires into it. It follows the jaws as Kuon moves.
     class BeamTell
     {
         public GameObject shape;
@@ -1476,8 +1587,10 @@ public class Shirogane : Boss
         }
     }
 
-    // The rectangle it becomes is a little wider than the beam's hit, so standing just outside it is safe.
+    // Its foot is a little wider than the beam's hit, so standing just outside it is safe; its top, at the jaws,
+    // is this share of that.
     const float TellMargin = 1.15f;
+    const float TellTop = 0.35f;
 
     BeamTell MarkBeam(float x, float halfWidth, float seconds)
     {
@@ -1499,12 +1612,13 @@ public class Shirogane : Boss
     IEnumerator OpenBeamTell(BeamTell tell, float x, float halfWidth, float seconds)
     {
         const float EdgeWidth = 0.12f;
+        const int Quads = 5;
         float beatTime = seconds / 3f;
         int beats = 0;
-        var vertices = new Vector3[12];
-        var colours = new Color[12];
-        var triangles = new int[18];
-        for (int q = 0; q < 3; q++)
+        var vertices = new Vector3[Quads * 4];
+        var colours = new Color[Quads * 4];
+        var triangles = new int[Quads * 6];
+        for (int q = 0; q < Quads; q++)
         {
             int v = q * 4, i = q * 6;
             triangles[i] = v; triangles[i + 1] = v + 1; triangles[i + 2] = v + 2;
@@ -1517,25 +1631,32 @@ public class Shirogane : Boss
                 beats++;
                 Sfx.Play(Sfx.BladeRing, 0.45f, 1.5f + 0.2f * beats);
             }
-            float opened = Mathf.Clamp01(t / seconds);
-            // A cone from a point at the jaws, widening there until both ends are the beam's width.
-            float top = Mathf.Lerp(0.05f, halfWidth, Mathf.SmoothStep(0, 1, opened));
-            float fill = Mathf.Lerp(0.1f, 0.22f, opened) + (beats - 1) * 0.06f;
-            float edge = Mathf.Lerp(0.35f, 0.6f, opened) + (beats - 1) * 0.2f;
-            // Open, it burns white and flickers: the beam is coming now.
-            Color tint = opened >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
+            float filled = Mathf.Clamp01(t / seconds);
+            float fill = 0.14f + 0.08f * beats;
+            float edge = 0.4f + 0.2f * beats;
+            // Full, it burns white and flickers: the beam is coming now.
+            Color tint = filled >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
 
             Vector3 from = WolfMouth;
             Vector3 to = new Vector3(x, GroundY, 0);
             Vector3 side = Vector3.Cross((to - from).normalized, Vector3.forward);
+            // On the last beat the narrow end widens until it is a rectangle: the beam's own shape as it fires.
+            float squaring = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(seconds * 2f / 3f, seconds, t));
+            float top = halfWidth * Mathf.Lerp(TellTop, 1f, squaring);
             Vector3 topLeft = from - side * top, topRight = from + side * top;
-            Vector3 bottomLeft = to - side * halfWidth, bottomRight = to + side * halfWidth;
-            Quad(vertices, 0, topLeft, topRight, bottomRight, bottomLeft);
-            // The edges: a thin strip along each side, inside the fill.
-            Vector3 inTop = side * Mathf.Min(EdgeWidth, top), inBottom = side * EdgeWidth;
-            Quad(vertices, 4, topLeft, topLeft + inTop, bottomLeft + inBottom, bottomLeft);
-            Quad(vertices, 8, topRight - inTop, topRight, bottomRight, bottomRight - inBottom);
-            for (int i = 0; i < 12; i++)
+            Vector3 footLeft = to - side * halfWidth, footRight = to + side * halfWidth;
+            // The fill pours down from the jaws, as far as it has got, widening as it goes.
+            float pour = Mathf.SmoothStep(0, 1, filled);
+            Vector3 frontLeft = Vector3.Lerp(topLeft, footLeft, pour), frontRight = Vector3.Lerp(topRight, footRight, pour);
+            Quad(vertices, 0, topLeft, topRight, frontRight, frontLeft);
+            // The outline: a strip down each side, one across the foot and one across the jaws, inside the shape.
+            Vector3 inTop = side * Mathf.Min(EdgeWidth, top), inFoot = side * EdgeWidth;
+            Vector3 down = (to - from).normalized * EdgeWidth;
+            Quad(vertices, 4, topLeft, topLeft + inTop, footLeft + inFoot, footLeft);
+            Quad(vertices, 8, topRight - inTop, topRight, footRight, footRight - inFoot);
+            Quad(vertices, 12, footLeft - down, footRight - down, footRight, footLeft);
+            Quad(vertices, 16, topLeft, topRight, topRight + down, topLeft + down);
+            for (int i = 0; i < vertices.Length; i++)
             {
                 Color c = tint;
                 c.a = Mathf.Min(1f, i < 4 ? fill : edge);

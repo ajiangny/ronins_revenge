@@ -37,7 +37,7 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 |---|---|
 | Gliding, never blinking | She never hid from him and doesn't start now. |
 | Every pattern leaves a gap | It is a test, not an execution. |
-| Moonsplitter Draw: only a parry answers it | "Answer me." She asks for the one counter he used to know. |
+| Crossing Moons: twin blades from both sides, only a parry answers | "Answer me." Her two blades close on him the way they once guarded his flanks; she asks for the one counter he used to know. |
 | Mirror Moon: her reflection fights beside her | The partner who used to stand on his other side. |
 | Phase break: the wolf arrives | She calls on the oath. The wolf is her shrine's guardian, Kuon, and it remembers too. |
 | Kuon wards her and hunts beside her | The guardian puts itself between her and his blade. To reach her he has to get through it. |
@@ -59,7 +59,7 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 Lily (ElevenLabs): low, calm and velvety, mournful, through Unity's long echo and slow drift. Short sentences. She
 never raises her voice except at Eclipse Fang. Barks: "Crescent Moon.", "Blades... fall." (also Moonfall), "Too
 slow.", "Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... Fang.", "My stance...", and the newer
-"Twin moons." (Mirror Moon), "Answer me." (Moonsplitter Draw), "Remember." (Fang of the Oath) and "...Rest, Kuon."
+"Twin moons." (Mirror Moon), "Answer me." (Crossing Moons), "Remember." (Fang of the Oath) and "...Rest, Kuon."
 (Kuon broken). The newer four are subtitles only so far, like most of her barks.
 
 ## Lines

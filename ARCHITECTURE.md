@@ -164,7 +164,7 @@ match `BoonChoiceUI.boonIcons`.
   0 HP `Break` fades it to a shadow at her side (it is never destroyed, so her defeat scene still plays) and raises
   `Broken`. While Kuon is `Guarded` she is in `SuperArmor` with `ArmorDamageTaken` 0.1 (her ward, `PulseWard`; sparks
   via `Boss.ArmorSpark`), except while `exposed`. Kuon fights in its own loop, `Hunt` (WolfCharge, Howl, WolfPack,
-  `SpiritMaw`), beside her `Fight`; `holdWolf`/`wolfBusy` keep it out of their joint moves and her blade rain.
+  `SpiritLances`: quick light `MawBeam`s behind short tells, `SpiritMaw`), beside her `Fight`; `holdWolf`/`wolfBusy` keep it out of their joint moves and her blade rain.
   `OnWolfBroken` (her ward shatters, `BossLine.WolfFallen`, a quiet `Stagger(GriefStagger, cry: false)`) starts the
   **Lone Blade** (`alone`: faster stats, eight-lane rain, `Moonfall` in place of the Eclipse Fang). `WolfJoined`
   hands Kuon to `GameManager.OnWolfJoined`, which shows its health (`GameUI.ShowWolfBar`, a thin strip inside the foot of her bar),
@@ -176,12 +176,13 @@ match `BoonChoiceUI.boonIcons`.
   Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
   Barrage (`PlaceOrbiting`, `LooseRow`; each sword `Seek`s the ronin at `SeekTurn` degrees a second via `Arrow.Turn` until `SeekStops` above him), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
   Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
-  `ParryAtLatest`): Moonsplitter Draw (phase 1) and Fang of the Oath (phase 2), both a `SightLine` tell, then an
-  unbreakable `MakeReflectable` shot steered onto the ronin by `Pursue`; the Fang is reflectable at Kuon while it
+  `ParryAtLatest`): Crossing Moons (`Moonsplitter`, phase 1: two ground lines lock on him from the
+  edges, then two unbreakable `MakeReflectable` crescents `Close` on him from both sides, trailing afterimages) and
+  Fang of the Oath (phase 2: a `SightLine` tell, then an unbreakable reflectable bolt steered onto him by `Pursue`); the Fang is reflectable at Kuon while it
   stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
   Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`
   dims the arena (`Dim`) and spirals streaks into the `Fx.ShiroMawOrb` orb at its jaws, `SwallowOrb` crushes it
-  while `MarkBeam` (a `BeamTell`: a code-built mesh drawn with the sprite material, which `OpenBeamTell` opens from a cone at Kuon's jaws into a rectangle over the beam's path across three ringing beats) marks the lane, `MawBeam` fires with
+  while `MarkBeam` (a `BeamTell`: a code-built mesh drawn with the sprite material, which `OpenBeamTell` draws as a trapezoid from Kuon's jaws, `TellTop` narrow there, fills over three ringing beats and squares into the beam's rectangle on the last) marks the lane, `MawBeam` fires with
   `Fx.ShiroMawBurst`, the `Fx.ShiroMawBeam` segment drawn `SpriteDrawMode.Tiled` down the lane and `Fx.ShiroMawHit`
   where it lands, code bars without the art; `MawBreakDamage` on Kuon
   during the gather bursts it, `orbBurst`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code

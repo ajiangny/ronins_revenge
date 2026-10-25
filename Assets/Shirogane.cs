@@ -1167,10 +1167,10 @@ public class Shirogane : Boss
         // The beam: the lane is marked where the ronin stands as Kuon starts to gather it, so stepping off it is the
         // dodge. Kuon draws the orb in and swallows it as in its own Maw, then looses the beam.
         float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
-        BeamTell warning = MarkBeam(x, 1.1f);
+        BeamTell warning = MarkBeam(x, 1.1f, 1.3f);
         wolf.Glare(1.4f);
-        yield return GatherOrb(() => WolfMouth, 0.8f, () => false, warning);
-        yield return SwallowOrb(warning, 0.2f);
+        yield return GatherOrb(() => WolfMouth, 0.8f, () => false);
+        yield return SwallowOrb(0.2f);
         warning.Remove();
         yield return MawBeam(x, 1.1f, 0.5f);
 
@@ -1215,7 +1215,7 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.WolfGrowl, 1f, 0.7f);
         wolf.StartCoroutine(wolf.Grow(1.3f, 0.5f));
         int before = wolf.Health;
-        yield return GatherOrb(() => WolfMouth, MawGather, () => wolf.IsBroken || before - wolf.Health >= MawBreakDamage, null);
+        yield return GatherOrb(() => WolfMouth, MawGather, () => wolf.IsBroken || before - wolf.Health >= MawBreakDamage);
         if (orbBurst)
         {
             if (!wolf.IsBroken)
@@ -1234,8 +1234,8 @@ public class Shirogane : Boss
         }
 
         float lane = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.4f, RightEdge - 1.4f);
-        BeamTell warning = MarkBeam(lane, 1.4f);
-        yield return SwallowOrb(warning, 0.35f);
+        BeamTell warning = MarkBeam(lane, 1.4f, 0.8f);
+        yield return SwallowOrb(0.5f);
         warning.Remove();
         yield return MawBeam(lane, 1.4f, 0.8f);
         Fx.Play(Fx.Explosion, new Vector3(lane, GroundY, 0), Cyan, 3f);
@@ -1264,9 +1264,8 @@ public class Shirogane : Boss
     const float OrbArtSize = 64f / 48f;
 
     // Like a tailed beast's bomb: the arena darkens, streaks of light and shadow spiral in from all round to an
-    // orb at `at` that swells and churns as they arrive, and the ground shakes harder as it grows. A beam's lane,
-    // if marked, flickers brighter with it.
-    IEnumerator GatherOrb(System.Func<Vector3> at, float seconds, System.Func<bool> burst, BeamTell warning)
+    // orb at `at` that swells and churns as they arrive, and the ground shakes harder as it grows.
+    IEnumerator GatherOrb(System.Func<Vector3> at, float seconds, System.Func<bool> burst)
     {
         orbBurst = false;
         RemoveOrb();
@@ -1329,7 +1328,6 @@ public class Shirogane : Boss
                 orbCore.transform.localScale = Vector3.one * size * 0.7f;
                 orbCore.color = new Color(0.9f, 1f, 1f, 0.9f);
             }
-            warning?.Show(0.3f + 0.5f * k, Mathf.PingPong(t * (4f + 8f * k), 1f));
             if (t >= nextRumble)
             {
                 nextRumble = t + 0.12f;
@@ -1354,7 +1352,7 @@ public class Shirogane : Boss
     }
 
     // The orb crushes down to a white-hot point and is swallowed, and for a beat everything goes quiet.
-    IEnumerator SwallowOrb(BeamTell warning, float beat)
+    IEnumerator SwallowOrb(float beat)
     {
         if (orb == null) yield break;
         Vector3 at = orb.transform.position;
@@ -1369,7 +1367,6 @@ public class Shirogane : Boss
             orbHalo.transform.localScale = Vector3.one * halo * squeeze;
             orbHalo.color = new Color(Frost.r, Frost.g, Frost.b, 0.45f + 0.4f * k);
             if (orbCore != null) orbCore.transform.localScale = Vector3.one * from.x * 0.45f * squeeze;
-            warning?.Show(0.8f + 0.2f * k, 1f);
             yield return null;
         }
         RemoveOrb();
@@ -1459,43 +1456,58 @@ public class Shirogane : Boss
         Dim(0f, 0.6f);
     }
 
-    // The lane a Maw beam will burn: two bright edge lines `halfWidth` either side of x from Kuon's jaws to the
-    // ground, over a faint fill, so the safe ground on either side reads at a glance.
+    // The warning for a Maw beam, like Benibana's chains: a wide, faint band from Kuon's jaws to where the beam will
+    // land, which narrows to a line over three ringing beats, brightening on each, so the beam fires as it closes.
+    // It follows the jaws as Kuon moves, and holds as a bright line until the beam replaces it.
     class BeamTell
     {
-        public SpriteRenderer fill, left, right;
+        public SpriteRenderer band;
+        public Coroutine closing;
         public Shirogane owner;
-
-        // strength 0..1 brightens it; flicker 0..1 pulses the edges.
-        public void Show(float strength, float flicker)
-        {
-            if (fill != null) fill.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.05f + 0.1f * strength);
-            Color edge = Color.Lerp(Cyan, Color.white, strength * flicker);
-            edge.a = 0.35f + 0.6f * strength * (0.6f + 0.4f * flicker);
-            if (left != null) left.color = edge;
-            if (right != null) right.color = edge;
-        }
 
         public void Remove()
         {
-            owner.Drop(fill);
-            owner.Drop(left);
-            owner.Drop(right);
+            if (closing != null) owner.StopCoroutine(closing);
+            owner.Drop(band);
         }
     }
 
-    BeamTell MarkBeam(float x, float halfWidth)
+    BeamTell MarkBeam(float x, float halfWidth, float seconds)
     {
-        float top = WolfMouth.y;
-        var tell = new BeamTell
-        {
-            owner = this,
-            fill = Bar(new Vector3(x, top, 0), new Vector3(x, GroundY, 0), halfWidth * 2f, Color.clear, 52),
-            left = Bar(new Vector3(x - halfWidth, top, 0), new Vector3(x - halfWidth, GroundY, 0), 0.08f, Color.clear),
-            right = Bar(new Vector3(x + halfWidth, top, 0), new Vector3(x + halfWidth, GroundY, 0), 0.08f, Color.clear),
-        };
-        tell.Show(0.3f, 0f);
+        var tell = new BeamTell { owner = this };
+        tell.band = Bar(WolfMouth, new Vector3(x, GroundY, 0), halfWidth * 2.6f, Color.clear, 52);
+        tell.closing = StartCoroutine(CloseBeamTell(tell, x, halfWidth, seconds));
         return tell;
+    }
+
+    IEnumerator CloseBeamTell(BeamTell tell, float x, float halfWidth, float seconds)
+    {
+        const float LineWidth = 0.1f;
+        float wide = halfWidth * 2.6f;
+        float beatTime = seconds / 3f;
+        int beats = 0;
+        for (float t = 0; tell.band != null; t += Time.deltaTime * Tempo)
+        {
+            if (t < seconds && t >= beats * beatTime)
+            {
+                beats++;
+                Sfx.Play(Sfx.BladeRing, 0.45f, 1.5f + 0.2f * beats);
+            }
+            float closing = Mathf.Clamp01(t / seconds);
+            float width = Mathf.Lerp(wide, LineWidth, closing);
+            float alpha = Mathf.Lerp(0.2f, 0.35f, closing) + (beats - 1) * 0.25f;
+            // Closed, it burns white and flickers: the beam is coming now.
+            Color colour = closing >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
+            colour.a = Mathf.Min(1f, alpha);
+            Vector3 from = WolfMouth;
+            Vector3 to = new Vector3(x, GroundY, 0);
+            Vector3 delta = to - from;
+            tell.band.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
+            tell.band.transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
+            tell.band.transform.localScale = new Vector3(delta.magnitude, width, 1f);
+            tell.band.color = colour;
+            yield return null;
+        }
     }
 
     // Eases the dark over the arena to `alpha` over `seconds`; 0 lifts it and then removes it.

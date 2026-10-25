@@ -12,6 +12,7 @@ writing a line, a scene or art for them**, and update it when something about th
 | **Benibana** | The Crimson Smoke / The Crimson Unsealed | Court sword-dancer and assassin. Stage 1 boss. | [Benibana.md](Benibana.md) |
 | **Utsusemi** | The Hollow Pilgrim / The Unwound Hour | A karakuri wearing a dead monk's hat. Stage 2 boss. | [Utsusemi.md](Utsusemi.md) |
 | **Shirogane** | The Forsaken Blade / Oath of the Spectral Wolf | Oni's sworn partner, now a ghost. Stage 3 boss. | [Shirogane.md](Shirogane.md) |
+| **Kuon** | The Shrine Guardian | Shirogane's spirit wolf, her family shrine's guardian. Fought beside her in her phase 2. | [Kuon.md](Kuon.md) |
 | **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Planned Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
 
 ## The betrayal

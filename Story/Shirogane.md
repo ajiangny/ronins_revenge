@@ -6,7 +6,7 @@
 |---|---|
 | Role | Stage 3 boss. Phase 2: **Oath of the Spectral Wolf**. |
 | Was | The Emperor's guard and Oni's sworn partner. White silver to his demon. |
-| Is | A ghost bound to stop Oni, with her shrine's guardian wolf bound to her. |
+| Is | A ghost bound to stop Oni, with her shrine's guardian wolf, [Kuon](Kuon.md), bound to her. |
 | Wants | Oni to win, and to remember what they swore. |
 | Signature | Twin katanas in blue spirit flame, a gliding stance, the spirit wolf. |
 
@@ -37,7 +37,12 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 |---|---|
 | Gliding, never blinking | She never hid from him and doesn't start now. |
 | Every pattern leaves a gap | It is a test, not an execution. |
-| Phase break: the wolf arrives | She calls on the oath. The wolf is her shrine's guardian, and it remembers too. |
+| Moonsplitter Draw: only a parry answers it | "Answer me." She asks for the one counter he used to know. |
+| Mirror Moon: her reflection fights beside her | The partner who used to stand on his other side. |
+| Phase break: the wolf arrives | She calls on the oath. The wolf is her shrine's guardian, Kuon, and it remembers too. |
+| Kuon wards her and hunts beside her | The guardian puts itself between her and his blade. To reach her he has to get through it. |
+| Fang of the Oath: parry it back into Kuon | "Remember." Their oath, thrown at him; he answers it. |
+| Kuon broken: "...Rest, Kuon." She staggers, then fights on faster | Grief, then the rest of her strength. Moonfall is everything she has left. |
 | Eclipse Fang, then standing spent | She gives everything, then leaves herself open on purpose. |
 | Defeat: the wolf dissolves under her hand | She lets go of the last thing binding her before she goes. |
 
@@ -52,8 +57,10 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 ## Voice
 
 Lily (ElevenLabs): low, calm and velvety, mournful, through Unity's long echo and slow drift. Short sentences. She
-never raises her voice except at Eclipse Fang. Barks unchanged: "Crescent Moon.", "Blades... fall.", "Too slow.",
-"Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... Fang.", "My stance...".
+never raises her voice except at Eclipse Fang. Barks: "Crescent Moon.", "Blades... fall." (also Moonfall), "Too
+slow.", "Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... Fang.", "My stance...", and the newer
+"Twin moons." (Mirror Moon), "Answer me." (Moonsplitter Draw), "Remember." (Fang of the Oath) and "...Rest, Kuon."
+(Kuon broken). The newer four are subtitles only so far, like most of her barks.
 
 ## Lines
 
@@ -93,4 +100,4 @@ ghost swords fall on the Emperor. In the true ending she is the second wisp besi
 
 - She is never cruel to Oni and never sexualised. Armor stays closed; skin stays ghost-white.
 - She is the only boss who never served Kagetsune willingly, not even once.
-- The wolf is her shrine's guardian, not Kagetsune's creature. It obeys her, not him.
+- The wolf is Kuon, her shrine's guardian, not Kagetsune's creature. It obeys her, not him. See [Kuon.md](Kuon.md).

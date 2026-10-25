@@ -154,23 +154,40 @@ match `BoonChoiceUI.boonIcons`.
   and hit the ronin where they cross his height (`HitIfCrossed`), leaving `GroundFire` patches burning along the ground; the hum is `Sfx.PlayLoop`/`Stop` on its own source. Fire burns the lace (`Burn`).
   Its effects are `Fx.Utsu*` clips (code shapes when missing); its clock is `Sfx.ClockTick`, with `HatWhirr`, `HatClang`, `GearGrind`, `LanternCharge`, `LanternBeam`, `MidnightChime`, `BladeChop`, `HourSlash`, `SwordWhirl` and `SwordPlant`.
 - `Shirogane.cs` — Stage 3 boss, "The Forsaken Blade" (two 140 HP bars), a ghost swordswoman with twin blue-flame
-  katanas and, from phase 2, her `SpiritWolf` (same file: a code-built body that follows her rest spot `WolfRest`,
-  `Vanish`/`AppearAt(at, hold)` through mist, `Glare`, `PlayHowl`, `Grow`, `OpenEyes`, `WalkTo`, `Dissolve`,
-  `Silhouette` for the pack; no collider, every hurt is an Arrow). She `Glide`s along her row (`Roam` between combos,
+  katanas and, from phase 2, her `SpiritWolf` **Kuon** ([Story/Kuon.md](Story/Kuon.md); same file: a code-built body
+  that follows her rest spot `WolfRest`, `Vanish`/`AppearAt(at, hold)` through mist, `Glare`, `PlayHowl`, `PlayMaw`,
+  `Grow`, `Gulp`, `OpenEyes`, `WalkTo`, `Dissolve`, `Silhouette` for the pack). Kuon is an `IHittable` of its own
+  (`StartingHealth` 80, a kinematic body and a `BoxCollider` on the Samurai layer, on only while `Targetable`: armed,
+  unbroken, not hidden in mist or as a charge). `Arm` at her phase break, `Disarm` at her fall; a `Reflected` hit is
+  `ReflectedDamage` 20 and dazes it (`Dazed`, hits on it double), `Backfire` is its Maw bursting in its jaws, and at
+  0 HP `Break` fades it to a shadow at her side (it is never destroyed, so her defeat scene still plays) and raises
+  `Broken`. While Kuon is `Guarded` she is in `SuperArmor` with `ArmorDamageTaken` 0.1 (her ward, `PulseWard`; sparks
+  via `Boss.ArmorSpark`), except while `exposed`. Kuon fights in its own loop, `Hunt` (WolfCharge, Howl, WolfPack,
+  `SpiritMaw`), beside her `Fight`; `holdWolf`/`wolfBusy` keep it out of their joint moves and her blade rain.
+  `OnWolfBroken` (her ward shatters, `BossLine.WolfFallen`, a quiet `Stagger(GriefStagger, cry: false)`) starts the
+  **Lone Blade** (`alone`: faster stats, eight-lane rain, `Moonfall` in place of the Eclipse Fang). `WolfJoined`
+  hands Kuon to `GameManager.OnWolfJoined`, which shows its bar (`GameUI.ShowWolfBar`, beside hers on the top line),
+  routes its hits (`OnWolfDamaged` → `BoonEffects.OnWolfHit`/`WolfBlast`) and adds it to `RandomEnemy`. She `Glide`s along her row (`Roam` between combos,
   `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots: `Crescent` (breakable),
   `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:
   `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
   Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
-  Barrage (`PlaceOrbiting`, `LooseRow`). Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
-  Spirit Assault, Phantom Wolf Pack (`lastPackLanes`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code
-  `Moon`, two crescent waves, a lane beam from the wolf's `Mouth`, a sword spread, then `exposed` doubles damage for
-  2 s via `DamageMultiplier`). `NextMove` weights the phase's signature twice, never repeats a move three times
-  (`repeats`), alternates sword and wolf moves in phase 2 (`lastWasWolf`) and forces the ultimate every fifth move.
+  Barrage (`PlaceOrbiting`, `LooseRow`), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
+  Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
+  `ParryAtLatest`): Moonsplitter Draw (phase 1) and Fang of the Oath (phase 2), both a `SightLine` tell, then an
+  unbreakable `MakeReflectable` shot steered onto the ronin by `Pursue`; the Fang is reflectable at Kuon while it
+  stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
+  Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`
+  spirals motes into an orb at its jaws, `SwallowOrb` locks the lane, `MawBeam` fires; `MawBreakDamage` on Kuon
+  during the gather bursts it, `orbBurst`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code
+  `Moon`, two crescent waves, the same gather and `MawBeam` from the wolf's `Mouth`, a sword spread, then `exposed`
+  doubles damage for 2 s via `DamageMultiplier` and drops the ward). `NextMove` weights the phase's signature twice,
+  never repeats a move three times (`repeats`) and forces the ultimate every fifth move (Moonfall when `alone`).
   `PhaseBreak` plays the wolf's arrival and swaps her to her awakened frames (blades burning; `SetPhaseDash` for her
   phase dash); `Fall` is an 11 s scene (`DefeatSeconds`, which `GameManager.BossFell`
   waits for): blades `DropBlade`/`Tumble`, the wolf walks to her and dissolves, she speaks `BossLine.DefeatFinal`
-  (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips via
-  `SetWolfFrames`. Effects `Fx.Shiro*`; sounds `WolfGrowl`, `WolfHowl`, `BladeRing`, `GhostSwordFall`, `SpiritBeam`
+  (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips (idle, howl, charge, vanish,
+  maw) via `SetWolfFrames`. Effects `Fx.Shiro*`; sounds `WolfGrowl`, `WolfHowl`, `BladeRing`, `GhostSwordFall`, `SpiritBeam`
   (loop), `MistSwirl`.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, spirit blue for Shirogane, `Backdrop.MoonLook`/`Moons`; `TuneVoice` retunes the shared chorus/echo/distortion filters per boss),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,

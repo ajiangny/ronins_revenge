@@ -24,8 +24,8 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
   alone.
 - **The oath.** Before the coronation she began to suspect the armor. They swore to kill the Emperor together if
   it was what she feared. They never got the chance to compare notes.
-- **The cut.** When the coffer opened she saw the armor reaching for Oni and cut the tether dragging his soul in.
-  Kagetsune's hammer came down on her. She went into the coffer, and her soul has never rung its bell: she would
+- **The cut.** When the coffin opened she saw the armor reaching for Oni and cut the tether dragging his soul in.
+  Kagetsune's hammer came down on her. She went into the coffin, and her soul has never rung its bell: she would
   not kneel.
 - **Now.** Kagetsune bound the guardian wolf of her family's shrine to her and set her at the top of the Frozen
   Shrine, the last place Oni must pass. She is forced to fight him. She wants him to win, but he has to be able

@@ -1,5 +1,6 @@
-// Generates the bosses' voice lines with ElevenLabs text-to-speech: Benibana's mid-fight barks in her Izumi voice,
-// and all of Utsusemi's lines in its designed voice. They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
+// Generates the bosses' voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her Izumi voice,
+// Utsusemi's in its designed voice and Shirogane's in Lily's (the story behind each is in Story/<Boss>.md).
+// They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
 // from .env.local.
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
@@ -20,6 +21,9 @@ const SHIROGANE = "pFZP5JQG7iQjIQuC4Bku";
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line, which show them as subtitles.
 const LINES = {
+  Benibana_Intro: [IZUMI, "[low, bitter, amused] We both led our flocks to his altar, Oni... [cold] and only you walked away. [sultry, mocking] The heavens have forsaken you. Let me paint your final moments in crimson."],
+  Benibana_Phase: [IZUMI, "[quiet, shaking with fury] Every step I ever danced was his... [fierce, drawing her sword] This one is mine."],
+  Benibana_Defeat: [IZUMI, "[weak, wry, fading] Crimson... suits you... [pleading, breathless] Find my bell, Oni... silence it for them..."],
   // Each move callout has three takes, picked at random; the texts match Benibana.Line's subtitles take for take.
   Benibana_SmokeRings: [IZUMI, "[sultry, amused] Breathe it in..."],
   Benibana_SmokeRings_2: [IZUMI, "[sultry whisper] Inhale..."],
@@ -38,9 +42,9 @@ const LINES = {
   Benibana_Hurt: [IZUMI, "[pained grunt] Ngh!"],
   Benibana_Hurt_2: [IZUMI, "[pained cry] Hah!"],
   Benibana_Hurt_3: [IZUMI, "[sharp pained gasp] Agh!"],
-  Utsusemi_Intro: [UTSUSEMI, "[slow, cold, deliberate] Tick... tock... The pilgrim who wore this hat walked a thousand roads. I have walked every one of them again. [quietly menacing] Yours... ends here."],
+  Utsusemi_Intro: [UTSUSEMI, "[slow, cold, deliberate] Tick... tock... The monk who wore this hat once gave you shelter. Now I walk every road he walked, looking for you. [quietly menacing] Yours... ends here."],
   Utsusemi_Phase: [UTSUSEMI, "[strained, then rising menace] Mainspring... unwound. [cold fury] I will not... stop."],
-  Utsusemi_Defeat: [UTSUSEMI, "[slowing down, fading away] The bell... has... stopped..."],
+  Utsusemi_Defeat: [UTSUSEMI, "[slowing down, fading away] The bell... has... stopped... [suddenly warm and human, a gentle old man's whisper] Run... boy..."],
   Utsusemi_Stagger: [UTSUSEMI, "[startled, faltering] Gears... seized..."],
   Utsusemi_Kasa: [UTSUSEMI, "[cold, clipped] Kasa."],
   Utsusemi_HourStrikes: [UTSUSEMI, "[cold, deliberate, counting] Remember the hours... [quietly menacing] one... by one."],

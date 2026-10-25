@@ -6,7 +6,8 @@ Unity 6000.6.6f1, URP, new Input System. Single scene: `Assets/Scenes/SampleScen
 **Read [ARCHITECTURE.md](ARCHITECTURE.md) first** to find a system: game flow, player combat, boons,
 samurai army, scouts, bosses, UI, VFX/audio, and the `Ninja/…` editor commands. Keep it up to date when you
 add or move a system, enemy or boss. [README.md](README.md) is the graded write-up; update it when a
-player-facing feature changes.
+player-facing feature changes. [Story/](Story/README.md) holds the plot and a file per character (Oni, the bosses,
+Kagetsune): read the character's file before writing their lines, scenes or art, and update it when they change.
 
 ## Layout
 

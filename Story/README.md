@@ -12,7 +12,7 @@ writing a line, a scene or art for them**, and update it when something about th
 | **Benibana** | The Crimson Smoke / The Crimson Unsealed | Court sword-dancer and assassin. Stage 1 boss. | [Benibana.md](Benibana.md) |
 | **Utsusemi** | The Hollow Pilgrim / The Unwound Hour | A karakuri wearing a dead monk's hat. Stage 2 boss. | [Utsusemi.md](Utsusemi.md) |
 | **Shirogane** | The Forsaken Blade / Oath of the Spectral Wolf | Oni's sworn partner, now a ghost. Stage 3 boss. | [Shirogane.md](Shirogane.md) |
-| **Kagetsune** | The Thousand-Soul Throne / The Bell-Breaker's Ruin | The Emperor. Planned Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
+| **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Planned Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
 
 ## The betrayal
 
@@ -20,19 +20,19 @@ Emperor Kagetsune was mortal once, and afraid of it. His two finest blades were 
 **Shirogane**, sworn to him and to each other. "Oni" was the name the Emperor gave him: his demon at the gate.
 
 In secret, Kagetsune had an armor forged that no smith should have made. It was black scale edged in bronze, hung
-with bells, and built around a reliquary coffer he carried as the head of a great hammer. Every soul sealed in the
-coffer would feed the armor and ring one of its bells. A man wearing enough of them could not die.
+with bells, and built around a reliquary coffin he carried as the head of a great hammer. Every soul sealed in the
+coffin would feed the armor and ring one of its bells. A man wearing enough of them could not die.
 
 He called it a coronation. On the **Night of a Thousand Bells** he summoned his whole court, his army and the
 village Oni was born in to the mountain shrine, and Oni escorted them there himself, proud to. Benibana danced for
-the feast, her smoke curling through the hall until no one could lift a hand. Then the coffer opened.
+the feast, her smoke curling through the hall until no one could lift a hand. Then the coffin opened.
 
 The bells rang until there were too many to hear apart. Thousands of souls poured into the armor in a flood of
 teal fire, and Kagetsune rose out of it colossal and deathless. With the last toll, the night stopped where it
 stood. Dawn has not come since.
 
 Shirogane saw the armor reach for Oni and cut the tether that was dragging his soul into it. Kagetsune's hammer
-came down on her, and her soul went into the coffer with the rest. Oni's tore loose. To mock him, Kagetsune had the
+came down on her, and her soul went into the coffin with the rest. Oni's tore loose. To mock him, Kagetsune had the
 new faces on his armor cast as snarling oni.
 
 ## Why everyone comes back
@@ -42,11 +42,11 @@ new faces on his armor cast as snarling oni.
   she gave him. The title screen is that hill, which makes the menu the game's hub (Hades' House). Each return
   wears a little more of his memory away.
 - **The army and the bosses** are souls from the armor, sent out each night in borrowed bodies. When one falls it
-  is drawn back into the coffer and forged again, so the army is always full and the bosses remember every fight.
+  is drawn back into the coffin and forged again, so the army is always full and the bosses remember every fight.
   The yurei of the Frozen Shrine are the souls the armor hasn't bothered to give bodies to.
 - **The endless night.** The last bell froze the hour, and Utsusemi winds the clock that holds it there. The moons
   over the boss fights (blood, steel, spirit) belong to the bosses, not to Kagetsune.
-- **Boons.** When a soldier dies, its soul sometimes slips past the coffer's pull as a Fire, Frost or Storm soul.
+- **Boons.** When a soldier dies, its soul sometimes slips past the coffin's pull as a Fire, Frost or Storm soul.
   It lends Oni its power because he is the only one who might set it free. Every boon is a soul stolen back.
   Technique scrolls are pages of Oni's own sword arts, the parts of himself the dying took.
 - **Teal fire.** The fire pouring from Kagetsune's chest is the same teal as Oni's spirit flames and wisps,
@@ -54,7 +54,7 @@ new faces on his armor cast as snarling oni.
 
 ## Endings
 
-Like Hades, the first win isn't the end. Kagetsune falls, but the coffer still holds enough souls to forge him
+Like Hades, the first win isn't the end. Kagetsune falls, but the coffin still holds enough souls to forge him
 again, and Oni wakes on his hill. A clear frees a boss for good once their story lines have played (see each
 character's file): Benibana's bell goes silent, the monk's clock stops, Shirogane lays down her blades. When all
 three are free and Kagetsune falls again, he can't be rebuilt. The **true ending** is dawn: the stopped hour moves,

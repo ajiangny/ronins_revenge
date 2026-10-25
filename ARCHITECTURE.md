@@ -124,7 +124,9 @@ match `BoonChoiceUI.boonIcons`.
   (`HasSecondPhase`: emptying the first bar runs `BreakPhase`, which plays the subclass `PhaseBreak` cutscene while
   `PhaseBreaking` makes it invincible and refills the bar, raising `Healed`, then starts phase 2 via `SecondPhase`),
   staggers, freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
-  that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`.
+  that restarts a dead fight loop, and the default defeat. Lines: `BossLine { Intro, Phase, Defeat }`. What each
+  boss says follows its story file in [Story/](Story/README.md) (one per character, plus the planned Kagetsune);
+  keep `Line()`, `Tools/generate-voice.mjs` and that file in step.
 - `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (two 70 HP bars). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 once her first bar empties: smoke veil

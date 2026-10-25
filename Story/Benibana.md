@@ -28,7 +28,7 @@ drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#be
 - **The bargain.** Kagetsune's inquisitors found her small congregation and took them. The Emperor offered her a
   way to save them: dance at the coronation, trailing her kiseru's drugged smoke through the hall so no one could
   resist what came next, and her people would *never die*.
-- **The betrayal.** She danced. Her congregation was in the hall too, and the coffer took them with everyone else.
+- **The betrayal.** She danced. Her congregation was in the hall too, and the coffin took them with everyone else.
   He kept his word to the letter, since nothing sealed in the armor ever dies. Then he sealed her last.
 - **Now.** Each of her people rings one of Kagetsune's bells. He has promised to silence one for every time she
   kills Oni. She has killed him many times. Not one bell has stopped.

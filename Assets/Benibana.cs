@@ -29,9 +29,10 @@ public class Benibana : Boss
 
     public override string Line(BossLine line) => line switch
     {
-        BossLine.Intro => "The heavens have forsaken you, and the gods have turned their gaze away. How fortunate... that I shall be the one to paint your final moments in crimson.",
-        BossLine.Phase => "You've torn my kimono... You will pay for that in blood!",
-        BossLine.Defeat => "Crimson... suits you... after all...",
+        // Her story is in Story/Benibana.md; keep these in sync with Tools/generate-voice.mjs.
+        BossLine.Intro => "We both led our flocks to his altar, Oni... and only you walked away. The heavens have forsaken you. Let me paint your final moments in crimson.",
+        BossLine.Phase => "Every step I ever danced was his... This one is mine.",
+        BossLine.Defeat => "Crimson... suits you... Find my bell, Oni... silence it for them...",
         BossLine.Stagger => "What?! My own blade...",
         BossLine.SmokeRings or BossLine.RosaryLash or BossLine.Iaido or BossLine.RosaryBloom => Line(line, 0),
         _ => null,

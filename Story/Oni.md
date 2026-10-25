@@ -23,7 +23,7 @@ himself out of.
   pride.
 - On the Night of a Thousand Bells he escorted the court, the army and his own village up to the "coronation." He
   led them into the hall himself.
-- When the coffer opened, Shirogane cut the tether pulling his soul into the armor. She was sealed in his place.
+- When the coffin opened, Shirogane cut the tether pulling his soul into the armor. She was sealed in his place.
 - A wandering monk found him half-dead on the Pilgrim's Pass and sheltered him through the first night. The monk
   was taken for it (see [Utsusemi](Utsusemi.md)).
 - Since then he dies and wakes on the hill where he and Shirogane used to sit, playing her flute. Each return takes

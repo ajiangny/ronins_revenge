@@ -4,14 +4,15 @@
 
 | | |
 |---|---|
-| Role | The Emperor. Planned Stage 4 final boss. Phase 2: **The Bell-Breaker's Ruin**. |
+| Role | The Emperor. Planned Stage 4 final boss. Phase 2: **The Unchained Wraith**. |
 | Was | A mortal emperor, terrified of dying. |
 | Is | Colossal and deathless, inside an armor of a thousand sealed souls. |
 | Wants | To stay. Forever, and on his throne. |
-| Signature | Bells, the Soul Coffer hammer, teal soul-fire, oni-skull faces. |
+| Signature | Bells, the Soul Coffin hammer, teal soul-fire, oni-skull faces. |
 
 His armor is a throne a thousand souls kneel to, which gives him his title. When they turn on him in his second
-phase, he becomes the Bell-Breaker's Ruin.
+phase and the coffin's chains snap, he becomes the Unchained Wraith: less an emperor than a storm of the souls he
+stole, still wearing his shape.
 
 ## Look (from the concept art)
 
@@ -23,24 +24,28 @@ phase, he becomes the Bell-Breaker's Ruin.
 - **Bronze bells** hang from his waist and robes: one for every sealed soul of rank. The imperial crest is on his
   tasset.
 - **Teal soul-fire** pours out of his open chest and wreathes his whole body, thick with drifting skulls.
-- **The Soul Coffer:** carried on his shoulder, a great war hammer whose head is a sealed reliquary box bound in
-  red cord and ofuda, with an oni face set in it. The shaft is wrapped in red cord and ends in a tasselled spike.
-- Phase 2 (planned art): his chest torn open, the coffer's seals burning away, his horns cracked, the skulls in
-  the fire turning outward.
+- **The Soul Coffin:** carried on his shoulder, the coffin-hammer: a great war hammer whose head is a sealed
+  coffin-shaped reliquary, chained shut and bound in red cord and ofuda, with an oni face set in it. The shaft is
+  wrapped in red cord and ends in a tasselled spike.
+- **Phase 2, the Unchained Wraith:** the coffin's chains snap and hang loose, and the armor cracks open into a
+  lattice of teal ghost-fire, with screaming faces in his chest. His horns burn, his eyes turn from red to soul
+  teal (the souls are looking out now), and skull spirits swarm free all around him.
 
-The concept art goes in as `Assets/Art/Portraits/Kagetsune_Full.png` (see the art guide's Kagetsune section).
+Paintings: `Assets/Art/Portraits/Kagetsune_Full.png`, `Kagetsune_Closeup.png` (a calm bust, hammer at rest) and
+`Kagetsune_Phase_Full.png`, `Kagetsune_Phase_Closeup.png` (the Wraith; a gauntlet reaching out around a howling
+skull flame).
 
 ## History
 
 - **The emperor.** Kagetsune's line had ruled for centuries. He watched his father die slowly and swore it would
   not happen to him.
-- **The armor.** He had it forged in secret, around the coffer. It feeds on souls sealed in the coffer, and every
+- **The armor.** He had it forged in secret, around the coffin. It feeds on souls sealed in the coffin, and every
   one rings a bell.
 - **The Night of a Thousand Bells.** He called his court, his army and Oni's home village to a coronation at the
   mountain shrine, with Oni as their escort and Benibana dancing her smoke through the hall. Then he opened the
-  coffer and drank them all. The last toll stopped the night.
+  coffin and drank them all. The last toll stopped the night.
 - **Since.** He sends the souls back out each night in borrowed bodies to hunt the one that got away. Every one
-  he loses is pulled back into the coffer and forged again, and so is he: the first time Oni kills him, he is
+  he loses is pulled back into the coffin and forged again, and so is he: the first time Oni kills him, he is
   rebuilt from the souls he still holds.
 
 ## His fight (planned)
@@ -51,16 +56,16 @@ The concept art goes in as `Assets/Art/Portraits/Kagetsune_Full.png` (see the ar
 
 | Move | What happens | What it means |
 |---|---|---|
-| Coffer Slam | The hammer marks a lane, then a shockwave runs down it and skulls burst from the crack. | The night the coffer opened. |
+| Coffer Slam | The hammer marks a lane, then a shockwave runs down it and skulls burst from the crack. | The night the coffin opened. |
 | Toll of Fealty | His bells ring, and each toll looses a fan of soul-skull orbs. | The souls answering him. |
 | Ofuda Decree | Talisman strips drift down and seal lanes. Nothing can be parried inside a sealed lane. | Imperial law. |
 | Thousand-Soul Wail | A beam of soul-fire from his open chest. | His power, which is their pain. |
 
-**Phase 2, the Armor Cracks.** The souls inside him start fighting back. Benibana's smoke, Utsusemi's hours and
+**Phase 2, the Unchained Wraith.** The coffin's chains snap and the souls inside him start fighting back. Benibana's smoke, Utsusemi's hours and
 Shirogane's blades appear as echoes that turn on *him*, each one only once that boss's story has been seen
 through (see their files). Parried skulls fly back as freed souls that strike him.
 
-**Defeat.** The coffer bursts. The bells fall silent one by one, the teal souls rise free, the stopped hour moves
+**Defeat.** The coffin bursts. The bells fall silent one by one, the teal souls rise free, the stopped hour moves
 again, and dawn breaks for the first time in the game. (Before the true ending he is rebuilt, and Oni wakes on
 his hill.)
 

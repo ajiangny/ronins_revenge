@@ -35,9 +35,10 @@ public class Utsusemi : Boss
 
     public override string Line(BossLine line) => line switch
     {
-        BossLine.Intro => "Tick... tock... The pilgrim who wore this hat walked a thousand roads. I have walked every one of them again. Yours... ends here.",
+        // Its story is in Story/Utsusemi.md; the defeat line's last words are the monk inside it.
+        BossLine.Intro => "Tick... tock... The monk who wore this hat once gave you shelter. Now I walk every road he walked, looking for you. Yours... ends here.",
         BossLine.Phase => "Mainspring... unwound. I will not... stop.",
-        BossLine.Defeat => "The bell... has... stopped...",
+        BossLine.Defeat => "The bell... has... stopped... Run... boy...",
         BossLine.Stagger => "Gears... seized...",
         BossLine.KasaWheel => "Kasa.",
         BossLine.Lattice => "Unravel.",

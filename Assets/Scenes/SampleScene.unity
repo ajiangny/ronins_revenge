@@ -542,7 +542,10 @@ MonoBehaviour:
   benibanaIntroLine: {fileID: 8300000, guid: 126d0f563be954d7fbaa233b87797292, type: 3}
   benibanaPhaseLine: {fileID: 8300000, guid: 8973700f7b05041729a016aa2cb0fcf3, type: 3}
   benibanaDefeatLine: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
-  benibanaStaggerLine: {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
+  benibanaStaggerLines:
+  - {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
+  - {fileID: 8300000, guid: eb3af3f3774304f9c8a50ddee342f8cc, type: 3}
+  - {fileID: 8300000, guid: 5d7c70c1af1e04caa814b370ef56b944, type: 3}
   benibanaSmokeRingsLines:
   - {fileID: 8300000, guid: da5f91080559c4ec7b86b356f8307e5b, type: 3}
   - {fileID: 8300000, guid: 27df9020781fe45978c2edc7e90fce01, type: 3}

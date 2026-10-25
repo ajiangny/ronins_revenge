@@ -81,7 +81,7 @@ public static class BossArtSetup
         so.FindProperty("benibanaIntroLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Intro.mp3");
         so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
         so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
-        so.FindProperty("benibanaStaggerLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Stagger.mp3");
+        SetTakes(so.FindProperty("benibanaStaggerLines"), "Benibana_Stagger");
         SetTakes(so.FindProperty("benibanaSmokeRingsLines"), "Benibana_SmokeRings");
         SetTakes(so.FindProperty("benibanaRosaryLashLines"), "Benibana_RosaryLash");
         SetTakes(so.FindProperty("benibanaIaidoLines"), "Benibana_Iaido");

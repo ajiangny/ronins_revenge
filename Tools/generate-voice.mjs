@@ -40,7 +40,10 @@ const LINES = {
   Benibana_RosaryBloom: [BENIBANA, "[furious shout] Bloom, my rosary!"],
   Benibana_RosaryBloom_2: [BENIBANA, "[furious] Scatter!"],
   Benibana_RosaryBloom_3: [BENIBANA, "[fierce] Pray!"],
+  // Her stance breaks when a parry turns her own attack back on her; three takes, short enough for the stagger.
   Benibana_Stagger: [BENIBANA, "[shocked gasp] What?! My own blade..."],
+  Benibana_Stagger_2: [BENIBANA, "[stunned, breathless, almost hurt] You... know that draw?"],
+  Benibana_Stagger_3: [BENIBANA, "[furious hiss, reeling] No one turns my blade!"],
   Benibana_Hurt: [BENIBANA, "[pained grunt] Ngh!"],
   Benibana_Hurt_2: [BENIBANA, "[pained cry] Hah!"],
   Benibana_Hurt_3: [BENIBANA, "[sharp pained gasp] Agh!"],

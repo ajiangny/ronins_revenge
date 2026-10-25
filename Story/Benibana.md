@@ -56,7 +56,9 @@ drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#be
 A voice designed for her in ElevenLabs (`BENIBANA` in `Tools/generate-voice.mjs`): a low, smoky alto with no
 accent and a stage performer's clear diction. Read sultry and amused in phase 1, furious and raw in phase 2. Mocking,
 theatrical; she speaks like someone used to an audience, with cold grief under the mockery. Her mid-fight barks are unchanged: "Breathe it in...", "Kneel!",
-"Crimson... Iaido!", "Bloom, my rosary!", "What?! My own blade...".
+"Crimson... Iaido!", "Bloom, my rosary!". When a parry turns her own attack back on her she staggers with one of
+"What?! My own blade...", "You... know that draw?" or "No one turns my blade!", since only someone who knows her
+draw could turn it.
 
 ## Lines
 

@@ -110,8 +110,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip benibanaIntroLine;
     [SerializeField] AudioClip benibanaPhaseLine;
     [SerializeField] AudioClip benibanaDefeatLine;
-    [Tooltip("Her gasp when her stance breaks.")]
-    [SerializeField] AudioClip benibanaStaggerLine;
+    [Tooltip("Her cries when her stance breaks, a few takes; one is picked at random, in the order of Benibana.Line's subtitles.")]
+    [SerializeField] AudioClip[] benibanaStaggerLines;
     [Tooltip("Her callouts for each move, a few takes each; one is picked at random, in the order of Benibana.Line's subtitles.")]
     [SerializeField] AudioClip[] benibanaSmokeRingsLines;
     [SerializeField] AudioClip[] benibanaRosaryLashLines;
@@ -1306,7 +1306,8 @@ public class GameManager : MonoBehaviour
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
         public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang;
         // Lines with several takes: one is picked at random, never the one played last time.
-        public AudioClip[] hurt, smokeRings, rosaryLash, iaido, rosaryBloom;
+        // A boss with stagger takes uses them instead of its single stagger clip.
+        public AudioClip[] hurt, staggers, smokeRings, rosaryLash, iaido, rosaryBloom;
 
         // The clip for a line and which take it is (0 for a single clip), so the subtitle can match it.
         public AudioClip Take(BossLine line, int last, out int take)
@@ -1315,6 +1316,7 @@ public class GameManager : MonoBehaviour
             AudioClip[] takes = line switch
             {
                 BossLine.Hurt => hurt,
+                BossLine.Stagger => staggers,
                 BossLine.SmokeRings => smokeRings,
                 BossLine.RosaryLash => rosaryLash,
                 BossLine.Iaido => iaido,
@@ -1355,7 +1357,7 @@ public class GameManager : MonoBehaviour
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
             phaseCloseupHeight = 1440f, phaseCloseupFocus = new Vector2(0.46f, 0.22f), phaseCloseupAt = new Vector2(-10f, 265f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
-            stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLines, rosaryLash = benibanaRosaryLashLines,
+            staggers = benibanaStaggerLines, smokeRings = benibanaSmokeRingsLines, rosaryLash = benibanaRosaryLashLines,
             iaido = benibanaIaidoLines, rosaryBloom = benibanaRosaryBloomLines, hurt = benibanaHurtLines,
         },
         BossKind.Utsusemi => new BossVoice

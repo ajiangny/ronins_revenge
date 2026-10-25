@@ -33,14 +33,15 @@ public class Benibana : Boss
         BossLine.Intro => "We both led our flocks to his altar, Oni... and only you walked away. The heavens have forsaken you. Let me paint your final moments in crimson.",
         BossLine.Phase => "Every step I ever danced was his... This one is mine.",
         BossLine.Defeat => "Crimson... suits you... Find my bell, Oni... silence it for them...",
-        BossLine.Stagger => "What?! My own blade...",
-        BossLine.SmokeRings or BossLine.RosaryLash or BossLine.Iaido or BossLine.RosaryBloom => Line(line, 0),
+        BossLine.Stagger or BossLine.SmokeRings or BossLine.RosaryLash or BossLine.Iaido or BossLine.RosaryBloom => Line(line, 0),
         _ => null,
     };
 
-    // Her callouts, each recorded three ways; GameManager picks a take and shows its words.
+    // Her callouts and her stagger, each recorded three ways; GameManager picks a take and shows its words.
     public override string Line(BossLine line, int take) => line switch
     {
+        // A parry turns her own draw back on her: only someone who knows it could.
+        BossLine.Stagger => Take(take, "What?! My own blade...", "You... know that draw?", "No one turns my blade!"),
         BossLine.SmokeRings => Take(take, "Breathe it in...", "Inhale...", "Lose yourself."),
         BossLine.RosaryLash => Take(take, "Kneel!", "Bow your head.", "Down!"),
         BossLine.Iaido => Take(take, "Crimson Iaido!", "Iaido.", "Too slow."),

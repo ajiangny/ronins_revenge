@@ -178,7 +178,9 @@ match `BoonChoiceUI.boonIcons`.
   cross-fades to the close-up while a lower-third title (epithet, a rule, name; Title style) rises in, with the
   spoken line typed on beneath. Each boss's phase break replays it as a phase card (`Boss.PhaseCard`, set in
   `BeginBoss` to `PlayPhaseCard` when `VoiceFor` has `phasePortrait`/`phaseCloseup`) with its transformed art,
-  `phaseEpithet` (`Benibana.PhaseEpithet`, `Utsusemi.PhaseEpithet`, `Shirogane.OathEpithet`) and Phase line;
+  `phaseEpithet` (`Benibana.PhaseEpithet`, `Utsusemi.PhaseEpithet`, `Shirogane.OathEpithet`) and Phase line, its wash
+  in `phaseColour` when the transformed art needs one (Utsusemi's molten orange); after it `GameUI.RenameBossBar` gives the
+  bar the phase epithet;
   without that art the line falls back to a subtitle.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
   `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Characters/<Boss>Phase2/<Boss>Phase2_<Clip>_<i>.png` (each boss's

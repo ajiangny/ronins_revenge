@@ -220,6 +220,12 @@ public class GameUI : MonoBehaviour
         bossBar.SetActive(true);
     }
 
+    // A new name for the bar when the boss changes form, leaving its health and colour as they are.
+    public void RenameBossBar(string name)
+    {
+        bossName.text = name;
+    }
+
     public void SetBossHealth(float fraction)
     {
         bossHealth = Mathf.Clamp01(fraction);

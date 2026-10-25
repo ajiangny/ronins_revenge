@@ -1239,8 +1239,12 @@ public class GameManager : MonoBehaviour
         AudioClip clip = lines.phase;
         Music.Duck(0.3f, (clip != null ? clip.length : 3f) + 2.5f);
         voice.volume = voiceVolume * Sfx.Volume;
+        // The wash behind the art follows the transformed painting where its colours change (Utsusemi's molten core).
+        Color wash = lines.phaseColour.a > 0f ? lines.phaseColour : boss.Colour;
         yield return ui.PlayBossIntro(lines.phasePortrait, lines.phaseCloseup, lines.phaseCloseupHeight, lines.phaseCloseupFocus,
-            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, boss.Colour, voice, clip, boss.Line(BossLine.Phase));
+            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, boss.Line(BossLine.Phase));
+        // The bar carries the name the card just announced.
+        ui.RenameBossBar($"{boss.Title}, {lines.phaseEpithet}");
     }
 
     Boss CreateBoss(BossKind kind, Vector3 position)
@@ -1293,6 +1297,8 @@ public class GameManager : MonoBehaviour
         // A second card for the boss's second phase, framed the same way; both sprites or none.
         public Sprite phasePortrait, phaseCloseup;
         public string phaseEpithet;
+        // The phase card's colour wash, when the transformed art needs a different one; clear keeps the boss's colour.
+        public Color phaseColour;
         public float phaseCloseupHeight;
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
         public AudioClip intro, phase, defeat, defeatFinal, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes,
@@ -1328,9 +1334,10 @@ public class GameManager : MonoBehaviour
             // Each close-up is framed on the face, on the centre line and high enough to clear the title block, big
             // enough that the painting's edges sit off screen.
             closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(0f, 200f),
-            // Unsealed: framed on her face, her loose hair and the drawn blade running off every edge.
+            // Unsealed: framed on her face with her loose hair and the drawn blade around her, held back far enough to
+            // see her shoulders; raised a touch so the painting's top edge stays off screen.
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
-            phaseCloseupHeight = 1700f, phaseCloseupFocus = new Vector2(0.46f, 0.22f), phaseCloseupAt = new Vector2(0f, 200f),
+            phaseCloseupHeight = 1440f, phaseCloseupFocus = new Vector2(0.46f, 0.22f), phaseCloseupAt = new Vector2(-10f, 265f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
             stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
             iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
@@ -1342,7 +1349,9 @@ public class GameManager : MonoBehaviour
             closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(0f, 230f),
             // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
             phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
-            phaseCloseupHeight = 1500f, phaseCloseupFocus = new Vector2(0.45f, 0.25f), phaseCloseupAt = new Vector2(0f, 200f),
+            // Pulled back as far as the painting allows: its left edge limits it, so the slit-eye sits a little left.
+            phaseCloseupHeight = 1380f, phaseCloseupFocus = new Vector2(0.45f, 0.25f), phaseCloseupAt = new Vector2(-70f, 235f),
+            phaseColour = new Color(1f, 0.45f, 0.12f),
             intro = utsusemiIntroLine, phase = utsusemiPhaseLine, defeat = utsusemiDefeatLine,
             stagger = utsusemiStaggerLine, kasaWheel = utsusemiKasaLine, hourStrikes = utsusemiHourStrikesLine, hurt = utsusemiHurtLines,
         },
@@ -1354,7 +1363,7 @@ public class GameManager : MonoBehaviour
             closeupHeight = 1800f, closeupFocus = new Vector2(0.45f, 0.2f), closeupAt = new Vector2(0f, 200f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
             phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
-            phaseCloseupHeight = 1500f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(0f, 150f),
+            phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
             eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,

@@ -106,6 +106,7 @@ match `BoonChoiceUI.boonIcons`.
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Yurei the Bushi's).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
+  Arrows break on each other unless both have `PassesShots` (Shirogane's).
   `MakeUnbreakable` makes the Taisho spear: it passes through slashes, kunai, arrows and blockers and only stops on the
   ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). `Tint` recolours a
   plain arrow (the yurei's). Its yari art
@@ -168,7 +169,8 @@ match `BoonChoiceUI.boonIcons`.
   **Lone Blade** (`alone`: faster stats, eight-lane rain, `Moonfall` in place of the Eclipse Fang). `WolfJoined`
   hands Kuon to `GameManager.OnWolfJoined`, which shows its health (`GameUI.ShowWolfBar`, a thin strip inside the foot of her bar),
   routes its hits (`OnWolfDamaged` → `BoonEffects.OnWolfHit`/`WolfBlast`) and adds it to `RandomEnemy`. She `Glide`s along her row (`Roam` between combos,
-  `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots: `Crescent` (breakable),
+  `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots (all through `Fire`, at `ShotSpeed` 1.35× the speeds in the moves, with `Arrow.PassesShots` so her and Kuon's
+  overlapping patterns fly through each other): `Crescent` (breakable),
   `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:
   `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
   Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade

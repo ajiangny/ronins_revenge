@@ -29,6 +29,9 @@ public class Arrow : MonoBehaviour
     public bool Unbreakable { get; private set; }
     // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
     public bool PassesCover { get; set; }
+    // Flies on through other shots that pass shots too, so a boss's overlapping patterns don't break each other
+    // (Shirogane's).
+    public bool PassesShots { get; set; }
     // What a parry sent back in its place (the first, for a spread), so its thrower can tell when that's gone.
     public Kunai Riposte { get; set; }
 
@@ -191,6 +194,11 @@ public class Arrow : MonoBehaviour
     // another Iaido slash parried back at the boss stops it.
     void OnCollisionEnter(Collision coll)
     {
+        if (PassesShots && coll.collider.GetComponentInParent<Arrow>() is Arrow other && other.PassesShots)
+        {
+            KeepFlying(coll.collider, spark: false);
+            return;
+        }
         if (Reflectable)
         {
             Kunai riposte = coll.collider.GetComponentInParent<Kunai>();
@@ -239,14 +247,14 @@ public class Arrow : MonoBehaviour
     }
 
     // Undo the knock from the collision and never touch that collider again.
-    void KeepFlying(Collider passedThrough)
+    void KeepFlying(Collider passedThrough, bool spark = true)
     {
         foreach (Collider own in GetComponentsInChildren<Collider>())
         {
             Physics.IgnoreCollision(own, passedThrough);
         }
         // Lace slipping through cover makes no spark; a blade or spear cutting through does.
-        if (!PassesCover) Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.4f, 0.45f), 0.5f);
+        if (spark && !PassesCover) Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.4f, 0.45f), 0.5f);
         body.linearVelocity = velocity;
         body.angularVelocity = Vector3.zero;
         transform.rotation = heading;

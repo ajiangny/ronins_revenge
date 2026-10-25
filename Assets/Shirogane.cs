@@ -34,6 +34,9 @@ public class Shirogane : Boss
     float DrawSpeed => alone ? 11f : 10f;
     float DrawAim => alone ? 0.65f : secondPhase ? 0.8f : 0.9f;
 
+    // Every shot she and Kuon throw flies this much faster than the speeds written in the moves.
+    const float ShotSpeed = 1.35f;
+
     // While Kuon stands, her ward lets this share of each blow through.
     const float WardDamageTaken = 0.1f;
     // The free stagger when Kuon falls, a moment to punish her grief.
@@ -410,10 +413,18 @@ public class Shirogane : Boss
         return lanes;
     }
 
+    // One of her shots, at ShotSpeed, passing through the rest of hers and Kuon's so overlapping patterns stay whole.
+    Arrow Fire(Vector3 from, Vector3 velocity)
+    {
+        Arrow shot = Shoot(from, velocity * ShotSpeed);
+        shot.PassesShots = true;
+        return shot;
+    }
+
     // A blade of blue spirit flame cast from her katana; it can be cut down by a slash.
     Arrow Crescent(Vector3 from, Vector3 velocity)
     {
-        Arrow wave = Shoot(from, velocity);
+        Arrow wave = Fire(from, velocity);
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         if (frames != null) wave.Restyle(frames, 14f, Color.white, new Vector2(2.2f, 1.4f), 0.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 2.4f);
         else wave.Restyle(ProceduralSprites.Glow, Cyan, new Vector2(2f, 0.8f), 0.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.5f), 2.4f);
@@ -423,7 +434,7 @@ public class Shirogane : Boss
     // A ghostly katana that falls point first and drifts straight through cover.
     Arrow GhostSword(Vector3 from, Vector3 velocity)
     {
-        Arrow blade = Shoot(from, velocity);
+        Arrow blade = Fire(from, velocity);
         Sprite[] frames = Fx.Frames(Fx.ShiroSword);
         if (frames != null) blade.Restyle(frames, 10f, Color.white, new Vector2(0.7f, 1.9f), 0.3f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f), 1.4f);
         else blade.Restyle(ProceduralSprites.White, Frost, new Vector2(0.16f, 1.6f), 0.3f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 1.4f);
@@ -434,7 +445,7 @@ public class Shirogane : Boss
     // A slow orb of the wolf's spirit energy, big enough to see coming and easy to read between.
     Arrow Orb(Vector3 from, Vector3 velocity)
     {
-        Arrow orb = Shoot(from, velocity);
+        Arrow orb = Fire(from, velocity);
         Sprite[] frames = Fx.Frames(Fx.ShiroOrb);
         if (frames != null) orb.Restyle(frames, 12f, Color.white, new Vector2(1.1f, 1.1f), 0.35f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 1.8f);
         else orb.Restyle(ProceduralSprites.Glow, new Color(0.6f, 0.95f, 1f), new Vector2(1f, 1f), 0.35f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.5f), 1.8f);
@@ -445,7 +456,7 @@ public class Shirogane : Boss
     // into mist where it meets the ground. Drawn from the charge art, or as a streak of spirit light.
     Arrow Charge(Vector3 from, float speed, float size)
     {
-        Arrow charge = Shoot(from, Vector3.down * speed);
+        Arrow charge = Fire(from, Vector3.down * speed);
         charge.MakeUnbreakable();
         Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
         if (frames != null) charge.Restyle(frames, 14f, new Color(0.75f, 0.95f, 1f, 0.9f), new Vector2(size * 1.4f, size * 1.9f), size * 0.45f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f), size * 2.2f);
@@ -784,14 +795,14 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.SwordSlash, 1f, 0.55f);
         Sfx.Play(Sfx.BladeRing, 0.9f, 0.7f);
         CameraShake.Add(0.3f);
-        Arrow cut = Shoot(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
+        Arrow cut = Fire(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
         if (frames != null) cut.Restyle(frames, 14f, Color.white, new Vector2(4.4f, 2.8f), 0.9f, halo, 4.4f);
         else cut.Restyle(ProceduralSprites.Glow, Frost, new Vector2(4f, 1.4f), 0.9f, halo, 4.4f);
         cut.MakeUnbreakable();
         cut.MakeReflectable(transform);
-        StartCoroutine(Pursue(cut, DrawSpeed));
+        StartCoroutine(Pursue(cut, DrawSpeed * ShotSpeed));
         yield return Wait(0.5f);
     }
 
@@ -818,14 +829,14 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.WolfGrowl, 1f, 0.9f);
         Sfx.Play(Sfx.SwordSlash, 0.9f, 0.6f);
         CameraShake.Add(0.3f);
-        Arrow fang = Shoot(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
+        Arrow fang = Fire(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
         Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
         Color halo = new Color(Cyan.r, Cyan.g, Cyan.b, 0.55f);
         if (frames != null) fang.Restyle(frames, 14f, new Color(0.8f, 0.97f, 1f, 0.95f), new Vector2(2.2f, 3f), 0.8f, halo, 3.6f);
         else fang.Restyle(ProceduralSprites.Glow, new Color(0.7f, 0.95f, 1f, 0.95f), new Vector2(1.8f, 2.6f), 0.8f, halo, 3.6f);
         fang.MakeUnbreakable();
         fang.MakeReflectable(together ? wolf.transform : transform);
-        StartCoroutine(Pursue(fang, DrawSpeed));
+        StartCoroutine(Pursue(fang, DrawSpeed * ShotSpeed));
 
         // Kuon holds its ground at her side until the fang has struck and anything parried back has reached it.
         if (together)

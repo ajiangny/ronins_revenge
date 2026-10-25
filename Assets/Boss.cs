@@ -437,7 +437,9 @@ public abstract class Boss : MonoBehaviour, IHittable
             Sfx.Play(Sfx.ParryClang, 0.5f, 1.3f);
         }
         Damaged?.Invoke(point, source);
-        if (IsDead) return;
+        // A boon's on-hit effect lands its own TakeHit from inside Damaged; if that nested hit already broke the
+        // phase (or killed), this one must not act on the empty bar again and kill outright.
+        if (IsDead || PhaseBreaking) return;
 
         if (Health <= 0)
         {

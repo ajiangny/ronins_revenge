@@ -110,12 +110,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip benibanaIntroLine;
     [SerializeField] AudioClip benibanaPhaseLine;
     [SerializeField] AudioClip benibanaDefeatLine;
-    [Tooltip("Her short mid-fight barks: a gasp when her stance breaks and a callout for each move.")]
+    [Tooltip("Her gasp when her stance breaks.")]
     [SerializeField] AudioClip benibanaStaggerLine;
-    [SerializeField] AudioClip benibanaSmokeRingsLine;
-    [SerializeField] AudioClip benibanaRosaryLashLine;
-    [SerializeField] AudioClip benibanaIaidoLine;
-    [SerializeField] AudioClip benibanaRosaryBloomLine;
+    [Tooltip("Her callouts for each move, a few takes each; one is picked at random, in the order of Benibana.Line's subtitles.")]
+    [SerializeField] AudioClip[] benibanaSmokeRingsLines;
+    [SerializeField] AudioClip[] benibanaRosaryLashLines;
+    [SerializeField] AudioClip[] benibanaIaidoLines;
+    [SerializeField] AudioClip[] benibanaRosaryBloomLines;
     [Tooltip("Pained gasps when she takes a hit; one is picked at random.")]
     [SerializeField] AudioClip[] benibanaHurtLines;
     [Tooltip("Utsusemi's sprite frames. Leave empty to use the Taisho art, tinted steel blue, as a stand-in.")]
@@ -285,6 +286,8 @@ public class GameManager : MonoBehaviour
     Behaviour[] machineVoice;
     // Whether the voice source is playing a full line rather than a bark.
     bool speakingFullLine;
+    // The take each line played last, so the next call of it picks another.
+    readonly Dictionary<BossLine, int> lastTakes = new Dictionary<BossLine, int>();
     Backdrop backdrop;
 
     void Awake()
@@ -1301,29 +1304,42 @@ public class GameManager : MonoBehaviour
         public Color phaseColour;
         public float phaseCloseupHeight;
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
-        public AudioClip intro, phase, defeat, defeatFinal, stagger, smokeRings, rosaryLash, iaido, rosaryBloom, kasaWheel, hourStrikes,
-            crescentSlash, bladeRain, eclipseFang;
-        public AudioClip[] hurt;
+        public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang;
+        // Lines with several takes: one is picked at random, never the one played last time.
+        public AudioClip[] hurt, smokeRings, rosaryLash, iaido, rosaryBloom;
 
-        public AudioClip Clip(BossLine line) => line switch
+        // The clip for a line and which take it is (0 for a single clip), so the subtitle can match it.
+        public AudioClip Take(BossLine line, int last, out int take)
         {
-            BossLine.Intro => intro,
-            BossLine.Phase => phase,
-            BossLine.Defeat => defeat,
-            BossLine.Hurt => hurt != null && hurt.Length > 0 ? hurt[Random.Range(0, hurt.Length)] : null,
-            BossLine.Stagger => stagger,
-            BossLine.SmokeRings => smokeRings,
-            BossLine.RosaryLash => rosaryLash,
-            BossLine.Iaido => iaido,
-            BossLine.RosaryBloom => rosaryBloom,
-            BossLine.KasaWheel => kasaWheel,
-            BossLine.HourStrikes => hourStrikes,
-            BossLine.DefeatFinal => defeatFinal,
-            BossLine.CrescentSlash => crescentSlash,
-            BossLine.BladeRain => bladeRain,
-            BossLine.EclipseFang => eclipseFang,
-            _ => null,
-        };
+            take = 0;
+            AudioClip[] takes = line switch
+            {
+                BossLine.Hurt => hurt,
+                BossLine.SmokeRings => smokeRings,
+                BossLine.RosaryLash => rosaryLash,
+                BossLine.Iaido => iaido,
+                BossLine.RosaryBloom => rosaryBloom,
+                _ => null,
+            };
+            if (takes == null) return line switch
+            {
+                BossLine.Intro => intro,
+                BossLine.Phase => phase,
+                BossLine.Defeat => defeat,
+                BossLine.Stagger => stagger,
+                BossLine.KasaWheel => kasaWheel,
+                BossLine.HourStrikes => hourStrikes,
+                BossLine.DefeatFinal => defeatFinal,
+                BossLine.CrescentSlash => crescentSlash,
+                BossLine.BladeRain => bladeRain,
+                BossLine.EclipseFang => eclipseFang,
+                _ => null,
+            };
+            if (takes.Length == 0) return null;
+            take = Random.Range(0, takes.Length);
+            if (takes.Length > 1 && take == last) take = (take + 1 + Random.Range(0, takes.Length - 1)) % takes.Length;
+            return takes[take];
+        }
     }
 
     BossVoice VoiceFor(BossKind kind) => kind switch
@@ -1339,8 +1355,8 @@ public class GameManager : MonoBehaviour
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
             phaseCloseupHeight = 1440f, phaseCloseupFocus = new Vector2(0.46f, 0.22f), phaseCloseupAt = new Vector2(-10f, 265f),
             intro = benibanaIntroLine, phase = benibanaPhaseLine, defeat = benibanaDefeatLine,
-            stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLine, rosaryLash = benibanaRosaryLashLine,
-            iaido = benibanaIaidoLine, rosaryBloom = benibanaRosaryBloomLine, hurt = benibanaHurtLines,
+            stagger = benibanaStaggerLine, smokeRings = benibanaSmokeRingsLines, rosaryLash = benibanaRosaryLashLines,
+            iaido = benibanaIaidoLines, rosaryBloom = benibanaRosaryBloomLines, hurt = benibanaHurtLines,
         },
         BossKind.Utsusemi => new BossVoice
         {
@@ -1379,8 +1395,9 @@ public class GameManager : MonoBehaviour
         bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal;
         if (!full && voice.isPlaying && (speakingFullLine || line != BossLine.Stagger)) return;
 
-        AudioClip clip = VoiceFor(Stage.boss).Clip(line);
-        string text = boss.Line(line);
+        AudioClip clip = VoiceFor(Stage.boss).Take(line, lastTakes.TryGetValue(line, out int last) ? last : -1, out int take);
+        lastTakes[line] = take;
+        string text = boss.Line(line, take);
         float seconds = clip != null ? clip.length : full ? 2.5f : 1.2f;
         if (clip != null)
         {

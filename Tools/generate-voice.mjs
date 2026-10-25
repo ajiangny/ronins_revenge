@@ -20,10 +20,20 @@ const SHIROGANE = "pFZP5JQG7iQjIQuC4Bku";
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line, which show them as subtitles.
 const LINES = {
+  // Each move callout has three takes, picked at random; the texts match Benibana.Line's subtitles take for take.
   Benibana_SmokeRings: [IZUMI, "[sultry, amused] Breathe it in..."],
+  Benibana_SmokeRings_2: [IZUMI, "[sultry whisper] Inhale..."],
+  Benibana_SmokeRings_3: [IZUMI, "[amused] Lose yourself."],
   Benibana_RosaryLash: [IZUMI, "[commanding, sharp] Kneel!"],
-  Benibana_Iaido: [IZUMI, "[intense, drawing her sword] Crimson... Iaido!"],
+  Benibana_RosaryLash_2: [IZUMI, "[contemptuous] Bow your head."],
+  Benibana_RosaryLash_3: [IZUMI, "[sharp] Down!"],
+  // Quick and clipped, no dramatic pause: the move is over in about a second.
+  Benibana_Iaido: [IZUMI, "[sharp, fast, drawing her sword] Crimson Iaido!"],
+  Benibana_Iaido_2: [IZUMI, "[cold, low] Iaido."],
+  Benibana_Iaido_3: [IZUMI, "[mocking] Too slow."],
   Benibana_RosaryBloom: [IZUMI, "[furious shout] Bloom, my rosary!"],
+  Benibana_RosaryBloom_2: [IZUMI, "[furious] Scatter!"],
+  Benibana_RosaryBloom_3: [IZUMI, "[fierce] Pray!"],
   Benibana_Stagger: [IZUMI, "[shocked gasp] What?! My own blade..."],
   Benibana_Hurt: [IZUMI, "[pained grunt] Ngh!"],
   Benibana_Hurt_2: [IZUMI, "[pained cry] Hah!"],

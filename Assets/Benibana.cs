@@ -33,12 +33,21 @@ public class Benibana : Boss
         BossLine.Phase => "You've torn my kimono... You will pay for that in blood!",
         BossLine.Defeat => "Crimson... suits you... after all...",
         BossLine.Stagger => "What?! My own blade...",
-        BossLine.SmokeRings => "Breathe it in...",
-        BossLine.RosaryLash => "Kneel!",
-        BossLine.Iaido => "Crimson... Iaido!",
-        BossLine.RosaryBloom => "Bloom, my rosary!",
+        BossLine.SmokeRings or BossLine.RosaryLash or BossLine.Iaido or BossLine.RosaryBloom => Line(line, 0),
         _ => null,
     };
+
+    // Her callouts, each recorded three ways; GameManager picks a take and shows its words.
+    public override string Line(BossLine line, int take) => line switch
+    {
+        BossLine.SmokeRings => Take(take, "Breathe it in...", "Inhale...", "Lose yourself."),
+        BossLine.RosaryLash => Take(take, "Kneel!", "Bow your head.", "Down!"),
+        BossLine.Iaido => Take(take, "Crimson Iaido!", "Iaido.", "Too slow."),
+        BossLine.RosaryBloom => Take(take, "Bloom, my rosary!", "Scatter!", "Pray!"),
+        _ => take == 0 ? Line(line) : null,
+    };
+
+    static string Take(int take, params string[] lines) => lines[Mathf.Clamp(take, 0, lines.Length - 1)];
 
     bool secondPhase => SecondPhase;
     bool breaking;

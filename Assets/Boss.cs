@@ -42,6 +42,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // The subtitle for a line, or null when the boss has nothing to say there.
     public virtual string Line(BossLine line) => null;
 
+    // The subtitle for one take of a line recorded several ways; take 0 is the line's own.
+    public virtual string Line(BossLine line, int take) => Line(line);
+
     protected void Speak(BossLine line)
     {
         Spoke?.Invoke(this, line);

@@ -82,10 +82,10 @@ public static class BossArtSetup
         so.FindProperty("benibanaPhaseLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Phase.mp3");
         so.FindProperty("benibanaDefeatLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Defeat.mp3");
         so.FindProperty("benibanaStaggerLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Stagger.mp3");
-        so.FindProperty("benibanaSmokeRingsLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_SmokeRings.mp3");
-        so.FindProperty("benibanaRosaryLashLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryLash.mp3");
-        so.FindProperty("benibanaIaidoLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_Iaido.mp3");
-        so.FindProperty("benibanaRosaryBloomLine").objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Benibana_RosaryBloom.mp3");
+        SetTakes(so.FindProperty("benibanaSmokeRingsLines"), "Benibana_SmokeRings");
+        SetTakes(so.FindProperty("benibanaRosaryLashLines"), "Benibana_RosaryLash");
+        SetTakes(so.FindProperty("benibanaIaidoLines"), "Benibana_Iaido");
+        SetTakes(so.FindProperty("benibanaRosaryBloomLines"), "Benibana_RosaryBloom");
         SetTakes(so.FindProperty("benibanaHurtLines"), "Benibana_Hurt");
 
         if (utsusemi != null)
@@ -158,12 +158,15 @@ public static class BossArtSetup
     }
 
     // Every <prefix>*.mp3 take, so more can be added without touching this.
+    // Takes are named prefix, prefix_2, prefix_3...; loaded in that order, since a boss's subtitles match them by index.
     static void SetTakes(SerializedProperty lines, string prefix)
     {
         var takes = new List<AudioClip>();
-        foreach (string guid in AssetDatabase.FindAssets(prefix + " t:AudioClip", new[] { VoiceRoot.TrimEnd('/') }))
+        for (int n = 1; ; n++)
         {
-            takes.Add(AssetDatabase.LoadAssetAtPath<AudioClip>(AssetDatabase.GUIDToAssetPath(guid)));
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + prefix + (n == 1 ? "" : "_" + n) + ".mp3");
+            if (clip == null) break;
+            takes.Add(clip);
         }
         lines.arraySize = takes.Count;
         for (int i = 0; i < takes.Count; i++) lines.GetArrayElementAtIndex(i).objectReferenceValue = takes[i];

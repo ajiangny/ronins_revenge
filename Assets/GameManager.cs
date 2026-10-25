@@ -1371,12 +1371,13 @@ public class GameManager : MonoBehaviour
         _ => default,
     };
 
-    // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them. Barks (move
-    // callouts, gasps) never cut off a full line, and a hurt gasp never cuts off anything.
+    // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them. A bark (move
+    // callout, gasp) never cuts off anything still playing: it's dropped, since a callout played late would name
+    // the wrong move. Only a stagger cries over another bark.
     void OnBossSpoke(Boss boss, BossLine line)
     {
         bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal;
-        if (!full && voice.isPlaying && (speakingFullLine || line == BossLine.Hurt)) return;
+        if (!full && voice.isPlaying && (speakingFullLine || line != BossLine.Stagger)) return;
 
         AudioClip clip = VoiceFor(Stage.boss).Clip(line);
         string text = boss.Line(line);

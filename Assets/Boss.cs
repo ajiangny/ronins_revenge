@@ -9,7 +9,9 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight,
     CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang,
     // Shirogane's last words, after her wolf has gone; a full line like Defeat.
-    DefeatFinal }
+    DefeatFinal,
+    // Shirogane's later barks: Kuon broken, and her mirrored and parry-only moves.
+    WolfFallen, MirrorMoon, Moonsplitter, OathFang }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -206,6 +208,9 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     // The share of each hit's damage that gets through super armour.
     protected virtual float ArmorDamageTaken => 1f;
+
+    // The spark a hit throws off super armour: Utsusemi's gold, Shirogane's spirit ward.
+    protected virtual Color ArmorSpark => new Color(1f, 0.85f, 0.4f);
 
     // True while a subclass is in a set piece (a phase break) and isn't expected to beat.
     protected virtual bool Busy => false;
@@ -409,14 +414,15 @@ public abstract class Boss : MonoBehaviour, IHittable
     }
 
     // Broken stance: the boss stops dead and takes double damage for a moment.
-    public void Stagger(float seconds)
+    // Without the cry, for a stagger the boss has her own line for (Shirogane when her wolf falls).
+    public void Stagger(float seconds, bool cry = true)
     {
         if (IsDead || SuperArmor || PhaseBreaking) return;
         Interrupt();
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
         Sfx.Play(Sfx.BossStagger);
-        Speak(BossLine.Stagger);
+        if (cry) Speak(BossLine.Stagger);
         OnStaggered();
         nextHurtLine = Time.time + seconds;
         StartCoroutine(RecoverFromStagger(seconds));
@@ -465,7 +471,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         // Armoured hits barely hurt, and glance off with a ring of steel instead of breaking its stance.
         if (SuperArmor)
         {
-            Fx.Play(Fx.Impact, point, new Color(1f, 0.85f, 0.4f), 1.2f);
+            Fx.Play(Fx.Impact, point, ArmorSpark, 1.2f);
             Sfx.Play(Sfx.ParryClang, 0.5f, 1.3f);
         }
         Damaged?.Invoke(point, source);

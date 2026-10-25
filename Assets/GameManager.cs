@@ -165,6 +165,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] shiroWolfHowl;
     [SerializeField] Sprite[] shiroWolfCharge;
     [SerializeField] Sprite[] shiroWolfVanish;
+    [Tooltip("Kuon's Maw: it rears, gathers the orb in its jaws and swallows it. Without it, it howls.")]
+    [SerializeField] Sprite[] shiroWolfMaw;
     [SerializeField] Sprite shiroganePortrait;
     [SerializeField] Sprite shiroganeCloseup;
     [Tooltip("Her second-phase illustrations, with the wolf: the card that plays as it arrives. Without them her phase line is a subtitle.")]
@@ -280,6 +282,8 @@ public class GameManager : MonoBehaviour
     Scout activeScout;
     float nextScoutTime;
     Boss activeBoss;
+    // Shirogane's wolf, Kuon, while it is in the fight with a bar of its own.
+    SpiritWolf activeWolf;
     AudioSource voice;
     // The voice filters: Utsusemi's machine voice (a doubled, ringing, slightly gritty layer over the recorded
     // lines) and Shirogane's spirit voice (a soft, hollow echo, as if from across water) retune the same three.
@@ -817,6 +821,7 @@ public class GameManager : MonoBehaviour
         }
         if (activeScout != null && activeScout.GetComponentInChildren<Collider>() is { enabled: true }) enemies.Add(activeScout.transform);
         if (activeBoss != null && !activeBoss.IsDead) enemies.Add(activeBoss.transform);
+        if (activeWolf != null && activeWolf.Targetable) enemies.Add(activeWolf.transform);
         return enemies.Count > 0 ? enemies[Random.Range(0, enemies.Count)] : null;
     }
 
@@ -1278,7 +1283,8 @@ public class GameManager : MonoBehaviour
                     blade.SetPhaseArt(shiroganePhaseArt);
                     blade.SetPhaseDash(shiroganePhaseDash);
                 }
-                blade.SetWolfFrames(shiroWolfIdle, shiroWolfHowl, shiroWolfCharge, shiroWolfVanish);
+                blade.SetWolfFrames(shiroWolfIdle, shiroWolfHowl, shiroWolfCharge, shiroWolfVanish, shiroWolfMaw);
+                blade.WolfJoined += OnWolfJoined;
                 return blade;
             default:
                 bool standIn = benibanaArt == null;
@@ -1438,6 +1444,54 @@ public class GameManager : MonoBehaviour
         effects.OnBossHit(point, source);
     }
 
+    // Kuon takes the field at her phase break: its bar goes up over hers, and it can be hit until it breaks.
+    void OnWolfJoined(SpiritWolf wolf)
+    {
+        activeWolf = wolf;
+        effects.Wolf = wolf;
+        wolf.Damaged += OnWolfDamaged;
+        wolf.Broken += OnWolfBroken;
+        ui.ShowWolfBar($"{SpiritWolf.Title}, {SpiritWolf.Epithet}", activeBoss != null ? activeBoss.Colour : Color.cyan);
+    }
+
+    void OnWolfDamaged(Vector3 point, KillSource source)
+    {
+        score += 10 * (stageIndex + 1);
+        highScore = Mathf.Max(highScore, score);
+        ui.SetScore(score);
+        if (activeWolf != null) ui.SetWolfHealth(activeWolf.HealthFraction);
+        if (state != State.Playing || source == KillSource.Effect) return;
+
+        if (source == KillSource.Reflected)
+        {
+            // The Fang of the Oath sent home: a heavy hit-stop as it slams into the wolf.
+            Debris.BurstSprites(point, ronin.art.deathParticles, activeBoss.Colour, 24, 1.2f, 8f);
+            Fx.Play(Fx.Impact, point, activeBoss.Colour, 2.5f);
+            CameraShake.Add(0.45f);
+            if (!hitStopping) StartCoroutine(HitStop(0.15f));
+        }
+        else
+        {
+            Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.AttackGlow;
+            Fx.Play(Fx.Impact, point + (Vector3)Random.insideUnitCircle * 0.6f, Color.Lerp(Color.white, spark, 0.6f), 1.2f);
+        }
+        effects.OnWolfHit(point, source);
+    }
+
+    // Kuon is broken: its bar goes, and she fights on alone.
+    void OnWolfBroken()
+    {
+        score += 750 * (stageIndex + 1);
+        highScore = Mathf.Max(highScore, score);
+        ui.SetScore(score);
+        ui.SetWolfHealth(0f);
+        ui.HideWolfBar();
+        if (!hitStopping) StartCoroutine(HitStop(0.2f));
+        CameraShake.Add(0.5f);
+        effects.Wolf = null;
+        activeWolf = null;
+    }
+
     void OnBossDefeated()
     {
         if (state != State.Playing) return;
@@ -1462,7 +1516,9 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
         yield return GatherDrops();
         effects.Boss = null;
+        effects.Wolf = null;
         activeBoss = null;
+        activeWolf = null;
         Boss.PhaseCard = null;
         // Her fall lifts the blood moon.
         if (backdrop != null) backdrop.SetBossMoon(false);

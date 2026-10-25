@@ -128,6 +128,7 @@ public static class BossArtSetup
         SetFrames(so.FindProperty("shiroWolfHowl"), TryFrames("SpiritWolf", "Howl"));
         SetFrames(so.FindProperty("shiroWolfCharge"), TryFrames("SpiritWolf", "Charge"));
         SetFrames(so.FindProperty("shiroWolfVanish"), TryFrames("SpiritWolf", "Vanish"));
+        SetFrames(so.FindProperty("shiroWolfMaw"), TryFrames("SpiritWolf", "Maw"));
         so.FindProperty("shiroganePortrait").objectReferenceValue = Portrait("Shirogane_Full");
         so.FindProperty("shiroganeCloseup").objectReferenceValue = Portrait("Shirogane_Closeup");
         so.FindProperty("shiroganePhasePortrait").objectReferenceValue = Portrait("Shirogane_Phase_Full");

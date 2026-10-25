@@ -725,6 +725,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 05ce56e8ee8fe44898d288e83a0d53bd, type: 3}
   - {fileID: 21300000, guid: 8e44f57243d6a4fe9baa1f2110ef2a18, type: 3}
   - {fileID: 21300000, guid: 95cc0cf8a8f3a42398bcac4151a79d1d, type: 3}
+  shiroWolfMaw:
+  - {fileID: 21300000, guid: 4bf5c78a5b3a47c68982b6fb83510a59, type: 3}
+  - {fileID: 21300000, guid: 3df426e9beb941ff895c1c2c02e7279a, type: 3}
+  - {fileID: 21300000, guid: 21c3247b178540d08152e458029c9a61, type: 3}
+  - {fileID: 21300000, guid: 6d61c0140fdf4086b9e489b01e3f565d, type: 3}
+  - {fileID: 21300000, guid: c3dbd7c2ebaf4e6a84e3d737a9598629, type: 3}
+  - {fileID: 21300000, guid: 9399fa099c7a477796751cc67eb4a3b6, type: 3}
+  - {fileID: 21300000, guid: b869e00f532147d9829ab4a41a7e53a4, type: 3}
+  - {fileID: 21300000, guid: f526ae1184654273a8041f45f841938c, type: 3}
+  - {fileID: 21300000, guid: a8937713ccf14de6a575dd2769beaf9e, type: 3}
+  - {fileID: 21300000, guid: 606cc94ffaa04188962bd2416dee6e68, type: 3}
+  - {fileID: 21300000, guid: 542d32c9e7bb4384b8e049470f2b870c, type: 3}
+  - {fileID: 21300000, guid: e38b062cfae447d982620ad7fc7bde44, type: 3}
   shiroganePortrait: {fileID: 21300000, guid: 7060fe1074bf6444ea4d1715b72e7108, type: 3}
   shiroganeCloseup: {fileID: 21300000, guid: e0e2e2ff5138a4f7096f36294d515e5d, type: 3}
   shiroganePhasePortrait: {fileID: 21300000, guid: cdea3b138cbd149c684eab469b416de4, type: 3}

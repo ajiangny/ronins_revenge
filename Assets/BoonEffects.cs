@@ -31,6 +31,9 @@ public class BoonEffects
     // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
     public Boss Boss { get; set; }
     bool BossFight => Boss != null && !Boss.IsDead;
+    // Shirogane's wolf, Kuon, while it can be fought: the damage boons land on it too, but frost doesn't hold a spirit.
+    public SpiritWolf Wolf { get; set; }
+    bool WolfFight => Wolf != null && Wolf.Armed && !Wolf.IsBroken;
 
     public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout)
     {
@@ -117,6 +120,7 @@ public class BoonEffects
         if (loadout.Has(BoonId.BurningRiposte, out value))
         {
             if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, value);
+            else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, value);
             else if (!BossFight) Blast(point, value);
         }
         // Frozen Riposte shards encase the samurai they hit themselves (Kunai.FreezeOnHit); only the boss is left.
@@ -273,6 +277,36 @@ public class BoonEffects
         Boss.TakeHit(Boss.Frozen && loadout.Find(BoonId.ThermalShock) != null ? 2 : 1, KillSource.Effect);
     }
 
+    // Fire on Kuon: the burst and one point of damage.
+    void WolfBlast(Vector3 position, float radius)
+    {
+        radius += loadout.Value(BoonId.Wildfire);
+        if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
+        CameraShake.Add(0.12f);
+        Sfx.Play(Sfx.FireBlast);
+        BurnArrows(position, radius);
+        Wolf.TakeHit(1, KillSource.Effect);
+    }
+
+    // The ronin's own hits on Kuon: the blade and shuriken fire bursts, and the blade's lightning.
+    public void OnWolfHit(Vector3 point, KillSource source)
+    {
+        if (!WolfFight) return;
+        float value;
+        switch (source)
+        {
+            case KillSource.Slash:
+            case KillSource.Kunai:
+                if (loadout.Has(BoonId.FlameBlade, out value)) WolfBlast(point, value);
+                if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
+                break;
+            case KillSource.Shuriken:
+                if (loadout.Has(BoonId.InfernoShuriken, out value)) WolfBlast(point, value);
+                break;
+        }
+        if (source != KillSource.Effect) BeatDrum();
+    }
+
     // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.
     void Strike(Vector3 from, Samurai target)
     {
@@ -335,6 +369,7 @@ public class BoonEffects
     public void OnFireballImpact(Vector3 point, IHittable target)
     {
         if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, KindlingRadius);
+        else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, KindlingRadius);
         else if (!BossFight) Blast(point, KindlingRadius);
     }
 

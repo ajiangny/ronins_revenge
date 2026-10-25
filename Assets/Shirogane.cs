@@ -5,7 +5,9 @@ using UnityEngine;
 // Stage 3's warlord: Shirogane, the Forsaken Blade, a ghostly swordswoman in black, white and deep-blue armour
 // whose twin katanas burn with blue spirit flame. She fights alone in her first phase, gliding about the top of
 // the field and raining spectral blades; once her first bar empties her spirit wolf answers her and the two
-// fight as one. Everything she throws is a readable pattern with a lane or a gap left open.
+// fight as one. Kuon is a foe of its own: while it stands it wards her, so only a sliver of each blow gets through,
+// and it hunts the ronin alongside her. Break it and she fights on alone, faster in her grief. Everything she throws
+// is a readable pattern with a lane or a gap left open, and twice a phase-long tell asks for a parry.
 public class Shirogane : Boss
 {
     // Per bar: she fights two, the second with her wolf.
@@ -17,15 +19,28 @@ public class Shirogane : Boss
     static readonly Color MistColour = new Color(0.55f, 0.85f, 1f, 0.7f);
     static readonly Color Trail = new Color(0.45f, 0.85f, 1f, 0.5f);
 
-    enum Move { CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang }
+    enum Move { CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, MirrorMoon, Moonsplitter, OathFang, Moonfall,
+        WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang, SpiritMaw }
 
-    // Each value is (phase 1, phase 2): with the wolf at her side she gives no quarter.
-    float Recovery => secondPhase ? 0.5f : 1f;
-    float ComboChance => secondPhase ? 0.75f : 0.5f;
-    int MaxCombo => secondPhase ? 3 : 2;
-    float GlideSpeed => secondPhase ? 7.5f : 5f;
-    float CrescentSpeed => secondPhase ? 9f : 8f;
-    float RainWarning => secondPhase ? 0.7f : 0.9f;
+    // Each value is (phase 1, phase 2 with Kuon, phase 2 alone): with the wolf at her side she gives no quarter, and
+    // without it she gives less still.
+    float Recovery => alone ? 0.35f : secondPhase ? 0.5f : 0.8f;
+    float ComboChance => alone ? 0.8f : secondPhase ? 0.75f : 0.6f;
+    int MaxCombo => alone ? 4 : secondPhase ? 3 : 2;
+    float GlideSpeed => alone ? 9f : secondPhase ? 7.5f : 5f;
+    float CrescentSpeed => alone ? 10f : secondPhase ? 9f : 8f;
+    float RainWarning => alone ? 0.6f : secondPhase ? 0.7f : 0.9f;
+    // The parry-only draws: how fast they come, and how long the sight line tracks the ronin before they do.
+    float DrawSpeed => alone ? 11f : 10f;
+    float DrawAim => alone ? 0.65f : secondPhase ? 0.8f : 0.9f;
+
+    // While Kuon stands, her ward lets this share of each blow through.
+    const float WardDamageTaken = 0.1f;
+    // The free stagger when Kuon falls, a moment to punish her grief.
+    const float GriefStagger = 2.5f;
+    // The fewest moves between two parry draws, and the most.
+    const int ParryEvery = 3;
+    const int ParryAtLatest = 4;
 
     public override string Title => "SHIROGANE";
     public override string Epithet => "The Forsaken Blade";
@@ -49,17 +64,37 @@ public class Shirogane : Boss
         BossLine.TwinAssault => "Together.",
         BossLine.WolfPack => "Hunt.",
         BossLine.EclipseFang => "Eclipse... Fang.",
+        BossLine.WolfFallen => "...Rest, Kuon.",
+        BossLine.MirrorMoon => "Twin moons.",
+        BossLine.Moonsplitter => "Answer me.",
+        BossLine.OathFang => "Remember.",
         _ => null,
     };
 
+    // Raised when Kuon takes the field at her phase break, so the HUD can show its bar.
+    public event System.Action<SpiritWolf> WolfJoined;
+
     bool secondPhase => SecondPhase;
+    // Kuon stands beside her and wards her.
+    bool Guarded => secondPhase && wolf != null && wolf.Armed && !wolf.IsBroken;
+    // Kuon has fallen: the Lone Blade.
+    bool alone => secondPhase && wolf != null && wolf.IsBroken;
     bool breaking;
     Move? lastMove;
     // How many times running the last move has come up: never the same major move three times in a row.
     int repeats;
     Move? lastWolfMove;
-    bool lastWasWolf;
+    int wolfRepeats;
     int movesSinceEclipse;
+    // Counts toward the next parry-only draw; starts part way so one comes within her first few moves.
+    int movesSinceParry = 1;
+    // Kuon's own attack loop, run beside hers while it stands.
+    Coroutine hunting;
+    // True while Kuon is mid-attack, and while she holds it back for a move of their own or her densest pattern.
+    bool wolfBusy;
+    bool holdWolf;
+    // A cold shimmer around her while Kuon wards her.
+    SpriteRenderer wardGlow;
     // True for the recovery after the Eclipse Fang, when she stands open and takes double damage.
     bool exposed;
     Coroutine roaming;
@@ -84,6 +119,10 @@ public class Shirogane : Boss
     // Just above the wolf's head and at the mouth it howls from.
     Vector3 WolfMouth => wolf != null ? wolf.Mouth : Centre;
     protected override int DamageMultiplier => exposed ? 2 : 1;
+    // Kuon's ward: only a sliver of each blow gets through, except while she stands spent after the Eclipse Fang.
+    protected override bool SuperArmor => Guarded && !exposed && !breaking;
+    protected override float ArmorDamageTaken => WardDamageTaken;
+    protected override Color ArmorSpark => Cyan;
     float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
     float GroundY => ronin.Feet.y - 0.3f;
     float LeftEdge => CameraShake.Center.x - HalfWidth;
@@ -104,10 +143,11 @@ public class Shirogane : Boss
     }
 
     // The wolf's clips; any that are missing leave it drawn in code.
-    Sprite[] wolfIdle, wolfHowl, wolfCharge, wolfVanish;
+    Sprite[] wolfIdle, wolfHowl, wolfCharge, wolfVanish, wolfMaw;
 
-    public void SetWolfFrames(Sprite[] idle, Sprite[] howl, Sprite[] charge, Sprite[] vanish)
+    public void SetWolfFrames(Sprite[] idle, Sprite[] howl, Sprite[] charge, Sprite[] vanish, Sprite[] maw)
     {
+        wolfMaw = maw != null && maw.Length > 0 ? maw : null;
         wolfIdle = idle != null && idle.Length > 0 ? idle : null;
         wolfHowl = howl != null && howl.Length > 0 ? howl : null;
         wolfCharge = charge != null && charge.Length > 0 ? charge : null;
@@ -119,8 +159,9 @@ public class Shirogane : Boss
         bladeGlow = Kunai.CreateGlow(sprite.transform, 1.6f / transform.lossyScale.x, sprite.sortingOrder - 1, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
         bladeGlow.transform.localPosition = new Vector3(0f, -0.1f, 0.05f);
         StartCoroutine(PulseBlades());
-        wolf = SpiritWolf.Create(this, wolfIdle, wolfHowl, wolfCharge, wolfVanish, transform.lossyScale.x, sprite.sortingOrder - 1);
+        wolf = SpiritWolf.Create(this, wolfIdle, wolfHowl, wolfCharge, wolfVanish, wolfMaw, transform.lossyScale.x, sprite.sortingOrder - 1);
         wolf.SetPresence(SpiritWolf.Presence.Silhouette);
+        wolf.Broken += OnWolfBroken;
     }
 
     // Her wolf rests a little behind her and to the side, moving with her glides.
@@ -141,9 +182,12 @@ public class Shirogane : Boss
     protected override IEnumerator Fight()
     {
         exposed = false;
+        holdWolf = false;
         while (true)
         {
             while (breaking) yield return null;
+            // Kuon hunts on its own clock beside hers for as long as it stands.
+            if (Guarded && hunting == null) hunting = StartCoroutine(Hunt());
             // She glides on between combos: the opening is there, but she never stands still for it.
             yield return Roam(Recovery);
 
@@ -153,61 +197,134 @@ public class Shirogane : Boss
             {
                 Beat();
                 Move move = NextMove();
-                bool wolf = move >= Move.WolfCharge;
-                if (move == Move.EclipseFang)
+                // Their joint moves need Kuon free, and her blade rain is dense enough without its charges on top.
+                if (Guarded && (move == Move.TwinAssault || move == Move.EclipseFang || move == Move.OathFang || move == Move.BladeRain))
+                {
+                    holdWolf = true;
+                    while (wolfBusy) yield return null;
+                }
+                if (move == Move.EclipseFang || move == Move.Moonfall)
                 {
                     // The ultimate ends every combo: nothing follows it but her recovery.
                     i = combo;
                 }
-                else if (!wolf && move != Move.MoonlitDash)
+                else if (move != Move.MoonlitDash && move != Move.TwinAssault && move != Move.MirrorMoon)
                 {
                     yield return Glide(NearX(1.5f, 3.5f));
                 }
                 repeats = move == lastMove ? repeats + 1 : 1;
                 lastMove = move;
-                lastWasWolf = wolf;
-                if (wolf) lastWolfMove = move;
-                movesSinceEclipse = move == Move.EclipseFang ? 0 : movesSinceEclipse + 1;
+                movesSinceEclipse = move == Move.EclipseFang || move == Move.Moonfall ? 0 : movesSinceEclipse + 1;
+                movesSinceParry = move == Move.Moonsplitter || move == Move.OathFang ? 0 : movesSinceParry + 1;
                 switch (move)
                 {
                     case Move.CrescentSlash: yield return CrescentSlash(); break;
                     case Move.BladeRain: yield return BladeRain(); break;
                     case Move.MoonlitDash: yield return MoonlitDash(); break;
                     case Move.BladeBarrage: yield return BladeBarrage(); break;
-                    case Move.WolfCharge: yield return WolfCharge(); break;
-                    case Move.Howl: yield return Howl(); break;
+                    case Move.MirrorMoon: yield return MirrorMoon(); break;
+                    case Move.Moonsplitter: yield return Moonsplitter(); break;
+                    case Move.OathFang: yield return OathFang(); break;
+                    case Move.Moonfall: yield return Moonfall(); break;
                     case Move.TwinAssault: yield return TwinAssault(); break;
-                    case Move.WolfPack: yield return WolfPack(); break;
                     case Move.EclipseFang: yield return EclipseFang(); break;
                 }
+                holdWolf = false;
                 yield return Wait(secondPhase ? 0.15f : 0.25f);
             }
         }
     }
 
-    // Weighted at random: the phase's signature counts twice, the same move never comes three times running, and
-    // once the wolf is out her sword moves and its own alternate so the two never pile on at once.
+    // Weighted at random: the phase's signature counts twice and the same move never comes three times running.
+    // Her parry-only draw comes up once at least ParryEvery moves have passed, and for certain by ParryAtLatest;
+    // in her second phase the ultimate comes every fifth move.
     Move NextMove()
     {
+        Move parry = secondPhase ? Move.OathFang : Move.Moonsplitter;
+        if (movesSinceParry >= ParryAtLatest) return parry;
         List<Move> options;
         if (!secondPhase)
         {
-            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage };
+            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage, Move.MirrorMoon };
         }
-        else if (movesSinceEclipse >= 5 && lastMove != Move.EclipseFang)
+        else if (movesSinceEclipse >= 5 && lastMove != Move.EclipseFang && lastMove != Move.Moonfall)
         {
-            return Move.EclipseFang;
+            // Kuon's ultimate needs Kuon; alone she brings the moon down herself.
+            return alone ? Move.Moonfall : Move.EclipseFang;
         }
-        else if (lastWasWolf)
+        else if (alone)
         {
-            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash };
+            options = new List<Move> { Move.CrescentSlash, Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage, Move.MirrorMoon };
         }
         else
         {
-            options = new List<Move> { Move.WolfCharge, Move.WolfCharge, Move.Howl, Move.TwinAssault, Move.WolfPack };
+            // Kuon's own moves run in Hunt; hers are the swords and the attacks they make together.
+            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.MirrorMoon, Move.TwinAssault, Move.TwinAssault };
         }
+        if (movesSinceParry >= ParryEvery) options.Add(parry);
         if (lastMove is Move last && repeats >= 2) options.RemoveAll(m => m == last);
         return options[Random.Range(0, options.Count)];
+    }
+
+    // Kuon's attack loop while it stands: a charge, a howl, the pack or its Maw, then a breath, then another. It holds back
+    // while she makes a move of their own, while it is dazed, and through her phase break.
+    IEnumerator Hunt()
+    {
+        yield return Wait(1f);
+        while (Guarded)
+        {
+            while (holdWolf || ultimate || breaking || wolf.Dazed) yield return null;
+            if (!Guarded) break;
+            wolfBusy = true;
+            Move move = NextWolfMove();
+            wolfRepeats = move == lastWolfMove ? wolfRepeats + 1 : 1;
+            lastWolfMove = move;
+            switch (move)
+            {
+                case Move.WolfCharge: yield return WolfCharge(); break;
+                case Move.Howl: yield return Howl(); break;
+                case Move.WolfPack: yield return WolfPack(); break;
+                case Move.SpiritMaw: yield return SpiritMaw(); break;
+            }
+            wolfBusy = false;
+            yield return Wait(Random.Range(1.2f, 1.8f));
+        }
+        wolfBusy = false;
+        hunting = null;
+    }
+
+    Move NextWolfMove()
+    {
+        var options = new List<Move> { Move.WolfCharge, Move.WolfCharge, Move.Howl, Move.WolfPack, Move.SpiritMaw };
+        // Its Maw is the big one: never twice running.
+        if (lastWolfMove == Move.SpiritMaw) options.Remove(Move.SpiritMaw);
+        if (lastWolfMove is Move last && wolfRepeats >= 2) options.RemoveAll(m => m == last);
+        return options[Random.Range(0, options.Count)];
+    }
+
+    void StopHunting()
+    {
+        if (hunting != null) StopCoroutine(hunting);
+        hunting = null;
+        wolfBusy = false;
+    }
+
+    // Kuon is broken: her ward shatters and grief staggers her, the one long opening she gives, and she fights on
+    // alone. Her farewell to it is said here; her stagger cry would talk over it.
+    void OnWolfBroken()
+    {
+        StopHunting();
+        holdWolf = false;
+        ultimate = false;
+        exposed = false;
+        // The ultimate waits a full cycle, so her grief isn't followed straight away by Moonfall.
+        movesSinceEclipse = 0;
+        Fx.Play(Fx.Impact, Centre, Cyan, 3f);
+        ElementFx.Glow(Centre, Frost, 1f, 4f, 0.5f);
+        Sfx.Play(Sfx.WardShatter, 1f, 0.8f);
+        CameraShake.Add(0.5f);
+        Speak(BossLine.WolfFallen);
+        Stagger(GriefStagger, cry: false);
     }
 
     // --- Movement ---
@@ -273,8 +390,12 @@ public class Shirogane : Boss
     protected override void OnStaggered()
     {
         StopRoaming();
+        StopHunting();
+        holdWolf = false;
         exposed = false;
         ultimate = false;
+        Sfx.Stop(Sfx.SpiritBeam);
+        RemoveOrb();
         if (wolf != null) wolf.Recall();
     }
 
@@ -416,7 +537,9 @@ public class Shirogane : Boss
         PlayAction(art.attack);
         if (Fx.Play(Fx.SlashArc, Hands, Cyan, 2.6f) == null) ElementFx.Glow(Hands, Cyan, 1f, 3f, 0.2f);
         Sfx.Play(Sfx.SwordSlash, 0.9f, 0.7f);
-        Vector3 aim = secondPhase ? (ronin.Bounds.center - Hands).normalized : Vector3.down;
+        // Past the middle of her first bar she has his measure, and aims.
+        bool aimed = secondPhase || HealthFraction < 0.5f;
+        Vector3 aim = aimed ? (ronin.Bounds.center - Hands).normalized : Vector3.down;
         var fan = new List<Arrow>();
         for (int i = 0; i < 5; i++)
         {
@@ -428,11 +551,12 @@ public class Shirogane : Boss
     }
 
     // Phantom Blade Rain: ghost swords hang over six lanes with a thin warning line under each, then fall. At least
-    // one lane stays empty. In her second phase there are seven lanes, two empty, and the swords fall in a ripple.
+    // one lane stays empty. In her second phase there are seven lanes, two empty, and the swords fall in a ripple;
+    // alone, eight.
     IEnumerator BladeRain()
     {
         if (Random.value < 0.5f) Speak(BossLine.BladeRain);
-        int laneCount = secondPhase ? 7 : 6;
+        int laneCount = alone ? 8 : secondPhase ? 7 : 6;
         int empty = secondPhase ? 2 : 1;
         List<float> lanes = Lanes(laneCount);
         // The empty lanes are picked at random; the ronin's own lane is never made the only way out on purpose.
@@ -597,8 +721,231 @@ public class Shirogane : Boss
         IgnoreEachOther(volley);
     }
 
+    // Mirror Moon: she takes one side of the field and leaves a reflection of herself standing on the other, mirrored
+    // across the middle. Each looses an aimed fan of three crescents a beat apart, a crossfire with gaps between.
+    IEnumerator MirrorMoon()
+    {
+        if (Random.value < 0.5f) Speak(BossLine.MirrorMoon);
+        float side = anchor.x < CameraShake.Center.x ? -1f : 1f;
+        yield return Glide(CameraShake.Center.x + side * HalfWidth * 0.45f);
+        SpriteRenderer reflection = Linger();
+        float mirrorX = CameraShake.Center.x * 2f - sprite.transform.position.x;
+        reflection.transform.position = new Vector3(mirrorX, reflection.transform.position.y, reflection.transform.position.z);
+        reflection.flipX = !sprite.flipX;
+        Puff(reflection.bounds.center, 2f);
+        Sfx.Play(Sfx.MistSwirl, 0.7f, 1.3f);
+        Vector3 reflectionHands = reflection.bounds.center + Vector3.down * (reflection.bounds.size.y * 0.1f);
+        ElementFx.Glow(Hands, Cyan, 0.7f, 2.4f, 0.6f, transform);
+        ElementFx.Glow(reflectionHands, Cyan, 0.7f, 2.4f, 0.6f);
+        Sfx.Play(Sfx.BladeRing, 0.6f, 1.25f);
+        yield return Wait(alone ? 0.45f : 0.6f);
+
+        PlayAction(art.attack);
+        AimedFan(Hands);
+        Sfx.Play(Sfx.SwordSlash, 0.9f, 0.75f);
+        yield return Wait(0.35f);
+        if (reflection != null)
+        {
+            AimedFan(reflectionHands);
+            Sfx.Play(Sfx.SwordSlash, 0.8f, 0.85f);
+            transient.Remove(reflection.gameObject);
+            Fader.Fade(reflection, 0.4f);
+        }
+        yield return Wait(0.3f);
+    }
+
+    // Three crescents from a point, the middle one at the ronin.
+    void AimedFan(Vector3 from)
+    {
+        if (Fx.Play(Fx.SlashArc, from, Cyan, 2.2f) == null) ElementFx.Glow(from, Cyan, 1f, 2.6f, 0.2f);
+        Vector3 aim = (ronin.Bounds.center - from).normalized;
+        var fan = new List<Arrow>();
+        for (int i = 0; i < 3; i++)
+        {
+            float angle = Mathf.Lerp(-16f, 16f, i / 2f);
+            fan.Add(Crescent(from, Quaternion.Euler(0, 0, angle) * aim * CrescentSpeed));
+        }
+        IgnoreEachOther(fan);
+    }
+
+    // --- Parry-only draws ---
+
+    // Moonsplitter Draw: she sheathes both blades and her flame drains into them while a sight line holds on the
+    // ronin, then one great crescent is drawn that turns with him and cuts through cover and slashes. There is no
+    // outrunning it: only a parry sends it back, and it breaks her stance.
+    IEnumerator Moonsplitter()
+    {
+        Speak(BossLine.Moonsplitter);
+        yield return SightLine(Hands, DrawAim, Frost);
+
+        PlayAction(art.attack);
+        Vector3 from = Hands;
+        if (Fx.Play(Fx.SlashArc, from, Frost, 4f) == null) ElementFx.Glow(from, Frost, 1f, 4f, 0.25f);
+        Sfx.Play(Sfx.SwordSlash, 1f, 0.55f);
+        Sfx.Play(Sfx.BladeRing, 0.9f, 0.7f);
+        CameraShake.Add(0.3f);
+        Arrow cut = Shoot(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
+        Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
+        Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
+        if (frames != null) cut.Restyle(frames, 14f, Color.white, new Vector2(4.4f, 2.8f), 0.9f, halo, 4.4f);
+        else cut.Restyle(ProceduralSprites.Glow, Frost, new Vector2(4f, 1.4f), 0.9f, halo, 4.4f);
+        cut.MakeUnbreakable();
+        cut.MakeReflectable(transform);
+        StartCoroutine(Pursue(cut, DrawSpeed));
+        yield return Wait(0.5f);
+    }
+
+    // Fang of the Oath: Kuon howls and she crosses her blades, and their spirit leaves as one bolt in the shape of a
+    // wolf's head that turns with the ronin. Parried, it goes back at Kuon, a heavy blow that dazes it; once Kuon
+    // has fallen she casts it alone, and parried it breaks her stance instead.
+    IEnumerator OathFang()
+    {
+        Speak(BossLine.OathFang);
+        bool together = Guarded;
+        if (together)
+        {
+            yield return wolf.Settle(WolfRest);
+            wolf.PlayHowl();
+            wolf.Glare(DrawAim);
+            Sfx.Play(Sfx.WolfHowl, 0.8f, 1.1f);
+        }
+        PlayAction(art.parry);
+        Vector3 Source() => together ? Vector3.Lerp(Hands, WolfMouth, 0.5f) : Hands;
+        yield return SightLine(Source(), DrawAim, Cyan, together ? (System.Func<Vector3>)Source : null);
+
+        Vector3 from = Source();
+        Fx.Play(Fx.Impact, from, Cyan, 2.4f);
+        Sfx.Play(Sfx.WolfGrowl, 1f, 0.9f);
+        Sfx.Play(Sfx.SwordSlash, 0.9f, 0.6f);
+        CameraShake.Add(0.3f);
+        Arrow fang = Shoot(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
+        Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
+        Color halo = new Color(Cyan.r, Cyan.g, Cyan.b, 0.55f);
+        if (frames != null) fang.Restyle(frames, 14f, new Color(0.8f, 0.97f, 1f, 0.95f), new Vector2(2.2f, 3f), 0.8f, halo, 3.6f);
+        else fang.Restyle(ProceduralSprites.Glow, new Color(0.7f, 0.95f, 1f, 0.95f), new Vector2(1.8f, 2.6f), 0.8f, halo, 3.6f);
+        fang.MakeUnbreakable();
+        fang.MakeReflectable(together ? wolf.transform : transform);
+        StartCoroutine(Pursue(fang, DrawSpeed));
+
+        // Kuon holds its ground at her side until the fang has struck and anything parried back has reached it.
+        if (together)
+        {
+            for (float t = 0; fang != null && t < 3f; t += Time.deltaTime) yield return null;
+            yield return Wait(1.4f);
+        }
+        else yield return Wait(0.5f);
+    }
+
+    // A sight line from her to the ronin that follows him, brightening and quickening, then holds still a moment
+    // before the draw: the tell for a blow that must be parried.
+    IEnumerator SightLine(Vector3 from, float seconds, Color colour, System.Func<Vector3> source = null)
+    {
+        ElementFx.Glow(from, colour, 0.9f, 3f, seconds, transform);
+        Sfx.Play(Sfx.BladeRing, 0.7f, 0.8f);
+        SpriteRenderer line = Bar(from, ronin.Bounds.center, 0.06f, new Color(colour.r, colour.g, colour.b, 0.3f));
+        float rang = 0f;
+        for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
+        {
+            float k = t / seconds;
+            Vector3 start = source != null ? source() : from;
+            Vector3 end = ronin.Bounds.center;
+            Vector3 delta = end - start;
+            line.transform.position = (start + end) / 2f + Vector3.back * 0.2f;
+            line.transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
+            line.transform.localScale = new Vector3(delta.magnitude, 0.06f + 0.08f * k, 1f);
+            line.color = new Color(colour.r, colour.g, colour.b, 0.3f + 0.5f * k);
+            if (k > 0.6f && t - rang > 0.12f)
+            {
+                rang = t;
+                Sfx.Play(Sfx.BladeRing, 0.25f, 1.2f + k);
+            }
+            yield return null;
+        }
+        // The aim locks with a flash: this is the beat to parry on.
+        line.color = Color.white;
+        yield return Wait(0.18f);
+        transient.Remove(line.gameObject);
+        Destroy(line.gameObject);
+    }
+
+    // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried.
+    IEnumerator Pursue(Arrow shot, float speed)
+    {
+        while (shot != null && ronin != null && shot.transform.position.y > ronin.Bounds.center.y)
+        {
+            float dx = ronin.Bounds.center.x - shot.transform.position.x;
+            shot.Steer(new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -speed, 0));
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    // Moonfall, her ultimate once Kuon has fallen: under the spirit moon three waves of ghost swords ripple down
+    // across eight lanes, each leaving a pair empty, and each wave's pair one lane over from the last so one lane
+    // always carries through. Then she stands spent, open to double damage.
+    IEnumerator Moonfall()
+    {
+        Speak(BossLine.BladeRain);
+        ultimate = true;
+        yield return Glide(CameraShake.Center.x);
+        SpriteRenderer moon = Moon(anchor + Vector3.up * 1.2f);
+        Sfx.Play(Sfx.MistSwirl, 1f, 0.6f);
+        CameraShake.Add(0.3f);
+        for (float t = 0; t < 0.8f; t += Time.deltaTime)
+        {
+            moon.color = new Color(0.6f, 0.9f, 1f, 0.55f * t / 0.8f);
+            yield return null;
+        }
+
+        List<float> lanes = Lanes(8);
+        int gap = Random.Range(0, lanes.Count - 1);
+        float hang = TopOfScreen - 1.4f;
+        for (int wave = 0; wave < 3; wave++)
+        {
+            if (wave > 0)
+            {
+                int step = Random.value < 0.5f ? -1 : 1;
+                if (gap + step < 0 || gap + step > lanes.Count - 2) step = -step;
+                gap += step;
+            }
+            var tells = new List<SpriteRenderer>();
+            var swords = new List<SpriteRenderer>();
+            var falling = new List<float>();
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                if (i == gap || i == gap + 1) continue;
+                falling.Add(lanes[i]);
+                tells.Add(LaneWarning(lanes[i]));
+                swords.Add(SwordPicture(new Vector3(lanes[i], hang, 0), 0f));
+            }
+            PlayAction(art.parry);
+            Sfx.Play(Sfx.BladeRing, 0.7f, 0.9f + wave * 0.1f);
+            yield return Brighten(tells, wave == 0 ? 0.8f : 0.6f);
+            for (int i = 0; i < falling.Count; i++)
+            {
+                if (swords[i] != null)
+                {
+                    transient.Remove(swords[i].gameObject);
+                    Destroy(swords[i].gameObject);
+                }
+                GhostSword(new Vector3(falling[i], hang, 0), Vector3.down * 13f);
+            }
+            RemoveTells(tells);
+            Sfx.Play(Sfx.GhostSwordFall, 1f, 0.9f);
+            yield return Wait(0.35f);
+        }
+        transient.Remove(moon.gameObject);
+        Fader.Fade(moon, 0.8f);
+        ultimate = false;
+
+        exposed = true;
+        PlayIdle();
+        yield return Wait(2f);
+        exposed = false;
+    }
+
 
     // --- Phase 2: the wolf ---
+    // Kuon's own moves (charge, howl, pack, Maw) run in Hunt beside hers, so they leave her movement to her.
 
     // Spirit Wolf Charge: the wolf melts into mist and reappears over the ronin's lane, growling, a warning line
     // under it; then it comes down the lane like a bolt and dissolves where it lands, and returns to her.
@@ -612,9 +959,7 @@ public class Shirogane : Boss
         yield return wolf.AppearAt(perch, true);
         Sfx.Play(Sfx.WolfGrowl, 0.9f, 1f);
         var tells = new List<SpriteRenderer> { LaneWarning(x) };
-        RoamMeanwhile(0.9f);
         yield return Brighten(tells, 0.9f);
-        StopRoaming();
         RemoveTells(tells);
 
         wolf.Hide();
@@ -633,9 +978,7 @@ public class Shirogane : Boss
         yield return wolf.Settle(WolfRest);
         wolf.Glare(0.8f);
         ElementFx.Glow(WolfMouth, Cyan, 0.6f, 2.4f, 0.8f, wolf.transform);
-        RoamMeanwhile(0.8f);
         yield return Wait(0.8f);
-        StopRoaming();
 
         wolf.PlayHowl();
         Sfx.Play(Sfx.WolfHowl, 1f, 1f);
@@ -727,9 +1070,7 @@ public class Shirogane : Boss
             pups.Add(wolf.Silhouette(perch, 0.6f, transient));
             Puff(perch, 1.2f);
         }
-        RoamMeanwhile(0.9f);
         yield return Brighten(tells, 0.9f);
-        StopRoaming();
 
         for (int i = 0; i < picks.Count; i++)
         {
@@ -761,7 +1102,7 @@ public class Shirogane : Boss
         yield return Glide(CameraShake.Center.x);
         yield return wolf.AppearAt(anchor + new Vector3(0f, 0.9f, 0f), true);
         SpriteRenderer moon = Moon(anchor + Vector3.up * 1.2f);
-        StartCoroutine(wolf.Grow(1.8f, 0.8f));
+        wolf.StartCoroutine(wolf.Grow(1.8f, 0.8f));
         Sfx.Play(Sfx.WolfHowl, 1f, 0.8f);
         CameraShake.Add(0.3f);
         for (float t = 0; t < 0.8f; t += Time.deltaTime)
@@ -785,48 +1126,15 @@ public class Shirogane : Boss
             yield return Wait(0.8f);
         }
 
-        // The beam: the lane is marked where the ronin stands as the charge starts, so stepping off it is the dodge.
+        // The beam: the lane is marked where the ronin stands as Kuon starts to gather it, so stepping off it is the
+        // dodge. Kuon draws the orb in and swallows it as in its own Maw, then looses the beam.
         float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
         SpriteRenderer warning = Bar(new Vector3(x, WolfMouth.y, 0), new Vector3(x, GroundY, 0), 2.2f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.15f));
-        wolf.Glare(1f);
-        ElementFx.Glow(WolfMouth, Frost, 0.5f, 3f, 1f, wolf.transform);
-        Sfx.Play(Sfx.MistSwirl, 0.8f, 0.6f);
-        for (float t = 0; t < 1f; t += Time.deltaTime)
-        {
-            warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.12f + 0.25f * Mathf.PingPong(t * 5f, 1f));
-            yield return null;
-        }
-        transient.Remove(warning.gameObject);
-        Destroy(warning.gameObject);
-
-        SpriteRenderer glow = Bar(WolfMouth, new Vector3(x, GroundY, 0), 2.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f), 53);
-        glow.sprite = ProceduralSprites.Glow;
-        SpriteRenderer body = Bar(WolfMouth, new Vector3(x, GroundY, 0), 1.1f, new Color(0.6f, 0.95f, 1f, 0.9f), 55);
-        SpriteRenderer core = Bar(WolfMouth, new Vector3(x, GroundY, 0), 0.35f, Color.white, 56);
-        FxPlayer flare = Fx.Play(Fx.ShiroBeamFlare, WolfMouth, Color.white, 2f, wolf.transform, 57);
-        if (flare != null) transient.Add(flare.gameObject);
-        Sfx.PlayLoop(Sfx.SpiritBeam, 0.8f, 1f);
-        CameraShake.Add(0.4f);
-        float nextSpark = 0f;
-        for (float t = 0; t < 0.5f; t += Time.deltaTime)
-        {
-            float flicker = 1f + 0.15f * Mathf.Sin(Time.time * 50f);
-            body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * flicker, 1f);
-            if (Mathf.Abs(ronin.Bounds.center.x - x) < 1.1f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
-            if (Time.time >= nextSpark)
-            {
-                nextSpark = Time.time + 0.1f;
-                Fx.Play(Fx.Impact, new Vector3(x, GroundY, 0), Cyan, 0.9f);
-            }
-            yield return null;
-        }
-        Sfx.Stop(Sfx.SpiritBeam);
-        foreach (SpriteRenderer part in new[] { glow, body, core })
-        {
-            transient.Remove(part.gameObject);
-            Destroy(part.gameObject);
-        }
-        if (flare != null) flare.Stop();
+        wolf.Glare(1.4f);
+        yield return GatherOrb(() => WolfMouth, 0.8f, () => false, warning);
+        yield return SwallowOrb(warning, 0.2f);
+        Drop(warning);
+        yield return MawBeam(x, 1.1f, 0.5f);
 
         // The closing spread of swords, then she is spent.
         PlayAction(art.parry);
@@ -838,7 +1146,7 @@ public class Shirogane : Boss
             swords.Add(GhostSword(Hands, Quaternion.Euler(0, 0, angle) * Vector3.down * 9f));
         }
         IgnoreEachOther(swords);
-        StartCoroutine(wolf.Grow(1f, 0.6f));
+        wolf.StartCoroutine(wolf.Grow(1f, 0.6f));
         transient.Remove(moon.gameObject);
         Fader.Fade(moon, 0.8f);
         ultimate = false;
@@ -849,6 +1157,214 @@ public class Shirogane : Boss
         exposed = false;
         yield return wolf.Vanish();
         yield return wolf.AppearAt(WolfRest);
+    }
+
+    // --- Kuon's Maw ---
+
+    // Kuon's own ultimate, drawn like a tailed beast's bomb. It plants itself over the field and rears back, and motes
+    // of spirit light, pale and deep, stream in from all round and spiral into an orb at its jaws that swells and
+    // shakes the ground. The lane locks where the ronin stands as the orb is crushed to a white-hot point and
+    // swallowed; a beat of silence, then the beam comes down that lane. Hit Kuon hard enough while it gathers and
+    // the orb bursts in its own jaws.
+    IEnumerator SpiritMaw()
+    {
+        yield return wolf.Vanish();
+        // It stands on her row, clear of the HUD, over the ronin's side of the field.
+        float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 2f, RightEdge - 2f);
+        yield return wolf.AppearAt(new Vector3(x, anchor.y + 0.2f, 0), true);
+        wolf.PlayMaw(MawGather + 0.3f);
+        wolf.Glare(1.8f);
+        Sfx.Play(Sfx.WolfGrowl, 1f, 0.7f);
+        wolf.StartCoroutine(wolf.Grow(1.3f, 0.5f));
+        int before = wolf.Health;
+        yield return GatherOrb(() => WolfMouth, MawGather, () => wolf.IsBroken || before - wolf.Health >= MawBreakDamage, null);
+        if (orbBurst)
+        {
+            if (!wolf.IsBroken)
+            {
+                wolf.Backfire(MawBackfireDamage);
+                wolf.StartCoroutine(wolf.Grow(1f, 0.4f));
+            }
+            CameraShake.Add(0.5f);
+            Sfx.Play(Sfx.FireBlast, 0.9f, 0.8f);
+            Sfx.Play(Sfx.WolfHowl, 0.8f, 1.6f);
+            while (wolf.Dazed) yield return null;
+            if (wolf.IsBroken) yield break;
+            yield return wolf.Vanish();
+            yield return wolf.AppearAt(WolfRest);
+            yield break;
+        }
+
+        float lane = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.4f, RightEdge - 1.4f);
+        SpriteRenderer warning = Bar(new Vector3(lane, WolfMouth.y, 0), new Vector3(lane, GroundY, 0), 2.8f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.2f));
+        yield return SwallowOrb(warning, 0.35f);
+        Drop(warning);
+        yield return MawBeam(lane, 1.4f, 0.8f);
+        Fx.Play(Fx.Explosion, new Vector3(lane, GroundY, 0), Cyan, 3f);
+        CameraShake.Add(0.4f);
+        wolf.PlayIdle();
+        wolf.StartCoroutine(wolf.Grow(1f, 0.4f));
+        yield return Wait(0.4f);
+        yield return wolf.Vanish();
+        yield return wolf.AppearAt(WolfRest);
+    }
+
+    // How long Kuon's Maw gathers, how much damage on Kuon meanwhile bursts the orb, and what the burst costs it.
+    const float MawGather = 1.6f;
+    const int MawBreakDamage = 6;
+    const int MawBackfireDamage = 10;
+
+    // The orb at Kuon's jaws while it gathers; null when none is out.
+    SpriteRenderer orb, orbCore;
+    // Set when the gather was cut short by burst() returning true, the orb bursting where it hung.
+    bool orbBurst;
+
+    // Motes of light and shadow spiral in from all round to an orb at `at` that swells as they arrive. A warning
+    // bar, if given, flickers brighter as it grows.
+    IEnumerator GatherOrb(System.Func<Vector3> at, float seconds, System.Func<bool> burst, SpriteRenderer warning)
+    {
+        orbBurst = false;
+        RemoveOrb();
+        orb = Glowing("SpiritOrb", ProceduralSprites.SoftGlow, 57);
+        orbCore = Glowing("OrbCore", ProceduralSprites.Glow, 58);
+        const int count = 28;
+        var motes = new SpriteRenderer[count];
+        var offsets = new Vector3[count];
+        var delays = new float[count];
+        var spins = new float[count];
+        for (int i = 0; i < count; i++)
+        {
+            motes[i] = Glowing("Mote", ProceduralSprites.Glow, 56);
+            motes[i].color = i % 2 == 0 ? new Color(Frost.r, Frost.g, Frost.b, 0f) : new Color(0.15f, 0.3f, 0.75f, 0f);
+            motes[i].transform.localScale = Vector3.one * Random.Range(0.45f, 0.85f);
+            offsets[i] = Random.insideUnitCircle.normalized * Random.Range(3.5f, 7f);
+            delays[i] = Random.Range(0f, seconds * 0.6f);
+            spins[i] = Random.Range(120f, 240f) * (Random.value < 0.5f ? -1f : 1f);
+        }
+        Sfx.Play(Sfx.LanternCharge, 0.9f, 0.8f);
+        Sfx.Play(Sfx.MistSwirl, 0.8f, 0.5f);
+        float nextRumble = 0f;
+        for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
+        {
+            float k = t / seconds;
+            Vector3 centre = at() + Vector3.back * 0.4f;
+            for (int i = 0; i < count; i++)
+            {
+                float m = Mathf.Clamp01((t - delays[i]) / (seconds * 0.4f));
+                Color c = motes[i].color;
+                c.a = m > 0f && m < 1f ? 0.9f : 0f;
+                motes[i].color = c;
+                if (c.a == 0f) continue;
+                // Each mote spirals in, quickening as it nears the orb.
+                motes[i].transform.position = centre + Quaternion.Euler(0, 0, spins[i] * m) * offsets[i] * (1f - m * m);
+            }
+            float size = Mathf.Lerp(0.3f, 2.8f, k) * (1f + 0.08f * Mathf.Sin(t * 40f));
+            orb.transform.position = centre;
+            orb.transform.localScale = Vector3.one * size * 1.6f;
+            orb.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.75f);
+            orbCore.transform.position = centre + Vector3.back * 0.05f;
+            orbCore.transform.localScale = Vector3.one * size * 0.7f;
+            orbCore.color = new Color(0.9f, 1f, 1f, 0.9f);
+            if (warning != null) warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.1f + 0.25f * k * Mathf.PingPong(t * 6f, 1f));
+            if (t >= nextRumble)
+            {
+                nextRumble = t + 0.12f;
+                CameraShake.Add(0.03f + 0.05f * k);
+            }
+            if (burst())
+            {
+                orbBurst = true;
+                break;
+            }
+            yield return null;
+        }
+        foreach (SpriteRenderer mote in motes) Drop(mote);
+        if (orbBurst)
+        {
+            Fx.Play(Fx.Explosion, orb.transform.position, Cyan, 2.4f);
+            RemoveOrb();
+        }
+    }
+
+    // The orb crushes down to a white-hot point and is swallowed, and for a beat everything goes quiet.
+    IEnumerator SwallowOrb(SpriteRenderer warning, float beat)
+    {
+        if (orb == null) yield break;
+        Vector3 at = orb.transform.position;
+        float from = orb.transform.localScale.x;
+        Color start = orb.color;
+        for (float t = 0; t < 0.3f; t += Time.deltaTime * Tempo)
+        {
+            float k = t / 0.3f;
+            orb.transform.localScale = Vector3.one * Mathf.Lerp(from, 0.4f, k * k);
+            orb.color = Color.Lerp(start, Color.white, k);
+            orbCore.transform.localScale = Vector3.one * Mathf.Lerp(from * 0.45f, 0.3f, k * k);
+            if (warning != null) warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f + 0.3f * k);
+            yield return null;
+        }
+        RemoveOrb();
+        Fx.Play(Fx.Impact, at, Color.white, 1.6f);
+        Sfx.Play(Sfx.WolfGrowl, 0.8f, 0.6f);
+        wolf.Glare(beat + 0.3f);
+        wolf.StartCoroutine(wolf.Gulp());
+        yield return Wait(beat);
+    }
+
+    // The beam from Kuon's jaws down a lane; it burns the ronin while he stands within halfWidth of it.
+    IEnumerator MawBeam(float x, float halfWidth, float seconds)
+    {
+        Vector3 from = WolfMouth;
+        Vector3 to = new Vector3(x, GroundY, 0);
+        float w = halfWidth / 1.1f;
+        SpriteRenderer glow = Bar(from, to, 2.4f * w, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f), 53);
+        glow.sprite = ProceduralSprites.Glow;
+        SpriteRenderer body = Bar(from, to, 1.1f * w, new Color(0.6f, 0.95f, 1f, 0.9f), 55);
+        SpriteRenderer core = Bar(from, to, 0.35f * w, Color.white, 56);
+        FxPlayer flare = Fx.Play(Fx.ShiroBeamFlare, from, Color.white, 2f * w, wolf.transform, 57);
+        if (flare != null) transient.Add(flare.gameObject);
+        Sfx.PlayLoop(Sfx.SpiritBeam, 0.8f, 1f);
+        CameraShake.Add(0.4f * w);
+        float nextSpark = 0f;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            float flicker = 1f + 0.15f * Mathf.Sin(Time.time * 50f);
+            if (body != null) body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * w * flicker, 1f);
+            if (Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            if (Time.time >= nextSpark)
+            {
+                nextSpark = Time.time + 0.1f;
+                Fx.Play(Fx.Impact, to, Cyan, 0.9f * w);
+            }
+            yield return null;
+        }
+        Sfx.Stop(Sfx.SpiritBeam);
+        foreach (SpriteRenderer part in new[] { glow, body, core }) Drop(part);
+        if (flare != null) flare.Stop();
+    }
+
+    // A code-drawn glow the current attack owns.
+    SpriteRenderer Glowing(string name, Sprite shape, int order)
+    {
+        var glow = new GameObject(name).AddComponent<SpriteRenderer>();
+        glow.sprite = shape;
+        glow.sortingOrder = order;
+        glow.color = Color.clear;
+        transient.Add(glow.gameObject);
+        return glow;
+    }
+
+    void Drop(SpriteRenderer thing)
+    {
+        if (thing == null) return;
+        transient.Remove(thing.gameObject);
+        Destroy(thing.gameObject);
+    }
+
+    void RemoveOrb()
+    {
+        Drop(orb);
+        Drop(orbCore);
+        orb = orbCore = null;
     }
 
     // The spectral moon that rises behind them for the Eclipse Fang.
@@ -881,6 +1397,7 @@ public class Shirogane : Boss
     {
         breaking = true;
         StopRoaming();
+        StopHunting();
         ultimate = false;
         exposed = false;
         animator.Play(art.hit, false, null, art.actionFps * 0.7f);
@@ -911,6 +1428,12 @@ public class Shirogane : Boss
         if (phaseDash != null) dashFrames = phaseDash;
         AddAura();
         PlayIdle();
+        // Kuon takes the field as a foe of its own, with its own bar, and wards her while it stands.
+        wolf.Arm();
+        AddWard();
+        WolfJoined?.Invoke(wolf);
+        movesSinceParry = 1;
+        movesSinceEclipse = 0;
         // Her oath: a title card with her and the wolf, over which she speaks; without its art, a subtitle.
         if (PhaseCard != null) yield return PhaseCard(this);
         else
@@ -942,11 +1465,35 @@ public class Shirogane : Boss
         if (glow != null) Destroy(glow.gameObject);
     }
 
+    // Kuon's ward: a pale shimmer behind her, wider than her aura, that flickers while it holds and is gone once
+    // Kuon falls.
+    void AddWard()
+    {
+        wardGlow = Kunai.CreateGlow(sprite.transform, 2.8f, sprite.sortingOrder - 3, Color.clear);
+        StartCoroutine(PulseWard());
+    }
+
+    IEnumerator PulseWard()
+    {
+        while (wardGlow != null && !IsDead)
+        {
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+            float a = SuperArmor ? 0.2f + 0.15f * pulse : 0f;
+            wardGlow.color = new Color(Frost.r, Frost.g, Frost.b, a);
+            wardGlow.transform.localScale = Vector3.one * (2.9f + 0.3f * pulse);
+            yield return null;
+        }
+        if (wardGlow != null) Destroy(wardGlow.gameObject);
+    }
+
     // Her fall: the swords drop from her hands, she sinks to a knee and her flames fade; the wolf comes to stand
     // by her and she rests a hand on its head; it dissolves into light, she speaks her last, and follows it.
     protected override IEnumerator Fall()
     {
         StopRoaming();
+        StopHunting();
+        if (wolf != null) wolf.Disarm();
+        if (wardGlow != null) Destroy(wardGlow.gameObject);
         ultimate = false;
         exposed = false;
         Sfx.Stop(Sfx.SpiritBeam);
@@ -1024,22 +1571,48 @@ public class Shirogane : Boss
     }
 }
 
-// Shirogane's spirit wolf: a translucent body of blue spirit flame with burning cyan eyes. It has no body to hit;
-// everything it does to the ronin is an Arrow it throws. A faint silhouette behind her in her first phase; once
-// she calls it, it rests beside her and vanishes into mist to attack from wherever it reappears.
-public class SpiritWolf : MonoBehaviour
+// Kuon, Shirogane's spirit wolf, the guardian of her family's shrine: a translucent body of blue spirit flame with
+// burning cyan eyes. A faint silhouette behind her in her first phase; once she calls it, it rests beside her and
+// vanishes into mist to attack from wherever it reappears. Everything it does to the ronin is an Arrow it throws,
+// but from her phase break it can be hit while it stands in sight, with a bar of its own; broken, it fades to a
+// shadow at her side until her fall.
+[RequireComponent(typeof(Rigidbody))]
+public class SpiritWolf : MonoBehaviour, IHittable
 {
     public enum Presence { Silhouette, Present }
 
+    public const string Title = "KUON";
+    public const string Epithet = "The Shrine Guardian";
+    public const int StartingHealth = 80;
+    // A parried Fang of the Oath does no damage by Damage.Of; on Kuon it lands as a heavy blow and dazes it.
+    const int ReflectedDamage = 20;
+    const float DazeSeconds = 2f;
+    const int SamuraiLayer = 7;
+
     static readonly Color Body = new Color(0.6f, 0.9f, 1f);
     static readonly Color EyeColour = new Color(0.4f, 1f, 1f);
+
+    public event System.Action<Vector3, KillSource> Damaged;
+    public event System.Action Broken;
+
+    public int Health { get; private set; } = StartingHealth;
+    public float HealthFraction => (float)Health / StartingHealth;
+    // In the fight as a foe of its own, from her phase break until her fall.
+    public bool Armed { get; private set; }
+    public bool IsBroken { get; private set; }
+    public bool Dazed => Time.time < dazedUntil;
+    // Only while it stands in plain sight: not in mist, not as the charge coming down a lane.
+    public bool Targetable => Armed && !IsBroken && !hidden && shown > 0.5f;
+    public Vector3 Centre => sprite.bounds.center;
+    float dazedUntil;
+    Collider hitbox;
 
     Shirogane owner;
     SpriteRenderer sprite;
     SpriteAnimator animator;
     SpriteRenderer glow;
     SpriteRenderer[] eyes;
-    Sprite[] idle, howl, charge, vanish;
+    Sprite[] idle, howl, charge, vanish, maw;
     float scale;
     Presence presence;
     float shown;
@@ -1055,15 +1628,19 @@ public class SpiritWolf : MonoBehaviour
         ? new Vector3(sprite.bounds.center.x, sprite.bounds.center.y + sprite.bounds.extents.y * 0.3f, 0)
         : transform.position + Vector3.up * 0.4f;
 
-    public static SpiritWolf Create(Shirogane owner, Sprite[] idle, Sprite[] howl, Sprite[] charge, Sprite[] vanish, float scale, int order)
+    public static SpiritWolf Create(Shirogane owner, Sprite[] idle, Sprite[] howl, Sprite[] charge, Sprite[] vanish, Sprite[] maw, float scale, int order)
     {
-        var go = new GameObject("SpiritWolf");
+        var go = new GameObject("SpiritWolf") { layer = SamuraiLayer };
+        var body = go.AddComponent<Rigidbody>();
+        body.isKinematic = true;
+        body.useGravity = false;
         var wolf = go.AddComponent<SpiritWolf>();
         wolf.owner = owner;
         wolf.idle = idle;
         wolf.howl = howl;
         wolf.charge = charge;
         wolf.vanish = vanish;
+        wolf.maw = maw;
         wolf.scale = scale;
         go.transform.position = owner.WolfRest;
         go.transform.localScale = Vector3.one * scale;
@@ -1096,14 +1673,75 @@ public class SpiritWolf : MonoBehaviour
             }
         }
         wolf.glow = Kunai.CreateGlow(go.transform, 2.6f / scale, order - 1, new Color(0.3f, 0.9f, 1f, 0.3f));
+        // A box over the body, inside the art's padding; off until it is armed and in sight.
+        Bounds frame = wolf.sprite.bounds;
+        var box = go.AddComponent<BoxCollider>();
+        box.center = (frame.center - go.transform.position) / scale;
+        box.size = new Vector3(frame.size.x * 0.7f / scale, frame.size.y * 0.6f / scale, 1f);
+        box.enabled = false;
+        wolf.hitbox = box;
         wolf.Apply();
         return wolf;
+    }
+
+    // Takes the field with a full bar.
+    public void Arm()
+    {
+        Health = StartingHealth;
+        IsBroken = false;
+        Armed = true;
+    }
+
+    // Out of the fight for good (her fall): nothing can hit it any more.
+    public void Disarm()
+    {
+        Armed = false;
+        hitbox.enabled = false;
+    }
+
+    public void TakeHit(int damage, KillSource source)
+    {
+        if (!Armed || IsBroken) return;
+        if (!Targetable && source != KillSource.Reflected) return;
+        if (source == KillSource.Reflected)
+        {
+            damage = ReflectedDamage;
+            dazedUntil = Time.time + DazeSeconds;
+            Sfx.Play(Sfx.WolfGrowl, 1f, 1.6f);
+        }
+        // Dazed, it can't guard itself: every other blow lands twice as hard.
+        else if (Dazed) damage *= 2;
+        Health = Mathf.Max(0, Health - damage);
+        HitFlash.Flash(sprite, 0.1f);
+        Sfx.Play(Sfx.BossHit, 0.8f, 1.25f);
+        Damaged?.Invoke(Centre, source);
+        if (Health <= 0 && !IsBroken) Break();
+    }
+
+    // Its bar is empty: it cries out, bursts into mist and fades to a shadow that keeps to her side.
+    void Break()
+    {
+        IsBroken = true;
+        hitbox.enabled = false;
+        StopAllCoroutines();
+        following = null;
+        hidden = false;
+        grown = 1f;
+        glare = 0f;
+        if (Fx.Play(Fx.ShiroMist, Centre, Color.white, 3f) == null) Fx.Play(Fx.SmokePuff, Centre, new Color(0.55f, 0.85f, 1f, 0.8f), 3f);
+        Fx.Play(Fx.Explosion, Centre, Body, 2f);
+        Sfx.Play(Sfx.WolfHowl, 1f, 1.5f);
+        CameraShake.Add(0.4f);
+        shownTarget = 0.18f;
+        Follow();
+        Broken?.Invoke();
     }
 
     public void SetPresence(Presence value)
     {
         presence = value;
         shownTarget = value == Presence.Present ? 1f : 0.22f;
+        if (IsBroken && Armed) shownTarget = 0.18f;
         if (value == Presence.Present) Follow();
         else StartCoroutine(Haunt());
     }
@@ -1231,6 +1869,23 @@ public class SpiritWolf : MonoBehaviour
         Apply();
     }
 
+    // Its Maw: it rears, opens its jaws round the gathering orb and gulps it down over `seconds`, then holds the
+    // last frame, head lowered, until the beam is spent. Without the clip it howls instead.
+    public void PlayMaw(float seconds)
+    {
+        if (maw == null)
+        {
+            PlayHowl();
+            return;
+        }
+        animator.Play(maw, false, () => animator.Play(new[] { maw[maw.Length - 1] }, true), maw.Length / Mathf.Max(0.1f, seconds));
+    }
+
+    public void PlayIdle()
+    {
+        if (idle != null) animator.Play(idle, true, null, 6f);
+    }
+
     public void PlayHowl()
     {
         if (howl != null) animator.Play(howl, false, () => { if (idle != null) animator.Play(idle, true, null, 6f); }, 12f);
@@ -1247,6 +1902,22 @@ public class SpiritWolf : MonoBehaviour
         }
         grown = to;
         Apply();
+    }
+
+    // A gulp: it swells for an instant around what it has swallowed, then settles back.
+    public IEnumerator Gulp()
+    {
+        float from = grown;
+        yield return Grow(from * 1.15f, 0.08f);
+        yield return Grow(from, 0.25f);
+    }
+
+    // Its own Maw burst in its jaws: a heavy blow, and it reels.
+    public void Backfire(int damage)
+    {
+        if (!Armed || IsBroken) return;
+        TakeHit(damage, KillSource.Effect);
+        if (!IsBroken) dazedUntil = Time.time + DazeSeconds;
     }
 
     // Two eyes open in the dark behind her, before the body takes shape.
@@ -1322,6 +1993,9 @@ public class SpiritWolf : MonoBehaviour
 
     void Update()
     {
+        hitbox.enabled = Targetable;
+        // A dazed wolf reels where it stands.
+        sprite.transform.localRotation = Dazed && !IsBroken ? Quaternion.Euler(0, 0, Mathf.Sin(Time.time * 18f) * 8f) : Quaternion.identity;
         if (hidden) return;
         shown = Mathf.MoveTowards(shown, shownTarget, Time.deltaTime * 1.5f);
         Apply();

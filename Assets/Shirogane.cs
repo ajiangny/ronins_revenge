@@ -1456,58 +1456,106 @@ public class Shirogane : Boss
         Dim(0f, 0.6f);
     }
 
-    // The warning for a Maw beam, like Benibana's chains: a wide, faint band from Kuon's jaws to where the beam will
-    // land, which narrows to a line over three ringing beats, brightening on each, so the beam fires as it closes.
-    // It follows the jaws as Kuon moves, and holds as a bright line until the beam replaces it.
+    // The warning for a Maw beam: a cone fanning out from Kuon's jaws to where the beam will land, which swells at
+    // the jaws over three ringing beats, brightening on each, until it is a wide rectangle over the beam's whole
+    // path; then it flickers white and the beam fills it. It follows the jaws as Kuon moves.
     class BeamTell
     {
-        public SpriteRenderer band;
-        public Coroutine closing;
+        public GameObject shape;
+        public Mesh mesh;
+        public Coroutine opening;
         public Shirogane owner;
 
         public void Remove()
         {
-            if (closing != null) owner.StopCoroutine(closing);
-            owner.Drop(band);
+            if (opening != null) owner.StopCoroutine(opening);
+            if (shape == null) return;
+            owner.transient.Remove(shape);
+            UnityEngine.Object.Destroy(shape);
+            UnityEngine.Object.Destroy(mesh);
         }
     }
 
+    // The rectangle it becomes is a little wider than the beam's hit, so standing just outside it is safe.
+    const float TellMargin = 1.15f;
+
     BeamTell MarkBeam(float x, float halfWidth, float seconds)
     {
-        var tell = new BeamTell { owner = this };
-        tell.band = Bar(WolfMouth, new Vector3(x, GroundY, 0), halfWidth * 2.6f, Color.clear, 52);
-        tell.closing = StartCoroutine(CloseBeamTell(tell, x, halfWidth, seconds));
+        var tell = new BeamTell { owner = this, shape = new GameObject("MawTell"), mesh = new Mesh() };
+        tell.mesh.MarkDynamic();
+        tell.shape.AddComponent<MeshFilter>().sharedMesh = tell.mesh;
+        var renderer = tell.shape.AddComponent<MeshRenderer>();
+        // Drawn with the sprites' own material, white, so the vertex colours give it its look.
+        renderer.sharedMaterial = sprite.sharedMaterial;
+        var block = new MaterialPropertyBlock();
+        block.SetTexture("_MainTex", Texture2D.whiteTexture);
+        renderer.SetPropertyBlock(block);
+        renderer.sortingOrder = 52;
+        transient.Add(tell.shape);
+        tell.opening = StartCoroutine(OpenBeamTell(tell, x, halfWidth * TellMargin, seconds));
         return tell;
     }
 
-    IEnumerator CloseBeamTell(BeamTell tell, float x, float halfWidth, float seconds)
+    IEnumerator OpenBeamTell(BeamTell tell, float x, float halfWidth, float seconds)
     {
-        const float LineWidth = 0.1f;
-        float wide = halfWidth * 2.6f;
+        const float EdgeWidth = 0.12f;
         float beatTime = seconds / 3f;
         int beats = 0;
-        for (float t = 0; tell.band != null; t += Time.deltaTime * Tempo)
+        var vertices = new Vector3[12];
+        var colours = new Color[12];
+        var triangles = new int[18];
+        for (int q = 0; q < 3; q++)
+        {
+            int v = q * 4, i = q * 6;
+            triangles[i] = v; triangles[i + 1] = v + 1; triangles[i + 2] = v + 2;
+            triangles[i + 3] = v; triangles[i + 4] = v + 2; triangles[i + 5] = v + 3;
+        }
+        for (float t = 0; tell.shape != null; t += Time.deltaTime * Tempo)
         {
             if (t < seconds && t >= beats * beatTime)
             {
                 beats++;
                 Sfx.Play(Sfx.BladeRing, 0.45f, 1.5f + 0.2f * beats);
             }
-            float closing = Mathf.Clamp01(t / seconds);
-            float width = Mathf.Lerp(wide, LineWidth, closing);
-            float alpha = Mathf.Lerp(0.2f, 0.35f, closing) + (beats - 1) * 0.25f;
-            // Closed, it burns white and flickers: the beam is coming now.
-            Color colour = closing >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
-            colour.a = Mathf.Min(1f, alpha);
+            float opened = Mathf.Clamp01(t / seconds);
+            // A cone from a point at the jaws, widening there until both ends are the beam's width.
+            float top = Mathf.Lerp(0.05f, halfWidth, Mathf.SmoothStep(0, 1, opened));
+            float fill = Mathf.Lerp(0.1f, 0.22f, opened) + (beats - 1) * 0.06f;
+            float edge = Mathf.Lerp(0.35f, 0.6f, opened) + (beats - 1) * 0.2f;
+            // Open, it burns white and flickers: the beam is coming now.
+            Color tint = opened >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
+
             Vector3 from = WolfMouth;
             Vector3 to = new Vector3(x, GroundY, 0);
-            Vector3 delta = to - from;
-            tell.band.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
-            tell.band.transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
-            tell.band.transform.localScale = new Vector3(delta.magnitude, width, 1f);
-            tell.band.color = colour;
+            Vector3 side = Vector3.Cross((to - from).normalized, Vector3.forward);
+            Vector3 topLeft = from - side * top, topRight = from + side * top;
+            Vector3 bottomLeft = to - side * halfWidth, bottomRight = to + side * halfWidth;
+            Quad(vertices, 0, topLeft, topRight, bottomRight, bottomLeft);
+            // The edges: a thin strip along each side, inside the fill.
+            Vector3 inTop = side * Mathf.Min(EdgeWidth, top), inBottom = side * EdgeWidth;
+            Quad(vertices, 4, topLeft, topLeft + inTop, bottomLeft + inBottom, bottomLeft);
+            Quad(vertices, 8, topRight - inTop, topRight, bottomRight, bottomRight - inBottom);
+            for (int i = 0; i < 12; i++)
+            {
+                Color c = tint;
+                c.a = Mathf.Min(1f, i < 4 ? fill : edge);
+                colours[i] = c;
+            }
+            tell.mesh.vertices = vertices;
+            tell.mesh.colors = colours;
+            if (tell.mesh.GetIndexCount(0) == 0) tell.mesh.triangles = triangles;
+            tell.mesh.RecalculateBounds();
             yield return null;
         }
+    }
+
+    static void Quad(Vector3[] vertices, int at, Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+    {
+        Vector3 back = Vector3.back * 0.2f;
+        vertices[at] = a + back;
+        vertices[at + 1] = b + back;
+        vertices[at + 2] = c + back;
+        vertices[at + 3] = d + back;
     }
 
     // Eases the dark over the arena to `alpha` over `seconds`; 0 lifts it and then removes it.

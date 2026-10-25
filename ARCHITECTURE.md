@@ -181,7 +181,7 @@ match `BoonChoiceUI.boonIcons`.
   stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
   Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`
   dims the arena (`Dim`) and spirals streaks into the `Fx.ShiroMawOrb` orb at its jaws, `SwallowOrb` crushes it
-  while `MarkBeam` (a `BeamTell`, closed by `CloseBeamTell` like Benibana's chain tell: a band from Kuon's jaws to the landing point that narrows to a line over three ringing beats) marks the lane, `MawBeam` fires with
+  while `MarkBeam` (a `BeamTell`: a code-built mesh drawn with the sprite material, which `OpenBeamTell` opens from a cone at Kuon's jaws into a rectangle over the beam's path across three ringing beats) marks the lane, `MawBeam` fires with
   `Fx.ShiroMawBurst`, the `Fx.ShiroMawBeam` segment drawn `SpriteDrawMode.Tiled` down the lane and `Fx.ShiroMawHit`
   where it lands, code bars without the art; `MawBreakDamage` on Kuon
   during the gather bursts it, `orbBurst`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code

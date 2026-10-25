@@ -336,7 +336,8 @@ public class Benibana : Boss
     {
         Arrow cross = Shoot(position, velocity);
         Sprite[] frames = Fx.Frames(Fx.BeniCross);
-        if (frames != null) cross.Restyle(frames, 10f, Color.white, new Vector2(1.1f, 1.3f), 0.16f, new Color(0.8f, 0.85f, 1f, 0.35f), 0.8f);
+        // Sized to the art's 2:3 canvas so the gothic cross isn't squashed.
+        if (frames != null) cross.Restyle(frames, 10f, Color.white, new Vector2(1f, 1.5f), 0.16f, new Color(0.8f, 0.85f, 1f, 0.35f), 0.8f);
         else cross.Restyle(cross.Sprite, Silver, new Vector2(0.45f, 0.9f), 0.12f, new Color(0.8f, 0.85f, 1f, 0.4f), 0.8f);
         return cross;
     }

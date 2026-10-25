@@ -269,7 +269,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`). A pool voice is free once its clip's audible part has played (`Sound.audible`, measured by Apply Audio, since the generated clips carry long silent tails); the march beat has its own source (`Sound.ownSource`) |
 | Music crossfade and ducking | `Music.cs` |
 | Player volume settings (`PlayerPrefs` `MusicVolume`, `SfxVolume`) | `Music.Volume` (applied every frame, so the slider works live), `Sfx.Volume` (also scales boss voice lines) |
-| Boss voicelines | `GameManager.voice` AudioSource (its own `BossVoice` child, with the chorus/echo/distortion machine-voice filters `CreateMachineVoice` turns on for Utsusemi), clips in `Audio/Voice/`; `BossLine` full lines (intro/phase/defeat) vs. barks (hurt, stagger, move callouts) in `OnBossSpoke` |
+| Boss voicelines | `GameManager.voice` AudioSource (its own `BossVoice` child, with the chorus/echo/distortion machine-voice filters `CreateMachineVoice` turns on for Utsusemi), clips in `Audio/Voice/`; `BossLine` full lines (intro/phase/defeat) vs. barks (hurt, stagger, move callouts) in `OnBossSpoke`: a bark is dropped while anything is still playing (only Stagger cuts in). Moves call out through `Boss.Bark(line, cooldown)`. Lines with several takes (`<Boss>_<Line>_2/_3`, loaded in order by `BossArtSetup.SetTakes`) are picked by `BossVoice.Take`, and their subtitle comes from `Boss.Line(line, take)` |
 
 Missing libraries or clips fall back gracefully (simple glows, silence), so the game runs before art/audio is wired.
 

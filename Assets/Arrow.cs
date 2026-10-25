@@ -177,6 +177,13 @@ public class Arrow : MonoBehaviour
         body.linearVelocity = velocity = newVelocity;
     }
 
+    // Changes course and turns to face the new heading, for a shot that curves after its target (a homing sword).
+    public void Turn(Vector3 newVelocity)
+    {
+        Steer(newVelocity);
+        transform.rotation = heading = Quaternion.FromToRotation(Vector3.down, newVelocity);
+    }
+
     public void IgnoreCollisionsWith(Arrow other)
     {
         foreach (Collider mine in GetComponentsInChildren<Collider>())

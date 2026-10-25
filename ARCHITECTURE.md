@@ -174,7 +174,7 @@ match `BoonChoiceUI.boonIcons`.
   `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:
   `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
   Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
-  Barrage (`PlaceOrbiting`, `LooseRow`), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
+  Barrage (`PlaceOrbiting`, `LooseRow`; each sword `Seek`s the ronin at `SeekTurn` degrees a second via `Arrow.Turn` until `SeekStops` above him), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
   Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
   `ParryAtLatest`): Moonsplitter Draw (phase 1) and Fang of the Oath (phase 2), both a `SightLine` tell, then an
   unbreakable `MakeReflectable` shot steered onto the ronin by `Pursue`; the Fang is reflectable at Kuon while it

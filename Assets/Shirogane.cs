@@ -666,7 +666,9 @@ public class Shirogane : Boss
     }
 
     // Spirit Blade Barrage: two rows of floating katanas wheel about her, then the inner row flies down and to
-    // the left and the outer row down and to the right, crossing in the middle of the field with gaps between.
+    // the left and the outer row down and to the right, crossing in the middle of the field. Each sword curves after
+    // the ronin as it falls, then flies straight for the last stretch, so standing still is a hit but a late step
+    // aside still slips it.
     IEnumerator BladeBarrage()
     {
         if (Random.value < 0.5f) Speak(BossLine.BladeBarrage);
@@ -727,9 +729,34 @@ public class Shirogane : Boss
             at.z = 0;
             transient.Remove(sword.gameObject);
             Destroy(sword.gameObject);
-            volley.Add(GhostSword(at, velocity));
+            Arrow blade = GhostSword(at, velocity);
+            volley.Add(blade);
+            StartCoroutine(Seek(blade));
         }
         IgnoreEachOther(volley);
+    }
+
+    // How fast a barrage sword turns after the ronin, in degrees a second, and how far above him it gives up and
+    // flies straight.
+    float SeekTurn => alone ? 200f : secondPhase ? 170f : 140f;
+    const float SeekStops = 3.5f;
+    const float SeekSeconds = 1.4f;
+
+    IEnumerator Seek(Arrow blade)
+    {
+        for (float t = 0; t < SeekSeconds; t += Time.fixedDeltaTime)
+        {
+            yield return new WaitForFixedUpdate();
+            if (blade == null || ronin == null) yield break;
+            Vector3 at = blade.transform.position;
+            Vector3 target = ronin.Bounds.center;
+            if (at.y - target.y < SeekStops) yield break;
+            Vector3 velocity = blade.GetComponent<Rigidbody>().linearVelocity;
+            Vector3 toward = target - at;
+            toward.z = 0;
+            Vector3 turned = Vector3.RotateTowards(velocity, toward.normalized * velocity.magnitude, SeekTurn * Mathf.Deg2Rad * Time.fixedDeltaTime, 0f);
+            blade.Turn(turned);
+        }
     }
 
     // Mirror Moon: she takes one side of the field and leaves a reflection of herself standing on the other, mirrored

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // The things a boss says out loud; GameManager plays the matching voice clip and subtitle. Intro, Phase and
-// Defeat are full lines; the rest are short barks that never cut one off.
+// Defeat are full lines; the rest are short barks that never cut off a line still playing (bar Stagger).
 public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLash, Iaido, RosaryBloom,
     KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight,
     CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang,
@@ -45,6 +45,17 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected void Speak(BossLine line)
     {
         Spoke?.Invoke(this, line);
+    }
+
+    readonly Dictionary<BossLine, float> lastBarked = new Dictionary<BossLine, float>();
+
+    // A move callout that stays quiet if the same line was called within cooldown seconds, so a move she
+    // repeats doesn't become a refrain. The first call of the fight always speaks.
+    protected void Bark(BossLine line, float cooldown)
+    {
+        if (lastBarked.TryGetValue(line, out float at) && Time.time - at < cooldown) return;
+        lastBarked[line] = Time.time;
+        Speak(line);
     }
 
     public int Health { get; private set; }

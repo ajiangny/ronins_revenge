@@ -101,7 +101,7 @@ public class Benibana : Boss
     IEnumerator SmokeRings()
     {
         // Her two common moves are only called out half the time, so combos don't become a monologue.
-        if (Random.value < 0.5f) Speak(BossLine.SmokeRings);
+        if (Random.value < 0.5f) Bark(BossLine.SmokeRings, 6f);
         PlayAction(art.parry);
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.2f);
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.55f);
@@ -148,7 +148,7 @@ public class Benibana : Boss
         float side = Random.value < 0.5f ? -1f : 1f;
         var columns = new List<float> { here, ClampToScreen(here + side * 3.4f) };
         if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
-        if (Random.value < 0.5f) Speak(BossLine.RosaryLash);
+        if (Random.value < 0.5f) Bark(BossLine.RosaryLash, 6f);
 
         // A wide red band on each column that narrows to a line over three beats, brightening on each, so the strike
         // lands as it closes. Faint while wide so it doesn't hide the field.
@@ -231,8 +231,9 @@ public class Benibana : Boss
     // phase she cuts an X: two crescents that cross over the ronin.
     IEnumerator Iaido()
     {
-        // Always named: the callout doubles as the cue to get ready to parry.
-        Speak(BossLine.Iaido);
+        // Named the first time, so the callout teaches the parry cue; after that only now and then, since the red
+        // line and her glow already give the cue.
+        Bark(BossLine.Iaido, 12f);
         float left = CameraShake.Center.x - HalfWidth;
         float right = CameraShake.Center.x + HalfWidth;
         SpriteRenderer line = Bar(new Vector3(left, Centre.y, 0), new Vector3(right, Centre.y, 0), 0.06f, Crimson);
@@ -281,7 +282,7 @@ public class Benibana : Boss
     {
         Vector3 centre = new Vector3(CameraShake.Center.x, anchor.y, 0);
         yield return BlinkTo(centre.x, new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
-        Speak(BossLine.RosaryBloom);
+        Bark(BossLine.RosaryBloom, 8f);
         ElementFx.Glow(Centre, Silver, 1f, 5f, 0.5f, transform);
         for (int beat = 0; beat < 3; beat++)
         {

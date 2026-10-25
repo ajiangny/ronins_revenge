@@ -459,11 +459,42 @@ public class Shirogane : Boss
     {
         Arrow charge = Fire(from, Vector3.down * speed);
         charge.MakeUnbreakable();
-        Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
-        if (frames != null) charge.Restyle(frames, 14f, new Color(0.75f, 0.95f, 1f, 0.9f), new Vector2(size * 1.4f, size * 1.9f), size * 0.45f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f), size * 2.2f);
-        else charge.Restyle(ProceduralSprites.Glow, new Color(0.7f, 0.95f, 1f, 0.95f), new Vector2(size * 1.1f, size * 2.2f), size * 0.45f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), size * 2.2f);
+        WolfShot(charge, size, new Color(0.85f, 0.98f, 1f, 1f), new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
         StartCoroutine(DissolveAtGround(charge));
         return charge;
+    }
+
+    // A charge's hit is its size times this either side of its lane, so its warning is drawn that wide.
+    const float ChargeHalfWidth = 1.6f * 0.45f;
+    const float PupHalfWidth = 1.1f * 0.45f;
+
+    // Dresses a shot as a spirit wolf of `size` lunging along its flight, drawn at its own proportions: Kuon's charge
+    // clip (its 104 px canvas is square, the wolf inside it tall and narrow), else the spirit streak, else a code
+    // glow; it leaves a wake of fading ghosts of itself.
+    void WolfShot(Arrow shot, float size, Color colour, Color halo)
+    {
+        if (wolfCharge != null)
+        {
+            float canvas = size * 2.6f;
+            shot.Restyle(wolfCharge, 14f, colour, new Vector2(canvas, canvas), size * 0.45f, halo, size * 1.1f);
+        }
+        else if (Fx.Frames(Fx.ShiroWolfCharge) is Sprite[] streak)
+        {
+            // The streak is 20 by 64 px.
+            shot.Restyle(streak, 14f, colour, new Vector2(size * 0.75f, size * 2.4f), size * 0.45f, halo, size * 2.2f);
+        }
+        else shot.Restyle(ProceduralSprites.Glow, colour, new Vector2(size * 1.1f, size * 2.2f), size * 0.45f, halo, size * 2.2f);
+        StartCoroutine(Wake(shot, new Color(halo.r, halo.g, halo.b, 0.4f)));
+    }
+
+    // Fading ghosts left behind a shot as it flies.
+    IEnumerator Wake(Arrow shot, Color colour)
+    {
+        while (shot != null)
+        {
+            Afterimage(shot.Art, colour);
+            yield return new WaitForSeconds(0.05f);
+        }
     }
 
     IEnumerator DissolveAtGround(Arrow charge)
@@ -810,8 +841,7 @@ public class Shirogane : Boss
     // --- Parry-only draws ---
 
     // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent rises at each edge of
-    // the field at the ronin's height, while two lines run along the ground from them to his feet, following him,
-    // brightening, then flashing as they lock. The crescents sweep in from both sides like closing scissors, chasing
+    // the field at the ronin's height, brightening while a reticle closes on him, then flashing as it locks. The crescents sweep in from both sides like closing scissors, chasing
     // him and trailing afterimages, and meet on him: there is nowhere to step, so the answer is a parry as they
     // cross (two, a beat apart, if he is on the move). Parried, they fly back and break her stance.
     IEnumerator Moonsplitter()
@@ -824,7 +854,6 @@ public class Shirogane : Boss
         float height = ronin.Bounds.center.y;
         Vector3[] starts = { new Vector3(LeftEdge + 0.8f, height, 0), new Vector3(RightEdge - 0.8f, height, 0) };
         var ghosts = new List<SpriteRenderer>();
-        var lines = new List<SpriteRenderer>();
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         for (int i = 0; i < 2; i++)
         {
@@ -836,35 +865,11 @@ public class Shirogane : Boss
             ghost.transform.localScale = Vector3.one * (3.2f / art);
             ghosts.Add(ghost);
             Puff(starts[i], 1.6f);
-            lines.Add(Bar(starts[i], ronin.Bounds.center, 0.06f, Color.clear));
         }
         Sfx.Play(Sfx.MistSwirl, 0.7f, 1.2f);
-
-        float rang = 0f;
-        for (float t = 0; t < DrawAim; t += Time.deltaTime * Tempo)
-        {
-            float k = t / DrawAim;
-            Vector3 feet = new Vector3(ronin.Bounds.center.x, height, 0);
-            for (int i = 0; i < 2; i++)
-            {
-                Vector3 delta = feet - starts[i];
-                lines[i].transform.position = (starts[i] + feet) / 2f + Vector3.back * 0.2f;
-                lines[i].transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
-                lines[i].transform.localScale = new Vector3(delta.magnitude, 0.05f + 0.08f * k, 1f);
-                lines[i].color = new Color(Frost.r, Frost.g, Frost.b, 0.3f + 0.5f * k);
-                ghosts[i].color = new Color(1f, 1f, 1f, 0.25f + 0.5f * k);
-            }
-            if (k > 0.5f && t - rang > 0.12f)
-            {
-                rang = t;
-                Sfx.Play(Sfx.BladeRing, 0.3f, 1.3f + k);
-            }
-            yield return null;
-        }
-        // The lock: the lines flash white, the beat to parry on is coming.
-        foreach (SpriteRenderer line in lines) line.color = Color.white;
-        yield return Wait(0.15f);
-        foreach (SpriteRenderer line in lines) Drop(line);
+        // The ghosts brighten while the reticle closes on him.
+        StartCoroutine(Brighten(ghosts, DrawAim));
+        yield return LockOn(Hands, DrawAim, Frost);
         foreach (SpriteRenderer ghost in ghosts) Drop(ghost);
 
         PlayAction(art.attack);
@@ -927,7 +932,7 @@ public class Shirogane : Boss
         }
         PlayAction(art.parry);
         Vector3 Source() => together ? Vector3.Lerp(Hands, WolfMouth, 0.5f) : Hands;
-        yield return SightLine(Source(), DrawAim, Cyan, together ? (System.Func<Vector3>)Source : null);
+        yield return LockOn(Source(), DrawAim, Cyan);
 
         Vector3 from = Source();
         Fx.Play(Fx.Impact, from, Cyan, 2.4f);
@@ -935,10 +940,8 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.SwordSlash, 0.9f, 0.6f);
         CameraShake.Add(0.3f);
         Arrow fang = Fire(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
-        Sprite[] frames = Fx.Frames(Fx.ShiroWolfCharge) ?? wolfCharge;
-        Color halo = new Color(Cyan.r, Cyan.g, Cyan.b, 0.55f);
-        if (frames != null) fang.Restyle(frames, 14f, new Color(0.8f, 0.97f, 1f, 0.95f), new Vector2(2.2f, 3f), 0.8f, halo, 3.6f);
-        else fang.Restyle(ProceduralSprites.Glow, new Color(0.7f, 0.95f, 1f, 0.95f), new Vector2(1.8f, 2.6f), 0.8f, halo, 3.6f);
+        // A great spirit wolf lunging at him, bright as their oath, trailing ghosts of itself.
+        WolfShot(fang, 2.2f, Color.white, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
         fang.MakeUnbreakable();
         fang.MakeReflectable(together ? wolf.transform : transform);
         StartCoroutine(Pursue(fang, DrawSpeed * ShotSpeed));
@@ -952,36 +955,40 @@ public class Shirogane : Boss
         else yield return Wait(0.5f);
     }
 
-    // A sight line from her to the ronin that follows him, brightening and quickening, then holds still a moment
-    // before the draw: the tell for a blow that must be parried.
-    IEnumerator SightLine(Vector3 from, float seconds, Color colour, System.Func<Vector3> source = null)
+    // A lock-on reticle that settles over the ronin from wide, following him, turning and brightening with a
+    // quickening ring, then flashes white and holds still a moment before the draw: the tell for a blow that must be
+    // parried. A spark at `from` shows where the blow will come from.
+    IEnumerator LockOn(Vector3 from, float seconds, Color colour)
     {
         ElementFx.Glow(from, colour, 0.9f, 3f, seconds, transform);
         Sfx.Play(Sfx.BladeRing, 0.7f, 0.8f);
-        SpriteRenderer line = Bar(from, ronin.Bounds.center, 0.06f, new Color(colour.r, colour.g, colour.b, 0.3f));
+        Sprite[] frames = Fx.Frames(Fx.ShiroLockOn);
+        SpriteRenderer sight = Glowing("LockOn", frames != null ? frames[0] : ProceduralSprites.Glow, 58);
+        if (frames != null) sight.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 12f);
+        // The reticle art is this many world units across at scale 1 (64 px at 48 px a unit).
+        float art = frames != null ? 64f / 48f : 1f;
         float rang = 0f;
         for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
         {
             float k = t / seconds;
-            Vector3 start = source != null ? source() : from;
-            Vector3 end = ronin.Bounds.center;
-            Vector3 delta = end - start;
-            line.transform.position = (start + end) / 2f + Vector3.back * 0.2f;
-            line.transform.rotation = Quaternion.FromToRotation(Vector3.right, delta);
-            line.transform.localScale = new Vector3(delta.magnitude, 0.06f + 0.08f * k, 1f);
-            line.color = new Color(colour.r, colour.g, colour.b, 0.3f + 0.5f * k);
-            if (k > 0.6f && t - rang > 0.12f)
+            sight.transform.position = ronin.Bounds.center + Vector3.back * 0.3f;
+            sight.transform.localScale = Vector3.one * Mathf.Lerp(4.5f, 2.2f, Mathf.SmoothStep(0, 1, k)) / art;
+            sight.transform.rotation = Quaternion.Euler(0, 0, -90f * k);
+            sight.color = new Color(colour.r, colour.g, colour.b, 0.35f + 0.6f * k);
+            if (k > 0.4f && t - rang > Mathf.Lerp(0.2f, 0.08f, k))
             {
                 rang = t;
                 Sfx.Play(Sfx.BladeRing, 0.25f, 1.2f + k);
             }
             yield return null;
         }
-        // The aim locks with a flash: this is the beat to parry on.
-        line.color = Color.white;
+        // The lock: it snaps tight and flashes white; this is the beat to parry on.
+        sight.transform.localScale = Vector3.one * 1.9f / art;
+        sight.color = Color.white;
+        Fx.Play(Fx.Impact, ronin.Bounds.center, Color.white, 0.9f);
+        Sfx.Play(Sfx.BladeRing, 0.6f, 2f);
         yield return Wait(0.18f);
-        transient.Remove(line.gameObject);
-        Destroy(line.gameObject);
+        Drop(sight);
     }
 
     // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried.
@@ -1071,12 +1078,13 @@ public class Shirogane : Boss
         yield return wolf.Vanish();
         yield return Wait(0.25f);
         float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
-        Vector3 perch = new Vector3(x, TopOfScreen - 1.6f, 0);
+        // On her row, clear of the HUD.
+        Vector3 perch = new Vector3(x, anchor.y + 0.3f, 0);
         yield return wolf.AppearAt(perch, true);
         Sfx.Play(Sfx.WolfGrowl, 0.9f, 1f);
-        var tells = new List<SpriteRenderer> { LaneWarning(x) };
-        yield return Brighten(tells, 0.9f);
-        RemoveTells(tells);
+        BeamTell lane = MarkBeam(x, ChargeHalfWidth, 0.9f, () => perch);
+        yield return Wait(0.9f);
+        lane.Remove();
 
         wolf.Hide();
         Charge(perch, 14f, 1.6f);
@@ -1176,17 +1184,17 @@ public class Shirogane : Boss
         lastPackLanes.Clear();
         foreach (int lane in picks) lastPackLanes.Add(lane);
 
-        float perchY = TopOfScreen - 1.5f;
-        var tells = new List<SpriteRenderer>();
+        float perchY = anchor.y + 0.3f;
+        var tells = new List<BeamTell>();
         var pups = new List<SpriteRenderer>();
         foreach (int lane in picks)
         {
             Vector3 perch = new Vector3(lanes[lane], perchY, 0);
-            tells.Add(LaneWarning(lanes[lane]));
+            tells.Add(MarkBeam(lanes[lane], PupHalfWidth, 0.9f, () => perch));
             pups.Add(wolf.Silhouette(perch, 0.6f, transient));
             Puff(perch, 1.2f);
         }
-        yield return Brighten(tells, 0.9f);
+        yield return Wait(0.9f);
 
         for (int i = 0; i < picks.Count; i++)
         {
@@ -1195,11 +1203,7 @@ public class Shirogane : Boss
                 transient.Remove(pups[i].gameObject);
                 Destroy(pups[i].gameObject);
             }
-            if (tells[i] != null)
-            {
-                transient.Remove(tells[i].gameObject);
-                Destroy(tells[i].gameObject);
-            }
+            tells[i].Remove();
             Charge(new Vector3(lanes[picks[i]], perchY, 0), 12f, 1.1f);
             Sfx.Play(Sfx.WolfGrowl, 0.6f, 1.3f);
             yield return Wait(0.35f);
@@ -1592,7 +1596,8 @@ public class Shirogane : Boss
     const float TellMargin = 1.15f;
     const float TellFoot = 2.2f;
 
-    BeamTell MarkBeam(float x, float halfWidth, float seconds)
+    // From Kuon's jaws unless `from` says otherwise (a lane charge's perch, a pup's).
+    BeamTell MarkBeam(float x, float halfWidth, float seconds, System.Func<Vector3> from = null)
     {
         var tell = new BeamTell { owner = this, shape = new GameObject("MawTell"), mesh = new Mesh() };
         tell.mesh.MarkDynamic();
@@ -1605,11 +1610,11 @@ public class Shirogane : Boss
         renderer.SetPropertyBlock(block);
         renderer.sortingOrder = 52;
         transient.Add(tell.shape);
-        tell.opening = StartCoroutine(OpenBeamTell(tell, x, halfWidth * TellMargin, seconds));
+        tell.opening = StartCoroutine(OpenBeamTell(tell, x, halfWidth * TellMargin, seconds, from ?? (() => WolfMouth)));
         return tell;
     }
 
-    IEnumerator OpenBeamTell(BeamTell tell, float x, float halfWidth, float seconds)
+    IEnumerator OpenBeamTell(BeamTell tell, float x, float halfWidth, float seconds, System.Func<Vector3> source)
     {
         const float EdgeWidth = 0.12f;
         const int Quads = 5;
@@ -1637,7 +1642,7 @@ public class Shirogane : Boss
             // Full, it burns white and flickers: the beam is coming now.
             Color tint = filled >= 1f ? Color.Lerp(Cyan, Color.white, Mathf.PingPong(t * 12f, 1f)) : Cyan;
 
-            Vector3 from = WolfMouth;
+            Vector3 from = source();
             Vector3 to = new Vector3(x, GroundY, 0);
             Vector3 side = Vector3.Cross((to - from).normalized, Vector3.forward);
             // The jaws end is the beam's width throughout; the wide foot draws in over the beats until the shape is

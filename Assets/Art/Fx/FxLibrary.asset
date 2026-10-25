@@ -610,4 +610,20 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 567362baacda424ba906c49e6dd9be20, type: 3}
     fps: 16
     loop: 0
+  - id: Shiro_LockOn
+    frames:
+    - {fileID: 21300000, guid: 0b590d5d3417445c8f3986abdef02723, type: 3}
+    - {fileID: 21300000, guid: 71d982efc75240b9a4445ee9443b1d25, type: 3}
+    - {fileID: 21300000, guid: 2e018559fb554dd1ae0c74f2e0b804c2, type: 3}
+    - {fileID: 21300000, guid: 81539a39c761409b9974bbcd1f85f632, type: 3}
+    - {fileID: 21300000, guid: 66f0a727da464e42b0f56a331f110c22, type: 3}
+    - {fileID: 21300000, guid: d3acc6ea9fca4cd8a0c85ca4944a0870, type: 3}
+    - {fileID: 21300000, guid: d6f471b0e01e4562a17755396ded8ccc, type: 3}
+    - {fileID: 21300000, guid: 82e654297d2d4e71813f1eb792c9e9cf, type: 3}
+    - {fileID: 21300000, guid: 5c42c7bc90324362ac9cda4a747db1ff, type: 3}
+    - {fileID: 21300000, guid: 0e344548a5f14c8193643073dde8b077, type: 3}
+    - {fileID: 21300000, guid: 27555d084ff74c8a898b84dfe0aba380, type: 3}
+    - {fileID: 21300000, guid: 7c8cbdb2d5054689a0256169a0e3ef8e, type: 3}
+    fps: 12
+    loop: 1
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

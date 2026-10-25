@@ -58,6 +58,8 @@ public static class Fx
     public const string ShiroMawBeam = "Shiro_MawBeam";
     public const string ShiroMawHit = "Shiro_MawHit";
     public const string ShiroMawBurst = "Shiro_MawBurst";
+    // The lock-on reticle that closes on the ronin before a blow that must be parried.
+    public const string ShiroLockOn = "Shiro_LockOn";
 
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;

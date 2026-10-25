@@ -171,14 +171,14 @@ match `BoonChoiceUI.boonIcons`.
   routes its hits (`OnWolfDamaged` → `BoonEffects.OnWolfHit`/`WolfBlast`) and adds it to `RandomEnemy`. She `Glide`s along her row (`Roam` between combos,
   `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots (all through `Fire`, at `ShotSpeed` 1.35× the speeds in the moves, with `Arrow.PassesShots` so her and Kuon's
   overlapping patterns fly through each other): `Crescent` (breakable),
-  `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:
+  `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`; it and the Fang are dressed by `WolfShot` in Kuon's charge clip at its own proportions with a `Wake` of afterimages, and their lanes are marked by `MarkBeam` from the perch); telegraphs:
   `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
   Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
   Barrage (`PlaceOrbiting`, `LooseRow`; each sword `Seek`s the ronin at `SeekTurn` degrees a second via `Arrow.Turn` until `SeekStops` above him), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
   Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
-  `ParryAtLatest`): Crossing Moons (`Moonsplitter`, phase 1: two ground lines lock on him from the
-  edges, then two unbreakable `MakeReflectable` crescents `Close` on him from both sides, trailing afterimages) and
-  Fang of the Oath (phase 2: a `SightLine` tell, then an unbreakable reflectable bolt steered onto him by `Pursue`); the Fang is reflectable at Kuon while it
+  `ParryAtLatest`): Crossing Moons (`Moonsplitter`, phase 1: a `LockOn` reticle (`Fx.ShiroLockOn`) closes on him while ghost crescents
+  brighten at the edges, then two unbreakable `MakeReflectable` crescents `Close` on him from both sides, trailing afterimages) and
+  Fang of the Oath (phase 2: a `LockOn` tell, then an unbreakable reflectable bolt steered onto him by `Pursue`); the Fang is reflectable at Kuon while it
   stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
   Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`
   dims the arena (`Dim`) and spirals streaks into the `Fx.ShiroMawOrb` orb at its jaws, `SwallowOrb` crushes it

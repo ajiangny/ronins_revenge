@@ -74,6 +74,7 @@ public static class FxSetup
         // The splash sits on the point where the beam lands, near the foot of its canvas.
         (Fx.ShiroMawHit, 16, true, new Vector2(0.5f, 1f - 46f / 64f)),
         (Fx.ShiroMawBurst, 16, false, Centre),
+        (Fx.ShiroLockOn, 12, true, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

@@ -1566,10 +1566,10 @@ public class Shirogane : Boss
         if (heavy) Dim(0f, 0.6f);
     }
 
-    // The warning for a Maw beam: a trapezoid from Kuon's jaws, narrow there, to where the beam will land, wide
-    // there. Its outline shows at once; over three ringing beats its fill pours down from the jaws to the ground,
-    // brightening on each, and on the last beat its narrow end widens until it is a rectangle, the beam's shape,
-    // flickering white as the beam fires into it. It follows the jaws as Kuon moves.
+    // The warning for a Maw beam: a trapezoid from Kuon's jaws, as wide there as the beam, to where the beam will
+    // land, much wider there. Its outline shows at once; over three ringing beats its fill pours down from the jaws
+    // to the ground, brightening on each, while the wide foot draws in until the shape is a rectangle, the beam's
+    // own, flickering white as the beam fires into it. It follows the jaws as Kuon moves.
     class BeamTell
     {
         public GameObject shape;
@@ -1587,10 +1587,10 @@ public class Shirogane : Boss
         }
     }
 
-    // Its foot is a little wider than the beam's hit, so standing just outside it is safe; its top, at the jaws,
-    // is this share of that.
+    // The rectangle it ends as is a little wider than the beam's hit, so standing just outside it is safe; its foot
+    // starts this many times as wide and shrinks to it.
     const float TellMargin = 1.15f;
-    const float TellTop = 0.35f;
+    const float TellFoot = 2.2f;
 
     BeamTell MarkBeam(float x, float halfWidth, float seconds)
     {
@@ -1640,11 +1640,12 @@ public class Shirogane : Boss
             Vector3 from = WolfMouth;
             Vector3 to = new Vector3(x, GroundY, 0);
             Vector3 side = Vector3.Cross((to - from).normalized, Vector3.forward);
-            // On the last beat the narrow end widens until it is a rectangle: the beam's own shape as it fires.
-            float squaring = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(seconds * 2f / 3f, seconds, t));
-            float top = halfWidth * Mathf.Lerp(TellTop, 1f, squaring);
+            // The jaws end is the beam's width throughout; the wide foot draws in over the beats until the shape is
+            // a rectangle, the beam's own, as it fires.
+            float top = halfWidth;
+            float foot = halfWidth * Mathf.Lerp(TellFoot, 1f, Mathf.SmoothStep(0, 1, filled));
             Vector3 topLeft = from - side * top, topRight = from + side * top;
-            Vector3 footLeft = to - side * halfWidth, footRight = to + side * halfWidth;
+            Vector3 footLeft = to - side * foot, footRight = to + side * foot;
             // The fill pours down from the jaws, as far as it has got, widening as it goes.
             float pour = Mathf.SmoothStep(0, 1, filled);
             Vector3 frontLeft = Vector3.Lerp(topLeft, footLeft, pour), frontRight = Vector3.Lerp(topRight, footRight, pour);

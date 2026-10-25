@@ -1167,11 +1167,11 @@ public class Shirogane : Boss
         // The beam: the lane is marked where the ronin stands as Kuon starts to gather it, so stepping off it is the
         // dodge. Kuon draws the orb in and swallows it as in its own Maw, then looses the beam.
         float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.2f, RightEdge - 1.2f);
-        SpriteRenderer warning = Bar(new Vector3(x, WolfMouth.y, 0), new Vector3(x, GroundY, 0), 2.2f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.15f));
+        BeamTell warning = MarkBeam(x, 1.1f);
         wolf.Glare(1.4f);
         yield return GatherOrb(() => WolfMouth, 0.8f, () => false, warning);
         yield return SwallowOrb(warning, 0.2f);
-        Drop(warning);
+        warning.Remove();
         yield return MawBeam(x, 1.1f, 0.5f);
 
         // The closing spread of swords, then she is spent.
@@ -1234,9 +1234,9 @@ public class Shirogane : Boss
         }
 
         float lane = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 1.4f, RightEdge - 1.4f);
-        SpriteRenderer warning = Bar(new Vector3(lane, WolfMouth.y, 0), new Vector3(lane, GroundY, 0), 2.8f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.2f));
+        BeamTell warning = MarkBeam(lane, 1.4f);
         yield return SwallowOrb(warning, 0.35f);
-        Drop(warning);
+        warning.Remove();
         yield return MawBeam(lane, 1.4f, 0.8f);
         Fx.Play(Fx.Explosion, new Vector3(lane, GroundY, 0), Cyan, 3f);
         CameraShake.Add(0.4f);
@@ -1252,32 +1252,44 @@ public class Shirogane : Boss
     const int MawBreakDamage = 6;
     const int MawBackfireDamage = 10;
 
-    // The orb at Kuon's jaws while it gathers; null when none is out.
-    SpriteRenderer orb, orbCore;
+    // The orb at Kuon's jaws while it gathers (the pixel orb, or a code glow without it), the bloom behind it and,
+    // drawn in code only, its white core; null when none is out.
+    SpriteRenderer orb, orbHalo, orbCore;
     // Set when the gather was cut short by burst() returning true, the orb bursting where it hung.
     bool orbBurst;
+    // The dark laid over the arena while Kuon gathers, so the orb and the beam blaze against it.
+    SpriteRenderer dimmer;
 
-    // Motes of light and shadow spiral in from all round to an orb at `at` that swells as they arrive. A warning
-    // bar, if given, flickers brighter as it grows.
-    IEnumerator GatherOrb(System.Func<Vector3> at, float seconds, System.Func<bool> burst, SpriteRenderer warning)
+    // The orb's pixel art is this many world units across at scale 1 (64 px at 48 px a unit).
+    const float OrbArtSize = 64f / 48f;
+
+    // Like a tailed beast's bomb: the arena darkens, streaks of light and shadow spiral in from all round to an
+    // orb at `at` that swells and churns as they arrive, and the ground shakes harder as it grows. A beam's lane,
+    // if marked, flickers brighter with it.
+    IEnumerator GatherOrb(System.Func<Vector3> at, float seconds, System.Func<bool> burst, BeamTell warning)
     {
         orbBurst = false;
         RemoveOrb();
-        orb = Glowing("SpiritOrb", ProceduralSprites.SoftGlow, 57);
-        orbCore = Glowing("OrbCore", ProceduralSprites.Glow, 58);
-        const int count = 28;
+        Dim(0.4f, 0.4f);
+        orbHalo = Glowing("OrbHalo", ProceduralSprites.SoftGlow, 56);
+        Sprite[] frames = Fx.Frames(Fx.ShiroMawOrb);
+        orb = Glowing("SpiritOrb", frames != null ? frames[0] : ProceduralSprites.SoftGlow, 58);
+        if (frames != null) orb.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 14f);
+        else orbCore = Glowing("OrbCore", ProceduralSprites.Glow, 59);
+
+        const int count = 36;
         var motes = new SpriteRenderer[count];
         var offsets = new Vector3[count];
         var delays = new float[count];
         var spins = new float[count];
         for (int i = 0; i < count; i++)
         {
-            motes[i] = Glowing("Mote", ProceduralSprites.Glow, 56);
-            motes[i].color = i % 2 == 0 ? new Color(Frost.r, Frost.g, Frost.b, 0f) : new Color(0.15f, 0.3f, 0.75f, 0f);
-            motes[i].transform.localScale = Vector3.one * Random.Range(0.45f, 0.85f);
-            offsets[i] = Random.insideUnitCircle.normalized * Random.Range(3.5f, 7f);
-            delays[i] = Random.Range(0f, seconds * 0.6f);
-            spins[i] = Random.Range(120f, 240f) * (Random.value < 0.5f ? -1f : 1f);
+            // Streaks, pale and deep in turn: light and shadow drawn in together.
+            motes[i] = Glowing("Mote", ProceduralSprites.White, 59);
+            motes[i].color = i % 2 == 0 ? new Color(Frost.r, Frost.g, Frost.b, 0f) : new Color(0.2f, 0.4f, 0.95f, 0f);
+            offsets[i] = Random.insideUnitCircle.normalized * Random.Range(4f, 8f);
+            delays[i] = Random.Range(0f, seconds * 0.65f);
+            spins[i] = Random.Range(140f, 260f) * (Random.value < 0.5f ? -1f : 1f);
         }
         Sfx.Play(Sfx.LanternCharge, 0.9f, 0.8f);
         Sfx.Play(Sfx.MistSwirl, 0.8f, 0.5f);
@@ -1288,26 +1300,40 @@ public class Shirogane : Boss
             Vector3 centre = at() + Vector3.back * 0.4f;
             for (int i = 0; i < count; i++)
             {
-                float m = Mathf.Clamp01((t - delays[i]) / (seconds * 0.4f));
+                float m = Mathf.Clamp01((t - delays[i]) / (seconds * 0.35f));
                 Color c = motes[i].color;
-                c.a = m > 0f && m < 1f ? 0.9f : 0f;
+                c.a = m > 0f && m < 1f ? 0.95f : 0f;
                 motes[i].color = c;
                 if (c.a == 0f) continue;
-                // Each mote spirals in, quickening as it nears the orb.
-                motes[i].transform.position = centre + Quaternion.Euler(0, 0, spins[i] * m) * offsets[i] * (1f - m * m);
+                // Each streak spirals in, quickening and stretching as it nears the orb.
+                Vector3 offset = Quaternion.Euler(0, 0, spins[i] * m) * offsets[i] * (1f - m * m);
+                motes[i].transform.position = centre + offset;
+                motes[i].transform.rotation = Quaternion.FromToRotation(Vector3.right, -offset);
+                motes[i].transform.localScale = new Vector3(0.25f + 0.9f * m, 0.09f, 1f);
             }
-            float size = Mathf.Lerp(0.3f, 2.8f, k) * (1f + 0.08f * Mathf.Sin(t * 40f));
+            float size = Mathf.Lerp(0.5f, 3.6f, Mathf.SmoothStep(0, 1, k)) * (1f + 0.06f * Mathf.Sin(t * 40f));
+            orbHalo.transform.position = centre + Vector3.forward * 0.05f;
+            orbHalo.transform.localScale = Vector3.one * size * 2.8f;
+            orbHalo.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.2f + 0.25f * k);
             orb.transform.position = centre;
-            orb.transform.localScale = Vector3.one * size * 1.6f;
-            orb.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.75f);
-            orbCore.transform.position = centre + Vector3.back * 0.05f;
-            orbCore.transform.localScale = Vector3.one * size * 0.7f;
-            orbCore.color = new Color(0.9f, 1f, 1f, 0.9f);
-            if (warning != null) warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.1f + 0.25f * k * Mathf.PingPong(t * 6f, 1f));
+            if (frames != null)
+            {
+                orb.transform.localScale = Vector3.one * size / OrbArtSize;
+                orb.color = Color.white;
+            }
+            else
+            {
+                orb.transform.localScale = Vector3.one * size * 1.6f;
+                orb.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.75f);
+                orbCore.transform.position = centre + Vector3.back * 0.05f;
+                orbCore.transform.localScale = Vector3.one * size * 0.7f;
+                orbCore.color = new Color(0.9f, 1f, 1f, 0.9f);
+            }
+            warning?.Show(0.3f + 0.5f * k, Mathf.PingPong(t * (4f + 8f * k), 1f));
             if (t >= nextRumble)
             {
                 nextRumble = t + 0.12f;
-                CameraShake.Add(0.03f + 0.05f * k);
+                CameraShake.Add(0.03f + 0.06f * k);
             }
             if (burst())
             {
@@ -1319,65 +1345,195 @@ public class Shirogane : Boss
         foreach (SpriteRenderer mote in motes) Drop(mote);
         if (orbBurst)
         {
-            Fx.Play(Fx.Explosion, orb.transform.position, Cyan, 2.4f);
+            Vector3 where = orb.transform.position;
+            if (Fx.Play(Fx.ShiroMawBurst, where, Color.white, 2.4f, null, 58) == null) Fx.Play(Fx.Explosion, where, Cyan, 2.4f);
+            Fx.Play(Fx.Explosion, where, Cyan, 2f);
             RemoveOrb();
+            Dim(0f, 0.5f);
         }
     }
 
     // The orb crushes down to a white-hot point and is swallowed, and for a beat everything goes quiet.
-    IEnumerator SwallowOrb(SpriteRenderer warning, float beat)
+    IEnumerator SwallowOrb(BeamTell warning, float beat)
     {
         if (orb == null) yield break;
         Vector3 at = orb.transform.position;
-        float from = orb.transform.localScale.x;
-        Color start = orb.color;
+        Vector3 from = orb.transform.localScale;
+        float halo = orbHalo.transform.localScale.x;
         for (float t = 0; t < 0.3f; t += Time.deltaTime * Tempo)
         {
             float k = t / 0.3f;
-            orb.transform.localScale = Vector3.one * Mathf.Lerp(from, 0.4f, k * k);
-            orb.color = Color.Lerp(start, Color.white, k);
-            orbCore.transform.localScale = Vector3.one * Mathf.Lerp(from * 0.45f, 0.3f, k * k);
-            if (warning != null) warning.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f + 0.3f * k);
+            // It bulges once before it gives, then crushes down fast.
+            float squeeze = k < 0.25f ? 1f + 0.15f * (k / 0.25f) : Mathf.Lerp(1.15f, 0.12f, Mathf.SmoothStep(0, 1, (k - 0.25f) / 0.75f));
+            orb.transform.localScale = from * squeeze;
+            orbHalo.transform.localScale = Vector3.one * halo * squeeze;
+            orbHalo.color = new Color(Frost.r, Frost.g, Frost.b, 0.45f + 0.4f * k);
+            if (orbCore != null) orbCore.transform.localScale = Vector3.one * from.x * 0.45f * squeeze;
+            warning?.Show(0.8f + 0.2f * k, 1f);
             yield return null;
         }
         RemoveOrb();
-        Fx.Play(Fx.Impact, at, Color.white, 1.6f);
+        Fx.Play(Fx.Impact, at, Color.white, 1.8f);
         Sfx.Play(Sfx.WolfGrowl, 0.8f, 0.6f);
         wolf.Glare(beat + 0.3f);
         wolf.StartCoroutine(wolf.Gulp());
+        // The held breath: the arena goes darker still for the beat before the beam.
+        Dim(0.55f, beat);
         yield return Wait(beat);
     }
 
-    // The beam from Kuon's jaws down a lane; it burns the ronin while he stands within halfWidth of it.
+    // The beam segment's pixel art is this many world units across at scale 1 (34 px at 48 px a unit).
+    const float BeamArtWidth = 34f / 48f;
+
+    // The beam from Kuon's jaws down a lane; it burns the ronin while he stands within halfWidth of it. It bursts
+    // from the jaws with a shockwave, snaps open wide, burns pulsing with spirit light streaming down it and
+    // splashing where it lands, then pinches shut and the arena's dark lifts.
     IEnumerator MawBeam(float x, float halfWidth, float seconds)
     {
         Vector3 from = WolfMouth;
         Vector3 to = new Vector3(x, GroundY, 0);
+        Vector3 delta = to - from;
         float w = halfWidth / 1.1f;
-        SpriteRenderer glow = Bar(from, to, 2.4f * w, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f), 53);
+        Sprite[] frames = Fx.Frames(Fx.ShiroMawBeam);
+
+        if (Fx.Play(Fx.ShiroMawBurst, from, Color.white, 2.6f * w, null, 58) == null) Fx.Play(Fx.Explosion, from, Cyan, 2.4f * w);
+        SpriteRenderer glow = Bar(from, to, 3.4f * w, new Color(Cyan.r, Cyan.g, Cyan.b, 0.3f), 53);
         glow.sprite = ProceduralSprites.Glow;
-        SpriteRenderer body = Bar(from, to, 1.1f * w, new Color(0.6f, 0.95f, 1f, 0.9f), 55);
-        SpriteRenderer core = Bar(from, to, 0.35f * w, Color.white, 56);
+        SpriteRenderer body = null, core = null, beam = null;
+        float beamScale = 2.7f * w / BeamArtWidth;
+        if (frames != null)
+        {
+            beam = Glowing("MawBeam", frames[0], 55);
+            beam.color = Color.white;
+            beam.drawMode = SpriteDrawMode.Tiled;
+            beam.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
+            beam.transform.rotation = Quaternion.FromToRotation(Vector3.down, delta);
+            beam.size = new Vector2(BeamArtWidth, delta.magnitude / beamScale);
+            beam.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 16f);
+        }
+        else
+        {
+            body = Bar(from, to, 1.1f * w, new Color(0.6f, 0.95f, 1f, 0.9f), 55);
+            core = Bar(from, to, 0.35f * w, Color.white, 56);
+        }
         FxPlayer flare = Fx.Play(Fx.ShiroBeamFlare, from, Color.white, 2f * w, wolf.transform, 57);
         if (flare != null) transient.Add(flare.gameObject);
-        Sfx.PlayLoop(Sfx.SpiritBeam, 0.8f, 1f);
-        CameraShake.Add(0.4f * w);
-        float nextSpark = 0f;
+        FxPlayer splash = Fx.Play(Fx.ShiroMawHit, to, Color.white, 2.4f * w, null, 57);
+        if (splash != null) transient.Add(splash.gameObject);
+        Sfx.PlayLoop(Sfx.SpiritBeam, 0.9f, 0.9f);
+        Sfx.Play(Sfx.FireBlast, 0.8f, 0.7f);
+        CameraShake.Add(0.6f * w);
+        Dim(0.45f, 0.1f);
+
+        float nextSpark = 0f, nextRumble = 0f;
         for (float t = 0; t < seconds; t += Time.deltaTime)
         {
-            float flicker = 1f + 0.15f * Mathf.Sin(Time.time * 50f);
-            if (body != null) body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * w * flicker, 1f);
+            // Snaps open past full width, settles, pulses, and pinches shut over its last moment.
+            float open = t < 0.1f ? Mathf.Lerp(0.2f, 1.25f, t / 0.1f)
+                : t < 0.2f ? Mathf.Lerp(1.25f, 1f, (t - 0.1f) / 0.1f)
+                : 1f + 0.06f * Mathf.Sin(Time.time * 45f);
+            open *= Mathf.Clamp01((seconds - t) / 0.15f);
+            if (beam != null) beam.transform.localScale = new Vector3(beamScale * open, beamScale, 1f);
+            if (body != null) body.transform.localScale = new Vector3(body.transform.localScale.x, 1.1f * w * open, 1f);
+            if (glow != null) glow.transform.localScale = new Vector3(glow.transform.localScale.x, 3.4f * w * open, 1f);
             if (Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
             if (Time.time >= nextSpark)
             {
-                nextSpark = Time.time + 0.1f;
-                Fx.Play(Fx.Impact, to, Cyan, 0.9f * w);
+                // Sparks thrown off the beam's edges along its length.
+                nextSpark = Time.time + 0.06f;
+                Vector3 along = Vector3.Lerp(from, to, Random.value);
+                Vector3 side = Vector3.Cross(delta.normalized, Vector3.forward) * (halfWidth * 0.9f * (Random.value < 0.5f ? -1f : 1f));
+                Fx.Play(Fx.Impact, along + side, Cyan, 0.5f * w);
+            }
+            if (Time.time >= nextRumble)
+            {
+                nextRumble = Time.time + 0.1f;
+                CameraShake.Add(0.08f * w);
             }
             yield return null;
         }
         Sfx.Stop(Sfx.SpiritBeam);
-        foreach (SpriteRenderer part in new[] { glow, body, core }) Drop(part);
+        foreach (SpriteRenderer part in new[] { glow, body, core, beam }) Drop(part);
         if (flare != null) flare.Stop();
+        if (splash != null) splash.Stop();
+        Dim(0f, 0.6f);
+    }
+
+    // The lane a Maw beam will burn: two bright edge lines `halfWidth` either side of x from Kuon's jaws to the
+    // ground, over a faint fill, so the safe ground on either side reads at a glance.
+    class BeamTell
+    {
+        public SpriteRenderer fill, left, right;
+        public Shirogane owner;
+
+        // strength 0..1 brightens it; flicker 0..1 pulses the edges.
+        public void Show(float strength, float flicker)
+        {
+            if (fill != null) fill.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.05f + 0.1f * strength);
+            Color edge = Color.Lerp(Cyan, Color.white, strength * flicker);
+            edge.a = 0.35f + 0.6f * strength * (0.6f + 0.4f * flicker);
+            if (left != null) left.color = edge;
+            if (right != null) right.color = edge;
+        }
+
+        public void Remove()
+        {
+            owner.Drop(fill);
+            owner.Drop(left);
+            owner.Drop(right);
+        }
+    }
+
+    BeamTell MarkBeam(float x, float halfWidth)
+    {
+        float top = WolfMouth.y;
+        var tell = new BeamTell
+        {
+            owner = this,
+            fill = Bar(new Vector3(x, top, 0), new Vector3(x, GroundY, 0), halfWidth * 2f, Color.clear, 52),
+            left = Bar(new Vector3(x - halfWidth, top, 0), new Vector3(x - halfWidth, GroundY, 0), 0.08f, Color.clear),
+            right = Bar(new Vector3(x + halfWidth, top, 0), new Vector3(x + halfWidth, GroundY, 0), 0.08f, Color.clear),
+        };
+        tell.Show(0.3f, 0f);
+        return tell;
+    }
+
+    // Eases the dark over the arena to `alpha` over `seconds`; 0 lifts it and then removes it.
+    void Dim(float alpha, float seconds)
+    {
+        if (dimmer == null)
+        {
+            if (alpha <= 0f) return;
+            dimmer = new GameObject("MawDark").AddComponent<SpriteRenderer>();
+            dimmer.sprite = ProceduralSprites.White;
+            // Over the floor and its cover's shadows, under every character and shot.
+            dimmer.sortingOrder = 1;
+            dimmer.color = new Color(0.01f, 0.02f, 0.06f, 0f);
+            dimmer.transform.position = new Vector3(CameraShake.Center.x, CameraShake.Center.y, 0f);
+            float h = Camera.main.orthographicSize * 2f + 4f;
+            dimmer.transform.localScale = new Vector3(h * Camera.main.aspect + 4f, h, 1f);
+            transient.Add(dimmer.gameObject);
+        }
+        if (dimming != null) StopCoroutine(dimming);
+        dimming = StartCoroutine(Dimming(alpha, seconds));
+    }
+
+    Coroutine dimming;
+
+    IEnumerator Dimming(float alpha, float seconds)
+    {
+        float from = dimmer.color.a;
+        for (float t = 0; t < seconds && dimmer != null; t += Time.deltaTime)
+        {
+            Color c = dimmer.color;
+            c.a = Mathf.Lerp(from, alpha, t / seconds);
+            dimmer.color = c;
+            yield return null;
+        }
+        if (dimmer == null) yield break;
+        if (alpha <= 0f) Drop(dimmer);
+        else dimmer.color = new Color(dimmer.color.r, dimmer.color.g, dimmer.color.b, alpha);
+        dimming = null;
     }
 
     // A code-drawn glow the current attack owns.
@@ -1401,8 +1557,9 @@ public class Shirogane : Boss
     void RemoveOrb()
     {
         Drop(orb);
+        Drop(orbHalo);
         Drop(orbCore);
-        orb = orbCore = null;
+        orb = orbHalo = orbCore = null;
     }
 
     // The spectral moon that rises behind them for the Eclipse Fang.

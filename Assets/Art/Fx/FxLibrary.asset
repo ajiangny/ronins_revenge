@@ -555,4 +555,59 @@ MonoBehaviour:
     - {fileID: 21300000, guid: f79a2fd359f7e45d3a327c8ab0715f6d, type: 3}
     fps: 14
     loop: 1
+  - id: Shiro_MawOrb
+    frames:
+    - {fileID: 21300000, guid: 8469c4e62b4643bea63750f87b4eb547, type: 3}
+    - {fileID: 21300000, guid: 77430bc46aa6462a9dc82048f1483947, type: 3}
+    - {fileID: 21300000, guid: f57e2bf180764ff6b6fcfdb1e1ebb7e3, type: 3}
+    - {fileID: 21300000, guid: fd356f20f9d24b45a48d35e97815501d, type: 3}
+    - {fileID: 21300000, guid: 37f7ddd247884b97aed23ec4c6c116c5, type: 3}
+    - {fileID: 21300000, guid: e10d4fed67ad4c55b01fc94b20ae6934, type: 3}
+    - {fileID: 21300000, guid: bdd6aa44fb1a48168d88003d847c8a64, type: 3}
+    - {fileID: 21300000, guid: 1d33a83bdd944feba019fc571312c84e, type: 3}
+    - {fileID: 21300000, guid: f46b3ccb96b54d109342bda11d1133f9, type: 3}
+    - {fileID: 21300000, guid: 4c7b597a20fb4cf6a40cc162a14acc1e, type: 3}
+    - {fileID: 21300000, guid: 15b7095b49534ef48891d74065e78e54, type: 3}
+    - {fileID: 21300000, guid: 5cf6336ca2884861931c14a5678bc501, type: 3}
+    fps: 14
+    loop: 1
+  - id: Shiro_MawBeam
+    frames:
+    - {fileID: 21300000, guid: ea94d79034854e2dab03a5c9f4b32ea9, type: 3}
+    - {fileID: 21300000, guid: 46949693c94e494992a1c8c3fd19b682, type: 3}
+    - {fileID: 21300000, guid: 5c64a9be2ef448139ef93770c3f0e308, type: 3}
+    - {fileID: 21300000, guid: 11b706dc24324cc5ba27406ed5dba802, type: 3}
+    - {fileID: 21300000, guid: 790e047e5078421890064010a9a99a8e, type: 3}
+    - {fileID: 21300000, guid: a4a3dde60e944d609bc093576c3baf36, type: 3}
+    - {fileID: 21300000, guid: b98b976efe9e4b4bb7942eeabdca3e0f, type: 3}
+    - {fileID: 21300000, guid: f9f084806bbc46f699874a5e2263d6ff, type: 3}
+    fps: 16
+    loop: 1
+  - id: Shiro_MawHit
+    frames:
+    - {fileID: 21300000, guid: b78341a58f6643adb0acd4c424efa9de, type: 3}
+    - {fileID: 21300000, guid: c0ef01069e2d45e7add54214696a0355, type: 3}
+    - {fileID: 21300000, guid: d66121b45ad749628330c992b622af85, type: 3}
+    - {fileID: 21300000, guid: 8b9abef62ff043e38734da6d3c37d531, type: 3}
+    - {fileID: 21300000, guid: 98f64851da914f5887edbb340c826890, type: 3}
+    - {fileID: 21300000, guid: 7d6acef21f294b21934a3f4d6b1f6b8e, type: 3}
+    - {fileID: 21300000, guid: 2fd50d0dac87455abc6d7d2db69cb621, type: 3}
+    - {fileID: 21300000, guid: de37c17deacc4c49b764506123d7e572, type: 3}
+    fps: 16
+    loop: 1
+  - id: Shiro_MawBurst
+    frames:
+    - {fileID: 21300000, guid: a514f90eff544e77aa931d76f658c5e3, type: 3}
+    - {fileID: 21300000, guid: 459970933d844a75aa91d1ad4dfb0231, type: 3}
+    - {fileID: 21300000, guid: 05c5eb61f3df42f6abdb684c01bb74c2, type: 3}
+    - {fileID: 21300000, guid: 9f4da36940ee46e9a67b06120441eaf4, type: 3}
+    - {fileID: 21300000, guid: 54a9a525c39648798fe0a64c8ea07320, type: 3}
+    - {fileID: 21300000, guid: 60b6000862684a5d96a43cb817816cca, type: 3}
+    - {fileID: 21300000, guid: 396bf11cbad44b908d432e60c92ff9fe, type: 3}
+    - {fileID: 21300000, guid: b97dc0ca09704a3ead664412010742e9, type: 3}
+    - {fileID: 21300000, guid: 4a5f3b3da529439db5f0eab166c72c5b, type: 3}
+    - {fileID: 21300000, guid: e5b91420efd546d6968d9fcc47382261, type: 3}
+    - {fileID: 21300000, guid: 567362baacda424ba906c49e6dd9be20, type: 3}
+    fps: 16
+    loop: 0
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

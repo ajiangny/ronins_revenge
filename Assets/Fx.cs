@@ -52,6 +52,12 @@ public static class Fx
     public const string ShiroMist = "Shiro_Mist";
     public const string ShiroBeamFlare = "Shiro_BeamFlare";
     public const string ShiroMoon = "Shiro_Moon";
+    // Kuon's Maw: the swirling orb at its jaws, a beam segment tiled down the lane, the splash where it lands and
+    // the shockwave as it fires.
+    public const string ShiroMawOrb = "Shiro_MawOrb";
+    public const string ShiroMawBeam = "Shiro_MawBeam";
+    public const string ShiroMawHit = "Shiro_MawHit";
+    public const string ShiroMawBurst = "Shiro_MawBurst";
 
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;

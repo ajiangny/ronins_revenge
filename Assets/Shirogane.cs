@@ -840,10 +840,11 @@ public class Shirogane : Boss
 
     // --- Parry-only draws ---
 
-    // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent rises at each edge of
-    // the field at the ronin's height, brightening while a reticle closes on him, then flashing as it locks. The crescents sweep in from both sides like closing scissors, chasing
-    // him and trailing afterimages, and meet on him: there is nowhere to step, so the answer is a parry as they
-    // cross (two, a beat apart, if he is on the move). Parried, they fly back and break her stance.
+    // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent rises high on each edge of
+    // the field, brightening while motes trace the curves they will take and a reticle closes on him, then flashing
+    // as it locks. The crescents swoop down the sides and in along the ground like sickles, closing like scissors,
+    // their curves bending to follow him and trailing afterimages, and meet on him together: there is nowhere to
+    // step, so the answer is a parry as they cross. Parried, they fly back and break her stance.
     IEnumerator Moonsplitter()
     {
         Speak(BossLine.Moonsplitter);
@@ -852,24 +853,29 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.BladeRing, 0.8f, 0.8f);
 
         float height = ronin.Bounds.center.y;
-        Vector3[] starts = { new Vector3(LeftEdge + 0.8f, height, 0), new Vector3(RightEdge - 0.8f, height, 0) };
+        // Each moon starts high on its edge and swoops down the side and in along the ground to him: a sickle's
+        // curve, the corner of which sits low on its own edge.
+        Vector3[] starts = { new Vector3(LeftEdge + 0.8f, height + MoonRise, 0), new Vector3(RightEdge - 0.8f, height + MoonRise, 0) };
+        Vector3[] bends = { new Vector3(LeftEdge + 1.2f, height - 0.4f, 0), new Vector3(RightEdge - 1.2f, height - 0.4f, 0) };
         var ghosts = new List<SpriteRenderer>();
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         for (int i = 0; i < 2; i++)
         {
             SpriteRenderer ghost = Glowing("MoonGhost", frames != null ? frames[0] : ProceduralSprites.Glow, 54);
             ghost.transform.position = starts[i];
-            // Drawn facing down; turned to face across the field toward the ronin.
-            ghost.transform.rotation = Quaternion.FromToRotation(Vector3.down, i == 0 ? Vector3.right : Vector3.left);
+            // Drawn facing down, the way it sets off.
+            ghost.transform.rotation = Quaternion.FromToRotation(Vector3.down, bends[i] - starts[i]);
             float art = frames != null ? frames[0].bounds.size.x : 1f;
             ghost.transform.localScale = Vector3.one * (3.2f / art);
             ghosts.Add(ghost);
             Puff(starts[i], 1.6f);
         }
         Sfx.Play(Sfx.MistSwirl, 0.7f, 1.2f);
-        // The ghosts brighten while the reticle closes on him.
+        // The ghosts brighten and their paths are traced in motes while the reticle closes on him.
         StartCoroutine(Brighten(ghosts, DrawAim));
+        Coroutine tracing = StartCoroutine(TraceMoonPaths(starts, bends, DrawAim + 0.18f));
         yield return LockOn(Hands, DrawAim, Frost);
+        if (tracing != null) StopCoroutine(tracing);
         foreach (SpriteRenderer ghost in ghosts) Drop(ghost);
 
         PlayAction(art.attack);
@@ -878,10 +884,11 @@ public class Shirogane : Boss
         CameraShake.Add(0.3f);
         var pair = new List<Arrow>();
         float speed = DrawSpeed * ShotSpeed * 0.9f;
+        // Both take the same time, so they meet on him together if he stands his ground.
+        float seconds = ((bends[0] - starts[0]).magnitude + (ronin.Bounds.center - bends[0]).magnitude) / speed;
         for (int i = 0; i < 2; i++)
         {
-            Vector3 inward = i == 0 ? Vector3.right : Vector3.left;
-            Arrow moon = Fire(starts[i], inward * DrawSpeed * 0.9f);
+            Arrow moon = Fire(starts[i], (bends[i] - starts[i]).normalized * speed / ShotSpeed);
             Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
             if (frames != null) moon.Restyle(frames, 14f, Color.white, new Vector2(3.2f, 2.2f), 0.8f, halo, 3.6f);
             else moon.Restyle(ProceduralSprites.Glow, Frost, new Vector2(1.4f, 3f), 0.8f, halo, 3.6f);
@@ -889,24 +896,66 @@ public class Shirogane : Boss
             moon.MakeReflectable(transform);
             if (Fx.Play(Fx.SlashArc, starts[i], Frost, 2.6f) == null) ElementFx.Glow(starts[i], Frost, 1f, 2.6f, 0.2f);
             pair.Add(moon);
-            StartCoroutine(Close(moon, speed));
+            StartCoroutine(Close(moon, starts[i], bends[i], seconds));
         }
         IgnoreEachOther(pair);
         yield return Wait(0.6f);
     }
 
-    // Flies a crossing moon at the ronin until it has passed him, trailing pale afterimages, then lets it fly on.
-    IEnumerator Close(Arrow moon, float speed)
+    // How far above the ronin the crossing moons start.
+    const float MoonRise = 5.5f;
+
+    // A point on the sickle curve from `start`, bending at `bend`, ending at `end`, `u` of the way along.
+    static Vector3 MoonPath(Vector3 start, Vector3 bend, Vector3 end, float u)
     {
-        float side = Mathf.Sign(ronin.Bounds.center.x - moon.transform.position.x);
-        float nextGhost = 0f;
-        while (moon != null && ronin != null)
+        float v = 1f - u;
+        return v * v * start + 2f * v * u * bend + u * u * end;
+    }
+
+    // Dots of light along both moons' paths to the ronin, following him, so the curve they will take reads before
+    // they fly.
+    IEnumerator TraceMoonPaths(Vector3[] starts, Vector3[] bends, float seconds)
+    {
+        const int Dots = 12;
+        var dots = new List<SpriteRenderer>();
+        for (int i = 0; i < Dots * 2; i++)
         {
-            Vector3 toward = ronin.Bounds.center - moon.transform.position;
-            toward.z = 0;
-            // Past him: it flies straight on.
-            if (Mathf.Sign(toward.x) != side) yield break;
-            moon.Turn(toward.normalized * speed);
+            SpriteRenderer dot = Glowing("MoonPath", ProceduralSprites.Glow, 53);
+            dot.transform.localScale = Vector3.one * 0.35f;
+            dots.Add(dot);
+        }
+        for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
+        {
+            float k = Mathf.Clamp01(t / seconds);
+            for (int side = 0; side < 2; side++)
+            {
+                for (int d = 0; d < Dots; d++)
+                {
+                    // The dots run along the path toward him, so it reads as the way they will come.
+                    float u = Mathf.Repeat((d + t * 6f) / Dots, 1f);
+                    SpriteRenderer dot = dots[side * Dots + d];
+                    if (dot == null) continue;
+                    dot.transform.position = MoonPath(starts[side], bends[side], ronin.Bounds.center, u) + Vector3.back * 0.2f;
+                    dot.color = new Color(Frost.r, Frost.g, Frost.b, (0.15f + 0.45f * k) * Mathf.Sin(Mathf.PI * u));
+                }
+            }
+            yield return null;
+        }
+        foreach (SpriteRenderer dot in dots) Drop(dot);
+    }
+
+    // Flies a crossing moon along its sickle curve onto the ronin, the curve's end following him so it can't be
+    // stepped out of, trailing pale afterimages; once there it flies on straight.
+    IEnumerator Close(Arrow moon, Vector3 start, Vector3 bend, float seconds)
+    {
+        float nextGhost = 0f;
+        for (float t = 0; moon != null && ronin != null && t < seconds; t += Time.fixedDeltaTime)
+        {
+            float u = Mathf.Clamp01((t + Time.fixedDeltaTime) / seconds);
+            Vector3 next = MoonPath(start, bend, ronin.Bounds.center, u);
+            Vector3 step = next - moon.transform.position;
+            step.z = 0;
+            if (step.sqrMagnitude > 0.0001f) moon.Turn(step / Time.fixedDeltaTime);
             if (Time.time >= nextGhost)
             {
                 nextGhost = Time.time + 0.04f;

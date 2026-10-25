@@ -177,7 +177,7 @@ match `BoonChoiceUI.boonIcons`.
   Barrage (`PlaceOrbiting`, `LooseRow`; each sword `Seek`s the ronin at `SeekTurn` degrees a second via `Arrow.Turn` until `SeekStops` above him), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
   Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
   `ParryAtLatest`): Crossing Moons (`Moonsplitter`, phase 1: a `LockOn` reticle (`Fx.ShiroLockOn`) closes on him while ghost crescents
-  brighten at the edges, then two unbreakable `MakeReflectable` crescents `Close` on him from both sides, trailing afterimages) and
+  brighten high at the edges and `TraceMoonPaths` dots their curves, then two unbreakable `MakeReflectable` crescents `Close` on him along mirrored `MoonPath` sickle curves (a quadratic Bezier whose end follows him), trailing afterimages) and
   Fang of the Oath (phase 2: a `LockOn` tell, then an unbreakable reflectable bolt steered onto him by `Pursue`); the Fang is reflectable at Kuon while it
   stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
   Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`

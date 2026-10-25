@@ -139,8 +139,8 @@ public class Benibana : Boss
         Fx.Play(Fx.SmokePuff, Mouth, Smoke, 1.8f);
     }
 
-    // Rosary Lash: a red line marks a column, then her cross-chain slams down it, smashing blockers. It hangs
-    // there as a wall for a moment before its crosses break off and fall. Two columns in her second phase.
+    // Rosary Lash: a red band closes to a line on a column, then her cross-chain slams down it, smashing blockers.
+    // It hangs there as a wall for a moment before its crosses break off and fall. Two columns in her second phase.
     IEnumerator RosaryLash()
     {
         // One chain on the ronin, the others hemming him in on either side.
@@ -150,18 +150,34 @@ public class Benibana : Boss
         if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
         if (Random.value < 0.5f) Speak(BossLine.RosaryLash);
 
-        // A red warning line on each column that brightens with every beat, so the strike lands on the last one.
+        // A wide red band on each column that narrows to a line over three beats, brightening on each, so the strike
+        // lands as it closes. Faint while wide so it doesn't hide the field.
+        const float TellWidth = 2.4f, LineWidth = 0.1f;
         var tells = new List<SpriteRenderer>();
         foreach (float x in columns)
         {
-            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 0.1f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.35f)));
+            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), TellWidth, new Color(Crimson.r, Crimson.g, Crimson.b, 0.2f)));
         }
         float beatTime = secondPhase ? 0.22f : 0.3f;
-        for (int beat = 0; beat < 3; beat++)
+        float tellTime = beatTime * 3f;
+        int beatsPlayed = 0;
+        for (float t = 0; t < tellTime; t += Time.deltaTime * Tempo)
         {
-            foreach (SpriteRenderer tell in tells) tell.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.35f + beat * 0.25f);
-            Sfx.Play(Sfx.BlockerHit, 0.45f, 1.9f);
-            yield return Wait(beatTime);
+            if (t >= beatsPlayed * beatTime)
+            {
+                Sfx.Play(Sfx.BlockerHit, 0.45f, 1.9f);
+                beatsPlayed++;
+            }
+            float closing = Mathf.Clamp01(t / tellTime);
+            float width = Mathf.Lerp(TellWidth, LineWidth, closing);
+            float alpha = Mathf.Lerp(0.2f, 0.35f, closing) + (beatsPlayed - 1) * 0.25f;
+            foreach (SpriteRenderer tell in tells)
+            {
+                Vector3 scale = tell.transform.localScale;
+                tell.transform.localScale = new Vector3(scale.x, width, scale.z);
+                tell.color = new Color(Crimson.r, Crimson.g, Crimson.b, alpha);
+            }
+            yield return null;
         }
 
         var chains = new List<GameObject>();

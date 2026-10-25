@@ -180,7 +180,10 @@ match `BoonChoiceUI.boonIcons`.
   unbreakable `MakeReflectable` shot steered onto the ronin by `Pursue`; the Fang is reflectable at Kuon while it
   stands, at her once it's broken. Phase 2 adds Spirit Wolf Charge, Howl of the Departed (`OrbFan`), Twin
   Spirit Assault, Phantom Wolf Pack (`lastPackLanes`), Kuon's Maw (`SpiritMaw`, Bijuu-bomb style: `GatherOrb`
-  spirals motes into an orb at its jaws, `SwallowOrb` locks the lane, `MawBeam` fires; `MawBreakDamage` on Kuon
+  dims the arena (`Dim`) and spirals streaks into the `Fx.ShiroMawOrb` orb at its jaws, `SwallowOrb` crushes it
+  while `MarkBeam` (a `BeamTell`: edge lines over a faint fill) marks the lane, `MawBeam` fires with
+  `Fx.ShiroMawBurst`, the `Fx.ShiroMawBeam` segment drawn `SpriteDrawMode.Tiled` down the lane and `Fx.ShiroMawHit`
+  where it lands, code bars without the art; `MawBreakDamage` on Kuon
   during the gather bursts it, `orbBurst`) and the Eclipse Fang ultimate (`ultimate` feeds `Busy`; a code
   `Moon`, two crescent waves, the same gather and `MawBeam` from the wolf's `Mouth`, a sword spread, then `exposed`
   doubles damage for 2 s via `DamageMultiplier` and drops the ward). `NextMove` weights the phase's signature twice,

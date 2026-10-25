@@ -840,9 +840,9 @@ public class Shirogane : Boss
 
     // --- Parry-only draws ---
 
-    // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent rises high on each edge of
-    // the field, brightening while motes trace the curves they will take and a reticle closes on him, then flashing
-    // as it locks. The crescents swoop down the sides and in along the ground like sickles, closing like scissors,
+    // Crossing Moons, her parry-only draw: she crosses her twin blades and a ghost crescent forms on each, brightening
+    // while motes trace the curves they will take and a reticle closes on him, then flashing as it locks. She
+    // flings them out to either side and they curve back in low along the ground like sickles, closing like scissors,
     // their curves bending to follow him and trailing afterimages, and meet on him together: there is nowhere to
     // step, so the answer is a parry as they cross. Parried, they fly back and break her stance.
     IEnumerator Moonsplitter()
@@ -853,10 +853,10 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.BladeRing, 0.8f, 0.8f);
 
         float height = ronin.Bounds.center.y;
-        // Each moon starts high on its edge and swoops down the side and in along the ground to him: a sickle's
-        // curve, the corner of which sits low on its own edge.
-        Vector3[] starts = { new Vector3(LeftEdge + 0.8f, height + MoonRise, 0), new Vector3(RightEdge - 0.8f, height + MoonRise, 0) };
-        Vector3[] bends = { new Vector3(LeftEdge + 1.2f, height - 0.4f, 0), new Vector3(RightEdge - 1.2f, height - 0.4f, 0) };
+        // Each moon leaves one of her blades, flies out wide to its own side and curves back in low along the ground
+        // to him: a sickle's curve, bending past the edge of the field at about his height.
+        Vector3[] starts = { Hands + Vector3.left * 0.6f, Hands + Vector3.right * 0.6f };
+        Vector3[] bends = { new Vector3(LeftEdge - 1.5f, height + MoonBend, 0), new Vector3(RightEdge + 1.5f, height + MoonBend, 0) };
         var ghosts = new List<SpriteRenderer>();
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         for (int i = 0; i < 2; i++)
@@ -866,7 +866,7 @@ public class Shirogane : Boss
             // Drawn facing down, the way it sets off.
             ghost.transform.rotation = Quaternion.FromToRotation(Vector3.down, bends[i] - starts[i]);
             float art = frames != null ? frames[0].bounds.size.x : 1f;
-            ghost.transform.localScale = Vector3.one * (3.2f / art);
+            ghost.transform.localScale = Vector3.one * (2.4f / art);
             ghosts.Add(ghost);
             Puff(starts[i], 1.6f);
         }
@@ -884,8 +884,8 @@ public class Shirogane : Boss
         CameraShake.Add(0.3f);
         var pair = new List<Arrow>();
         float speed = DrawSpeed * ShotSpeed * 0.9f;
-        // Both take the same time, so they meet on him together if he stands his ground.
-        float seconds = ((bends[0] - starts[0]).magnitude + (ronin.Bounds.center - bends[0]).magnitude) / speed;
+        // Both take the same time, so they meet on him together; the curve is a little shorter than its corners.
+        float seconds = 0.85f * ((bends[0] - starts[0]).magnitude + (ronin.Bounds.center - bends[0]).magnitude) / speed;
         for (int i = 0; i < 2; i++)
         {
             Arrow moon = Fire(starts[i], (bends[i] - starts[i]).normalized * speed / ShotSpeed);
@@ -902,8 +902,8 @@ public class Shirogane : Boss
         yield return Wait(0.6f);
     }
 
-    // How far above the ronin the crossing moons start.
-    const float MoonRise = 5.5f;
+    // How far above the ronin the crossing moons' curves bend back in.
+    const float MoonBend = 1.2f;
 
     // A point on the sickle curve from `start`, bending at `bend`, ending at `end`, `u` of the way along.
     static Vector3 MoonPath(Vector3 start, Vector3 bend, Vector3 end, float u)

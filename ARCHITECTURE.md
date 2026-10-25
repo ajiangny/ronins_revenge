@@ -313,5 +313,5 @@ Each object handles its own collision (projectiles only destroy themselves).
 ## Outside Unity
 
 - `Tools/generate-music.mjs` — regenerates music via ElevenLabs (`npm run music`, key in gitignored `.env.local`).
-- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, Benibana's mid-fight barks, all of Utsusemi's lines in its designed voice and all of Shirogane's in Lily's (`npm run sfx`, `npm run voice`).
+- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, all of Benibana's lines in her designed voice, all of Utsusemi's lines in its designed voice and all of Shirogane's in Lily's (`npm run sfx`, `npm run voice`).
 - `README.md` — the assignment write-up (requirements, template fixes, features, balancing).

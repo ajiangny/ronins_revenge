@@ -53,8 +53,9 @@ drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#be
 
 ## Voice
 
-Izumi (ElevenLabs), read sultry and amused in phase 1, furious and raw in phase 2. Mocking, theatrical; she speaks
-like someone used to an audience. Her mid-fight barks are unchanged: "Breathe it in...", "Kneel!",
+A voice designed for her in ElevenLabs (`BENIBANA` in `Tools/generate-voice.mjs`): a low, smoky alto with no
+accent and a stage performer's clear diction. Read sultry and amused in phase 1, furious and raw in phase 2. Mocking,
+theatrical; she speaks like someone used to an audience, with cold grief under the mockery. Her mid-fight barks are unchanged: "Breathe it in...", "Kneel!",
 "Crimson... Iaido!", "Bloom, my rosary!", "What?! My own blade...".
 
 ## Lines

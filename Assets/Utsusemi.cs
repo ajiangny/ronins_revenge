@@ -1839,10 +1839,37 @@ public class Utsusemi : Boss
         // A break mid-Hour Strikes drops the armour with the rest of the move.
         armored = false;
         ShowEye(false);
-        CameraShake.Add(0.5f);
+
+        // The mainspring slips: it seizes and shudders, sparks spitting from its joints while the clock inside it
+        // races, each tick closer on the last.
+        animator.Play(art.hit, false, null, art.actionFps * 0.5f);
+        HitFlash.Flash(sprite, 0.15f);
+        CameraShake.Add(0.3f);
         Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
+        Music.Duck(0.15f, 6f);
+        StartCoroutine(Tremble(1.5f, 0.1f, 2f));
+        float tick = 0.3f;
+        for (float t = 0; t < 1.5f; t += tick, tick = Mathf.Max(0.05f, tick * 0.8f))
+        {
+            Sfx.Play(Sfx.ClockTick, 0.7f, 1f + t * 0.4f);
+            Vector3 joint = Centre + new Vector3(Random.Range(-1f, 1f) * sprite.bounds.extents.x * 0.6f,
+                Random.Range(-1f, 1f) * sprite.bounds.extents.y * 0.6f, 0);
+            Fx.Play(Fx.Impact, joint, Gold, 0.7f);
+            yield return new WaitForSeconds(tick);
+        }
+
+        // It stops dead. A bell tolls once.
+        Sfx.Play(Sfx.MidnightChime, 1f, 0.7f);
+        yield return new WaitForSeconds(0.55f);
+
+        // Then it breaks open: gears and parts burst off it, the hat shatters into a halo and the core blazes out.
+        CameraShake.Add(0.6f);
+        HitFlash.Flash(sprite, 0.2f);
+        Sfx.Play(Sfx.GearGrind, 1f, 0.6f);
         Sfx.Play(Sfx.StageStart, 1f, 0.8f);
+        Sfx.Play(Sfx.HatClang, 0.9f, 0.7f);
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 3f) == null) Fx.Play(Fx.Explosion, Centre, Gold, 2.5f);
+        if (Fx.Play(Fx.UtsuParts, Head, Color.white, 2.5f) == null) Fx.Play(Fx.Impact, Head, Gold, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
         bodyTint = Color.Lerp(bodyTint, new Color(0.75f, 0.7f, 0.8f), 0.5f);
         WearPhaseArt();
@@ -1865,10 +1892,12 @@ public class Utsusemi : Boss
             Fader.Fade(flash, 0.35f);
         }
         Sfx.Play(Sfx.LanternCharge, 1f, 1.3f);
-        // Overdriven: a title card of its broken form, over which it speaks; without its art, a subtitle.
+        ElementFx.Glow(Core, new Color(1f, 0.45f, 0.12f), 0.8f, 4f, 0.9f, transform);
+        // Overdriven: it hangs there, burning, then a title card of its broken form, over which it speaks; without
+        // its art, a subtitle.
         if (PhaseCard != null)
         {
-            yield return new WaitForSeconds(0.6f);
+            yield return new WaitForSeconds(1f);
             yield return PhaseCard(this);
         }
         else

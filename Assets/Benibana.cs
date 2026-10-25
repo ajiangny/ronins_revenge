@@ -355,20 +355,55 @@ public class Benibana : Boss
     protected override IEnumerator PhaseBreak()
     {
         breaking = true;
-        CameraShake.Add(0.5f);
-        Sfx.Play(Sfx.StageStart, 1f, 0.7f);
-        Fx.Play(Fx.SlashArc, Centre, Crimson, 4f);
-        Fx.Play(Fx.BeniPetals, Centre, Color.white, 2.5f);
-        Debris.BurstSprites(Centre, art.deathParticles, Crimson, 30, 1.2f, 8f);
-        for (int i = 0; i < 6; i++)
+
+        // She staggers, the blow still ringing.
+        animator.Play(art.hit, false, null, art.actionFps * 0.6f);
+        HitFlash.Flash(sprite, 0.15f);
+        Sfx.Play(Sfx.BossStagger, 1f, 0.85f);
+        CameraShake.Add(0.3f);
+        yield return Tremble(0.7f, 0.12f);
+
+        // She draws on her pipe and the smoke rushes back into her, a crimson glow building at her heart.
+        Music.Duck(0.15f, 6f);
+        PlayAction(art.parry);
+        ElementFx.Glow(Centre, Crimson, 0.6f, 3.2f, 1.1f, transform);
+        for (int i = 0; i < 8; i++)
         {
-            Fx.Play(Fx.SmokePuff, Centre + (Vector3)Random.insideUnitCircle * 2f, Smoke, 2.5f);
+            Vector3 from = Centre + Quaternion.Euler(0, 0, i * 45f + Random.Range(-15f, 15f)) * Vector3.right * Random.Range(2.6f, 3.4f);
+            Fx.Play(Fx.SmokePuff, Vector3.Lerp(from, Centre, i / 9f), Smoke, Mathf.Lerp(2.4f, 1.2f, i / 7f));
+            if (i % 2 == 0) Sfx.Play(Sfx.MistSwirl, 0.45f, 0.7f + i * 0.05f);
+            yield return new WaitForSeconds(0.13f);
         }
+
+        // A breath of silence.
+        yield return new WaitForSeconds(0.35f);
+
+        // Unsealed: the blade comes out in a crossing cut, the kimono tears, and the smoke is blown away from her.
+        Fx.Play(Fx.SlashArc, Centre, Crimson, 5f);
+        Fx.Play(Fx.BeniIaidoFlash, Centre, Color.white, 3f);
+        Fx.Play(Fx.BeniPetals, Centre, Color.white, 3f);
+        Debris.BurstSprites(Centre, art.deathParticles, Crimson, 40, 1.4f, 10f);
+        for (int i = 0; i < 8; i++)
+        {
+            Fx.Play(Fx.SmokePuff, Centre + Quaternion.Euler(0, 0, i * 45f) * Vector3.right * 2.4f, Smoke, 2.6f);
+        }
+        HitFlash.Flash(sprite, 0.2f);
+        CameraShake.Add(0.65f);
+        Sfx.Play(Sfx.SwordSlash, 1f, 0.7f);
+        Sfx.Play(Sfx.ParryClang, 0.8f, 0.6f);
+        Sfx.Play(Sfx.StageStart, 1f, 0.7f);
         bodyTint = new Color(0.8f, 0.45f, 0.5f);
         WearPhaseArt();
         PlayIdle();
         AddEyes();
         AddAura();
+
+        // She stands revealed a moment, her afterimages bleeding off her, before the card.
+        for (int i = 0; i < 3; i++)
+        {
+            Afterimage(new Color(Crimson.r, Crimson.g, Crimson.b, 0.55f));
+            yield return new WaitForSeconds(0.25f);
+        }
         // Unsealed: a title card of her transformed, over which she speaks; without its art, a subtitle.
         if (PhaseCard != null) yield return PhaseCard(this);
         else

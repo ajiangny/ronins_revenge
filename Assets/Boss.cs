@@ -306,6 +306,24 @@ public abstract class Boss : MonoBehaviour, IHittable
         anchor = to;
     }
 
+    // Shakes the body in place, building to `strength` (world units) and easing off at the end: a stagger, a seizing
+    // machine. Rotation and offset are restored after, so the art lands back where it stood.
+    protected IEnumerator Tremble(float seconds, float strength, float twist = 4f)
+    {
+        Transform view = sprite.transform;
+        Vector3 rest = view.localPosition;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            float k = Mathf.Sin(Mathf.PI * t / seconds);
+            Vector2 jolt = UnityEngine.Random.insideUnitCircle * strength * k;
+            view.localPosition = rest + (Vector3)jolt / transform.lossyScale.x;
+            view.localRotation = Quaternion.Euler(0, 0, UnityEngine.Random.Range(-twist, twist) * k);
+            yield return null;
+        }
+        view.localPosition = rest;
+        view.localRotation = Quaternion.identity;
+    }
+
     protected void Afterimage(Color color)
     {
         Afterimage(sprite, color);

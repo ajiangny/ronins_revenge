@@ -43,7 +43,7 @@ const LINES = {
   // Her stance breaks when a parry turns her own attack back on her; two takes, each a grunt as the blow lands, then a short, clipped
   // line from someone who has lost to this parry before (every fight is a rematch).
   Benibana_Stagger: [BENIBANA, "[sharp staggered grunt, knocked back] Ngh! [furious, through gritted teeth] Dirty trick!"],
-  Benibana_Stagger_2: [BENIBANA, "[sharp staggered grunt, knocked back] Agh! [quick, furious] No one turns my blade!"],
+  Benibana_Stagger_2: [BENIBANA, "[sharp staggered grunt, knocked back] Agh! [quick, furious, spitting it out] You dog!"],
   Benibana_Hurt: [BENIBANA, "[pained grunt] Ngh!"],
   Benibana_Hurt_2: [BENIBANA, "[pained cry] Hah!"],
   Benibana_Hurt_3: [BENIBANA, "[sharp pained gasp] Agh!"],

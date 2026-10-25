@@ -57,7 +57,7 @@ A voice designed for her in ElevenLabs (`BENIBANA` in `Tools/generate-voice.mjs`
 accent and a stage performer's clear diction. Read sultry and amused in phase 1, furious and raw in phase 2. Mocking,
 theatrical; she speaks like someone used to an audience, with cold grief under the mockery. Her mid-fight barks are unchanged: "Breathe it in...", "Kneel!",
 "Crimson... Iaido!", "Bloom, my rosary!". When a parry turns her own attack back on her she grunts as the blow lands and staggers
-with "Dirty trick!" or "No one turns my blade!": short, and never as if it's their first fight.
+with "Dirty trick!" or "You dog!": short, and never as if it's their first fight.
 
 ## Lines
 

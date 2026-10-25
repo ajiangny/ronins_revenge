@@ -41,7 +41,7 @@ public class Benibana : Boss
     public override string Line(BossLine line, int take) => line switch
     {
         // A parry turns her own attack back on her, and not for the first time: every fight is a rematch.
-        BossLine.Stagger => Take(take, "Ngh! Dirty trick!", "Agh! No one turns my blade!"),
+        BossLine.Stagger => Take(take, "Ngh! Dirty trick!", "Agh! You dog!"),
         BossLine.SmokeRings => Take(take, "Breathe it in...", "Inhale...", "Lose yourself."),
         BossLine.RosaryLash => Take(take, "Kneel!", "Bow your head.", "Down!"),
         BossLine.Iaido => Take(take, "Crimson Iaido!", "Iaido.", "Too slow."),

@@ -166,7 +166,7 @@ match `BoonChoiceUI.boonIcons`.
   `SpiritMaw`), beside her `Fight`; `holdWolf`/`wolfBusy` keep it out of their joint moves and her blade rain.
   `OnWolfBroken` (her ward shatters, `BossLine.WolfFallen`, a quiet `Stagger(GriefStagger, cry: false)`) starts the
   **Lone Blade** (`alone`: faster stats, eight-lane rain, `Moonfall` in place of the Eclipse Fang). `WolfJoined`
-  hands Kuon to `GameManager.OnWolfJoined`, which shows its bar (`GameUI.ShowWolfBar`, beside hers on the top line),
+  hands Kuon to `GameManager.OnWolfJoined`, which shows its health (`GameUI.ShowWolfBar`, a thin strip inside the foot of her bar),
   routes its hits (`OnWolfDamaged` → `BoonEffects.OnWolfHit`/`WolfBlast`) and adds it to `RandomEnemy`. She `Glide`s along her row (`Roam` between combos,
   `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots: `Crescent` (breakable),
   `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`); telegraphs:

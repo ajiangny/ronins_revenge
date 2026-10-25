@@ -57,18 +57,9 @@ public class GameUI : MonoBehaviour
     Image bossFillImage;
     float shownBossHealth = 1f;
     float bossHealth = 1f;
-    RectTransform bossFrame;
-    RectTransform bossBack;
-    // The boss bar's width alone, and while it shares the top line with a companion's bar (Shirogane's Kuon), which
-    // sits to its right: hers narrows and slides left so both fit where hers stood.
-    const float BossBarY = -80f;
-    const float BossBarWidth = 904f;
-    const float SharedBossBarWidth = 580f;
-    const float WolfBarWidth = 300f;
-    const float BarGap = 48f;
 
-    GameObject wolfBar;
-    TextMeshProUGUI wolfName;
+    // A companion's health (Shirogane's wolf, Kuon) as a thin strip along the foot of the boss bar.
+    GameObject wolfStrip;
     RectTransform wolfFill;
     RectTransform wolfTrail;
     Image wolfFillImage;
@@ -90,7 +81,6 @@ public class GameUI : MonoBehaviour
     {
         BuildHud();
         BuildBossBar();
-        BuildWolfBar();
         BuildSubtitle();
         BuildBanner();
         BuildFade();
@@ -225,16 +215,8 @@ public class GameUI : MonoBehaviour
         shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
         bossFill.anchorMax = new Vector2(bossHealth, 1f);
         bossTrail.anchorMax = new Vector2(shownBossHealth, 1f);
-        // The boss bar narrows to the left while a companion's bar shares the line, and widens back once it's gone.
-        float width = wolfBar.activeSelf ? SharedBossBarWidth : BossBarWidth;
-        float x = wolfBar.activeSelf ? -(WolfBarWidth + BarGap) / 2f : 0f;
-        float ease = 1f - Mathf.Exp(-Time.unscaledDeltaTime * 8f);
-        bossFrame.sizeDelta = new Vector2(Mathf.Lerp(bossFrame.sizeDelta.x, width, ease), bossFrame.sizeDelta.y);
-        bossFrame.anchoredPosition = new Vector2(Mathf.Lerp(bossFrame.anchoredPosition.x, x, ease), BossBarY);
-        bossBack.sizeDelta = new Vector2(bossFrame.sizeDelta.x - 8f, bossBack.sizeDelta.y);
-        bossName.rectTransform.sizeDelta = new Vector2(bossFrame.sizeDelta.x - (wolfBar.activeSelf ? 24f : 0f), bossName.rectTransform.sizeDelta.y);
 
-        if (!wolfBar.activeSelf) return;
+        if (!wolfStrip.activeSelf) return;
         shownWolfHealth = Mathf.MoveTowards(shownWolfHealth, wolfHealth, Time.unscaledDeltaTime * 0.6f);
         wolfFill.anchorMax = new Vector2(wolfHealth, 1f);
         wolfTrail.anchorMax = new Vector2(shownWolfHealth, 1f);
@@ -262,15 +244,13 @@ public class GameUI : MonoBehaviour
         bossHealth = Mathf.Clamp01(fraction);
     }
 
-    // A second, thinner bar above the boss's for a companion fought alongside her (Shirogane's wolf, Kuon).
-    public void ShowWolfBar(string name, Color colour)
+    // The companion's strip inside the boss bar, in its own colour, from full.
+    public void ShowWolfBar(Color colour)
     {
-        wolfName.text = name;
-        wolfName.color = colour;
         wolfFillImage.color = colour;
         wolfHealth = shownWolfHealth = 1f;
         wolfFill.anchorMax = wolfTrail.anchorMax = Vector2.one;
-        wolfBar.SetActive(true);
+        wolfStrip.SetActive(true);
     }
 
     public void SetWolfHealth(float fraction)
@@ -280,7 +260,7 @@ public class GameUI : MonoBehaviour
 
     public void HideWolfBar()
     {
-        wolfBar.SetActive(false);
+        wolfStrip.SetActive(false);
     }
 
     // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour.
@@ -548,56 +528,40 @@ public class GameUI : MonoBehaviour
     public void HideBossBar()
     {
         bossBar.SetActive(false);
-        wolfBar.SetActive(false);
-        bossFrame.anchoredPosition = new Vector2(0, BossBarY);
-        bossFrame.sizeDelta = new Vector2(BossBarWidth, bossFrame.sizeDelta.y);
-        bossBack.sizeDelta = new Vector2(BossBarWidth - 8f, bossBack.sizeDelta.y);
+        wolfStrip.SetActive(false);
     }
 
     void BuildBossBar()
     {
-        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, BossBarY), new Vector2(904, 30));
-        bossFrame = frame;
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -80), new Vector2(904, 30));
         frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
-        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(BossBarWidth - 8f, 22));
+        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
         back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
-        bossBack = back;
         bossTrail = Stretch(CreateRect("Trail", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
         bossFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossFillImage = bossFill.gameObject.AddComponent<Image>();
         bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 32), new Vector2(904, 48), 38, TextAlignmentOptions.Bottom, frame);
         bossName.characterSpacing = 4;
-        // Shrinks to fit when the bar narrows to share its line.
-        bossName.enableAutoSizing = true;
-        bossName.fontSizeMin = 22;
-        bossName.fontSizeMax = 38;
         Style(bossName, TextStyle.Heading);
         bossBar = frame.gameObject;
         bossBar.SetActive(false);
-    }
 
-    // The companion's bar, to the right of the boss's on the same line: the same look, shorter and thinner, with a
-    // smaller name over it.
-    void BuildWolfBar()
-    {
-        float x = (SharedBossBarWidth + BarGap) / 2f;
-        RectTransform frame = CreateRect("WolfBar", transform, new Vector2(0.5f, 1f), new Vector2(x, BossBarY), new Vector2(WolfBarWidth, 22));
-        frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
-        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(WolfBarWidth - 6f, 16));
-        back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
-        wolfTrail = Stretch(CreateRect("Trail", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        // The companion's strip: a dark band along the bottom of the bar's inside, over the boss's own fill, with
+        // its own trail and fill.
+        RectTransform strip = CreateRect("WolfStrip", back, Vector2.zero, Vector2.zero, Vector2.zero);
+        strip.anchorMin = Vector2.zero;
+        strip.anchorMax = new Vector2(1f, 0f);
+        strip.pivot = new Vector2(0.5f, 0f);
+        strip.offsetMin = Vector2.zero;
+        strip.offsetMax = new Vector2(0f, 7f);
+        strip.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.03f, 0.05f, 0.95f);
+        wolfTrail = Stretch(CreateRect("Trail", strip, Vector2.zero, Vector2.zero, Vector2.zero));
         wolfTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
-        wolfFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        wolfFill = Stretch(CreateRect("Fill", strip, Vector2.zero, Vector2.zero, Vector2.zero));
         wolfFillImage = wolfFill.gameObject.AddComponent<Image>();
-        wolfName = CreateText("WolfName", new Vector2(0.5f, 0f), new Vector2(0, 28), new Vector2(WolfBarWidth, 40), 30, TextAlignmentOptions.Bottom, frame);
-        wolfName.characterSpacing = 4;
-        wolfName.enableAutoSizing = true;
-        wolfName.fontSizeMin = 20;
-        wolfName.fontSizeMax = 30;
-        Style(wolfName, TextStyle.Heading);
-        wolfBar = frame.gameObject;
-        wolfBar.SetActive(false);
+        wolfStrip = strip.gameObject;
+        wolfStrip.SetActive(false);
     }
 
     static RectTransform Stretch(RectTransform rect)

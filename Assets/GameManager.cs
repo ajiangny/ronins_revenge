@@ -1451,7 +1451,8 @@ public class GameManager : MonoBehaviour
         effects.Wolf = wolf;
         wolf.Damaged += OnWolfDamaged;
         wolf.Broken += OnWolfBroken;
-        ui.ShowWolfBar($"{SpiritWolf.Title}, {SpiritWolf.Epithet}", activeBoss != null ? activeBoss.Colour : Color.cyan);
+        // Kuon's strip sits inside her bar, paler than her own fill so the two read apart.
+        ui.ShowWolfBar(new Color(0.85f, 0.97f, 1f));
     }
 
     void OnWolfDamaged(Vector3 point, KillSource source)

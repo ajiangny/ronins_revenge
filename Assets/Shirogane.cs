@@ -1428,7 +1428,7 @@ public class Shirogane : Boss
         if (phaseDash != null) dashFrames = phaseDash;
         AddAura();
         PlayIdle();
-        // Kuon takes the field as a foe of its own, with its own bar, and wards her while it stands.
+        // Kuon takes the field as a foe of its own, its health a strip inside her bar, and wards her while it stands.
         wolf.Arm();
         AddWard();
         WolfJoined?.Invoke(wolf);
@@ -1574,15 +1574,13 @@ public class Shirogane : Boss
 // Kuon, Shirogane's spirit wolf, the guardian of her family's shrine: a translucent body of blue spirit flame with
 // burning cyan eyes. A faint silhouette behind her in her first phase; once she calls it, it rests beside her and
 // vanishes into mist to attack from wherever it reappears. Everything it does to the ronin is an Arrow it throws,
-// but from her phase break it can be hit while it stands in sight, with a bar of its own; broken, it fades to a
+// but from her phase break it can be hit while it stands in sight, its health a strip in her bar; broken, it fades to a
 // shadow at her side until her fall.
 [RequireComponent(typeof(Rigidbody))]
 public class SpiritWolf : MonoBehaviour, IHittable
 {
     public enum Presence { Silhouette, Present }
 
-    public const string Title = "KUON";
-    public const string Epithet = "The Shrine Guardian";
     public const int StartingHealth = 80;
     // A parried Fang of the Oath does no damage by Damage.Of; on Kuon it lands as a heavy blow and dazes it.
     const int ReflectedDamage = 20;

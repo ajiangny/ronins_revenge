@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Role | Shirogane's spirit wolf. A foe of its own in her phase 2, with its own bar. |
+| Role | Shirogane's spirit wolf. A foe of its own in her phase 2, its health a strip inside her bar. |
 | Name | 久遠, "the eternal": the one that remembers. |
 | Was | The guardian wolf of Shirogane's family shrine, watching over her bloodline for generations. |
 | Is | Bound to her by Kagetsune and set at the top of the Frozen Shrine with her. |

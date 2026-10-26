@@ -108,13 +108,13 @@ public class GameUI : MonoBehaviour
         fade.color = new Color(0f, 0f, 0f, alpha);
     }
 
-    // Arcade layout: score top left, stage and samurai left top right, lives in a thin strip along the very bottom
-    // left, below the ronin's feet so he's never hidden behind them. The top centre stays clear
-    // for the boss bar; the high score is shown on the title and end menus instead. Small dim labels sit over big
-    // bright numbers, on a shade that fades out before the army's top row.
+    // Arcade layout, kept minimal: one row each side of the boss bar, score top left and stage/round top right, each a
+    // small dim label beside a bright number; lives in a thin strip along the very bottom left, below the ronin's feet
+    // so he's never hidden behind them. The high score is shown on the title and end menus instead. Both rows sit on
+    // a shade that fades out before the army's top row.
     void BuildHud()
     {
-        RectTransform shade = CreateRect("HudShade", transform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 150));
+        RectTransform shade = CreateRect("HudShade", transform, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0, 120));
         shade.anchorMin = new Vector2(0f, 1f);
         shade.anchorMax = new Vector2(1f, 1f);
         Image shadeImage = shade.gameObject.AddComponent<Image>();
@@ -123,25 +123,12 @@ public class GameUI : MonoBehaviour
         shadeImage.raycastTarget = false;
         hudParts.Add(shade.gameObject);
 
-        HudLabel("ScoreLabel", "SCORE", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft);
-        scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -42), TextAlignmentOptions.TopLeft, Color.white);
+        scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft, Color.white);
         levelText = HudValue("Level", new Vector2(1f, 1f), new Vector2(-36, -14), TextAlignmentOptions.TopRight, Color.white);
-        levelText.fontSize = 36;
 
-        // The samurai counter is the one HUD text authored in the scene; it joins the stage block on the right.
+        // The army still counts into the scene's samurai counter, but the HUD no longer shows it.
         SamuraiCounter counter = FindAnyObjectByType<SamuraiCounter>();
-        if (counter != null && counter.TryGetComponent(out TextMeshProUGUI counterText))
-        {
-            RectTransform rect = counterText.rectTransform;
-            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1f, 1f);
-            rect.anchoredPosition = new Vector2(-36, -62);
-            rect.sizeDelta = new Vector2(500, 50);
-            counterText.alignment = TextAlignmentOptions.TopRight;
-            counterText.fontSize = 30;
-            counterText.color = MutedColour;
-            Style(counterText, TextStyle.Hud);
-            hudParts.Add(counterText.gameObject);
-        }
+        if (counter != null && counter.TryGetComponent(out TextMeshProUGUI counterText)) counterText.enabled = false;
 
         livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(20, 6), new Vector2(400, LifeIconSize));
         hudParts.Add(livesRow.gameObject);
@@ -168,20 +155,9 @@ public class GameUI : MonoBehaviour
         godModeTag.gameObject.SetActive(on);
     }
 
-    TextMeshProUGUI HudLabel(string name, string label, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment)
-    {
-        TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(500, 36), 28, alignment);
-        text.text = label;
-        text.color = MutedColour;
-        text.characterSpacing = 8;
-        Style(text, TextStyle.Hint);
-        hudParts.Add(text.gameObject);
-        return text;
-    }
-
     TextMeshProUGUI HudValue(string name, Vector2 anchor, Vector2 position, TextAlignmentOptions alignment, Color colour)
     {
-        TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(600, 64), 50, alignment);
+        TextMeshProUGUI text = CreateText(name, anchor, position, new Vector2(700, 56), 40, alignment);
         text.color = colour;
         Style(text, TextStyle.Hud);
         hudParts.Add(text.gameObject);
@@ -578,13 +554,21 @@ public class GameUI : MonoBehaviour
 
     public void SetScore(int score)
     {
-        scoreText.SetText("{0:000000}", score);
+        scoreText.SetText(ScoreFormat, score);
     }
 
     public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
-        levelText.text = $"STAGE {stage}/{stageCount}  ·  ROUND {round}/{roundCount}";
+        levelText.text = $"{HudLabel("STAGE")}{stage}{HudDim($"/{stageCount}")}     {HudLabel("ROUND")}{round}{HudDim($"/{roundCount}")}";
     }
+
+    // A HUD row's small dim label, set in the same text as its number so the two share a baseline.
+    static string HudLabel(string label) => $"<size=26><cspace=6>{HudDim(label)}</cspace></size>  ";
+
+    static string HudDim(string text) => $"<color=#{ColorUtility.ToHtmlStringRGB(MutedColour)}>{text}</color>";
+
+    // Built once, as the score changes many times a second.
+    static readonly string ScoreFormat = HudLabel("SCORE") + "{0:000000}";
 
     // A full heart per remaining life and an empty outlined one per life lost, up to his maximum.
     public void SetLives(int lives, int maxLives)

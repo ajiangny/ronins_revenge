@@ -561,12 +561,21 @@ public class GameUI : MonoBehaviour
 
     public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
-        // The stage on the HUD row, with the round as a smaller line under it, both kept to the right edge.
-        levelText.text = $"{HudLabel("STAGE")}{stage}\n<size=30>{HudLabel("ROUND")}{round}{HudDim($"/{roundCount}")}</size>";
+        // The stage on the HUD row, with the round as a smaller line under it scaled to the stage line's width, so
+        // the two sit as one right-aligned block.
+        string stageLine = $"{HudLabel("STAGE")}{stage}";
+        float stageWidth = levelText.GetPreferredValues(stageLine).x;
+        float roundWidth = levelText.GetPreferredValues(RoundLine(round, roundCount, 1f)).x;
+        float scale = roundWidth > 0f ? Mathf.Min(1f, stageWidth / roundWidth) : 1f;
+        levelText.text = $"{stageLine}\n{RoundLine(round, roundCount, scale)}";
     }
 
+    string RoundLine(int round, int roundCount, float scale) =>
+        $"{HudLabel("ROUND", scale)}<size={levelText.fontSize * scale:0.#}>{round}{HudDim($"/{roundCount}")}</size>";
+
     // A HUD row's small dim label, set in the same text as its number so the two share a baseline.
-    static string HudLabel(string label) => $"<size=26><cspace=6>{HudDim(label)}</cspace></size>  ";
+    static string HudLabel(string label, float scale = 1f) =>
+        $"<size={26f * scale:0.#}><cspace={6f * scale:0.#}>{HudDim(label)}</cspace>  </size>";
 
     static string HudDim(string text) => $"<color=#{ColorUtility.ToHtmlStringRGB(MutedColour)}>{text}</color>";
 

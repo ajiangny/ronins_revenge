@@ -582,9 +582,9 @@ public class Utsusemi : Boss
 
     // Hour Strikes: one hour at a time, a thin red sight line from its eye tracks the ronin, then locks on where he
     // stands; a gold hour numeral (I, II, III...) lights up there as the warning, and a moment later its eye lasers
-    // it, burning him if he hasn't stepped off. Then the numerals fade, and in turn each burns red; it dashes down
-    // out of its row onto that hour, chops it with a ground-cracking blow and dashes back up, so he weaves between
-    // the marks. Then, back in its row, it strikes the hour: a clock mark settles under the ronin and follows him
+    // it, burning him if he hasn't stepped off. Then the numerals fade, and it counts the hours again with its blade:
+    // for each, the sight line hunts him down and locks on, a red numeral marks the spot, and after a short window it
+    // dashes down out of its row onto it, chops it with a ground-cracking blow and dashes back up. Then, back in its row, it strikes the hour: a clock mark settles under the ronin and follows him
     // while its core glows and the blade draws back over three ticks, and a giant crescent cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it:
     // sent back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
     IEnumerator HourStrikes()
@@ -610,15 +610,13 @@ public class Utsusemi : Boss
         armored = false;
         foreach (SpriteRenderer part in shell) RemoveTransient(part);
 
-        // The dashes: from memory now.
-        foreach (HourMark mark in marks)
+        // The dashes: each one locks onto wherever the ronin stands now.
+        for (int hour = 1; hour <= count; hour++)
         {
             Beat();
             Tick(0.9f);
             yield return Wait(beat);
-            yield return Dash(new Vector3(mark.x, Landing(), row.z), HourDashTime);
-            yield return Chop(mark.x, mark, 36f, 0.08f);
-            yield return Dash(row, HourDashTime);
+            yield return LockOnDash(hour, row);
             PlayIdle();
         }
 
@@ -661,22 +659,41 @@ public class Utsusemi : Boss
             HitIfCrossed(Eye, spot);
         });
         EndBeam(beam);
-        ShedShards(spot);
         yield return HoldArmor(shell, 0.1f);
     }
 
-    // The laser leaves three red-hot shards spinning off its line, which rain back down round the mark. They're
-    // crimson, and no parry turns them: the first lesson that some blows can only be dodged.
-    void ShedShards(Vector3 spot)
+    // One hour struck where the ronin stands: a red sight line from its eye follows him, then locks on, and the
+    // numeral burns red there. After a short window to step off, it dashes down onto the spot and chops it.
+    IEnumerator LockOnDash(int hour, Vector3 row)
     {
-        Vector3 from = Vector3.Lerp(spot, Eye, 0.3f);
-        for (int i = -1; i <= 1; i++)
+        float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
+        float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
+        SpriteRenderer sight = Bar(Eye, Spot(x), 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.4f));
+        float track = secondPhase ? 0.4f : 0.5f;
+        for (float t = 0; t < track; t += Time.deltaTime * Tempo)
         {
-            Arrow shard = BulletHell.Enlist(Shoot(from, new Vector3(i * 3f, -6f, 0)), capped: false);
-            BulletHell.MakeSealDart(shard, new Color(1f, 0.35f, 0.2f));
-            shard.PassesCover = false;
+            x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
+            Stretch(sight, Eye, Spot(x), 0.05f);
+            yield return null;
         }
-        Sfx.Play(Sfx.BladeChop, 0.4f, 1.6f);
+
+        // Locked: the hour burns red where he stood, and the dodge window opens.
+        var mark = new HourMark(this, hour, x);
+        mark.Show(CoreRed);
+        Tick(0.7f);
+        Vector3 spot = Spot(x);
+        sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
+        float window = secondPhase ? 0.3f : 0.4f;
+        for (float t = 0; t < window; t += Time.deltaTime * Tempo)
+        {
+            Stretch(sight, Eye, spot, 0.07f);
+            yield return null;
+        }
+        RemoveTransient(sight);
+
+        yield return Dash(new Vector3(x, Landing(), row.z), HourDashTime);
+        yield return Chop(x, mark, 36f, 0.08f);
+        yield return Dash(row, HourDashTime);
     }
 
     Vector3 Spot(float x) => new Vector3(x, GroundY + 0.15f, 0);

@@ -1418,11 +1418,11 @@ public class Utsusemi : Boss
         yield return Stride(CameraShake.Center.x);
         Speak(BossLine.HeartLantern);
         yield return ThrowSword(SwordLanding());
-        yield return Charge();
-
         float dir = Random.value < 0.5f ? 1f : -1f;
         float from = dir > 0 ? LeftEdge + 0.5f : RightEdge - 0.5f;
         float to = dir > 0 ? RightEdge - 0.5f : LeftEdge + 0.5f;
+        ShowShelter(() => new[] { new ShelterSweep(Core, Mathf.Min(from, to), Mathf.Max(from, to)) });
+        yield return Charge();
 
         // A faint guide line runs the sweep first, so the ronin knows which way to run for cover.
         SpriteRenderer guide = Bar(Core, Core, 0.06f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f));
@@ -1451,6 +1451,7 @@ public class Utsusemi : Boss
         yield return SweepBeam(beam, to, from, 0.5f);
         EndBeam(beam);
         Sfx.Stop(Sfx.LanternBeam);
+        HideShelter();
         yield return ReclaimSword();
     }
 
@@ -1684,6 +1685,11 @@ public class Utsusemi : Boss
         float leftEdge = LeftEdge + 0.3f, rightEdge = RightEdge - 0.3f;
         // The hands stop this far either side of the sword: the gap they leave is the safe spot.
         const float gap = 1.1f;
+        ShowShelter(() => new[]
+        {
+            new ShelterSweep(Eye, leftEdge, markX - gap),
+            new ShelterSweep(Core, markX + gap, rightEdge),
+        });
         for (int strike = 0; strike < strikes; strike++)
         {
             // Close: slow at first, quickening as they near twelve.
@@ -1719,15 +1725,127 @@ public class Utsusemi : Boss
             // Another hour to strike: the sword comes back and goes out again while the hands wait at the edges.
             if (strike + 1 < strikes)
             {
+                HideShelter();
                 yield return HoldingHands(RecallSword(), left, right, leftEdge, rightEdge);
                 yield return HoldingHands(ThrowSword(AtRonin(3f), strike + 2), left, right, leftEdge, rightEdge);
                 if (plantedSword != null) markX = plantedSword.transform.position.x;
+                ShowShelter(() => new[]
+                {
+                    new ShelterSweep(Eye, leftEdge, markX - gap),
+                    new ShelterSweep(Core, markX + gap, rightEdge),
+                });
             }
         }
+        HideShelter();
         EndBeam(left);
         EndBeam(right);
         Sfx.Stop(Sfx.LanternBeam);
         yield return ReclaimSword();
+    }
+
+    // The sword's shelter, marked on the ground from the moment the sword plants until the laser is over: the stretch of
+    // the ronin's row that every ray of the coming laser hits the sword before reaching his height, worked out from
+    // the beams themselves so it's exactly where he's safe, and marked with a SafeZone, brightening while the laser fires.
+    readonly struct ShelterSweep
+    {
+        public readonly Vector3 from;
+        public readonly float lo, hi;
+        public ShelterSweep(Vector3 from, float lo, float hi)
+        {
+            this.from = from;
+            this.lo = lo;
+            this.hi = hi;
+        }
+    }
+
+    // The shelter is sampled at this step along the row, and a beam this close to the ronin's middle still hits him.
+    const float ShelterStep = 0.05f, BeamReach = 0.45f;
+    Coroutine shelter;
+    SafeZone shelterZone;
+
+    void ShowShelter(System.Func<ShelterSweep[]> sweeps)
+    {
+        HideShelter();
+        shelter = StartCoroutine(Shelter(sweeps));
+    }
+
+    void HideShelter()
+    {
+        if (shelter != null) StopCoroutine(shelter);
+        shelter = null;
+        if (shelterZone != null)
+        {
+            transient.Remove(shelterZone.gameObject);
+            shelterZone.Dismiss(0.25f);
+        }
+        shelterZone = null;
+    }
+
+    IEnumerator Shelter(System.Func<ShelterSweep[]> sweeps)
+    {
+        float rowY = ronin.Bounds.center.y, floorY = GroundY + 0.15f;
+        shelterZone = SafeZone.Create();
+        transient.Add(shelterZone.gameObject);
+        ElementFx.Glow(new Vector3(plantedSword != null ? plantedSword.transform.position.x : ronin.Bounds.center.x, floorY + 0.5f, 0),
+            SafeZone.Colour, 0.6f, 2.5f, 0.4f);
+        Sfx.Play(Sfx.SoulCollect, 0.5f, 1.3f);
+
+        float nextSample = 0;
+        for (float age = 0; plantedSword != null && shelterZone != null; age += Time.deltaTime)
+        {
+            if (age >= nextSample)
+            {
+                nextSample = age + 0.2f;
+                bool found = ShelterSpan(sweeps(), rowY, plantedSword.transform.position.x, out float lo, out float hi);
+                if (found) shelterZone.Place(lo, hi, floorY);
+                // Brighter while a laser is burning; gone if there's nowhere to hide.
+                shelterZone.Strength = found ? (beams.Count > 0 ? 1f : 0.65f) : 0f;
+            }
+            yield return null;
+        }
+        HideShelter();
+    }
+
+    // The stretch of the row nearest the sword that none of the sweeps' unblocked rays come within reach of.
+    bool ShelterSpan(ShelterSweep[] sweeps, float rowY, float swordX, out float lo, out float hi)
+    {
+        float left = LeftEdge, right = RightEdge;
+        int cells = Mathf.CeilToInt((right - left) / ShelterStep) + 1;
+        var danger = new bool[cells];
+        foreach (ShelterSweep sweep in sweeps)
+        {
+            for (float x = sweep.lo; x <= sweep.hi; x += ShelterStep)
+            {
+                Vector3 end = BeamEnd(sweep.from, x, out _);
+                // Stopped above his head: this ray can't reach him.
+                if (end.y > rowY + 0.2f || sweep.from.y - end.y < 0.01f) continue;
+                float crossX = sweep.from.x + (end.x - sweep.from.x) * (sweep.from.y - rowY) / (sweep.from.y - end.y);
+                int a = Mathf.Max(0, Mathf.FloorToInt((crossX - BeamReach - left) / ShelterStep));
+                int b = Mathf.Min(cells - 1, Mathf.CeilToInt((crossX + BeamReach - left) / ShelterStep));
+                for (int i = a; i <= b; i++) danger[i] = true;
+            }
+        }
+        // The safe run closest to the sword.
+        lo = hi = swordX;
+        float best = float.MaxValue;
+        bool found = false;
+        for (int i = 0; i < cells; i++)
+        {
+            if (danger[i]) continue;
+            int j = i;
+            while (j + 1 < cells && !danger[j + 1]) j++;
+            float runLo = left + i * ShelterStep, runHi = left + j * ShelterStep;
+            float distance = swordX < runLo ? runLo - swordX : swordX > runHi ? swordX - runHi : 0f;
+            if (runHi - runLo >= 0.3f && distance < best)
+            {
+                best = distance;
+                lo = runLo;
+                hi = runHi;
+                found = true;
+            }
+            i = j;
+        }
+        return found;
     }
 
     // Runs a step of the attack (and everything it waits on) while both hands keep burning at the given spots.

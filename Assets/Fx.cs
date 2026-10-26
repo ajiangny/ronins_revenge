@@ -50,6 +50,9 @@ public static class Fx
     public const string UtsuBeamMolten = "Utsu_BeamMolten";
     public const string UtsuHaloShards = "Utsu_HaloShards";
     public const string UtsuCracking = "Utsu_Cracking";
+    // The reusable safe-zone marker (SafeZone): its ward (left post, tiled band, right post) and its shield icon.
+    public const string SafeZone = "SafeZone";
+    public const string SafeZoneIcon = "SafeZoneIcon";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
 
     // Shirogane's effects.

@@ -75,6 +75,8 @@ public class Ronin : MonoBehaviour
     public bool Invincible { get; set; }
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
     public Func<Transform> RiposteTarget { get; set; }
+    // True while he stands where a parry is forbidden (inside a lane sealed by the Emperor's ofuda); set by that boss.
+    public Func<bool> ParrySealed { get; set; }
     // A fireball or ice shard riposte struck something.
     public event Action<Vector3, IHittable> RiposteImpact;
     // Kindling's fireball has hit something.
@@ -192,7 +194,8 @@ public class Ronin : MonoBehaviour
             }
             if (parry && ParryCharge >= 1f)
             {
-                StartParry();
+                if (ParrySealed != null && ParrySealed()) SealedParry();
+                else StartParry();
             }
         }
         UpdateLoopClip();
@@ -384,6 +387,17 @@ public class Ronin : MonoBehaviour
         ShurikenThrown?.Invoke(Muzzle, shuriken);
     }
 
+    // The seal holds his blade: a dull red spark and no parry, and the cooldown isn't spent.
+    void SealedParry()
+    {
+        if (Time.time - lastSealedParry < 0.3f) return;
+        lastSealedParry = Time.time;
+        Fx.Play(Fx.Impact, Bounds.center + Vector3.up * 0.35f, new Color(0.9f, 0.15f, 0.15f), 0.8f);
+        Sfx.Play(Sfx.Deflect, 0.4f, 0.55f);
+    }
+
+    float lastSealedParry = float.NegativeInfinity;
+
     void StartParry()
     {
         lastParry = Time.time;
@@ -497,6 +511,14 @@ public class Ronin : MonoBehaviour
         EndAction();
     }
 
+    // Holds him in a looping pose of his own (the flute at dawn) for the rest of the scene.
+    public void Pose(Sprite[] frames, float fps)
+    {
+        if (frames == null || frames.Length == 0) return;
+        actionPlaying = true;
+        animator.Play(frames, true, null, fps);
+    }
+
     // Moves him at once, e.g. to just below the view before he walks into a new map.
     public void PlaceAt(Vector3 position)
     {
@@ -582,6 +604,7 @@ public class Ronin : MonoBehaviour
             sent = riposte;
         }
         arrow.Riposte = sent;
+        arrow.Parried?.Invoke(sent);
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);

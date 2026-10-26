@@ -11,7 +11,12 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     // Shirogane's last words, after her wolf has gone; a full line like Defeat.
     DefeatFinal,
     // Shirogane's later barks: Kuon broken, and her mirrored and parry-only moves.
-    WolfFallen, MirrorMoon, Moonsplitter, OathFang }
+    WolfFallen, MirrorMoon, Moonsplitter, OathFang,
+    // Kagetsune's move callouts, his summons, and the summoned souls' own lines (spoken in their voices).
+    CofferSlam, TollOfFealty, OfudaDecree, SoulWail, LastToll, WraithSwarm, BrokenChains, SoulCoffin, ThousandBells,
+    SummonBenibana, SummonUtsusemi, SummonShirogane, EchoBenibana, EchoUtsusemi, EchoShirogane,
+    // His line over the ronin when he falls to him.
+    KilledOni }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -46,6 +51,10 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     // The subtitle for one take of a line recorded several ways; take 0 is the line's own.
     public virtual string Line(BossLine line, int take) => Line(line);
+
+    // Who says a line, for its subtitle: the boss, or a soul it has summoned to speak for itself.
+    public virtual string Speaker(BossLine line) => Title;
+    public virtual Color SpeakerColour(BossLine line) => Colour;
 
     protected void Speak(BossLine line)
     {

@@ -94,6 +94,11 @@ public class Backdrop : MonoBehaviour
     Atmosphere atmosphere;
     float blood;
     float bloodTarget;
+    // The true ending's sunrise: a warm sky climbing from the top of the field and a sun glow over the hill line.
+    // Nothing shows a dawn before it.
+    SpriteRenderer dawnSky, dawnSun;
+    float dawn;
+    float dawnTarget;
 
     void Start()
     {
@@ -122,6 +127,13 @@ public class Backdrop : MonoBehaviour
         moonHalo = CreateSprite("MoonHalo", ProceduralSprites.Glow, moonSpot, 9f, 0, Color.clear);
         moon = CreateSprite("BloodMoon", ProceduralSprites.Disc, moonSpot, 3.2f, 0, Color.clear);
         moonHalo.sortingOrder = moon.sortingOrder = -99;
+        dawnSky = CreateSprite("DawnSky", ProceduralSprites.FadeDown, new Vector3(centerX, centerY + viewHeight * 0.1f, 0), 1f, 0, Color.clear);
+        // The gradient is a one-pixel-wide strip, so it's stretched by its own size to cover the view.
+        Vector2 skySize = dawnSky.sprite.bounds.size;
+        dawnSky.transform.localScale = new Vector3(viewWidth * 1.2f / skySize.x, viewHeight * 0.9f / skySize.y, 1f);
+        dawnSun = CreateSprite("DawnSun", ProceduralSprites.SoftGlow, new Vector3(centerX + viewWidth * 0.18f, centerY + viewHeight * 0.42f, 0), 16f, 0, Color.clear);
+        dawnSky.sortingOrder = -98;
+        dawnSun.sortingOrder = -97;
 
         petals = new Petal[petalCount];
         petalRenderers = new SpriteRenderer[petalCount];
@@ -199,6 +211,25 @@ public class Backdrop : MonoBehaviour
         return r;
     }
 
+    // The sun comes up over the field, slowly, over about six seconds.
+    public void SetDawn(bool on)
+    {
+        dawnTarget = on ? 1f : 0f;
+    }
+
+    static readonly Color DawnGlow = new Color(1f, 0.62f, 0.38f);
+    static readonly Color DawnGround = new Color(1.15f, 0.92f, 0.8f);
+
+    void UpdateDawn(float dt)
+    {
+        dawn = Mathf.MoveTowards(dawn, dawnTarget, dt / 6f);
+        float k = Mathf.SmoothStep(0, 1, dawn);
+        dawnSky.color = new Color(DawnGlow.r, DawnGlow.g, DawnGlow.b, 0.55f * k);
+        dawnSun.color = new Color(1f, 0.85f, 0.6f, 0.6f * k);
+        if (blood <= 0f) groundRenderer.color = Color.Lerp(shownGroundTint, shownGroundTint * DawnGround, k);
+        atmosphere.TintMoon(DawnGlow, k);
+    }
+
     // Raises (or sets) the boss moon; the look only changes when it rises, so it fades out in the colour it came in.
     public void SetBossMoon(bool on, MoonLook moonLook = MoonLook.Blood)
     {
@@ -210,6 +241,7 @@ public class Backdrop : MonoBehaviour
     {
         float dt = Time.deltaTime;
         if (!Mathf.Approximately(blood, bloodTarget)) UpdateBloodMoon(Time.unscaledDeltaTime);
+        if (!Mathf.Approximately(dawn, dawnTarget)) UpdateDawn(Time.unscaledDeltaTime);
         foreach (Petal p in petals)
         {
             Vector3 position = p.transform.position;

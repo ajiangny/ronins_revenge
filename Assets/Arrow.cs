@@ -34,6 +34,8 @@ public class Arrow : MonoBehaviour
     public bool PassesShots { get; set; }
     // What a parry sent back in its place (the first, for a spread), so its thrower can tell when that's gone.
     public Kunai Riposte { get; set; }
+    // Told what a parry sent back in its place, so its thrower can dress it (the Emperor's skulls fly home as freed souls).
+    public System.Action<Kunai> Parried { get; set; }
 
     void Awake()
     {

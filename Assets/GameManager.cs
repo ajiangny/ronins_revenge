@@ -183,6 +183,39 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip shiroganeBladeRainLine;
     [SerializeField] AudioClip shiroganeEclipseLine;
     [SerializeField] AudioClip[] shiroganeHurtLines;
+    [Tooltip("Kagetsune's sprite frames. Leave empty to use the Taisho art, darkened to blackened bronze, as a stand-in.")]
+    [SerializeField] CharacterArt kagetsuneArt;
+    [Tooltip("The Unchained Wraith's frames, worn from his phase break on. Leave empty to keep his first art.")]
+    [SerializeField] CharacterArt kagetsunePhaseArt;
+    [Tooltip("He is drawn bigger than the other bosses: a colossus over the field.")]
+    [SerializeField] float kagetsuneScale = 4.6f;
+    [SerializeField] Sprite kagetsunePortrait;
+    [SerializeField] Sprite kagetsuneCloseup;
+    [Tooltip("The Unchained Wraith's illustrations: the card that plays in his phase break. Without them his phase line is a subtitle.")]
+    [SerializeField] Sprite kagetsunePhasePortrait;
+    [SerializeField] Sprite kagetsunePhaseCloseup;
+    [SerializeField] AudioClip kagetsuneIntroLine;
+    [SerializeField] AudioClip kagetsunePhaseLine;
+    [SerializeField] AudioClip kagetsuneDefeatLine;
+    [SerializeField] AudioClip kagetsuneStaggerLine;
+    [SerializeField] AudioClip kagetsuneKilledOniLine;
+    [Tooltip("His move callouts and summons, and the summoned souls' lines in their own voices. Missing clips just show the subtitle.")]
+    [SerializeField] AudioClip kagetsuneCofferSlamLine;
+    [SerializeField] AudioClip kagetsuneTollLine;
+    [SerializeField] AudioClip kagetsuneOfudaLine;
+    [SerializeField] AudioClip kagetsuneWailLine;
+    [SerializeField] AudioClip kagetsuneLastTollLine;
+    [SerializeField] AudioClip kagetsuneSwarmLine;
+    [SerializeField] AudioClip kagetsuneChainsLine;
+    [SerializeField] AudioClip kagetsuneCoffinLine;
+    [SerializeField] AudioClip kagetsuneThousandBellsLine;
+    [SerializeField] AudioClip kagetsuneSummonBenibanaLine;
+    [SerializeField] AudioClip kagetsuneSummonUtsusemiLine;
+    [SerializeField] AudioClip kagetsuneSummonShiroganeLine;
+    [SerializeField] AudioClip echoBenibanaLine;
+    [SerializeField] AudioClip echoUtsusemiLine;
+    [SerializeField] AudioClip echoShiroganeLine;
+    [SerializeField] AudioClip[] kagetsuneHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
     [SerializeField] float bossDepth = 3f;
@@ -334,15 +367,17 @@ public class GameManager : MonoBehaviour
         var chorus = (AudioChorusFilter)machineVoice[0];
         var ring = (AudioEchoFilter)machineVoice[1];
         bool spirit = boss == BossKind.Shirogane;
-        chorus.dryMix = spirit ? 0.8f : 0.7f;
-        chorus.wetMix1 = chorus.wetMix2 = spirit ? 0.3f : 0.45f;
-        chorus.delay = spirit ? 30f : 14f;
-        chorus.rate = spirit ? 0.2f : 0.35f;
-        chorus.depth = spirit ? 0.1f : 0.06f;
-        ring.delay = spirit ? 140f : 16f;
-        ring.decayRatio = spirit ? 0.3f : 0.4f;
-        ring.wetMix = spirit ? 0.28f : 0.35f;
-        bool on = boss == BossKind.Utsusemi || spirit;
+        // The Emperor: a choir of the souls inside him, a wide slow chorus that drifts deeper, under a hall's echo.
+        bool choir = boss == BossKind.Kagetsune;
+        chorus.dryMix = spirit ? 0.8f : choir ? 0.75f : 0.7f;
+        chorus.wetMix1 = chorus.wetMix2 = spirit ? 0.3f : choir ? 0.55f : 0.45f;
+        chorus.delay = spirit ? 30f : choir ? 45f : 14f;
+        chorus.rate = spirit ? 0.2f : choir ? 0.12f : 0.35f;
+        chorus.depth = spirit ? 0.1f : choir ? 0.3f : 0.06f;
+        ring.delay = spirit ? 140f : choir ? 70f : 16f;
+        ring.decayRatio = spirit ? 0.3f : choir ? 0.35f : 0.4f;
+        ring.wetMix = spirit ? 0.28f : choir ? 0.3f : 0.35f;
+        bool on = boss == BossKind.Utsusemi || spirit || choir;
         chorus.enabled = ring.enabled = on;
         machineVoice[2].enabled = boss == BossKind.Utsusemi;
     }
@@ -1293,6 +1328,16 @@ public class GameManager : MonoBehaviour
                         utsusemiPhaseHourSlash, utsusemiPhaseSwordThrow);
                 }
                 return automaton;
+            case BossKind.Kagetsune:
+                bool hollow = kagetsuneArt == null;
+                Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Kagetsune.StartingHealth,
+                    position, hollow ? new Color(0.55f, 0.42f, 0.32f) : Color.white);
+                if (!hollow) emperor.SetPhaseArt(kagetsunePhaseArt);
+                // The souls he can drag out of the coffin, drawn in their own art at their own size.
+                emperor.SetEcho(BossKind.Benibana, benibanaPhaseArt != null ? benibanaPhaseArt : benibanaArt, benibanaScale);
+                emperor.SetEcho(BossKind.Utsusemi, utsusemiArt, utsusemiScale);
+                emperor.SetEcho(BossKind.Shirogane, shiroganeArt, shiroganeScale);
+                return emperor;
             case BossKind.Shirogane:
                 bool ghostly = shiroganeArt == null;
                 Shirogane blade = Boss.Create<Shirogane>(ghostly ? army.samuraiByRow[Mathf.Min(1, army.samuraiByRow.Length - 1)] : shiroganeArt,
@@ -1331,6 +1376,9 @@ public class GameManager : MonoBehaviour
         public float phaseCloseupHeight;
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
         public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang;
+        // Kagetsune's callouts and summons, and the summoned souls' lines.
+        public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, chains, coffin, thousandBells,
+            summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane;
         // Lines with several takes: one is picked at random, never the one played last time.
         // A boss with stagger takes uses them instead of its single stagger clip.
         public AudioClip[] hurt, staggers, smokeRings, rosaryLash, iaido, rosaryBloom;
@@ -1361,6 +1409,22 @@ public class GameManager : MonoBehaviour
                 BossLine.CrescentSlash => crescentSlash,
                 BossLine.BladeRain => bladeRain,
                 BossLine.EclipseFang => eclipseFang,
+                BossLine.KilledOni => killedOni,
+                BossLine.CofferSlam => cofferSlam,
+                BossLine.TollOfFealty => toll,
+                BossLine.OfudaDecree => ofuda,
+                BossLine.SoulWail => wail,
+                BossLine.LastToll => lastToll,
+                BossLine.WraithSwarm => swarm,
+                BossLine.BrokenChains => chains,
+                BossLine.SoulCoffin => coffin,
+                BossLine.ThousandBells => thousandBells,
+                BossLine.SummonBenibana => summonBenibana,
+                BossLine.SummonUtsusemi => summonUtsusemi,
+                BossLine.SummonShirogane => summonShirogane,
+                BossLine.EchoBenibana => echoBenibana,
+                BossLine.EchoUtsusemi => echoUtsusemi,
+                BossLine.EchoShirogane => echoShirogane,
                 _ => null,
             };
             if (takes.Length == 0) return null;
@@ -1412,6 +1476,23 @@ public class GameManager : MonoBehaviour
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
             eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,
         },
+        BossKind.Kagetsune => new BossVoice
+        {
+            portrait = kagetsunePortrait, closeup = kagetsuneCloseup,
+            // Framed on the horned helm and its visor slit, the coffin-hammer's head running off to the right.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.48f, 0.3f), closeupAt = new Vector2(0f, 200f),
+            // The Wraith: framed on the helm and the howling skull fire, washed in the souls' teal.
+            phasePortrait = kagetsunePhasePortrait, phaseCloseup = kagetsunePhaseCloseup, phaseEpithet = Kagetsune.PhaseEpithet,
+            phaseCloseupHeight = 1400f, phaseCloseupFocus = new Vector2(0.5f, 0.32f), phaseCloseupAt = new Vector2(0f, 190f),
+            phaseColour = new Color(0.3f, 1f, 0.82f),
+            intro = kagetsuneIntroLine, phase = kagetsunePhaseLine, defeat = kagetsuneDefeatLine, stagger = kagetsuneStaggerLine,
+            killedOni = kagetsuneKilledOniLine, cofferSlam = kagetsuneCofferSlamLine, toll = kagetsuneTollLine, ofuda = kagetsuneOfudaLine,
+            wail = kagetsuneWailLine, lastToll = kagetsuneLastTollLine, swarm = kagetsuneSwarmLine, chains = kagetsuneChainsLine,
+            coffin = kagetsuneCoffinLine, thousandBells = kagetsuneThousandBellsLine, summonBenibana = kagetsuneSummonBenibanaLine,
+            summonUtsusemi = kagetsuneSummonUtsusemiLine, summonShirogane = kagetsuneSummonShiroganeLine,
+            echoBenibana = echoBenibanaLine, echoUtsusemi = echoUtsusemiLine, echoShirogane = echoShiroganeLine,
+            hurt = kagetsuneHurtLines,
+        },
         _ => default,
     };
 
@@ -1420,7 +1501,10 @@ public class GameManager : MonoBehaviour
     // the wrong move. Only a stagger cries over another bark.
     void OnBossSpoke(Boss boss, BossLine line)
     {
-        bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal;
+        // The Emperor's summons and the souls' answers are story, not barks: a gasp mustn't swallow them.
+        bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal
+            || line is BossLine.SummonBenibana or BossLine.SummonUtsusemi or BossLine.SummonShirogane
+                or BossLine.EchoBenibana or BossLine.EchoUtsusemi or BossLine.EchoShirogane;
         if (!full && voice.isPlaying && (speakingFullLine || line != BossLine.Stagger)) return;
 
         AudioClip clip = VoiceFor(Stage.boss).Take(line, lastTakes.TryGetValue(line, out int last) ? last : -1, out int take);
@@ -1436,7 +1520,7 @@ public class GameManager : MonoBehaviour
             speakingFullLine = full;
             if (full) Music.Duck(0.3f, seconds + 0.3f);
         }
-        if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(boss.Title, text, boss.Colour, seconds + 0.6f);
+        if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(boss.Speaker(line), text, boss.SpeakerColour(line), seconds + 0.6f);
     }
 
     void OnBossDamaged(Vector3 point, KillSource source)
@@ -1535,6 +1619,12 @@ public class GameManager : MonoBehaviour
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
         // working through the blow that felled her. Each boss's fall takes its own time (Shirogane's is a scene).
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
+        // The Emperor is the end: no boon, the dawn.
+        if (Stage.boss == BossKind.Kagetsune && stageIndex == stages.Length - 1)
+        {
+            yield return PlayDawn();
+            yield break;
+        }
         yield return GatherDrops();
         effects.Boss = null;
         effects.Wolf = null;
@@ -1550,6 +1640,60 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.SoulCollect);
         yield return new WaitForSeconds(0.6f);
         if (!OfferBoons(element, NextStage)) NextStage();
+    }
+
+    // The true ending. The bells are silent and the stopped hour moves: the sky warms over the field for the first
+    // time in the game, Oni walks out into it and plays the bone flute, and the second spirit wisp beside him is
+    // Shirogane's. Then the end screen.
+    IEnumerator PlayDawn()
+    {
+        effects.Boss = null;
+        activeBoss = null;
+        Boss.PhaseCard = null;
+        if (backdrop != null)
+        {
+            backdrop.SetBossMoon(false);
+            backdrop.SetDawn(true);
+        }
+        // The clock that held the hour starts again.
+        for (int i = 0; i < 3; i++)
+        {
+            Sfx.Play(Sfx.ClockTick, 0.7f, 0.8f);
+            yield return new WaitForSeconds(0.6f);
+        }
+        if (Sfx.Has(Sfx.DawnChime)) Sfx.Play(Sfx.DawnChime);
+        else Sfx.Play(Sfx.VictorySting, 0.8f, 0.8f);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
+
+        Vector3 spot = new Vector3(CameraShake.Center.x, ronin.Home.y, ronin.Home.z);
+        yield return ronin.WalkTo(spot, travelWalkSpeed * 0.35f);
+        ronin.Pose(titleFluteFrames, titleFluteFps);
+        StartCoroutine(SecondWisp());
+        yield return new WaitForSeconds(1.5f);
+        ui.ShowBanner("The bells are silent", "Dawn", "The stopped hour moves, and the souls go home.", new Color(1f, 0.72f, 0.45f));
+        yield return new WaitForSeconds(5f);
+        ui.HideBanner();
+        yield return new WaitForSeconds(1f);
+        EndGame("DAWN", "Kagetsune has fallen and his bells are silent. The sun rises over the hill,\nand Oni plays the flute one last time, with Shirogane beside him.",
+            new Color(1f, 0.72f, 0.45f), Sfx.VictorySting);
+    }
+
+    // Shirogane's soul, free at last: a pale blue-white wisp that drifts in and bobs at his shoulder.
+    IEnumerator SecondWisp()
+    {
+        var wisp = new GameObject("ShiroganeWisp").AddComponent<SpriteRenderer>();
+        wisp.sprite = ProceduralSprites.Glow;
+        wisp.sortingOrder = 8;
+        Vector3 from = ronin.Bounds.center + new Vector3(4f, 5f, 0);
+        for (float t = 0; wisp != null; t += Time.deltaTime)
+        {
+            float arrive = Mathf.SmoothStep(0, 1, Mathf.Clamp01(t / 3f));
+            Vector3 beside = ronin.Bounds.center + new Vector3(-0.9f, 0.6f + Mathf.Sin(t * 2.2f) * 0.15f, -0.2f);
+            wisp.transform.position = Vector3.Lerp(from, beside, arrive);
+            wisp.transform.localScale = Vector3.one * (0.9f + 0.1f * Mathf.Sin(t * 5f));
+            wisp.color = new Color(0.85f, 0.95f, 1f, 0.85f * arrive);
+            yield return null;
+        }
     }
 
     void NextStage()
@@ -1621,7 +1765,14 @@ public class GameManager : MonoBehaviour
         if (lives <= 0)
         {
             ronin.Explode();
-            EndGame("DEFEATED", "The ronin has fallen.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
+            // The Emperor has the last word over him.
+            string message = "The ronin has fallen.";
+            if (activeBoss is Kagetsune emperor)
+            {
+                OnBossSpoke(emperor, BossLine.KilledOni);
+                message = $"\"{emperor.Line(BossLine.KilledOni)}\"";
+            }
+            EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
         }
     }
 

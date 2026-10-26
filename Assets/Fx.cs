@@ -61,6 +61,12 @@ public static class Fx
     // The lock-on reticle that closes on the ronin before a blow that must be parried.
     public const string ShiroLockOn = "Shiro_LockOn";
 
+    // Kagetsune's: a soul-skull shot, an ofuda strip, the great bell of the Last Toll and the thrown Soul Coffin.
+    public const string KageSkull = "Kage_Skull";
+    public const string KageOfuda = "Kage_Ofuda";
+    public const string KageGreatBell = "Kage_GreatBell";
+    public const string KageCoffin = "Kage_Coffin";
+
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;
 

@@ -91,7 +91,9 @@ with "Dirty trick!" or "You dog!": short, and never as if it's their first fight
 
 Mockery, then envy, then the night she realises no bell has ever gone quiet, then telling Oni which bell is hers
 (`Benibana_Intro_Bell`). Once that line has played and he has beaten her again, her soul counts as freed for the
-ending, and in Kagetsune's phase 2 her smoke turns on the Emperor.
+ending. Until then, in Kagetsune's phase 2 he drags her soul out of the coffin to dance for him: a teal ghost of her
+looses her smoke rings and Crimson Iaido at Oni (her echo line: "Forgive me, Oni... he has my bell."). A parried
+Iaido flies back at the Emperor, not at her.
 
 ## Keep consistent
 

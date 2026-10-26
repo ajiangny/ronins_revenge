@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Role | The Emperor. Planned Stage 4 final boss. Phase 2: **The Unchained Wraith**. |
+| Role | The Emperor. Stage 4 final boss (`Assets/Kagetsune.cs`). Phase 2: **The Unchained Wraith**. |
 | Was | A mortal emperor, terrified of dying. |
 | Is | Colossal and deathless, inside an armor of a thousand sealed souls. |
 | Wants | To stay. Forever, and on his throne. |
@@ -48,26 +48,41 @@ skull flame).
   he loses is pulled back into the coffin and forged again, and so is he: the first time Oni kills him, he is
   rebuilt from the souls he still holds.
 
-## His fight (planned)
+## His fight
 
-**Arena:** no moon. A starless black sky lit only by his own teal soul-fire.
+**Stage:** "The Mountain Shrine", the stair up to the hall where the Night of a Thousand Bells was held. Its rounds
+bring every kind of soldier and his **Bellringers**, shrine guards whose tolls rouse the army to fire twice as fast;
+cutting one down silences its bell. **Arena:** no moon. The coronation courtyard under a starless black sky, lit only
+by teal soul-fire braziers and his own chest.
 
-**Phase 1.**
+Two bars of 170. He barely moves: a few heavy steps that shake the ground. Each move is slow and telegraphed.
+
+**Phase 1, the Thousand-Soul Throne.**
 
 | Move | What happens | What it means |
 |---|---|---|
-| Coffer Slam | The hammer marks a lane, then a shockwave runs down it and skulls burst from the crack. | The night the coffin opened. |
-| Toll of Fealty | His bells ring, and each toll looses a fan of soul-skull orbs. | The souls answering him. |
-| Ofuda Decree | Talisman strips drift down and seal lanes. Nothing can be parried inside a sealed lane. | Imperial law. |
-| Thousand-Soul Wail | A beam of soul-fire from his open chest. | His power, which is their pain. |
+| Coffer Slam | The hammer marks Oni's lane over three tolls, then a shockwave runs down it. The first cover in its way takes the blow and breaks; skulls leap from the crack and dive at him. | The night the coffin opened. |
+| Toll of Fealty | Three tolls (five in phase 2), each loosing a fan of soul-skulls, each fan's gaps where the last one's skulls were. | The souls answering him. |
+| Ofuda Decree | Talisman strips drift down into two lanes (three in phase 2), always one of them Oni's. Inside a sealed lane he cannot parry. A slam or a toll follows at once. | Imperial law. |
+| Thousand-Soul Wail | A beam of soul-fire from his open chest sweeps the field (there and back in phase 2), burning cover. | His power, which is their pain. |
+| The Last Toll (parry-only) | A lock-on closes on Oni and a great bronze bell drops on him, steered onto his lane. Parried, it rings against the Emperor's armor and staggers him. | His bell turned on him. |
 
-**Phase 2, the Unchained Wraith.** The coffin's chains snap and the souls inside him start fighting back. Benibana's smoke, Utsusemi's hours and
-Shirogane's blades appear as echoes that turn on *him*, each one only once that boss's story has been seen
-through (see their files). Parried skulls fly back as freed souls that strike him.
+**Phase break.** His bells clamour faster and faster and the coffin's chains snap one by one; the souls tear loose
+in a burst of skulls and his eyes turn teal.
 
-**Defeat.** The coffin bursts. The bells fall silent one by one, the teal souls rise free, the stopped hour moves
-again, and dawn breaks for the first time in the game. (Before the true ending he is rebuilt, and Oni wakes on
-his hill.)
+**Phase 2, the Unchained Wraith.** Faster, longer combos, a second slam lane, plus:
+
+| Move | What happens |
+|---|---|
+| Wraith Swarm | Waves of skull spirits wheel out of his armor and dive after Oni. Parried, a skull flies home at him as a freed soul. |
+| Broken Chains | The snapped chains lash from his shoulders, sweeping stretches of the ground. |
+| Soul Coffin (parry-only) | He hurls the coffin-hammer down on its chain. Parried, it bursts against him: a stagger, and he stands open to double damage. |
+| Night of a Thousand Bells (every sixth move) | The field goes dark and soul-fire falls down every lane but one in five waves, the safe lane stepping aside each time. Then he kneels, spent and open. |
+| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane will not kneel: her last blade falls on the Emperor. |
+
+**Defeat.** The coffin bursts. The bells fall silent one by one, each toll lower and quieter than the last, a soul
+rising free with each, and the armor sinks hollow and fades. Then the stopped hour ticks on and dawn breaks for the
+first time in the game: Oni walks out into it and plays the flute, and Shirogane's wisp settles beside him.
 
 ## Relationships
 
@@ -80,17 +95,27 @@ his hill.)
 
 ## Voice
 
-Each line opens on a single bell toll. A very deep, slow rumble, with a chorus of the souls inside him layered
-underneath (the chorus filter Utsusemi uses, pushed further). He never hurries and never shouts until phase 2,
+His designed ElevenLabs voice: an extremely deep, slow, resonant bass, as if from inside an iron helm, with a choir of
+the souls inside him layered underneath (`GameManager.TuneVoice`'s wide, slow chorus and a hall's echo). He never hurries and never shouts until phase 2,
 when the chorus starts speaking over him.
 
-## Lines (planned)
+## Lines
+
+**(in game)** lines match `Kagetsune.Line()` and `Tools/generate-voice.mjs` word for word.
 
 | Line | Text |
 |---|---|
-| Intro | "Every bell upon me is a soul that knelt, Oni. One still hangs silent... yours." |
-| Phase | "Kneel! KNEEL! You are MINE, every one of you..." |
-| Defeat | "The bells... why do they not ring...?" |
+| Intro **(in game)** | "Every bell upon me is a soul that knelt, Oni. One still hangs silent... yours." |
+| Phase **(in game)** | "Kneel! KNEEL! You are MINE, every one of you..." |
+| Defeat **(in game)** | "The bells... why do they not ring...?" |
+| Stagger **(in game)** | "You dare ring MY bell?" |
+| Hurt **(in game)** | "Insolence." / "A scratch, little demon." / "Hm." |
+| KilledOni **(in game)** | "Back to your hill, little demon. I will be here. I am always here." (also the end screen's text) |
+| Callouts **(in game)** | Coffer Slam "Bow." · Toll "Answer me." · Ofuda "By my decree." · Wail "Hear them, little demon." · Last Toll "Hear the last toll." · Swarm "Go. Fetch him." · Chains "Chains do not hold me." · Soul Coffin "Into the coffin!" · Thousand Bells "A thousand bells, Oni! Ring!" |
+| Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." |
+| The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "I do not kneel." |
+
+Planned for the reactive dialogue system:
 
 **`BossIntro` variants**
 

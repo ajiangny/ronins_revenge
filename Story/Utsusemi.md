@@ -88,7 +88,9 @@ seized...".
 
 Pure machine, then a machine that counts Oni's deaths aloud, then the monk surfacing through the gears (tea, the
 boy), then asking to be wound down (`Utsusemi_Intro_WindDown`). Once that line has played and Oni beats it again,
-the monk is freed for the ending, and in Kagetsune's phase 2 its hours strike the Emperor.
+the monk is freed for the ending. Until then, in Kagetsune's phase 2 he winds its soul up out of the coffin to strike
+the hour on Oni: three hour marks and its cleave ("The hour... strikes... Run... boy."). The parried cleave strikes
+the Emperor.
 
 ## Keep consistent
 

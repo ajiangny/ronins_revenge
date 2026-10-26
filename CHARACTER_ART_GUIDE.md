@@ -86,7 +86,7 @@ References: `Assets/Art/Portraits/Kagetsune_Full.png` (the user's concept art; d
 
 Known issue: `Kagetsune_Phase_Full.png` appears to carry a soft teal/crimson gradient backdrop rather than a clean transparent background. Next time it's revised, re-export it transparent and crisp per the four-piece set rules.
 
-Pixel sprite (not yet made): keep the horns, the hammer-on-shoulder silhouette, the bells at the waist and the teal chest glow readable at chibi scale; he should be several times the size of the other bosses on screen.
+Pixel sprite: PixelLab character "Kagetsune P1" (pro mode from `Kagetsune_Full.png`, styled on Shirogane's sprite) and its "Unchained Wraith" state, five clips each (Idle, Slam, Toll, Hit, Defeat) in `Art/Sprites/Characters/Kagetsune[Phase2]/`. It keeps the horns, the hammer-on-shoulder silhouette, the bells at the waist and the teal chest glow readable at chibi scale, and is drawn about one and a half times the other bosses' size (`BossArtSetup.KagetsuneScale`). The Wraith state burns teal at the horns and through cracks in the armor, with skull spirits about him.
 
 ## Revision and new-character workflow
 

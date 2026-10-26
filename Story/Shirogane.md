@@ -93,8 +93,9 @@ slow.", "Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... F
 ## Arc across runs
 
 A test, then reminders, then the oath given back (`Shirogane_Intro_Oath`), which also unlocks Oni's own memory of
-it. Once it has played and he beats her again, she lays down her blades for good, and in Kagetsune's phase 2 her
-ghost swords fall on the Emperor. In the true ending she is the second wisp beside Oni at sunrise.
+it. Once it has played and he beats her again, she lays down her blades for good. In Kagetsune's phase 2 he
+summons her soul to rain her ghost swords on Oni, but she is the one bell that never rang: she ends it with "I do not
+kneel," and her last blade falls on the Emperor. In the true ending she is the second wisp beside Oni at sunrise.
 
 ## Keep consistent
 

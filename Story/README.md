@@ -13,7 +13,7 @@ writing a line, a scene or art for them**, and update it when something about th
 | **Utsusemi** | The Hollow Pilgrim / The Unwound Hour | A karakuri wearing a dead monk's hat. Stage 2 boss. | [Utsusemi.md](Utsusemi.md) |
 | **Shirogane** | The Forsaken Blade / Oath of the Spectral Wolf | Oni's sworn partner, now a ghost. Stage 3 boss. | [Shirogane.md](Shirogane.md) |
 | **Kuon** | The Shrine Guardian | Shirogane's spirit wolf, her family shrine's guardian. Fought beside her in her phase 2. | [Kuon.md](Kuon.md) |
-| **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Planned Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
+| **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
 
 ## The betrayal
 
@@ -61,6 +61,11 @@ character's file): Benibana's bell goes silent, the monk's clock stops, Shirogan
 three are free and Kagetsune falls again, he can't be rebuilt. The **true ending** is dawn: the stopped hour moves,
 the sun comes up over the hill, Oni plays the flute one last time, and the second spirit wisp beside him is
 Shirogane.
+
+**As built:** there is no story save yet, so beating Kagetsune plays the true ending straight away: his bells fall
+silent one by one, the souls rise, the stopped hour ticks on and the dawn comes up over the arena while Oni plays the
+flute with Shirogane's wisp beside him (`GameManager.PlayDawn`). The rebuilt-Emperor first win is for when runs carry
+over.
 
 ## Consistency rules
 

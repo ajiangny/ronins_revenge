@@ -10,7 +10,7 @@ using UnityEngine;
 // Bells, and the souls of the three bosses summoned out of the coffin to use their own moves on Oni.
 public class Kagetsune : Boss
 {
-    public const int StartingHealth = 170;
+    public const int StartingHealth = 210;
     public const string PhaseEpithet = "The Unchained Wraith";
 
     static readonly Color Crimson = new Color(0.78f, 0.1f, 0.14f);
@@ -25,11 +25,11 @@ public class Kagetsune : Boss
     // In phase 2 a summoned soul comes at least this often, and the Night of a Thousand Bells every UltimateEvery moves.
     const int EchoAtLatest = 3;
     const int UltimateEvery = 6;
-    const float ExposedSeconds = 2.2f;
+    const float ExposedSeconds = 1.8f;
 
-    float Recovery => secondPhase ? 0.6f : 1.05f;
-    float ComboChance => secondPhase ? 0.55f : 0.35f;
-    int MaxCombo => secondPhase ? 3 : 2;
+    float Recovery => secondPhase ? (lastBell ? 0.35f : 0.45f) : 0.8f;
+    float ComboChance => secondPhase ? 0.65f : 0.5f;
+    int MaxCombo => secondPhase ? 4 : 3;
     float ShotSpeed => secondPhase ? 1.2f : 1f;
 
     public override string Title => "KAGETSUNE";
@@ -111,8 +111,9 @@ public class Kagetsune : Boss
 
     protected override bool HasSecondPhase => true;
     protected override bool Busy => breaking || ultimate;
-    protected override float StaggerSeconds => secondPhase ? 1.7f : 2.2f;
-    protected override int DamageMultiplier => Time.time < exposedUntil ? 2 : 1;
+    protected override float StaggerSeconds => secondPhase ? 1.4f : 1.8f;
+    // Open is double damage, but not on top of a stagger's own double: the best burst is ×2, not ×4.
+    protected override int DamageMultiplier => Time.time < exposedUntil && !Staggered ? 2 : 1;
     public override float DefeatSeconds => 11f;
 
     // The bosses whose souls he can summon: their art and the scale each is drawn at.
@@ -213,7 +214,7 @@ public class Kagetsune : Boss
                 yield return Play(move);
                 // The ultimate ends the combo.
                 if (move == Move.ThousandBells) i = combo;
-                yield return Wait(secondPhase ? 0.25f : 0.4f);
+                yield return Wait(secondPhase ? 0.2f : 0.3f);
             }
         }
     }

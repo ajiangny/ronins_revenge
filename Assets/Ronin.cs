@@ -69,6 +69,8 @@ public class Ronin : MonoBehaviour
     public event Action<Vector3, Kunai> ShurikenThrown;
     // Raised once per parry, on the first arrow it deflects.
     public event Action Parried;
+    // Raised when a parry meets a shot it can't turn (a crimson seal-dart), once per parry.
+    public event Action ParryFizzled;
 
     public bool ControlsEnabled { get; set; }
     // God mode from the dev menu: nothing can hurt him.
@@ -117,6 +119,7 @@ public class Ronin : MonoBehaviour
     // A parry sends back at most this many of a curtain's bullets (Arrow.CappedRiposte); the rest burst harmlessly.
     const int RiposteCap = 3;
     int cappedRipostes;
+    bool parryFizzled;
     float minOffsetX, maxOffsetX, centerOffsetX, topOffset;
     float lastShot = float.NegativeInfinity;
     // Swings since Kindling's last fireball.
@@ -408,6 +411,7 @@ public class Ronin : MonoBehaviour
         parryUntil = Time.time + parryWindow;
         parryLanded = false;
         cappedRipostes = 0;
+        parryFizzled = false;
         Sfx.Play(Sfx.ParrySwing);
         // The slash sweeps over his head, where the arrows come from.
         if (Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, parryColor, 0.7f), 1.15f, transform) == null)
@@ -544,7 +548,15 @@ public class Ronin : MonoBehaviour
             Arrow arrow = parryBuffer[i].GetComponentInParent<Arrow>();
             if (arrow == null) continue;
             // The blade meets a seal-dart and fizzles; the dart flies on.
-            if (arrow.Unparryable) SealedParry();
+            if (arrow.Unparryable)
+            {
+                SealedParry();
+                if (!parryFizzled)
+                {
+                    parryFizzled = true;
+                    ParryFizzled?.Invoke();
+                }
+            }
             else Deflect(arrow);
         }
     }

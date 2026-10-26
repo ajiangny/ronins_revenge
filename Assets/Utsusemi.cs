@@ -661,7 +661,22 @@ public class Utsusemi : Boss
             HitIfCrossed(Eye, spot);
         });
         EndBeam(beam);
+        ShedShards(spot);
         yield return HoldArmor(shell, 0.1f);
+    }
+
+    // The laser leaves three red-hot shards spinning off its line, which rain back down round the mark. They're
+    // crimson, and no parry turns them: the first lesson that some blows can only be dodged.
+    void ShedShards(Vector3 spot)
+    {
+        Vector3 from = Vector3.Lerp(spot, Eye, 0.3f);
+        for (int i = -1; i <= 1; i++)
+        {
+            Arrow shard = BulletHell.Enlist(Shoot(from, new Vector3(i * 3f, -6f, 0)), capped: false);
+            BulletHell.MakeSealDart(shard, new Color(1f, 0.35f, 0.2f));
+            shard.PassesCover = false;
+        }
+        Sfx.Play(Sfx.BladeChop, 0.4f, 1.6f);
     }
 
     Vector3 Spot(float x) => new Vector3(x, GroundY + 0.15f, 0);

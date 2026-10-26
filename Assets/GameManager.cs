@@ -332,6 +332,8 @@ public class GameManager : MonoBehaviour
     bool soulCaught;
     FxPlayer aura;
     bool hitStopping;
+    // The crimson-shot hint shows once a session.
+    bool toldUnparryable;
     Scout activeScout;
     float nextScoutTime;
     Boss activeBoss;
@@ -423,6 +425,7 @@ public class GameManager : MonoBehaviour
         ronin.Hit += OnRoninHit;
         ronin.ShurikenThrown += OnShurikenThrown;
         ronin.Parried += OnParried;
+        ronin.ParryFizzled += OnParryFizzled;
         ronin.RiposteImpact += OnRiposteImpact;
         ronin.FireballImpact += OnFireballImpact;
         ronin.RiposteTarget = RandomEnemy;
@@ -841,6 +844,14 @@ public class GameManager : MonoBehaviour
         // Thunder Riposte can strike down the army's last samurai, which already moved on to the next stage
         // or the victory screen; freezing then would stall the stage intro.
         if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(parryHitStop));
+    }
+
+    // The first time a parry meets a crimson shot it can't turn, the game says so once.
+    void OnParryFizzled()
+    {
+        if (toldUnparryable || state != State.Playing) return;
+        toldUnparryable = true;
+        ui.ShowSubtitle(null, "Some blows can't be turned. Dodge the crimson.", BulletHell.Crimson, 3f);
     }
 
     void OnStatueShattered(Vector3 position)

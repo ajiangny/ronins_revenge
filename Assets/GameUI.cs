@@ -58,14 +58,6 @@ public class GameUI : MonoBehaviour
     float shownBossHealth = 1f;
     float bossHealth = 1f;
 
-    // A companion's health (Shirogane's wolf, Kuon) as a thin strip along the foot of the boss bar.
-    GameObject wolfStrip;
-    RectTransform wolfFill;
-    RectTransform wolfTrail;
-    Image wolfFillImage;
-    float shownWolfHealth = 1f;
-    float wolfHealth = 1f;
-
     RectTransform subtitlePlate;
     TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
@@ -193,11 +185,6 @@ public class GameUI : MonoBehaviour
         shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
         bossFill.anchorMax = new Vector2(bossHealth, 1f);
         bossTrail.anchorMax = new Vector2(shownBossHealth, 1f);
-
-        if (!wolfStrip.activeSelf) return;
-        shownWolfHealth = Mathf.MoveTowards(shownWolfHealth, wolfHealth, Time.unscaledDeltaTime * 0.6f);
-        wolfFill.anchorMax = new Vector2(wolfHealth, 1f);
-        wolfTrail.anchorMax = new Vector2(shownWolfHealth, 1f);
     }
 
     RectTransform bossTrail;
@@ -220,25 +207,6 @@ public class GameUI : MonoBehaviour
     public void SetBossHealth(float fraction)
     {
         bossHealth = Mathf.Clamp01(fraction);
-    }
-
-    // The companion's strip inside the boss bar, in its own colour, from full.
-    public void ShowWolfBar(Color colour)
-    {
-        wolfFillImage.color = colour;
-        wolfHealth = shownWolfHealth = 1f;
-        wolfFill.anchorMax = wolfTrail.anchorMax = Vector2.one;
-        wolfStrip.SetActive(true);
-    }
-
-    public void SetWolfHealth(float fraction)
-    {
-        wolfHealth = Mathf.Clamp01(fraction);
-    }
-
-    public void HideWolfBar()
-    {
-        wolfStrip.SetActive(false);
     }
 
     // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour.
@@ -506,7 +474,6 @@ public class GameUI : MonoBehaviour
     public void HideBossBar()
     {
         bossBar.SetActive(false);
-        wolfStrip.SetActive(false);
     }
 
     // A compact strip hugging the top edge, name over a thin bar, so the bosses' heads and raised weapons (the
@@ -526,22 +493,6 @@ public class GameUI : MonoBehaviour
         Style(bossName, TextStyle.Heading);
         bossBar = frame.gameObject;
         bossBar.SetActive(false);
-
-        // The companion's strip: a dark band along the bottom of the bar's inside, over the boss's own fill, with
-        // its own trail and fill.
-        RectTransform strip = CreateRect("WolfStrip", back, Vector2.zero, Vector2.zero, Vector2.zero);
-        strip.anchorMin = Vector2.zero;
-        strip.anchorMax = new Vector2(1f, 0f);
-        strip.pivot = new Vector2(0.5f, 0f);
-        strip.offsetMin = Vector2.zero;
-        strip.offsetMax = new Vector2(0f, 5f);
-        strip.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.03f, 0.05f, 0.95f);
-        wolfTrail = Stretch(CreateRect("Trail", strip, Vector2.zero, Vector2.zero, Vector2.zero));
-        wolfTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
-        wolfFill = Stretch(CreateRect("Fill", strip, Vector2.zero, Vector2.zero, Vector2.zero));
-        wolfFillImage = wolfFill.gameObject.AddComponent<Image>();
-        wolfStrip = strip.gameObject;
-        wolfStrip.SetActive(false);
     }
 
     static RectTransform Stretch(RectTransform rect)

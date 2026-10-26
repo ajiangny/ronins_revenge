@@ -16,7 +16,9 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     CofferSlam, TollOfFealty, OfudaDecree, SoulWail, LastToll, WraithSwarm, BrokenChains, SoulCoffin, ThousandBells,
     SummonBenibana, SummonUtsusemi, SummonShirogane, EchoBenibana, EchoUtsusemi, EchoShirogane,
     // His line over the ronin when he falls to him.
-    KilledOni }
+    KilledOni,
+    // Shirogane's word to Kuon when she falls before it does.
+    KuonEnraged }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -44,8 +46,12 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Set by the GameManager: a brief freeze of the whole game, for a blow that deserves weight (a parry-only move
     // sent home).
     public static System.Action<float> HitStop;
+    // Set by the GameManager: renames the boss bar mid-fight (a partner joins, or one of a pair falls).
+    public static System.Action<string> RenameBar;
 
     public abstract string Title { get; }
+    // The name on the bar from the phase card on (Shirogane shares hers with Kuon).
+    public virtual string PhaseTitle => Title;
     public abstract string Epithet { get; }
     public abstract Color Colour { get; }
 
@@ -80,7 +86,11 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Damage let through super armour that hasn't yet added up to a whole hit point.
     float armorChip;
     public float HealthFraction => (float)Health / MaxHealth;
+    // What the HUD bar shows: her own health, unless she shares the bar with a partner (Shirogane and Kuon).
+    public virtual float BarFraction => HealthFraction;
     public bool IsDead { get; private set; }
+    // Beaten while a partner fights on: out of the fight, can't be hit or targeted, but not yet fallen.
+    public bool Down { get; private set; }
     // Bosses with a second phase have two bars: emptying the first starts a phase break that refills it.
     protected virtual bool HasSecondPhase => false;
     public bool SecondPhase { get; private set; }
@@ -186,9 +196,21 @@ public abstract class Boss : MonoBehaviour, IHittable
         fighting = false;
         StopAllCoroutines();
         ClearTransient();
+        OnCleared();
     }
 
     protected abstract IEnumerator Fight();
+
+    // Called when the fight is torn down for good (a halt or her fall), for anything a subclass keeps outside
+    // `transient`.
+    protected virtual void OnCleared() { }
+
+    // In her second phase, an empty bar puts her Down instead of killing her while this is true (a partner still
+    // fights); she is finished later with Defeat.
+    protected virtual bool HoldOnAtZero => false;
+
+    // She has just gone Down: her fight is stopped and her hitbox is off.
+    protected virtual void OnDowned() { }
 
     // Called after every hit that leaves the boss standing.
     protected virtual void OnDamaged() { }
@@ -206,7 +228,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         if (fight != null) StopCoroutine(fight);
         lastBeat = Time.time;
-        fight = fighting && !IsDead ? StartCoroutine(Fight()) : null;
+        fight = fighting && !IsDead && !Down ? StartCoroutine(Fight()) : null;
     }
 
     // Fight loops call this each time they start a move, to show the watchdog they're alive.
@@ -240,7 +262,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     // fight, the boss notices it has stopped moving and starts over.
     void Update()
     {
-        if (!fighting || IsDead || PhaseBreaking || Busy || Staggered || Frozen)
+        if (!fighting || IsDead || Down || PhaseBreaking || Busy || Staggered || Frozen)
         {
             lastBeat = Time.time;
             return;
@@ -494,7 +516,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public void Freeze(float seconds)
     {
-        if (SuperArmor || PhaseBreaking) return;
+        if (SuperArmor || PhaseBreaking || Down) return;
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
     }
 
@@ -502,7 +524,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Without the cry, for a stagger the boss has her own line for (Shirogane when her wolf falls).
     public void Stagger(float seconds, bool cry = true)
     {
-        if (IsDead || SuperArmor || PhaseBreaking) return;
+        if (IsDead || Down || SuperArmor || PhaseBreaking) return;
         Interrupt();
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
@@ -538,7 +560,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     public void TakeHit(int damage, KillSource source)
     {
-        if (IsDead || PhaseBreaking) return;
+        if (IsDead || Down || PhaseBreaking) return;
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
         if (SuperArmor)
@@ -562,11 +584,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         Damaged?.Invoke(point, source);
         // A boon's on-hit effect lands its own TakeHit from inside Damaged; if that nested hit already broke the
         // phase (or killed), this one must not act on the empty bar again and kill outright.
-        if (IsDead || PhaseBreaking) return;
+        if (IsDead || Down || PhaseBreaking) return;
 
         if (Health <= 0)
         {
             if (HasSecondPhase && !SecondPhase) StartCoroutine(BreakPhase());
+            else if (HoldOnAtZero) GoDown();
             else Die();
             return;
         }
@@ -612,12 +635,29 @@ public abstract class Boss : MonoBehaviour, IHittable
         done();
     }
 
+    // Out of the fight but not fallen: her moves stop and nothing can hit her until Defeat finishes her.
+    void GoDown()
+    {
+        Down = true;
+        staggeredUntil = frozenUntil = 0;
+        Interrupt();
+        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
+        OnDowned();
+    }
+
+    // Finishes a boss that went Down, once whatever kept her in the fight has fallen too.
+    protected void Defeat()
+    {
+        if (!IsDead) Die();
+    }
+
     void Die()
     {
         IsDead = true;
         fighting = false;
         StopAllCoroutines();
         ClearTransient();
+        OnCleared();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Defeated?.Invoke();
         Speak(BossLine.Defeat);

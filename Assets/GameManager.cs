@@ -357,6 +357,7 @@ public class GameManager : MonoBehaviour
         {
             if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(seconds));
         };
+        Boss.RenameBar = name => ui.RenameBossBar(name);
         // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects. It sits on its
         // own child so the machine-voice filters only ever touch it.
         backdrop = FindAnyObjectByType<Backdrop>();
@@ -890,7 +891,7 @@ public class GameManager : MonoBehaviour
             if (!samurai.IsDead) enemies.Add(samurai.transform);
         }
         if (activeScout != null && activeScout.GetComponentInChildren<Collider>() is { enabled: true }) enemies.Add(activeScout.transform);
-        if (activeBoss != null && !activeBoss.IsDead) enemies.Add(activeBoss.transform);
+        if (activeBoss != null && !activeBoss.IsDead && !activeBoss.Down) enemies.Add(activeBoss.transform);
         if (activeWolf != null && activeWolf.Targetable) enemies.Add(activeWolf.transform);
         return enemies.Count > 0 ? enemies[Random.Range(0, enemies.Count)] : null;
     }
@@ -1277,7 +1278,7 @@ public class GameManager : MonoBehaviour
         TuneVoice(Stage.boss);
         activeBoss.Damaged += OnBossDamaged;
         Boss boss = activeBoss;
-        boss.Healed += () => ui.SetBossHealth(boss.HealthFraction);
+        boss.Healed += () => ui.SetBossHealth(boss.BarFraction);
         activeBoss.Defeated += OnBossDefeated;
         activeBoss.Spoke += OnBossSpoke;
         effects.Boss = activeBoss;
@@ -1324,7 +1325,7 @@ public class GameManager : MonoBehaviour
         yield return ui.PlayBossIntro(lines.phasePortrait, lines.phaseCloseup, lines.phaseCloseupHeight, lines.phaseCloseupFocus,
             lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, boss.Line(BossLine.Phase));
         // The bar carries the name the card just announced.
-        ui.RenameBossBar($"{boss.Title}, {lines.phaseEpithet}");
+        ui.RenameBossBar($"{boss.PhaseTitle}, {lines.phaseEpithet}");
     }
 
     Boss CreateBoss(BossKind kind, Vector3 position)
@@ -1545,7 +1546,7 @@ public class GameManager : MonoBehaviour
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        ui.SetBossHealth(activeBoss.HealthFraction);
+        ui.SetBossHealth(activeBoss.BarFraction);
         if (state != State.Playing || source == KillSource.Effect) return;
 
         if (source == KillSource.Reflected)
@@ -1565,15 +1566,13 @@ public class GameManager : MonoBehaviour
         effects.OnBossHit(point, source);
     }
 
-    // Kuon takes the field at her phase break: its bar goes up over hers, and it can be hit until it breaks.
+    // Kuon takes the field at her phase break: it shares her bar, and it can be hit until it breaks.
     void OnWolfJoined(SpiritWolf wolf)
     {
         activeWolf = wolf;
         effects.Wolf = wolf;
         wolf.Damaged += OnWolfDamaged;
         wolf.Broken += OnWolfBroken;
-        // Kuon's strip sits inside her bar, paler than her own fill so the two read apart.
-        ui.ShowWolfBar(new Color(0.85f, 0.97f, 1f));
     }
 
     void OnWolfDamaged(Vector3 point, KillSource source)
@@ -1581,7 +1580,7 @@ public class GameManager : MonoBehaviour
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        if (activeWolf != null) ui.SetWolfHealth(activeWolf.HealthFraction);
+        if (activeBoss != null) ui.SetBossHealth(activeBoss.BarFraction);
         if (state != State.Playing || source == KillSource.Effect) return;
 
         if (source == KillSource.Reflected)
@@ -1600,14 +1599,13 @@ public class GameManager : MonoBehaviour
         effects.OnWolfHit(point, source);
     }
 
-    // Kuon is broken: its bar goes, and she fights on alone.
+    // Kuon is broken: its share of the bar is gone, and she fights on enraged (or, if she was already down, falls).
     void OnWolfBroken()
     {
         score += 750 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        ui.SetWolfHealth(0f);
-        ui.HideWolfBar();
+        if (activeBoss != null) ui.SetBossHealth(activeBoss.BarFraction);
         if (!hitStopping) StartCoroutine(HitStop(0.2f));
         CameraShake.Add(0.5f);
         effects.Wolf = null;

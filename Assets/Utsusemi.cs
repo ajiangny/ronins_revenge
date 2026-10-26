@@ -1651,7 +1651,7 @@ public class Utsusemi : Boss
             for (float step = 0; step <= 1f; step += SweepCheckStep / Mathf.Max(Mathf.Abs(x - lastX), SweepCheckStep))
             {
                 Vector3 between = BeamEnd(Mathf.Lerp(lastX, x, step), out Blocker shade);
-                if (shade == null) HitIfCrossed(Core, between);
+                if (shade == null) BeamHit(Core, between);
             }
             lastX = x;
             yield return null;
@@ -1806,6 +1806,16 @@ public class Utsusemi : Boss
         HideShelter();
     }
 
+    // A beam that crosses the ronin's height burns him, unless he stands within the planted sword's ward: the whole
+    // ward is his cover, not just the shade the blade casts.
+    void BeamHit(Vector3 from, Vector3 end)
+    {
+        if (InSwordWard(ronin.Bounds.center.x)) return;
+        HitIfCrossed(from, end);
+    }
+
+    bool InSwordWard(float x) => plantedSword != null && Mathf.Abs(x - plantedSword.transform.position.x) <= SwordCoverWidth / 2f;
+
     // The stretch of the row nearest the sword that none of the sweeps' unblocked rays come within reach of.
     bool ShelterSpan(ShelterSweep[] sweeps, float rowY, float swordX, out float lo, out float hi)
     {
@@ -1824,6 +1834,11 @@ public class Utsusemi : Boss
                 int b = Mathf.Min(cells - 1, Mathf.CeilToInt((crossX + BeamReach - left) / ShelterStep));
                 for (int i = a; i <= b; i++) danger[i] = true;
             }
+        }
+        // The sword's ward is safe ground whatever the rays do.
+        for (int i = 0; i < cells; i++)
+        {
+            if (InSwordWard(left + i * ShelterStep)) danger[i] = false;
         }
         // The safe run closest to the sword.
         lo = hi = swordX;
@@ -1881,7 +1896,7 @@ public class Utsusemi : Boss
         Vector3 end = BeamEnd(from, x, out Blocker cover);
         DrawBeam(hand, from, end, flash, cover == null);
         if (cover != null) BurnCover(hand, cover, end);
-        else HitIfCrossed(from, end);
+        else BeamHit(from, end);
     }
 
     // The ronin's spot on the ground, kept at least margin inside the screen.

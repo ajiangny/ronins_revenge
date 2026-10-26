@@ -82,6 +82,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] titleFluteFrames;
     [Tooltip("Frames per second for the title screen's flute loop.")]
     [SerializeField] float titleFluteFps = 4f;
+    [Tooltip("The ronin putting his flute away and getting up, played once when START is chosen. Empty skips to the walk.")]
+    [SerializeField] Sprite[] titleStandFrames;
+    [Tooltip("Frames per second for the stand-up.")]
+    [SerializeField] float titleStandFps = 8f;
+    [Tooltip("How fast the ronin walks from his seat to the middle of his row after START, in world units a second.")]
+    [SerializeField] float titleWalkSpeed = 6f;
+    [Tooltip("Seconds the title page takes to fade into the first stage's field as he walks.")]
+    [SerializeField] float titleFadeTime = 2.2f;
     [Tooltip("One entry per element: Fire, Water, Lightning.")]
     [SerializeField] ElementArt[] elementArt = new ElementArt[3];
 
@@ -503,12 +511,7 @@ public class GameManager : MonoBehaviour
     {
         var items = new List<MenuUI.Item>
         {
-            MenuUI.Item.Button("START", () =>
-            {
-                menu.Hide();
-                SetHudVisible(true);
-                StartGame();
-            }),
+            MenuUI.Item.Button("START", () => StartCoroutine(TitleToGame())),
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTitleMenu)),
         };
@@ -528,14 +531,80 @@ public class GameManager : MonoBehaviour
     {
         Sprite[] frames = titleFluteFrames != null && titleFluteFrames.Length > 0 ? titleFluteFrames : baseRoninArt != null ? baseRoninArt.idle : null;
         Camera cam = Camera.main;
-        float halfWidth = cam.orthographicSize * cam.aspect;
-        Vector3 seat = new Vector3(CameraShake.Center.x - halfWidth + 1.8f, ronin.ArtBounds.min.y, 0f);
         var canvas = (RectTransform)ui.transform;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvas, cam.WorldToScreenPoint(seat), null, out Vector2 feet);
         float canvasPerWorld = canvas.rect.height / (2f * cam.orthographicSize);
         // Notes rise from the flute's tip, beside his mouth, when he's playing it.
         bool flute = titleFluteFrames != null && titleFluteFrames.Length > 0;
-        menu.ShowFigure(frames, titleFluteFps, feet, ronin.ArtPixelSize * canvasPerWorld, flute ? FluteTip : (Vector2?)null);
+        menu.ShowFigure(frames, titleFluteFps, CanvasPoint(TitleSeat()), ronin.ArtPixelSize * canvasPerWorld, flute ? FluteTip : (Vector2?)null);
+    }
+
+    // Where the title ronin's feet rest in the world: 1.8 units in from the left edge, on his own row.
+    Vector3 TitleSeat()
+    {
+        Camera cam = Camera.main;
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        return new Vector3(CameraShake.Center.x - halfWidth + 1.8f, ronin.ArtBounds.min.y, 0f);
+    }
+
+    Vector2 CanvasPoint(Vector3 world)
+    {
+        RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)ui.transform, Camera.main.WorldToScreenPoint(world), null, out Vector2 local);
+        return local;
+    }
+
+    // START: the ronin puts his flute away and gets up, then walks to the middle of his row while the paper page
+    // fades into the first stage's field, and the run begins. The title figure is a UI image over the paper, so it
+    // follows the real ronin (frame and position) until the paper is gone, then hands over to him. Any key skips.
+    IEnumerator TitleToGame()
+    {
+        state = State.Transition;
+        menu.LeaveTitle();
+        Music.Stop(1.5f);
+        bool skipped = false;
+        // The press that chose START mustn't also skip.
+        yield return null;
+
+        bool stood = false;
+        menu.PlayFigureOnce(titleStandFrames, titleStandFps, () => stood = true);
+        while (!stood && !(skipped = SkipPressed())) yield return null;
+
+        Vector3 seat = TitleSeat();
+        ronin.PlaceAt(new Vector3(seat.x, ronin.Home.y, ronin.Home.z));
+        bool walked = false;
+        StartCoroutine(Then(ronin.WalkTo(ronin.Home, titleWalkSpeed, baseRoninArt.runRight, baseRoninArt.runFps * 0.7f), () => walked = true));
+        Coroutine fade = StartCoroutine(menu.FadePaper(skipped ? 0.3f : titleFadeTime));
+        while (!walked || menu.IsOpen)
+        {
+            if (!skipped && SkipPressed())
+            {
+                skipped = true;
+                StopCoroutine(fade);
+                menu.Hide();
+            }
+            if (skipped) ronin.FinishWalk();
+            Bounds art = ronin.ArtBounds;
+            if (menu.IsOpen) menu.PlaceFigure(ronin.CurrentFrame, CanvasPoint(new Vector3(art.center.x, art.min.y, 0f)));
+            yield return null;
+        }
+        menu.HideFigure();
+        SetHudVisible(true);
+        StartGame();
+    }
+
+    static bool SkipPressed()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Gamepad gamepad = Gamepad.current;
+        Mouse mouse = Mouse.current;
+        return (keyboard != null && keyboard.anyKey.wasPressedThisFrame)
+            || (gamepad != null && (gamepad.buttonSouth.wasPressedThisFrame || gamepad.startButton.wasPressedThisFrame))
+            || (mouse != null && mouse.leftButton.wasPressedThisFrame);
+    }
+
+    static IEnumerator Then(IEnumerator routine, System.Action after)
+    {
+        yield return routine;
+        after();
     }
 
     // The title screen keeps the playfield clear of score, lives and ability slots.

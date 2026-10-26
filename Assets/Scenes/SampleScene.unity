@@ -503,6 +503,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6ff6bdcad28f04f1a9933576f1f65568, type: 3}
   - {fileID: 21300000, guid: 91e4878d3321c4fb9933fd6981f1775c, type: 3}
   titleFluteFps: 4
+  titleStandFrames:
+  - {fileID: 21300000, guid: 959f23ec7f9c453a90602fa7974f30b8, type: 3}
+  - {fileID: 21300000, guid: 750ec55f72464a54bffd2d5ac48b289c, type: 3}
+  - {fileID: 21300000, guid: 0a974c1a61514388aef14bcf96ce0787, type: 3}
+  - {fileID: 21300000, guid: 153a56fedf7e40968f2c32a4052c3c53, type: 3}
+  - {fileID: 21300000, guid: e2a0337316e94774b326d255fc5eba96, type: 3}
+  - {fileID: 21300000, guid: 944233f1aef84c759a759f5250243e23, type: 3}
+  - {fileID: 21300000, guid: 3d46cbc2d3024fa29abdbe5a93b53b2e, type: 3}
+  - {fileID: 21300000, guid: c57af3a6022b4440bbded67394cabea6, type: 3}
+  - {fileID: 21300000, guid: 1fd3bd4b0419434f865f2a4b67f0953a, type: 3}
+  titleStandFps: 8
+  titleWalkSpeed: 6
+  titleFadeTime: 2.2
   elementArt:
   - element: 0
     soulFrames:

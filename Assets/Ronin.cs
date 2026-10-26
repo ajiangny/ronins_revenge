@@ -91,6 +91,7 @@ public class Ronin : MonoBehaviour
     // sprite's pivot, so effects anchored here (aura, frost wave, boon pillar) line up with him.
     // The drawn sprite's extent, and the world size of one of its art pixels, for drawing him elsewhere at the same scale.
     public Bounds ArtBounds => sprite.bounds;
+    public Sprite CurrentFrame => sprite.sprite;
     public float ArtPixelSize => sprite.transform.lossyScale.y / sprite.sprite.pixelsPerUnit;
     public Vector3 Feet => sprite.transform.position + Vector3.up * (FeetAbovePivotPx / sprite.sprite.pixelsPerUnit * sprite.transform.lossyScale.y);
 
@@ -108,6 +109,7 @@ public class Ronin : MonoBehaviour
 
     Rigidbody body;
     SpriteRenderer sprite;
+    bool hurry;
     SpriteRenderer shadow;
     SpriteRenderer shadowGlow;
     SpriteRenderer aura;
@@ -495,22 +497,26 @@ public class Ronin : MonoBehaviour
 
     // Walks him to a spot on his own while his controls are off, to leave one map and enter the next. He passes
     // through cover, and nothing can hit him on the way.
-    public IEnumerator WalkTo(Vector3 target, float walkSpeed)
+    public IEnumerator WalkTo(Vector3 target, float walkSpeed) => WalkTo(target, walkSpeed, art.walkUp, art.walkFps);
+
+    // The same walk on a clip of the caller's choosing, e.g. his run frames slowed down to cross the screen sideways.
+    public IEnumerator WalkTo(Vector3 target, float walkSpeed, Sprite[] frames, float fps)
     {
         walking = true;
         actionPlaying = true;
         SetTouchable(false);
         // Without walk frames he bobs along on his idle loop.
-        bool bob = art.walkUp == null || art.walkUp.Length == 0;
-        animator.Play(bob ? art.idle : art.walkUp, true, null, bob ? art.idleFps : art.walkFps);
+        bool bob = frames == null || frames.Length == 0;
+        animator.Play(bob ? art.idle : frames, true, null, bob ? art.idleFps : fps);
         Transform look = sprite.transform;
         Vector3 rest = look.localPosition;
         Vector3 at = body.position;
+        hurry = false;
         for (float t = 0f; at != target;)
         {
             yield return new WaitForFixedUpdate();
             t += Time.fixedDeltaTime;
-            at = Vector3.MoveTowards(at, target, walkSpeed * Time.fixedDeltaTime);
+            at = hurry ? target : Vector3.MoveTowards(at, target, walkSpeed * Time.fixedDeltaTime);
             body.MovePosition(at);
             if (bob) look.localPosition = rest + Vector3.up * (Mathf.Abs(Mathf.Sin(t * 9f)) * 0.12f / transform.lossyScale.y);
         }
@@ -519,6 +525,9 @@ public class Ronin : MonoBehaviour
         walking = false;
         EndAction();
     }
+
+    // Ends a WalkTo on its next step, standing him on its target (a skipped cutscene).
+    public void FinishWalk() => hurry = walking;
 
     // Holds him in a looping pose of his own (the flute at dawn) for the rest of the scene.
     public void Pose(Sprite[] frames, float fps)

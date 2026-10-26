@@ -78,6 +78,11 @@ public class MenuUI : MonoBehaviour
     float notePixel;
     float nextNoteAt;
     int nextNoteKind;
+    float figurePixel;
+    // Set once START is chosen: the title page stops taking input while its logo and rows fade, then the paper
+    // itself fades to show the field.
+    bool leaving;
+    float leftAt;
     int selected;
     int heardSelection;
     float shownAt;
@@ -150,6 +155,7 @@ public class MenuUI : MonoBehaviour
         back = null;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
+        leaving = false;
         SetLight(true);
 
         bool art = ui.TitleLogo != null;
@@ -181,6 +187,7 @@ public class MenuUI : MonoBehaviour
         foreach (var note in liveNotes) Release(note.image);
         liveNotes.Clear();
         notePixel = notesFrom.HasValue ? pixelSize : 0f;
+        figurePixel = pixelSize;
         bool shown = frames != null && frames.Length > 0;
         figure.gameObject.SetActive(shown);
         if (!shown) return;
@@ -194,6 +201,56 @@ public class MenuUI : MonoBehaviour
             noteSource = feet + new Vector2(notesFrom.Value.x - size.x / 2f, size.y - notesFrom.Value.y) * pixelSize;
             nextNoteAt = Time.unscaledTime + 0.6f;
         }
+    }
+
+    // Plays `frames` once on the title figure (the ronin getting up), holding the last frame, then calls `onDone`.
+    // The figure keeps its feet where they were, so clips on a different canvas size still stand on the same row.
+    public void PlayFigureOnce(Sprite[] frames, float fps, Action onDone)
+    {
+        notePixel = 0f;
+        if (frames == null || frames.Length == 0 || !figure.gameObject.activeSelf)
+        {
+            onDone?.Invoke();
+            return;
+        }
+        figure.sprite = frames[0];
+        figure.rectTransform.sizeDelta = frames[0].rect.size * figurePixel;
+        figureAnimator.PlayOnce(frames, fps, onDone);
+    }
+
+    public void HideFigure()
+    {
+        figureAnimator.Play(null, 0f);
+        figure.gameObject.SetActive(false);
+    }
+
+    // Fades the title page's logo, rows and hint out and stops taking input; the paper stays until FadePaper.
+    public void LeaveTitle()
+    {
+        leaving = true;
+        leftAt = Time.unscaledTime;
+    }
+
+    // Fades the paper away over `seconds` of unscaled time to reveal the field under it, then closes the page.
+    public System.Collections.IEnumerator FadePaper(float seconds)
+    {
+        for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+        {
+            float k = t / seconds;
+            paper.color = new Color(Paper.r, Paper.g, Paper.b, 1f - k * k * (3f - 2f * k));
+            yield return null;
+        }
+        Hide();
+    }
+
+    // Shows one frame on the title figure with its feet at `feet`, for when it follows the real ronin.
+    public void PlaceFigure(Sprite frame, Vector2 feet)
+    {
+        if (frame == null) return;
+        figureAnimator.Play(null, 0f);
+        figure.sprite = frame;
+        figure.rectTransform.sizeDelta = frame.rect.size * figurePixel;
+        figure.rectTransform.anchoredPosition = feet;
     }
 
     static readonly Vector2 LogoCentre = new Vector2(0f, 250f);
@@ -249,6 +306,8 @@ public class MenuUI : MonoBehaviour
     public void Hide()
     {
         if (page != null) page.gameObject.SetActive(false);
+        leaving = false;
+        if (paper != null) paper.color = Paper;
     }
 
     void Update()
@@ -261,7 +320,7 @@ public class MenuUI : MonoBehaviour
 
         float elapsed = Time.unscaledTime - shownAt;
         Animate(elapsed);
-        if (elapsed < InputDelay || items.Length == 0) return;
+        if (leaving || elapsed < InputDelay || items.Length == 0) return;
 
         Keyboard keyboard = Keyboard.current;
         Gamepad gamepad = Gamepad.current;
@@ -341,8 +400,10 @@ public class MenuUI : MonoBehaviour
         {
             // The logo settles in from slightly large while it fades up.
             float rise = EaseOut(Mathf.Clamp01(elapsed / 0.9f));
-            titleArt.color = new Color(1f, 1f, 1f, rise);
+            titleArt.color = new Color(1f, 1f, 1f, rise * Chrome);
             titleArt.rectTransform.localScale = Vector3.one * (1.04f - 0.04f * rise);
+            titleText.alpha = Chrome;
+            hintText.alpha = 0.55f * Chrome;
             figure.color = new Color(1f, 1f, 1f, rise);
         }
         float rowHeight = light ? LightRowHeight : RowHeight;
@@ -352,7 +413,7 @@ public class MenuUI : MonoBehaviour
             Row row = rows[i];
             float enter = EaseOut(Mathf.Clamp01((elapsed - 0.05f * i) / 0.25f));
             row.root.anchoredPosition = new Vector2(0, -rowHeight * (i + 0.5f) - 24f * (1f - enter));
-            row.root.GetComponent<CanvasGroup>().alpha = enter;
+            row.root.GetComponent<CanvasGroup>().alpha = enter * Chrome;
 
             float target = i == selected ? 1f : 0f;
             row.shownSelect = Mathf.MoveTowards(row.shownSelect, target, dt / 0.12f);
@@ -520,6 +581,7 @@ public class MenuUI : MonoBehaviour
     void UpdateNotes()
     {
         bool playing = light && figure.gameObject.activeSelf && notePixel > 0f;
+        bool shown = light && figure.gameObject.activeSelf;
         float now = Time.unscaledTime;
         if (playing && now >= nextNoteAt)
         {
@@ -542,7 +604,8 @@ public class MenuUI : MonoBehaviour
         {
             var (image, born, from, drift) = liveNotes[i];
             float t = (now - born) / NoteLife;
-            if (t >= 1f || !playing)
+            // Notes already in the air drift on and fade when he stops playing; they go at once if he's gone.
+            if (t >= 1f || !shown)
             {
                 Release(image);
                 liveNotes.RemoveAt(i);
@@ -570,6 +633,9 @@ public class MenuUI : MonoBehaviour
         rect.anchoredPosition = Vector2.zero;
         return rect;
     }
+
+    // How much of the title page's logo, rows and hint still shows while it is leaving.
+    float Chrome => leaving ? 1f - Mathf.Clamp01((Time.unscaledTime - leftAt) / 0.4f) : 1f;
 
     static float EaseOut(float k) => 1f - (1f - k) * (1f - k) * (1f - k);
 }

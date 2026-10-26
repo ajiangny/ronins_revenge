@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Wires the UI fonts, the title logo and the title screen's flute-playing ronin into the scene. Safe to re-run;
+// Wires the UI fonts, the title logo and the title screen's flute-playing ronin (and his stand-up) into the scene. Safe to re-run;
 // anything missing leaves the game's fallback in its place.
 public static class UiSetup
 {
@@ -24,22 +24,29 @@ public static class UiSetup
         ui.FindProperty("titleLogo").objectReferenceValue = Logo();
         ui.ApplyModifiedPropertiesWithoutUndo();
 
-        // Ronin_Flute_* frames, in name order, once they've been drawn.
-        var frames = new List<Sprite>();
-        foreach (string guid in AssetDatabase.FindAssets("Ronin_Flute_ t:Sprite", new[] { FluteFrames }))
-        {
-            frames.Add(AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(guid)));
-        }
-        frames.Sort((a, b) => EditorUtility.NaturalCompare(a.name, b.name));
+        // Ronin_Flute_* frames and the Ronin_StandUp_* clip START plays, in name order, once they've been drawn.
         var manager = new SerializedObject(Object.FindAnyObjectByType<GameManager>());
-        SerializedProperty flute = manager.FindProperty("titleFluteFrames");
-        flute.arraySize = frames.Count;
-        for (int i = 0; i < frames.Count; i++) flute.GetArrayElementAtIndex(i).objectReferenceValue = frames[i];
+        int flutes = SetFrames(manager.FindProperty("titleFluteFrames"), "Ronin_Flute_");
+        int stand = SetFrames(manager.FindProperty("titleStandFrames"), "Ronin_StandUp_");
         manager.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"UI fonts and title art applied ({frames.Count} flute frames).");
+        Debug.Log($"UI fonts and title art applied ({flutes} flute frames, {stand} stand-up frames).");
+    }
+
+    static int SetFrames(SerializedProperty property, string prefix)
+    {
+        var frames = new List<Sprite>();
+        foreach (string guid in AssetDatabase.FindAssets(prefix + " t:Sprite", new[] { FluteFrames }))
+        {
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GUIDToAssetPath(guid));
+            if (sprite != null && sprite.name.StartsWith(prefix)) frames.Add(sprite);
+        }
+        frames.Sort((a, b) => EditorUtility.NaturalCompare(a.name, b.name));
+        property.arraySize = frames.Count;
+        for (int i = 0; i < frames.Count; i++) property.GetArrayElementAtIndex(i).objectReferenceValue = frames[i];
+        return frames.Count;
     }
 
     // The logo is painted art, not pixel art: a smooth, full-size UI sprite.

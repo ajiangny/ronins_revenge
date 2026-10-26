@@ -38,7 +38,7 @@ drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#be
 | Move | What it means |
 |---|---|
 | Kiseru Smoke Rings | The smoke she danced through the hall. Her sin. |
-| Rosary Lash / Rosary Bloom | Her people, swung like a dancer's ribbon. |
+| Rosary Lash / Rosary Bloom | Her people, swung like a dancer's ribbon. The bloom ends with the rosary unstrung, a curtain of crosses with one way through. |
 | Crimson Iaido | The blade: the one thing she never sold. Only a parry answers it, because only someone who knows that draw can turn it. |
 | Phase break | She breathes the smoke back in, and in the silence after it she cuts the ceremonial robes off with her own blade. She stops dancing for an emperor. |
 | Smoke veil (phase 2) | She fights from inside her own smoke, no longer hiding it. |

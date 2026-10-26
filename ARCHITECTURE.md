@@ -129,6 +129,23 @@ match `BoonChoiceUI.boonIcons`.
   guaranteed soul. Built in code (no prefab). Spawned by `GameManager.UpdateScouts` in rounds with
   `LevelConfig.scouts = true`, every 15–25 s.
 
+### Bullet hell
+- `BulletHell.cs` — the static kit bosses build curtains from, written round the ronin's one axis: a pattern only
+  matters where it crosses his row, so every crossing leaves `MinGap` (2.2) clear and the next gap is never more than
+  `MaxDodgeSpeed` (6 u/s, 60% of his speed) away. Shooters are `BulletHell.Shooter` delegates (a boss's own styled
+  shot). `Enlist` puts a shot on the `BossBullet` physics layer (it copies the `Arrow` layer's collisions at first use,
+  minus arrows and itself; `PassesShots` without the layer), counts it against `Budget` (`Room` waits for space) and
+  marks it `Arrow.CappedRiposte`. Patterns: `Ring`, `Fan` (aimed, capped at `AimedSpeedCap`), `Spiral` (its interval
+  is worked out from the height so one arm's landings sit a gap apart; only downward arms fire), `Curtain` (a row with
+  gaps; `shooterFor` swaps single shots, e.g. a bell), `NextGap`/`GapOk` (staircase steps and a debug check),
+  `HaltAndAim`. Colour language: `Crimson` = `MakeSealDart` (`Arrow.Unparryable`, passes cover), `Bronze` =
+  `MakeBell`/`MakeResonant` (parried, `Resonance` pops every breakable shot within `ResonanceRadius`).
+- `ArrowShadow.cs` — every `Arrow` (`Arrow.Awake`) marks where it will cross the ronin's row, glowing in its
+  `GlowColor` and brightening as it nears; none for shots rising or nearly level.
+- Parry rules in `Ronin`: `DeflectNearbyArrows` fizzles on `Unparryable` shots (`SealedParry`, raising `ParryFizzled`;
+  `GameManager.OnParryFizzled` shows a one-time hint) and `Deflect` sends back at most `RiposteCap` (3) capped
+  shots per parry, popping the rest (`Arrow.Pop`) while still landing the parry (`LandParry`).
+
 ### Bosses
 - `Boss.cs` — abstract base. Handles creation (`Boss.Create<T>`, no prefab), entrance, HP, the second-phase art
   (`SetPhaseArt` stores a transformed `CharacterArt`; each `PhaseBreak` calls `WearPhaseArt` before its first `PlayIdle`,
@@ -141,7 +158,8 @@ match `BoonChoiceUI.boonIcons`.
   keep `Line()`, `Tools/generate-voice.mjs` and that file in step.
 - `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (two 70 HP bars). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
-  back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only). Phase 2 once her first bar empties: smoke veil
+  back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only; ends with
+  one `BulletHell.Curtain` of crosses with a wide gap, the game's first curtain). Phase 2 once her first bar empties: smoke veil
   (`VeilPuff`, burnable by fire), aura, glowing eyes, faster combos. Also defines helpers `Swell`, `VeilPuff`.
 - `Utsusemi.cs` — Stage 2 boss, "The Hollow Pilgrim" (two 120 HP bars), a karakuri automaton that moves in ticking steps, trailing digital afterimages (`DigitalGhost`: steel-blue and gold `SpriteFlash` silhouettes, faded by `GlitchFade`)
   (`Stride`). Its `Entrance` (a `Boss` hook `BeginBoss` plays after the descent, before the title card) is
@@ -150,7 +168,7 @@ match `BoonChoiceUI.boonIcons`.
   and a parried hat circles it as the ronin's riposte, back on its head only once that riposte is gone: `Arrow.Riposte`, set by `Ronin.Deflect`; in phase 2 the sword wheels round a second loop, `ThrowSwordWheel`/`swordWheeling`, and meanwhile `NextMove` picks only the bladeless Lattice and Plumb Lines, its stance `BareUnarmedIdle` patched at runtime by `ProceduralSprites.Patched` from its unarmed and bare-headed idles), Lace Lattice (a curtain of breakable diamonds with gaps that
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze and lets only `ArmorDamageTaken`, 5%, of each hit's damage through
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
-  `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, are each placed by `MarkHour` where the ronin stands (a sight line that tracks him, locks, shows the numeral, then fires an eye laser that hits him if he hasn't moved), are shown one by one, then hidden; it `Dash`es
+  `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `HourMark` numerals drawn from bars, are each placed by `MarkHour` where the ronin stands (a sight line that tracks him, locks, shows the numeral, then fires an eye laser that hits him if he hasn't moved, and `ShedShards` sheds three crimson unparryable shards round the mark: the game's first crimson shot), are shown one by one, then hidden; it `Dash`es
   down from its row onto each mark in turn, chops it with its own chop frames and dashes back; then `StrikeTheHour` from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
@@ -184,7 +202,8 @@ match `BoonChoiceUI.boonIcons`.
   overlapping patterns fly through each other): `Crescent` (breakable),
   `GhostSword` (`PassesCover`), `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`; it and the Fang are dressed by `WolfShot` in Kuon's charge clip at its own proportions with a `Wake` of afterimages, and their lanes are marked by `MarkBeam` from the perch); telegraphs:
   `LaneWarning` + `Brighten`, `SwordPicture` hovers, `Lanes(n)`. Phase 1 moves: Crescent Moon Slash, Phantom Blade
-  Rain (one lane always empty; two in phase 2), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
+  Rain (one lane always empty; two in phase 2; followed by `RingingFence`, a short sword curtain over the ronin whose
+  middle blade is bronze and `BulletHell.MakeResonant`: the game's first bronze shot), Moonlit Dash (`Linger` afterimages that each fire), Spirit Blade
   Barrage (`PlaceOrbiting`, `LooseRow`; each sword `Seek`s the ronin at `SeekTurn` degrees a second via `Arrow.Turn` until `SeekStops` above him), Mirror Moon (a `Linger` reflection mirrored across the centre, `AimedFan`).
   Parry-only draws, one per phase (`NextMove` offers one once `ParryEvery` moves have passed and forces it by
   `ParryAtLatest`): Crossing Moons (`Moonsplitter`, phase 1: a `LockOn` reticle (`Fx.ShiroLockOn`) closes on him while ghost crescents
@@ -206,7 +225,7 @@ match `BoonChoiceUI.boonIcons`.
   (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips (idle, howl, charge, vanish,
   maw) via `SetWolfFrames`. Effects `Fx.Shiro*`; sounds `WolfGrowl`, `WolfHowl`, `BladeRing`, `GhostSwordFall`, `SpiritBeam`
   (loop), `MistSwirl`.
-- `Kagetsune.cs` — Stage 4's final boss, "The Thousand-Soul Throne" (two 170 HP bars), the Emperor
+- `Kagetsune.cs` — Stage 4's final boss, "The Thousand-Soul Throne" (two 210 HP bars), the Emperor
   ([Story/Kagetsune.md](Story/Kagetsune.md)). Drawn about 1.5× the other bosses and stood `kagetsuneDrop` lower; he
   never blinks or glides, only takes heavy `Stride` steps. Body points on his art: `Chest` (the soul-fire `chestGlow`,
   and the Wail's source), `Waist` (bells), `HammerHead`, `Shoulder(side)`. Shots: `Skull` (a breakable `Fx.KageSkull`
@@ -218,15 +237,32 @@ match `BoonChoiceUI.boonIcons`.
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
   Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,
   `Sfx.SoulWail` loop), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
-  `PhaseBreak`: bells clamour, code-bar chains snap, skulls burst, `WearPhaseArt`, teal `eyes`, `PhaseCard`. Phase 2
-  adds Wraith Swarm, Broken Chains (bar lashes from his shoulders), the parry-only Soul Coffin (`Fx.KageCoffin` on a
+  **Bullet hell** (built from `BulletHell`, all his skulls `Enlist`ed; `BellShot`/`SealDart` are his bronze and crimson
+  shots; `Hardened` = phase 2 or past half of bar 1): the Toll of Fealty is a `Spiral` per toll from `Waist`; the
+  Rosary Curtain (`RosaryCurtain`, `Move.Curtain`) drops gapped `Curtain` rows stepped by `NextGap`, one gapless row
+  with a bell when hardened; the slam's `SlamRing`; the Ofuda Decree's `DecreeRain` (darts outside the seals, skull
+  walls inside); the Wail gutters once a sweep (`GutterTell`/`GutterSeconds`) and sheds embers; the Last Toll's
+  `ClosingRing`. VFX: `Crack` and `Shockwave` under slams, stride dust and phase-2 afterimages, `UpdateWisps`, a
+  `chestGlow` that swells as bar 2 drains; chains and soul-fire columns are `Tiled` strips (`Fx.KageChain`,
+  `Fx.KageSoulPillar`, drawn `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the ultimate hangs
+  `HangBell`s (`Fx.KageBell`) that `Swing` when rung.
+  `PhaseBreak`: bells clamour, chains snap, skulls burst, `WearPhaseArt`, teal `eyes`, `PhaseCard`. Phase 2
+  adds Wraith Swarm (the Thousand-Soul Bloom: a `Ring` from the chest under `HaltAndAim`), Soul River (`SoulRiver`,
+  `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), Broken Chains
+  (`ChainCage` first: two chain walls that `HitIfCrossed` for 3 s round a two-arm `cageSpiral`, then lashes from his
+  shoulders), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
   chain; parried, `OnStaggered` sees `coffinThrownAt` and sets `exposedUntil`, doubling `DamageMultiplier`), the Night
-  of a Thousand Bells (`ultimate`, every `UltimateEvery` moves: `Darkness`, eight lanes, five waves with a stepping
-  safe lane, then exposed), and the summoned souls (`Summon` builds an `Echo`: the boss's own CharacterArt idle, set
+  of a Thousand Bells (`ultimate`, every `Ultimate` moves: `Darkness`, eight lanes, five waves with a stepping
+  safe lane that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Summon` builds an `Echo`: the boss's own CharacterArt idle, set
   by `SetEcho` from `GameManager.CreateBoss`, drawn teal and translucent on a chain from the hammer; `EchoBenibana`
   smoke rings + a reflectable Iaido crescent, `EchoUtsusemi` three hour marks + a reflectable cleave, `EchoShirogane`
-  two waves of blade rain, her warning line spoken over the first). `NextMove` forces the
-  ultimate, then the phase's parry move (`ParryAtLatest`), then a soul (`EchoAtLatest`; the first three in boss order).
+  two waves of blade rain, her warning line spoken over the first). A soul runs beside the fight loop as
+  `echoRoutine` (`RunEcho`); while `EchoOut`, `NextMove` picks only light moves (no parry-only move, ultimate or second
+  soul), and `RecallEcho` (stagger, phase break, fall) stops it and drops `activeEcho` and the `cageSpiral`. Otherwise
+  `NextMove` forces the ultimate, then the phase's parry move (`ParryAtLatest`), then a soul (`EchoAtLatest`; the first
+  three in boss order). Under `LastBellAt` (30%) of bar 2, `lastBell`: four spiral arms, denser blooms, `Ultimate` 4,
+  quicker `Recovery`, and `UpdateLastBell`'s pulsing dark. `DamageMultiplier` doubles while exposed but not while
+  staggered (×2 at most); `OnStaggered` adds a `Boss.HitStop`, a bronze flash and freed souls.
   `Speaker`/`SpeakerColour` (virtual on `Boss`) put the souls' answers under their own names; `OnBossSpoke` treats
   the summons and answers as full lines. `Fall` is an 11 s scene: the coffin bursts, seven tolls fade lower and
   quieter, each loosing a `RisingSoul`, and the armor sinks hollow. Sounds `BellToll`, `BellSilenced`, `HammerSlam`,
@@ -368,7 +404,8 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 ## Physics
 
 Gameplay objects use 3D Rigidbodies and colliders on the gameplay plane (sprites are visuals only). Layers:
-`Ronin`, `Samurai`, `Kunai`, `Arrow`; the collision matrix is in `ProjectSettings/DynamicsManager.asset`.
+`Ronin`, `Samurai`, `Kunai`, `Arrow`, `BossBullet` (bullet-hell shots; its collisions are copied from `Arrow` at
+runtime by `BulletHell`, minus arrows and itself); the collision matrix is in `ProjectSettings/DynamicsManager.asset`.
 Characters move kinematically with `Rigidbody.MovePosition`; projectiles are launched once with `linearVelocity`.
 Each object handles its own collision (projectiles only destroy themselves).
 

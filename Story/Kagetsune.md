@@ -55,30 +55,37 @@ bring every kind of soldier and his **Bellringers**, shrine guards whose tolls r
 cutting one down silences its bell. **Arena:** no moon. The coronation courtyard under a starless black sky, lit only
 by teal soul-fire braziers and his own chest.
 
-Two bars of 170. He barely moves: a few heavy steps that shake the ground. Each move is slow and telegraphed.
+Two bars of 210, the hardest fight in the game, tuned for an Oni carrying a full set of boons. He barely moves: a
+few heavy steps that shake the ground. His power is the souls, so he fights as a **bullet hell** of soul-skulls,
+always leaving Oni a gap he can reach along his one row. Bronze is a bell Oni can parry to ring a way open
+(Resonance); crimson is imperial law, a seal-dart no parry turns.
 
 **Phase 1, the Thousand-Soul Throne.**
 
 | Move | What happens | What it means |
 |---|---|---|
-| Coffer Slam | The hammer marks Oni's lane over three tolls, then a shockwave runs down it. The first cover in its way takes the blow and breaks; skulls leap from the crack and dive at him. | The night the coffin opened. |
-| Toll of Fealty | Three tolls (five in phase 2), each loosing a fan of soul-skulls, each fan's gaps where the last one's skulls were. | The souls answering him. |
-| Ofuda Decree | Talisman strips drift down into two lanes (three in phase 2), always one of them Oni's. Inside a sealed lane he cannot parry. A slam or a toll follows at once. | Imperial law. |
-| Thousand-Soul Wail | A beam of soul-fire from his open chest sweeps the field (there and back in phase 2), burning cover. | His power, which is their pain. |
-| The Last Toll (parry-only) | A lock-on closes on Oni and a great bronze bell drops on him, steered onto his lane. Parried, it rings against the Emperor's armor and staggers him. | His bell turned on him. |
+| Coffer Slam | The hammer marks Oni's lane over three tolls (two lanes past half his bar), then a shockwave runs down it. The first cover in its way takes the blow and breaks; the ground cracks and a slow ring of skulls bursts from it. | The night the coffin opened. |
+| Toll of Fealty | Each toll winds a spiral of skulls out of his bells, turning the other way each time; the landings step along Oni's row a gap apart. | The souls answering him. |
+| Rosary Curtain | Rows of skulls fall with one gap each, a staircase down. Past half his bar one row has no gap, only a bronze bell to parry. | The court kneeling in rows. |
+| Ofuda Decree | Talisman strips drift down into two lanes (three in phase 2), always one of them Oni's. Inside a sealed lane he cannot parry. A slam, a toll, or a rain of crimson seal-darts round skull-walled seals follows. | Imperial law. |
+| Thousand-Soul Wail | A beam of soul-fire from his open chest sweeps the field (there and back in phase 2), burning cover. Once a sweep the souls falter and it gutters out; past half his bar it sheds embers. | His power, which is their pain. |
+| The Last Toll (parry-only) | A lock-on closes on Oni and a great bronze bell drops on him, steered onto his lane, with an arc of skulls closing in past half his bar. Parried, it rings against the Emperor's armor and staggers him. | His bell turned on him. |
 
 **Phase break.** His bells clamour faster and faster and the coffin's chains snap one by one; the souls tear loose
 in a burst of skulls and his eyes turn teal.
 
-**Phase 2, the Unchained Wraith.** Faster, longer combos, a second slam lane, plus:
+**Phase 2, the Unchained Wraith.** Faster, longer combos, skull spirits circling him and his chest-fire swelling as
+he weakens, plus:
 
 | Move | What happens |
 |---|---|
-| Wraith Swarm | Waves of skull spirits wheel out of his armor and dive after Oni. Parried, a skull flies home at him as a freed soul. |
-| Broken Chains | The snapped chains lash from his shoulders, sweeping stretches of the ground. |
-| Soul Coffin (parry-only) | He hurls the coffin-hammer down on its chain. Parried, it bursts against him: a stagger, and he stands open to double damage. |
-| Night of a Thousand Bells (every sixth move) | The field goes dark and soul-fire falls down every lane but one in five waves, the safe lane stepping aside each time. Then he kneels, spent and open. |
-| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane, bound to his will, can only warn Oni before her blades fall. |
+| Wraith Swarm (the Thousand-Soul Bloom) | A flower of skulls blooms from his chest, halts, and turns on Oni in two volleys. Parried, a skull flies home at him as a freed soul. |
+| Soul River | Rows of skulls pour down round one snaking channel, bronze bells on its banks. |
+| Broken Chains | The snapped chains slam down either side of Oni and cage him under a skull spiral, then lash across the ground. |
+| Soul Coffin (parry-only) | He hurls the coffin-hammer down on its chain, seal-darts falling either side. Parried, it bursts against him: a stagger, and he stands open to double damage. |
+| Night of a Thousand Bells (every sixth move) | The field goes dark under eight hanging bells and soul-fire falls down every lane but one in five waves, the safe lane stepping aside each time; the last toll is a gapless wall with a bell to parry. Then he kneels, spent and open. |
+| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni while he keeps attacking: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane, bound to his will, can only warn Oni before her blades fall. |
+| **The Last Bell** (under 30%) | The dark closes in and pulses with his heart; four spiral arms, thicker blooms, the Night every fourth move. |
 
 **Defeat.** The coffin bursts. The bells fall silent one by one, each toll lower and quieter than the last, a soul
 rising free with each, and the armor sinks hollow and fades. Then the stopped hour ticks on and dawn breaks for the

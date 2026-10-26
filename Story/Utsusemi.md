@@ -37,7 +37,7 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Razing the cover | It walked every road; it knows every place Oni could hide. |
 | Kasa Wheel | The monk's own hat, thrown at the boy who once slept under it. |
 | Lace Lattice | His shroud, unravelling. |
-| Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one. |
+| Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one. Each laser throws off red-hot shards no parry turns: the Emperor's law, already in its works. |
 | Plumb Lines | The weights of the clock it winds. |
 | Phase break | The mainspring slips: it seizes, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
 | Heart Lantern / Midnight | Its core: the monk's soul, burning as fuel. |

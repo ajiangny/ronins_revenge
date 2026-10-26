@@ -202,8 +202,16 @@ public static class BulletHell
         Sprite[] frames = Fx.Frames(Fx.KageBellShot);
         if (frames != null) shot.Restyle(frames, 10f, Color.white, new Vector2(0.9f, 0.9f) * size, 0.34f * size, new Color(Bronze.r, Bronze.g, Bronze.b, 0.55f), 1.6f * size);
         else shot.Restyle(ProceduralSprites.Disc, Bronze, new Vector2(0.7f, 0.75f) * size, 0.34f * size, new Color(1f, 0.8f, 0.45f, 0.6f), 1.6f * size);
+        return MakeResonant(shot);
+    }
+
+    // Any shot can ring: parried, it sends Resonance out from where it was turned. Always sent back, never capped.
+    public static Arrow MakeResonant(Arrow shot)
+    {
+        if (shot == null) return null;
+        Vector3 last = shot.transform.position;
         shot.CappedRiposte = false;
-        shot.Parried = riposte => Resonance(riposte != null ? riposte.transform.position : shot.transform.position);
+        shot.Parried = riposte => Resonance(riposte != null ? riposte.transform.position : last);
         return shot;
     }
 

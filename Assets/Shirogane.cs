@@ -608,7 +608,27 @@ public class Shirogane : Boss
         }
         RemoveTells(tells);
         Sfx.Play(Sfx.GhostSwordFall, 0.9f, 1f);
+        yield return Wait(0.25f);
+        RingingFence();
         yield return Wait(0.4f);
+    }
+
+    // After the rain, a short fence of ghost swords falls over the ronin with one bronze-edged ringing blade at its
+    // heart. He can walk out round the end, or parry the ringing blade: it rings, and the swords beside it burst.
+    // It's the first bronze shot, so the Emperor's bells read as a parry when they come.
+    void RingingFence()
+    {
+        float x = Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 5f, RightEdge - 5f);
+        float hang = TopOfScreen - 1.4f;
+        BulletHell.Shooter sword = (from, velocity) => BulletHell.Enlist(GhostSword(from, velocity));
+        BulletHell.Shooter ringing = (from, velocity) =>
+        {
+            Arrow blade = BulletHell.MakeResonant(BulletHell.Enlist(GhostSword(from, velocity)));
+            blade.Tint(Color.Lerp(Color.white, BulletHell.Bronze, 0.7f), new Color(BulletHell.Bronze.r, BulletHell.Bronze.g, BulletHell.Bronze.b, 0.7f));
+            return blade;
+        };
+        BulletHell.Curtain(sword, hang, x - 4.2f, x + 4.2f, 1.4f, null, BulletHell.MinGap, 7f, i => i == 3 ? ringing : null);
+        Sfx.Play(Sfx.BladeRing, 0.7f, 0.8f);
     }
 
     // Moonlit Dash: a blue trail shows the way, she vanishes into mist and streaks across the field, and three

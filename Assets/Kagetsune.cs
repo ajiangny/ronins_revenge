@@ -148,8 +148,45 @@ public class Kagetsune : Boss
         chestGlow.transform.position = Chest + Vector3.back * 0.1f;
         float pulse = 0.35f + 0.12f * Mathf.Sin(Time.time * 3.1f) + (Time.time < exposedUntil ? 0.3f : 0f);
         chestGlow.color = new Color(Teal.r, Teal.g, Teal.b, pulse);
+        // As his last bar drains the souls burn fiercer in him, so the fight visibly builds to its end.
+        float drained = secondPhase && !IsDead ? 1f - HealthFraction : 0f;
+        chestGlow.transform.localScale = Vector3.one * (2.2f + 2.2f * drained) / transform.lossyScale.x;
+        UpdateWisps();
         if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.44f) + Vector3.back * 0.1f;
         UpdateLastBell();
+    }
+
+    // The Wraith's skull spirits, a few small ghosts circling him once the chains have snapped.
+    readonly List<SpriteRenderer> wisps = new List<SpriteRenderer>();
+
+    void UpdateWisps()
+    {
+        if (!secondPhase || breaking || IsDead)
+        {
+            foreach (SpriteRenderer wisp in wisps) if (wisp != null) wisp.color = Color.Lerp(wisp.color, Color.clear, Time.deltaTime * 3f);
+            return;
+        }
+        if (wisps.Count == 0)
+        {
+            Sprite[] frames = Fx.Frames(Fx.KageSkull);
+            for (int i = 0; i < 4; i++)
+            {
+                var wisp = new GameObject("SkullWisp").AddComponent<SpriteRenderer>();
+                wisp.sprite = frames != null ? frames[0] : ProceduralSprites.Glow;
+                wisp.sortingOrder = 6;
+                float size = frames != null ? 0.6f / frames[0].bounds.size.y : 0.6f;
+                wisp.transform.localScale = Vector3.one * size;
+                wisps.Add(wisp);
+            }
+        }
+        for (int i = 0; i < wisps.Count; i++)
+        {
+            if (wisps[i] == null) continue;
+            float angle = Time.time * 0.9f + i * Mathf.PI / 2f;
+            Vector3 offset = new Vector3(Mathf.Cos(angle) * Extents.x * 0.7f, Mathf.Sin(angle * 1.3f) * Extents.y * 0.45f, -0.1f);
+            wisps[i].transform.position = Centre + offset;
+            wisps[i].color = new Color(0.75f, 1f, 0.92f, 0.35f + 0.1f * Mathf.Sin(Time.time * 4f + i));
+        }
     }
 
     // The Last Bell: once his last bar runs low, the dark closes in round the field and pulses with his heart.
@@ -184,6 +221,7 @@ public class Kagetsune : Boss
     {
         base.OnDestroy();
         if (lastBellDark != null) Destroy(lastBellDark.gameObject);
+        foreach (SpriteRenderer wisp in wisps) if (wisp != null) Destroy(wisp.gameObject);
     }
 
     protected override IEnumerator Fight()
@@ -332,6 +370,9 @@ public class Kagetsune : Boss
             anchor = to;
             CameraShake.Add(0.12f);
             Sfx.Play(Sfx.MarchStep, 0.9f, 0.45f);
+            Fx.Play(Fx.SmokePuff, new Vector3(Centre.x, sprite.bounds.min.y + 0.3f, 0), new Color(0.3f, 0.3f, 0.32f, 0.6f), 1.6f);
+            // The Wraith leaves a ghost of soul-fire where each step began.
+            if (secondPhase) Afterimage(new Color(Teal.r, Teal.g, Teal.b, 0.35f));
             yield return Wait(0.1f);
         }
     }
@@ -513,6 +554,8 @@ public class Kagetsune : Boss
         {
             Fx.Play(Fx.Impact, end, Teal, 2.2f);
             Fx.Play(Fx.SmokePuff, end, new Color(0.25f, 0.25f, 0.28f, 0.8f), 2f);
+            ElementFx.Glow(end, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 0.5f, 7f, 0.4f);
+            Crack(end);
             GroundFire.Light(end);
             Debris.BurstSprites(end, art.deathParticles, Bronze, 10, 0.8f, 7f);
         }
@@ -520,6 +563,31 @@ public class Kagetsune : Boss
         yield return Wait(0.15f);
         foreach (Vector3 end in ends) SlamRing(end);
         yield return Wait(0.5f);
+    }
+
+    // A crack left in the courtyard where the hammer landed: dark rifts glowing teal from below, cooling over a few
+    // seconds. Only for show, and not transient, so it outlasts a stagger.
+    static void Crack(Vector3 at)
+    {
+        int rifts = Random.Range(3, 5);
+        for (int i = 0; i < rifts; i++)
+        {
+            float angle = Random.Range(-35f, 35f) + (i % 2 == 0 ? 0f : 180f);
+            float length = Random.Range(0.9f, 1.8f);
+            Vector3 dir = Quaternion.Euler(0, 0, angle) * Vector3.right;
+            Vector3 mid = at + dir * (length / 2f) + Vector3.down * 0.1f;
+            for (int layer = 0; layer < 2; layer++)
+            {
+                var rift = new GameObject("Crack").AddComponent<SpriteRenderer>();
+                rift.sprite = layer == 0 ? ProceduralSprites.Glow : ProceduralSprites.White;
+                rift.color = layer == 0 ? new Color(Teal.r, Teal.g, Teal.b, 0.45f) : new Color(0.04f, 0.03f, 0.05f, 0.9f);
+                rift.sortingOrder = 3 + layer;
+                rift.transform.position = mid + Vector3.forward * 0.3f;
+                rift.transform.rotation = Quaternion.Euler(0, 0, angle);
+                rift.transform.localScale = new Vector3(length, layer == 0 ? 0.5f : 0.08f, 1f);
+                Fader.Fade(rift, 3f);
+            }
+        }
     }
 
     IEnumerator BreakAfter(Blocker cover, float seconds)
@@ -1100,7 +1168,8 @@ public class Kagetsune : Boss
         Bark(BossLine.SoulCoffin, 5f);
         PlayAction(art.attack);
         SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 3f);
-        yield return LockOn(1f, Teal);
+        // Bronze, like the Last Toll's: every blow only a parry answers rings in the same colour.
+        yield return LockOn(1f, Bronze);
         Drop(raised);
         Vector3 from = HammerHead;
         Arrow coffin = Shoot(from, (ronin.Bounds.center - from).normalized * 9f);

@@ -423,7 +423,13 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).
 - Raw frames live in `Art/Sprites/{Characters,Projectiles,Fx,Effects,Blockers,Background,UI}`;
   `Editor/PixelArtImporter.cs` imports them as point-filtered pixel sprites automatically.
-- Boss intro paintings: `Art/Portraits/`. Fonts: `Art/Fonts/` (Cinzel headers, Zen Kaku Gothic New body, pixel fallback font).
+- Boss intro paintings: `Art/Portraits/` (each side a multiple of 4, or WebGL can't compress them). Fonts:
+  `Art/Fonts/` (Cinzel headers, Zen Kaku Gothic New body, pixel fallback font); the two TTFs are baked into static
+  `… SDF.asset` TMP fonts of `GameUI.PrintableCharacters` by Apply UI Fonts (`GameUI.bodyFontBaked`/`headerFontBaked`),
+  so builds don't ship or rasterise the TTFs. Delete a baked asset to re-bake it after adding characters.
+- `Editor/WebImportSettings.cs` (an `AssetPostprocessor`) keeps the web build lean on every import: portraits
+  and logo crunch-compressed for WebGL at full size, sound effects and voice lines preloaded (no hitch
+  the first time one plays), voice lines mono at quality 0.5 for WebGL. Pixel sprites stay uncompressed.
 
 ## Editor menu commands (`Ninja/…`)
 
@@ -437,7 +443,8 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Ronin spirit wisps cut from his base art, elemental ronin recolours, soul and boon icon wiring (`UI/Boons/<BoonId>`), each element's shuriken (`Projectiles/ShurikenArt_<suffix>`, PixelLab; recoloured from the base when missing), the ice statue shell |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
-| Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) → `GameUI.headerFont`, body font (Zen Kaku Gothic New Bold) → `GameUI.bodyFont`, `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames` |
+| Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) and body font (Zen Kaku Gothic New Bold) baked → `GameUI.headerFontBaked` / `bodyFontBaked` (the TTF fields are cleared), `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames`, `Ronin_StandUp_*` → `titleStandFrames` |
+| Apply Web Import Settings | `Editor/WebImportSettings.cs` | Reimports portraits, logo, sound effects and voice lines through the web import hooks |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
 | Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
 | Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |

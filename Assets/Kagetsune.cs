@@ -125,10 +125,11 @@ public class Kagetsune : Boss
 
     // Where his body parts sit on the art: the soul-fire chest, the bells at his waist, the coffin-hammer's head.
     Vector3 Extents => sprite.bounds.extents;
-    Vector3 Chest => Centre + Vector3.up * (Extents.y * 0.15f);
-    Vector3 Waist => Centre + Vector3.down * (Extents.y * 0.12f);
-    Vector3 HammerHead => Centre + new Vector3(Extents.x * 0.5f, Extents.y * 0.55f, 0);
-    Vector3 Shoulder(float side) => Centre + new Vector3(side * Extents.x * 0.35f, Extents.y * 0.35f, 0);
+    // Measured on his PixelLab frames, which leave room round the figure on a square canvas.
+    Vector3 Chest => Centre + Vector3.up * (Extents.y * 0.06f);
+    Vector3 Waist => Centre + Vector3.down * (Extents.y * 0.25f);
+    Vector3 HammerHead => Centre + new Vector3(Extents.x * 0.45f, Extents.y * 0.45f, 0);
+    Vector3 Shoulder(float side) => Centre + new Vector3(side * Extents.x * 0.3f, Extents.y * 0.25f, 0);
 
     SpriteRenderer chestGlow;
     SpriteRenderer eyes;
@@ -146,7 +147,7 @@ public class Kagetsune : Boss
         chestGlow.transform.position = Chest + Vector3.back * 0.1f;
         float pulse = 0.35f + 0.12f * Mathf.Sin(Time.time * 3.1f) + (Time.time < exposedUntil ? 0.3f : 0f);
         chestGlow.color = new Color(Teal.r, Teal.g, Teal.b, pulse);
-        if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.62f) + Vector3.back * 0.1f;
+        if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.44f) + Vector3.back * 0.1f;
     }
 
     protected override IEnumerator Fight()
@@ -743,7 +744,7 @@ public class Kagetsune : Boss
         if (Sfx.Has(Sfx.SkullShriek)) Sfx.Play(Sfx.SkullShriek, 1f, 0.8f);
         WearPhaseArt();
         PlayIdle();
-        eyes = Glowing(Centre + Vector3.up * (Extents.y * 0.62f), new Color(Teal.r, Teal.g, Teal.b, 0.75f), 1.1f, 7, false);
+        eyes = Glowing(Centre + Vector3.up * (Extents.y * 0.44f), new Color(Teal.r, Teal.g, Teal.b, 0.6f), 0.8f, 7, false);
         eyes.transform.SetParent(transform, true);
         yield return new WaitForSeconds(0.6f);
 

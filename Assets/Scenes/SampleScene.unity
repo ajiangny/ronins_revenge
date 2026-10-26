@@ -754,6 +754,38 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 259c9bfe645a34460bfdc93f8a8ddc9e, type: 3}
   - {fileID: 8300000, guid: b1acac455d56d49f7a06c0359bf14f8f, type: 3}
   - {fileID: 8300000, guid: 4c3f7330c0ad7496b844bafe5898122b, type: 3}
+  kagetsuneArt: {fileID: 11400000, guid: 50b3d60d1e4854f378e0b60b69f6b3c5, type: 2}
+  kagetsunePhaseArt: {fileID: 11400000, guid: f3f499a9d17024d1d9c377bfff56bb6c, type: 2}
+  kagetsuneScale: 3
+  kagetsuneDrop: 1.5
+  kagetsunePortrait: {fileID: 21300000, guid: 0a68f6ff4a7d9423299705bc9306383c, type: 3}
+  kagetsuneCloseup: {fileID: 21300000, guid: 95109c5f4e1244f6b81d35e611212528, type: 3}
+  kagetsunePhasePortrait: {fileID: 21300000, guid: 3c24ec4cafa9b4c678a7bac25150ca29, type: 3}
+  kagetsunePhaseCloseup: {fileID: 21300000, guid: 488745800d371469a87a3e61cb3fb7eb, type: 3}
+  kagetsuneIntroLine: {fileID: 8300000, guid: d44a6532e237143989c1ee837f03e220, type: 3}
+  kagetsunePhaseLine: {fileID: 8300000, guid: 088e00b81f9894ced9b5e83f9a945974, type: 3}
+  kagetsuneDefeatLine: {fileID: 8300000, guid: 7c7729ed3106d4ac399850c0ea09ce24, type: 3}
+  kagetsuneStaggerLine: {fileID: 8300000, guid: 2960e3ab4536f4a6abb738c58d84a42e, type: 3}
+  kagetsuneKilledOniLine: {fileID: 8300000, guid: 63feb2258bcd14c6a9a58519ad7debd8, type: 3}
+  kagetsuneCofferSlamLine: {fileID: 8300000, guid: 04daba481377b46ee82f53f953d8deee, type: 3}
+  kagetsuneTollLine: {fileID: 8300000, guid: 66f2a3984740f46c8905e869dafedf6b, type: 3}
+  kagetsuneOfudaLine: {fileID: 8300000, guid: 259391173c626452eb1bc4a3a78f4f51, type: 3}
+  kagetsuneWailLine: {fileID: 8300000, guid: 6262f5c2e30024523952f52445162c8a, type: 3}
+  kagetsuneLastTollLine: {fileID: 8300000, guid: dd4d5de5cba9e4e5eafb6cf0c1563f86, type: 3}
+  kagetsuneSwarmLine: {fileID: 8300000, guid: e466dce6f30e24cd39af3dd2f3d0b2da, type: 3}
+  kagetsuneChainsLine: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
+  kagetsuneCoffinLine: {fileID: 8300000, guid: 421d015ce93eb4de0a494a6669e2d287, type: 3}
+  kagetsuneThousandBellsLine: {fileID: 8300000, guid: 9627a09e2e2b84261ad521a0358b46f1, type: 3}
+  kagetsuneSummonBenibanaLine: {fileID: 8300000, guid: d0bb098dd01e544be94b7ad469a3bc42, type: 3}
+  kagetsuneSummonUtsusemiLine: {fileID: 8300000, guid: 1ef58837b43fa4902afa6018eac2f72a, type: 3}
+  kagetsuneSummonShiroganeLine: {fileID: 8300000, guid: 2d883306e8a4d404b898b598b033d566, type: 3}
+  echoBenibanaLine: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
+  echoUtsusemiLine: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}
+  echoShiroganeLine: {fileID: 8300000, guid: 0447e34cfbda64b3694f9c19576c3253, type: 3}
+  kagetsuneHurtLines:
+  - {fileID: 8300000, guid: f0464b58c1a3b4156ade381d5d3b6721, type: 3}
+  - {fileID: 8300000, guid: 17e6c1dcb93bd460c893b535d314a283, type: 3}
+  - {fileID: 8300000, guid: baf8e8ac0b7ed4fef83a2f7840872abb, type: 3}
   voiceVolume: 1
   bossDepth: 4.5
   roundIntroTime: 1.2
@@ -1255,41 +1287,117 @@ MonoBehaviour:
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     boss: 4
     roundsMap:
-      ground: {fileID: 0}
+      ground: {fileID: 21300000, guid: 2fc99f61925ea4f80a009508d5afaac9, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
-      petal: {fileID: 0}
-      petalTint: {r: 1, g: 1, b: 1, a: 1}
-      blockers: []
-      blockerPattern: 
+      petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
+      petalTint: {r: 0.75, g: 0.25, b: 0.2, a: 0.55}
+      blockers:
+      - name: Gravestone
+        damageStates:
+        - {fileID: 21300000, guid: 327dd0eedc5234b00b90508f75e755e8, type: 3}
+        - {fileID: 21300000, guid: 55a3ebbcaf5364786812129e4dfdf9e4, type: 3}
+        - {fileID: 21300000, guid: 7ae6f2b0b89b7462987046a181932f6b, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 638ab274512c54da7a20476338e13ad0, type: 3}
+          - {fileID: 21300000, guid: 18201be87c556480fb8cf6b81846a9fd, type: 3}
+          - {fileID: 21300000, guid: ae2c5ed4eb16c49d8beaac99e02d47d2, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 4a2dbecb017aa4d0e85797c3f97000b0, type: 3}
+          - {fileID: 21300000, guid: 4061798779b304f7d95f6b35658419c5, type: 3}
+          - {fileID: 21300000, guid: c788360179b994598854df6b9a61bf2a, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 6
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Bellframe
+        damageStates:
+        - {fileID: 21300000, guid: fe8a18911ade840eaa1821226773b1ef, type: 3}
+        - {fileID: 21300000, guid: 3fc2a179904944af6946f3f6bf7b02f1, type: 3}
+        - {fileID: 21300000, guid: 4fd69c2a468814b4ba297af74b338d5b, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: d58020442a27646f79c6c5dfeb43b327, type: 3}
+          - {fileID: 21300000, guid: f0a02a927cbb645999d8b6552d5bd65e, type: 3}
+          - {fileID: 21300000, guid: f13994687dd5f43968b77c7bee0bc791, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 38cee87cd0caf404f8edd5ad35a0f5ec, type: 3}
+          - {fileID: 21300000, guid: bf684cd72f8954671bfb964eb6b02131, type: 3}
+          - {fileID: 21300000, guid: 41fa33e50b91347cab62bffbc146e897, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+        health: 8
+        height: 1.8
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: GBG
       atmosphere:
-        clouds: 0
-        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
-        wind: {x: 0.8, y: -0.3}
+        clouds: 2
+        cloudShadow: {r: 0.03, g: 0, b: 0.01, a: 0.3}
+        wind: {x: 0.3, y: -0.5}
         moonlight: {r: 0, g: 0, b: 0, a: 0}
-        shade: 0.35
-        vignette: 0.3
-        mist: 0
-        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
-        motes: 0
-        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
+        shade: 0.5
+        vignette: 0.5
+        mist: 4
+        mistColor: {r: 0.6, g: 0.12, b: 0.12, a: 0.08}
+        motes: 14
+        moteColor: {r: 0.35, g: 1, b: 0.82, a: 0.7}
     bossMap:
-      ground: {fileID: 0}
+      ground: {fileID: 21300000, guid: cce39617f4d4d48e6996429054464a11, type: 3}
       groundTint: {r: 1, g: 1, b: 1, a: 1}
       petal: {fileID: 0}
       petalTint: {r: 0.9, g: 0.2, b: 0.2, a: 0.85}
-      blockers: []
-      blockerPattern: 
+      blockers:
+      - name: OniBrazier
+        damageStates:
+        - {fileID: 21300000, guid: 9407bfdb2d5b84a63820336fc55f1f4a, type: 3}
+        - {fileID: 21300000, guid: 909d9e91234dc4a96850488d7919b00c, type: 3}
+        - {fileID: 21300000, guid: 89485dba3974c4ce5abebc25ff5d149a, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: dd3e04fc5e3794e56b05c9757af6fa92, type: 3}
+          - {fileID: 21300000, guid: 324d6a89cb17d48d497809ff809bef63, type: 3}
+          - {fileID: 21300000, guid: 6163c5f367b6e4b1bbeb21a9614511b2, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 1ccbc2b18559b46e2ba6c7238a312689, type: 3}
+          - {fileID: 21300000, guid: 81ec07f3777a34b2ca78588f40b055c6, type: 3}
+          - {fileID: 21300000, guid: 8c6bd94fa9ff94971b49ea53a71ee1de, type: 3}
+        debris:
+        - {fileID: 21300000, guid: 03b1cf682846744e181aa70330927630, type: 3}
+        health: 6
+        height: 1.1
+        hitbox: {x: 0.85, y: 0.85}
+      - name: Pillar
+        damageStates:
+        - {fileID: 21300000, guid: 47176bbe0d02e4625a1e7829c84d3b4b, type: 3}
+        - {fileID: 21300000, guid: 5e0cbbde160844087a356ca8fc6976f4, type: 3}
+        - {fileID: 21300000, guid: 88b3be47d67b74709862f748aa6230d1, type: 3}
+        variants:
+        - damageStates:
+          - {fileID: 21300000, guid: 2422bc54fed6c4b34a3fa4d63fad82c9, type: 3}
+          - {fileID: 21300000, guid: c6b6c13e7505c4e5eaff935bc75040f7, type: 3}
+          - {fileID: 21300000, guid: ae396249d7a2940c98de9fcb0a0eb3cc, type: 3}
+        - damageStates:
+          - {fileID: 21300000, guid: 98895eb4dff1e48de81ac7e4ec883c79, type: 3}
+          - {fileID: 21300000, guid: 11c4eefb7b7044bc1b78dab828b4615f, type: 3}
+          - {fileID: 21300000, guid: 63337422cb5f6478ea49a2e7eefbdbb9, type: 3}
+        debris:
+        - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+        health: 8
+        height: 1.8
+        hitbox: {x: 0.85, y: 0.85}
+      blockerPattern: OPO
       atmosphere:
         clouds: 0
         cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
-        wind: {x: 0.8, y: -0.3}
+        wind: {x: 0.15, y: 0.25}
         moonlight: {r: 0, g: 0, b: 0, a: 0}
-        shade: 0.35
-        vignette: 0.3
-        mist: 0
-        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
-        motes: 0
-        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
+        shade: 0.55
+        vignette: 0.55
+        mist: 6
+        mistColor: {r: 0.55, g: 0.08, b: 0.1, a: 0.1}
+        motes: 30
+        moteColor: {r: 0.35, g: 1, b: 0.82, a: 0.8}
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0

@@ -29,6 +29,8 @@ public static class NinjaArtSetup
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
+        // The Bellringer's own look, once its frames exist; without them the army tints the Bushi bronze.
+        CharacterArt bellringer = AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + "Characters/Bellringer/Bellringer_March_0.png") != null ? SamuraiArt("Bellringer", samuraiParticles) : null;
 
         EditPrefab("Assets/Samurai.prefab", root =>
         {
@@ -84,6 +86,7 @@ public static class NinjaArtSetup
         {
             var army = root.GetComponent<SamuraiArmy>();
             Set(army, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
+            Set(army, "bellringerArt", bellringer);
             // The army's trampling and landing checks use the samurai collider's world radius; rows are spread to fit the bigger bodies.
             SetFloat(army, "samuraiRadius", 0.5f * SamuraiScale);
             SetFloat(army, "spacingY", 1.75f);
@@ -232,6 +235,18 @@ public static class NinjaArtSetup
             new BlockerSpec("Icebloom", "Blockers/Icebloom", "Effects/Leaf", 5, 1.2f, 3),
             new BlockerSpec("ShrineLantern", "Blockers/ShrineLantern", "Effects/StoneChip", 8, 1.7f, 3),
         }, "ISI"),
+        // Grave markers either side of a temple bell frame on the mountain stair.
+        ["Mountain_Stage4"] = (new[]
+        {
+            new BlockerSpec("Gravestone", "Blockers/Gravestone", "Effects/StoneChip", 6, 1.1f, 3),
+            new BlockerSpec("Bellframe", "Blockers/Bellframe", "Effects/Spark", 8, 1.8f, 3),
+        }, "GBG"),
+        // Oni-faced braziers of soul-fire either side of a broken palace pillar.
+        ["Arena_Kagetsune"] = (new[]
+        {
+            new BlockerSpec("OniBrazier", "Blockers/OniBrazier", "Effects/Spark", 6, 1.1f, 3),
+            new BlockerSpec("Pillar", "Blockers/Pillar", "Effects/StoneChip", 8, 1.8f, 3),
+        }, "OPO"),
     };
 
     // Copies the stages written in GameManager.DefaultStages into the scene's own serialized copy (which wins at runtime),
@@ -370,6 +385,8 @@ public static class NinjaArtSetup
         ("Background/Pass_Stage2", new Color(0.85f, 0.75f, 0.5f, 0.6f)),
         // Snow, not leaves, drifts over the frozen shrine path.
         ("Background/Shrine_Stage3", new Color(0.9f, 0.96f, 1f, 0.75f)),
+        // Red maple leaves fall dimly down the mountain stair.
+        ("Background/Mountain_Stage4", new Color(0.75f, 0.25f, 0.2f, 0.55f)),
     };
 
     static void SetUpMaps(GameManager manager)
@@ -465,6 +482,24 @@ public static class NinjaArtSetup
             moonlight = new Color(0.6f, 0.85f, 1f, 0.16f), shade = 0.45f, vignette = 0.5f,
             mist = 6, mistColor = new Color(0.5f, 0.85f, 1f, 0.1f),
             motes = 26, moteColor = new Color(0.55f, 0.95f, 1f, 0.7f),
+        },
+        // The mountain stair under a starless sky: no moonlight at all, smoke drifting down from the shrine above,
+        // crimson mist on the steps and a few teal souls in the air.
+        ["Mountain_Stage4"] = new Atmosphere.Settings
+        {
+            clouds = 2, cloudShadow = new Color(0.03f, 0f, 0.01f, 0.3f), wind = new Vector2(0.3f, -0.5f),
+            moonlight = new Color(0f, 0f, 0f, 0f), shade = 0.5f, vignette = 0.5f,
+            mist = 4, mistColor = new Color(0.6f, 0.12f, 0.12f, 0.08f),
+            motes = 14, moteColor = new Color(0.35f, 1f, 0.82f, 0.7f),
+        },
+        // The coronation hall: dead black but for the soul-fire. Heavy dark, low crimson smoke, and teal embers
+        // drifting up from the braziers.
+        ["Arena_Kagetsune"] = new Atmosphere.Settings
+        {
+            clouds = 0, wind = new Vector2(0.15f, 0.25f),
+            moonlight = new Color(0f, 0f, 0f, 0f), shade = 0.55f, vignette = 0.55f,
+            mist = 6, mistColor = new Color(0.55f, 0.08f, 0.1f, 0.1f),
+            motes = 30, moteColor = new Color(0.35f, 1f, 0.82f, 0.8f),
         },
     };
 

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Kagetsune
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: fa3d1e190f2e24a1f8e3d5590098aa90, type: 3}
+  - {fileID: 21300000, guid: 81ce504da351c4c86ae314170300346d, type: 3}
+  - {fileID: 21300000, guid: 6ae828a25621f4381b5acaf3254e59c1, type: 3}
+  - {fileID: 21300000, guid: 5634a83c96fb243f7bbdc6bbc84b5403, type: 3}
+  - {fileID: 21300000, guid: 7a2538947769644f8959a9a14b0de825, type: 3}
+  - {fileID: 21300000, guid: 81cdb494804134c90a171604c0190cd5, type: 3}
+  - {fileID: 21300000, guid: be957ae28ffdb4578bf10f2f6eb996a4, type: 3}
+  - {fileID: 21300000, guid: 5c4b453d53c51477ba6de3b729e036c8, type: 3}
+  attack:
+  - {fileID: 21300000, guid: fcfd64423ff8e47968cf09ead855a4d4, type: 3}
+  - {fileID: 21300000, guid: bcf0a07b3b74c4192b1fa76864e69b93, type: 3}
+  - {fileID: 21300000, guid: e9bc6b2a48aa148a0a2f024515aca2db, type: 3}
+  - {fileID: 21300000, guid: 42809db4e549e4818bd77e71bf75f6a3, type: 3}
+  - {fileID: 21300000, guid: 834802b595cfa4a8a823c429988424e5, type: 3}
+  - {fileID: 21300000, guid: cb3f408e39b5a46d295152b29cdfe328, type: 3}
+  - {fileID: 21300000, guid: e577547a0e0cd48dc96161941f13a05f, type: 3}
+  - {fileID: 21300000, guid: 234a8d61f71ff40238c4643525e0a00e, type: 3}
+  hit:
+  - {fileID: 21300000, guid: 3796756fe1d20426a843c77f85278406, type: 3}
+  - {fileID: 21300000, guid: e79a2faaf7dc34c6f87374bb815dabfb, type: 3}
+  - {fileID: 21300000, guid: 64e82297853d44937a23431224554c42, type: 3}
+  - {fileID: 21300000, guid: 5390f0d2e77f542cca0746fb5e92368d, type: 3}
+  - {fileID: 21300000, guid: 2cbf596e4547f4f16950c52f3b502ffe, type: 3}
+  - {fileID: 21300000, guid: 403fcb6d9fdca4765afddc9b4e2e7852, type: 3}
+  death:
+  - {fileID: 21300000, guid: 54e31dfe4e7574f93ae6614079b4c37a, type: 3}
+  - {fileID: 21300000, guid: e282ea8d067bf4bcd9d7b8ab473ff861, type: 3}
+  - {fileID: 21300000, guid: 2d431872366d24077b8a58912a5d5119, type: 3}
+  - {fileID: 21300000, guid: 97677f1f79d924b1ab8eefc02c60dbb1, type: 3}
+  - {fileID: 21300000, guid: b3cb5714053954cf7a12690a22b7a7eb, type: 3}
+  - {fileID: 21300000, guid: 0c1f99b42410b4ac1bcd288de446d760, type: 3}
+  - {fileID: 21300000, guid: 83131707c5acc4b598912c5cf447e8b9, type: 3}
+  - {fileID: 21300000, guid: 54d16bc15d4f148a38ffcbeb0bf8a889, type: 3}
+  parry:
+  - {fileID: 21300000, guid: f349e3eded9b4442c9be28c59de66e91, type: 3}
+  - {fileID: 21300000, guid: 4a1cc5f50364d48029b18f2bd1b237d1, type: 3}
+  - {fileID: 21300000, guid: 466f7e09daac14423ab2ecccbd6c732d, type: 3}
+  - {fileID: 21300000, guid: c93f9b7374b484fbc83d1c3c5be9bc74, type: 3}
+  - {fileID: 21300000, guid: 68ed18f45e90e47b5bde485fbd1c1873, type: 3}
+  - {fileID: 21300000, guid: 3abf5839a631b40f8befac51401df694, type: 3}
+  - {fileID: 21300000, guid: c5f137868b47d4ae49425dcc60d70427, type: 3}
+  - {fileID: 21300000, guid: 01c7011c9a5564d8cb16632b577e5351, type: 3}
+  slash: []
+  runLeft: []
+  runRight: []
+  walkUp: []
+  wisps: []
+  framesWithWisps: []
+  idleFps: 6
+  actionFps: 11
+  runFps: 14
+  walkFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

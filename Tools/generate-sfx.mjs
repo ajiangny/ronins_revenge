@@ -145,6 +145,55 @@ const SOUNDS = {
       "A swirl of cold spectral mist as a ghost vanishes: a soft airy whoosh with a breathy, frosty shimmer and " +
       "a faint whispering reverb, video game sound effect, no music.",
   },
+  // Kagetsune, the Emperor.
+  BellToll: {
+    seconds: 2.5,
+    prompt:
+      "A single deep toll of a large bronze Japanese temple bell struck once, a heavy low boom with a long shimmering " +
+      "metallic hum that slowly decays, ominous, video game sound effect, no music.",
+  },
+  BellSilenced: {
+    seconds: 1.5,
+    prompt:
+      "A small bronze bell's last soft ring cut short and fading into silence, with a faint airy release like a " +
+      "breath let go, gentle and bittersweet, video game sound effect, no music.",
+  },
+  HammerSlam: {
+    seconds: 1.5,
+    prompt:
+      "A colossal war hammer slamming into a stone floor: a huge deep thud, cracking stone and a rumbling " +
+      "shockwave with rattling chains, video game sound effect, no music.",
+  },
+  ChainSnap: {
+    seconds: 1,
+    prompt:
+      "A thick iron chain under great strain snapping apart: a sharp metallic crack and the clattering links " +
+      "whipping loose, video game sound effect, no music.",
+  },
+  SoulWail: {
+    seconds: 2,
+    prompt:
+      "A sustained beam of ghostly soul fire made of a chorus of moaning, wailing spirit voices over a deep " +
+      "roaring hum, eerie and loopable, video game sound effect, no music.",
+  },
+  OfudaFlutter: {
+    seconds: 1.2,
+    prompt:
+      "Many paper talisman strips fluttering down through the air with a soft papery rustle and a faint " +
+      "magical hum as they seal, video game sound effect, no music.",
+  },
+  SkullShriek: {
+    seconds: 1.2,
+    prompt:
+      "A swarm of ghostly skull spirits bursting loose with hollow shrieking whispers and a rushing spectral " +
+      "whoosh, video game sound effect, no music.",
+  },
+  DawnChime: {
+    seconds: 4,
+    prompt:
+      "A peaceful sunrise: soft warm wind chimes and a gentle rising airy shimmer, hopeful and calm, the night " +
+      "ending, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

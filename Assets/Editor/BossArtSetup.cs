@@ -19,6 +19,8 @@ public static class BossArtSetup
     const float UtsusemiScale = 2.6f;
     // Shirogane stands about Utsusemi's height; her hair and wolf fill out the rest.
     const float ShiroganeScale = 2.5f;
+    // The Emperor towers over all of them: about one and a half times Shirogane's height.
+    const float KagetsuneScale = 3f;
     // Low enough that her ponytail clears the boss bar.
     const float BossDepth = 4.5f;
 
@@ -61,10 +63,21 @@ public static class BossArtSetup
             death: TryFrames("Shirogane", "Defeat") ?? shiroganeIdle,
             new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
 
+        // Kagetsune: the coffin-hammer slam in the attack slot, the bell toll in the parry slot.
+        Sprite[] kagetsuneIdle = TryFrames("Kagetsune", "Idle");
+        CharacterArt kagetsune = kagetsuneIdle == null ? null : SaveArt("Kagetsune",
+            idle: kagetsuneIdle,
+            attack: TryFrames("Kagetsune", "Slam") ?? kagetsuneIdle,
+            parry: TryFrames("Kagetsune", "Toll") ?? kagetsuneIdle,
+            hit: TryFrames("Kagetsune", "Hit") ?? kagetsuneIdle,
+            death: TryFrames("Kagetsune", "Defeat") ?? kagetsuneIdle,
+            new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
+
         // Each boss's second-phase form, worn from its phase break on; any clip it lacks falls back to the first form's.
         CharacterArt benibanaPhase = PhaseArt("BenibanaPhase2", benibana, "Slash", "Puff");
         CharacterArt utsusemiPhase = PhaseArt("UtsusemiPhase2", utsusemi, "Thrust", "Throw");
         CharacterArt shiroganePhase = PhaseArt("ShiroganePhase2", shirogane, "Slash", "BladeCall");
+        CharacterArt kagetsunePhase = PhaseArt("KagetsunePhase2", kagetsune, "Slam", "Toll");
 
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(ScenePath);
         if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -143,6 +156,33 @@ public static class BossArtSetup
             so.FindProperty(field).objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Shirogane_" + file + ".mp3");
         }
         SetTakes(so.FindProperty("shiroganeHurtLines"), "Shirogane_Hurt");
+
+        if (kagetsune != null)
+        {
+            so.FindProperty("kagetsuneArt").objectReferenceValue = kagetsune;
+            so.FindProperty("kagetsuneScale").floatValue = KagetsuneScale;
+        }
+        so.FindProperty("kagetsunePhaseArt").objectReferenceValue = kagetsunePhase;
+        so.FindProperty("kagetsunePortrait").objectReferenceValue = Portrait("Kagetsune_Full");
+        so.FindProperty("kagetsuneCloseup").objectReferenceValue = Portrait("Kagetsune_Closeup");
+        so.FindProperty("kagetsunePhasePortrait").objectReferenceValue = Portrait("Kagetsune_Phase_Full");
+        so.FindProperty("kagetsunePhaseCloseup").objectReferenceValue = Portrait("Kagetsune_Phase_Closeup");
+        // His lines, and the souls he summons answering in their own voices (Benibana_Echo, ...).
+        foreach (var (field, file) in new[]
+        {
+            ("kagetsuneIntroLine", "Kagetsune_Intro"), ("kagetsunePhaseLine", "Kagetsune_Phase"), ("kagetsuneDefeatLine", "Kagetsune_Defeat"),
+            ("kagetsuneStaggerLine", "Kagetsune_Stagger"), ("kagetsuneKilledOniLine", "Kagetsune_KilledOni"),
+            ("kagetsuneCofferSlamLine", "Kagetsune_CofferSlam"), ("kagetsuneTollLine", "Kagetsune_Toll"), ("kagetsuneOfudaLine", "Kagetsune_Ofuda"),
+            ("kagetsuneWailLine", "Kagetsune_Wail"), ("kagetsuneLastTollLine", "Kagetsune_LastToll"), ("kagetsuneSwarmLine", "Kagetsune_Swarm"),
+            ("kagetsuneChainsLine", "Kagetsune_Chains"), ("kagetsuneCoffinLine", "Kagetsune_Coffin"),
+            ("kagetsuneThousandBellsLine", "Kagetsune_ThousandBells"), ("kagetsuneSummonBenibanaLine", "Kagetsune_SummonBenibana"),
+            ("kagetsuneSummonUtsusemiLine", "Kagetsune_SummonUtsusemi"), ("kagetsuneSummonShiroganeLine", "Kagetsune_SummonShirogane"),
+            ("echoBenibanaLine", "Benibana_Echo"), ("echoUtsusemiLine", "Utsusemi_Echo"), ("echoShiroganeLine", "Shirogane_Echo"),
+        })
+        {
+            so.FindProperty(field).objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + file + ".mp3");
+        }
+        SetTakes(so.FindProperty("kagetsuneHurtLines"), "Kagetsune_Hurt");
         so.ApplyModifiedProperties();
 
         EditorSceneManager.MarkSceneDirty(scene);

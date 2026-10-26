@@ -1,5 +1,5 @@
 // Generates the bosses' voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
-// Utsusemi's in its designed voice and Shirogane's in Lily's (the story behind each is in Story/<Boss>.md).
+// Utsusemi's in its designed voice, Shirogane's in Lily's and Kagetsune's in his designed voice (the story behind each is in Story/<Boss>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
 // from .env.local.
@@ -19,9 +19,12 @@ const UTSUSEMI = "nCaDofVjs6twTSKyrLJG";
 // Shirogane: ElevenLabs' Lily, a low, velvety actress's voice, read calm and mournful; Unity adds the ghostly
 // echo and drift (GameManager's spirit retune of the voice filters).
 const SHIROGANE = "pFZP5JQG7iQjIQuC4Bku";
+// Designed in ElevenLabs for Kagetsune: an extremely deep, slow, resonant bass, imperious and contemptuous, as if from
+// inside an iron helm. Unity layers the choir of souls under it (GameManager's choir retune of the voice filters).
+const KAGETSUNE = "icDlqXtTOaetg6DNGlyW";
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
-// with Benibana.Line / Utsusemi.Line / Shirogane.Line, which show them as subtitles.
+// with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
 const LINES = {
   Benibana_Intro: [BENIBANA, "[low, bitter, amused] We both led our flocks to his altar, Oni... [cold] and only you walked away. [sultry, mocking] The heavens have forsaken you. Let me paint your final moments in crimson."],
   Benibana_Phase: [BENIBANA, "[quiet, shaking with fury] Every step I ever danced was his... [fierce, drawing her sword] This one is mine."],
@@ -67,6 +70,31 @@ const LINES = {
   Shirogane_Hurt: [SHIROGANE, "[short pained breath] Hh!"],
   Shirogane_Hurt_2: [SHIROGANE, "[sharp wince] Ah!"],
   Shirogane_Hurt_3: [SHIROGANE, "[quiet pained exhale] Nn..."],
+  // The Emperor. He never hurries and never shouts until his phase break.
+  Kagetsune_Intro: [KAGETSUNE, "[very slow, deep, contemptuous] Every bell upon me is a soul that knelt, Oni. [pause] One still hangs silent... [cold] yours."],
+  Kagetsune_Phase: [KAGETSUNE, "[roaring, furious] Kneel! KNEEL! [ragged, desperate] You are MINE, every one of you..."],
+  Kagetsune_Defeat: [KAGETSUNE, "[faltering, afraid, fading] The bells... why do they not ring...?"],
+  Kagetsune_Stagger: [KAGETSUNE, "[shocked, enraged] You dare ring MY bell?"],
+  Kagetsune_KilledOni: [KAGETSUNE, "[slow, satisfied, contemptuous] Back to your hill, little demon. I will be here. [pause] I am always here."],
+  Kagetsune_CofferSlam: [KAGETSUNE, "[deep, commanding] Bow."],
+  Kagetsune_Toll: [KAGETSUNE, "[slow, imperious] Answer me."],
+  Kagetsune_Ofuda: [KAGETSUNE, "[cold, formal] By my decree."],
+  Kagetsune_Wail: [KAGETSUNE, "[slow, cruel] Hear them, little demon."],
+  Kagetsune_LastToll: [KAGETSUNE, "[slow, grave] Hear the last toll."],
+  Kagetsune_Swarm: [KAGETSUNE, "[contemptuous] Go. Fetch him."],
+  Kagetsune_Chains: [KAGETSUNE, "[snarling] Chains do not hold me."],
+  Kagetsune_Coffin: [KAGETSUNE, "[roaring] Into the coffin!"],
+  Kagetsune_ThousandBells: [KAGETSUNE, "[booming, exultant] A thousand bells, Oni! Ring!"],
+  Kagetsune_SummonBenibana: [KAGETSUNE, "[slow, mocking] Dance for me, Benibana."],
+  Kagetsune_SummonUtsusemi: [KAGETSUNE, "[cold, bored] Strike the hour, clock."],
+  Kagetsune_SummonShirogane: [KAGETSUNE, "[commanding, a trace of unease] Rise, Shirogane. Kneel, and strike."],
+  Kagetsune_Hurt: [KAGETSUNE, "[deep, irritated] Insolence."],
+  Kagetsune_Hurt_2: [KAGETSUNE, "[slow, contemptuous] A scratch, little demon."],
+  Kagetsune_Hurt_3: [KAGETSUNE, "[low grunt] Hm."],
+  // The souls he drags out of the coffin, answering in their own voices.
+  Benibana_Echo: [BENIBANA, "[hollow, sorrowful, distant] Forgive me, Oni... he has my bell."],
+  Utsusemi_Echo: [UTSUSEMI, "[slow, grinding, straining] The hour... strikes... [urgent whisper] Run... boy."],
+  Shirogane_Echo: [SHIROGANE, "[quiet, defiant, cold] I do not kneel."],
 };
 
 const client = new ElevenLabsClient();

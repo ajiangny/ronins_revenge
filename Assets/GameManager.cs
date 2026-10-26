@@ -189,6 +189,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] CharacterArt kagetsunePhaseArt;
     [Tooltip("He is drawn bigger than the other bosses: a colossus over the field.")]
     [SerializeField] float kagetsuneScale = 4.6f;
+    [Tooltip("How much lower than the other bosses he stands, so his horns clear the boss bar.")]
+    [SerializeField] float kagetsuneDrop = 1.5f;
     [SerializeField] Sprite kagetsunePortrait;
     [SerializeField] Sprite kagetsuneCloseup;
     [Tooltip("The Unchained Wraith's illustrations: the card that plays in his phase break. Without them his phase line is a subtitle.")]
@@ -1248,7 +1250,7 @@ public class GameManager : MonoBehaviour
         Camera cam = Camera.main;
         float top = CameraShake.Center.y + cam.orthographicSize;
         float halfWidth = cam.orthographicSize * cam.aspect;
-        Vector3 post = new Vector3(CameraShake.Center.x, top - bossDepth, 0);
+        Vector3 post = new Vector3(CameraShake.Center.x, top - bossDepth - (Stage.boss == BossKind.Kagetsune ? kagetsuneDrop : 0f), 0);
         for (int i = 0; i < 7; i++)
         {
             Vector3 puff = new Vector3(post.x + Mathf.Lerp(-halfWidth, halfWidth, i / 6f), post.y + Random.Range(-0.5f, 1.5f), 0);

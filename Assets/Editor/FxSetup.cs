@@ -75,6 +75,11 @@ public static class FxSetup
         (Fx.ShiroMawHit, 16, true, new Vector2(0.5f, 1f - 46f / 64f)),
         (Fx.ShiroMawBurst, 16, false, Centre),
         (Fx.ShiroLockOn, 12, true, Centre),
+        // Kagetsune's shots and props: single still frames, drawn by his shots at their own sizes.
+        (Fx.KageSkull, 10, true, Centre),
+        (Fx.KageOfuda, 8, true, Centre),
+        (Fx.KageGreatBell, 8, true, Centre),
+        (Fx.KageCoffin, 8, true, Centre),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

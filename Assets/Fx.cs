@@ -78,6 +78,8 @@ public static class Fx
     public const string ShiroIceShatter = "Shiro_IceShatter";
     public const string ShiroIceSlash = "Shiro_IceSlash";
     public const string ShiroWolfSlash = "Shiro_WolfSlash";
+    // A wisp of spirit light flying right, one of the shrine's souls that gather into Kuon at her phase break.
+    public const string ShiroSpiritWisp = "Shiro_SpiritWisp";
 
     // Kagetsune's: a soul-skull shot, an ofuda strip, the great bell of the Last Toll and the thrown Soul Coffin.
     public const string KageSkull = "Kage_Skull";

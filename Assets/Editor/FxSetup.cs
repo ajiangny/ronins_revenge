@@ -99,6 +99,8 @@ public static class FxSetup
         (Fx.ShiroIceShatter, 12, false, new Vector2(46f / 87f, 1f - 41f / 113f)),
         (Fx.ShiroIceSlash, 14, false, new Vector2(23f / 70f, 1f - 41f / 83f)),
         (Fx.ShiroWolfSlash, 1, true, Centre),
+        // The wisp turns about its glowing head, its tail streaming behind.
+        (Fx.ShiroSpiritWisp, 12, true, new Vector2(41f / 54f, 1f - 12f / 25f)),
         // Kagetsune's shots and props: single still frames, drawn by his shots at their own sizes.
         (Fx.KageSkull, 10, true, Centre),
         (Fx.KageOfuda, 8, true, Centre),

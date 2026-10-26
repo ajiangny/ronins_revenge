@@ -247,7 +247,9 @@ match `BoonChoiceUI.boonIcons`.
   doubles damage for 2 s via `DamageMultiplier`). `NextMove` weights the phase's signature twice,
   never repeats a move three times (`repeats`) and forces the ultimate every fifth move (Moonfall when enraged or
   Kuon is busy).
-  `PhaseBreak` plays the wolf's arrival and swaps her to her awakened frames (blades burning; `SetPhaseDash` for her
+  `PhaseBreak` plays the wolf's arrival (`GatherSouls`: `Souls` wisps, `Fx.ShiroSpiritWisp` turned along their
+  flight, rise across the court and spiral into a soul core (the `Fx.ShiroMawOrb` art) that swells per merge while
+  `SpiritWolf.Form` draws Kuon inside it, then crushes; `OpenEyes` in it, the burst, `AppearAt`) and swaps her to her awakened frames (blades burning; `SetPhaseDash` for her
   phase dash); `Fall` is an 11 s scene (`DefeatSeconds`, which `GameManager.BossFell`
   waits for): blades `DropBlade`/`Tumble`, the wolf walks to her and dissolves, she speaks `BossLine.DefeatFinal`
   (a full line) and fades. Extra frames: `GameManager.shiroganeDash` via `SetDashFrames`, the wolf's clips (idle, howl, charge, vanish,

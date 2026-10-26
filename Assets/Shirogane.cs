@@ -2313,9 +2313,11 @@ public class Shirogane : Boss
         return moon;
     }
 
-    // When her first bar empties she staggers to a knee and her blades go dark; mist spreads over the field, a
-    // howl sounds far off, two eyes open behind her and the wolf takes shape in a burst of blue flame. She rises
-    // wreathed in it, with her second bar.
+    // When her first bar empties she staggers to a knee and her blades go dark; mist spreads over the field and a
+    // howl sounds far off. The souls of her shrine answer: wisps of spirit light rise all over the court and spiral
+    // into one soul beside her, which swells as each merges, Kuon's shape gathering inside it. The soul crushes to a
+    // point, two eyes open in it, and it bursts: the wolf steps out of the merge in blue flame. She rises wreathed in
+    // it, with her second bar.
     protected override IEnumerator PhaseBreak()
     {
         breaking = true;
@@ -2335,14 +2337,21 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.MistSwirl, 1f, 0.6f);
         yield return new WaitForSeconds(0.6f);
         Sfx.Play(Sfx.WolfHowl, 0.5f, 0.85f);
-        yield return new WaitForSeconds(0.9f);
 
-        yield return wolf.OpenEyes(WolfRest, 0.6f);
-        CameraShake.Add(0.6f);
-        Fx.Play(Fx.Explosion, WolfRest, Cyan, 2.4f);
-        Debris.BurstSprites(WolfRest, art.deathParticles, Cyan, 24, 1.2f, 8f);
+        Vector3 heart = WolfRest + Vector3.up * 0.3f;
+        yield return GatherSouls(heart, SoulGather);
+        yield return wolf.OpenEyes(heart, 0.5f);
+
+        // The merged soul bursts and Kuon steps out of it.
+        CameraShake.Add(0.7f);
+        if (Fx.Play(Fx.ShiroMawBurst, heart, Color.white, 3.2f, null, 58) == null) Fx.Play(Fx.Explosion, heart, Cyan, 3f);
+        Fx.Play(Fx.Explosion, heart, Cyan, 2.4f);
+        ElementFx.Glow(heart, Frost, 1f, 6f, 0.5f);
+        Debris.BurstSprites(heart, art.deathParticles, Cyan, 30, 1.2f, 9f);
         Sfx.Play(Sfx.WolfHowl, 1f, 1f);
         Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
+        RemoveSoulCore();
+        Dim(0f, 0.8f);
         wolf.SetPresence(SpiritWolf.Presence.Present);
         yield return wolf.AppearAt(WolfRest);
 
@@ -2365,6 +2374,140 @@ public class Shirogane : Boss
             yield return new WaitForSeconds(2.2f);
         }
         breaking = false;
+    }
+
+    // How long the shrine's souls take to gather into Kuon, and how many come.
+    const float SoulGather = 3.6f;
+    const int Souls = 26;
+
+    // The merging soul and the bloom behind it, while the souls gather.
+    SpriteRenderer soulCore, soulHalo;
+    // Each gathering wisp's soft glow.
+    readonly SpriteRenderer[] wispGlows = new SpriteRenderer[Souls];
+
+    // Wisps of spirit light rise from all over the court, near the ground and up the walls, and spiral in to `heart`,
+    // each arriving on its own beat. Every one that merges swells the soul there with a rising chime, and Kuon's
+    // shape grows inside it. The arena darkens and the ground shakes harder as it fills; once all have merged the
+    // soul crushes to a white-hot point.
+    IEnumerator GatherSouls(Vector3 heart, float seconds)
+    {
+        Dim(0.5f, 0.8f);
+        soulHalo = Glowing("SoulHalo", ProceduralSprites.SoftGlow, 56);
+        Sprite[] coreFrames = Fx.Frames(Fx.ShiroMawOrb);
+        soulCore = Glowing("SoulCore", coreFrames != null ? coreFrames[0] : ProceduralSprites.SoftGlow, 57);
+        if (coreFrames != null) soulCore.gameObject.AddComponent<SpriteAnimator>().Play(coreFrames, true, null, 10f);
+        Sprite[] wispFrames = Fx.Frames(Fx.ShiroSpiritWisp);
+        Sfx.Play(Sfx.MistSwirl, 0.9f, 0.8f);
+        Sfx.Play(Sfx.LanternCharge, 0.6f, 0.6f);
+
+        var wisps = new SpriteRenderer[Souls];
+        var starts = new Vector3[Souls];
+        var delays = new float[Souls];
+        var travels = new float[Souls];
+        var spins = new float[Souls];
+        var last = new Vector3[Souls];
+        for (int i = 0; i < Souls; i++)
+        {
+            // Spread across the whole court, most rising from the ground, a few from higher up the walls.
+            float x = CameraShake.Center.x + Mathf.Lerp(-HalfWidth + 1f, HalfWidth - 1f, (i + Random.value) / Souls);
+            float y = i % 3 == 0 ? Random.Range(GroundY + 3f, heart.y - 1f) : GroundY + Random.Range(0.3f, 1.2f);
+            starts[i] = new Vector3(x, y, 0);
+            // Their arrivals are spread over the whole gather, a trickle that becomes a flood.
+            delays[i] = seconds * 0.55f * Mathf.Sqrt(Random.value);
+            travels[i] = Random.Range(1.6f, 2.3f);
+            spins[i] = Random.Range(90f, 200f) * (x < heart.x ? -1f : 1f);
+            last[i] = starts[i];
+        }
+
+        int merged = 0;
+        float nextRumble = 0f;
+        float end = seconds;
+        for (int i = 0; i < Souls; i++) end = Mathf.Max(end, delays[i] + travels[i]);
+        for (float t = 0; t < end; t += Time.deltaTime)
+        {
+            for (int i = 0; i < Souls; i++)
+            {
+                float u = (t - delays[i]) / travels[i];
+                if (u < 0f || (u >= 1f && wisps[i] == null)) continue;
+                if (wisps[i] == null)
+                {
+                    // It rises out of a breath of mist.
+                    wisps[i] = Glowing("Wisp", wispFrames != null ? wispFrames[0] : ProceduralSprites.Glow, 58);
+                    if (wispFrames != null) wisps[i].gameObject.AddComponent<SpriteAnimator>().Play(wispFrames, true, null, 12f);
+                    wisps[i].transform.localScale = Vector3.one * (wispFrames != null ? Random.Range(1.5f, 2.1f) : 0.7f);
+                    wispGlows[i] = Glowing("WispGlow", ProceduralSprites.SoftGlow, 57);
+                    wispGlows[i].transform.localScale = Vector3.one * 1.6f;
+                    Puff(starts[i], 1.2f);
+                }
+                if (u >= 1f)
+                {
+                    // It merges: the soul swells, rings and flashes.
+                    Drop(wisps[i]);
+                    Drop(wispGlows[i]);
+                    wisps[i] = null;
+                    delays[i] = float.MaxValue;
+                    merged++;
+                    Fx.Play(Fx.Impact, heart, Frost, 0.8f + 0.04f * merged);
+                    Sfx.Play(Sfx.SoulCollect, 0.35f, 0.8f + 0.05f * merged);
+                    continue;
+                }
+                // Up off the ground first, then a spiral that tightens onto the soul.
+                float pull = u * u;
+                Vector3 offset = starts[i] - heart;
+                Vector3 at = heart + Quaternion.Euler(0, 0, spins[i] * u) * offset * (1f - pull) + Vector3.up * (Mathf.Sin(Mathf.PI * u) * 1.2f);
+                Vector3 step = at - last[i];
+                last[i] = at;
+                wisps[i].transform.position = at + Vector3.back * 0.3f;
+                // Drawn flying right, so it turns to face where it goes.
+                if (step.sqrMagnitude > 0.00001f) wisps[i].transform.rotation = Quaternion.FromToRotation(Vector3.right, step);
+                float fade = Mathf.Clamp01(u / 0.2f);
+                wisps[i].color = wispFrames != null ? new Color(1f, 1f, 1f, fade) : new Color(Frost.r, Frost.g, Frost.b, 0.9f * fade);
+                wispGlows[i].transform.position = at + Vector3.back * 0.25f;
+                wispGlows[i].color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f * fade);
+                if (Random.value < 0.15f) Afterimage(wisps[i], new Color(Spirit.r, Spirit.g, Spirit.b, 0.3f * fade));
+            }
+
+            float full = (float)merged / Souls;
+            float size = Mathf.Lerp(0.5f, 3.6f, full) * (1f + 0.08f * Mathf.Sin(t * 30f));
+            soulCore.transform.position = heart + Vector3.back * 0.4f;
+            soulCore.transform.localScale = Vector3.one * size / (coreFrames != null ? OrbArtSize : 0.6f);
+            // Kept see-through, so the wolf taking shape inside shows.
+            soulCore.color = coreFrames != null ? new Color(1f, 1f, 1f, 0.3f + 0.3f * full) : new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f + 0.3f * full);
+            soulHalo.transform.position = heart + Vector3.back * 0.35f;
+            soulHalo.transform.localScale = Vector3.one * size * 2.6f;
+            soulHalo.color = new Color(Cyan.r, Cyan.g, Cyan.b, 0.15f + 0.25f * full);
+            // Kuon's shape gathers inside the soul as it fills.
+            wolf.Form(heart, 0.9f * full);
+            if (t >= nextRumble)
+            {
+                nextRumble = t + 0.15f;
+                CameraShake.Add(0.02f + 0.06f * full);
+            }
+            yield return null;
+        }
+
+        // All have merged: the soul bulges once, then crushes to a white-hot point.
+        Vector3 from = soulCore.transform.localScale;
+        float halo = soulHalo.transform.localScale.x;
+        for (float t = 0; t < 0.35f; t += Time.deltaTime)
+        {
+            float k = t / 0.35f;
+            float squeeze = k < 0.3f ? 1f + 0.2f * (k / 0.3f) : Mathf.Lerp(1.2f, 0.1f, Mathf.SmoothStep(0, 1, (k - 0.3f) / 0.7f));
+            soulCore.transform.localScale = from * squeeze;
+            soulHalo.transform.localScale = Vector3.one * halo * squeeze;
+            soulHalo.color = new Color(Frost.r, Frost.g, Frost.b, 0.4f + 0.5f * k);
+            yield return null;
+        }
+        Fx.Play(Fx.Impact, heart, Color.white, 1.6f);
+        Sfx.Play(Sfx.WolfGrowl, 0.8f, 0.7f);
+        Dim(0.5f, 0.3f);
+    }
+
+    void RemoveSoulCore()
+    {
+        Drop(soulCore);
+        Drop(soulHalo);
+        soulCore = soulHalo = null;
     }
 
     // Blue spirit flame licking up from her feet and a cold glow pulsing behind her.
@@ -2531,6 +2674,8 @@ public class SpiritWolf : MonoBehaviour, IHittable
     bool hidden;
     // Held, it stays where it stands instead of padding about (mid-howl, mid-lance).
     bool held;
+    // Taking shape inside the soul at her phase break: its presence is set from outside, frame by frame.
+    bool forming;
     // Its own spot on her row, and when it next moves on from it.
     Vector3 den;
     float nextProwl;
@@ -2764,6 +2909,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public IEnumerator AppearAt(Vector3 at, bool hold = false)
     {
         StopFollowing();
+        forming = false;
         transform.position = at;
         hidden = false;
         if (idle != null) animator.Play(idle, true, null, 6f);
@@ -2777,6 +2923,18 @@ public class SpiritWolf : MonoBehaviour, IHittable
         shown = shownTarget;
         Apply();
         if (presence == Presence.Present && !hold) Follow();
+    }
+
+    // Takes shape inside the merging soul at her phase break: drawn at `amount` of its full presence, held at `at`
+    // until it appears for real.
+    public void Form(Vector3 at, float amount)
+    {
+        StopFollowing();
+        forming = true;
+        hidden = false;
+        transform.position = at;
+        shown = amount;
+        Apply();
     }
 
     // Beside her at once if it isn't already, for a move that fires from its rest.
@@ -2956,7 +3114,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
         rage = Mathf.MoveTowards(rage, Enraged ? 1f : 0f, Time.deltaTime * 1.5f);
         // A dazed wolf reels where it stands.
         sprite.transform.localRotation = Dazed && !IsBroken ? Quaternion.Euler(0, 0, Mathf.Sin(Time.time * 18f) * 8f) : Quaternion.identity;
-        if (hidden) return;
+        if (hidden || forming) return;
         shown = Mathf.MoveTowards(shown, shownTarget, Time.deltaTime * 1.5f);
         Apply();
     }

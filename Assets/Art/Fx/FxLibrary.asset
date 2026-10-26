@@ -749,6 +749,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 3c3b6a749fddd42aeb268c1ba2b859f9, type: 3}
     fps: 1
     loop: 1
+  - id: Shiro_SpiritWisp
+    frames:
+    - {fileID: 21300000, guid: 3e8c87bd8d02b41268cc9c71883722a2, type: 3}
+    - {fileID: 21300000, guid: 7ed9a67f0134249709d279252c8fc689, type: 3}
+    - {fileID: 21300000, guid: e7a432723942c4403ba274d905148b11, type: 3}
+    - {fileID: 21300000, guid: 10e81ed2e9ac8432b980d562eb7ddc80, type: 3}
+    - {fileID: 21300000, guid: 7419a75c3aaac4923af9c82d0feda707, type: 3}
+    - {fileID: 21300000, guid: 37ded12b05f024e6ebea25cae54bfc1d, type: 3}
+    - {fileID: 21300000, guid: 6c4172191d60846bb893549aef82688d, type: 3}
+    - {fileID: 21300000, guid: aa9a4e74795d84897b4f8d2101d7a7e3, type: 3}
+    fps: 12
+    loop: 1
   - id: Kage_Skull
     frames:
     - {fileID: 21300000, guid: fe02e54460ad64a258f274d45f2479ca, type: 3}

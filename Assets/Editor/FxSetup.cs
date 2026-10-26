@@ -80,6 +80,14 @@ public static class FxSetup
         (Fx.KageOfuda, 8, true, Centre),
         (Fx.KageGreatBell, 8, true, Centre),
         (Fx.KageCoffin, 8, true, Centre),
+        // The bullet-hell kit's bell and seal-dart, the Night of a Thousand Bells' hanging bell, the chain and soul-fire
+        // segments drawn tiled along their length, and the burst under a slam, which sits on the ground.
+        (Fx.KageBellShot, 8, true, Centre),
+        (Fx.KageSealDart, 8, true, Centre),
+        (Fx.KageBell, 8, true, new Vector2(0.5f, 1f)),
+        (Fx.KageChain, 8, true, Centre),
+        (Fx.KageSoulPillar, 8, true, Centre),
+        (Fx.KageShockwave, 8, false, new Vector2(0.5f, 0.2f)),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

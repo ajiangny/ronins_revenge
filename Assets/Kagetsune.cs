@@ -439,6 +439,55 @@ public class Kagetsune : Boss
         Destroy(thing.gameObject);
     }
 
+    // A chain or soul-fire column: its art tiled along the length when it exists, or a plain bar in the fallback colour.
+    SpriteRenderer Tiled(string id, Vector3 from, Vector3 to, float width, Color fallback, int order)
+    {
+        Sprite[] frames = Fx.Frames(id);
+        if (frames == null) return Bar(from, to, width, fallback, order);
+        var strip = new GameObject(id).AddComponent<SpriteRenderer>();
+        strip.sprite = frames[0];
+        strip.drawMode = SpriteDrawMode.Tiled;
+        strip.sortingOrder = order;
+        transient.Add(strip.gameObject);
+        Lay(strip, from, to, width);
+        return strip;
+    }
+
+    // Stretch for both kinds: a tiled strip is scaled to the width and tiled to the length, so its links don't smear.
+    static void Lay(SpriteRenderer strip, Vector3 from, Vector3 to, float width)
+    {
+        if (strip == null) return;
+        if (strip.drawMode != SpriteDrawMode.Tiled)
+        {
+            Stretch(strip, from, to, width);
+            return;
+        }
+        Vector3 delta = to - from;
+        float art = strip.sprite.bounds.size.y;
+        float scale = width / art;
+        strip.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
+        strip.transform.rotation = delta.sqrMagnitude > 0.0001f ? Quaternion.FromToRotation(Vector3.right, delta) : Quaternion.identity;
+        strip.transform.localScale = Vector3.one * scale;
+        strip.size = new Vector2(delta.magnitude / scale, art);
+    }
+
+    // The colour of a chain at the given opacity: its own art's colours, or bronze for the bar.
+    static Color ChainColour(SpriteRenderer chain, float alpha) =>
+        chain.drawMode == SpriteDrawMode.Tiled ? new Color(1f, 1f, 1f, alpha) : new Color(Bronze.r, Bronze.g, Bronze.b, alpha);
+
+    // The burst of stone and soul-fire under a slam: the art held a moment and faded, or nothing extra without it.
+    static void Shockwave(Vector3 at, float size)
+    {
+        Sprite[] frames = Fx.Frames(Fx.KageShockwave);
+        if (frames == null) return;
+        var burst = new GameObject("Shockwave").AddComponent<SpriteRenderer>();
+        burst.sprite = frames[0];
+        burst.sortingOrder = 57;
+        burst.transform.position = at + Vector3.back * 0.2f;
+        burst.transform.localScale = Vector3.one * (size / frames[0].bounds.size.x);
+        Fader.Fade(burst, 0.5f);
+    }
+
     // A wide faint band down a lane that narrows and brightens over the tell, so the blow lands as it closes.
     IEnumerator CloseLanes(List<SpriteRenderer> bands, List<float> xs, float fromWidth, float toWidth, Color colour, float seconds, int beats = 3, float peak = 0.45f)
     {
@@ -529,7 +578,7 @@ public class Kagetsune : Boss
             SpriteRenderer halo = Bar(top, top, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.5f), 55);
             halo.sprite = ProceduralSprites.Glow;
             waves.Add(halo);
-            waves.Add(Bar(top, top, 1f, new Color(0.9f, 1f, 0.96f, 0.9f), 56));
+            waves.Add(Tiled(Fx.KageSoulPillar, top, top, 1.2f, new Color(0.9f, 1f, 0.96f, 0.9f), 56));
             if (cover != null) StartCoroutine(BreakAfter(cover, 0.18f));
         }
         bool hit = false;
@@ -541,7 +590,7 @@ public class Kagetsune : Boss
                 Vector3 top = new Vector3(xs[i], anchor.y - Extents.y * 0.5f, 0);
                 Vector3 tip = Vector3.Lerp(top, ends[i], k);
                 Stretch(waves[2 * i], top, tip, 2.6f);
-                Stretch(waves[2 * i + 1], top, tip, 0.7f * (1f - 0.4f * k));
+                Lay(waves[2 * i + 1], top, tip, (waves[2 * i + 1].drawMode == SpriteDrawMode.Tiled ? 1.4f : 0.7f) * (1f - 0.4f * k));
                 if (!hit && Mathf.Abs(ronin.Bounds.center.x - xs[i]) < 0.95f && tip.y <= ronin.Bounds.center.y + 0.3f)
                 {
                     hit = true;
@@ -556,6 +605,7 @@ public class Kagetsune : Boss
             Fx.Play(Fx.SmokePuff, end, new Color(0.25f, 0.25f, 0.28f, 0.8f), 2f);
             ElementFx.Glow(end, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 0.5f, 7f, 0.4f);
             Crack(end);
+            Shockwave(end, 3.2f);
             GroundFire.Light(end);
             Debris.BurstSprites(end, art.deathParticles, Bronze, 10, 0.8f, 7f);
         }
@@ -965,7 +1015,7 @@ public class Kagetsune : Boss
         {
             Vector3 a = HammerHead + new Vector3(Random.Range(-0.6f, 0.6f), Random.Range(-0.5f, 0.5f), 0);
             Vector3 b = Centre + new Vector3((i - 1.5f) * Extents.x * 0.4f, -Extents.y * 0.1f, 0);
-            chains.Add(Bar(a, b, 0.14f, Bronze, 57));
+            chains.Add(Tiled(Fx.KageChain, a, b, 0.45f, Bronze, 57));
         }
         StartCoroutine(Tremble(2.4f, 0.16f));
         // The bells: slow at first, then a clamour.
@@ -1085,7 +1135,7 @@ public class Kagetsune : Boss
             Drop(startTell);
             Drop(endTell);
 
-            var chain = Bar(root, root, 0.22f, Bronze, 56);
+            var chain = Tiled(Fx.KageChain, root, root, 0.5f, Bronze, 56);
             var glow = Bar(root, root, 0.8f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 54);
             glow.sprite = ProceduralSprites.Glow;
             if (Sfx.Has(Sfx.ChainSnap)) Sfx.Play(Sfx.ChainSnap, 0.7f, 0.8f);
@@ -1096,7 +1146,7 @@ public class Kagetsune : Boss
                 root = Shoulder(side);
                 float x = Mathf.Lerp(a, b, Mathf.SmoothStep(0, 1, t / 0.45f));
                 Vector3 end = BeamEnd(root, new Vector3(x, GroundY, 0), out Blocker cover);
-                Stretch(chain, root, end, 0.22f);
+                Lay(chain, root, end, chain.drawMode == SpriteDrawMode.Tiled ? 0.5f : 0.22f);
                 Stretch(glow, root, end, 0.8f);
                 HitIfCrossed(root, end);
                 if (cover != null && Time.time >= nextBurn)
@@ -1133,7 +1183,7 @@ public class Kagetsune : Boss
         var glows = new List<SpriteRenderer>();
         for (int i = 0; i < 2; i++)
         {
-            chains.Add(Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.22f, Bronze, 56));
+            chains.Add(Tiled(Fx.KageChain, Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.5f, Bronze, 56));
             SpriteRenderer glow = Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.8f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 54);
             glow.sprite = ProceduralSprites.Glow;
             glows.Add(glow);
@@ -1149,7 +1199,7 @@ public class Kagetsune : Boss
             {
                 Vector3 root = Shoulder(i == 0 ? -1f : 1f);
                 Vector3 end = new Vector3(xs[i], GroundY, 0);
-                Stretch(chains[i], root, end, 0.22f);
+                Lay(chains[i], root, end, chains[i].drawMode == SpriteDrawMode.Tiled ? 0.5f : 0.22f);
                 Stretch(glows[i], root, end, 0.8f * (1f + 0.15f * Mathf.Sin(Time.time * 9f)));
                 HitIfCrossed(root, end);
             }
@@ -1188,10 +1238,10 @@ public class Kagetsune : Boss
         }
         Slam(0.6f);
         // The chain pays out behind it.
-        SpriteRenderer chain = Bar(from, from, 0.12f, Bronze, 54);
+        SpriteRenderer chain = Tiled(Fx.KageChain, from, from, 0.4f, Bronze, 54);
         for (float t = 0; t < 1.6f && coffin != null; t += Time.deltaTime)
         {
-            Stretch(chain, HammerHead, coffin.transform.position, 0.12f);
+            Lay(chain, HammerHead, coffin.transform.position, chain.drawMode == SpriteDrawMode.Tiled ? 0.4f : 0.12f);
             yield return null;
         }
         Drop(chain);
@@ -1238,7 +1288,7 @@ public class Kagetsune : Boss
         List<float> lanes = Lanes(LaneCount);
         float halfWidth = (RightEdge - LeftEdge - 2.4f) / (LaneCount * 2f);
         var bells = new List<SpriteRenderer>();
-        foreach (float x in lanes) bells.Add(Glowing(new Vector3(x, TopOfScreen - 1.2f, 0), new Color(Bronze.r, Bronze.g, Bronze.b, 0.35f), 1.2f, 57));
+        foreach (float x in lanes) bells.Add(HangBell(new Vector3(x, TopOfScreen - 0.6f, 0)));
 
         int safe = 0;
         for (int i = 1; i < LaneCount; i++) if (Mathf.Abs(lanes[i] - ronin.Bounds.center.x) < Mathf.Abs(lanes[safe] - ronin.Bounds.center.x)) safe = i;
@@ -1253,7 +1303,7 @@ public class Kagetsune : Boss
                 float bellAt = ronin.Bounds.center.x;
                 float left = FieldLeft;
                 Toll(1f, 0.6f);
-                foreach (SpriteRenderer bell in bells) if (bell != null) bell.color = new Color(Bronze.r, Bronze.g, Bronze.b, 1f);
+                foreach (SpriteRenderer bell in bells) if (bell != null) bell.color = BellColour(bell, 1f);
                 BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, 1.5f, null, BulletHell.MinGap, 4.5f,
                     i => Mathf.Abs(left + i * 1.5f - bellAt) < 0.75f ? BellShot : null);
                 yield return Wait((TopOfScreen - Row) / (4.5f * ShotSpeed));
@@ -1266,14 +1316,15 @@ public class Kagetsune : Boss
                 if (i == safe) continue;
                 xs.Add(lanes[i]);
                 bands.Add(Bar(new Vector3(lanes[i], TopOfScreen, 0), new Vector3(lanes[i], GroundY, 0), halfWidth * 2f, new Color(Teal.r, Teal.g, Teal.b, 0.1f)));
-                if (bells[i] != null) bells[i].color = new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f);
+                if (bells[i] != null) bells[i].color = BellColour(bells[i], 0.9f);
             }
-            if (bells[safe] != null) bells[safe].color = new Color(Bronze.r, Bronze.g, Bronze.b, 0.15f);
+            if (bells[safe] != null) bells[safe].color = BellColour(bells[safe], 0.2f);
             yield return CloseLanes(bands, xs, halfWidth * 1.6f, halfWidth * 0.5f, Teal, wave == 0 ? 0.9f : 0.7f, 2, 0.2f);
             foreach (SpriteRenderer band in bands) Drop(band);
 
             Toll(1f, 0.7f + 0.05f * wave);
             CameraShake.Add(0.3f);
+            for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) StartCoroutine(Swing(bells[i]));
             var columns = new List<SpriteRenderer>();
             foreach (float x in xs)
             {
@@ -1281,7 +1332,7 @@ public class Kagetsune : Boss
                 SpriteRenderer halo = Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), 55);
                 halo.sprite = ProceduralSprites.Glow;
                 columns.Add(halo);
-                columns.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 0.55f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
+                columns.Add(Tiled(Fx.KageSoulPillar, new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 1.3f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
                 GroundFire.Light(new Vector3(x, GroundY, 0));
             }
             // The columns burn for their whole flash, not a single frame.
@@ -1313,6 +1364,35 @@ public class Kagetsune : Boss
     }
 
     const float ColumnSeconds = 0.25f;
+
+    // A bell hung across the top for the ultimate: the art on its cord, or a bronze glow without it.
+    SpriteRenderer HangBell(Vector3 at)
+    {
+        Sprite[] frames = Fx.Frames(Fx.KageBell);
+        if (frames == null) return Glowing(at + Vector3.down * 0.6f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.35f), 1.2f, 57);
+        var bell = new GameObject("Bell").AddComponent<SpriteRenderer>();
+        bell.sprite = frames[0];
+        bell.sortingOrder = 57;
+        bell.transform.position = at;
+        bell.transform.localScale = Vector3.one * (1.3f / frames[0].bounds.size.y);
+        bell.color = BellColour(bell, 0.5f);
+        transient.Add(bell.gameObject);
+        return bell;
+    }
+
+    Color BellColour(SpriteRenderer bell, float alpha) =>
+        bell.sprite == ProceduralSprites.Glow ? new Color(Bronze.r, Bronze.g, Bronze.b, alpha * 0.9f) : new Color(1f, 1f, 1f, alpha);
+
+    // A rung bell swings on its cord and settles.
+    IEnumerator Swing(SpriteRenderer bell)
+    {
+        for (float t = 0; t < 0.6f && bell != null; t += Time.deltaTime)
+        {
+            bell.transform.rotation = Quaternion.Euler(0, 0, Mathf.Sin(t * 22f) * 18f * (1f - t / 0.6f));
+            yield return null;
+        }
+        if (bell != null) bell.transform.rotation = Quaternion.identity;
+    }
 
     // A full-screen dark under the action, for his ultimate.
     SpriteRenderer Darkness()
@@ -1371,7 +1451,8 @@ public class Kagetsune : Boss
         transient.Add(body.gameObject);
         echo.body = body;
         echo.aura = Glowing(at, new Color(Teal.r, Teal.g, Teal.b, 0f), echo.Height * 1.1f, 3);
-        echo.chain = Bar(HammerHead, at, 0.1f, new Color(Bronze.r, Bronze.g, Bronze.b, 0f), 3);
+        echo.chain = Tiled(Fx.KageChain, HammerHead, at, 0.3f, new Color(Bronze.r, Bronze.g, Bronze.b, 0f), 3);
+        echo.chain.color = ChainColour(echo.chain, 0f);
 
         activeEcho = echo;
         Fx.Play(Fx.SmokePuff, at, new Color(Teal.r, Teal.g, Teal.b, 0.7f), 2.5f);
@@ -1381,7 +1462,7 @@ public class Kagetsune : Boss
             float k = t / 0.8f;
             body.color = new Color(0.55f, 1f, 0.9f, 0.7f * k);
             echo.aura.color = new Color(Teal.r, Teal.g, Teal.b, 0.3f * k);
-            echo.chain.color = new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f * k);
+            echo.chain.color = ChainColour(echo.chain, 0.8f * k);
             yield return null;
         }
         ready(echo);
@@ -1395,7 +1476,7 @@ public class Kagetsune : Boss
             float k = 1f - t / 0.6f;
             echo.body.color = new Color(0.55f, 1f, 0.9f, 0.7f * k);
             if (echo.aura != null) echo.aura.color = new Color(Teal.r, Teal.g, Teal.b, 0.3f * k);
-            if (echo.chain != null) echo.chain.color = new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f * k);
+            if (echo.chain != null) echo.chain.color = ChainColour(echo.chain, 0.8f * k);
             yield return null;
         }
         Drop(echo.body);
@@ -1407,7 +1488,7 @@ public class Kagetsune : Boss
     // The chain from the coffin-hammer follows the ghost while the soul works.
     void HoldChain(Echo echo)
     {
-        if (echo?.chain != null && echo.body != null) Stretch(echo.chain, HammerHead, echo.Centre, 0.1f);
+        if (echo?.chain != null && echo.body != null) Lay(echo.chain, HammerHead, echo.Centre, echo.chain.drawMode == SpriteDrawMode.Tiled ? 0.3f : 0.1f);
     }
 
     // Benibana's soul: her smoke rings in offset fans, then her Crimson Iaido, a crescent only a parry answers.

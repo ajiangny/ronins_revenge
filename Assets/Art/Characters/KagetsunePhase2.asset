@@ -44,6 +44,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f4f73276035bc40b2977e4735af69379, type: 3}
   - {fileID: 21300000, guid: 5f7f41888f1e9469bb5e35a0a43aa187, type: 3}
   - {fileID: 21300000, guid: d403966c22b92459b86870e49a43e3ce, type: 3}
+  - {fileID: 21300000, guid: 6736480ae884c43c0a90dac629caed41, type: 3}
+  - {fileID: 21300000, guid: 2b313fc3960ec43078f08a6ae76eb625, type: 3}
   parry:
   - {fileID: 21300000, guid: 7d78328a8e2404227910d549f21209c1, type: 3}
   - {fileID: 21300000, guid: fed3aebb4061c4ad7a9315c2396294a5, type: 3}
@@ -51,8 +53,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 674d0856fc3784db4858dbeb0dd5e750, type: 3}
   - {fileID: 21300000, guid: 7403cc8721a9b46fcb8aaed1e23fdef9, type: 3}
   - {fileID: 21300000, guid: 416836b70772a498da4fef0f5adb3347, type: 3}
-  - {fileID: 21300000, guid: fbf1e383bf9e44950b7fdfc4914eeb28, type: 3}
-  - {fileID: 21300000, guid: 15a63bbb1fee941169598fee5f58648b, type: 3}
   slash: []
   runLeft: []
   runRight: []

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: be957ae28ffdb4578bf10f2f6eb996a4
+guid: 6736480ae884c43c0a90dac629caed41
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7227757194466313192
-    second: Kagetsune_Idle_6_0
+      213: -6067876273264533328
+    second: KagetsunePhase2_Defeat_6_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Kagetsune_Idle_6_0
+      name: KagetsunePhase2_Defeat_6_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 160
-        height: 160
+        width: 176
+        height: 176
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 81cbf0d3029d1bb90800000000000000
-      internalID: -7227757194466313192
+      spriteID: 0b0eb0fada29acba0800000000000000
+      internalID: -6067876273264533328
       vertices: []
       indices: 
       edges: []

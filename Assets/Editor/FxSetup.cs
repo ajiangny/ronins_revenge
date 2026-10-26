@@ -91,6 +91,14 @@ public static class FxSetup
         (Fx.ShiroMawHit, 16, true, new Vector2(0.5f, 1f - 46f / 64f)),
         (Fx.ShiroMawBurst, 16, false, Centre),
         (Fx.ShiroLockOn, 12, true, Centre),
+        // Her ice: the pillar and the glacier spire, still frames drawn at their own sizes by the shots; the shards
+        // burst from the point where the ice strikes, high on the canvas; her ice slash sweeps out from her hands
+        // (its swing's centre), and the ice wolf's head lunges along it.
+        (Fx.ShiroIcePillar, 8, true, Centre),
+        (Fx.ShiroIceSpire, 8, true, Centre),
+        (Fx.ShiroIceShatter, 12, false, new Vector2(46f / 87f, 1f - 41f / 113f)),
+        (Fx.ShiroIceSlash, 14, false, new Vector2(23f / 70f, 1f - 41f / 83f)),
+        (Fx.ShiroWolfSlash, 1, true, Centre),
         // Kagetsune's shots and props: single still frames, drawn by his shots at their own sizes.
         (Fx.KageSkull, 10, true, Centre),
         (Fx.KageOfuda, 8, true, Centre),

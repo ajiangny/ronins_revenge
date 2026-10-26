@@ -670,12 +670,12 @@ public class Shirogane : Boss
     const float PillarRadius = 0.42f;
     // A glacier spire's: its hit reaches SpireRadius either side of its lane.
     const float SpireLength = 7.5f;
-    const float SpireWidth = 3.6f;
+    const float SpireWidth = 3.2f;
     const float SpireRadius = 1.45f;
     static readonly Color DeepIce = new Color(0.25f, 0.45f, 1f);
 
-    // Where a falling pillar hangs before it drops: just inside the top of the field.
-    float PillarHang => TopOfScreen - 1.2f;
+    // Where a falling pillar hangs before it drops: whole, just inside the top of the field.
+    float PillarHang => TopOfScreen - PillarLength * 0.5f - 0.9f;
 
     // A pillar of ice dropped down a lane, point first: blows and cover don't stop it, but a parry knocks it aside.
     // It shatters where it meets the ground.
@@ -792,7 +792,7 @@ public class Shirogane : Boss
             }
             float k = t / tell;
             float flicker = k > 0.75f ? 0.6f + 0.4f * Mathf.PingPong(t * 14f, 1f) : 1f;
-            band.color = new Color(DeepIce.r, DeepIce.g, DeepIce.b, (0.06f + 0.22f * k) * flicker);
+            band.color = new Color(DeepIce.r, DeepIce.g, DeepIce.b, (0.04f + 0.12f * k) * flicker);
             shadow.color = new Color(0.05f, 0.1f, 0.25f, 0.25f + 0.45f * k);
             shadow.transform.localScale = new Vector3(half * 2.4f * (0.6f + 0.4f * k), 0.9f, 1f);
             picture.transform.position = new Vector3(x, top - Mathf.Lerp(0.6f, 2.2f, k), -0.3f);
@@ -826,11 +826,11 @@ public class Shirogane : Boss
         yield return Wait(secondPhase ? 0.5f : 0.6f);
 
         PlayAction(art.attack);
-        if (Fx.Play(Fx.SlashArc, Hands, Cyan, 2.6f) == null) ElementFx.Glow(Hands, Cyan, 1f, 3f, 0.2f);
         Sfx.Play(Sfx.SwordSlash, 0.9f, 0.7f);
         // Past the middle of her first bar she has his measure, and aims.
         bool aimed = secondPhase || HealthFraction < 0.5f;
         Vector3 aim = aimed ? (ronin.Bounds.center - Hands).normalized : Vector3.down;
+        WolfSlash(Hands, aim, 2.6f);
         CrescentFan(aim, 0f);
         // Enraged, a second swing follows, its blades between the first's and aimed afresh.
         if (enraged)
@@ -838,9 +838,45 @@ public class Shirogane : Boss
             yield return Wait(0.25f);
             PlayAction(art.attack);
             Sfx.Play(Sfx.SwordSlash, 0.9f, 0.8f);
-            CrescentFan((ronin.Bounds.center - Hands).normalized, 9f);
+            Vector3 again = (ronin.Bounds.center - Hands).normalized;
+            WolfSlash(Hands, again, 2.6f);
+            CrescentFan(again, 9f);
         }
         yield return Wait(0.3f);
+    }
+
+    // Her sword slash: a frost arc sweeps out from `at` toward `aim` and an ice wolf's head lunges along it, jaws
+    // open, and fades. Without the art, the plain slash arc and a glow.
+    void WolfSlash(Vector3 at, Vector3 aim, float size)
+    {
+        aim.z = 0f;
+        aim = aim.sqrMagnitude > 0.0001f ? aim.normalized : Vector3.down;
+        FxPlayer arc = Fx.Play(Fx.ShiroIceSlash, at, Color.white, size * 0.6f);
+        if (arc != null) arc.transform.rotation = Quaternion.FromToRotation(Vector3.right, aim);
+        else if (Fx.Play(Fx.SlashArc, at, Cyan, size) == null) ElementFx.Glow(at, Cyan, 1f, size + 0.4f, 0.2f);
+        Sprite[] head = Fx.Frames(Fx.ShiroWolfSlash);
+        if (head != null) StartCoroutine(Lunge(head[0], at, aim, size));
+    }
+
+    // The ice wolf's head leaping out along a slash: it swells in, lunges past the arc and fades, leaving a ghost.
+    IEnumerator Lunge(Sprite head, Vector3 at, Vector3 aim, float size)
+    {
+        SpriteRenderer wolfHead = Glowing("IceWolf", head, 57);
+        wolfHead.transform.rotation = Quaternion.FromToRotation(Vector3.right, aim);
+        // Drawn facing right; flipped so it never lunges upside down.
+        wolfHead.flipY = aim.x < 0f;
+        float scale = size * 1.3f / head.bounds.size.x;
+        const float Seconds = 0.4f;
+        for (float t = 0; t < Seconds && wolfHead != null; t += Time.deltaTime)
+        {
+            float k = t / Seconds;
+            wolfHead.transform.position = at + aim * (size * (0.15f + 0.9f * Mathf.Sqrt(k))) + Vector3.back * 0.3f;
+            wolfHead.transform.localScale = Vector3.one * scale * (0.7f + 0.4f * k);
+            wolfHead.color = new Color(1f, 1f, 1f, k < 0.25f ? k / 0.25f : 1f - (k - 0.25f) / 0.75f);
+            if (k > 0.3f && Random.value < 0.35f) Afterimage(wolfHead, new Color(Frost.r, Frost.g, Frost.b, 0.35f));
+            yield return null;
+        }
+        Drop(wolfHead);
     }
 
     // Five crescents in a fan about `aim`, turned by `offset` degrees.
@@ -1147,8 +1183,8 @@ public class Shirogane : Boss
     // Three crescents from a point, the middle one at the ronin.
     void AimedFan(Vector3 from)
     {
-        if (Fx.Play(Fx.SlashArc, from, Cyan, 2.2f) == null) ElementFx.Glow(from, Cyan, 1f, 2.6f, 0.2f);
         Vector3 aim = (ronin.Bounds.center - from).normalized;
+        WolfSlash(from, aim, 2.2f);
         var fan = new List<Arrow>();
         for (int i = 0; i < 3; i++)
         {
@@ -1214,7 +1250,7 @@ public class Shirogane : Boss
             else moon.Restyle(ProceduralSprites.Glow, Frost, new Vector2(1.4f, 3f), 0.8f, halo, 3.6f);
             moon.MakeUnbreakable();
             moon.MakeReflectable(transform);
-            if (Fx.Play(Fx.SlashArc, starts[i], Frost, 2.6f) == null) ElementFx.Glow(starts[i], Frost, 1f, 2.6f, 0.2f);
+            WolfSlash(starts[i], bends[i] - starts[i], 2.6f);
             pair.Add(moon);
             StartCoroutine(Close(moon, starts[i], bends[i], seconds));
         }
@@ -1594,6 +1630,7 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.WolfHowl, 0.7f, 1.2f);
         // Positive angles turn a downward shot to the right, negative to the left.
         float inward = herLeft ? 1f : -1f;
+        WolfSlash(Hands, Quaternion.Euler(0, 0, 40f * inward) * Vector3.down, 2.6f);
         var volley = new List<Arrow>();
         for (int i = 0; i < 5; i++)
         {
@@ -1680,6 +1717,7 @@ public class Shirogane : Boss
         {
             PlayAction(art.attack);
             Sfx.Play(Sfx.SwordSlash, 0.9f, 0.65f);
+            WolfSlash(Hands, Vector3.down, 3f);
             var fan = new List<Arrow>();
             for (int i = 0; i < 5; i++)
             {

@@ -709,6 +709,46 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 7c8cbdb2d5054689a0256169a0e3ef8e, type: 3}
     fps: 12
     loop: 1
+  - id: Shiro_IcePillar
+    frames:
+    - {fileID: 21300000, guid: 28c4f0c88c0154f679b6bcd2c47c1a78, type: 3}
+    fps: 8
+    loop: 1
+  - id: Shiro_IceSpire
+    frames:
+    - {fileID: 21300000, guid: c3e1fcac0806d48918e99da699bce25b, type: 3}
+    fps: 8
+    loop: 1
+  - id: Shiro_IceShatter
+    frames:
+    - {fileID: 21300000, guid: b273e140bef9446e382ecac51cbb1b16, type: 3}
+    - {fileID: 21300000, guid: 97dc08e311578437683752fbc9f9df18, type: 3}
+    - {fileID: 21300000, guid: 333ef57e6a5e14808bd58dbe30529804, type: 3}
+    - {fileID: 21300000, guid: b9d1dcaa1ba7c47e5891244a5877d086, type: 3}
+    - {fileID: 21300000, guid: ba75ae8df298044d2819621cda193abc, type: 3}
+    - {fileID: 21300000, guid: 2458916cc748d41419975655f39aacb2, type: 3}
+    - {fileID: 21300000, guid: 556bde03f800e4fee89cac35e896ab5a, type: 3}
+    - {fileID: 21300000, guid: 0e6029de38e99486f9b8bd53a5ad4662, type: 3}
+    - {fileID: 21300000, guid: 2d526c0ecdb4d4a4a87d8f68d9a67420, type: 3}
+    - {fileID: 21300000, guid: df66251bd2f6c4e6da1d63252270dc5f, type: 3}
+    fps: 12
+    loop: 0
+  - id: Shiro_IceSlash
+    frames:
+    - {fileID: 21300000, guid: 96f97c426b23543b7bddbcfade97183f, type: 3}
+    - {fileID: 21300000, guid: a1ac41fdee95649d0be529fe9337404d, type: 3}
+    - {fileID: 21300000, guid: 380ffd2c623c646109028238cf8097a6, type: 3}
+    - {fileID: 21300000, guid: 08120e82077de41b994a916d1e52cf40, type: 3}
+    - {fileID: 21300000, guid: be983bacc1556478cbb29a45f24aa732, type: 3}
+    - {fileID: 21300000, guid: a37a52d689056428997fcb55fda83c25, type: 3}
+    - {fileID: 21300000, guid: 1de9886cbb4a641f1ba5daaf5cd3edb5, type: 3}
+    fps: 14
+    loop: 0
+  - id: Shiro_WolfSlash
+    frames:
+    - {fileID: 21300000, guid: 3c3b6a749fddd42aeb268c1ba2b859f9, type: 3}
+    fps: 1
+    loop: 1
   - id: Kage_Skull
     frames:
     - {fileID: 21300000, guid: fe02e54460ad64a258f274d45f2479ca, type: 3}

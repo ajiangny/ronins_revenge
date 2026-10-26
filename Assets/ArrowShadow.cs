@@ -1,8 +1,9 @@
 using UnityEngine;
 
-// The spot on the ronin's row where a falling shot will land, drawn on the ground under it. He only runs left and
-// right, so where things will cross his row is all he needs to read: the shadow darkens and grows as the shot nears.
-// Every enemy arrow carries one; shots flying up or nearly sideways cast none.
+// The spot on the ronin's row where a falling shot will land, marked on the ground under it. He only runs left and
+// right, so where things will cross his row is all he needs to read: the mark brightens and grows as the shot nears.
+// It glows in the shot's own halo colour, since a dark shadow vanishes on the Emperor's black courtyard. Every enemy
+// arrow carries one; shots flying up or nearly sideways cast none.
 public class ArrowShadow : MonoBehaviour
 {
     const float Alpha = 0.45f;
@@ -14,12 +15,14 @@ public class ArrowShadow : MonoBehaviour
     static Ronin ronin;
 
     Rigidbody body;
+    Arrow arrow;
     SpriteRenderer shadow;
 
     public static void Attach(Arrow arrow)
     {
         var mark = arrow.gameObject.AddComponent<ArrowShadow>();
         mark.body = arrow.GetComponent<Rigidbody>();
+        mark.arrow = arrow;
     }
 
     void Start()
@@ -34,7 +37,7 @@ public class ArrowShadow : MonoBehaviour
     void LateUpdate()
     {
         if (shadow == null) return;
-        if (ronin == null) ronin = FindFirstObjectByType<Ronin>();
+        if (ronin == null) ronin = FindAnyObjectByType<Ronin>();
         Vector3 velocity = body.linearVelocity;
         if (ronin == null || velocity.y > -MinFall)
         {
@@ -53,7 +56,8 @@ public class ArrowShadow : MonoBehaviour
         float near = 1f - seconds / Lookahead;
         shadow.transform.position = new Vector3(at.x + velocity.x * seconds, row, 0.4f);
         shadow.transform.localScale = new Vector3(Width * (0.5f + 0.5f * near), Width * 0.3f * (0.5f + 0.5f * near), 1f);
-        shadow.color = new Color(0f, 0f, 0f, Alpha * near);
+        Color tint = Color.Lerp(arrow.GlowColor, Color.white, 0.3f);
+        shadow.color = new Color(tint.r, tint.g, tint.b, Alpha * near);
     }
 
     void OnDisable()

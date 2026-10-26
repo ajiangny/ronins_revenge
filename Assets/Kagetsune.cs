@@ -86,7 +86,7 @@ public class Kagetsune : Boss
 
     enum Move
     {
-        CofferSlam, Toll, Ofuda, Wail, LastToll,
+        CofferSlam, Toll, Ofuda, Wail, LastToll, Curtain,
         Swarm, Chains, SoulCoffin, ThousandBells,
         EchoBenibana, EchoUtsusemi, EchoShirogane,
     }
@@ -185,6 +185,7 @@ public class Kagetsune : Boss
         Move.Ofuda => OfudaDecree(),
         Move.Wail => ThousandSoulWail(),
         Move.LastToll => LastToll(),
+        Move.Curtain => RosaryCurtain(),
         Move.Swarm => WraithSwarm(),
         Move.Chains => BrokenChains(),
         Move.SoulCoffin => SoulCoffin(),
@@ -201,7 +202,7 @@ public class Kagetsune : Boss
         if (movesSinceParry >= ParryAtLatest) return parry;
         if (secondPhase && movesSinceEcho >= EchoAtLatest) return NextEcho();
 
-        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail };
+        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail, Move.Curtain };
         if (secondPhase)
         {
             options.Add(Move.Swarm);
@@ -259,7 +260,7 @@ public class Kagetsune : Boss
     // A soul-skull: a breakable teal orb. Parried, it flies home at him as a freed soul.
     Arrow Skull(Vector3 from, Vector3 velocity)
     {
-        Arrow skull = Shoot(from, velocity * ShotSpeed);
+        Arrow skull = BulletHell.Enlist(Shoot(from, velocity * ShotSpeed));
         Sprite[] frames = Fx.Frames(Fx.KageSkull);
         if (frames != null) skull.Restyle(frames, 10f, Color.white, new Vector2(0.95f, 0.95f), 0.32f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), 1.5f);
         else skull.Restyle(ProceduralSprites.Disc, new Color(0.75f, 1f, 0.92f), new Vector2(0.6f, 0.6f), 0.32f, new Color(Teal.r, Teal.g, Teal.b, 0.55f), 1.5f);
@@ -277,19 +278,18 @@ public class Kagetsune : Boss
         else Sfx.Play(Sfx.MidnightChime, 0.3f, 1.9f);
     }
 
-    // Fans of skulls aimed at the ronin; an offset fan fills the gaps the last one left.
-    void SkullFan(Vector3 from, int count, float spread, float speed, bool offset)
-    {
-        Vector3 aim = (ronin.Bounds.center - from).normalized;
-        float step = count > 1 ? 2f * spread / (count - 1f) : 0f;
-        var volley = new List<Arrow>();
-        for (int i = 0; i < count; i++)
-        {
-            float angle = (count > 1 ? Mathf.Lerp(-spread, spread, i / (count - 1f)) : 0f) + (offset ? step / 2f : 0f);
-            volley.Add(Skull(from, Quaternion.Euler(0, 0, angle) * aim * speed));
-        }
-        IgnoreEachOther(volley);
-    }
+    // His other two bullets: a bronze bell a parry rings into Resonance, and a crimson seal-dart no parry turns.
+    Arrow BellShot(Vector3 from, Vector3 velocity) => BulletHell.MakeBell(BulletHell.Enlist(Shoot(from, velocity * ShotSpeed), capped: false));
+    Arrow SealDart(Vector3 from, Vector3 velocity) => BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, velocity * ShotSpeed), capped: false), SealRed);
+
+    // The ronin's row, and the stretch of it a curtain spans.
+    float Row => ronin.Bounds.center.y;
+    float FieldLeft => LeftEdge + 0.6f;
+    float FieldRight => RightEdge - 0.6f;
+    // Past the middle of his first bar he hardens: a second slam lane, embers off the Wail, a gapless curtain row,
+    // and a ring of skulls closing with the Last Toll.
+    bool Hardened => secondPhase || HealthFraction < 0.5f;
+    int SpiralArms => 3;
 
     // A soft glow sprite, tracked with the attack unless told otherwise.
     SpriteRenderer Glowing(Vector3 at, Color colour, float size, int order = 55, bool track = true)
@@ -379,7 +379,7 @@ public class Kagetsune : Boss
     {
         Bark(BossLine.CofferSlam, 7f);
         var xs = new List<float> { ClampX(ronin.Bounds.center.x) };
-        if (secondPhase) xs.Add(ClampX(xs[0] + (Random.value < 0.5f ? -1f : 1f) * Random.Range(3f, 4.5f)));
+        if (Hardened) xs.Add(ClampX(xs[0] + (Random.value < 0.5f ? -1f : 1f) * Random.Range(3f, 4.5f)));
         var bands = new List<SpriteRenderer>();
         foreach (float x in xs) bands.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 2.6f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.12f)));
         SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.4f), 2.5f);
@@ -431,7 +431,7 @@ public class Kagetsune : Boss
         }
         foreach (SpriteRenderer wave in waves) StartCoroutine(FadeOut(wave, 0.3f));
         yield return Wait(0.15f);
-        foreach (Vector3 end in ends) StartCoroutine(SkullBurst(end, secondPhase ? 4 : 3));
+        foreach (Vector3 end in ends) SlamRing(end);
         yield return Wait(0.5f);
     }
 
@@ -455,27 +455,19 @@ public class Kagetsune : Boss
         Drop(thing);
     }
 
-    // Skulls leap up out of the crack, hang for a beat, then turn and dive at the ronin.
-    IEnumerator SkullBurst(Vector3 at, int count)
+    // Skulls burst from the crack in a slow ring a little above the ground; where it comes down round the crack it
+    // closes off the ground nearby. Step clear of it, or parry through it.
+    void SlamRing(Vector3 at)
     {
-        var skulls = new List<Arrow>();
-        for (int i = 0; i < count; i++)
-        {
-            float angle = Mathf.Lerp(-40f, 40f, count > 1 ? i / (count - 1f) : 0.5f);
-            skulls.Add(Skull(at + Vector3.up * 0.4f, Quaternion.Euler(0, 0, angle) * Vector3.up * 6f / ShotSpeed));
-        }
-        IgnoreEachOther(skulls);
+        int count = secondPhase ? 20 : Hardened ? 16 : 12;
+        Vector3 from = new Vector3(at.x, Mathf.Max(at.y, Row) + 3.2f, 0);
+        BulletHell.Ring(Skull, from, count, 3f, Random.Range(0f, 360f / count));
         if (Sfx.Has(Sfx.SkullShriek)) Sfx.Play(Sfx.SkullShriek, 0.6f);
-        yield return Wait(0.45f);
-        foreach (Arrow skull in skulls)
-        {
-            if (skull == null) continue;
-            skull.Turn((ronin.Bounds.center - skull.transform.position).normalized * 7.5f * ShotSpeed);
-        }
     }
 
-    // Toll of Fealty: his bells ring, and each toll looses a fan of soul-skulls at the ronin, each fan's gaps
-    // where the last one's skulls were.
+    // Toll of Fealty: each toll winds a spiral of skulls out of the bells at his waist, turning the other way from the
+    // last. Where the arms come down, their landings step sideways along the ronin's row a gap apart, so he reads
+    // the shadows and steps between them. In phase 2 a small aimed fan rides each toll, so standing still won't do.
     IEnumerator TollOfFealty(int tolls)
     {
         Bark(BossLine.TollOfFealty, 7f);
@@ -486,9 +478,48 @@ public class Kagetsune : Boss
             yield return Wait(0.22f);
             Toll(0.75f, 1f - 0.05f * i);
             Fx.Play(Fx.Impact, Waist, Teal, 1.6f);
-            SkullFan(Waist, secondPhase ? 7 : 5, secondPhase ? 55f : 45f, 6.5f, i % 2 == 1);
             Drop(bell);
-            yield return Wait(secondPhase ? 0.42f : 0.55f);
+            yield return BulletHell.Room(12);
+            if (secondPhase) BulletHell.Fan(Skull, Waist, ronin.Bounds.center, 3, 10f, 6.5f);
+            float spin = (i % 2 == 0 ? 1f : -1f) * (secondPhase ? 60f : 48f);
+            yield return BulletHell.Spiral(Skull, () => Waist, Row, SpiralArms, spin, secondPhase ? 0.8f : 1f, 5.5f, 0.32f, Wait, Random.Range(0f, 360f));
+            yield return Wait(secondPhase ? 0.15f : 0.25f);
+        }
+    }
+
+    // Rosary Curtain: rows of skulls fall slowly from the top of the field, each with one gap a few steps from the
+    // last: a staircase read off the shadows. Hardened, one row has no gap at all, only a bronze bell where the last
+    // gap was: parry it, and its Resonance opens the way.
+    IEnumerator RosaryCurtain()
+    {
+        PlayAction(art.parry);
+        const int Rows = 4;
+        const float Spacing = 1.5f;
+        const float Speed = 4.5f;
+        float between = secondPhase ? 0.6f : 0.75f;
+        float width = secondPhase ? 2.8f : 3.2f;
+        float lo = FieldLeft + width / 2f, hi = FieldRight - width / 2f;
+        float side = Random.value < 0.5f ? -1f : 1f;
+        float gap = Mathf.Clamp(ronin.Bounds.center.x + side * Random.Range(3f, 6f), lo, hi);
+        // No gapless row while a seal holds: inside one he couldn't parry the bell.
+        int bellRow = Hardened && !SealActive ? Random.Range(1, Rows - 1) : -1;
+        for (int row = 0; row < Rows; row++)
+        {
+            yield return BulletHell.Room(26);
+            Toll(0.45f, 0.9f + 0.06f * row);
+            if (row == bellRow)
+            {
+                float bellAt = gap;
+                float left = FieldLeft;
+                BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, Spacing, null, BulletHell.MinGap, Speed,
+                    i => Mathf.Abs(left + i * Spacing - bellAt) < Spacing / 2f ? BellShot : null);
+            }
+            else BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, Spacing, new[] { gap }, width, Speed);
+            yield return Wait(between);
+            float want = gap + (Random.value < 0.5f ? -1f : 1f) * Random.Range(1.5f, 4f);
+            float next = BulletHell.NextGap(gap, Mathf.Clamp(want, lo, hi), between, lo, hi);
+            BulletHell.GapOk(gap, next, between, width, "Rosary Curtain");
+            gap = next;
         }
     }
 
@@ -551,8 +582,34 @@ public class Kagetsune : Boss
 
         // The law is laid down; now the blow that can't be parried inside it.
         yield return Wait(0.3f);
-        if (Random.value < 0.5f) yield return TollOfFealty(secondPhase ? 3 : 2);
+        float roll = Random.value;
+        if (roll < (Hardened ? 0.5f : 0.34f)) yield return DecreeRain(chosen, halfWidth);
+        else if (roll < 0.75f) yield return TollOfFealty(secondPhase ? 3 : 2);
         else yield return CofferSlam();
+    }
+
+    // The decree's sentence: crimson seal-darts rain everywhere the seals don't hang, while rows of skulls fall down
+    // the sealed lanes. Inside a seal he can't parry the skulls; outside it no parry turns the darts. He has to
+    // leave his lane and weave.
+    IEnumerator DecreeRain(List<float> sealedLanes, float halfWidth)
+    {
+        const float DartSpacing = 2.7f;
+        for (int wave = 0; wave < 3; wave++)
+        {
+            yield return BulletHell.Room(30);
+            float offset = Random.Range(0f, DartSpacing);
+            for (float x = FieldLeft + offset; x <= FieldRight; x += DartSpacing)
+            {
+                if (sealedLanes.Exists(lane => Mathf.Abs(x - lane) < halfWidth + 0.4f)) continue;
+                SealDart(new Vector3(x, TopOfScreen, 0), Vector3.down * 6f);
+            }
+            foreach (float lane in sealedLanes)
+            {
+                BulletHell.Curtain(Skull, TopOfScreen, lane - halfWidth + 0.6f, lane + halfWidth - 0.6f, 1.5f, null, BulletHell.MinGap, 6f);
+            }
+            if (Sfx.Has(Sfx.OfudaFlutter)) Sfx.Play(Sfx.OfudaFlutter, 0.5f, 1.2f);
+            yield return Wait(0.7f);
+        }
     }
 
     SpriteRenderer Ofuda(Vector3 at)
@@ -605,6 +662,9 @@ public class Kagetsune : Boss
         return false;
     }
 
+    const float GutterTell = 0.35f;
+    const float GutterSeconds = 0.4f;
+
     // The Thousand-Soul Wail: a beam of soul-fire from his open chest sweeps the field, edge to edge (and back in
     // phase 2). Cover stops it and burns; it lights the ground as it drags.
     IEnumerator ThousandSoulWail()
@@ -637,20 +697,35 @@ public class Kagetsune : Boss
         CameraShake.Add(0.3f);
         int passes = secondPhase ? 2 : 1;
         float sweep = secondPhase ? 1.9f : 2.6f;
-        float nextBurn = 0, lastFire = from;
+        float nextBurn = 0, lastFire = from, nextEmber = 0;
         for (int pass = 0; pass < passes; pass++)
         {
             float a = pass % 2 == 0 ? from : to, b = pass % 2 == 0 ? to : from;
+            // Once a sweep the souls falter and the beam gutters out for a moment, thinning and stuttering just
+            // before, so even with every scrap of cover burnt away there's a way through it.
+            float gutterAt = Random.Range(0.35f, 0.6f) * sweep;
             for (float t = 0; t < sweep; t += Time.deltaTime * Tempo)
             {
                 float x = Mathf.Lerp(a, b, Mathf.SmoothStep(0, 1, t / sweep));
                 Vector3 start = Chest;
                 Vector3 end = BeamEnd(start, new Vector3(x, GroundY, 0), out Blocker cover);
+                bool faltering = t > gutterAt - GutterTell && t < gutterAt;
+                bool guttered = t >= gutterAt && t < gutterAt + GutterSeconds;
                 float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
+                if (faltering) flicker *= Random.value < 0.5f ? 0.25f : 0.7f;
+                if (guttered) flicker = 0.06f;
                 Stretch(glow, start, end, 1.8f * flicker);
                 Stretch(body, start, end, 0.5f * flicker);
-                Stretch(core, start, end, 0.16f);
-                HitIfCrossed(start, end);
+                Stretch(core, start, end, guttered ? 0.02f : 0.16f);
+                if (!guttered) HitIfCrossed(start, end);
+                // Hardened, the beam sheds embers as it drags: soul-skulls that drift down behind it.
+                float emberY = Row + 3.5f;
+                if (Hardened && !guttered && cover == null && end.y < emberY && Time.time >= nextEmber)
+                {
+                    nextEmber = Time.time + (secondPhase ? 0.18f : 0.25f);
+                    float emberX = Mathf.Lerp(start.x, end.x, Mathf.InverseLerp(start.y, end.y, emberY));
+                    Skull(new Vector3(emberX, emberY, 0), Vector3.down * 2.2f);
+                }
                 if (cover != null && Time.time >= nextBurn)
                 {
                     nextBurn = Time.time + 0.25f;
@@ -693,7 +768,25 @@ public class Kagetsune : Boss
         bell.MakeReflectable(transform);
         StartCoroutine(Pursue(bell, 8.5f));
         Toll(1f, 0.5f);
+        if (Hardened) ClosingRing((bell.transform.position.y - Row) / 8.5f);
         yield return Wait(1.6f);
+    }
+
+    // Skulls in an arc over the ronin that close on where he stands, timed to arrive with the bell, so the parry that
+    // turns the bell also has to cut through them.
+    void ClosingRing(float arrival)
+    {
+        const int Count = 7;
+        const float Radius = 6f;
+        Vector3 centre = ronin.Bounds.center;
+        float speed = Mathf.Min(BulletHell.AimedSpeedCap, Radius / Mathf.Max(0.5f, arrival));
+        for (int i = 0; i < Count; i++)
+        {
+            float angle = Mathf.Lerp(32f, 148f, i / (Count - 1f)) * Mathf.Deg2Rad;
+            Vector3 from = centre + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * Radius;
+            Skull(from, (centre - from).normalized * speed / ShotSpeed);
+        }
+        if (Sfx.Has(Sfx.SkullShriek)) Sfx.Play(Sfx.SkullShriek, 0.5f, 1.2f);
     }
 
     // --- Phase break ---

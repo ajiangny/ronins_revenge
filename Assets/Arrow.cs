@@ -42,6 +42,8 @@ public class Arrow : MonoBehaviour
     // so a parry into a dense stream doesn't turn into a swarm of homing ripostes.
     public bool CappedRiposte { get; set; }
     public Vector3 Velocity => body.linearVelocity;
+    // The halo's colour, which its landing shadow is drawn in.
+    public Color GlowColor => glow != null ? glow.color : glowColor;
 
     void Awake()
     {

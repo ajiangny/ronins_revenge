@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Role | Shirogane's spirit wolf. A foe of its own in her phase 2, its health a strip inside her bar. |
+| Role | Shirogane's spirit wolf. A foe of its own in her phase 2, sharing one bar with her. |
 | Name | 久遠, "the eternal": the one that remembers. |
 | Was | The guardian wolf of Shirogane's family shrine, watching over her bloodline for generations. |
 | Is | Bound to her by Kagetsune and set at the top of the Frozen Shrine with her. |
@@ -23,16 +23,18 @@ Maw (it rears, gathers an orb in its jaws and swallows it).
   feeding it rice cakes at the gate. It is not a pet and it is not tame: it chose her.
 - **The binding.** When Kagetsune set Shirogane at the Frozen Shrine, he bound Kuon to her soul to make her harder
   to beat. He thought he was giving her a weapon. He gave her a friend.
-- **Now.** Kuon wards her, standing between her and every blow, because that is what a guardian does. It doesn't
-  know the fight is a test. It only knows someone is cutting at her.
+- **Now.** Kuon fights beside her, on its own ground and its own clock, because that is what a guardian does. It
+  doesn't know the fight is a test. It only knows someone is cutting at her. If she falls first, it stops holding
+  back.
 
 ## Its fight, read as story
 
 | Move | What it means |
 |---|---|
 | A faint shadow at her back in phase 1 | It has always been there; she only calls it when she must. |
-| It wards her (her damage is a tenth while it stands) | A guardian puts itself between its charge and the blade. |
-| It hunts beside her, on its own clock | It isn't her weapon. It fights for her, its own way. |
+| It shares her bar | One oath, one life between them. |
+| It hunts beside her, on its own clock and its own ground, never waiting for her | It isn't her weapon. It fights for her, its own way. |
+| She falls first: "Kuon... don't hold back." It burns red and fights harder | She lets it stop guarding and start avenging. Its own Fang and its Frozen Howl are the shrine's whole cold. |
 | Spirit Lances: quick beams from its jaws | A guardian's snaps at whoever comes too close to her. |
 | Kuon's Maw: the gathered orb, the beam | Everything the shrine ever held, thrown at the one threatening her. |
 | Fang of the Oath parried back into it | Their shared oath, turned on the guardian: Oni's answer to both of them. |

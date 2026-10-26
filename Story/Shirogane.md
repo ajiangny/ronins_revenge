@@ -8,7 +8,7 @@
 | Was | The Emperor's guard and Oni's sworn partner. White silver to his demon. |
 | Is | A ghost bound to stop Oni, with her shrine's guardian wolf, [Kuon](Kuon.md), bound to her. |
 | Wants | Oni to win, and to remember what they swore. |
-| Signature | Twin katanas in blue spirit flame, a gliding stance, the spirit wolf. |
+| Signature | Twin katanas in blue spirit flame, an ice wolf in every slash, pillars of ice from the sky, the spirit wolf. |
 
 ## Look
 
@@ -37,12 +37,16 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 |---|---|
 | Gliding, never blinking | She never hid from him and doesn't start now. |
 | Every pattern leaves a gap | It is a test, not an execution. |
+| Pillars of ice from the sky, which a parry turns | The Frozen Shrine's cold, brought down on him; the counter is still the one he knows. |
+| Glacier spires that only a step avoids | Some blows a guard can't take. She shows him which, with time to move. |
+| An ice wolf lunging in every slash | Kuon is in her blade before it is ever beside her. |
 | Crossing Moons: twin blades from both sides, only a parry answers | "Answer me." Her two blades close on him the way they once guarded his flanks; she asks for the one counter he used to know. |
 | Mirror Moon: her reflection fights beside her | The partner who used to stand on his other side. |
 | Phase break: the wolf arrives | She calls on the oath. The wolf is her shrine's guardian, Kuon, and it remembers too. |
-| Kuon wards her and hunts beside her | The guardian puts itself between her and his blade. To reach her he has to get through it. |
+| Kuon hunts beside her on its own clock, never waiting for her | It isn't her weapon; it fights for her, its own way. They share one bar: one oath, one life between them. |
 | Fang of the Oath: parry it back into Kuon | "Remember." Their oath, thrown at him; he answers it. |
-| Kuon broken: "...Rest, Kuon." She staggers, then fights on faster | Grief, then the rest of her strength. Moonfall is everything she has left. |
+| Kuon broken: "...Rest, Kuon." She staggers, then fights on enraged | Grief, then the rest of her strength. Moonfall is everything she has left. |
+| She falls first: kneeling, fading, "Kuon... don't hold back." | She can't fight on, so she lets her guardian stop holding back for her sake. It fights for both of them. |
 | Eclipse Fang, then standing spent | She gives everything, then leaves herself open on purpose. |
 | Defeat: the wolf dissolves under her hand | She lets go of the last thing binding her before she goes. |
 
@@ -60,7 +64,8 @@ Lily (ElevenLabs): low, calm and velvety, mournful, through Unity's long echo an
 never raises her voice except at Eclipse Fang. Barks: "Crescent Moon.", "Blades... fall." (also Moonfall), "Too
 slow.", "Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... Fang.", "My stance...", and the newer
 "Twin moons." (Mirror Moon), "Answer me." (Crossing Moons), "Remember." (Fang of the Oath) and "...Rest, Kuon."
-(Kuon broken). The newer four are subtitles only so far, like most of her barks.
+(Kuon broken). The newer four are subtitles only so far, like most of her barks. "Kuon... don't hold back." (as she
+falls before Kuon) is voiced, a full line.
 
 ## Lines
 

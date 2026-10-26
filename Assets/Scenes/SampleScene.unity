@@ -757,7 +757,7 @@ MonoBehaviour:
   kagetsuneArt: {fileID: 11400000, guid: 50b3d60d1e4854f378e0b60b69f6b3c5, type: 2}
   kagetsunePhaseArt: {fileID: 11400000, guid: f3f499a9d17024d1d9c377bfff56bb6c, type: 2}
   kagetsuneScale: 3
-  kagetsuneDrop: 1.5
+  kagetsuneDrop: 2.1
   kagetsunePortrait: {fileID: 21300000, guid: 0a68f6ff4a7d9423299705bc9306383c, type: 3}
   kagetsuneCloseup: {fileID: 21300000, guid: 95109c5f4e1244f6b81d35e611212528, type: 3}
   kagetsunePhasePortrait: {fileID: 21300000, guid: 3c24ec4cafa9b4c678a7bac25150ca29, type: 3}

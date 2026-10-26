@@ -531,18 +531,20 @@ public class GameUI : MonoBehaviour
         wolfStrip.SetActive(false);
     }
 
+    // A compact strip hugging the top edge, name over a thin bar, so the bosses' heads and raised weapons (the
+    // Emperor's hammer reaches past the old bar's bottom) stay clear of it.
     void BuildBossBar()
     {
-        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -80), new Vector2(904, 30));
+        RectTransform frame = CreateRect("BossBar", transform, new Vector2(0.5f, 1f), new Vector2(0, -44), new Vector2(904, 20));
         frame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
-        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(896, 22));
+        RectTransform back = CreateRect("Back", frame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(898, 14));
         back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
         bossTrail = Stretch(CreateRect("Trail", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
         bossFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossFillImage = bossFill.gameObject.AddComponent<Image>();
-        bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 32), new Vector2(904, 48), 38, TextAlignmentOptions.Bottom, frame);
-        bossName.characterSpacing = 4;
+        bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 20), new Vector2(904, 40), 30, TextAlignmentOptions.Bottom, frame);
+        bossName.characterSpacing = 3;
         Style(bossName, TextStyle.Heading);
         bossBar = frame.gameObject;
         bossBar.SetActive(false);
@@ -554,7 +556,7 @@ public class GameUI : MonoBehaviour
         strip.anchorMax = new Vector2(1f, 0f);
         strip.pivot = new Vector2(0.5f, 0f);
         strip.offsetMin = Vector2.zero;
-        strip.offsetMax = new Vector2(0f, 7f);
+        strip.offsetMax = new Vector2(0f, 5f);
         strip.gameObject.AddComponent<Image>().color = new Color(0.05f, 0.03f, 0.05f, 0.95f);
         wolfTrail = Stretch(CreateRect("Trail", strip, Vector2.zero, Vector2.zero, Vector2.zero));
         wolfTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);

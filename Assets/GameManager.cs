@@ -189,8 +189,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] CharacterArt kagetsunePhaseArt;
     [Tooltip("He is drawn bigger than the other bosses: a colossus over the field.")]
     [SerializeField] float kagetsuneScale = 4.6f;
-    [Tooltip("How much lower than the other bosses he stands, so his horns clear the boss bar.")]
-    [SerializeField] float kagetsuneDrop = 1.5f;
+    [Tooltip("How much lower than the other bosses he stands, so his horns and the Wraith's ghost-fire clear the boss bar.")]
+    [SerializeField] float kagetsuneDrop = 2.1f;
     [SerializeField] Sprite kagetsunePortrait;
     [SerializeField] Sprite kagetsuneCloseup;
     [Tooltip("The Unchained Wraith's illustrations: the card that plays in his phase break. Without them his phase line is a subtitle.")]

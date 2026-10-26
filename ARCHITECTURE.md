@@ -291,8 +291,8 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 
 ## UI
 
-- `GameUI.cs` — HUD (one row each for score and stage/round, a small dim label beside each number, and lives; no
-  high score, so the top centre stays free for the compact boss bar), the stage/round card (`ShowBanner(overline, title, body, accent)`), boss bar, subtitles on a plate with the
+- `GameUI.cs` — HUD (score in one row; stage with the round as a smaller line under it, right-aligned; a small dim
+  label beside each number; lives; no high score, so the top centre stays free for the compact boss bar), the stage/round card (`ShowBanner(overline, title, body, accent)`), boss bar, subtitles on a plate with the
   speaker's name, boss intro. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the
   title menu.
 - **Text styles:** `GameUI.Style(text, TextStyle)` gives text its font and a shared outline-and-shadow material

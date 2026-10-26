@@ -125,6 +125,8 @@ public class GameUI : MonoBehaviour
 
         scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft, Color.white);
         levelText = HudValue("Level", new Vector2(1f, 1f), new Vector2(-36, -14), TextAlignmentOptions.TopRight, Color.white);
+        levelText.rectTransform.sizeDelta = new Vector2(700, 100);
+        levelText.lineSpacing = -12;
 
         // The army still counts into the scene's samurai counter, but the HUD no longer shows it.
         SamuraiCounter counter = FindAnyObjectByType<SamuraiCounter>();
@@ -559,7 +561,8 @@ public class GameUI : MonoBehaviour
 
     public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
-        levelText.text = $"{HudLabel("STAGE")}{stage}{HudDim($"/{stageCount}")}     {HudLabel("ROUND")}{round}{HudDim($"/{roundCount}")}";
+        // The stage on the HUD row, with the round as a smaller line under it, both kept to the right edge.
+        levelText.text = $"{HudLabel("STAGE")}{stage}\n<size=30>{HudLabel("ROUND")}{round}{HudDim($"/{roundCount}")}</size>";
     }
 
     // A HUD row's small dim label, set in the same text as its number so the two share a baseline.

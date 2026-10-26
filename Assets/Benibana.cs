@@ -62,8 +62,6 @@ public class Benibana : Boss
 
     protected override bool Busy => breaking;
     protected override float StaggerSeconds => secondPhase ? 1.4f : 2f;
-    float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
-    float GroundY => ronin.Feet.y - 0.3f;
     Vector3 Mouth => Centre + Vector3.up * 0.5f;
 
     protected override IEnumerator Fight()

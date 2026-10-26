@@ -374,6 +374,79 @@ public abstract class Boss : MonoBehaviour, IHittable
         return Mathf.Clamp(centre * 2f - anchor.x, centre - range, centre + range);
     }
 
+    // The field's edges, measured from the camera's resting spot so screen shake doesn't move them.
+    protected float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
+    protected float GroundY => ronin.Feet.y - 0.3f;
+    protected float LeftEdge => CameraShake.Center.x - HalfWidth;
+    protected float RightEdge => CameraShake.Center.x + HalfWidth;
+
+    // A spot minStep to maxStep from where the boss stands, kept inside the top band; it turns back from an edge.
+    protected float NearX(float minStep, float maxStep)
+    {
+        float range = HalfWidth - 2.5f;
+        float lo = CameraShake.Center.x - range, hi = CameraShake.Center.x + range;
+        float step = UnityEngine.Random.Range(minStep, maxStep) * (UnityEngine.Random.value < 0.5f ? -1f : 1f);
+        float x = anchor.x + step;
+        if (x < lo || x > hi) x = anchor.x - step;
+        return Mathf.Clamp(x, lo, hi);
+    }
+
+    // Positions of n lanes spread evenly across the field, clear of the edges.
+    protected List<float> Lanes(int count)
+    {
+        var lanes = new List<float>(count);
+        float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
+        for (int i = 0; i < count; i++) lanes.Add(Mathf.Lerp(lo, hi, (i + 0.5f) / count));
+        return lanes;
+    }
+
+    // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried.
+    protected IEnumerator Pursue(Arrow shot, float speed)
+    {
+        while (shot != null && ronin != null && shot.transform.position.y > ronin.Bounds.center.y)
+        {
+            float dx = ronin.Bounds.center.x - shot.transform.position.x;
+            shot.Steer(new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -speed, 0));
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    // Where a beam from `from` towards `ground` stops: on the nearest blocker in the way, or the ground.
+    protected static Vector3 BeamEnd(Vector3 from, Vector3 ground, out Blocker cover)
+    {
+        cover = null;
+        Vector3 delta = ground - from;
+        float nearest = delta.magnitude;
+        foreach (RaycastHit hit in Physics.RaycastAll(from, delta.normalized, delta.magnitude))
+        {
+            if (hit.distance < nearest && hit.collider.TryGetComponent(out Blocker blocker))
+            {
+                nearest = hit.distance;
+                cover = blocker;
+            }
+        }
+        return from + delta.normalized * nearest;
+    }
+
+    // Where a beam from `from` to `end` crosses the ronin's height, it burns him (unless cover stopped it above him).
+    protected void HitIfCrossed(Vector3 from, Vector3 end)
+    {
+        float y = ronin.Bounds.center.y;
+        if (end.y > y + 0.2f) return;
+        float beamX = Mathf.Lerp(from.x, end.x, Mathf.InverseLerp(from.y, end.y, y));
+        if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) ronin.TakeHit(new Vector3(beamX, y, 0));
+    }
+
+    // Lays a bar along from-to at the given width (beams redrawn every frame).
+    protected static void Stretch(SpriteRenderer bar, Vector3 from, Vector3 to, float width)
+    {
+        if (bar == null) return;
+        Vector3 delta = to - from;
+        bar.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
+        bar.transform.rotation = delta.sqrMagnitude > 0.0001f ? Quaternion.FromToRotation(Vector3.right, delta) : Quaternion.identity;
+        bar.transform.localScale = new Vector3(delta.magnitude, width, 1f);
+    }
+
     // A thin bar between two points, drawn above the action, for telegraphs and chains.
     protected SpriteRenderer Bar(Vector3 from, Vector3 to, float width, Color color, int order = 55)
     {

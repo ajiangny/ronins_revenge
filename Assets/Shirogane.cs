@@ -126,10 +126,6 @@ public class Shirogane : Boss
     protected override bool SuperArmor => Guarded && !exposed && !breaking;
     protected override float ArmorDamageTaken => WardDamageTaken;
     protected override Color ArmorSpark => Cyan;
-    float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
-    float GroundY => ronin.Feet.y - 0.3f;
-    float LeftEdge => CameraShake.Center.x - HalfWidth;
-    float RightEdge => CameraShake.Center.x + HalfWidth;
     Vector3 Hands => Centre + Vector3.down * (sprite.bounds.size.y * 0.1f);
 
     public void SetDashFrames(Sprite[] dash)
@@ -353,16 +349,6 @@ public class Shirogane : Boss
         anchor = to;
     }
 
-    float NearX(float minStep, float maxStep)
-    {
-        float range = HalfWidth - 2.5f;
-        float lo = CameraShake.Center.x - range, hi = CameraShake.Center.x + range;
-        float step = Random.Range(minStep, maxStep) * (Random.value < 0.5f ? -1f : 1f);
-        float x = anchor.x + step;
-        if (x < lo || x > hi) x = anchor.x - step;
-        return Mathf.Clamp(x, lo, hi);
-    }
-
     // Drifts from spot to spot for a while, stopping short of its end so an attack never starts mid-glide.
     IEnumerator Roam(float seconds)
     {
@@ -404,15 +390,6 @@ public class Shirogane : Boss
     }
 
     // --- Shots ---
-
-    // Positions of n lanes spread evenly across the field, clear of the edges.
-    List<float> Lanes(int count)
-    {
-        var lanes = new List<float>(count);
-        float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
-        for (int i = 0; i < count; i++) lanes.Add(Mathf.Lerp(lo, hi, (i + 0.5f) / count));
-        return lanes;
-    }
 
     // One of her shots, at ShotSpeed, passing through the rest of hers and Kuon's so overlapping patterns stay whole.
     Arrow Fire(Vector3 from, Vector3 velocity)
@@ -1038,17 +1015,6 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.BladeRing, 0.6f, 2f);
         yield return Wait(0.18f);
         Drop(sight);
-    }
-
-    // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried.
-    IEnumerator Pursue(Arrow shot, float speed)
-    {
-        while (shot != null && ronin != null && shot.transform.position.y > ronin.Bounds.center.y)
-        {
-            float dx = ronin.Bounds.center.x - shot.transform.position.x;
-            shot.Steer(new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -speed, 0));
-            yield return new WaitForFixedUpdate();
-        }
     }
 
     // Moonfall, her ultimate once Kuon has fallen: under the spirit moon three waves of ghost swords ripple down

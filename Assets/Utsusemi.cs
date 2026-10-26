@@ -118,10 +118,6 @@ public class Utsusemi : Boss
             return bareUnarmedIdle != null && bareUnarmedIdle.Length > 0 ? bareUnarmedIdle : null;
         }
     }
-    float TopOfScreen => CameraShake.Center.y + Camera.main.orthographicSize + 0.5f;
-    float GroundY => ronin.Feet.y - 0.3f;
-    float LeftEdge => CameraShake.Center.x - HalfWidth;
-    float RightEdge => CameraShake.Center.x + HalfWidth;
     Vector3 Head => new Vector3(Centre.x, sprite.bounds.max.y - sprite.bounds.size.y * 0.12f, 0);
     // The red slit-eye under the hat brim and the lantern heart in its chest, where its frames draw them.
     Vector3 Eye => OnSprite(57.5f, 38.5f);
@@ -216,17 +212,6 @@ public class Utsusemi : Boss
     }
 
     // Stilt Stride: no blinking. It stalks to a new spot in stiff clockwork steps, one per tick.
-    // A spot minStep to maxStep from where it stands, kept inside the top band; it turns back from an edge.
-    float NearX(float minStep, float maxStep)
-    {
-        float range = HalfWidth - 2.5f;
-        float lo = CameraShake.Center.x - range, hi = CameraShake.Center.x + range;
-        float step = Random.Range(minStep, maxStep) * (Random.value < 0.5f ? -1f : 1f);
-        float x = anchor.x + step;
-        if (x < lo || x > hi) x = anchor.x - step;
-        return Mathf.Clamp(x, lo, hi);
-    }
-
     IEnumerator Stride(float x)
     {
         float distance = x - anchor.x;
@@ -915,7 +900,7 @@ public class Utsusemi : Boss
         else cleave.Restyle(ProceduralSprites.White, new Color(0.9f, 0.93f, 1f), new Vector2(5.4f, 0.5f), 1.1f, new Color(1f, 0.2f, 0.18f, 0.6f), 4.5f);
         cleave.MakeUnbreakable();
         cleave.MakeReflectable(transform);
-        StartCoroutine(HuntRonin(cleave));
+        StartCoroutine(Pursue(cleave, HourSpeed));
         Sfx.Play(Sfx.HourSlash, 1f);
         Sfx.Play(Sfx.MidnightChime, 0.6f, 1.4f);
         CameraShake.Add(0.35f);
@@ -925,16 +910,6 @@ public class Utsusemi : Boss
 
     // Fast, but it turns as fast as the ronin runs: there's no outrunning it, only parrying it.
     const float HourSpeed = 11f;
-
-    IEnumerator HuntRonin(Arrow cleave)
-    {
-        while (cleave != null && ronin != null && cleave.transform.position.y > ronin.Bounds.center.y)
-        {
-            float dx = ronin.Bounds.center.x - cleave.transform.position.x;
-            cleave.Steer(new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -HourSpeed, 0));
-            yield return new WaitForFixedUpdate();
-        }
-    }
 
     void FollowRonin(FxPlayer hour, SpriteRenderer fallback)
     {
@@ -1762,15 +1737,6 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.BlockerHit, 0.5f, 1.6f);
     }
 
-    // Where a beam from `from` to `end` crosses the ronin's height, it burns him (unless cover stopped it above him).
-    void HitIfCrossed(Vector3 from, Vector3 end)
-    {
-        float y = ronin.Bounds.center.y;
-        if (end.y > y + 0.2f) return;
-        float beamX = Mathf.Lerp(from.x, end.x, Mathf.InverseLerp(from.y, end.y, y));
-        if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) ronin.TakeHit(new Vector3(beamX, y, 0));
-    }
-
     void EndBeam(Beam beam)
     {
         beams.Remove(beam);
@@ -1785,31 +1751,6 @@ public class Utsusemi : Boss
     Vector3 BeamEnd(float x, out Blocker cover) => BeamEnd(Core, x, out cover);
 
     Vector3 BeamEnd(Vector3 from, float x, out Blocker cover) => BeamEnd(from, new Vector3(x, GroundY, 0), out cover);
-
-    Vector3 BeamEnd(Vector3 from, Vector3 ground, out Blocker cover)
-    {
-        cover = null;
-        Vector3 delta = ground - from;
-        float nearest = delta.magnitude;
-        foreach (RaycastHit hit in Physics.RaycastAll(from, delta.normalized, delta.magnitude))
-        {
-            if (hit.distance < nearest && hit.collider.TryGetComponent(out Blocker blocker))
-            {
-                nearest = hit.distance;
-                cover = blocker;
-            }
-        }
-        return from + delta.normalized * nearest;
-    }
-
-    static void Stretch(SpriteRenderer bar, Vector3 from, Vector3 to, float width)
-    {
-        if (bar == null) return;
-        Vector3 delta = to - from;
-        bar.transform.position = (from + to) / 2f + Vector3.back * 0.2f;
-        bar.transform.rotation = delta.sqrMagnitude > 0.0001f ? Quaternion.FromToRotation(Vector3.right, delta) : Quaternion.identity;
-        bar.transform.localScale = new Vector3(delta.magnitude, width, 1f);
-    }
 
     // Fire burns holes in the lace.
     public override void Burn(Vector3 point, float radius)

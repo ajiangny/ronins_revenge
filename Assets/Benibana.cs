@@ -313,6 +313,17 @@ public class Benibana : Boss
             Sfx.Play(Sfx.WardShatter, 0.5f, 1.6f);
             yield return Wait(0.35f);
         }
+        // Then her rosary unstrung: one slow row of crosses falls across the whole field with a single wide gap a few
+        // steps from the ronin, the first curtain read off the shadows on the ground.
+        yield return Wait(0.4f);
+        float left = CameraShake.Center.x - HalfWidth + 0.6f, right = CameraShake.Center.x + HalfWidth - 0.6f;
+        float side = Random.value < 0.5f ? -1f : 1f;
+        float gap = ronin.Bounds.center.x + side * Random.Range(4f, 7f);
+        if (gap < left + 2f || gap > right - 2f) gap = ronin.Bounds.center.x - side * Random.Range(4f, 7f);
+        gap = Mathf.Clamp(gap, left + 2f, right - 2f);
+        BulletHell.Curtain((from, velocity) => BulletHell.Enlist(Cross(from, velocity)), TopOfScreen, left, right, 1.3f,
+            new[] { gap }, 3.5f, 4.5f);
+        Sfx.Play(Sfx.WardShatter, 0.6f, 1.2f);
     }
 
     float ClampToScreen(float x)

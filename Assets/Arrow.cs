@@ -102,6 +102,15 @@ public class Arrow : MonoBehaviour
         ReflectTarget = target;
     }
 
+    // Draws a restyled shot's hitbox out along its length (Shirogane's ice pillars), keeping its radius.
+    public void Lengthen(float length)
+    {
+        if (GetComponentInChildren<Collider>() is CapsuleCollider capsule)
+        {
+            capsule.height = Mathf.Max(capsule.radius * 2f, length / capsule.transform.lossyScale.y);
+        }
+    }
+
     // Unbreakable in its own look, for a boss shot that draws itself (Utsusemi's hour cleave).
     public void MakeUnbreakable()
     {

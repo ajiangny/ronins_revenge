@@ -239,6 +239,7 @@ public class Shirogane : Boss
                     case Move.Moonsplitter: yield return Moonsplitter(); break;
                     case Move.OathFang: yield return OathFang(); break;
                     case Move.Moonfall: yield return Moonfall(); break;
+                    case Move.Glacier: yield return Glacier(); break;
                     case Move.TwinAssault: yield return TwinAssault(); break;
                     case Move.EclipseFang: yield return EclipseFang(); break;
                 }
@@ -267,12 +268,12 @@ public class Shirogane : Boss
         }
         else if (enraged)
         {
-            options = new List<Move> { Move.CrescentSlash, Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage, Move.MirrorMoon };
+            options = new List<Move> { Move.CrescentSlash, Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.BladeBarrage, Move.MirrorMoon, Move.Glacier, Move.Glacier };
         }
         else
         {
             // Kuon's own moves run in Hunt; hers are the blades, and the attack they make together while it's free.
-            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.MirrorMoon };
+            options = new List<Move> { Move.CrescentSlash, Move.BladeRain, Move.MoonlitDash, Move.MirrorMoon, Move.Glacier };
             if (WolfFree) options.AddRange(new[] { Move.TwinAssault, Move.TwinAssault });
         }
         if (movesSinceParry >= ParryEvery) options.Add(parry);
@@ -661,6 +662,158 @@ public class Shirogane : Boss
         if (Fx.Play(Fx.ShiroMist, at, Color.white, size) == null) Fx.Play(Fx.SmokePuff, at, MistColour, size);
     }
 
+    // --- Ice ---
+
+    // An ice pillar's size, drawn and hit, in world units.
+    const float PillarLength = 3.2f;
+    const float PillarWidth = 1.1f;
+    const float PillarRadius = 0.42f;
+    // A glacier spire's: its hit reaches SpireRadius either side of its lane.
+    const float SpireLength = 7.5f;
+    const float SpireWidth = 3.6f;
+    const float SpireRadius = 1.45f;
+    static readonly Color DeepIce = new Color(0.25f, 0.45f, 1f);
+
+    // Where a falling pillar hangs before it drops: just inside the top of the field.
+    float PillarHang => TopOfScreen - 1.2f;
+
+    // A pillar of ice dropped down a lane, point first: blows and cover don't stop it, but a parry knocks it aside.
+    // It shatters where it meets the ground.
+    Arrow IcePillar(Vector3 from, float speed)
+    {
+        Arrow pillar = Fire(from, Vector3.down * speed);
+        Sprite[] frames = Fx.Frames(Fx.ShiroIcePillar);
+        Color halo = new Color(Frost.r, Frost.g, Frost.b, 0.4f);
+        if (frames != null) pillar.Restyle(frames, 8f, Color.white, new Vector2(PillarWidth, PillarLength), PillarRadius, halo, 1.6f);
+        else pillar.Restyle(ProceduralSprites.White, new Color(0.75f, 0.93f, 1f, 0.9f), new Vector2(0.55f, PillarLength * 0.9f), PillarRadius, halo, 1.6f);
+        pillar.Lengthen(PillarLength * 0.85f);
+        pillar.MakeUnbreakable();
+        pillar.PassesCover = true;
+        StartCoroutine(ShatterAtGround(pillar, PillarLength, false));
+        return pillar;
+    }
+
+    // A glacier spire, far bigger than a pillar: it can't be parried, only dodged, and it bursts at the ground with
+    // a shockwave.
+    Arrow IceSpire(Vector3 from, float speed)
+    {
+        Arrow spire = Fire(from, Vector3.down * speed);
+        Sprite[] frames = Fx.Frames(Fx.ShiroIceSpire);
+        Color halo = new Color(DeepIce.r, DeepIce.g, DeepIce.b, 0.5f);
+        if (frames != null) spire.Restyle(frames, 8f, Color.white, new Vector2(SpireWidth, SpireLength), SpireRadius, halo, SpireWidth * 1.3f);
+        else spire.Restyle(ProceduralSprites.White, new Color(0.6f, 0.82f, 1f, 0.92f), new Vector2(SpireWidth * 0.7f, SpireLength * 0.95f), SpireRadius, halo, SpireWidth * 1.3f);
+        spire.Lengthen(SpireLength * 0.85f);
+        spire.MakeUnbreakable();
+        spire.Unparryable = true;
+        spire.PassesCover = true;
+        StartCoroutine(ShatterAtGround(spire, SpireLength, true));
+        return spire;
+    }
+
+    // Once its point reaches the ground the ice bursts into shards: a pillar with a crack, a spire with a shockwave.
+    IEnumerator ShatterAtGround(Arrow shot, float length, bool huge)
+    {
+        while (shot != null && shot.transform.position.y - length * 0.5f > GroundY) yield return null;
+        if (shot == null) yield break;
+        Vector3 at = new Vector3(shot.transform.position.x, GroundY + 0.4f, 0);
+        float size = huge ? 4f : 1.6f;
+        if (Fx.Play(Fx.ShiroIceShatter, at, Color.white, size) == null) Fx.Play(Fx.Impact, at, Frost, size);
+        Puff(at, huge ? 3f : 1.2f);
+        Sfx.Play(Sfx.FrostChill, huge ? 1f : 0.5f, huge ? 0.6f : 1.3f);
+        if (huge)
+        {
+            Fx.Play(Fx.Explosion, at, DeepIce, 3.5f);
+            ElementFx.Glow(at, Frost, 1f, 6f, 0.4f);
+            Sfx.Play(Sfx.WardShatter, 0.8f, 0.7f);
+            CameraShake.Add(0.5f);
+        }
+        else CameraShake.Add(0.06f);
+        Destroy(shot.gameObject);
+    }
+
+    // An ice pillar's (or spire's) picture, faint, hanging where it will fall from; drawn in code without the art.
+    SpriteRenderer PillarPicture(Vector3 at, bool huge = false, bool wolfs = false)
+    {
+        var picture = new GameObject(huge ? "IceSpire" : "IcePillar").AddComponent<SpriteRenderer>();
+        picture.transform.position = at + Vector3.back * 0.3f;
+        picture.sortingOrder = 54;
+        Sprite[] frames = Fx.Frames(huge ? Fx.ShiroIceSpire : Fx.ShiroIcePillar);
+        Vector2 size = huge ? new Vector2(SpireWidth, SpireLength) : new Vector2(PillarWidth, PillarLength);
+        if (frames != null)
+        {
+            picture.sprite = frames[0];
+            Vector2 art = frames[0].bounds.size;
+            picture.transform.localScale = new Vector3(size.x / art.x, size.y / art.y, 1f);
+            if (frames.Length > 1) picture.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 8f);
+            picture.color = new Color(1f, 1f, 1f, 0.75f);
+        }
+        else
+        {
+            picture.sprite = ProceduralSprites.White;
+            picture.transform.localScale = new Vector3(size.x * (huge ? 0.7f : 0.5f), size.y * 0.9f, 1f);
+            picture.color = new Color(Frost.r, Frost.g, Frost.b, 0.6f);
+        }
+        (wolfs ? wolfTransient : transient).Add(picture.gameObject);
+        return picture;
+    }
+
+    // A ring of frost on the ground under a pillar's lane, which brightens with its warning line.
+    SpriteRenderer FrostMark(float x)
+    {
+        SpriteRenderer mark = Glowing("FrostMark", ProceduralSprites.SoftGlow, 3);
+        mark.transform.position = new Vector3(x, GroundY + 0.2f, 0);
+        mark.transform.localScale = new Vector3(1.8f, 0.5f, 1f);
+        return mark;
+    }
+
+    // A glacier spire down lane x: its lane darkens under a deep blue band, its shadow spreads on the ground and the
+    // field rumbles as its point lowers into sight over `tell` seconds, then it falls. Cut short (her stagger, or
+    // Kuon's attack swept away), it never falls.
+    IEnumerator Spire(float x, float tell, bool wolfs = false)
+    {
+        float half = SpireRadius * TellMargin;
+        SpriteRenderer band = Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), half * 2f, Color.clear, 52);
+        if (wolfs) WolfOwns(band.gameObject);
+        SpriteRenderer shadow = Glowing("SpireShadow", ProceduralSprites.SoftGlow, 3, wolfs);
+        shadow.transform.position = new Vector3(x, GroundY + 0.2f, 0);
+        float top = TopOfScreen + SpireLength * 0.5f;
+        SpriteRenderer picture = PillarPicture(new Vector3(x, top - 0.6f, 0), true, wolfs);
+        Puff(new Vector3(x, TopOfScreen - 0.8f, 0), 2.4f);
+        Sfx.Play(Sfx.FrostChill, 0.9f, 0.55f);
+        float nextRumble = 0f;
+        for (float t = 0; t < tell; t += Time.deltaTime)
+        {
+            if (band == null || shadow == null || picture == null)
+            {
+                Drop(band);
+                Drop(shadow);
+                Drop(picture);
+                yield break;
+            }
+            float k = t / tell;
+            float flicker = k > 0.75f ? 0.6f + 0.4f * Mathf.PingPong(t * 14f, 1f) : 1f;
+            band.color = new Color(DeepIce.r, DeepIce.g, DeepIce.b, (0.06f + 0.22f * k) * flicker);
+            shadow.color = new Color(0.05f, 0.1f, 0.25f, 0.25f + 0.45f * k);
+            shadow.transform.localScale = new Vector3(half * 2.4f * (0.6f + 0.4f * k), 0.9f, 1f);
+            picture.transform.position = new Vector3(x, top - Mathf.Lerp(0.6f, 2.2f, k), -0.3f);
+            if (t >= nextRumble)
+            {
+                nextRumble = t + 0.15f;
+                CameraShake.Add(0.02f + 0.05f * k);
+            }
+            yield return null;
+        }
+        bool whole = picture != null;
+        Vector3 from = whole ? picture.transform.position : Vector3.zero;
+        Drop(band);
+        Drop(shadow);
+        Drop(picture);
+        if (!whole) yield break;
+        from.z = 0;
+        IceSpire(from, 13f);
+        Sfx.Play(Sfx.GhostSwordFall, 1f, 0.6f);
+    }
+
     // --- Phase 1 moves ---
 
     // Crescent Moon Slash: her blades glow bright cyan, then a swing casts five crescents in a fan beneath her.
@@ -702,9 +855,10 @@ public class Shirogane : Boss
         IgnoreEachOther(fan);
     }
 
-    // Phantom Blade Rain: ghost swords hang over six lanes with a thin warning line under each, then fall. At least
-    // one lane stays empty. In her second phase there are seven lanes, two empty, and the swords fall in a ripple;
-    // enraged, eight lanes with only one empty.
+    // Phantom Blade Rain: pillars of ice form at the top of six lanes, a thin warning line and a ring of frost under
+    // each, then fall. At least one lane stays empty. In her second phase there are seven lanes, two empty, the
+    // pillars fall in a ripple, and one lane (never beside an open one) brings down a glacier spire that must be
+    // dodged; enraged, eight lanes with only one empty.
     IEnumerator BladeRain()
     {
         if (Random.value < 0.5f) Speak(BossLine.BladeRain);
@@ -712,34 +866,52 @@ public class Shirogane : Boss
         int empty = secondPhase && !enraged ? 2 : 1;
         List<float> lanes = Lanes(laneCount);
         // The empty lanes are picked at random; the ronin's own lane is never made the only way out on purpose.
-        for (int i = 0; i < empty; i++) lanes.RemoveAt(Random.Range(0, lanes.Count));
+        var open = new HashSet<int>();
+        while (open.Count < empty) open.Add(Random.Range(0, lanes.Count));
+        int spire = -1;
+        if (secondPhase)
+        {
+            var away = new List<int>();
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                if (!open.Contains(i) && !open.Contains(i - 1) && !open.Contains(i + 1)) away.Add(i);
+            }
+            if (away.Count > 0) spire = away[Random.Range(0, away.Count)];
+        }
 
         var tells = new List<SpriteRenderer>();
-        var swords = new List<SpriteRenderer>();
-        float hang = TopOfScreen - 1.4f;
-        foreach (float x in lanes)
+        var pillars = new List<SpriteRenderer>();
+        var falling = new List<float>();
+        float hang = PillarHang;
+        for (int i = 0; i < lanes.Count; i++)
         {
+            if (open.Contains(i)) continue;
+            if (i == spire)
+            {
+                StartCoroutine(Spire(lanes[i], RainWarning));
+                continue;
+            }
+            float x = lanes[i];
+            falling.Add(x);
             tells.Add(LaneWarning(x));
-            swords.Add(SwordPicture(new Vector3(x, hang, 0), 0f));
+            tells.Add(FrostMark(x));
+            pillars.Add(PillarPicture(new Vector3(x, hang, 0)));
             Puff(new Vector3(x, hang, 0), 1f);
         }
         Sfx.Play(Sfx.MistSwirl, 0.6f, 1f);
+        Sfx.Play(Sfx.FrostChill, 0.5f, 1.1f);
         RoamMeanwhile(RainWarning);
         yield return Brighten(tells, RainWarning);
         StopRoaming();
 
-        for (int i = 0; i < lanes.Count; i++)
+        for (int i = 0; i < falling.Count; i++)
         {
-            if (swords[i] != null)
-            {
-                transient.Remove(swords[i].gameObject);
-                Destroy(swords[i].gameObject);
-            }
-            GhostSword(new Vector3(lanes[i], hang, 0), Vector3.down * 11f);
+            Drop(pillars[i]);
+            IcePillar(new Vector3(falling[i], hang, 0), 11f);
             if (secondPhase) yield return Wait(0.08f);
         }
         RemoveTells(tells);
-        Sfx.Play(Sfx.GhostSwordFall, 0.9f, 1f);
+        Sfx.Play(Sfx.GhostSwordFall, 0.9f, 0.8f);
         yield return Wait(0.25f);
         RingingFence();
         yield return Wait(0.4f);
@@ -764,7 +936,7 @@ public class Shirogane : Boss
     }
 
     // Moonlit Dash: a blue trail shows the way, she vanishes into mist and streaks across the field, and three
-    // afterimages left along her path each loose a ghost sword straight down, one after the other. Enraged, she
+    // afterimages left along her path each drop a pillar of ice straight down, one after the other. Enraged, she
     // streaks straight back the way she came and leaves three more.
     IEnumerator MoonlitDash()
     {
@@ -809,7 +981,7 @@ public class Shirogane : Boss
             {
                 if (ghost == null) continue;
                 Vector3 at = ghost.bounds.center + Vector3.down * 0.4f;
-                GhostSword(at, Vector3.down * 10f);
+                IcePillar(at, 10f);
                 Sfx.Play(Sfx.GhostSwordFall, 0.6f, 1.2f);
                 transient.Remove(ghost.gameObject);
                 Fader.Fade(ghost, 0.3f);
@@ -1213,9 +1385,9 @@ public class Shirogane : Boss
     }
 
     // Moonfall, her ultimate once Kuon has fallen (or while it's too busy for the Eclipse Fang): under the spirit moon
-    // three waves of ghost swords ripple down across eight lanes, four enraged, each leaving a pair empty, and each
-    // wave's pair one lane over from the last so one lane always carries through. Then she stands spent, open to
-    // double damage.
+    // three waves of ice pillars ripple down across eight lanes, four enraged, each leaving a pair empty, and each
+    // wave's pair one lane over from the last so one lane always carries through. Enraged, each wave also brings down
+    // a glacier spire well clear of the gap. Then she stands spent, open to double damage.
     IEnumerator Moonfall()
     {
         Speak(BossLine.BladeRain);
@@ -1232,7 +1404,7 @@ public class Shirogane : Boss
 
         List<float> lanes = Lanes(8);
         int gap = Random.Range(0, lanes.Count - 1);
-        float hang = TopOfScreen - 1.4f;
+        float hang = PillarHang;
         int waves = enraged ? 4 : 3;
         for (int wave = 0; wave < waves; wave++)
         {
@@ -1242,30 +1414,42 @@ public class Shirogane : Boss
                 if (gap + step < 0 || gap + step > lanes.Count - 2) step = -step;
                 gap += step;
             }
+            float warning = wave == 0 ? 0.8f : 0.6f;
+            int spire = -1;
+            if (enraged)
+            {
+                var away = new List<int>();
+                for (int i = 0; i < lanes.Count; i++)
+                {
+                    if (i < gap - 1 || i > gap + 2) away.Add(i);
+                }
+                if (away.Count > 0) spire = away[Random.Range(0, away.Count)];
+            }
             var tells = new List<SpriteRenderer>();
-            var swords = new List<SpriteRenderer>();
+            var pillars = new List<SpriteRenderer>();
             var falling = new List<float>();
             for (int i = 0; i < lanes.Count; i++)
             {
                 if (i == gap || i == gap + 1) continue;
+                if (i == spire)
+                {
+                    StartCoroutine(Spire(lanes[i], warning));
+                    continue;
+                }
                 falling.Add(lanes[i]);
                 tells.Add(LaneWarning(lanes[i]));
-                swords.Add(SwordPicture(new Vector3(lanes[i], hang, 0), 0f));
+                pillars.Add(PillarPicture(new Vector3(lanes[i], hang, 0)));
             }
             PlayAction(art.parry);
             Sfx.Play(Sfx.BladeRing, 0.7f, 0.9f + wave * 0.1f);
-            yield return Brighten(tells, wave == 0 ? 0.8f : 0.6f);
+            yield return Brighten(tells, warning);
             for (int i = 0; i < falling.Count; i++)
             {
-                if (swords[i] != null)
-                {
-                    transient.Remove(swords[i].gameObject);
-                    Destroy(swords[i].gameObject);
-                }
-                GhostSword(new Vector3(falling[i], hang, 0), Vector3.down * 13f);
+                Drop(pillars[i]);
+                IcePillar(new Vector3(falling[i], hang, 0), 13f);
             }
             RemoveTells(tells);
-            Sfx.Play(Sfx.GhostSwordFall, 1f, 0.9f);
+            Sfx.Play(Sfx.GhostSwordFall, 1f, 0.8f);
             yield return Wait(0.35f);
         }
         transient.Remove(moon.gameObject);
@@ -1278,6 +1462,24 @@ public class Shirogane : Boss
         exposed = false;
     }
 
+    // Glacier, from her second phase: she raises her blades and two glacier spires, far too big to parry, come down
+    // on the ronin's lane and one beside it under long dark warnings. Enraged, a third follows him to wherever he
+    // stepped.
+    IEnumerator Glacier()
+    {
+        PlayAction(art.parry);
+        ElementFx.Glow(Hands, Frost, 0.9f, 3f, 0.8f, transform);
+        Sfx.Play(Sfx.BladeRing, 0.8f, 0.7f);
+        float tell = enraged ? 0.95f : 1.15f;
+        float lo = LeftEdge + 2f, hi = RightEdge - 2f;
+        float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
+        float beside = x < CameraShake.Center.x ? x + 4.2f : x - 4.2f;
+        StartCoroutine(Spire(x, tell));
+        StartCoroutine(Spire(Mathf.Clamp(beside, lo, hi), tell));
+        yield return Wait(tell + 0.3f);
+        if (enraged) yield return Spire(Mathf.Clamp(ronin.Bounds.center.x, lo, hi), 0.8f);
+        yield return Wait(0.4f);
+    }
 
     // --- Phase 2: the wolf ---
     // Kuon's own moves (charge, howl, pack, lances, Maw) run in Hunt on its own clock, so they leave her to hers and
@@ -1608,8 +1810,9 @@ public class Shirogane : Boss
     const float LanceBurn = 0.25f;
 
     // Frozen Howl, Kuon's ultimate once she is down and it fights for both of them: it takes the middle of the field
-    // and gathers a longer Maw, then the beam comes down his lane, wide, dragging after him. Afterwards it stands
-    // spent and reeling for two seconds, open to double damage.
+    // and gathers a longer Maw while two glacier spires come down on the ronin one after the other, then the beam
+    // comes down his lane, wide, dragging after him. Afterwards it stands spent and reeling for two seconds, open to
+    // double damage.
     IEnumerator FrozenHowl()
     {
         yield return wolf.Vanish();
@@ -1618,6 +1821,7 @@ public class Shirogane : Boss
         Sfx.Play(Sfx.WolfHowl, 1f, 0.75f);
         CameraShake.Add(0.3f);
         yield return WolfWait(0.4f);
+        StartCoroutine(SpireVolley(2, 0.9f, 0.8f));
         yield return MawStrike(FrozenGather, 2f, 1.2f, 2.6f);
         if (wolf.IsBroken) yield break;
         // Spent: it reels where it stands.
@@ -1628,6 +1832,16 @@ public class Shirogane : Boss
     }
 
     const float FrozenGather = 2.2f;
+
+    // Kuon's spires: `count` of them on wherever the ronin stands, `gap` seconds apart.
+    IEnumerator SpireVolley(int count, float tell, float gap)
+    {
+        for (int i = 0; i < count && WolfFights; i++)
+        {
+            StartCoroutine(Spire(Mathf.Clamp(ronin.Bounds.center.x, LeftEdge + 2f, RightEdge - 2f), tell, wolfs: true));
+            yield return WolfWait(gap);
+        }
+    }
 
     // How long Kuon's Maw gathers, how much damage on Kuon meanwhile bursts the orb, and what the burst costs it.
     const float MawGather = 1.6f;

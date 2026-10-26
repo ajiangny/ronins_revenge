@@ -71,6 +71,12 @@ public static class Fx
     public const string ShiroMawBurst = "Shiro_MawBurst";
     // The lock-on reticle that closes on the ronin before a blow that must be parried.
     public const string ShiroLockOn = "Shiro_LockOn";
+    // Her ice: a pillar dropped down a lane, the glacier spire far too big to parry, the shards they burst into at the
+    // ground, and the ice wolf that lunges along her sword slashes.
+    public const string ShiroIcePillar = "Shiro_IcePillar";
+    public const string ShiroIceSpire = "Shiro_IceSpire";
+    public const string ShiroIceShatter = "Shiro_IceShatter";
+    public const string ShiroWolfSlash = "Shiro_WolfSlash";
 
     // Kagetsune's: a soul-skull shot, an ofuda strip, the great bell of the Last Toll and the thrown Soul Coffin.
     public const string KageSkull = "Kage_Skull";

@@ -42,7 +42,7 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shir
 | An ice wolf lunging in every slash | Kuon is in her blade before it is ever beside her. |
 | Crossing Moons: twin blades from both sides, only a parry answers | "Answer me." Her two blades close on him the way they once guarded his flanks; she asks for the one counter he used to know. |
 | Mirror Moon: her reflection fights beside her | The partner who used to stand on his other side. |
-| Phase break: the wolf arrives | She calls on the oath. The wolf is her shrine's guardian, Kuon, and it remembers too. |
+| Phase break: the shrine's souls gather into one, and the wolf steps out of the merge | She calls on the oath, and everything her shrine ever guarded answers. The wolf is its guardian, Kuon, and it remembers too. |
 | Kuon hunts beside her on its own clock, never waiting for her | It isn't her weapon; it fights for her, its own way. They share one bar: one oath, one life between them. |
 | Fang of the Oath: parry it back into Kuon | "Remember." Their oath, thrown at him; he answers it. |
 | Kuon broken: "...Rest, Kuon." She staggers, then fights on enraged | Grief, then the rest of her strength. Moonfall is everything she has left. |

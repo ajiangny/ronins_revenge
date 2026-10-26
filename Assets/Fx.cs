@@ -42,6 +42,13 @@ public static class Fx
     public const string UtsuHourSlash = "Utsu_HourSlash";
     public const string UtsuClockMark = "Utsu_ClockMark";
     public const string UtsuSword = "Utsu_Sword";
+    public const string UtsuSwordP2 = "Utsu_SwordP2";
+    public const string UtsuSwordFlying = "Utsu_SwordFlying";
+    public const string UtsuSwordFlyingP2 = "Utsu_SwordFlyingP2";
+    public const string UtsuNumerals = "Utsu_Numerals";
+    public const string UtsuBeamRed = "Utsu_BeamRed";
+    public const string UtsuBeamMolten = "Utsu_BeamMolten";
+    public const string UtsuHaloShards = "Utsu_HaloShards";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
 
     // Shirogane's effects.

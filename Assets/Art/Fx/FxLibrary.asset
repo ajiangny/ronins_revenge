@@ -467,6 +467,67 @@ MonoBehaviour:
     - {fileID: 21300000, guid: bb8231f129d1144aa99ce5aa6e814677, type: 3}
     fps: 8
     loop: 1
+  - id: Utsu_SwordP2
+    frames:
+    - {fileID: 21300000, guid: 08752352918324410b7702b97cf40618, type: 3}
+    - {fileID: 21300000, guid: cf039b7942d724a9eb9129b7ece38441, type: 3}
+    - {fileID: 21300000, guid: 4f2d1e12dc00542e7a9f0cb8521e4e6c, type: 3}
+    - {fileID: 21300000, guid: 1ee335af560f944aa9bb66e2d1655899, type: 3}
+    - {fileID: 21300000, guid: 67daa138c9d5b4b6e9698ef343a33c8c, type: 3}
+    - {fileID: 21300000, guid: a57e5355b24bf4219b40cdbf13e9ff35, type: 3}
+    fps: 8
+    loop: 1
+  - id: Utsu_SwordFlying
+    frames:
+    - {fileID: 21300000, guid: e6e335be4bb504a9688ae93d11eba627, type: 3}
+    fps: 1
+    loop: 1
+  - id: Utsu_SwordFlyingP2
+    frames:
+    - {fileID: 21300000, guid: 9df087b043f1f4f898187dcd46062b1c, type: 3}
+    fps: 1
+    loop: 1
+  - id: Utsu_Numerals
+    frames:
+    - {fileID: 21300000, guid: df6a0626e9a00446ea878d6184d4199a, type: 3}
+    - {fileID: 21300000, guid: 102fcff04bc22482780e128b528f8ef4, type: 3}
+    - {fileID: 21300000, guid: 784138dce6ddc428b8cdfd837e148396, type: 3}
+    - {fileID: 21300000, guid: 8c3663213835a4a28970e8981a22bbbe, type: 3}
+    - {fileID: 21300000, guid: 0d49c48c809df4807a470d8b30f66eda, type: 3}
+    - {fileID: 21300000, guid: dbd1ce2fd6a7b42a5a1f1828a6209961, type: 3}
+    fps: 1
+    loop: 1
+  - id: Utsu_BeamRed
+    frames:
+    - {fileID: 21300000, guid: a7d41ba4edcce4cf7a3e36a9e2a59cdd, type: 3}
+    - {fileID: 21300000, guid: e8ad53d8cce5a4bb6a9b62e20b749294, type: 3}
+    - {fileID: 21300000, guid: 006d759be330947eb9128d9eb65f95a1, type: 3}
+    - {fileID: 21300000, guid: 670b0163b95eb4c519c1167af9f33163, type: 3}
+    - {fileID: 21300000, guid: 2c2ed35617c564ab38efbc9e50c768df, type: 3}
+    - {fileID: 21300000, guid: 353802414a59b42cdbe15023e59aa82c, type: 3}
+    - {fileID: 21300000, guid: 8c70c5ad65da34a49b0be58b799dc164, type: 3}
+    - {fileID: 21300000, guid: bd9cb1e11a0d04636b880b3cc37eaf3a, type: 3}
+    fps: 18
+    loop: 1
+  - id: Utsu_BeamMolten
+    frames:
+    - {fileID: 21300000, guid: 0d3d000eaf0f34fed914ef50143bebdf, type: 3}
+    - {fileID: 21300000, guid: a0c204de4fba04493ad27d7cd99c2346, type: 3}
+    - {fileID: 21300000, guid: bf12fab3374f940609182d50e084e774, type: 3}
+    - {fileID: 21300000, guid: d48cb652e85104072ba752a432fd8a18, type: 3}
+    - {fileID: 21300000, guid: d875e07dd794942d0a0be8b61ac63ef0, type: 3}
+    - {fileID: 21300000, guid: 99cec0bbb9a9f43949ecb12cd836671e, type: 3}
+    - {fileID: 21300000, guid: 15bb57b13e7de4505bbf26c2d95016ac, type: 3}
+    - {fileID: 21300000, guid: 5b8e2e5659bc548d393ee89261025a23, type: 3}
+    fps: 18
+    loop: 1
+  - id: Utsu_HaloShards
+    frames:
+    - {fileID: 21300000, guid: 9111d4248a0f140f08978ec7605b33d9, type: 3}
+    - {fileID: 21300000, guid: 4fa72eee4c90a4123964dda63cede8c4, type: 3}
+    - {fileID: 21300000, guid: ca2614fb4023f4ebcb10faa5b60e15e3, type: 3}
+    fps: 1
+    loop: 1
   - id: Utsu_PlumbPortal
     frames:
     - {fileID: 21300000, guid: 1dfbf83e74b4540c0bc299fe81af413b, type: 3}

@@ -302,16 +302,56 @@ public class Utsusemi : Boss
         PlayAction(art.parry);
         ElementFx.Glow(Head, Gold, 1f, 3f, 0.4f, transform);
         Sfx.Play(Sfx.ParrySwing, 0.8f, 0.6f);
+        if (secondPhase)
+        {
+            yield return ShatteredHalo();
+            yield break;
+        }
         HatPath path = AimHat();
-        List<SpriteRenderer> trail = TrailDots(path);
+        List<SpriteRenderer> trail = TrailDots(path, Gold);
         // The hat leaves its hand on the throw clip's last frame.
         yield return Wait(0.55f);
 
         StartCoroutine(FlyHat(path, trail, false));
-        if (secondPhase) StartCoroutine(ThrowSwordWheel(0.8f));
         ShowEye(true);
         Sfx.Play(Sfx.HatWhirr);
     }
+
+    // The second phase's Kasa Wheel: its hat is a broken halo now, and the three pieces fly apart. The crown flies
+    // the hat's old loop at the ronin; a beat later each side shard dives in on its own side of him and skims away
+    // outward, so there's room to dodge just beside where he stood but not far along the lane. Then its sword wheels
+    // after them. Each piece is parried on its own, and every hit is doubled until all of them are home.
+    IEnumerator ShatteredHalo()
+    {
+        float roninX = ronin.Bounds.center.x;
+        HatPath crown = AimHat();
+        HatPath left = AimHat(roninX - HaloShardOffset, -1f, HaloShardSkim);
+        HatPath right = AimHat(roninX + HaloShardOffset, 1f, HaloShardSkim);
+        List<SpriteRenderer> crownTrail = TrailDots(crown, Gold);
+        List<SpriteRenderer> leftTrail = TrailDots(left, Molten);
+        List<SpriteRenderer> rightTrail = TrailDots(right, Molten);
+        yield return Wait(0.55f);
+
+        // The halo bursts apart off its head.
+        Fx.Play(Fx.Impact, Head, Molten, 1.2f);
+        ElementFx.Glow(Head, Molten, 0.6f, 2.5f, 0.3f, transform);
+        Sfx.Play(Sfx.HatWhirr);
+        Sfx.Play(Sfx.ParryClang, 0.4f, 0.7f);
+        StartCoroutine(FlyHat(crown, crownTrail, false, HaloCrown));
+        ShowEye(true);
+        // The side shards follow a beat later, so the three don't land at once.
+        yield return Wait(0.35f);
+        StartCoroutine(FlyHat(left, leftTrail, false, HaloLeft));
+        StartCoroutine(FlyHat(right, rightTrail, false, HaloRight));
+        Sfx.Play(Sfx.HatWhirr, 0.7f, 1.2f);
+        StartCoroutine(ThrowSwordWheel(1.1f));
+    }
+
+    // The side shards of the broken halo dive this far either side of the ronin and skim this far outward.
+    const float HaloShardOffset = 2.6f;
+    const float HaloShardSkim = 3.5f;
+    // Which piece of the broken halo flies: its frames in Fx.UtsuHaloShards.
+    const int HaloLeft = 0, HaloCrown = 1, HaloRight = 2;
 
     IEnumerator ThrowSwordWheel(float delay)
     {
@@ -319,7 +359,7 @@ public class Utsusemi : Boss
         yield return Wait(delay);
         if (IsDead) yield break;
         HatPath path = AimHat();
-        StartCoroutine(FlyHat(path, TrailDots(path), true));
+        StartCoroutine(FlyHat(path, TrailDots(path, SwordGlow), true));
         Sfx.Play(Sfx.SwordWhirl, 0.8f, 1.15f);
     }
 
@@ -334,17 +374,22 @@ public class Utsusemi : Boss
 
     HatPath AimHat()
     {
-        float laneY = ronin.Bounds.center.y;
         float roninX = ronin.Bounds.center.x;
         // It skims toward the side with more open ground, coming in steeply from the other side.
-        float sweepDir = roninX < CameraShake.Center.x ? 1f : -1f;
+        return AimHat(roninX, roninX < CameraShake.Center.x ? 1f : -1f, 8f);
+    }
+
+    HatPath AimHat(float roninX, float sweepDir, float skim)
+    {
+        float laneY = ronin.Bounds.center.y;
         float bound = HalfWidth - 1.5f;
+        roninX = Mathf.Clamp(roninX, CameraShake.Center.x - bound, CameraShake.Center.x + bound);
         var path = new HatPath { sweepDir = sweepDir };
         path.a0 = Head;
         path.a1 = Head + new Vector3(-sweepDir * 5f, -1.5f, 0);
         path.a2 = new Vector3(roninX - sweepDir * 2f, laneY + 4f, 0);
         path.a3 = new Vector3(roninX, laneY, 0);
-        float skimX = Mathf.Clamp(roninX + sweepDir * 8f, CameraShake.Center.x - bound, CameraShake.Center.x + bound);
+        float skimX = Mathf.Clamp(roninX + sweepDir * skim, CameraShake.Center.x - bound, CameraShake.Center.x + bound);
         path.skimEnd = new Vector3(skimX, laneY, 0);
         return path;
     }
@@ -364,8 +409,8 @@ public class Utsusemi : Boss
         return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
     }
 
-    // Faint gold dots along the whole loop, so the ronin can read where it will dip.
-    List<SpriteRenderer> TrailDots(HatPath path)
+    // Faint dots along the whole loop, so the ronin can read where it will dip.
+    List<SpriteRenderer> TrailDots(HatPath path, Color colour)
     {
         var dots = new List<SpriteRenderer>();
         const int perLeg = 9;
@@ -376,7 +421,7 @@ public class Utsusemi : Boss
                 float t = (i + 0.5f) / perLeg;
                 Vector3 p = leg == 0 ? Bezier(path.a0, path.a1, path.a2, path.a3, t)
                     : leg == 1 ? Vector3.Lerp(path.a3, path.skimEnd, t) : HatReturn(path, t);
-                SpriteRenderer dot = Bar(p, p + Vector3.right * 0.22f, 0.22f, new Color(Gold.r, Gold.g, Gold.b, 0.55f), 52);
+                SpriteRenderer dot = Bar(p, p + Vector3.right * 0.22f, 0.22f, new Color(colour.r, colour.g, colour.b, 0.55f), 52);
                 dot.sprite = ProceduralSprites.Glow;
                 dots.Add(dot);
             }
@@ -384,8 +429,9 @@ public class Utsusemi : Boss
         return dots;
     }
 
-    // The hat (or, with sword set, the sword wheeling end over end) flown around the loop as an unbreakable shot.
-    IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool sword)
+    // The hat (or, with sword set, the sword wheeling end over end, or with a halo piece set that piece of the broken
+    // halo, spinning) flown around the loop as an unbreakable shot.
+    IEnumerator FlyHat(HatPath path, List<SpriteRenderer> trail, bool sword, int haloPiece = -1)
     {
         if (sword)
         {
@@ -400,15 +446,24 @@ public class Utsusemi : Boss
         // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
         hat.MakeUnbreakable(null);
-        Sprite[] frames = Fx.Frames(sword ? Fx.UtsuSword : Fx.UtsuKasa);
+        Sprite[] frames = sword ? FlyingSwordFrames() : Fx.Frames(Fx.UtsuKasa);
         Vector3 bladeMiddle = Vector3.zero;
         if (sword)
         {
             Sprite blade = frames != null ? frames[0] : ProceduralSprites.White;
             Vector2 size = frames != null ? (Vector2)blade.bounds.size * SwordScale : new Vector2(0.15f, SwordCoverHeight);
-            hat.Restyle(blade, frames != null ? Color.white : Lace, size, 0.6f, new Color(Steel.r, Steel.g, Steel.b, 0.4f), 2.2f);
+            hat.Restyle(blade, frames != null ? Color.white : Lace, size, 0.6f, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.4f), 2.2f);
             // The sword art pivots where the blade meets the ground; it wheels about its middle instead.
             bladeMiddle = Vector3.Scale(blade.bounds.center, hat.Art.transform.lossyScale);
+        }
+        else if (haloPiece >= 0)
+        {
+            Sprite[] pieces = Fx.Frames(Fx.UtsuHaloShards);
+            Sprite piece = pieces != null ? pieces[Mathf.Min(haloPiece, pieces.Length - 1)] : null;
+            // Drawn at the hat's own pixel size, so the pieces add up to the hat.
+            float scale = frames != null ? 2.6f / frames[0].bounds.size.x : 1f;
+            if (piece != null) hat.Restyle(piece, Color.white, (Vector2)piece.bounds.size * scale, 0.5f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 2f);
+            else hat.Restyle(ProceduralSprites.Disc, Gunmetal, haloPiece == HaloCrown ? new Vector2(1.8f, 0.6f) : new Vector2(1f, 0.6f), 0.5f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 2f);
         }
         else if (frames != null) hat.Restyle(frames, 14f, Color.white, new Vector2(2.6f, 1.18f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 2.6f);
         else hat.Restyle(ProceduralSprites.Disc, Gunmetal, new Vector2(2.6f, 0.7f), 0.55f, new Color(Gold.r, Gold.g, Gold.b, 0.45f), 2.6f);
@@ -437,13 +492,19 @@ public class Utsusemi : Boss
             {
                 Quaternion spin = Quaternion.Euler(0, 0, -720f * t);
                 hat.Art.transform.SetPositionAndRotation(hat.transform.position - spin * bladeMiddle, spin);
-                if (Random.value < 0.4f) Afterimage(hat.Art, new Color(Steel.r, Steel.g, Steel.b, 0.4f));
+                if (Random.value < 0.4f) Afterimage(hat.Art, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.4f));
+            }
+            else if (haloPiece == HaloLeft || haloPiece == HaloRight)
+            {
+                // The side shards cartwheel, each turning toward the side it skims to.
+                hat.Art.transform.rotation = Quaternion.Euler(0, 0, -path.sweepDir * 600f * t);
+                if (Random.value < 0.4f) Afterimage(hat.Art, new Color(Molten.r, Molten.g, Molten.b, 0.4f));
             }
 
             // The trail fades out behind the hat as it flies.
             int passed = Mathf.Min(trail.Count, Mathf.FloorToInt(trail.Count * t / total));
             for (; dotsGone < passed; dotsGone++) RemoveTransient(trail[dotsGone]);
-            if (!sword && t < legSeconds[0] && Time.time >= nextTassel)
+            if (!sword && haloPiece < 0 && t < legSeconds[0] && Time.time >= nextTassel)
             {
                 nextTassel = Time.time + (secondPhase ? 0.3f : 0.4f);
                 Tassel(hat.transform.position);
@@ -467,7 +528,7 @@ public class Utsusemi : Boss
             {
                 yield return Wait(2f);
             }
-            if (!IsDead) Fx.Play(Fx.Impact, sword ? Shoulder : Head, sword ? Steel : Gold, 0.9f);
+            if (!IsDead) Fx.Play(Fx.Impact, sword ? Shoulder : Head, sword ? SwordGlow : haloPiece >= 0 ? Molten : Gold, 0.9f);
         }
         else if (hat != null)
         {
@@ -581,12 +642,13 @@ public class Utsusemi : Boss
     }
 
     // Hour Strikes: one hour at a time, a thin red sight line from its eye tracks the ronin, then locks on where he
-    // stands; a gold hour numeral (I, II, III...) lights up there as the warning, and a moment later its eye lasers
-    // it, burning him if he hasn't stepped off. Then the numerals fade, and it counts the hours again with its blade:
-    // for each, the sight line hunts him down and locks on, a red numeral marks the spot, and after a short window it
-    // dashes down out of its row onto it, chops it with a ground-cracking blow and dashes back up. Then, back in its row, it strikes the hour: a clock mark settles under the ronin and follows him
-    // while its core glows and the blade draws back over three ticks, and a giant crescent cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it:
-    // sent back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
+    // stands, and a moment later its eye lasers the spot, burning him if he hasn't stepped off. Then it counts the
+    // hours again with its blade: for each, the sight line hunts him down and locks on, the hour's numeral (I, II,
+    // III...) rises on the spot, and after a short window it dashes down out of its row onto it, chops it with a
+    // ground-cracking blow and dashes back up. Then, back in its row, it strikes the next hour: that numeral rises under
+    // the ronin and follows him while its core glows and the blade draws back over three ticks, and a giant crescent
+    // cleave flies at him. It hunts him, breaks his shots and cuts through cover, so only a parry answers it: sent
+    // back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
     IEnumerator HourStrikes()
     {
         int count = secondPhase ? 5 : 3;
@@ -595,16 +657,14 @@ public class Utsusemi : Boss
         Vector3 row = anchor;
 
         // The announcement, in super armour: it calls the move and stands its ground in a gold shell while it lasers
-        // the hours in one at a time, then they go dark. Nothing staggers or freezes it until the shell drops.
+        // the hours in one at a time. Nothing staggers or freezes it until the shell drops.
         Speak(BossLine.HourStrikes);
         armored = true;
         SpriteRenderer[] shell = ArmorShell();
         Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
-        var marks = new List<HourMark>();
         yield return HoldArmor(shell, 0.3f);
-        for (int hour = 1; hour <= count; hour++) yield return MarkHour(hour, marks, shell);
+        for (int i = 0; i < count; i++) yield return LaserHour(shell);
         yield return HoldArmor(shell, 0.3f);
-        foreach (HourMark mark in marks) mark.Hide(0.3f);
         Tick(0.4f);
         yield return HoldArmor(shell, 0.25f);
         armored = false;
@@ -621,14 +681,13 @@ public class Utsusemi : Boss
         }
 
         Beat();
-        yield return StrikeTheHour();
+        yield return StrikeTheHour(count + 1);
         PlayIdle();
     }
 
-    // One hour marked where the ronin stands: a thin sight line from its eye follows him, then locks on, and the
-    // numeral lights up there. He has a moment to step off it before its eye's laser strikes the spot. The laser
-    // burns him if he's still there but leaves no fire, so the numerals stay clear to read.
-    IEnumerator MarkHour(int hour, List<HourMark> marks, SpriteRenderer[] shell)
+    // One hour lasered where the ronin stands: a thin sight line from its eye follows him, then locks on and
+    // brightens. He has a moment to step off before its eye's laser strikes the spot; it burns him if he's still there.
+    IEnumerator LaserHour(SpriteRenderer[] shell)
     {
         float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
         float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
@@ -639,10 +698,7 @@ public class Utsusemi : Boss
             Stretch(sight, Eye, Spot(x), 0.05f);
         });
 
-        // Locked: the hour is set, the sight line brightens, and the dodge window opens.
-        var mark = new HourMark(this, hour, x);
-        marks.Add(mark);
-        mark.Show(Gold);
+        // Locked: the sight line brightens, and the dodge window opens.
         Tick(0.7f);
         Vector3 spot = Spot(x);
         sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
@@ -663,7 +719,7 @@ public class Utsusemi : Boss
     }
 
     // One hour struck where the ronin stands: a red sight line from its eye follows him, then locks on, and the
-    // numeral burns red there. After a short window to step off, it dashes down onto the spot and chops it.
+    // hour's numeral rises there. After a short window to step off, it dashes down onto the spot and chops it.
     IEnumerator LockOnDash(int hour, Vector3 row)
     {
         float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
@@ -677,9 +733,9 @@ public class Utsusemi : Boss
             yield return null;
         }
 
-        // Locked: the hour burns red where he stood, and the dodge window opens.
+        // Locked: the hour's numeral rises where he stood, and the dodge window opens.
         var mark = new HourMark(this, hour, x);
-        mark.Show(CoreRed);
+        mark.Show();
         Tick(0.7f);
         Vector3 spot = Spot(x);
         sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
@@ -897,13 +953,12 @@ public class Utsusemi : Boss
     const int SlashDrawnFrame = 5;
     const int SlashReleaseFrame = 7;
 
-    // The hour: a clock mark under the ronin follows him for three ticks while the core glows and the blade is drawn
-    // back, then the swing flings a giant crescent cleave at him.
-    IEnumerator StrikeTheHour()
+    // The hour: its numeral under the ronin follows him for three ticks while the core glows and the blade is drawn
+    // back, then flares red as the swing flings a giant crescent cleave at him.
+    IEnumerator StrikeTheHour(int hour)
     {
-        FxPlayer hour = Fx.Play(Fx.UtsuClockMark, ronin.Feet, Color.white, 3.2f, null, 6);
-        if (hour != null) transient.Add(hour.gameObject);
-        SpriteRenderer fallback = hour == null ? HourGlow() : null;
+        var mark = new HourMark(this, hour, ronin.Bounds.center.x);
+        mark.Show();
         Sfx.Play(Sfx.LanternCharge, 0.8f, 1.3f);
         PlayFrames(slashFrames, 1, SlashDrawnFrame, true, 14f);
 
@@ -914,12 +969,11 @@ public class Utsusemi : Boss
             ElementFx.Glow(Core, i == 2 ? Color.white : CoreRed, 0.7f, 1.6f + i * 0.6f, tickTime * 0.8f, transform);
             for (float t = 0; t < tickTime; t += Time.deltaTime * Tempo)
             {
-                FollowRonin(hour, fallback);
+                mark.MoveTo(ronin.Bounds.center.x);
                 yield return null;
             }
         }
-        if (hour != null) RemoveTransient(hour.GetComponent<SpriteRenderer>());
-        if (fallback != null) RemoveTransient(fallback);
+        mark.Struck();
 
         const float swingFps = 18f;
         PlayFrames(slashFrames, SlashDrawnFrame + 1, -1, false, swingFps);
@@ -942,22 +996,6 @@ public class Utsusemi : Boss
 
     // Fast, but it turns as fast as the ronin runs: there's no outrunning it, only parrying it.
     const float HourSpeed = 11f;
-
-    void FollowRonin(FxPlayer hour, SpriteRenderer fallback)
-    {
-        Vector3 at = new Vector3(ronin.Bounds.center.x, ronin.Feet.y, -1f);
-        if (hour != null) hour.transform.position = at;
-        if (fallback != null) fallback.transform.position = at;
-    }
-
-    SpriteRenderer HourGlow()
-    {
-        SpriteRenderer glow = Bar(ronin.Feet, ronin.Feet, 1f, new Color(Gold.r, Gold.g, Gold.b, 0.7f), 6);
-        glow.sprite = ProceduralSprites.Glow;
-        glow.transform.rotation = Quaternion.identity;
-        glow.transform.localScale = new Vector3(2.2f, 0.7f, 1f);
-        return glow;
-    }
 
     // Its Hour Strikes frames; without them it uses its thrust frames.
     Sprite[] dashFrames, chopFrames, slashFrames;
@@ -984,12 +1022,15 @@ public class Utsusemi : Boss
         else animator.Play(frames, false, PlayIdle, fps);
     }
 
-    // A gold Roman numeral standing on the ground over a soft pool of light, drawn from bars: I and V strokes are all
-    // the first six hours need. Shown during the announcement and then hidden; it flashes red again when struck.
+    // The warning where a dash or a thrown sword will land: a brass Roman numeral (I to V) standing on a brass ring on
+    // the ground, glowing red-hot at the edges, which rises in with a flash and flares red when the blow lands. Without
+    // the numeral art it's drawn from bars over a soft pool of light: I and V strokes are all the first six hours need.
     class HourMark
     {
         const float Height = 0.8f;
-        public readonly float x;
+        // The numeral art is drawn this many world units wide, about the reach of the blow it marks.
+        const float ArtWidth = 1.9f;
+        public float x { get; private set; }
         readonly Utsusemi owner;
         readonly int hour;
         readonly List<SpriteRenderer> strokes = new List<SpriteRenderer>();
@@ -1002,10 +1043,41 @@ public class Utsusemi : Boss
             this.x = x;
         }
 
-        public void Show(Color colour)
+        public void Show() => Show(Color.white);
+
+        // Slides the numeral along the ground to follow the ronin.
+        public void MoveTo(float newX)
+        {
+            Vector3 shift = Vector3.right * (newX - x);
+            x = newX;
+            foreach (SpriteRenderer part in strokes)
+            {
+                if (part != null) part.transform.position += shift;
+            }
+            if (pool != null) pool.transform.position += shift;
+        }
+
+        void Show(Color tint)
         {
             Hide(0f);
             Vector3 foot = new Vector3(x, owner.GroundY + 0.15f, 0);
+            Sprite[] numerals = Fx.Frames(Fx.UtsuNumerals);
+            if (numerals != null)
+            {
+                // Its ring sits on the ground line, a touch below the feet so it reads as lying flat.
+                var art = new GameObject("HourNumeral").AddComponent<SpriteRenderer>();
+                art.sprite = numerals[Mathf.Clamp(hour - 1, 0, numerals.Length - 1)];
+                art.transform.position = new Vector3(x, foot.y - 0.2f, 0);
+                art.transform.localScale = Vector3.one * (ArtWidth / art.sprite.bounds.size.x);
+                art.color = tint;
+                art.sortingOrder = 8;
+                owner.transient.Add(art.gameObject);
+                strokes.Add(art);
+                ElementFx.Glow(foot + Vector3.up * 0.5f, tint == Color.white ? Gold : tint, 0.5f, 1.6f, 0.3f);
+                return;
+            }
+
+            Color colour = tint == Color.white ? Gold : tint;
             pool = owner.Bar(foot, foot, 1f, new Color(colour.r, colour.g, colour.b, 0.45f), 6);
             pool.sprite = ProceduralSprites.Glow;
             pool.transform.rotation = Quaternion.identity;
@@ -1045,10 +1117,10 @@ public class Utsusemi : Boss
             strokes.Add(owner.Bar(from, to, width, colour, 8));
         }
 
-        // The hour it was: it flashes up red under the blow, then fades.
+        // The hour it was: it flares red under the blow, then fades.
         public void Struck()
         {
-            Show(CoreRed);
+            Show(new Color(1f, 0.45f, 0.35f));
             Hide(0.5f);
         }
 
@@ -1382,6 +1454,18 @@ public class Utsusemi : Boss
     // The throw clip lets the sword go on this frame, with the blade high overhead.
     const int SwordReleaseFrame = 4;
 
+    // Once its core opens, its blade glows molten orange like the one in its phase 2 frames.
+    static readonly Color Molten = new Color(1f, 0.55f, 0.15f);
+    Color SwordGlow => secondPhase ? Molten : Steel;
+
+    // The sword in flight: its planted art without the cracked ground under the blade, molten in phase 2.
+    Sprite[] FlyingSwordFrames()
+    {
+        Sprite[] frames = secondPhase ? Fx.Frames(Fx.UtsuSwordFlyingP2) : null;
+        if (frames == null) frames = Fx.Frames(Fx.UtsuSwordFlying);
+        return frames ?? Fx.Frames(Fx.UtsuSword);
+    }
+
     // Its sword while it lies planted as cover; null while it's in hand.
     Blocker plantedSword;
     bool swordOut;
@@ -1402,15 +1486,14 @@ public class Utsusemi : Boss
         return x;
     }
 
-    // The sword hurled at the ronin: a steel glint shows where it will land, it raises the blade overhead and throws,
-    // and the sword wheels end over end to plant itself point-down there, cutting him if he hasn't moved.
-    IEnumerator ThrowSword(float x)
+    // The sword hurled at the ronin: an hour's numeral rises where it will land, as before each Hour Strikes dash, it
+    // raises the blade overhead and throws, and the sword wheels end over end to plant itself point-down there,
+    // cutting him if he hasn't moved.
+    IEnumerator ThrowSword(float x, int hour = 1)
     {
         Vector3 ground = new Vector3(x, GroundY + 0.15f, 0);
-        SpriteRenderer glint = Bar(ground, ground, 1f, new Color(Steel.r, Steel.g, Steel.b, 0.7f), 6);
-        glint.sprite = ProceduralSprites.Glow;
-        glint.transform.rotation = Quaternion.identity;
-        glint.transform.localScale = new Vector3(1.8f, 0.5f, 1f);
+        var mark = new HourMark(this, hour, x);
+        mark.Show();
         const float fps = 12f;
         PlayFrames(swordThrowFrames, 0, SwordReleaseFrame, true, fps);
         Sfx.Play(Sfx.ParrySwing, 0.7f, 0.7f);
@@ -1421,11 +1504,11 @@ public class Utsusemi : Boss
         PlayIdle();
         Sfx.Play(Sfx.SwordWhirl);
         yield return FlySword(Head + Vector3.up * 0.8f, ground, 0.55f, 2f, 1.2f);
-        RemoveTransient(glint);
+        mark.Struck();
 
         plantedSword = PlantSword(ground);
         if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.6f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
-        if (Fx.Play(Fx.UtsuChop, ground, Color.white, 1.8f) == null) Fx.Play(Fx.Impact, ground, Steel, 1f);
+        if (Fx.Play(Fx.UtsuChop, ground, Color.white, 1.8f) == null) Fx.Play(Fx.Impact, ground, SwordGlow, 1f);
         Debris.BurstSprites(ground, art.deathParticles, new Color(0.6f, 0.55f, 0.45f), 6, 0.6f, 4f);
         ElementFx.Glow(ground + Vector3.up * 1.2f, Color.white, 0.8f, 2.5f, 0.25f);
         Sfx.Play(Sfx.SwordPlant);
@@ -1437,7 +1520,7 @@ public class Utsusemi : Boss
     // sword pulled back up, to its hand), on an arc rising `lift` above the straight line, trailing steel afterimages.
     IEnumerator FlySword(Vector3 start, Vector3 to, float seconds, float turns, float lift, bool planting = true)
     {
-        Sprite[] frames = Fx.Frames(Fx.UtsuSword);
+        Sprite[] frames = FlyingSwordFrames();
         var flying = new GameObject("ThrownSword").AddComponent<SpriteRenderer>();
         flying.sortingOrder = 50;
         transient.Add(flying.gameObject);
@@ -1462,7 +1545,7 @@ public class Utsusemi : Boss
             Vector3 middle = Vector3.Lerp(start, end, k) + Vector3.up * Mathf.Sin(k * Mathf.PI) * lift;
             Quaternion spin = Quaternion.Euler(0, 0, -360f * turns * Mathf.SmoothStep(0, 1, k));
             flying.transform.SetPositionAndRotation(middle - spin * Vector3.up * pivotToMiddle, spin);
-            if (Random.value < 0.6f) Afterimage(flying, new Color(Steel.r, Steel.g, Steel.b, 0.45f));
+            if (Random.value < 0.6f) Afterimage(flying, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.45f));
             yield return null;
         }
         RemoveTransient(flying);
@@ -1477,7 +1560,7 @@ public class Utsusemi : Boss
         transient.Remove(plantedSword.gameObject);
         plantedSword = null;
         Sfx.Play(Sfx.SwordWhirl, 0.8f, 1.15f);
-        Fx.Play(Fx.Impact, new Vector3(from.x, GroundY + 0.15f, 0), Steel, 0.8f);
+        Fx.Play(Fx.Impact, new Vector3(from.x, GroundY + 0.15f, 0), SwordGlow, 0.8f);
         yield return FlySword(from, Head + Vector3.up * 0.8f, 0.4f, -1f, 0.6f, false);
         Tick(0.8f);
     }
@@ -1491,7 +1574,8 @@ public class Utsusemi : Boss
         sword.AddComponent<BoxCollider>().size = new Vector3(SwordCoverWidth, SwordCoverHeight, 0.5f);
         transient.Add(sword.gameObject);
 
-        FxPlayer planted = Fx.Play(Fx.UtsuSword, ground, Color.white, SwordScale, null, 4);
+        FxPlayer planted = secondPhase ? Fx.Play(Fx.UtsuSwordP2, ground, Color.white, SwordScale, null, 4) : null;
+        if (planted == null) planted = Fx.Play(Fx.UtsuSword, ground, Color.white, SwordScale, null, 4);
         SpriteRenderer look;
         if (planted != null)
         {
@@ -1507,8 +1591,8 @@ public class Utsusemi : Boss
             look.color = Lace;
             look.sortingOrder = 4;
         }
-        // A steel ward round the blade, showing how far its cover reaches.
-        SpriteRenderer ward = Kunai.CreateGlow(sword.transform, 1f, 3, new Color(Steel.r, Steel.g, Steel.b, 0.5f));
+        // A ward round the blade, showing how far its cover reaches.
+        SpriteRenderer ward = Kunai.CreateGlow(sword.transform, 1f, 3, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.5f));
         ward.transform.localScale = new Vector3(SwordCoverWidth * 1.6f, SwordCoverHeight * 1.3f, 1f);
 
         Blocker cover = sword.AddComponent<Blocker>();
@@ -1628,7 +1712,7 @@ public class Utsusemi : Boss
             if (strike + 1 < strikes)
             {
                 yield return HoldingHands(RecallSword(), left, right, leftEdge, rightEdge);
-                yield return HoldingHands(ThrowSword(AtRonin(3f)), left, right, leftEdge, rightEdge);
+                yield return HoldingHands(ThrowSword(AtRonin(3f), strike + 2), left, right, leftEdge, rightEdge);
                 if (plantedSword != null) markX = plantedSword.transform.position.x;
             }
         }
@@ -1680,8 +1764,8 @@ public class Utsusemi : Boss
     // Sparks pour into the core while it whines up to full power.
     IEnumerator Charge()
     {
-        if (Fx.Play(Fx.UtsuCharge, Core, Color.white, 2.2f, transform) == null) ElementFx.Glow(Core, CoreRed, 2f, 0.5f, 0.7f, transform);
-        ElementFx.Glow(Core, CoreRed, 0.5f, 4f, 0.9f, transform);
+        if (Fx.Play(Fx.UtsuCharge, Core, secondPhase ? MoltenTint : Color.white, 2.2f, transform) == null) ElementFx.Glow(Core, BeamColour, 2f, 0.5f, 0.7f, transform);
+        ElementFx.Glow(Core, BeamColour, 0.5f, 4f, 0.9f, transform);
         Sfx.Play(Sfx.LanternCharge);
         CameraShake.Add(0.15f);
         for (int i = 0; i < 3; i++)
@@ -1691,11 +1775,13 @@ public class Utsusemi : Boss
         }
     }
 
-    // A laser in three layers redrawn every frame (a soft red glow, a flickering red body, a white-hot core), with a
-    // flare at the core, sparks where it lands and a trail of fire it leaves burning on the ground.
+    // A laser redrawn every frame: a soft glow under its body, which is its beam art tiled along its length and
+    // scrolling (red, or molten orange and wilder once its core opens), or without the art a flickering red bar over a
+    // white-hot core. A flare at the source, sparks where it lands and a trail of fire it leaves burning on the ground.
     class Beam
     {
         public SpriteRenderer glow, body, core;
+        public Sprite[] art;
         public FxPlayer flare, hit;
         public float nextFire, nextBurn, nextSpark, lastFireX;
         // Fired from the slit-eye rather than the core.
@@ -1708,12 +1794,24 @@ public class Utsusemi : Boss
     {
         var beam = new Beam
         {
-            glow = Bar(from, from, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f), 53),
-            body = Bar(from, from, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f), 55),
-            core = Bar(from, from, 1f, new Color(1f, 0.92f, 0.88f), 56),
-            flare = Fx.Play(Fx.UtsuBeamFlare, from, Color.white, flareSize, transform, 57),
-            hit = Fx.Play(Fx.UtsuBeamHit, from, Color.white, 1.3f, null, 57),
+            art = Fx.Frames(secondPhase ? Fx.UtsuBeamMolten : Fx.UtsuBeamRed),
+            glow = Bar(from, from, 1f, new Color(BeamColour.r, BeamColour.g, BeamColour.b, 0.35f), 53),
+            flare = Fx.Play(Fx.UtsuBeamFlare, from, secondPhase ? MoltenTint : Color.white, flareSize, transform, 57),
+            hit = Fx.Play(Fx.UtsuBeamHit, from, secondPhase ? MoltenTint : Color.white, 1.3f, null, 57),
         };
+        if (beam.art != null)
+        {
+            beam.body = new GameObject("BeamBody").AddComponent<SpriteRenderer>();
+            beam.body.sprite = beam.art[0];
+            beam.body.drawMode = SpriteDrawMode.Tiled;
+            beam.body.sortingOrder = 55;
+            transient.Add(beam.body.gameObject);
+        }
+        else
+        {
+            beam.body = Bar(from, from, 1f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f), 55);
+            beam.core = Bar(from, from, 1f, new Color(1f, 0.92f, 0.88f), 56);
+        }
         beam.glow.sprite = ProceduralSprites.Glow;
         // Cleared with the rest of the attack if it's cut short.
         if (beam.flare != null) transient.Add(beam.flare.gameObject);
@@ -1733,13 +1831,32 @@ public class Utsusemi : Boss
     void DrawBeam(Beam beam, Vector3 from, Vector3 to, bool flash, bool onGround)
     {
         float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
-        Stretch(beam.glow, from, to, 1.6f * flicker);
-        Stretch(beam.body, from, to, 0.42f * flicker);
-        Stretch(beam.core, from, to, 0.14f);
-        beam.body.color = flash ? Color.white : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f);
-        beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.35f);
+        // The molten beam thrashes: its width jumps about every frame on top of the flicker.
+        if (secondPhase) flicker *= Random.Range(0.85f, 1.2f);
+        Stretch(beam.glow, from, to, (secondPhase ? 2f : 1.6f) * flicker);
+        beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(BeamColour.r, BeamColour.g, BeamColour.b, 0.35f);
+        if (beam.art != null)
+        {
+            beam.body.sprite = beam.art[(int)(Time.time * BeamFps) % beam.art.Length];
+            // Flipped now and then, so the molten plasma never settles into a pattern.
+            if (secondPhase && Random.value < 0.15f) beam.body.flipY = !beam.body.flipY;
+            LayTiled(beam.body, from, to, (secondPhase ? 0.95f : 0.7f) * flicker * (flash ? 1.3f : 1f));
+            if (secondPhase && Time.time >= beam.nextSpark)
+            {
+                // Embers spit off its length.
+                beam.nextSpark = Time.time + 0.06f;
+                Vector3 along = Vector3.Lerp(from, to, Random.value);
+                Fx.Play(Fx.Impact, along, Molten, Random.Range(0.3f, 0.55f));
+            }
+        }
+        else
+        {
+            Stretch(beam.body, from, to, 0.42f * flicker);
+            Stretch(beam.core, from, to, 0.14f);
+            beam.body.color = flash ? Color.white : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f);
+        }
         if (beam.hit != null) beam.hit.transform.position = to + Vector3.back * 0.3f;
-        else if (Time.time >= beam.nextSpark)
+        else if (beam.art == null && Time.time >= beam.nextSpark)
         {
             beam.nextSpark = Time.time + 0.12f;
             Fx.Play(Fx.Impact, to, CoreRed, 0.7f);
@@ -1752,6 +1869,25 @@ public class Utsusemi : Boss
             beam.lastFireX = to.x;
             GroundFire.Light(to);
         }
+    }
+
+    // The beam art scrolls at this many frames a second.
+    const float BeamFps = 18f;
+    // Its laser's colour: red, and molten orange once its core opens.
+    static readonly Color MoltenTint = new Color(1f, 0.75f, 0.45f);
+    Color BeamColour => secondPhase ? Molten : CoreRed;
+
+    // Lays tiled beam art from one point to another: scaled to the width and tiled along the length, so the art
+    // doesn't smear.
+    static void LayTiled(SpriteRenderer strip, Vector3 from, Vector3 to, float width)
+    {
+        Vector3 delta = to - from;
+        float art = strip.sprite.bounds.size.y;
+        float scale = width / art;
+        strip.transform.position = (from + to) / 2f;
+        strip.transform.rotation = delta.sqrMagnitude > 0.0001f ? Quaternion.FromToRotation(Vector3.right, delta) : Quaternion.identity;
+        strip.transform.localScale = Vector3.one * scale;
+        strip.size = new Vector2(delta.magnitude / scale, art);
     }
 
     void BurnCover(Beam beam, Blocker cover, Vector3 at)

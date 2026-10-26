@@ -61,6 +61,17 @@ public static class FxSetup
         (Fx.UtsuClockMark, 10, true, Centre),
         // The thrown sword stands planted where its blade meets the ground.
         (Fx.UtsuSword, 8, true, new Vector2(0.5f, 1f - 72f / 88f)),
+        // Its molten phase 2 blade, and both blades in flight without the cracked ground under them.
+        (Fx.UtsuSwordP2, 8, true, new Vector2(0.5f, 1f - 72f / 88f)),
+        (Fx.UtsuSwordFlying, 1, true, new Vector2(0.5f, 1f - 72f / 88f)),
+        (Fx.UtsuSwordFlyingP2, 1, true, new Vector2(0.5f, 1f - 72f / 88f)),
+        // The ground numerals I to V, one per frame, standing on their base line.
+        (Fx.UtsuNumerals, 1, true, new Vector2(0.5f, 0f)),
+        // Its lasers' bodies, tiled along the beam and scrolled: red, and molten orange in phase 2.
+        (Fx.UtsuBeamRed, 18, true, Centre),
+        (Fx.UtsuBeamMolten, 18, true, Centre),
+        // The three pieces of its broken halo (left shard, crown, right shard), one per frame.
+        (Fx.UtsuHaloShards, 1, true, Centre),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
         (Fx.ShiroCrescent, 14, true, Centre),
         (Fx.ShiroSword, 10, true, Centre),

@@ -35,7 +35,7 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Move | What it means |
 |---|---|
 | Razing the cover | It walked every road; it knows every place Oni could hide. |
-| Kasa Wheel | The monk's own hat, thrown at the boy who once slept under it. |
+| Kasa Wheel | The monk's own hat, thrown at the boy who once slept under it. Once it breaks into a halo, its pieces fly apart and come at him from three sides: even the shelter he remembers is broken. |
 | Lace Lattice | His shroud, unravelling. |
 | Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one, then hunts him down the hours again with its blade. |
 | Plumb Lines | The weights of the clock it winds. |

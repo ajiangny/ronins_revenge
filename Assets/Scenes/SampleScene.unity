@@ -750,6 +750,7 @@ MonoBehaviour:
   shiroganeCrescentLine: {fileID: 8300000, guid: 7316bb481dc204102984169df7973526, type: 3}
   shiroganeBladeRainLine: {fileID: 8300000, guid: ffe58a554e32747ed8a8c5fad0fd891e, type: 3}
   shiroganeEclipseLine: {fileID: 8300000, guid: 74635955a71f441cfb3057b37c4bf616, type: 3}
+  shiroganeKuonEnragedLine: {fileID: 8300000, guid: c356777aa34724943ad3ae5f9781a978, type: 3}
   shiroganeHurtLines:
   - {fileID: 8300000, guid: 259c9bfe645a34460bfdc93f8a8ddc9e, type: 3}
   - {fileID: 8300000, guid: b1acac455d56d49f7a06c0359bf14f8f, type: 3}

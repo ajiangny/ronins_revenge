@@ -150,7 +150,7 @@ public static class BossArtSetup
         {
             ("shiroganeIntroLine", "Intro"), ("shiroganePhaseLine", "Phase"), ("shiroganeDefeatLine", "Defeat"),
             ("shiroganeDefeatFinalLine", "DefeatFinal"), ("shiroganeStaggerLine", "Stagger"), ("shiroganeCrescentLine", "Crescent"),
-            ("shiroganeBladeRainLine", "BladeRain"), ("shiroganeEclipseLine", "Eclipse"),
+            ("shiroganeBladeRainLine", "BladeRain"), ("shiroganeEclipseLine", "Eclipse"), ("shiroganeKuonEnragedLine", "KuonEnraged"),
         })
         {
             so.FindProperty(field).objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + "Shirogane_" + file + ".mp3");

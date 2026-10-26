@@ -67,6 +67,7 @@ const LINES = {
   Shirogane_Crescent: [SHIROGANE, "[calm, cold] Crescent Moon."],
   Shirogane_BladeRain: [SHIROGANE, "[soft command] Blades... fall."],
   Shirogane_Eclipse: [SHIROGANE, "[slow, intense, building] Eclipse... [fierce] Fang."],
+  Shirogane_KuonEnraged: [SHIROGANE, "[weak, kneeling, breathless] Kuon... [fierce, urgent] don't hold back."],
   Shirogane_Hurt: [SHIROGANE, "[short pained breath] Hh!"],
   Shirogane_Hurt_2: [SHIROGANE, "[sharp wince] Ah!"],
   Shirogane_Hurt_3: [SHIROGANE, "[quiet pained exhale] Nn..."],

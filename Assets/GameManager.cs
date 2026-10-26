@@ -182,6 +182,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip shiroganeCrescentLine;
     [SerializeField] AudioClip shiroganeBladeRainLine;
     [SerializeField] AudioClip shiroganeEclipseLine;
+    [Tooltip("Her word to Kuon as she falls before it, sending it on enraged.")]
+    [SerializeField] AudioClip shiroganeKuonEnragedLine;
     [SerializeField] AudioClip[] shiroganeHurtLines;
     [Tooltip("Kagetsune's sprite frames. Leave empty to use the Taisho art, darkened to blackened bronze, as a stand-in.")]
     [SerializeField] CharacterArt kagetsuneArt;
@@ -1393,7 +1395,7 @@ public class GameManager : MonoBehaviour
         public Color phaseColour;
         public float phaseCloseupHeight;
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
-        public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang;
+        public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang, kuonEnraged;
         // Kagetsune's callouts and summons, and the summoned souls' lines.
         public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, chains, coffin, thousandBells,
             summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane;
@@ -1427,6 +1429,7 @@ public class GameManager : MonoBehaviour
                 BossLine.CrescentSlash => crescentSlash,
                 BossLine.BladeRain => bladeRain,
                 BossLine.EclipseFang => eclipseFang,
+                BossLine.KuonEnraged => kuonEnraged,
                 BossLine.KilledOni => killedOni,
                 BossLine.CofferSlam => cofferSlam,
                 BossLine.TollOfFealty => toll,
@@ -1492,7 +1495,7 @@ public class GameManager : MonoBehaviour
             phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),
             intro = shiroganeIntroLine, phase = shiroganePhaseLine, defeat = shiroganeDefeatLine, defeatFinal = shiroganeDefeatFinalLine,
             stagger = shiroganeStaggerLine, crescentSlash = shiroganeCrescentLine, bladeRain = shiroganeBladeRainLine,
-            eclipseFang = shiroganeEclipseLine, hurt = shiroganeHurtLines,
+            eclipseFang = shiroganeEclipseLine, kuonEnraged = shiroganeKuonEnragedLine, hurt = shiroganeHurtLines,
         },
         BossKind.Kagetsune => new BossVoice
         {
@@ -1521,6 +1524,7 @@ public class GameManager : MonoBehaviour
     {
         // The Emperor's summons and the souls' answers are story, not barks: a gasp mustn't swallow them.
         bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal
+            || line == BossLine.KuonEnraged
             || line is BossLine.SummonBenibana or BossLine.SummonUtsusemi or BossLine.SummonShirogane
                 or BossLine.EchoBenibana or BossLine.EchoUtsusemi or BossLine.EchoShirogane;
         if (!full && voice.isPlaying && (speakingFullLine || line != BossLine.Stagger)) return;

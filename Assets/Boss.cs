@@ -652,7 +652,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         Destroy(gameObject);
     }
 
-    void OnDestroy()
+    protected virtual void OnDestroy()
     {
         ClearTransient();
     }

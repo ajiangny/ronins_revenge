@@ -87,7 +87,7 @@ public class Kagetsune : Boss
     enum Move
     {
         CofferSlam, Toll, Ofuda, Wail, LastToll, Curtain,
-        Swarm, Chains, SoulCoffin, ThousandBells,
+        Swarm, Chains, SoulCoffin, ThousandBells, River,
         EchoBenibana, EchoUtsusemi, EchoShirogane,
     }
 
@@ -148,6 +148,41 @@ public class Kagetsune : Boss
         float pulse = 0.35f + 0.12f * Mathf.Sin(Time.time * 3.1f) + (Time.time < exposedUntil ? 0.3f : 0f);
         chestGlow.color = new Color(Teal.r, Teal.g, Teal.b, pulse);
         if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.44f) + Vector3.back * 0.1f;
+        UpdateLastBell();
+    }
+
+    // The Last Bell: once his last bar runs low, the dark closes in round the field and pulses with his heart.
+    SpriteRenderer lastBellDark;
+
+    void UpdateLastBell()
+    {
+        if (IsDead || !lastBell)
+        {
+            if (lastBellDark != null) lastBellDark.color = Color.Lerp(lastBellDark.color, Color.clear, Time.deltaTime * 2f);
+            return;
+        }
+        if (!lastBellRung)
+        {
+            lastBellRung = true;
+            Toll(1f, 0.45f);
+            CameraShake.Add(0.5f);
+            ElementFx.Glow(Chest, Teal, 2f, 18f, 1f);
+            lastBellDark = new GameObject("LastBellDark").AddComponent<SpriteRenderer>();
+            lastBellDark.sprite = ProceduralSprites.White;
+            lastBellDark.sortingOrder = 1;
+            Camera cam = Camera.main;
+            lastBellDark.transform.position = new Vector3(CameraShake.Center.x, CameraShake.Center.y, 0.5f);
+            lastBellDark.transform.localScale = new Vector3(cam.orthographicSize * cam.aspect * 2.4f, cam.orthographicSize * 2.4f, 1f);
+            lastBellDark.color = Color.clear;
+        }
+        float pulse = 0.2f + 0.06f * Mathf.Sin(Time.time * 3.1f);
+        lastBellDark.color = new Color(0.02f, 0.06f, 0.06f, pulse);
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        if (lastBellDark != null) Destroy(lastBellDark.gameObject);
     }
 
     protected override IEnumerator Fight()
@@ -168,13 +203,49 @@ public class Kagetsune : Boss
                 movesSinceEcho = IsEcho(move) ? 0 : movesSinceEcho + 1;
                 movesSinceUltimate = move == Move.ThousandBells ? 0 : movesSinceUltimate + 1;
                 lastMove = move;
+                // A summoned soul fights beside him: it works its own pattern while he goes on with his.
+                if (IsEcho(move))
+                {
+                    echoRoutine = StartCoroutine(RunEcho(move));
+                    yield return Wait(1.2f);
+                    continue;
+                }
                 yield return Play(move);
-                // A set piece ends the combo.
-                if (move == Move.ThousandBells || IsEcho(move)) i = combo;
+                // The ultimate ends the combo.
+                if (move == Move.ThousandBells) i = combo;
                 yield return Wait(secondPhase ? 0.25f : 0.4f);
             }
         }
     }
+
+    Coroutine echoRoutine;
+    bool EchoOut => echoRoutine != null;
+
+    IEnumerator RunEcho(Move move)
+    {
+        yield return Play(move);
+        echoRoutine = null;
+    }
+
+    // A stagger, the phase break or his fall sends the soul back into the coffin; its ghost and chain are transient,
+    // so the interrupt has already cleared them.
+    void RecallEcho()
+    {
+        if (echoRoutine != null) StopCoroutine(echoRoutine);
+        echoRoutine = null;
+        if (activeEcho != null)
+        {
+            Drop(activeEcho.body);
+            Drop(activeEcho.aura);
+            Drop(activeEcho.chain);
+            activeEcho = null;
+        }
+        if (cageSpiral != null) StopCoroutine(cageSpiral);
+        cageSpiral = null;
+    }
+
+    Echo activeEcho;
+    Coroutine cageSpiral;
 
     static bool IsEcho(Move move) => move == Move.EchoBenibana || move == Move.EchoUtsusemi || move == Move.EchoShirogane;
 
@@ -190,6 +261,7 @@ public class Kagetsune : Boss
         Move.Chains => BrokenChains(),
         Move.SoulCoffin => SoulCoffin(),
         Move.ThousandBells => NightOfAThousandBells(),
+        Move.River => SoulRiver(),
         Move.EchoBenibana => EchoBenibana(),
         Move.EchoUtsusemi => EchoUtsusemi(),
         _ => EchoShirogane(),
@@ -197,7 +269,14 @@ public class Kagetsune : Boss
 
     Move NextMove()
     {
-        if (secondPhase && movesSinceUltimate >= UltimateEvery - 1 && lastMove != null) return Move.ThousandBells;
+        // While a soul is out he keeps to light patterns: no parry-only blow, no ultimate, no second soul.
+        if (EchoOut)
+        {
+            var light = new List<Move> { Move.Toll, Move.Swarm, Move.Toll, Move.Swarm, Move.CofferSlam };
+            if (lastMove is Move previous) light.Remove(previous);
+            return light[Random.Range(0, light.Count)];
+        }
+        if (secondPhase && movesSinceUltimate >= Ultimate - 1 && lastMove != null) return Move.ThousandBells;
         Move parry = secondPhase ? Move.SoulCoffin : Move.LastToll;
         if (movesSinceParry >= ParryAtLatest) return parry;
         if (secondPhase && movesSinceEcho >= EchoAtLatest) return NextEcho();
@@ -208,6 +287,7 @@ public class Kagetsune : Boss
             options.Add(Move.Swarm);
             options.Add(Move.Swarm);
             options.Add(Move.Chains);
+            options.Add(Move.River);
         }
         else
         {
@@ -289,7 +369,13 @@ public class Kagetsune : Boss
     // Past the middle of his first bar he hardens: a second slam lane, embers off the Wail, a gapless curtain row,
     // and a ring of skulls closing with the Last Toll.
     bool Hardened => secondPhase || HealthFraction < 0.5f;
-    int SpiralArms => 3;
+    int SpiralArms => lastBell ? 4 : 3;
+    // Under 30% of his last bar the Last Bell rings: a fourth spiral arm, denser blooms, the ultimate every fourth
+    // move, and the dark closes in.
+    bool lastBell => secondPhase && HealthFraction < LastBellAt;
+    const float LastBellAt = 0.3f;
+    bool lastBellRung;
+    int Ultimate => lastBell ? 4 : UltimateEvery;
 
     // A soft glow sprite, tracked with the attack unless told otherwise.
     SpriteRenderer Glowing(Vector3 at, Color colour, float size, int order = 55, bool track = true)
@@ -797,6 +883,7 @@ public class Kagetsune : Boss
     {
         breaking = true;
         ultimate = false;
+        RecallEcho();
         exposedUntil = 0;
         seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
@@ -855,51 +942,57 @@ public class Kagetsune : Boss
 
     // --- Phase 2 ---
 
-    // Wraith Swarm: skull spirits tear out of his armor, wheel round him, and dive at the ronin a few at a time.
+    // Thousand-Soul Bloom (the Wraith Swarm): a flower of skulls blooms out of his chest, stops dead in the air, then
+    // turns on the ronin in two volleys a beat apart. Aimed shots meet where he stood, so a step clears the first;
+    // the second is aimed where he stepped to.
     IEnumerator WraithSwarm()
     {
         Bark(BossLine.WraithSwarm, 7f);
         if (Sfx.Has(Sfx.SkullShriek)) Sfx.Play(Sfx.SkullShriek, 0.8f);
-        for (int wave = 0; wave < 3; wave++)
+        int blooms = lastBell ? 3 : 2;
+        int count = lastBell ? 30 : 24;
+        for (int wave = 0; wave < blooms; wave++)
         {
-            var skulls = new List<Arrow>();
-            int count = 4;
-            for (int i = 0; i < count; i++)
-            {
-                float angle = (i / (float)count) * 360f + wave * 25f;
-                Vector3 dir = Quaternion.Euler(0, 0, angle) * Vector3.right;
-                skulls.Add(Skull(Chest, dir * 3.5f / ShotSpeed));
-            }
-            IgnoreEachOther(skulls);
-            Fx.Play(Fx.Impact, Chest, Teal, 1.6f);
-            yield return Wait(0.45f);
-            foreach (Arrow skull in skulls)
-            {
-                if (skull == null) continue;
-                skull.Steer(Vector3.zero);
-            }
-            yield return Wait(0.25f);
-            foreach (Arrow skull in skulls)
-            {
-                if (skull == null) continue;
-                StartCoroutine(Hunt(skull, 7f * ShotSpeed));
-                yield return Wait(0.12f);
-            }
-            yield return Wait(0.5f);
+            yield return BulletHell.Room(count);
+            List<Arrow> bloom = BulletHell.Ring(Skull, Chest, count, 4f / ShotSpeed, wave * 180f / count);
+            Fx.Play(Fx.Impact, Chest, Teal, 2f);
+            ElementFx.Glow(Chest, Teal, 1f, 6f, 0.4f);
+            StartCoroutine(BulletHell.HaltAndAim(bloom, () => ronin.Bounds.center, 0.55f, 0.45f, 2, 0.55f, 7.5f, Wait));
+            yield return Wait(1.7f);
         }
     }
 
-    // Curves a skull after the ronin until it is level with him, then lets it fly on.
-    IEnumerator Hunt(Arrow skull, float speed)
+    // Soul River: rows of skulls pour down with one channel through them that snakes from side to side, never faster
+    // than he can follow. Now and then a bronze bell rides the channel's bank: parry it, and the river widens.
+    IEnumerator SoulRiver()
     {
-        Vector3 velocity = (ronin.Bounds.center - skull.transform.position).normalized * speed;
-        skull.Turn(velocity);
-        while (skull != null && ronin != null && skull.transform.position.y > ronin.Bounds.center.y + 0.8f)
+        Bark(BossLine.WraithSwarm, 7f);
+        const float Spacing = 1.6f;
+        const float Speed = 6.5f;
+        const float Between = 0.45f;
+        const float Width = 3.2f;
+        float lo = FieldLeft + Width, hi = FieldRight - Width;
+        float centre = (lo + hi) / 2f;
+        float sway = Mathf.Min((hi - lo) / 2f, 7f);
+        // The channel's speed along his row is sway × rate: kept under the dodge limit.
+        float rate = (BulletHell.MaxDodgeSpeed * 0.8f) / sway;
+        float phase = Mathf.Asin(Mathf.Clamp((ronin.Bounds.center.x - centre) / sway, -1f, 1f));
+        int rows = lastBell ? 14 : 11;
+        float last = centre + sway * Mathf.Sin(phase);
+        for (int row = 0; row < rows; row++)
         {
-            Vector3 want = (ronin.Bounds.center - skull.transform.position).normalized * speed;
-            velocity = Vector3.RotateTowards(velocity, want, Mathf.Deg2Rad * 120f * Time.fixedDeltaTime, 0f);
-            skull.Turn(velocity);
-            yield return new WaitForFixedUpdate();
+            yield return BulletHell.Room(24);
+            float gap = centre + sway * Mathf.Sin(phase + rate * row * Between);
+            BulletHell.GapOk(last, gap, Between, Width, "Soul River");
+            last = gap;
+            // Every fourth row, the skull on one bank is a bell.
+            float bank = gap + (row % 8 == 3 ? -1f : 1f) * (Width / 2f + Spacing * 0.75f);
+            float left = FieldLeft;
+            bool bellRow = row % 4 == 3 && !SealActive;
+            BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, Spacing, new[] { gap }, Width, Speed,
+                i => bellRow && Mathf.Abs(left + i * Spacing - bank) < Spacing / 2f ? BellShot : null);
+            if (row % 2 == 0) Toll(0.3f, 1.1f + 0.03f * row);
+            yield return Wait(Between);
         }
     }
 
@@ -908,7 +1001,8 @@ public class Kagetsune : Boss
     IEnumerator BrokenChains()
     {
         Bark(BossLine.BrokenChains, 7f);
-        int lashes = Random.Range(2, 4);
+        yield return ChainCage();
+        int lashes = 2;
         for (int i = 0; i < lashes; i++)
         {
             float side = i % 2 == 0 ? -1f : 1f;
@@ -950,6 +1044,53 @@ public class Kagetsune : Boss
         }
     }
 
+    // Chain Cage: both chains slam into the ground either side of the ronin and stay there as walls, and while he's
+    // caged a two-arm spiral of skulls winds down on him. Touching a chain burns.
+    IEnumerator ChainCage()
+    {
+        const float HalfWidth = 3f;
+        const float Hold = 3f;
+        float centre = Mathf.Clamp(ronin.Bounds.center.x, FieldLeft + HalfWidth + 0.5f, FieldRight - HalfWidth - 0.5f);
+        float[] xs = { centre - HalfWidth, centre + HalfWidth };
+        var tells = new List<SpriteRenderer>();
+        for (int i = 0; i < 2; i++)
+        {
+            tells.Add(Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.05f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.6f)));
+        }
+        yield return Wait(0.6f);
+        foreach (SpriteRenderer tell in tells) Drop(tell);
+
+        var chains = new List<SpriteRenderer>();
+        var glows = new List<SpriteRenderer>();
+        for (int i = 0; i < 2; i++)
+        {
+            chains.Add(Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.22f, Bronze, 56));
+            SpriteRenderer glow = Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.8f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 54);
+            glow.sprite = ProceduralSprites.Glow;
+            glows.Add(glow);
+            Fx.Play(Fx.Impact, new Vector3(xs[i], GroundY, 0), Bronze, 1.6f);
+        }
+        if (Sfx.Has(Sfx.ChainSnap)) Sfx.Play(Sfx.ChainSnap, 0.9f, 0.7f);
+        Slam(0.6f);
+        CameraShake.Add(0.3f);
+        cageSpiral = StartCoroutine(BulletHell.Spiral(Skull, () => Waist, Row, 2, Random.value < 0.5f ? 40f : -40f, Hold - 0.6f, 5f, 0.32f, Wait, Random.Range(0f, 360f)));
+        for (float t = 0; t < Hold; t += Time.deltaTime * Tempo)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                Vector3 root = Shoulder(i == 0 ? -1f : 1f);
+                Vector3 end = new Vector3(xs[i], GroundY, 0);
+                Stretch(chains[i], root, end, 0.22f);
+                Stretch(glows[i], root, end, 0.8f * (1f + 0.15f * Mathf.Sin(Time.time * 9f)));
+                HitIfCrossed(root, end);
+            }
+            yield return null;
+        }
+        foreach (SpriteRenderer chain in chains) StartCoroutine(FadeOut(chain, 0.25f));
+        foreach (SpriteRenderer glow in glows) StartCoroutine(FadeOut(glow, 0.25f));
+        yield return Wait(0.3f);
+    }
+
     // Soul Coffin, parry-only: he hurls the coffin-hammer down on its broken chain. Parried, it bursts against his
     // own armor, and he stands open.
     IEnumerator SoulCoffin()
@@ -969,6 +1110,12 @@ public class Kagetsune : Boss
         coffin.MakeReflectable(transform);
         coffinThrownAt = Time.time;
         StartCoroutine(Pursue(coffin, 9f));
+        // Seal-darts fall either side of him, so running wide only trades the coffin for the darts.
+        foreach (float offset in new[] { -2.6f, 2.6f, -5.2f, 5.2f })
+        {
+            float x = ronin.Bounds.center.x + offset;
+            if (x > FieldLeft && x < FieldRight) SealDart(new Vector3(x, TopOfScreen, 0), Vector3.down * 8f);
+        }
         Slam(0.6f);
         // The chain pays out behind it.
         SpriteRenderer chain = Bar(from, from, 0.12f, Bronze, 54);
@@ -985,6 +1132,11 @@ public class Kagetsune : Boss
     protected override void OnStaggered()
     {
         ultimate = false;
+        RecallEcho();
+        // His own bell or coffin sent home: the whole field holds its breath for a moment.
+        HitStop?.Invoke(0.12f);
+        ElementFx.Glow(Centre, new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f), 1f, 12f, 0.5f);
+        Debris.BurstSprites(Centre, art.deathParticles, Teal, 40, 1.1f, 9f);
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);
         Toll(1f, 0.7f);
@@ -1021,8 +1173,22 @@ public class Kagetsune : Boss
         int safe = 0;
         for (int i = 1; i < LaneCount; i++) if (Mathf.Abs(lanes[i] - ronin.Bounds.center.x) < Mathf.Abs(lanes[safe] - ronin.Bounds.center.x)) safe = i;
         safe = Mathf.Clamp(safe + (Random.value < 0.5f ? -1 : 1), 0, LaneCount - 1);
-        for (int wave = 0; wave < 5; wave++)
+        const int Waves = 6;
+        for (int wave = 0; wave < Waves; wave++)
         {
+            // The last toll has no safe lane: a wall of skulls with a bronze bell over him. Only the parry gets through.
+            if (wave == Waves - 1)
+            {
+                yield return BulletHell.Room(26);
+                float bellAt = ronin.Bounds.center.x;
+                float left = FieldLeft;
+                Toll(1f, 0.6f);
+                foreach (SpriteRenderer bell in bells) if (bell != null) bell.color = new Color(Bronze.r, Bronze.g, Bronze.b, 1f);
+                BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, 1.5f, null, BulletHell.MinGap, 4.5f,
+                    i => Mathf.Abs(left + i * 1.5f - bellAt) < 0.75f ? BellShot : null);
+                yield return Wait((TopOfScreen - Row) / (4.5f * ShotSpeed));
+                break;
+            }
             var bands = new List<SpriteRenderer>();
             var xs = new List<float>();
             for (int i = 0; i < LaneCount; i++)
@@ -1048,9 +1214,14 @@ public class Kagetsune : Boss
                 columns.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 0.55f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
                 GroundFire.Light(new Vector3(x, GroundY, 0));
             }
-            if (Mathf.Abs(ronin.Bounds.center.x - lanes[safe]) > halfWidth * 0.95f) ronin.TakeHit(ronin.Bounds.center);
+            // The columns burn for their whole flash, not a single frame.
+            for (float t = 0; t < ColumnSeconds; t += Time.deltaTime * Tempo)
+            {
+                if (Mathf.Abs(ronin.Bounds.center.x - lanes[safe]) > halfWidth * 0.95f) ronin.TakeHit(ronin.Bounds.center);
+                yield return null;
+            }
             foreach (SpriteRenderer column in columns) StartCoroutine(FadeOut(column, 0.35f));
-            yield return Wait(0.3f);
+            yield return Wait(0.3f - ColumnSeconds);
             // The safe lane steps one over, never off the field.
             int stepTo = safe + (Random.value < 0.5f ? -1 : 1);
             if (stepTo < 0 || stepTo >= LaneCount) stepTo = safe - (stepTo - safe);
@@ -1070,6 +1241,8 @@ public class Kagetsune : Boss
         yield return Tremble(0.6f, 0.08f);
         yield return Wait(ExposedSeconds);
     }
+
+    const float ColumnSeconds = 0.25f;
 
     // A full-screen dark under the action, for his ultimate.
     SpriteRenderer Darkness()
@@ -1130,6 +1303,7 @@ public class Kagetsune : Boss
         echo.aura = Glowing(at, new Color(Teal.r, Teal.g, Teal.b, 0f), echo.Height * 1.1f, 3);
         echo.chain = Bar(HammerHead, at, 0.1f, new Color(Bronze.r, Bronze.g, Bronze.b, 0f), 3);
 
+        activeEcho = echo;
         Fx.Play(Fx.SmokePuff, at, new Color(Teal.r, Teal.g, Teal.b, 0.7f), 2.5f);
         Sfx.Play(Sfx.MistSwirl, 0.8f, 0.8f);
         for (float t = 0; t < 0.8f; t += Time.deltaTime * Tempo)
@@ -1157,6 +1331,7 @@ public class Kagetsune : Boss
         Drop(echo.body);
         Drop(echo.aura);
         Drop(echo.chain);
+        if (activeEcho == echo) activeEcho = null;
     }
 
     // The chain from the coffin-hammer follows the ghost while the soul works.
@@ -1302,6 +1477,7 @@ public class Kagetsune : Boss
     // free with each, until there is silence and the armor stands hollow, then fades.
     protected override IEnumerator Fall()
     {
+        RecallEcho();
         seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);

@@ -14,6 +14,10 @@ public class Samurai : MonoBehaviour, IHittable
     static readonly Color GhostColor = new Color(0.6f, 0.95f, 1f);
     static readonly Color GhostGlow = new Color(0.4f, 0.9f, 1f, 0.45f);
     static readonly Color GhostArrow = new Color(0.55f, 0.95f, 1f);
+    // Bellringers wear bronze until they have their own art, so the bell-bearers read apart from the ranks.
+    static readonly Color BronzeColor = new Color(1f, 0.72f, 0.42f);
+    // A bell's toll is the souls answering: teal, the colour of soul-fire.
+    static readonly Color TollColor = new Color(0.3f, 1f, 0.8f, 0.8f);
     const float ArcherSpread = 15f;
     // A yurei's pair of arrows part just enough that one lane sits between them.
     const float YureiSpread = 12f;
@@ -72,11 +76,17 @@ public class Samurai : MonoBehaviour, IHittable
         animator.Play(art.idle, true, null, art.idleFps);
     }
 
-    public bool CanFire => Kind != SamuraiKind.Shieldbearer && !Encased;
+    public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased;
+
+    // Shieldbearers and bellringers never shoot, so the rank behind them looses over their heads.
+    public bool CanFireKind => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer;
+
+    // Without its own art a bellringer is a bronze-tinted Bushi.
+    public bool Bronzed { get; set; }
 
     public void Fire(float arrowSpeed)
     {
-        if (Kind == SamuraiKind.Shieldbearer) return;
+        if (Kind == SamuraiKind.Shieldbearer || Kind == SamuraiKind.Bellringer) return;
         // Spawn just below the samurai's body (its collider radius is 0.5 in local space), whatever its scale.
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         if (Kind == SamuraiKind.Archer)
@@ -107,6 +117,20 @@ public class Samurai : MonoBehaviour, IHittable
             Instantiate(arrowPrefab, muzzle, Quaternion.identity).Launch(arrowSpeed);
         }
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
+    }
+
+    // A bellringer lifts its bell: it shudders and glows for a beat before the toll, so the haste can be seen coming.
+    public void WarnToll(float seconds)
+    {
+        HitFlash.Flash(animator.Renderer, 0.15f);
+        ElementFx.Glow(transform.position, TollColor, 0.6f, 1.6f, seconds, transform);
+    }
+
+    // The toll: a ring of soul-fire spreads from the bell.
+    public void Toll()
+    {
+        ElementFx.Glow(transform.position, TollColor, 1f, 9f, 0.7f);
+        Fx.Play(Fx.Impact, transform.position, TollColor, 1.4f);
     }
 
     // A flash and a battle cry just before it breaks formation to dive.
@@ -167,6 +191,7 @@ public class Samurai : MonoBehaviour, IHittable
         frost = amount;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
         if (Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);
+        if (Bronzed) clan = Color.Lerp(clan, BronzeColor, 0.65f);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);

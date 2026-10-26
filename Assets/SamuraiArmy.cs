@@ -30,6 +30,20 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] int taishoHealth = 2;
     [Tooltip("Shieldbearers take this many hits to fall.")]
     [SerializeField] int shieldHealth = 2;
+    [Tooltip("The Bellringer's own look. Wired by Ninja/Apply Sprite Art; empty draws it as a bronze-tinted Bushi.")]
+    [SerializeField] CharacterArt bellringerArt;
+    [Tooltip("Bellringers take this many hits to fall.")]
+    [SerializeField] int bellHealth = 2;
+    [Tooltip("Average seconds between tolls. One living bellringer rings each time.")]
+    [SerializeField] float bellInterval = 6f;
+    [Tooltip("Seconds a bellringer glows before its bell tolls.")]
+    [SerializeField] float tollWarning = 0.6f;
+    [Tooltip("Seconds the army fires faster after a toll.")]
+    [SerializeField] float tollHaste = 2.5f;
+    [Tooltip("The army's fire interval is multiplied by this while a toll's haste lasts.")]
+    [SerializeField] float tollFireScale = 0.5f;
+    [Tooltip("Seconds a silenced bell pushes the next toll back.")]
+    [SerializeField] float silenceDelay = 2f;
     [Tooltip("How far above the top of the view the army's front rank starts before it marches in.")]
     [SerializeField] float entryMargin = 1f;
 
@@ -70,6 +84,10 @@ public class SamuraiArmy : MonoBehaviour
     float nextShotTime;
     float nextSpearTime;
     float nextDiveTime;
+    float nextBellTime;
+    float hasteUntil;
+    Samurai ringing;
+    float ringAt;
     float landingY;
     float blockerTopY;
     float frozenUntil;
@@ -133,8 +151,10 @@ public class SamuraiArmy : MonoBehaviour
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY + entryOffset, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
+                soldier.Bronzed = kind == SamuraiKind.Bellringer && bellringerArt == null;
                 soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
-                    kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth : 1);
+                    kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth
+                    : kind == SamuraiKind.Bellringer ? bellHealth : 1);
                 soldier.SetTouchable(false);
                 soldiers.Add(soldier);
             }
@@ -172,6 +192,9 @@ public class SamuraiArmy : MonoBehaviour
         nextShotTime = Time.time + level.fireInterval;
         nextSpearTime = Time.time + spearInterval;
         nextDiveTime = Time.time + level.diveInterval;
+        nextBellTime = Time.time + bellInterval;
+        hasteUntil = 0f;
+        ringing = null;
     }
 
     public void Halt()
@@ -202,6 +225,7 @@ public class SamuraiArmy : MonoBehaviour
     static int PointsFor(SamuraiKind kind, int row) => kind switch
     {
         SamuraiKind.Taisho => 60,
+        SamuraiKind.Bellringer => 50,
         SamuraiKind.Shieldbearer => 40,
         SamuraiKind.Yurei => 35,
         SamuraiKind.Archer => 30,
@@ -213,6 +237,8 @@ public class SamuraiArmy : MonoBehaviour
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {
         SamuraiKind.Taisho => samuraiByRow[0],
+        SamuraiKind.Bellringer when bellringerArt != null => bellringerArt,
+        SamuraiKind.Bellringer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         SamuraiKind.Archer or SamuraiKind.Shieldbearer or SamuraiKind.Yurei => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         _ => samuraiByRow[samuraiByRow.Length - 1],
     };
@@ -290,6 +316,7 @@ public class SamuraiArmy : MonoBehaviour
         {
             ThrowSpear();
         }
+        UpdateBells();
         if (level.diveInterval > 0 && Time.time >= nextDiveTime)
         {
             StartDive();
@@ -426,7 +453,8 @@ public class SamuraiArmy : MonoBehaviour
     // Only the front soldier of a column fires, so shots never come from behind the front line.
     void FireShot()
     {
-        nextShotTime = Time.time + level.fireInterval * UnityEngine.Random.Range(0.5f, 1.5f);
+        float haste = Time.time < hasteUntil ? tollFireScale : 1f;
+        nextShotTime = Time.time + level.fireInterval * haste * UnityEngine.Random.Range(0.5f, 1.5f);
 
         int column;
         if (target != null && UnityEngine.Random.value < level.aimedShotChance)
@@ -453,6 +481,34 @@ public class SamuraiArmy : MonoBehaviour
         taisho[UnityEngine.Random.Range(0, taisho.Count)].Fire(level.arrowSpeed);
     }
 
+    // A living bellringer lifts its bell, glows for a beat, then tolls: the army fires faster for a while. Cut down
+    // before the toll, its bell never rings.
+    void UpdateBells()
+    {
+        if (ringing != null)
+        {
+            if (ringing.IsDead) ringing = null;
+            else if (Time.time >= ringAt)
+            {
+                ringing.Toll();
+                ringing = null;
+                hasteUntil = Time.time + tollHaste;
+                // The next shot comes at the quicker pace rather than waiting out the old interval.
+                nextShotTime = Mathf.Min(nextShotTime, Time.time + 0.15f);
+                if (Sfx.Has(Sfx.BellToll)) Sfx.Play(Sfx.BellToll, 0.7f, UnityEngine.Random.Range(0.95f, 1.1f));
+                else Sfx.Play(Sfx.MidnightChime, 0.6f, 1.3f);
+            }
+            return;
+        }
+        if (Time.time < nextBellTime) return;
+        nextBellTime = Time.time + bellInterval * UnityEngine.Random.Range(0.7f, 1.3f);
+        List<Samurai> bells = soldiers.FindAll(s => s.Kind == SamuraiKind.Bellringer && !s.Encased && !IsDiving(s));
+        if (bells.Count == 0) return;
+        ringing = bells[UnityEngine.Random.Range(0, bells.Count)];
+        ringAt = Time.time + tollWarning;
+        ringing.WarnToll(tollWarning);
+    }
+
     public int ClosestColumnTo(float x)
     {
         if (soldiers.Count == 0) return 0;
@@ -473,7 +529,7 @@ public class SamuraiArmy : MonoBehaviour
         Samurai front = null;
         foreach (Samurai soldier in soldiers)
         {
-            if (soldier.Column == column && soldier.Kind != SamuraiKind.Shieldbearer && !IsDiving(soldier)
+            if (soldier.Column == column && soldier.CanFireKind && !IsDiving(soldier)
                 && (front == null || soldier.Body.position.y < front.Body.position.y))
             {
                 front = soldier;
@@ -530,6 +586,13 @@ public class SamuraiArmy : MonoBehaviour
     {
         if (!soldiers.Remove(soldier)) return;
         dives.RemoveAll(d => d.soldier == soldier);
+        // A bell silenced: a soul set free. Its quiet chime, and the next toll comes later.
+        if (soldier.Kind == SamuraiKind.Bellringer)
+        {
+            nextBellTime += silenceDelay;
+            if (Sfx.Has(Sfx.BellSilenced)) Sfx.Play(Sfx.BellSilenced, 0.6f);
+            else Sfx.Play(Sfx.MidnightChime, 0.35f, 1.8f);
+        }
 
         samuraiCounter.SetCount(soldiers.Count);
         SamuraiKilled?.Invoke(soldier, source);

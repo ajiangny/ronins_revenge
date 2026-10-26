@@ -52,6 +52,15 @@ public static class Sfx
     public const string GhostSwordFall = "GhostSwordFall";
     public const string SpiritBeam = "SpiritBeam";
     public const string MistSwirl = "MistSwirl";
+    // The Emperor's: his bells, the coffin-hammer, the chains, the souls' wail, and the dawn.
+    public const string BellToll = "BellToll";
+    public const string BellSilenced = "BellSilenced";
+    public const string HammerSlam = "HammerSlam";
+    public const string ChainSnap = "ChainSnap";
+    public const string SoulWail = "SoulWail";
+    public const string OfudaFlutter = "OfudaFlutter";
+    public const string SkullShriek = "SkullShriek";
+    public const string DawnChime = "DawnChime";
 
     const int VoiceCount = 16;
 
@@ -90,6 +99,9 @@ public static class Sfx
         ownSources.Clear();
         lastPlayed.Clear();
     }
+
+    // Whether a sound has clips, so a caller can fall back on an older one until it's generated.
+    public static bool Has(string id) => Library != null && Library.Find(id) != null;
 
     public static void Play(string id, float volume = 1f, float pitch = 1f)
     {

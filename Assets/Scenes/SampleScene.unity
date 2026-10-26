@@ -1215,6 +1215,81 @@ MonoBehaviour:
         mistColor: {r: 0.5, g: 0.85, b: 1, a: 0.1}
         motes: 26
         moteColor: {r: 0.55, g: 0.95, b: 1, a: 0.7}
+  - name: The Mountain Shrine
+    rounds:
+    - columns: 12
+      rows: 5
+      topRowY: 8.6
+      rowKinds: 0200000005000000010000000400000003000000i
+      scouts: 0
+      diveInterval: 5
+      baseSpeed: 3.3
+      maxSpeedMultiplier: 4.6
+      fireInterval: 0.7
+      aimedShotChance: 0.4
+      arrowSpeed: 9
+      samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
+    - columns: 12
+      rows: 6
+      topRowY: 8.8
+      rowKinds: 050000000200000001000000050000000400000003000000i
+      scouts: 1
+      diveInterval: 4.5
+      baseSpeed: 3.5
+      maxSpeedMultiplier: 4.8
+      fireInterval: 0.66
+      aimedShotChance: 0.45
+      arrowSpeed: 9.5
+      samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
+    - columns: 13
+      rows: 6
+      topRowY: 9
+      rowKinds: 020000000500000004000000010000000500000003000000i
+      scouts: 1
+      diveInterval: 3.5
+      baseSpeed: 3.6
+      maxSpeedMultiplier: 5
+      fireInterval: 0.62
+      aimedShotChance: 0.5
+      arrowSpeed: 10
+      samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
+    boss: 4
+    roundsMap:
+      ground: {fileID: 0}
+      groundTint: {r: 1, g: 1, b: 1, a: 1}
+      petal: {fileID: 0}
+      petalTint: {r: 1, g: 1, b: 1, a: 1}
+      blockers: []
+      blockerPattern: 
+      atmosphere:
+        clouds: 0
+        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
+        wind: {x: 0.8, y: -0.3}
+        moonlight: {r: 0, g: 0, b: 0, a: 0}
+        shade: 0.35
+        vignette: 0.3
+        mist: 0
+        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
+        motes: 0
+        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
+    bossMap:
+      ground: {fileID: 0}
+      groundTint: {r: 1, g: 1, b: 1, a: 1}
+      petal: {fileID: 0}
+      petalTint: {r: 0.9, g: 0.2, b: 0.2, a: 0.85}
+      blockers: []
+      blockerPattern: 
+      atmosphere:
+        clouds: 0
+        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.3}
+        wind: {x: 0.8, y: -0.3}
+        moonlight: {r: 0, g: 0, b: 0, a: 0}
+        shade: 0.35
+        vignette: 0.3
+        mist: 0
+        mistColor: {r: 0.75, g: 0.8, b: 0.9, a: 0.15}
+        motes: 0
+        moteColor: {r: 0.85, g: 1, b: 0.5, a: 0.8}
 --- !u!1 &900000004
 GameObject:
   m_ObjectHideFlags: 0

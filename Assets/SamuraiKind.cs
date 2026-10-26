@@ -10,4 +10,6 @@ public enum SamuraiKind
     Shieldbearer,
     // A ghost of a fallen samurai: translucent, and its paired arrows drift straight through cover.
     Yurei,
+    // An Imperial shrine guard with a hand bell: never shoots, but its toll rouses the whole army to fire faster.
+    Bellringer,
 }

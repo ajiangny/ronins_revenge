@@ -247,6 +247,24 @@ public class GameManager : MonoBehaviour
             },
             boss = BossKind.Shirogane,
         },
+        // The mountain shrine where the Night of a Thousand Bells was held: every kind of soldier he has, and his
+        // bellringers, whose tolls rouse the ranks. The army wears crimson and bronze, the court's colours.
+        new StageConfig
+        {
+            name = "The Mountain Shrine",
+            rounds = new[]
+            {
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.3f, maxSpeedMultiplier = 4.6f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 9f,   samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 5f },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.5f, maxSpeedMultiplier = 4.8f, fireInterval = 0.66f, aimedShotChance = 0.45f, arrowSpeed = 9.5f, samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    rowKinds = new[] { SamuraiKind.Bellringer, SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
+                    diveInterval = 4.5f, scouts = true },
+                new LevelConfig { columns = 13, rows = 6, topRowY = 9f,   baseSpeed = 3.6f, maxSpeedMultiplier = 5f,   fireInterval = 0.62f, aimedShotChance = 0.5f,  arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Shieldbearer },
+                    diveInterval = 3.5f, scouts = true },
+            },
+            boss = BossKind.Kagetsune,
+        },
     };
 
     State state;
@@ -1181,11 +1199,13 @@ public class GameManager : MonoBehaviour
         ui.HideBanner();
         ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
         Music.Stop(0.8f);
-        // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi, spirit blue for Shirogane.
+        // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi, spirit blue for Shirogane; for the
+        // Emperor none, only a starless dark lit by his soul-fire.
         if (backdrop != null) backdrop.SetBossMoon(true, Stage.boss switch
         {
             BossKind.Utsusemi => Backdrop.MoonLook.Steel,
             BossKind.Shirogane => Backdrop.MoonLook.Spirit,
+            BossKind.Kagetsune => Backdrop.MoonLook.Soul,
             _ => Backdrop.MoonLook.Blood,
         });
         yield return new WaitForSeconds(1f);

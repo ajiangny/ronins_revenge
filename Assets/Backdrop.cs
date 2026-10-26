@@ -48,7 +48,7 @@ public class Backdrop : MonoBehaviour
     Map pendingMap;
     bool mapPending;
 
-    public enum MoonLook { Blood, Steel, Spirit }
+    public enum MoonLook { Blood, Steel, Spirit, Soul }
 
     // How a boss moon colours the scene: the ground tint it multiplies in, what the petals become, the moon and its
     // halo, and the tint the moonlight takes.
@@ -76,6 +76,13 @@ public class Backdrop : MonoBehaviour
         {
             ground = new Color(0.55f, 0.72f, 0.95f), petal = new Color(0.85f, 0.97f, 1f, 0.9f),
             moon = new Color(0.7f, 0.95f, 1f), halo = new Color(0.35f, 0.85f, 1f, 0.5f), light = new Color(0.55f, 0.9f, 1f),
+        },
+        // No moon for the Emperor: the sky goes starless black and the only light is his teal soul-fire, so the disc
+        // and halo stay clear and the ground sinks into the dark, faintly green.
+        new MoonColours
+        {
+            ground = new Color(0.42f, 0.55f, 0.52f), petal = new Color(0.35f, 1f, 0.82f, 0.75f),
+            moon = Color.clear, halo = Color.clear, light = new Color(0.3f, 0.95f, 0.8f),
         },
     };
 
@@ -173,7 +180,7 @@ public class Backdrop : MonoBehaviour
         groundRenderer.color = Color.Lerp(shownGroundTint, shownGroundTint * colours.ground, blood);
         Color petalColour = Color.Lerp(shownPetalTint, colours.petal, blood);
         foreach (SpriteRenderer r in petalRenderers) r.color = petalColour;
-        moon.color = new Color(colours.moon.r, colours.moon.g, colours.moon.b, blood);
+        moon.color = new Color(colours.moon.r, colours.moon.g, colours.moon.b, colours.moon.a * blood);
         moonHalo.color = new Color(colours.halo.r, colours.halo.g, colours.halo.b, colours.halo.a * blood);
         atmosphere.TintMoon(colours.light, blood);
     }

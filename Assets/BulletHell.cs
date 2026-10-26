@@ -28,12 +28,25 @@ public static class BulletHell
     static readonly List<Arrow> live = new List<Arrow>();
     static int layer = -2;
 
-    // Bullets still flying (a parried or popped one leaves physics at once, so it no longer counts).
+    // Bullets still flying on screen (a parried or popped one leaves physics at once, so it no longer counts). Ones
+    // that have left the view, like the upper half of a ring, are culled here rather than flying out their lifetime
+    // and holding the budget.
     public static int Live
     {
         get
         {
-            live.RemoveAll(a => a == null || !a.isActiveAndEnabled);
+            Camera cam = Camera.main;
+            Vector3 centre = CameraShake.Center;
+            float halfHeight = cam != null ? cam.orthographicSize + 2f : 100f;
+            float halfWidth = cam != null ? cam.orthographicSize * cam.aspect + 2f : 100f;
+            live.RemoveAll(a =>
+            {
+                if (a == null || !a.isActiveAndEnabled) return true;
+                Vector3 at = a.transform.position;
+                if (Mathf.Abs(at.x - centre.x) <= halfWidth && Mathf.Abs(at.y - centre.y) <= halfHeight) return false;
+                UnityEngine.Object.Destroy(a.gameObject);
+                return true;
+            });
             return live.Count;
         }
     }
@@ -71,10 +84,11 @@ public static class BulletHell
         return shot;
     }
 
-    // Holds a pattern until there's room on the field for `count` more bullets.
+    // Holds a pattern until there's room on the field for `count` more bullets, but never for more than a couple of
+    // seconds, so a crowded field can't stall a boss's fight loop.
     public static IEnumerator Room(int count)
     {
-        while (Live + count > Budget) yield return null;
+        for (float t = 0; t < 2f && Live + count > Budget; t += Time.deltaTime) yield return null;
     }
 
     // `count` shots spread evenly round a circle, the first `turn` degrees round from straight right.

@@ -260,10 +260,14 @@ public class Kagetsune : Boss
     Coroutine echoRoutine;
     bool EchoOut => echoRoutine != null;
 
+    // Each soul sent out gets a number, so one that finishes late can't clear the flag for a newer one.
+    int echoId;
+
     IEnumerator RunEcho(Move move)
     {
+        int id = ++echoId;
         yield return Play(move);
-        echoRoutine = null;
+        if (id == echoId) echoRoutine = null;
     }
 
     // A stagger, the phase break or his fall sends the soul back into the coffin; its ghost and chain are transient,
@@ -272,6 +276,7 @@ public class Kagetsune : Boss
     {
         if (echoRoutine != null) StopCoroutine(echoRoutine);
         echoRoutine = null;
+        echoId++;
         if (activeEcho != null)
         {
             Drop(activeEcho.body);
@@ -1485,6 +1490,9 @@ public class Kagetsune : Boss
         if (activeEcho == echo) activeEcho = null;
     }
 
+    // A soul whose ghost has been cleared away (a stagger, his fall) stops where it is.
+    static bool Gone(Echo echo) => echo == null || echo.body == null;
+
     // The chain from the coffin-hammer follows the ghost while the soul works.
     void HoldChain(Echo echo)
     {
@@ -1497,6 +1505,7 @@ public class Kagetsune : Boss
     {
         Echo echo = null;
         yield return Summon(BossKind.Benibana, BossLine.SummonBenibana, e => echo = e);
+        if (Gone(echo)) yield break;
         Vector3 mouth = echo.Centre + Vector3.up * (echo.Height * 0.25f);
         for (int volley = 0; volley < 3; volley++)
         {
@@ -1519,10 +1528,12 @@ public class Kagetsune : Boss
             // She answers once his summons has been heard.
             if (volley == 0) Speak(BossLine.EchoBenibana);
             yield return Wait(0.6f);
+            if (Gone(echo)) yield break;
         }
         // The draw.
         HoldChain(echo);
         yield return LockOn(0.8f, new Color(1f, 0.3f, 0.35f));
+        if (Gone(echo)) yield break;
         Vector3 from = echo.Centre;
         Arrow wave = Shoot(from, (ronin.Bounds.center - from).normalized * 10f);
         Sprite[] crescent = Fx.Frames(Fx.BeniCrescent);
@@ -1532,6 +1543,7 @@ public class Kagetsune : Boss
         Fx.Play(Fx.SlashArc, from, Teal, 3f);
         Sfx.Play(Sfx.SwordSlash, 0.9f, 0.7f);
         yield return Wait(0.8f);
+        if (Gone(echo)) yield break;
         yield return Dismiss(echo);
     }
 
@@ -1541,6 +1553,7 @@ public class Kagetsune : Boss
     {
         Echo echo = null;
         yield return Summon(BossKind.Utsusemi, BossLine.SummonUtsusemi, e => echo = e);
+        if (Gone(echo)) yield break;
         for (int i = 0; i < 3; i++)
         {
             HoldChain(echo);
@@ -1553,20 +1566,24 @@ public class Kagetsune : Boss
             Sfx.Play(Sfx.ClockTick, 0.8f, 0.8f);
             if (i == 0) Speak(BossLine.EchoUtsusemi);
             yield return Wait(0.7f);
+            if (Gone(echo)) yield break;
             var laser = Bar(eye, spot, 0.3f, new Color(0.85f, 1f, 0.95f, 0.95f), 56);
             Sfx.Play(Sfx.LanternBeam, 0.5f, 1.3f);
             if (Mathf.Abs(ronin.Bounds.center.x - spot.x) < 0.9f) ronin.TakeHit(spot + Vector3.up * 0.5f);
             Fx.Play(Fx.Impact, spot, Teal, 1.4f);
             GroundFire.Light(spot);
             yield return Wait(0.15f);
+            if (Gone(echo)) yield break;
             Drop(laser);
             Drop(sight);
             Drop(ring);
             if (mark != null) { transient.Remove(mark.gameObject); mark.Stop(); }
             yield return Wait(0.2f);
+            if (Gone(echo)) yield break;
         }
         HoldChain(echo);
         yield return LockOn(0.8f, Teal);
+        if (Gone(echo)) yield break;
         Sfx.Play(Sfx.MidnightChime, 0.8f, 0.7f);
         Vector3 from = echo.Centre;
         Arrow cleave = Shoot(from, (ronin.Bounds.center - from).normalized * 11f);
@@ -1578,6 +1595,7 @@ public class Kagetsune : Boss
         StartCoroutine(Pursue(cleave, 11f));
         Sfx.Play(Sfx.HourSlash, 0.9f);
         yield return Wait(0.9f);
+        if (Gone(echo)) yield break;
         yield return Dismiss(echo);
     }
 
@@ -1587,6 +1605,7 @@ public class Kagetsune : Boss
     {
         Echo echo = null;
         yield return Summon(BossKind.Shirogane, BossLine.SummonShirogane, e => echo = e);
+        if (Gone(echo)) yield break;
         const int LaneCount = 8;
         List<float> lanes = Lanes(LaneCount);
         int gap = Random.Range(0, LaneCount - 1);
@@ -1604,6 +1623,7 @@ public class Kagetsune : Boss
             Sfx.Play(Sfx.BladeRing, 0.7f);
             if (wave == 0) Speak(BossLine.EchoShirogane);
             yield return Wait(0.8f);
+            if (Gone(echo)) yield break;
             foreach (SpriteRenderer tell in tells) Drop(tell);
             foreach (float x in xs)
             {
@@ -1618,6 +1638,7 @@ public class Kagetsune : Boss
             // The next wave's gap is one lane over, so one lane carries through.
             gap = Mathf.Clamp(gap + (Random.value < 0.5f ? -1 : 1), 0, LaneCount - 2);
             yield return Wait(0.7f);
+            if (Gone(echo)) yield break;
         }
         yield return Dismiss(echo);
     }

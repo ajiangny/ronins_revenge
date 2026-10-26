@@ -78,7 +78,7 @@ in a burst of skulls and his eyes turn teal.
 | Broken Chains | The snapped chains lash from his shoulders, sweeping stretches of the ground. |
 | Soul Coffin (parry-only) | He hurls the coffin-hammer down on its chain. Parried, it bursts against him: a stagger, and he stands open to double damage. |
 | Night of a Thousand Bells (every sixth move) | The field goes dark and soul-fire falls down every lane but one in five waves, the safe lane stepping aside each time. Then he kneels, spent and open. |
-| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane will not kneel: her last blade falls on the Emperor. |
+| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane, bound to his will, can only warn Oni before her blades fall. |
 
 **Defeat.** The coffin bursts. The bells fall silent one by one, each toll lower and quieter than the last, a soul
 rising free with each, and the armor sinks hollow and fades. Then the stopped hour ticks on and dawn breaks for the
@@ -113,7 +113,7 @@ when the chorus starts speaking over him.
 | KilledOni **(in game)** | "Back to your hill, little demon. I will be here. I am always here." (also the end screen's text) |
 | Callouts **(in game)** | Coffer Slam "Bow." · Toll "Answer me." · Ofuda "By my decree." · Wail "Hear them, little demon." · Last Toll "Hear the last toll." · Swarm "Go. Fetch him." · Chains "Chains do not hold me." · Soul Coffin "Into the coffin!" · Thousand Bells "A thousand bells, Oni! Ring!" |
 | Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." |
-| The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "I do not kneel." |
+| The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "Move, Oni. I cannot hold my blades." |
 
 Planned for the reactive dialogue system:
 

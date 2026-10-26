@@ -57,7 +57,7 @@ public class Kagetsune : Boss
         BossLine.SummonUtsusemi => "Strike the hour, clock.",
         BossLine.EchoUtsusemi => "The hour... strikes... Run... boy.",
         BossLine.SummonShirogane => "Rise, Shirogane. Kneel, and strike.",
-        BossLine.EchoShirogane => "I do not kneel.",
+        BossLine.EchoShirogane => "Move, Oni. I cannot hold my blades.",
         BossLine.KilledOni => "Back to your hill, little demon. I will be here. I am always here.",
         _ => null,
     };
@@ -1162,8 +1162,8 @@ public class Kagetsune : Boss
         yield return Dismiss(echo);
     }
 
-    // Shirogane's soul: her Phantom Blade Rain, two waves of ghost swords down every lane but two. She is the one
-    // bell that never rang: as she fades, her last blade falls on him instead.
+    // Shirogane's soul: her Phantom Blade Rain, two waves of ghost swords down every lane but two. Bound to his will,
+    // she can only warn Oni before her blades fall.
     IEnumerator EchoShirogane()
     {
         Echo echo = null;
@@ -1183,6 +1183,7 @@ public class Kagetsune : Boss
                 tells.Add(Bar(new Vector3(lanes[i], TopOfScreen, 0), new Vector3(lanes[i], GroundY, 0), 0.1f, new Color(0.6f, 0.95f, 1f, 0.3f)));
             }
             Sfx.Play(Sfx.BladeRing, 0.7f);
+            if (wave == 0) Speak(BossLine.EchoShirogane);
             yield return Wait(0.8f);
             foreach (SpriteRenderer tell in tells) Drop(tell);
             foreach (float x in xs)
@@ -1199,31 +1200,7 @@ public class Kagetsune : Boss
             gap = Mathf.Clamp(gap + (Random.value < 0.5f ? -1 : 1), 0, LaneCount - 2);
             yield return Wait(0.7f);
         }
-        // Her defiance.
-        Speak(BossLine.EchoShirogane);
-        yield return Wait(0.6f);
-        Vector3 above = new Vector3(Centre.x, TopOfScreen, 0);
-        SpriteRenderer sword = new GameObject("DefiantBlade").AddComponent<SpriteRenderer>();
-        Sprite[] blades = Fx.Frames(Fx.ShiroSword);
-        sword.sprite = blades != null ? blades[0] : ProceduralSprites.White;
-        sword.color = blades != null ? Color.white : new Color(0.85f, 0.97f, 1f);
-        sword.sortingOrder = 58;
-        sword.transform.localScale = blades != null ? Vector3.one * (2.4f / blades[0].bounds.size.y) : new Vector3(0.25f, 2.2f, 1f);
-        transient.Add(sword.gameObject);
-        Sfx.Play(Sfx.GhostSwordFall, 1f, 0.8f);
-        for (float t = 0; t < 0.25f; t += Time.deltaTime)
-        {
-            sword.transform.position = Vector3.Lerp(above, Centre, t / 0.25f) + Vector3.back * 0.2f;
-            yield return null;
-        }
-        Drop(sword);
-        Sfx.Play(Sfx.BladeRing, 1f, 0.8f);
-        Fx.Play(Fx.SlashArc, Centre, new Color(0.6f, 0.95f, 1f), 4f);
-        CameraShake.Add(0.4f);
-        StartCoroutine(Dismiss(echo));
-        // Not a Reflected hit: it wounds and opens him, but doesn't break his stance mid-set.
-        exposedUntil = Time.time + ExposedSeconds;
-        TakeHit(6, KillSource.Effect);
+        yield return Dismiss(echo);
     }
 
     // --- Defeat ---

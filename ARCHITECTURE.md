@@ -225,7 +225,7 @@ match `BoonChoiceUI.boonIcons`.
   safe lane, then exposed), and the summoned souls (`Summon` builds an `Echo`: the boss's own CharacterArt idle, set
   by `SetEcho` from `GameManager.CreateBoss`, drawn teal and translucent on a chain from the hammer; `EchoBenibana`
   smoke rings + a reflectable Iaido crescent, `EchoUtsusemi` three hour marks + a reflectable cleave, `EchoShirogane`
-  blade rain, then her defiant blade hits him for `KillSource.Effect` damage and exposes him). `NextMove` forces the
+  two waves of blade rain, her warning line spoken over the first). `NextMove` forces the
   ultimate, then the phase's parry move (`ParryAtLatest`), then a soul (`EchoAtLatest`; the first three in boss order).
   `Speaker`/`SpeakerColour` (virtual on `Boss`) put the souls' answers under their own names; `OnBossSpoke` treats
   the summons and answers as full lines. `Fall` is an 11 s scene: the coffin bursts, seven tolls fade lower and

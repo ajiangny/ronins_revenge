@@ -94,7 +94,7 @@ const LINES = {
   // The souls he drags out of the coffin, answering in their own voices.
   Benibana_Echo: [BENIBANA, "[hollow, sorrowful, distant] Forgive me, Oni... he has my bell."],
   Utsusemi_Echo: [UTSUSEMI, "[slow, grinding, straining] The hour... strikes... [urgent whisper] Run... boy."],
-  Shirogane_Echo: [SHIROGANE, "[quiet, defiant, cold] I do not kneel."],
+  Shirogane_Echo: [SHIROGANE, "[strained, urgent, sorrowful] Move, Oni. [anguished] I cannot hold my blades."],
 };
 
 const client = new ElevenLabsClient();

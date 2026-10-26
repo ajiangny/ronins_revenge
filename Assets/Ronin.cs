@@ -112,7 +112,11 @@ public class Ronin : MonoBehaviour
     readonly System.Collections.Generic.List<SpriteRenderer> wisps = new System.Collections.Generic.List<SpriteRenderer>();
     SpriteAnimator animator;
     Camera cam;
-    readonly Collider[] parryBuffer = new Collider[16];
+    // Room for a bullet-hell curtain's worth of shots inside the parry at once.
+    readonly Collider[] parryBuffer = new Collider[48];
+    // A parry sends back at most this many of a curtain's bullets (Arrow.CappedRiposte); the rest burst harmlessly.
+    const int RiposteCap = 3;
+    int cappedRipostes;
     float minOffsetX, maxOffsetX, centerOffsetX, topOffset;
     float lastShot = float.NegativeInfinity;
     // Swings since Kindling's last fireball.
@@ -403,6 +407,7 @@ public class Ronin : MonoBehaviour
         lastParry = Time.time;
         parryUntil = Time.time + parryWindow;
         parryLanded = false;
+        cappedRipostes = 0;
         Sfx.Play(Sfx.ParrySwing);
         // The slash sweeps over his head, where the arrows come from.
         if (Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, parryColor, 0.7f), 1.15f, transform) == null)
@@ -537,7 +542,10 @@ public class Ronin : MonoBehaviour
         for (int i = 0; i < hits; i++)
         {
             Arrow arrow = parryBuffer[i].GetComponentInParent<Arrow>();
-            if (arrow != null) Deflect(arrow);
+            if (arrow == null) continue;
+            // The blade meets a seal-dart and fizzles; the dart flies on.
+            if (arrow.Unparryable) SealedParry();
+            else Deflect(arrow);
         }
     }
 
@@ -551,6 +559,13 @@ public class Ronin : MonoBehaviour
         Color arrowColor = arrow.Color;
         SpriteRenderer arrowArt = arrow.Art;
         bool heavy = arrow.Unbreakable;
+        // Past the cap, a curtain's bullets are cut down instead of sent back; the parry still counts as landed.
+        if (arrow.CappedRiposte && !reflect && !heavy && ++cappedRipostes > RiposteCap)
+        {
+            arrow.Pop(Color.Lerp(Color.white, parryColor, 0.6f));
+            LandParry();
+            return;
+        }
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
@@ -608,7 +623,11 @@ public class Ronin : MonoBehaviour
         Debris.BurstSprites(position, art.deathParticles, parryColor, 6, 0.7f, 5f);
         Fx.Play(Fx.Impact, position, Color.Lerp(Color.white, parryColor, 0.6f), 0.9f);
         Sfx.Play(Sfx.Deflect);
+        LandParry();
+    }
 
+    void LandParry()
+    {
         if (parryLanded) return;
         parryLanded = true;
         // A landed parry is ready again straight away, so a well-timed one can answer the next arrow too.
@@ -621,7 +640,7 @@ public class Ronin : MonoBehaviour
     {
         Arrow arrow = coll.collider.GetComponentInParent<Arrow>();
         if (!ControlsEnabled || arrow == null) return;
-        if (Parrying)
+        if (Parrying && !arrow.Unparryable)
         {
             Deflect(arrow);
             return;

@@ -36,6 +36,12 @@ public class Arrow : MonoBehaviour
     public Kunai Riposte { get; set; }
     // Told what a parry sent back in its place, so its thrower can dress it (the Emperor's skulls fly home as freed souls).
     public System.Action<Kunai> Parried { get; set; }
+    // A crimson seal-dart: the parry fizzles on it, so it can only be dodged.
+    public bool Unparryable { get; set; }
+    // One of a bullet-hell curtain's: a parry sends only a few of these back (Ronin.RiposteCap) and pops the rest,
+    // so a parry into a dense stream doesn't turn into a swarm of homing ripostes.
+    public bool CappedRiposte { get; set; }
+    public Vector3 Velocity => body.linearVelocity;
 
     void Awake()
     {
@@ -43,6 +49,7 @@ public class Arrow : MonoBehaviour
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
         glow = Kunai.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
+        ArrowShadow.Attach(this);
     }
 
     // Turns an arrow into another kind of shot (a smoke ring, a slash wave). artSize is in world units;
@@ -238,9 +245,15 @@ public class Arrow : MonoBehaviour
     // Wildfire: a fire blast burns the arrow away.
     public void Burn(Color fire)
     {
+        Pop(fire);
+    }
+
+    // Bursts harmlessly in a puff of the given colour (a fire blast, a bell's Resonance, a parry past its cap).
+    public void Pop(Color colour)
+    {
         if (deflected) return;
         deflected = true;
-        Fx.Play(Fx.Impact, transform.position, fire, 0.9f);
+        Fx.Play(Fx.Impact, transform.position, colour, 0.9f);
         gameObject.SetActive(false);
         Destroy(gameObject);
     }

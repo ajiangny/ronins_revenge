@@ -351,6 +351,10 @@ public class GameManager : MonoBehaviour
     {
         // Added before anything measures the view, so CameraShake.Center is the camera's resting spot.
         if (Camera.main.GetComponent<CameraShake>() == null) Camera.main.gameObject.AddComponent<CameraShake>();
+        Boss.HitStop = seconds =>
+        {
+            if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(seconds));
+        };
         // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects. It sits on its
         // own child so the machine-voice filters only ever touch it.
         backdrop = FindAnyObjectByType<Backdrop>();

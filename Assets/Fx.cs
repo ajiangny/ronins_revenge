@@ -66,6 +66,15 @@ public static class Fx
     public const string KageOfuda = "Kage_Ofuda";
     public const string KageGreatBell = "Kage_GreatBell";
     public const string KageCoffin = "Kage_Coffin";
+    // The bullet-hell kit's: the bronze bell-shot a parry rings into Resonance, and the crimson seal-dart no parry turns.
+    public const string KageBellShot = "Kage_BellShot";
+    public const string KageSealDart = "Kage_SealDart";
+    // His set dressing: a hanging bell for the Night of a Thousand Bells, a chain link and a soul-fire column
+    // segment drawn tiled along their length, and the burst under a slam.
+    public const string KageBell = "Kage_Bell";
+    public const string KageChain = "Kage_Chain";
+    public const string KageSoulPillar = "Kage_SoulPillar";
+    public const string KageShockwave = "Kage_Shockwave";
 
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;

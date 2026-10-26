@@ -41,6 +41,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Set by the GameManager for a boss with phase-two portraits: plays a title card for the new phase (its own
     // art, epithet and the Phase line) and finishes when the card has. Null leaves the phase line as a subtitle.
     public static System.Func<Boss, IEnumerator> PhaseCard;
+    // Set by the GameManager: a brief freeze of the whole game, for a blow that deserves weight (a parry-only move
+    // sent home).
+    public static System.Action<float> HitStop;
 
     public abstract string Title { get; }
     public abstract string Epithet { get; }

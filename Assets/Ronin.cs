@@ -328,6 +328,14 @@ public class Ronin : MonoBehaviour
         PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
     }
 
+    // One cut with no crescent, for a cutscene (Oni cutting the chain on Shirogane's soul).
+    public void Swing()
+    {
+        Sfx.Play(Sfx.SwordSlash);
+        Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.white, 0.8f, transform);
+        PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
+    }
+
     void ThrowKunai()
     {
         Fan(kunaiPrefab, KillSource.Kunai, kunaiSprite);

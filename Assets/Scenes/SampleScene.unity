@@ -706,6 +706,30 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c90bb5d9352c41749ff82a65b163c857, type: 3}
   - {fileID: 21300000, guid: deb9b8d024ed4e14a5eaba777571d088, type: 3}
   - {fileID: 21300000, guid: b916f48bc59e464eba357d5d060eec5f, type: 3}
+  freedKneel:
+  - {fileID: 21300000, guid: 63f070cc238d45b2be94c4d4de244a8a, type: 3}
+  - {fileID: 21300000, guid: 67aa776d269440699bc2fca48676602e, type: 3}
+  - {fileID: 21300000, guid: 1a4a953bde934420b337ca0483ff6524, type: 3}
+  - {fileID: 21300000, guid: 9e2a7a2facb5418ca75d45206412a12d, type: 3}
+  - {fileID: 21300000, guid: 1ddffa35d0ca4996bc977bd95d52b317, type: 3}
+  - {fileID: 21300000, guid: 99d08bba7a4840a6b088f9e1c94a06c7, type: 3}
+  - {fileID: 21300000, guid: 423fe996d6f14cb598545b0781d453eb, type: 3}
+  - {fileID: 21300000, guid: 91fa8b643c294d17a2647d71b1f0e574, type: 3}
+  - {fileID: 21300000, guid: f1b0736211bd445d980b46a349c8d9df, type: 3}
+  freedBow:
+  - {fileID: 21300000, guid: 367cf699c4b342988f48d7d2772ac476, type: 3}
+  - {fileID: 21300000, guid: 9012d7fcdbf545bf85b0860a2f0469ed, type: 3}
+  - {fileID: 21300000, guid: 6cedd725d7a84d13bd76122804d3e774, type: 3}
+  - {fileID: 21300000, guid: f5765c7dc3534a89ae3164979eaecf09, type: 3}
+  - {fileID: 21300000, guid: 6413734b50ef4626a0cee4afc311a408, type: 3}
+  - {fileID: 21300000, guid: 09673d0476d34987a7b90d25dbb92377, type: 3}
+  - {fileID: 21300000, guid: bac537cbef954231b5657b03279a5aae, type: 3}
+  - {fileID: 21300000, guid: 563d71d00304435c89ccf160a91e4ab8, type: 3}
+  freedIdle:
+  - {fileID: 21300000, guid: c6a4a1ef940c405c9cd7f1555477582a, type: 3}
+  - {fileID: 21300000, guid: 8bcec198c09044aabd8dc50f098bf719, type: 3}
+  - {fileID: 21300000, guid: ab49601268fa46e7a0dc02744ae88b25, type: 3}
+  - {fileID: 21300000, guid: 3f65c46235024fb28fe112bd7d99fd46, type: 3}
   shiroWolfIdle:
   - {fileID: 21300000, guid: 48da7131cf26b48d7942776843b933cd, type: 3}
   - {fileID: 21300000, guid: 195ecaf4db36c426d8da6a5c00f0a4b7, type: 3}
@@ -796,6 +820,8 @@ MonoBehaviour:
   echoBenibanaLine: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
   echoUtsusemiLine: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}
   echoShiroganeLine: {fileID: 8300000, guid: 0447e34cfbda64b3694f9c19576c3253, type: 3}
+  shiroganeFreedLine: {fileID: 8300000, guid: 5cf9a9098bf1d4752bebb46b13208cb0, type: 3}
+  shiroganeFarewellLine: {fileID: 8300000, guid: 05b9c6b72c3504aaebef0312809d3ed5, type: 3}
   kagetsuneHurtLines:
   - {fileID: 8300000, guid: f0464b58c1a3b4156ade381d5d3b6721, type: 3}
   - {fileID: 8300000, guid: 17e6c1dcb93bd460c893b535d314a283, type: 3}

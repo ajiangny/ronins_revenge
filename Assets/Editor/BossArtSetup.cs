@@ -142,6 +142,10 @@ public static class BossArtSetup
         SetFrames(so.FindProperty("shiroWolfCharge"), TryFrames("SpiritWolf", "Charge"));
         SetFrames(so.FindProperty("shiroWolfVanish"), TryFrames("SpiritWolf", "Vanish"));
         SetFrames(so.FindProperty("shiroWolfMaw"), TryFrames("SpiritWolf", "Maw"));
+        // Her freed soul in the ending, drawn at Oni's size.
+        SetFrames(so.FindProperty("freedKneel"), TryFrames("ShiroganeFreed", "Kneel"));
+        SetFrames(so.FindProperty("freedBow"), TryFrames("ShiroganeFreed", "Bow"));
+        SetFrames(so.FindProperty("freedIdle"), TryFrames("ShiroganeFreed", "Idle"));
         so.FindProperty("shiroganePortrait").objectReferenceValue = Portrait("Shirogane_Full");
         so.FindProperty("shiroganeCloseup").objectReferenceValue = Portrait("Shirogane_Closeup");
         so.FindProperty("shiroganePhasePortrait").objectReferenceValue = Portrait("Shirogane_Phase_Full");
@@ -178,6 +182,7 @@ public static class BossArtSetup
             ("kagetsuneThousandBellsLine", "Kagetsune_ThousandBells"), ("kagetsuneSummonBenibanaLine", "Kagetsune_SummonBenibana"),
             ("kagetsuneSummonUtsusemiLine", "Kagetsune_SummonUtsusemi"), ("kagetsuneSummonShiroganeLine", "Kagetsune_SummonShirogane"),
             ("echoBenibanaLine", "Benibana_Echo"), ("echoUtsusemiLine", "Utsusemi_Echo"), ("echoShiroganeLine", "Shirogane_Echo"),
+            ("shiroganeFreedLine", "Shirogane_Freed"), ("shiroganeFarewellLine", "Shirogane_Farewell"),
         })
         {
             so.FindProperty(field).objectReferenceValue = AssetDatabase.LoadAssetAtPath<AudioClip>(VoiceRoot + file + ".mp3");

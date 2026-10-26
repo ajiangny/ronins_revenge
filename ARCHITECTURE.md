@@ -38,10 +38,21 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   walks the ronin off the top (`Ronin.WalkTo`, collider off, `CharacterArt.walkUp` or an idle bob), fades to black
   (`GameUI.FadeTo`), swaps the ground (`Backdrop.Show`), rebuilds the blockers and walks him up from below to
   `Ronin.Home`. Used before every boss (`StageCleared`) and every later stage (`EnterStage`). F2 swaps the map at once.
-- **The ending:** the last stage's boss is Kagetsune; `BossFell` skips the boon for him and runs `PlayDawn`: the
-  boss moon lifts, `Backdrop.SetDawn` warms the sky (`DawnSky`, a `ProceduralSprites.FadeDown` gradient, and a
-  `DawnSun` glow), the ronin walks to the centre and holds his flute pose (`Ronin.Pose` with `titleFluteFrames`),
-  `SecondWisp` drifts Shirogane's wisp to his shoulder, a "Dawn" card shows, then `EndGame("DAWN", …)`. Dying to him
+- **Title → game:** START runs `TitleToGame`: `MenuUI.LeaveTitle` fades the logo and rows (input off), the title
+  figure plays `titleStandFrames` once (`MenuUI.PlayFigureOnce` / `SpriteAnimatorUI.PlayOnce`), the world ronin is
+  `PlaceAt` the title seat (`TitleSeat`) and `WalkTo(Home, titleWalkSpeed, runRight, …)` while `MenuUI.FadePaper`
+  fades the paper off stage 1's map; until the page closes the UI figure tracks him (`PlaceFigure` with
+  `Ronin.CurrentFrame`) so the handoff is seamless. Any key skips (`Ronin.FinishWalk`). Then `StartGame` as before;
+  Restart, Play Again and DevJump still call `StartGame` directly.
+- **The ending:** the last stage's boss is Kagetsune; `BossFell` skips the boon for him and runs `PlayDawn(throne)`:
+  the boss moon lifts, `ShiroganeFreed` (code-built, `freedKneel`/`freedBow`/`freedIdle`, falling back to her
+  boss art) kneels her soul mid-field chained (`Fx.KageChain` via `Kagetsune.Lay`) to her bell (`Fx.KageBell`); the
+  ronin walks up and `Swing`s, `Snap` bursts the chain and rings the bell once before it fades, she `Rise`s (her
+  kneel reversed, teal to silver) and speaks through `Say` (`TuneVoice(Shirogane)`, `shiroganeFreedLine`), then
+  `Backdrop.SetDawn` warms the sky (`DawnSky`, a `ProceduralSprites.FadeDown` gradient, and a `DawnSun` glow), she
+  says farewell (`shiroganeFarewellLine`), he holds his flute pose (`Ronin.Pose` with `titleFluteFrames`), she
+  `Bow`s and `Dissolve`s and `SecondWisp` rises from her into his shoulder, a "Dawn" card shows, then
+  `EndGame("DAWN", …)`. Kagetsune's `RisingSoul`s drive themselves (`FreedSoul`) so they finish after he is gone. Dying to him
   ends on his `BossLine.KilledOni` line instead of the plain defeat text.
 - Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
   without it.

@@ -71,6 +71,9 @@ const LINES = {
   Shirogane_Hurt: [SHIROGANE, "[short pained breath] Hh!"],
   Shirogane_Hurt_2: [SHIROGANE, "[sharp wince] Ah!"],
   Shirogane_Hurt_3: [SHIROGANE, "[quiet pained exhale] Nn..."],
+  // The ending: Oni cuts the chain binding her soul to the fallen Emperor's hammer, as she once cut his tether.
+  Shirogane_Freed: [SHIROGANE, "[soft, wondering, almost laughing through tears] You cut it... [tender] the way I cut yours."],
+  Shirogane_Farewell: [SHIROGANE, "[warm, at peace] The oath is kept. [gentle, smiling] Play for me, Oni... one last time."],
   // The Emperor. He never hurries and never shouts until his phase break.
   Kagetsune_Intro: [KAGETSUNE, "[very slow, deep, contemptuous] Every bell upon me is a soul that knelt, Oni. [pause] One still hangs silent... [cold] yours."],
   Kagetsune_Phase: [KAGETSUNE, "[roaring, furious] Kneel! KNEEL! [ragged, desperate] You are MINE, every one of you..."],

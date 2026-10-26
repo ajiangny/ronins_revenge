@@ -102,6 +102,20 @@ it. Once it has played and he beats her again, she lays down her blades for good
 summons her soul to rain her ghost swords on Oni. Bound to his will, she can't stop her blades, only warn him:
 "Move, Oni. I cannot hold my blades." In the true ending she is the second wisp beside Oni at sunrise.
 
+## The ending
+
+When Kagetsune falls, her soul is the last one left: kneeling in soul-fire teal, chained to her bell, the one that
+never rang. Oni cuts the chain, the way she cut the tether dragging him into the armor. Her bell rings once and goes
+silent, and she rises as herself: no armor or blades now, a white kimono, his oni mask still in her hair, drawn as a
+chibi at Oni's height and in his style (PixelLab character `Shirogane Freed`).
+
+| Moment | Line |
+|---|---|
+| The chain cut, rising **(in game)** | "You cut it... the way I cut yours." (`Shirogane_Freed`) |
+| Dawn **(in game)** | "The oath is kept. Play for me, Oni... one last time." (`Shirogane_Farewell`) |
+
+Then she bows and becomes the wisp at his shoulder while he plays.
+
 ## Keep consistent
 
 - She is never cruel to Oni and never sexualised. Armor stays closed; skin stays ghost-white.

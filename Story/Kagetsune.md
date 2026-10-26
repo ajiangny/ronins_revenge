@@ -88,8 +88,10 @@ he weakens, plus:
 | **The Last Bell** (under 30%) | The dark closes in and pulses with his heart; four spiral arms, thicker blooms, the Night every fourth move. |
 
 **Defeat.** The coffin bursts. The bells fall silent one by one, each toll lower and quieter than the last, a soul
-rising free with each, and the armor sinks hollow and fades. Then the stopped hour ticks on and dawn breaks for the
-first time in the game: Oni walks out into it and plays the flute, and Shirogane's wisp settles beside him.
+rising free with each, and the armor sinks hollow and fades. One soul is left kneeling where he fell, still
+chained to its bell: Shirogane's, the bell that never rang. Oni cuts the chain; the bell rings once and goes silent,
+and she rises as herself. Then the stopped hour ticks on and dawn breaks for the first time in the game: Oni plays
+the flute beside her, and she becomes the wisp that settles at his shoulder.
 
 ## Relationships
 

@@ -63,8 +63,10 @@ the sun comes up over the hill, Oni plays the flute one last time, and the secon
 Shirogane.
 
 **As built:** there is no story save yet, so beating Kagetsune plays the true ending straight away: his bells fall
-silent one by one, the souls rise, the stopped hour ticks on and the dawn comes up over the arena while Oni plays the
-flute with Shirogane's wisp beside him (`GameManager.PlayDawn`). The rebuilt-Emperor first win is for when runs carry
+silent one by one and the souls rise, leaving Shirogane's soul chained to her bell. Oni cuts the chain, as she once
+cut his tether; her bell rings once and goes silent, and she rises as herself. The stopped hour ticks on and the dawn
+comes up over the arena while Oni plays the flute, and she becomes the wisp beside him (`GameManager.PlayDawn`,
+`ShiroganeFreed`). The rebuilt-Emperor first win is for when runs carry
 over.
 
 ## Consistency rules

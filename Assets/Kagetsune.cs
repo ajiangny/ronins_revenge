@@ -459,7 +459,7 @@ public class Kagetsune : Boss
     }
 
     // Stretch for both kinds: a tiled strip is scaled to the width and tiled to the length, so its links don't smear.
-    static void Lay(SpriteRenderer strip, Vector3 from, Vector3 to, float width)
+    public static void Lay(SpriteRenderer strip, Vector3 from, Vector3 to, float width)
     {
         if (strip == null) return;
         if (strip.drawMode != SpriteDrawMode.Tiled)
@@ -1668,7 +1668,7 @@ public class Kagetsune : Boss
         {
             float k = i / (Bells - 1f);
             Toll(Mathf.Lerp(0.9f, 0.25f, k), Mathf.Lerp(0.9f, 0.5f, k));
-            StartCoroutine(RisingSoul(Centre + new Vector3(Random.Range(-Extents.x, Extents.x) * 0.6f, Random.Range(-0.3f, 0.5f) * Extents.y, 0)));
+            RisingSoul(Centre + new Vector3(Random.Range(-Extents.x, Extents.x) * 0.6f, Random.Range(-0.3f, 0.5f) * Extents.y, 0));
             yield return new WaitForSeconds(Mathf.Lerp(0.7f, 1.05f, k));
         }
         // Silence. The armor sinks hollow and fades.
@@ -1684,7 +1684,7 @@ public class Kagetsune : Boss
             sprite.color = c;
             if (chestGlow != null) chestGlow.color = new Color(Teal.r, Teal.g, Teal.b, 0.4f * (1f - k));
             if (eyes != null) eyes.color = new Color(Teal.r, Teal.g, Teal.b, 0.75f * (1f - k));
-            if (Random.value < 0.1f) StartCoroutine(RisingSoul(Centre + (Vector3)Random.insideUnitCircle * Extents.x * 0.5f));
+            if (Random.value < 0.1f) RisingSoul(Centre + (Vector3)Random.insideUnitCircle * Extents.x * 0.5f);
             yield return null;
         }
         sprite.color = Color.clear;
@@ -1696,22 +1696,47 @@ public class Kagetsune : Boss
     }
 
     // A freed soul: a teal wisp drifting up and away, its fire leaving with it.
-    static IEnumerator RisingSoul(Vector3 from)
+    // A freed soul rising and fading. It drives itself, so it finishes its climb after he is gone.
+    public static void RisingSoul(Vector3 from)
     {
         var soul = new GameObject("FreedSoul").AddComponent<SpriteRenderer>();
         soul.sprite = ProceduralSprites.Glow;
         soul.sortingOrder = 58;
         soul.transform.position = from + Vector3.back * 0.3f;
-        float drift = Random.Range(-1f, 1f);
-        float size = Random.Range(0.8f, 1.5f);
-        for (float t = 0; t < 3f && soul != null; t += Time.deltaTime)
+        soul.gameObject.AddComponent<FreedSoul>().Begin(from, Teal);
+    }
+}
+
+// The rise of one freed soul: up nine units over three seconds, swaying, shrinking and fading.
+public class FreedSoul : MonoBehaviour
+{
+    SpriteRenderer soul;
+    Vector3 from;
+    Color colour;
+    float drift;
+    float size;
+    float age;
+
+    public void Begin(Vector3 start, Color tint)
+    {
+        soul = GetComponent<SpriteRenderer>();
+        from = start;
+        colour = tint;
+        drift = Random.Range(-1f, 1f);
+        size = Random.Range(0.8f, 1.5f);
+    }
+
+    void Update()
+    {
+        age += Time.deltaTime;
+        float k = age / 3f;
+        if (k >= 1f)
         {
-            float k = t / 3f;
-            soul.transform.position = from + new Vector3(drift * k * 2f + Mathf.Sin(t * 3f) * 0.3f, k * 9f, -0.3f);
-            soul.transform.localScale = Vector3.one * size * (1f - 0.4f * k);
-            soul.color = new Color(Teal.r, Teal.g, Teal.b, 0.8f * (1f - k));
-            yield return null;
+            Destroy(gameObject);
+            return;
         }
-        if (soul != null) Destroy(soul.gameObject);
+        transform.position = from + new Vector3(drift * k * 2f + Mathf.Sin(age * 3f) * 0.3f, k * 9f, -0.3f);
+        transform.localScale = Vector3.one * size * (1f - 0.4f * k);
+        soul.color = new Color(colour.r, colour.g, colour.b, 0.8f * (1f - k));
     }
 }

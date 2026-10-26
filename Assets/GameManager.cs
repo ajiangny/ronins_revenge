@@ -168,6 +168,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("Her awakened frames, spirit flame on her blades, worn from her phase break on. Leave empty to keep her first art.")]
     [SerializeField] CharacterArt shiroganePhaseArt;
     [SerializeField] Sprite[] shiroganePhaseDash;
+    [Tooltip("Her freed soul in the ending, drawn at Oni's size: sinking to her knees (reversed, rising), a bow, an idle.")]
+    [SerializeField] Sprite[] freedKneel;
+    [SerializeField] Sprite[] freedBow;
+    [SerializeField] Sprite[] freedIdle;
     [Tooltip("Her spirit wolf's frames: resting beside her, howling, charging down a lane and dissolving into mist.")]
     [SerializeField] Sprite[] shiroWolfIdle;
     [SerializeField] Sprite[] shiroWolfHowl;
@@ -227,6 +231,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] AudioClip echoBenibanaLine;
     [SerializeField] AudioClip echoUtsusemiLine;
     [SerializeField] AudioClip echoShiroganeLine;
+    [Tooltip("Shirogane in the ending, once Oni cuts her chain, and her farewell at dawn.")]
+    [SerializeField] AudioClip shiroganeFreedLine;
+    [SerializeField] AudioClip shiroganeFarewellLine;
     [SerializeField] AudioClip[] kagetsuneHurtLines;
     [SerializeField, Range(0, 1)] float voiceVolume = 1f;
     [Tooltip("Where bosses stand, in world units from the top of the screen.")]
@@ -1710,7 +1717,7 @@ public class GameManager : MonoBehaviour
         // The Emperor is the end: no boon, the dawn.
         if (Stage.boss == BossKind.Kagetsune && stageIndex == stages.Length - 1)
         {
-            yield return PlayDawn();
+            yield return PlayDawn(where);
             yield break;
         }
         yield return GatherDrops();
@@ -1733,17 +1740,42 @@ public class GameManager : MonoBehaviour
     // The true ending. The bells are silent and the stopped hour moves: the sky warms over the field for the first
     // time in the game, Oni walks out into it and plays the bone flute, and the second spirit wisp beside him is
     // Shirogane's. Then the end screen.
-    IEnumerator PlayDawn()
+    // The ending. Her bell, the one that never rang, lies where the Emperor fell, and Shirogane's soul is still
+    // chained to it. Oni walks up and cuts the chain, as she once cut the tether dragging him into the armor; her
+    // bell rings once and goes silent, she rises as herself, and the stopped hour moves. Dawn comes up while he
+    // plays the flute beside her, and she says goodbye and becomes the wisp at his shoulder.
+    IEnumerator PlayDawn(Vector3 throne)
     {
         effects.Boss = null;
         activeBoss = null;
         Boss.PhaseCard = null;
-        if (backdrop != null)
-        {
-            backdrop.SetBossMoon(false);
-            backdrop.SetDawn(true);
-        }
-        // The clock that held the hour starts again.
+        if (backdrop != null) backdrop.SetBossMoon(false);
+
+        Vector3 herFeet = new Vector3(CameraShake.Center.x, Mathf.Lerp(ronin.Home.y, throne.y, 0.4f), 0f);
+        // The bell lies up the field toward where he fell, close enough that the chain reads as hers.
+        Vector3 bellAt = new Vector3(herFeet.x + Mathf.Clamp(throne.x - herFeet.x, -2.5f, 2.5f), herFeet.y + 4f, 0f);
+        var her = ShiroganeFreed.Create(herFeet, bellAt, ronin.ArtPixelSize, ronin.SpriteOrder, freedKneel, freedBow, freedIdle, shiroganeArt);
+        yield return her.Appear(1.6f);
+        yield return new WaitForSeconds(0.8f);
+
+        // He walks up beside her and cuts the chain.
+        float feetToBody = ronin.transform.position.y - ronin.ArtBounds.min.y;
+        Vector3 beside = new Vector3(herFeet.x - 1.6f, herFeet.y + feetToBody, ronin.Home.z);
+        yield return ronin.WalkTo(beside, travelWalkSpeed * 0.35f);
+        yield return new WaitForSeconds(0.4f);
+        ronin.Swing();
+        yield return new WaitForSeconds(0.12f);
+        her.Snap();
+        if (!hitStopping) StartCoroutine(HitStop(0.12f));
+        yield return new WaitForSeconds(1.4f);
+
+        // She rises as herself and speaks in her own voice, not the Emperor's choir.
+        TuneVoice(BossKind.Shirogane);
+        yield return her.Rise(1.6f);
+        yield return Say("Shirogane", FreedColour, shiroganeFreedLine, "You cut it... the way I cut yours.");
+
+        // The clock that held the hour starts again, and the sun comes up.
+        if (backdrop != null) backdrop.SetDawn(true);
         for (int i = 0; i < 3; i++)
         {
             Sfx.Play(Sfx.ClockTick, 0.7f, 0.8f);
@@ -1752,12 +1784,16 @@ public class GameManager : MonoBehaviour
         if (Sfx.Has(Sfx.DawnChime)) Sfx.Play(Sfx.DawnChime);
         else Sfx.Play(Sfx.VictorySting, 0.8f, 0.8f);
         if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
-
-        Vector3 spot = new Vector3(CameraShake.Center.x, ronin.Home.y, ronin.Home.z);
-        yield return ronin.WalkTo(spot, travelWalkSpeed * 0.35f);
-        ronin.Pose(titleFluteFrames, titleFluteFps);
-        StartCoroutine(SecondWisp());
         yield return new WaitForSeconds(1.5f);
+        yield return Say("Shirogane", FreedColour, shiroganeFarewellLine, "The oath is kept. Play for me, Oni... one last time.");
+        ronin.Pose(titleFluteFrames, titleFluteFps);
+        yield return new WaitForSeconds(1f);
+        yield return her.Bow();
+        Vector3 wispFrom = her.Centre;
+        StartCoroutine(her.Dissolve(1.6f));
+        StartCoroutine(SecondWisp(wispFrom));
+        yield return new WaitForSeconds(2.5f);
+
         ui.ShowBanner("The bells are silent", "Dawn", "The stopped hour moves, and the souls go home.", new Color(1f, 0.72f, 0.45f));
         yield return new WaitForSeconds(5f);
         ui.HideBanner();
@@ -1766,20 +1802,49 @@ public class GameManager : MonoBehaviour
             new Color(1f, 0.72f, 0.45f), Sfx.VictorySting);
     }
 
-    // Shirogane's soul, free at last: a pale blue-white wisp that drifts in and bobs at his shoulder.
-    IEnumerator SecondWisp()
+    // Her silver, as herself rather than the Emperor's teal.
+    static readonly Color FreedColour = new Color(0.72f, 0.9f, 1f);
+
+    // A line spoken outside a fight (the ending): voiced when the clip is there, always subtitled, waited out.
+    IEnumerator Say(string speaker, Color colour, AudioClip clip, string text)
     {
+        float seconds = clip != null ? clip.length : 2.5f;
+        if (clip != null)
+        {
+            voice.Stop();
+            voice.volume = voiceVolume * Sfx.Volume;
+            voice.clip = clip;
+            voice.Play();
+            Music.Duck(0.3f, seconds + 0.3f);
+        }
+        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f);
+        yield return new WaitForSeconds(seconds + 0.5f);
+    }
+
+    // Shirogane's soul, free at last: her spirit wisp rises from where she stood and settles at his shoulder.
+    IEnumerator SecondWisp(Vector3 from)
+    {
+        Sprite[] frames = Fx.Frames(Fx.ShiroSpiritWisp);
         var wisp = new GameObject("ShiroganeWisp").AddComponent<SpriteRenderer>();
-        wisp.sprite = ProceduralSprites.Glow;
-        wisp.sortingOrder = 8;
-        Vector3 from = ronin.Bounds.center + new Vector3(4f, 5f, 0);
+        wisp.sprite = frames != null ? frames[0] : ProceduralSprites.Glow;
+        wisp.sortingOrder = ronin.SpriteOrder + 2;
+        if (frames != null) wisp.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 10f);
+        var glow = new GameObject("ShiroganeWispGlow").AddComponent<SpriteRenderer>();
+        glow.sprite = ProceduralSprites.SoftGlow;
+        glow.sortingOrder = ronin.SpriteOrder + 1;
+        glow.transform.SetParent(wisp.transform, false);
+        glow.transform.localScale = Vector3.one * 1.4f;
+        float size = frames != null ? 1.2f : 0.9f;
         for (float t = 0; wisp != null; t += Time.deltaTime)
         {
-            float arrive = Mathf.SmoothStep(0, 1, Mathf.Clamp01(t / 3f));
-            Vector3 beside = ronin.Bounds.center + new Vector3(-0.9f, 0.6f + Mathf.Sin(t * 2.2f) * 0.15f, -0.2f);
-            wisp.transform.position = Vector3.Lerp(from, beside, arrive);
-            wisp.transform.localScale = Vector3.one * (0.9f + 0.1f * Mathf.Sin(t * 5f));
-            wisp.color = new Color(0.85f, 0.95f, 1f, 0.85f * arrive);
+            float arrive = Mathf.SmoothStep(0, 1, Mathf.Clamp01(t / 2.5f));
+            Vector3 shoulder = ronin.Bounds.center + new Vector3(0.9f, 0.6f + Mathf.Sin(t * 2.2f) * 0.15f, -0.2f);
+            // It rises a little first, then curves down onto his shoulder.
+            Vector3 lift = from + Vector3.up * 1.2f;
+            wisp.transform.position = Vector3.Lerp(Vector3.Lerp(from, lift, arrive), Vector3.Lerp(lift, shoulder, arrive), arrive);
+            wisp.transform.localScale = Vector3.one * size * (0.9f + 0.1f * Mathf.Sin(t * 5f));
+            wisp.color = new Color(0.85f, 0.95f, 1f, 0.9f * Mathf.Clamp01(t / 0.6f));
+            glow.color = new Color(0.7f, 0.9f, 1f, 0.3f * Mathf.Clamp01(t / 0.6f));
             yield return null;
         }
     }

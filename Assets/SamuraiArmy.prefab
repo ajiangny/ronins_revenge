@@ -51,6 +51,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 633c256d808d7469e83acf8ce1533b6b, type: 2}
   - {fileID: 11400000, guid: 633c256d808d7469e83acf8ce1533b6b, type: 2}
   - {fileID: 11400000, guid: 2d84d8c4a90bc4d41bae7eb6ca01fbdf, type: 2}
+  iceShell: {fileID: 0}
   maxSpacingX: 2
   spacingY: 1.75
   edgeMargin: 1
@@ -60,3 +61,15 @@ MonoBehaviour:
   marchBeatDistance: 1.2
   spearInterval: 4.5
   taishoHealth: 2
+  shieldHealth: 2
+  bellringerArt: {fileID: 11400000, guid: 2ab58ebda15d8479fa6115667328309f, type: 2}
+  bellHealth: 2
+  bellInterval: 6
+  tollWarning: 0.6
+  tollHaste: 2.5
+  tollFireScale: 0.5
+  silenceDelay: 2
+  entryMargin: 1
+  diveWarning: 0.6
+  diveDuration: 1.7
+  diveReturn: 1.2

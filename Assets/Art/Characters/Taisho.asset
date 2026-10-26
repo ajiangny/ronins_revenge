@@ -27,9 +27,13 @@ MonoBehaviour:
   slash: []
   runLeft: []
   runRight: []
+  walkUp: []
+  wisps: []
+  framesWithWisps: []
   idleFps: 6
   actionFps: 8
   runFps: 14
+  walkFps: 8
   deathParticles:
   - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
   - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

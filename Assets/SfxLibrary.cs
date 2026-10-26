@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 // The ElevenLabs sound effects and music, looked up by id. Built by Ninja/Apply Audio.
@@ -34,13 +35,23 @@ public class SfxLibrary : ScriptableObject
     public AudioClip battleMusic;
     [Range(0, 1)] public float musicVolume = 0.45f;
 
+    // Sounds are looked up on every hit and kill, so they are indexed by id on first use (and again if Apply
+    // Audio swaps the array).
+    [NonSerialized] Dictionary<string, Sound> byId;
+    [NonSerialized] Sound[] indexed;
+
     public Sound Find(string id)
     {
-        if (sounds == null) return null;
-        foreach (Sound sound in sounds)
+        if (sounds == null || id == null) return null;
+        if (byId == null || indexed != sounds)
         {
-            if (sound.id == id && sound.clips != null && sound.clips.Length > 0) return sound;
+            byId = new Dictionary<string, Sound>();
+            foreach (Sound sound in sounds)
+            {
+                if (sound.id != null && sound.clips != null && sound.clips.Length > 0 && !byId.ContainsKey(sound.id)) byId[sound.id] = sound;
+            }
+            indexed = sounds;
         }
-        return null;
+        return byId.TryGetValue(id, out Sound found) ? found : null;
     }
 }

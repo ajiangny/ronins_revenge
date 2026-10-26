@@ -445,14 +445,19 @@ public abstract class Boss : MonoBehaviour, IHittable
         }
     }
 
+    // Beams are measured every frame they burn, so their hits go into one shared buffer.
+    static readonly RaycastHit[] BeamHits = new RaycastHit[32];
+
     // Where a beam from `from` towards `ground` stops: on the nearest blocker in the way, or the ground.
     protected static Vector3 BeamEnd(Vector3 from, Vector3 ground, out Blocker cover)
     {
         cover = null;
         Vector3 delta = ground - from;
         float nearest = delta.magnitude;
-        foreach (RaycastHit hit in Physics.RaycastAll(from, delta.normalized, delta.magnitude))
+        int count = Physics.RaycastNonAlloc(from, delta.normalized, BeamHits, delta.magnitude);
+        for (int i = 0; i < count; i++)
         {
+            RaycastHit hit = BeamHits[i];
             if (hit.distance < nearest && hit.collider.TryGetComponent(out Blocker blocker))
             {
                 nearest = hit.distance;

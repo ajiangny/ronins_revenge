@@ -12,7 +12,6 @@ public class ArrowShadow : MonoBehaviour
     const float MinFall = 0.5f;
     const float Width = 0.9f;
 
-    static Ronin ronin;
 
     Rigidbody body;
     Arrow arrow;
@@ -37,7 +36,7 @@ public class ArrowShadow : MonoBehaviour
     void LateUpdate()
     {
         if (shadow == null) return;
-        if (ronin == null) ronin = FindAnyObjectByType<Ronin>();
+        Ronin ronin = Ronin.Instance;
         Vector3 velocity = body.linearVelocity;
         if (ronin == null || velocity.y > -MinFall)
         {

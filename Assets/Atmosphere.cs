@@ -51,6 +51,7 @@ public class Atmosphere : MonoBehaviour
     SpriteRenderer moonlight;
     // All the clouds share one tiling layer that scrolls with the wind, so overlapping clouds never darken twice.
     SpriteRenderer cloudLayer;
+    Sprite cloudSprite;
     Vector2 cloudOffset;
     Vector2 cloudTile;
     SpriteRenderer shade;
@@ -80,9 +81,16 @@ public class Atmosphere : MonoBehaviour
         settings = mood ?? new Settings();
         BuildSprites();
 
+        // Each map draws its own sky, so the last one's texture is freed rather than left to pile up over a run.
+        if (cloudSprite != null)
+        {
+            Destroy(cloudSprite.texture);
+            Destroy(cloudSprite);
+            cloudSprite = null;
+        }
         if (settings.clouds > 0)
         {
-            Sprite sky = CloudLayer(settings.clouds, Random.Range(0f, 100f));
+            Sprite sky = cloudSprite = CloudLayer(settings.clouds, Random.Range(0f, 100f));
             cloudTile = sky.bounds.size;
             cloudOffset = new Vector2(Random.Range(0f, cloudTile.x), Random.Range(0f, cloudTile.y));
             cloudLayer = Create("CloudShadows", sky, centre, ShadowOrder);
@@ -258,7 +266,9 @@ public class Atmosphere : MonoBehaviour
 
         var texture = NewTexture(width, height);
         texture.wrapMode = TextureWrapMode.Repeat;
-        for (int k = 0; k < alpha.Length; k++) texture.SetPixel(k % width, k / width, new Color(1f, 1f, 1f, Band(alpha[k], 4)));
+        var pixels = new Color32[alpha.Length];
+        for (int k = 0; k < alpha.Length; k++) pixels[k] = new Color32(255, 255, 255, (byte)(Band(alpha[k], 4) * 255f));
+        texture.SetPixels32(pixels);
         texture.Apply();
         return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 4f, 0, SpriteMeshType.FullRect);
     }

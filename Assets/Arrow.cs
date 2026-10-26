@@ -45,9 +45,13 @@ public class Arrow : MonoBehaviour
     // The halo's colour, which its landing shadow is drawn in.
     public Color GlowColor => glow != null ? glow.color : glowColor;
 
+    // Cached once: volleys ignore each other pair by pair, and fetching them each time made garbage per pair.
+    Collider[] colliders;
+
     void Awake()
     {
         body = GetComponent<Rigidbody>();
+        colliders = GetComponentsInChildren<Collider>();
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
         glow = Kunai.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
@@ -206,9 +210,9 @@ public class Arrow : MonoBehaviour
 
     public void IgnoreCollisionsWith(Arrow other)
     {
-        foreach (Collider mine in GetComponentsInChildren<Collider>())
+        foreach (Collider mine in colliders)
         {
-            foreach (Collider theirs in other.GetComponentsInChildren<Collider>())
+            foreach (Collider theirs in other.colliders)
             {
                 Physics.IgnoreCollision(mine, theirs);
             }
@@ -282,7 +286,7 @@ public class Arrow : MonoBehaviour
     // Undo the knock from the collision and never touch that collider again.
     void KeepFlying(Collider passedThrough, bool spark = true)
     {
-        foreach (Collider own in GetComponentsInChildren<Collider>())
+        foreach (Collider own in colliders)
         {
             Physics.IgnoreCollision(own, passedThrough);
         }

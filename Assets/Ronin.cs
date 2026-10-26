@@ -145,8 +145,12 @@ public class Ronin : MonoBehaviour
     Color shurikenGlow = DefaultGlow;
     Color parryColor = Color.white;
 
+    // The one ronin, for things that follow him every frame (arrow shadows) without searching the scene.
+    public static Ronin Instance { get; private set; }
+
     void Awake()
     {
+        Instance = this;
         body = GetComponent<Rigidbody>();
         Home = transform.position;
         sprite = GetComponentInChildren<SpriteRenderer>();

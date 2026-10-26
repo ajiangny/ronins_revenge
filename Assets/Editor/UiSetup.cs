@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 // Wires the UI fonts, the title logo and the title screen's flute-playing ronin (and his stand-up) into the scene. Safe to re-run;
 // anything missing leaves the game's fallback in its place.
@@ -19,8 +21,16 @@ public static class UiSetup
         if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
         var ui = new SerializedObject(Object.FindAnyObjectByType<GameUI>());
-        ui.FindProperty("bodyFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "ZenKakuGothicNew-Bold.ttf");
-        ui.FindProperty("headerFont").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Cinzel.ttf");
+        // The TTFs are baked into static TMP fonts holding just the characters the game prints; the scene then drops
+        // the TTFs, so builds neither ship them nor rasterise them at startup.
+        var body = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "ZenKakuGothicNew-Bold.ttf");
+        var header = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Cinzel.ttf");
+        TMP_FontAsset bodyBaked = Bake(body, FontRoot + "ZenKakuGothicNew-Bold SDF.asset", GameUI.BodySampling, GameUI.BodyPadding);
+        TMP_FontAsset headerBaked = Bake(header, FontRoot + "Cinzel SDF.asset", GameUI.HeaderSampling, GameUI.HeaderPadding);
+        ui.FindProperty("bodyFontBaked").objectReferenceValue = bodyBaked;
+        ui.FindProperty("headerFontBaked").objectReferenceValue = headerBaked;
+        ui.FindProperty("bodyFont").objectReferenceValue = bodyBaked != null ? null : body;
+        ui.FindProperty("headerFont").objectReferenceValue = headerBaked != null ? null : header;
         ui.FindProperty("titleLogo").objectReferenceValue = Logo();
         ui.ApplyModifiedPropertiesWithoutUndo();
 
@@ -33,6 +43,35 @@ public static class UiSetup
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         Debug.Log($"UI fonts and title art applied ({flutes} flute frames, {stand} stand-up frames).");
+    }
+
+    // A static SDF font of the game's printable characters, saved with its atlas and material inside it. Delete the
+    // asset to re-bake (after adding characters to GameUI.PrintableCharacters).
+    static TMP_FontAsset Bake(Font source, string path, int samplingSize, int padding)
+    {
+        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
+        if (existing != null || source == null) return existing;
+        TMP_FontAsset asset = TMP_FontAsset.CreateFontAsset(source, samplingSize, padding, GlyphRenderMode.SDFAA, 1024, 1024,
+            AtlasPopulationMode.Dynamic, false);
+        if (asset == null) return null;
+        asset.TryAddCharacters(GameUI.PrintableCharacters, out string missing);
+        if (!string.IsNullOrEmpty(missing)) Debug.LogWarning($"{source.name} has no glyphs for: {missing}");
+        asset.atlasPopulationMode = AtlasPopulationMode.Static;
+        asset.name = System.IO.Path.GetFileNameWithoutExtension(path);
+        AssetDatabase.CreateAsset(asset, path);
+        foreach (Texture2D atlas in asset.atlasTextures)
+        {
+            atlas.name = asset.name + " Atlas";
+            AssetDatabase.AddObjectToAsset(atlas, asset);
+        }
+        asset.material.name = asset.name + " Material";
+        AssetDatabase.AddObjectToAsset(asset.material, asset);
+        var so = new SerializedObject(asset);
+        SerializedProperty sourceFile = so.FindProperty("m_SourceFontFile");
+        if (sourceFile != null) sourceFile.objectReferenceValue = null;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        AssetDatabase.SaveAssets();
+        return asset;
     }
 
     static int SetFrames(SerializedProperty property, string prefix)

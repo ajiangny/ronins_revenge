@@ -25,11 +25,16 @@ public class GameUI : MonoBehaviour
     [SerializeField] Sprite titleLogo;
     [Tooltip("Clean, readable font for the HUD, menus and body text. Without it they use the pixel font.")]
     [SerializeField] Font bodyFont;
+    [Tooltip("The body and header fonts baked into static TMP fonts by Ninja/Apply UI Fonts, so a build needn't ship " +
+             "the TTFs or rasterise them at startup. Empty falls back to building them from the TTFs above.")]
+    [SerializeField] TMP_FontAsset bodyFontBaked;
+    [SerializeField] TMP_FontAsset headerFontBaked;
 
     public TMP_FontAsset Font => font;
     public Sprite LifeIcon => lifeIcon;
-    public TMP_FontAsset BodyFont => BuildFont(bodyFont, ref bodyAsset, 72, 12);
-    public TMP_FontAsset TitleFont => BuildFont(headerFont, ref headerAsset, 90, 16);
+    public TMP_FontAsset BodyFont => bodyFontBaked != null ? bodyFontBaked : BuildFont(bodyFont, ref bodyAsset, BodySampling, BodyPadding);
+    public TMP_FontAsset TitleFont => headerFontBaked != null ? headerFontBaked : BuildFont(headerFont, ref headerAsset, HeaderSampling, HeaderPadding);
+    public const int BodySampling = 72, BodyPadding = 12, HeaderSampling = 90, HeaderPadding = 16;
     public Sprite TitleLogo => titleLogo;
 
     public static readonly Color MutedColour = new Color(0.8f, 0.77f, 0.72f);
@@ -426,7 +431,7 @@ public class GameUI : MonoBehaviour
         return asset != null ? asset : font;
     }
 
-    const string PrintableCharacters =
+    public const string PrintableCharacters =
         " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•–—…←↑→↓";
 
     // Gives text its font and a shared outline-and-shadow material, so it stays readable over the busy playfield.

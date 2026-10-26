@@ -442,7 +442,7 @@ public class Utsusemi : Boss
         {
             hatsOut++;
         }
-        Arrow hat = Instantiate(arrowPrefab, Head, Quaternion.identity);
+        Arrow hat = Own(Instantiate(arrowPrefab, Head, Quaternion.identity));
         // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
         hat.MakeUnbreakable(null);
@@ -549,6 +549,14 @@ public class Utsusemi : Boss
         if (!IsDead) PlayIdle();
     }
 
+    // Its own shots pass through one another: a swinging weight or a wheeling hat is never cut down by its lace,
+    // tassels or cleave. The ronin's attacks still break them.
+    static Arrow Own(Arrow shot)
+    {
+        shot.PassesShots = true;
+        return shot;
+    }
+
     void RemoveTransient(SpriteRenderer thing)
     {
         if (thing == null) return;
@@ -559,7 +567,7 @@ public class Utsusemi : Boss
     // A gold weight snapping off the hat's brim and dropping straight down.
     void Tassel(Vector3 from)
     {
-        Arrow weight = Shoot(from + Vector3.down * 0.4f, Vector3.down * (secondPhase ? 7.5f : 6.5f));
+        Arrow weight = Own(Shoot(from + Vector3.down * 0.4f, Vector3.down * (secondPhase ? 7.5f : 6.5f)));
         Sprite[] frames = Fx.Frames(Fx.UtsuPlumb);
         if (frames != null) weight.Restyle(frames, 8f, Color.white, new Vector2(0.65f, 0.77f), 0.2f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 0.8f);
         else weight.Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.4f, 0.55f), 0.2f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 0.8f);
@@ -627,7 +635,7 @@ public class Utsusemi : Boss
             {
                 if (open.Contains(c)) continue;
                 float x = left + c * spacing + (row % 2 == 1 ? spacing / 2f : 0f);
-                Arrow diamond = Shoot(new Vector3(x, y0 + row * 0.9f, 0), Vector3.down * speed);
+                Arrow diamond = Own(Shoot(new Vector3(x, y0 + row * 0.9f, 0), Vector3.down * speed));
                 if (frames != null) diamond.Restyle(frames, 8f, Color.white, new Vector2(0.7f, 0.7f), 0.22f, new Color(0.8f, 0.85f, 1f, 0.25f), 0.7f);
                 else
                 {
@@ -980,7 +988,7 @@ public class Utsusemi : Boss
         yield return Wait(slashFrames != null ? (SlashReleaseFrame - SlashDrawnFrame - 1) / swingFps : 0.05f);
 
         Vector3 from = OnSprite(58f, FeetPx) + Vector3.down * 0.6f;
-        Arrow cleave = Shoot(from, (ronin.Bounds.center - from).normalized * HourSpeed);
+        Arrow cleave = Own(Shoot(from, (ronin.Bounds.center - from).normalized * HourSpeed));
         Sprite[] frames = Fx.Frames(Fx.UtsuHourSlash);
         if (frames != null) cleave.Restyle(frames, 14f, Color.white, new Vector2(5.6f, 3.7f), 1.1f, new Color(1f, 0.2f, 0.18f, 0.6f), 4.5f);
         else cleave.Restyle(ProceduralSprites.White, new Color(0.9f, 0.93f, 1f), new Vector2(5.4f, 0.5f), 1.1f, new Color(1f, 0.2f, 0.18f, 0.6f), 4.5f);
@@ -1195,7 +1203,7 @@ public class Utsusemi : Boss
         Sprite[] frames = Fx.Frames(Fx.UtsuPlumb);
         for (int i = 0; i < count; i++)
         {
-            weights[i] = Shoot(pivots[i], Vector3.down * 0.1f);
+            weights[i] = Own(Shoot(pivots[i], Vector3.down * 0.1f));
             if (frames != null) weights[i].Restyle(frames, 8f, Color.white, new Vector2(0.9f, 1.07f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
             threads[i].color = new Color(0.95f, 0.95f, 1f, 0.6f);
@@ -1782,6 +1790,9 @@ public class Utsusemi : Boss
     {
         public SpriteRenderer glow, body, core;
         public Sprite[] art;
+        // The phase 2 beam: molten orange and wild.
+        public bool molten;
+        public Color colour;
         public FxPlayer flare, hit;
         public float nextFire, nextBurn, nextSpark, lastFireX;
         // Fired from the slit-eye rather than the core.
@@ -1790,14 +1801,19 @@ public class Utsusemi : Boss
 
     Beam MakeBeam() => MakeBeam(Core, 1.6f);
 
-    Beam MakeBeam(Vector3 from, float flareSize)
+    Beam MakeBeam(Vector3 from, float flareSize) => MakeBeam(from, flareSize, secondPhase);
+
+    Beam MakeBeam(Vector3 from, float flareSize, bool molten)
     {
+        Color colour = molten ? Molten : CoreRed;
         var beam = new Beam
         {
-            art = Fx.Frames(secondPhase ? Fx.UtsuBeamMolten : Fx.UtsuBeamRed),
-            glow = Bar(from, from, 1f, new Color(BeamColour.r, BeamColour.g, BeamColour.b, 0.35f), 53),
-            flare = Fx.Play(Fx.UtsuBeamFlare, from, secondPhase ? MoltenTint : Color.white, flareSize, transform, 57),
-            hit = Fx.Play(Fx.UtsuBeamHit, from, secondPhase ? MoltenTint : Color.white, 1.3f, null, 57),
+            molten = molten,
+            colour = colour,
+            art = Fx.Frames(molten ? Fx.UtsuBeamMolten : Fx.UtsuBeamRed),
+            glow = Bar(from, from, 1f, new Color(colour.r, colour.g, colour.b, 0.35f), 53),
+            flare = Fx.Play(Fx.UtsuBeamFlare, from, molten ? MoltenTint : Color.white, flareSize, transform, 57),
+            hit = Fx.Play(Fx.UtsuBeamHit, from, molten ? MoltenTint : Color.white, 1.3f, null, 57),
         };
         if (beam.art != null)
         {
@@ -1832,16 +1848,16 @@ public class Utsusemi : Boss
     {
         float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
         // The molten beam thrashes: its width jumps about every frame on top of the flicker.
-        if (secondPhase) flicker *= Random.Range(0.85f, 1.2f);
-        Stretch(beam.glow, from, to, (secondPhase ? 2f : 1.6f) * flicker);
-        beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(BeamColour.r, BeamColour.g, BeamColour.b, 0.35f);
+        if (beam.molten) flicker *= Random.Range(0.85f, 1.2f);
+        Stretch(beam.glow, from, to, (beam.molten ? 2f : 1.6f) * flicker);
+        beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(beam.colour.r, beam.colour.g, beam.colour.b, 0.35f);
         if (beam.art != null)
         {
             beam.body.sprite = beam.art[(int)(Time.time * BeamFps) % beam.art.Length];
             // Flipped now and then, so the molten plasma never settles into a pattern.
-            if (secondPhase && Random.value < 0.15f) beam.body.flipY = !beam.body.flipY;
-            LayTiled(beam.body, from, to, (secondPhase ? 0.95f : 0.7f) * flicker * (flash ? 1.3f : 1f));
-            if (secondPhase && Time.time >= beam.nextSpark)
+            if (beam.molten && Random.value < 0.15f) beam.body.flipY = !beam.body.flipY;
+            LayTiled(beam.body, from, to, (beam.molten ? 0.95f : 0.7f) * flicker * (flash ? 1.3f : 1f));
+            if (beam.molten && Time.time >= beam.nextSpark)
             {
                 // Embers spit off its length.
                 beam.nextSpark = Time.time + 0.06f;
@@ -1941,8 +1957,9 @@ public class Utsusemi : Boss
 
     protected override bool HasSecondPhase => true;
 
-    // When its first bar empties the mainspring snaps: the shroud tears, the chest opens on its glowing core, and the
-    // clock runs fast from then on.
+    // When its first bar empties the mainspring snaps: it overloads, lasering wildly in every direction as it cracks
+    // open from the core out, then the shroud tears, the chest opens on its glowing core, and the clock runs fast from
+    // then on.
     protected override IEnumerator PhaseBreak()
     {
         breaking = true;
@@ -1950,23 +1967,14 @@ public class Utsusemi : Boss
         armored = false;
         ShowEye(false);
 
-        // The mainspring slips: it seizes and shudders, sparks spitting from its joints while the clock inside it
-        // races, each tick closer on the last.
+        // The mainspring slips: it seizes with a jolt.
         animator.Play(art.hit, false, null, art.actionFps * 0.5f);
         HitFlash.Flash(sprite, 0.15f);
         CameraShake.Add(0.3f);
         Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
-        Music.Duck(0.15f, 6f);
-        StartCoroutine(Tremble(1.5f, 0.1f, 2f));
-        float tick = 0.3f;
-        for (float t = 0; t < 1.5f; t += tick, tick = Mathf.Max(0.05f, tick * 0.8f))
-        {
-            Sfx.Play(Sfx.ClockTick, 0.7f, 1f + t * 0.4f);
-            Vector3 joint = Centre + new Vector3(Random.Range(-1f, 1f) * sprite.bounds.extents.x * 0.6f,
-                Random.Range(-1f, 1f) * sprite.bounds.extents.y * 0.6f, 0);
-            Fx.Play(Fx.Impact, joint, Gold, 0.7f);
-            yield return new WaitForSeconds(tick);
-        }
+        Music.Duck(0.15f, 8f);
+        yield return new WaitForSeconds(0.4f);
+        yield return Overload();
 
         // It stops dead. A bell tolls once.
         Sfx.Play(Sfx.MidnightChime, 1f, 0.7f);
@@ -2016,6 +2024,72 @@ public class Utsusemi : Boss
             yield return new WaitForSeconds(1.8f);
         }
         breaking = false;
+    }
+
+    // How long it overloads before it stops dead, and how far apart its wild lasers fire at the start and the end.
+    const float OverloadSeconds = 3.4f;
+    const float WildLaserGapStart = 0.45f, WildLaserGapEnd = 0.07f;
+
+    // It overloads: it shudders in place while cracks spread from its core over its body and hat, its clock racing,
+    // each tick closer on the last, and its eye and core loose lasers in every direction, ever faster, turning molten
+    // as the cracks open. The lasers are wild, not aimed: they scorch the ground but can't hurt the ronin. Without the
+    // cracking art it shudders in its hit pose, sparks spitting from its joints.
+    IEnumerator Overload()
+    {
+        Sprite[] cracks = Fx.Frames(Fx.UtsuCracking);
+        StartCoroutine(Tremble(OverloadSeconds, 0.08f, 1.5f));
+        int stage = -1;
+        float nextTick = 0, tick = 0.3f, nextShot = 0.2f;
+        for (float t = 0; t < OverloadSeconds; t += Time.deltaTime)
+        {
+            float k = t / OverloadSeconds;
+            int now = cracks != null ? Mathf.Min(cracks.Length - 1, (int)(k * cracks.Length)) : (int)(k * 6);
+            if (now != stage)
+            {
+                // Another crack splits open with a snap, spitting sparks.
+                stage = now;
+                if (cracks != null) animator.Play(new[] { cracks[stage] }, true);
+                Vector3 split = Core + (Vector3)(Random.insideUnitCircle * sprite.bounds.extents.x * 0.5f);
+                Fx.Play(Fx.Impact, split, stage < 3 ? Gold : Molten, 0.8f);
+                Sfx.Play(Sfx.ParryClang, 0.35f, Random.Range(0.6f, 0.8f));
+                ElementFx.Glow(Core, Color.Lerp(CoreRed, Molten, k), 0.5f, 1.5f + k * 2f, 0.3f, transform);
+                CameraShake.Add(0.12f + 0.1f * k);
+            }
+            if (t >= nextTick)
+            {
+                Sfx.Play(Sfx.ClockTick, 0.7f, 1f + k * 0.8f);
+                nextTick = t + tick;
+                tick = Mathf.Max(0.05f, tick * 0.85f);
+            }
+            if (t >= nextShot)
+            {
+                StartCoroutine(WildLaser(k > 0.45f));
+                nextShot = t + Mathf.Lerp(WildLaserGapStart, WildLaserGapEnd, k * k) * Random.Range(0.7f, 1.3f);
+            }
+            yield return null;
+        }
+    }
+
+    // One wild laser from its eye or core: mostly raking the ground, some flung up and out to the sides, swinging as
+    // it fires. It burns the ground where it lands but never hits the ronin.
+    IEnumerator WildLaser(bool molten)
+    {
+        bool fromEye = Random.value < 0.4f;
+        float angle = Random.value < 0.75f ? Random.Range(-160f, -20f) : Random.Range(-15f, 195f);
+        float swing = Random.Range(-40f, 40f);
+        float seconds = Random.Range(0.18f, 0.32f);
+        Beam beam = MakeBeam(fromEye ? Eye : Core, 0.7f, molten);
+        Sfx.Play(Sfx.LanternCharge, 0.3f, Random.Range(1.9f, 2.5f));
+        CameraShake.Add(0.06f);
+        for (float t = 0; t < seconds && beam.body != null; t += Time.deltaTime)
+        {
+            Vector3 from = fromEye ? Eye : Core;
+            Vector3 heading = Quaternion.Euler(0, 0, angle + swing * t / seconds) * Vector3.right;
+            Vector3 to = heading.y < -0.05f ? from + heading * ((GroundY - from.y) / heading.y) : from + heading * 30f;
+            DrawBeam(beam, from, to, t < 0.04f, heading.y < -0.05f);
+            yield return null;
+        }
+        EndBeam(beam);
     }
 
     void AddCore()

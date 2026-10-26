@@ -49,6 +49,7 @@ public static class Fx
     public const string UtsuBeamRed = "Utsu_BeamRed";
     public const string UtsuBeamMolten = "Utsu_BeamMolten";
     public const string UtsuHaloShards = "Utsu_HaloShards";
+    public const string UtsuCracking = "Utsu_Cracking";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
 
     // Shirogane's effects.

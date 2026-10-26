@@ -72,6 +72,8 @@ public static class FxSetup
         (Fx.UtsuBeamMolten, 18, true, Centre),
         // The three pieces of its broken halo (left shard, crown, right shard), one per frame.
         (Fx.UtsuHaloShards, 1, true, Centre),
+        // Its phase 1 body cracking open stage by stage, standing on its feet like its character frames.
+        (Fx.UtsuCracking, 1, true, new Vector2(0.5f, 0f)),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
         (Fx.ShiroCrescent, 14, true, Centre),
         (Fx.ShiroSword, 10, true, Centre),

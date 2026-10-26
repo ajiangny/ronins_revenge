@@ -174,7 +174,7 @@ match `BoonChoiceUI.boonIcons`.
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
   `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights hang from `Utsu_PlumbPortal` portals opened above and behind it; a cut thread plays `SnapThread`/`DropLooseEnd`, built in code; it `Pace`s about from the first portal until the swings die,
   `OpenPortal`/`ClosePortal`, and swing through the ronin's lane as a pendulum wave before being reeled back in, flown
-  with `Arrow.Steer` per physics step). Phase 2 once its first bar empties opens its core and is the laser phase (`NextMove` puts a
+  with `Arrow.Steer` per physics step). Its shots all pass through one another (`Own` sets `Arrow.PassesShots`). Its `PhaseBreak` opens with `Overload`: it holds the `Fx.UtsuCracking` frames (its idle with cracks spreading from the core, one stage at a time) while `WildLaser`s fire from its eye and core in random directions, ever faster, red then molten (`MakeBeam(from, flare, molten)`; harmless, no `HitIfCrossed`). Phase 2 once its first bar empties opens its core and is the laser phase (`NextMove` puts a
   laser at least every other move): the Heart Lantern (a beam swept there and back) and Midnight (two clock-hand beams
   closing on the planted sword; at low health `HoldingHands` keeps them burning at the edges while it `RecallSword`s
   and throws again). Both open with `ThrowSword` (an `HourMark` where it will land, the `FlySword` flight, then `PlantSword`: a never-breaking

@@ -528,6 +528,16 @@ MonoBehaviour:
     - {fileID: 21300000, guid: ca2614fb4023f4ebcb10faa5b60e15e3, type: 3}
     fps: 1
     loop: 1
+  - id: Utsu_Cracking
+    frames:
+    - {fileID: 21300000, guid: c7a69669280ed4e03916b59d57e39a71, type: 3}
+    - {fileID: 21300000, guid: 31486e398722842f1be000ad1b642f9c, type: 3}
+    - {fileID: 21300000, guid: 7d81837aac961494681f76fbd5af61e6, type: 3}
+    - {fileID: 21300000, guid: 04c3e100a13b949b8bbb5fee5743e7ba, type: 3}
+    - {fileID: 21300000, guid: f27e802a47d554317bfef575a2b09396, type: 3}
+    - {fileID: 21300000, guid: 006186ba9b4a948bab284ea3abf8941c, type: 3}
+    fps: 1
+    loop: 1
   - id: Utsu_PlumbPortal
     frames:
     - {fileID: 21300000, guid: 1dfbf83e74b4540c0bc299fe81af413b, type: 3}

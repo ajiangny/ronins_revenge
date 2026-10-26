@@ -39,7 +39,7 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Lace Lattice | His shroud, unravelling. |
 | Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one, then hunts him down the hours again with its blade. |
 | Plumb Lines | The weights of the clock it winds. |
-| Phase break | The mainspring slips: it seizes, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
+| Phase break | The mainspring slips: it overloads, its lasers firing wild as it cracks open from the heart, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
 | Heart Lantern / Midnight | Its core: the monk's soul, burning as fuel. |
 
 ## Relationships

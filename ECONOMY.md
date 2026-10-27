@@ -13,14 +13,14 @@ belongs to the boons).
 
 ## Earning
 
-Soul Embers are kept on death: 1 per samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled. A death in stage 1
+Soul Embers are kept on death: 1 per samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus ember-cache portals (30 × the stage), all raised by Heat. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
 five clears. Embers go into the save the moment they're earned, so quitting mid-run keeps them.
 
 ## Spending
 
 Price of the next rank = base × (rank + 1) + ⌊10 × 1.1^ranks bought in total⌋ (the Vampire Survivors formula at half
-its fee): about 4,600 embers buys every song. Refund returns everything spent, and a maxed song can be switched
+its fee). Refund returns everything spent, and a maxed song can be switched
 off for a harder run. The shop appears on the title menu once there are embers to spend.
 
 | Song | Fresh → max | Ranks | Base |
@@ -31,10 +31,37 @@ off for a harder run. The shop appears on the title menu once there are embers t
 | Spirit Wind (shuriken cooldown) | 6 → 5 s | 2 | 80 |
 | Steady Breath (missed parry) | 2 → 1.5 s | 2 | 80 |
 | Long Shadow (invulnerability after a hit) | 2 → 2.5 s | 1 | 120 |
-| Soul Pull (soul drop chance, sure soul after) | 7% → 9%, 15 → 13 kills | 2 | 100 |
 | Iron Will (max lives) | 3 → 4 | 1 | 600 |
-| Fate's Thread (one boon redraw a run, R on the boon screen) | 0 → 1 | 1 | 1,000 |
+| Fate's Thread (boon redraws a run, R on the boon screen) | 0 → 3 | 3 | 300 |
 | Second Dawn (once a run, rise again with 2 lives) | 0 → 1 | 1 | 1,200 |
+| Third Path (portals after each round) | 2 → 3 | 1 | 400 |
+| Banishing Bell (take a boon out of the run, B on the boon screen) | 0 → 2 a run | 2 | 350 |
+| Pond's Blessing (Spirit Beads after the first boss) | 1 → 2 | 1 | 500 |
+| Ancestral Lore (each stage's first soul) | any rarity → Rare or better | 1 | 600 |
+
+### Control, not power (the boon revamp)
+
+With souls dropping from kills a run saw about 65 boon offers, so every slot was Epic by stage 2 and the songs
+(deliberately tiny) didn't matter. Souls now come from portals between rounds (about 12–16 boons a run), and held
+boons are raised only by Spirit Beads. The newer songs follow Hades' later Mirror rows and Hades II's Arcana: they
+give **more say over the rewards** (another portal, redraws, banishes, an extra bead, a Rare floor) rather than more
+damage, so embers stay worth earning without a fresh save being any weaker. **Soul Pull** is retired (its ranks are
+refunded, `Upgrades.RefundRetired`).
+
+## Oaths and Heat (after the first dawn)
+
+The counterweight for strong players, Hades' Pact of Punishment: an oath stone in the temple, sealed until
+Kagetsune falls. Each oath rank is a point of Heat; embers earned are raised 10% a point, and the first dawn at a
+new highest Heat pays 150 embers per point gained (`Oaths.cs`).
+
+| Oath | Ranks | Per rank |
+|---|---|---|
+| Hastened March | 2 | armies +10% speed |
+| Rain of Arrows | 2 | arrows 10% more often, +5% speed |
+| Iron Generals | 2 | warlords +15% health |
+| The Long Road | 2 | the boss portal opens a round later |
+| Faded Spirits | 2 | no Spirit Beads behind portals; then no Rare floor on the warlord's boon |
+| Frail Body | 1 | one life fewer |
 
 ## Research
 

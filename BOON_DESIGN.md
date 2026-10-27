@@ -205,6 +205,34 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
   blast every few slash kills, which played too quietly. Now every few swings it throws a great fireball instead
   of a slash, which bursts in a wide blast. It's something you see coming and can aim.
 
+## 5. The portal revamp (fewer, weightier boons)
+
+**The problem.** With four stages a run fields about 636 samurai. At 7% a kill with pity at 15 that was a soul every
+~9.5 kills: **about 65 offers a run**, plus scouts and stage boons, against 21 boons, and every held boon came back as
+an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and runs became god runs.
+
+**What changed.**
+- **Portals between rounds** (Hades' chamber doors): each round is fought for a reward chosen at a portal (a soul of a
+  shown element, a Spirit Bead, embers, a healing spring, a scroll); a stage's first round is always a soul. The
+  boss's portal opens from round 3; a stage runs up to 5 rounds, the extra ones harder. Samurai no longer drop souls;
+  scouts do 20% of the time. Picking the soul's element at the portal is Hades' "god first, boon second".
+- **Spirit Beads** (Pom of Power): souls no longer offer held boons; a bead raises one held boon a rarity. One follows
+  each stage boon, more from bead portals.
+- About **12–16 boons a run**, each a new boon, a slot swap or a capstone.
+
+**Numbers** (before → after):
+
+| Boon | Before | After |
+|---|---|---|
+| Rarity odds | 60 / 30 / 10 | 70 / 25 / 5 |
+| Glacial Shuriken freeze | 1 / 1.5 / 2 s | 0.6 / 0.9 / 1.2 s |
+| Frost Blade freeze | 2 / 3 / 4 s | 1.5 / 2 / 2.5 s |
+| Flame Blade / Inferno Shuriken / Burning Riposte Epic radius | 2.7 (diagonals) | 2.3 (diagonals are Wildfire's) |
+| Blazing Hands, Static Charge | 15 / 25 / 35% | 10 / 18 / 25% |
+| Tidal Renewal Rare | +1 life and heal all | +1 life |
+
+Army difficulty is tuned in a separate pass against a play log of these changes.
+
 ## 4. Later
 
 - **Shared statuses.**
@@ -216,10 +244,7 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
   stance that reflects every arrow for half a second.
 - **Cursed souls (Chaos).** For example the army marches 20% faster for two rounds, then the shuriken recharges
   30% faster for good.
-- **Run resources.**
-  - One reroll and one banish per run.
-  - Never repeat the previous offer.
-  - A rarity pity offset.
-- **Soul cadence.** Raise the pity count to about 20, so a run's roughly 28 offers fall to about 20 weightier ones.
+- **Run resources.** Redraws and banishes are now Flute Songs (Fate's Thread, Banishing Bell). Still open: never
+  repeat the previous offer, and a rarity pity offset.
 - **Icons.** Icons for the six capstones and the Offering (`UI/Boons/<BoonId>`). Until they exist, the card shows
   the boon's initial.

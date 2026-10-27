@@ -189,13 +189,11 @@ public class GameUI : MonoBehaviour
         subtitlePlate.gameObject.SetActive(false);
     }
 
-    // The frame a speaker's close-up is cropped into, standing at the plate's left end like a Hades portrait: a thin
+    // The frame a speaker's close-up is cropped into, standing by the plate like a Hades portrait (placed per line): a thin
     // edge in their colour around a night-dark window, lit from behind in their colour so the art never sits on paper.
     void BuildSpeakerPortrait()
     {
         portraitFrame = CreateRect("Portrait", subtitlePlate, Vector2.zero, Vector2.zero, PortraitSize);
-        portraitFrame.pivot = new Vector2(1f, 0f);
-        portraitFrame.anchoredPosition = new Vector2(-PortraitGap, 0f);
         portraitEdge = portraitFrame.gameObject.AddComponent<Image>();
         portraitEdge.raycastTarget = false;
         RectTransform window = Stretch(CreateRect("Window", portraitFrame, Vector2.zero, Vector2.zero, Vector2.zero));
@@ -282,20 +280,34 @@ public class GameUI : MonoBehaviour
 
     // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour. Given
     // `beside`, the plate's bottom-left corner sits at that point from the screen's bottom-left instead, next to
-    // whoever is talking (Oni on the title hill). Given a `portrait`, their close-up stands framed at the plate's left
-    // (the plate moves over to make room); without one the plate shows alone.
+    // whoever is talking (Oni on the title hill). Given a `portrait`, their close-up stands framed beside the plate, or
+    // on top of it when `beside` is set; without one the plate shows alone.
     public void ShowSubtitle(string speaker, string text, Color colour, float seconds, Vector2? beside = null,
         SpeakerPortrait? portrait = null)
     {
         bool framed = portrait.HasValue && portrait.Value.art != null;
-        float room = framed ? PortraitSize.x + PortraitGap : 0f;
         Vector2 anchor = beside.HasValue ? Vector2.zero : new Vector2(0.5f, 0f);
         subtitlePlate.anchorMin = subtitlePlate.anchorMax = anchor;
         subtitlePlate.pivot = anchor;
-        // Centred, the portrait and plate are centred together; beside someone, the portrait takes the corner.
-        subtitlePlate.anchoredPosition = (beside ?? new Vector2(0, 150)) + new Vector2(beside.HasValue ? room : room / 2f, 0f);
+        // Centred, the portrait stands at the plate's left and the two are centred together. Beside someone (the title
+        // page, where the menu column is just to the right) the plate keeps its place and the portrait stands on it.
+        float room = framed && !beside.HasValue ? PortraitSize.x + PortraitGap : 0f;
+        subtitlePlate.anchoredPosition = (beside ?? new Vector2(0, 150)) + new Vector2(room / 2f, 0f);
         portraitFrame.gameObject.SetActive(framed);
-        if (framed) FramePortrait(portrait.Value, colour);
+        if (framed)
+        {
+            portraitFrame.anchorMin = portraitFrame.anchorMax = beside.HasValue ? new Vector2(0f, 1f) : Vector2.zero;
+            portraitFrame.pivot = beside.HasValue ? Vector2.zero : new Vector2(1f, 0f);
+            portraitFrame.anchoredPosition = beside.HasValue ? new Vector2(0f, PortraitGap) : new Vector2(-PortraitGap, 0f);
+            FramePortrait(portrait.Value, colour);
+        }
+        // With the portrait standing on the plate, the name moves out from under it, just right of the frame.
+        bool nameAside = framed && beside.HasValue;
+        Vector2 nameAnchor = nameAside ? new Vector2(0f, 1f) : new Vector2(0.5f, 1f);
+        subtitleSpeaker.rectTransform.anchorMin = subtitleSpeaker.rectTransform.anchorMax = nameAnchor;
+        subtitleSpeaker.rectTransform.pivot = new Vector2(nameAside ? 0f : 0.5f, 0.5f);
+        subtitleSpeaker.rectTransform.anchoredPosition = new Vector2(nameAside ? PortraitSize.x + PortraitGap : 0f, 40f);
+        subtitleSpeaker.alignment = nameAside ? TextAlignmentOptions.BottomLeft : TextAlignmentOptions.Bottom;
         subtitleSpeaker.text = speaker != null ? speaker.ToUpperInvariant() : "";
         subtitleSpeaker.color = Color.Lerp(colour, Color.white, 0.25f);
         subtitle.text = text;

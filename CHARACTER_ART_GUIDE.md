@@ -16,7 +16,7 @@ This is the shared art direction for Benibana, Utsusemi, Shirogane, Kagetsune, a
 | Deliverable | Exact width × height | Composition |
 | --- | --- | --- |
 | Phase 1 full body | 1024 × 1536 px | Entire character, boots, weapons, hair, and costume within canvas |
-| Phase 1 close-up | 1024 × 1536 px | Transparent dialogue portrait (Hades-style), cut off around the thigh; eyes about 0.19 down the canvas so the set lines up; nothing clipped at the top or sides. Exceptions: Shirogane's is 1536 × 1024 for the width of her crossed blades (same framing and eye line), and Kagetsune's is a 1536 × 1024 low-angle bust, kept by choice |
+| Phase 1 close-up | 1024 × 1536 px | Transparent dialogue portrait (Hades-style), cut off around the thigh; eyes about 0.19 down the canvas so the set lines up; nothing clipped at the top or sides. Kagetsune's is the exception: a 1536 × 1024 low-angle bust, kept by choice |
 | Phase 2 full body | 1024 × 1536 px | Entire transformed character and essential spirit/effect silhouette |
 | Phase 2 close-up | 1536 × 1024 px | Dramatic introduction framing matching the Phase 2 full-body design |
 

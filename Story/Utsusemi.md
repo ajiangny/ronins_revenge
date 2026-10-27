@@ -67,7 +67,7 @@ seized...".
 | Phase | "Mainspring... unwound. I will not... stop." |
 | Defeat | "The bell... has... stopped... Run... boy..." |
 
-**Reactive dialogue, in game** (`Dialogue.cs`; the new lines are subtitles until voiced) (`BossIntro`):
+**Reactive dialogue, in game** (`Dialogue.cs`, voiced in `Tools/generate-voice.mjs` except the death count, which stays a subtitle) (`BossIntro`):
 
 | Priority | Requires | Text |
 |---|---|---|

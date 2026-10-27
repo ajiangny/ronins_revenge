@@ -100,8 +100,9 @@ const LINES = {
   Utsusemi_Echo: [UTSUSEMI, "[slow, grinding, straining] The hour... strikes... [urgent whisper] Run... boy."],
   Shirogane_Echo: [SHIROGANE, "[strained, urgent, sorrowful] Move, Oni. [anguished] I cannot hold my blades."],
 
-  // The reactive dialogue's lines (Dialogue.cs): ids are conversation ids, and the words must match its text. Not
-  // generated yet; until they are, they play as subtitles. Run Ninja/Apply Voice Lines after generating them.
+  // The reactive dialogue's lines (Dialogue.cs): ids are conversation ids, and the words must match its text. Run
+  // Ninja/Apply Voice Lines after generating them. Utsusemi_Intro_Counted fills in a death count, so it stays a
+  // subtitle.
   Benibana_Intro_Three: [BENIBANA, "[cold, counting, bitter] Three times I've killed you. Three bells he swore to silence. [quiet] Not one has stopped ringing."],
   Benibana_Intro_Bell: [BENIBANA, "[low, confiding, almost tender] The third bell from the left on his belt. The cracked one. [quiet] That one is mine."],
   Benibana_Intro_Back: [BENIBANA, "[amused, mocking] Back so soon? [bitter] He promised me a bell for that one. I'm still listening."],

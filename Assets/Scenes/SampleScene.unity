@@ -515,6 +515,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1fd3bd4b0419434f865f2a4b67f0953a, type: 3}
   titleStandFps: 8
   oniCloseup: {fileID: 21300000, guid: f66a475089829402e85baf977f272394, type: 3}
+  akaganeCloseup: {fileID: 21300000, guid: fbb18dca375914fd88f76bd84a2b38b9, type: 3}
+  mizoreCloseup: {fileID: 21300000, guid: b5c3a3e041e3946158e6a725a709c327, type: 3}
+  hibikiCloseup: {fileID: 21300000, guid: 1c1a8e443b485410fb586a6a7a21cc7c, type: 3}
   titleWalkSpeed: 6
   titleFadeTime: 2.2
   elementArt:

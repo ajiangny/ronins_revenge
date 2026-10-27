@@ -5,8 +5,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 
-// Wires the UI fonts, the title logo, the title screen's flute-playing ronin (and his stand-up) and Oni's dialogue
-// portrait into the scene. Safe to re-run; anything missing leaves the game's fallback in its place.
+// Wires the UI fonts, the title logo, the title screen's flute-playing ronin (and his stand-up), and Oni's and the
+// three souls' dialogue portraits into the scene. Safe to re-run; anything missing leaves the game's fallback in its place.
 public static class UiSetup
 {
     const string FontRoot = "Assets/Art/Fonts/";
@@ -14,6 +14,9 @@ public static class UiSetup
     const string LogoPath = "Assets/Art/Logo/RoninsRevenge.png";
     const string FluteFrames = "Assets/Art/Sprites/Characters/Ronin";
     const string OniCloseupPath = "Assets/Art/Portraits/Oni_Closeup.png";
+    // The souls' paintings, by GameManager field: Portraits/<Soul>_Closeup.png (their _Full.png is imported the same
+    // way, kept for cards to come).
+    static readonly string[] Souls = { "Akagane", "Mizore", "Hibiki" };
     // A boss close-up whose import settings Oni's painting shares (smooth, full size, web-compressed).
     const string BossCloseupPath = "Assets/Art/Portraits/Benibana_Closeup.png";
 
@@ -42,12 +45,21 @@ public static class UiSetup
         int flutes = SetFrames(manager.FindProperty("titleFluteFrames"), "Ronin_Flute_");
         int stand = SetFrames(manager.FindProperty("titleStandFrames"), "Ronin_StandUp_");
         manager.FindProperty("oniCloseup").objectReferenceValue = Painting(OniCloseupPath, BossCloseupPath);
+        var painted = new List<string>();
+        foreach (string soul in Souls)
+        {
+            Sprite closeup = Painting($"Assets/Art/Portraits/{soul}_Closeup.png", BossCloseupPath);
+            Painting($"Assets/Art/Portraits/{soul}_Full.png", BossCloseupPath);
+            manager.FindProperty(char.ToLowerInvariant(soul[0]) + soul.Substring(1) + "Closeup").objectReferenceValue = closeup;
+            if (closeup != null) painted.Add(soul);
+        }
         manager.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         Debug.Log($"UI fonts and title art applied ({flutes} flute frames, {stand} stand-up frames, " +
-                  $"Oni's portrait {(AssetDatabase.LoadAssetAtPath<Sprite>(OniCloseupPath) != null ? "set" : "missing")}).");
+                  $"Oni's portrait {(AssetDatabase.LoadAssetAtPath<Sprite>(OniCloseupPath) != null ? "set" : "missing")}, " +
+                  $"souls painted: {(painted.Count > 0 ? string.Join(", ", painted) : "none")}).");
     }
 
     // A static SDF font of the game's printable characters, saved with its atlas and material inside it. Delete the

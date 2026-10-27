@@ -1679,7 +1679,8 @@ public class GameManager : MonoBehaviour
             portrait = benibanaPortrait, closeup = benibanaCloseup,
             // The close-ups are transparent dialogue portraits, 1024x1536 and cut off at the thigh, shown 1500 tall
             // with each boss's eyes (the focus) on the centre line at the same point on screen, so the set lines up and
-            // the cut-off bottom sits off screen. Kagetsune's is a wider 1536x1024 bust, sized to match.
+            // the cut-off bottom sits off screen. Shirogane's (crossed blades) and Kagetsune's (a bust) are wider
+            // 1536x1024 paintings, sized to match.
             // Hers: the kiseru raised by her face, its smoke curling up to the left.
             closeupHeight = 1500f, closeupFocus = new Vector2(0.46f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // Unsealed: framed on her face with her loose hair and the drawn blade around her, held back far enough to
@@ -1706,8 +1707,9 @@ public class GameManager : MonoBehaviour
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Framed on her face, her hair streaming out to the right, twin blades held low.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.4f, 0.19f), closeupAt = new Vector2(0f, 255f),
+            // Her twin blades crossed low in front of her, tips sweeping out to either side; wide art, sized so her head
+            // matches the others'.
+            closeupHeight = 1300f, closeupFocus = new Vector2(0.449f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
             phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
             phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),

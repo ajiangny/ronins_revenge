@@ -84,6 +84,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     }
 
     public int Health { get; private set; }
+    // Iron Generals: every warlord's bars are this much longer (Oaths).
+    public static float HealthScale = 1f;
     public int MaxHealth { get; private set; }
     // Damage let through super armour that hasn't yet added up to a whole hit point.
     float armorChip;
@@ -155,7 +157,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         boss.art = art;
         boss.anchor = position;
         boss.bodyTint = tint;
-        boss.Health = boss.MaxHealth = health;
+        boss.Health = boss.MaxHealth = Mathf.RoundToInt(health * HealthScale);
         renderer.color = tint;
         animator.Play(art.idle, true, null, art.idleFps);
         // Centre the art on the body, and fit an upright capsule to the figure inside the canvas padding.

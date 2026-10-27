@@ -484,10 +484,15 @@ MonoBehaviour:
   levelIntroTime: 2.5
   devToolsInRelease: 1
   boonChoice: {fileID: 2080831156}
-  soulDropChance: 0.07
-  soulPityKills: 15
+  scoutSoulChance: 0.2
   soulElementBias: 0.5
   soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
+  maxRounds: 5
+  bossPortalAfterRound: 3
+  portalChoices: 2
+  emberCache: 30
+  extraRoundSpeedUp: 0.06
+  extraRoundFireCut: 0.08
   scrollChanceFromScout: 0.4
   scrollChancePerKill: 0.005
   maxScrollsPerRun: 2
@@ -908,6 +913,16 @@ MonoBehaviour:
       propAt: {x: 562, y: 340}
       footprint: {x: 2.6, y: 0.5}
       fx: 2
+    - kind: 4
+      label: OATH STONE
+      spot: {x: 0.3125, y: 0.1}
+      art: {fileID: 0}
+      onMap: 0
+      placeholder: {r: 0.32, g: 0.36, b: 0.3, a: 1}
+      reach: 2
+      propAt: {x: 190, y: 334}
+      footprint: {x: 2, y: 0.5}
+      fx: 3
     poolCentre: {x: 343, y: 319}
     poolRadii: {x: 39, y: 30}
     poolWater: {fileID: 21300000, guid: 44621fbffbe7c4a5388fcfaaf490740c, type: 3}

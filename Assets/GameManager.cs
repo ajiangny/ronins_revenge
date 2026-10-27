@@ -315,6 +315,9 @@ public class GameManager : MonoBehaviour
                 // On the plank platform under the broken eave, used from its left end.
                 new SafeArea.Station { kind = StationKind.WeaponRack, label = "WEAPON RACK", spot = new Vector2(0.7849f, 0.0885f), propAt = new Vector2(562f, 340f),
                     footprint = new Vector2(2.6f, 0.5f), fx = StationFx.Glint, reach = 2.2f },
+                // On the flagstones to the lower left, between the dais and the pool, used from its right side.
+                new SafeArea.Station { kind = StationKind.Oaths, label = "OATH STONE", spot = new Vector2(0.3125f, 0.1f), propAt = new Vector2(190f, 334f),
+                    placeholder = new Color(0.32f, 0.36f, 0.3f), footprint = new Vector2(2f, 0.5f), fx = StationFx.Glow, reach = 2f },
             },
             // The ghost-fires at either side, and the two stone lanterns at the dais, lit.
             lamps = new[]
@@ -415,6 +418,7 @@ public class GameManager : MonoBehaviour
     int highScoreAtStart;
     // Soul Embers earned this run (already added to the save), for the end screen.
     int embersThisRun;
+    float emberFraction;
     // Second Dawn and Fate's Thread work once a run.
     bool dawnUsed;
     // Fate's Thread redraws and Banishing Bell banishes left this run, and the boons banished.
@@ -944,6 +948,11 @@ public class GameManager : MonoBehaviour
         if (backdrop != null) backdrop.Show(area.map);
         blockers.Clear();
         if (safeArea != null) Destroy(safeArea.gameObject);
+        // The oath stone stands in chains until the first dawn.
+        foreach (SafeArea.Station station in area.stations)
+        {
+            if (station.kind == StationKind.Oaths) station.label = Oaths.Unlocked && Save.Data.oathsUnsealed ? "OATH STONE" : "SEALED STONE";
+        }
         safeArea = SafeArea.Build(area, ui.BodyFont, ronin, backdrop != null ? backdrop.GroundBounds : null);
     }
 
@@ -989,6 +998,55 @@ public class GameManager : MonoBehaviour
         ronin.Roaming = true;
         ronin.ControlsEnabled = true;
         state = State.Hub;
+        if (Oaths.Unlocked && !Save.Data.oathsUnsealed) StartCoroutine(UnsealOaths());
+    }
+
+    // After the first dawn the oath stone's chains break, once, and the stone answers from then on.
+    IEnumerator UnsealOaths()
+    {
+        Save.Data.oathsUnsealed = true;
+        Save.Write();
+        yield return new WaitForSeconds(3.2f);
+        Vector3 stone = safeArea.PointOf(StationKind.Oaths) + Vector3.up * 1.2f;
+        Sfx.Play(Sfx.ChainSnap);
+        Fx.Play(Fx.Impact, stone, Oaths.HeatColour, 2.2f);
+        ElementFx.Glow(stone, Oaths.HeatColour, 1f, 5f, 1.2f);
+        foreach (SafeArea.Station station in CurrentSafeArea.stations)
+        {
+            if (station.kind == StationKind.Oaths) station.label = "OATH STONE";
+        }
+        ui.ShowSubtitle(null, "The oath stone's chains fall away. Harder oaths may be sworn there now.", Oaths.HeatColour, 3.5f);
+    }
+
+    // The oath stone (Hades' Pact of Punishment): each oath cycles through its ranks; the Heat they add up to raises
+    // the embers earned, and a dawn at a new highest Heat pays a bounty.
+    void ShowOaths(System.Action back, int startIndex = 0)
+    {
+        string muted = MenuUI.MutedHex(false);
+        string heat = ColorUtility.ToHtmlStringRGB(Oaths.HeatColour);
+        var items = new List<MenuUI.Item>();
+        foreach (Oath oath in Oaths.All)
+        {
+            OathId id = oath.Id;
+            int row = items.Count;
+            int rank = Oaths.Rank(id);
+            string pips = $"<color=#{(rank > 0 ? heat : muted)}>{rank}/{oath.MaxRank}</color>";
+            string note = rank > 0 ? $"{oath.Effect(rank)}   <color=#{muted}>·  Enter to {(rank < oath.MaxRank ? "swear deeper" : "release it")}</color>"
+                : $"{oath.Effect(1)}   <color=#{muted}>·  Enter to swear</color>";
+            items.Add(MenuUI.Item.Button($"{oath.Name.ToUpperInvariant()}  {pips}", () =>
+            {
+                Oaths.Cycle(id);
+                Sfx.Play(Oaths.Rank(id) > 0 ? Sfx.ChainSnap : Sfx.UiMove);
+                ShowOaths(back, row);
+            }, note));
+        }
+        items.Add(MenuUI.Item.Button("BACK", back, ""));
+        int nextBounty = 0;
+        for (int h = Save.Data.bestHeatCleared + 1; h <= Oaths.Heat; h++) nextBounty += Oaths.BountyPerHeat * h;
+        string bounty = nextBounty > 0 ? $"   <color=#{muted}>·</color>   dawn bounty  <color=#{heat}>{nextBounty}</color>" : "";
+        menu.Show("OATH STONE",
+            $"<color=#{heat}>HEAT {Oaths.Heat}</color>   <color=#{muted}>·</color>   embers  x{Oaths.EmberMultiplier:0.0}{bounty}\n<size=30><color=#{muted}>Vows cut into the stone by ronin who wanted the road harder. Highest Heat at dawn: {Save.Data.bestHeatCleared}.</color></size>",
+            items.ToArray(), back, startIndex, gridColumns: 2);
     }
 
     // What the run he just died on was worth, for a moment, under the stations.
@@ -1021,6 +1079,10 @@ public class GameManager : MonoBehaviour
             case StationKind.FluteSongs: OpenStation(() => ShowSongs(CloseStation)); break;
             case StationKind.Memorial: OpenStation(() => ShowRecords(CloseStation)); break;
             case StationKind.WeaponRack: OpenStation(() => ShowRack(CloseStation)); break;
+            case StationKind.Oaths:
+                if (Oaths.Unlocked) OpenStation(() => ShowOaths(CloseStation));
+                else ui.ShowSubtitle("Oni", "Bound in chains. Not until the Emperor falls.", OniColour, 2.5f);
+                break;
         }
     }
 
@@ -1059,7 +1121,9 @@ public class GameManager : MonoBehaviour
     {
         SaveData d = Save.Data;
         string muted = MenuUI.MutedHex(false);
-        string body = $"<color=#{muted}>RUNS</color>  {d.runsStarted}        <color=#{muted}>DAWNS</color>  {d.runsCleared}        <color=#{muted}>DEATHS</color>  {d.deaths}\n\n<align=left>";
+        string body = $"<color=#{muted}>RUNS</color>  {d.runsStarted}        <color=#{muted}>DAWNS</color>  {d.runsCleared}        <color=#{muted}>DEATHS</color>  {d.deaths}";
+        if (d.bestHeatCleared > 0) body += $"        <color=#{muted}>HIGHEST HEAT</color>  {d.bestHeatCleared}";
+        body += "\n\n<align=left>";
         string Row(string name, string fell, string felled) => $"<pos=14%>{name}<pos=52%><color=#{muted}>killed him</color>  {fell}<pos=76%><color=#{muted}>fell to him</color>  {felled}\n";
         body += Row("THE ARMY", d.deathsTo[(int)BossKind.None].ToString(), "-");
         var listed = new HashSet<BossKind>();
@@ -1337,7 +1401,7 @@ public class GameManager : MonoBehaviour
     {
         stageIndex = stage;
         boss &= Stage.boss != BossKind.None;
-        roundIndex = boss ? Mathf.Min(bossPortalAfterRound, maxRounds) - 1 : 0;
+        roundIndex = boss ? BossPortalAfter - 1 : 0;
         ShowMap(boss ? BossMap : Stage.roundsMap);
         StartCoroutine(boss ? BeginBoss() : BeginRound());
     }
@@ -1352,6 +1416,18 @@ public class GameManager : MonoBehaviour
 
     StageConfig Stage => stages[stageIndex];
     LevelConfig Round => roundIndex < Stage.rounds.Length ? Stage.rounds[roundIndex] : ExtraRound();
+
+    // The round as the oaths sworn make it: a faster march and more, faster arrows. A copy, so the stage keeps its own.
+    static LevelConfig Sworn(LevelConfig round)
+    {
+        int march = Oaths.Rank(OathId.HastenedMarch), arrows = Oaths.Rank(OathId.RainOfArrows);
+        if (march == 0 && arrows == 0) return round;
+        var sworn = round.Clone();
+        sworn.baseSpeed *= 1f + march * Oaths.MarchPerRank;
+        sworn.fireInterval *= 1f - arrows * Oaths.ArrowIntervalPerRank;
+        sworn.arrowSpeed *= 1f + arrows * Oaths.ArrowSpeedPerRank;
+        return sworn;
+    }
 
     // A round past the stage's configured ones: its last round again, marching faster and shooting more often, with
     // a commander in the back rank and, from the second extra round, one more rank (up to six).
@@ -1395,7 +1471,9 @@ public class GameManager : MonoBehaviour
         Upgrades.RefundRetired();
         ronin.LearnSongs();
         ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
-        lives = maxLives = Mathf.Min(startingLives + Upgrades.Rank(UpgradeId.IronWill), Boons.MaxLives);
+        lives = maxLives = Mathf.Clamp(startingLives + Upgrades.Rank(UpgradeId.IronWill) - Oaths.Rank(OathId.FrailBody), 1, Boons.MaxLives);
+        Boss.HealthScale = 1f + Oaths.Rank(OathId.IronGenerals) * Oaths.BossHealthPerRank;
+        emberFraction = 0f;
         embersThisRun = 0;
         dawnUsed = false;
         redrawsLeft = Upgrades.Rank(UpgradeId.FatesThread);
@@ -1445,7 +1523,7 @@ public class GameManager : MonoBehaviour
             pendingElement = PickSoulElement();
         }
 
-        LevelConfig round = Round;
+        LevelConfig round = Sworn(Round);
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, 0);
         string body = roundIndex >= Stage.rounds.Length + 1 ? "Their finest march."
@@ -1473,10 +1551,14 @@ public class GameManager : MonoBehaviour
     }
 
     // Embers go straight into the save, so a run that ends any way at all keeps them.
+    // Heat raises them; the fractions carry over so single kills still add up.
     void Earn(int embers)
     {
-        embersThisRun += embers;
-        Upgrades.AddEmbers(embers);
+        emberFraction += embers * Oaths.EmberMultiplier;
+        int whole = Mathf.FloorToInt(emberFraction);
+        emberFraction -= whole;
+        embersThisRun += whole;
+        Upgrades.AddEmbers(whole);
     }
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
@@ -1956,6 +2038,9 @@ public class GameManager : MonoBehaviour
         StartCoroutine(BeginRound());
     }
 
+    // The Long Road holds the boss's portal back a round per rank.
+    int BossPortalAfter => Mathf.Min(bossPortalAfterRound + Oaths.Rank(OathId.LongRoad), maxRounds);
+
     // The cleared round's reward, given before the portals open.
     IEnumerator GrantReward()
     {
@@ -2097,7 +2182,7 @@ public class GameManager : MonoBehaviour
     List<(PortalReward, Element)> RollPortals()
     {
         var weights = new List<(PortalReward reward, float weight)> { (PortalReward.Soul, 45f), (PortalReward.Embers, 20f) };
-        if (Boons.DrawBead(loadout, 1).Count > 0) weights.Add((PortalReward.Bead, 20f));
+        if (Boons.DrawBead(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PortalReward.Bead, 20f));
         if (lives < maxLives) weights.Add((PortalReward.Spring, 10f));
         if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PortalReward.Scroll, 5f));
 
@@ -2115,7 +2200,7 @@ public class GameManager : MonoBehaviour
             weights.RemoveAt(index);
             picks.Add((reward, reward == PortalReward.Soul ? PickSoulElement() : Element.Fire));
         }
-        if (roundIndex + 1 >= bossPortalAfterRound) picks.Add((PortalReward.Boss, Element.Fire));
+        if (roundIndex + 1 >= BossPortalAfter) picks.Add((PortalReward.Boss, Element.Fire));
         return picks;
     }
 
@@ -2182,7 +2267,8 @@ public class GameManager : MonoBehaviour
         }
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
         Sfx.Play(Sfx.SoulCollect);
-        if (!OfferBoons(element, BeadThenNextStage, true, Rarity.Rare)) BeadThenNextStage();
+        Rarity floor = Oaths.Rank(OathId.FadedSpirits) >= 2 ? Rarity.Common : Rarity.Rare;
+        if (!OfferBoons(element, BeadThenNextStage, true, floor)) BeadThenNextStage();
     }
 
     // A fallen boss also leaves a Spirit Bead, so the stage's reward raises the build as well as widening it.
@@ -2992,6 +3078,8 @@ public class GameManager : MonoBehaviour
     void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None)
     {
         state = State.GameOver;
+        // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
+        if (cleared) embersThisRun += Oaths.ClaimBounty();
         Save.EndRun(cleared, killer);
         lastRunEmbers = embersThisRun;
         if (activeBoss != null) activeBoss.Halt();

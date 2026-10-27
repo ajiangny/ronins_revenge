@@ -27,4 +27,7 @@ public class LevelConfig
     [FormerlySerializedAs("bulletSpeed")] public float arrowSpeed = 7f;
 
     [FormerlySerializedAs("alienColor")] public Color samuraiColor = new Color(0f, 0.98f, 0.6f);
+
+    // A copy to tune for one round (the oaths) without touching the stage's own; rowKinds is shared, read-only.
+    public LevelConfig Clone() => (LevelConfig)MemberwiseClone();
 }

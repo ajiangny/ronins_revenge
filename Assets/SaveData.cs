@@ -31,6 +31,11 @@ public class SaveData
     public List<int> songsOff = new List<int>();
     // The blade taken from the temple's weapon rack (Ronin.Weapon).
     public int weapon;
+    // Indexed by OathId: the ranks sworn at the oath stone; the highest Heat a dawn was reached at; and whether the
+    // stone's chains have fallen (after the first dawn).
+    public int[] oaths = new int[0];
+    public int bestHeatCleared;
+    public bool oathsUnsealed;
 
     public int SeenIn(string id)
     {

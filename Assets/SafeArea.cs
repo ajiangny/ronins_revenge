@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // What a station does when Oni uses it.
-public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack }
+public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths }
 
 // A little life a station gives off: incense smoke rising, light glinting on blades, a soft glow.
 public enum StationFx { None, Incense, Glint, Glow }

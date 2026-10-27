@@ -1677,11 +1677,11 @@ public class GameManager : MonoBehaviour
         BossKind.Benibana => new BossVoice
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
-            // The close-ups are transparent 1536x1024 paintings cut off around the hips, the figure centred. Each is
-            // shown centred at the same size, wider than the screen so the art's cut-off sides and bottom sit off it,
-            // with every boss's eyes at the same height; the focus is the eyes' height down the art.
+            // The close-ups are transparent dialogue portraits, 1024x1536 and cut off at the thigh, shown 1500 tall
+            // with each boss's eyes (the focus) on the centre line at the same point on screen, so the set lines up and
+            // the cut-off bottom sits off screen. Kagetsune's is a wider 1536x1024 bust, sized to match.
             // Hers: the kiseru raised by her face, its smoke curling up to the left.
-            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.355f), closeupAt = new Vector2(0f, 90f),
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.46f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // Unsealed: framed on her face with her loose hair and the drawn blade around her, held back far enough to
             // see her shoulders; raised a touch so the painting's top edge stays off screen.
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
@@ -1694,7 +1694,7 @@ public class GameManager : MonoBehaviour
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed on its slit-eye, the whole hat brim and its pendants on screen.
-            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.246f), closeupAt = new Vector2(0f, 90f),
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.45f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
             phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
             // Pulled back as far as the painting allows: its left edge limits it, so the slit-eye sits a little left.
@@ -1706,8 +1706,8 @@ public class GameManager : MonoBehaviour
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Her blade drawn low across her, her hair streaming out to the right.
-            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.26f), closeupAt = new Vector2(0f, 90f),
+            // Framed on her face, her hair streaming out to the right, twin blades held low.
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.4f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
             phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
             phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),
@@ -1718,8 +1718,9 @@ public class GameManager : MonoBehaviour
         BossKind.Kagetsune => new BossVoice
         {
             portrait = kagetsunePortrait, closeup = kagetsuneCloseup,
-            // The horned helm over the coffin-hammer on his shoulder, filling the frame.
-            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.245f), closeupAt = new Vector2(0f, 90f),
+            // The horned helm over the coffin-hammer on his shoulder. Kept just wider than the screen so the painting's
+            // cut-off sides stay off it, which puts his horn tips at the top edge: he's the biggest of them.
+            closeupHeight = 1300f, closeupFocus = new Vector2(0.51f, 0.245f), closeupAt = new Vector2(0f, 255f),
             // The Wraith: framed on the helm and the howling skull fire, washed in the souls' teal.
             phasePortrait = kagetsunePhasePortrait, phaseCloseup = kagetsunePhaseCloseup, phaseEpithet = Kagetsune.PhaseEpithet,
             phaseCloseupHeight = 1400f, phaseCloseupFocus = new Vector2(0.5f, 0.32f), phaseCloseupAt = new Vector2(0f, 190f),

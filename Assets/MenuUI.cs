@@ -17,10 +17,12 @@ public class MenuUI : MonoBehaviour
         public Action chosen;
         public Func<float> get;
         public Action<float> set;
+        // A line shown under the rows while this item is selected (the Flute Songs' effects).
+        public string note;
 
         public bool IsSlider => set != null;
 
-        public static Item Button(string label, Action chosen) => new Item { label = label, chosen = chosen };
+        public static Item Button(string label, Action chosen, string note = null) => new Item { label = label, chosen = chosen, note = note };
         public static Item Slider(string label, Func<float> get, Action<float> set) => new Item { label = label, get = get, set = set };
     }
 
@@ -61,6 +63,7 @@ public class MenuUI : MonoBehaviour
     TextMeshProUGUI titleText;
     TextMeshProUGUI bodyText;
     TextMeshProUGUI hintText;
+    TextMeshProUGUI noteText;
     RectTransform rowsRoot;
     readonly List<Row> rows = new List<Row>();
     Item[] items = Array.Empty<Item>();
@@ -118,6 +121,10 @@ public class MenuUI : MonoBehaviour
         titleText.fontSize = 96;
         bodyText.text = body ?? "";
         bodyText.gameObject.SetActive(!string.IsNullOrEmpty(body));
+        noteText.gameObject.SetActive(Array.Exists(items, item => item.note != null));
+        noteText.color = paper ? Ink : Color.white;
+        if (paper) noteText.fontSharedMaterial = noteText.font.material;
+        else ui.Style(noteText, TextStyle.Body);
         hintText.text = Hint(columns > 1 ? "↑ ↓ ← →" : "↑ ↓", "Select")
             + (Array.Exists(items, item => item.IsSlider) ? Hint("← →", "Adjust") : "")
             + Hint("Enter", "Confirm")
@@ -276,7 +283,11 @@ public class MenuUI : MonoBehaviour
             ui.Style(titleText, TextStyle.Title);
             rowsRoot.anchoredPosition = new Vector2(0, rowsRoot.anchoredPosition.y);
         }
-        if (on) bodyText.gameObject.SetActive(false);
+        if (on)
+        {
+            bodyText.gameObject.SetActive(false);
+            noteText.gameObject.SetActive(false);
+        }
         hintText.color = on ? new Color(Ink.r, Ink.g, Ink.b, 0.55f) : GameUI.MutedColour;
         hintText.fontSharedMaterial = on ? hintText.font.material : null;
         if (!on) ui.Style(hintText, TextStyle.Hint);
@@ -323,6 +334,7 @@ public class MenuUI : MonoBehaviour
 
         if (selected != heardSelection) Sfx.Play(Sfx.UiMove);
         heardSelection = selected;
+        if (noteText.gameObject.activeSelf && items.Length > 0) noteText.text = items[selected].note ?? "";
 
         float elapsed = Time.unscaledTime - shownAt;
         Animate(elapsed);
@@ -616,6 +628,9 @@ public class MenuUI : MonoBehaviour
             28, TextAlignmentOptions.Bottom);
         hintText.color = GameUI.MutedColour;
         ui.Style(hintText, TextStyle.Hint);
+        noteText = GameUI.CreateText(page, ui.BodyFont, "Note", new Vector2(0.5f, 0f), new Vector2(0, 98f), new Vector2(1600f, 60f),
+            34, TextAlignmentOptions.Bottom);
+        noteText.richText = true;
 
         paper.gameObject.SetActive(false);
         titleArt.gameObject.SetActive(false);

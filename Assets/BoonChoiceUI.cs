@@ -82,6 +82,9 @@ public class BoonChoiceUI : MonoBehaviour
 
     List<BoonOffer> offers;
     Action<int> chosen;
+    // Fate's Thread: draws a fresh set of offers, once.
+    Func<List<BoonOffer>> redraw;
+    TextMeshProUGUI hint;
     Color elementColor;
     int selected;
     int heardSelection;
@@ -129,6 +132,8 @@ public class BoonChoiceUI : MonoBehaviour
     {
         offers = boonOffers;
         chosen = onChosen;
+        redraw = null;
+        hint.text = Hints;
         elementColor = colour;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
@@ -172,6 +177,32 @@ public class BoonChoiceUI : MonoBehaviour
         // The ability slots would show through the footer's key hints.
         SetHudVisible(false);
         panel.SetActive(true);
+    }
+
+    static string Hints => $"{MenuUI.KeyCap("1 2 3", false)}  Quick pick       {MenuUI.KeyCap("↑ ↓", false)}  Select       {MenuUI.KeyCap("Enter", false)}  Choose";
+
+    // Offers one redraw of this screen's cards (R), for the Fate's Thread song.
+    public void OfferRedraw(Func<List<BoonOffer>> draw)
+    {
+        redraw = draw;
+        hint.text = Hints + $"       {MenuUI.KeyCap("R", false)}  Redraw";
+    }
+
+    void Redraw()
+    {
+        List<BoonOffer> fresh = redraw();
+        redraw = null;
+        hint.text = Hints;
+        if (fresh == null || fresh.Count == 0) return;
+        offers = fresh;
+        selected = heardSelection = 0;
+        shownAt = Time.unscaledTime;
+        for (int i = 0; i < cards.Length; i++)
+        {
+            cards[i].root.gameObject.SetActive(i < offers.Count);
+            if (i < offers.Count) Fill(cards[i], offers[i]);
+        }
+        Sfx.Play(Sfx.SoulCollect);
     }
 
     void Fill(Card card, BoonOffer offer)
@@ -249,6 +280,11 @@ public class BoonChoiceUI : MonoBehaviour
             if (keyboard.digit1Key.wasPressedThisFrame) selected = 0;
             if (keyboard.digit2Key.wasPressedThisFrame && offers.Count > 1) selected = 1;
             if (keyboard.digit3Key.wasPressedThisFrame && offers.Count > 2) selected = 2;
+            if (keyboard.rKey.wasPressedThisFrame && redraw != null)
+            {
+                Redraw();
+                return;
+            }
             if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
             {
                 Choose(selected);
@@ -435,8 +471,8 @@ public class BoonChoiceUI : MonoBehaviour
         }
 
         // Key hints in the menus' key caps, under the cards.
-        TextMeshProUGUI hint = GameUI.CreateText(root, font, "Hint", new Vector2(0.5f, 0f), new Vector2(CardX, 40), new Vector2(1300, 50), 30, TextAlignmentOptions.Center);
-        hint.text = $"{MenuUI.KeyCap("1 2 3", false)}  Quick pick       {MenuUI.KeyCap("↑ ↓", false)}  Select       {MenuUI.KeyCap("Enter", false)}  Choose";
+        hint = GameUI.CreateText(root, font, "Hint", new Vector2(0.5f, 0f), new Vector2(CardX, 40), new Vector2(1300, 50), 30, TextAlignmentOptions.Center);
+        hint.text = Hints;
         hint.color = MutedText;
         ui.Style(hint, TextStyle.Hint);
     }

@@ -331,6 +331,11 @@ public class GameManager : MonoBehaviour
     int highScore;
     // The best score before this run, so the end screen can tell a new record apart.
     int highScoreAtStart;
+    // Soul Embers earned this run (already added to the save), for the end screen.
+    int embersThisRun;
+    // Second Dawn and Fate's Thread work once a run.
+    bool dawnUsed;
+    bool redrawUsed;
     MenuUI menu;
 
     RoninLoadout loadout;
@@ -539,9 +544,14 @@ public class GameManager : MonoBehaviour
         var items = new List<MenuUI.Item>
         {
             MenuUI.Item.Button("START", () => StartCoroutine(TitleToGame())),
+        };
+        // The songs appear once there are embers to spend, like Hades' mirror after the first death.
+        if (Save.Data.embers > 0 || Upgrades.TotalBought > 0) items.Add(MenuUI.Item.Button("FLUTE SONGS", () => ShowSongs(ShowTitleMenu)));
+        items.AddRange(new[]
+        {
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTitleMenu)),
-        };
+        });
         if (DevToolsOn) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowTitleMenu)));
         if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT", Quit));
         menu.ShowTitle("RONIN'S REVENGE", items.ToArray());
@@ -664,6 +674,44 @@ public class GameManager : MonoBehaviour
             new[] { MenuUI.Item.Button("BACK", back) }, back, paper: paper);
     }
 
+    // The shop on the hill: each song's name, ranks learned and the price of the next; the line under the rows says
+    // what the selected one does. A maxed song toggles on and off instead.
+    void ShowSongs(System.Action back, int startIndex = 0)
+    {
+        bool paper = OnPaper;
+        string muted = MenuUI.MutedHex(paper);
+        string ember = paper ? "1E8C7E" : ColorUtility.ToHtmlStringRGB(OniColour);
+        var items = new List<MenuUI.Item>();
+        foreach (Song song in Upgrades.All)
+        {
+            UpgradeId id = song.Id;
+            int row = items.Count;
+            int bought = Upgrades.Bought(id);
+            bool maxed = Upgrades.Maxed(id);
+            string pips = $"<color=#{muted}>{bought}/{song.MaxRank}</color>";
+            string price = maxed ? (Upgrades.IsOff(id) ? "OFF" : "") : $"<color=#{(Upgrades.CanBuy(id) ? ember : muted)}>{Upgrades.Price(id)}</color>";
+            string note = maxed
+                ? $"{song.Effect(song.MaxRank)}   <color=#{muted}>·  Enter switches it {(Upgrades.IsOff(id) ? "on" : "off")}</color>"
+                : $"{song.Effect(bought + 1)}   <color=#{muted}>·  {(Upgrades.CanBuy(id) ? "Enter to learn" : "not enough embers")}</color>";
+            items.Add(MenuUI.Item.Button($"{song.Name.ToUpperInvariant()}  {pips}  {price}", () =>
+            {
+                if (maxed) Upgrades.Toggle(id);
+                else if (Upgrades.Buy(id)) Sfx.Play(Sfx.SoulCollect);
+                ShowSongs(back, row);
+            }, note));
+        }
+        int refundRow = items.Count;
+        items.Add(MenuUI.Item.Button("REFUND ALL", () =>
+        {
+            Upgrades.RefundAll();
+            ShowSongs(back, refundRow);
+        }, $"Forget every song and take back {Upgrades.Spent} embers"));
+        items.Add(MenuUI.Item.Button("BACK", back, ""));
+        menu.Show("FLUTE SONGS",
+            $"<color=#{ember}>{Save.Data.embers} SOUL EMBERS</color>\n<size=30><color=#{muted}>Songs Shirogane taught him on her flute. They stay with him through every run.</color></size>",
+            items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
+    }
+
     void ShowSettings(System.Action back)
     {
         menu.Show("SETTINGS", null, new[]
@@ -723,6 +771,14 @@ public class GameManager : MonoBehaviour
             SetGodMode(!godMode);
             ShowDevMenu(back, godModeRow);
         }));
+        // Enough embers to try the songs without playing for them.
+        int embersRow = items.Count;
+        items.Add(MenuUI.Item.Button($"+1000 EMBERS  ({Save.Data.embers})", () =>
+        {
+            Upgrades.AddEmbers(1000);
+            Save.Write();
+            ShowDevMenu(back, embersRow);
+        }));
         // Forgets every run, line heard and song bought, so the game plays as on a first boot.
         int resetRow = items.Count;
         items.Add(MenuUI.Item.Button(Save.Data.runsStarted > 0 ? $"RESET SAVE  ({Save.Data.runsStarted} RUNS)" : "RESET SAVE  (FRESH)", () =>
@@ -764,6 +820,8 @@ public class GameManager : MonoBehaviour
     // Reload for a clean slate (arrows, debris, ronin), straight into play or back to the title menu.
     static void Reload(bool intoPlay)
     {
+        // A restart or quit mid-run still keeps the embers earned so far.
+        Save.Write();
         skipTitle = intoPlay;
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -788,6 +846,7 @@ public class GameManager : MonoBehaviour
 
     void OnScoutKilled(Scout scout)
     {
+        Earn(Upgrades.PerScout);
         score += scout.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
@@ -870,7 +929,10 @@ public class GameManager : MonoBehaviour
 
     void StartGame()
     {
-        lives = maxLives = startingLives;
+        ronin.LearnSongs();
+        lives = maxLives = Mathf.Min(startingLives + Upgrades.Rank(UpgradeId.IronWill), Boons.MaxLives);
+        embersThisRun = 0;
+        dawnUsed = redrawUsed = false;
         score = 0;
         highScoreAtStart = highScore;
         stageIndex = 0;
@@ -932,8 +994,16 @@ public class GameManager : MonoBehaviour
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
 
+    // Embers go straight into the save, so a run that ends any way at all keeps them.
+    void Earn(int embers)
+    {
+        embersThisRun += embers;
+        Upgrades.AddEmbers(embers);
+    }
+
     void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
+        Earn(Upgrades.PerSamurai);
         score += samurai.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
@@ -1033,7 +1103,9 @@ public class GameManager : MonoBehaviour
     {
         if (activeSoul != null || army.Remaining == 0) return;
         killsSinceSoul++;
-        if (!guaranteed && Random.value >= soulDropChance && killsSinceSoul < soulPityKills) return;
+        int pull = Upgrades.Rank(UpgradeId.SoulPull);
+        if (!guaranteed && Random.value >= soulDropChance + pull * Upgrades.SoulChancePerRank
+            && killsSinceSoul < soulPityKills - pull * Upgrades.SoulPityPerRank) return;
 
         killsSinceSoul = 0;
         SpawnSoul(position, PickSoulElement());
@@ -1195,6 +1267,19 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             afterPick();
         });
+        // Fate's Thread: one redraw a run. The new cards replace these in the same list, so the pick reads them.
+        if (!redrawUsed && Upgrades.Rank(UpgradeId.FatesThread) > 0)
+        {
+            boonChoice.OfferRedraw(() =>
+            {
+                redrawUsed = true;
+                var fresh = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity);
+                if (fresh.Count == 0) return null;
+                offers.Clear();
+                offers.AddRange(fresh);
+                return offers;
+            });
+        }
         return true;
     }
 
@@ -1772,6 +1857,7 @@ public class GameManager : MonoBehaviour
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
         // working through the blow that felled her. Each boss's fall takes its own time (Shirogane's is a scene).
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
+        Earn(Upgrades.ForBoss(Stage.boss));
         Save.BossFelled(Stage.boss);
         // The Emperor is the end: no boon, the dawn.
         if (Stage.boss == BossKind.Kagetsune && stageIndex == stages.Length - 1)
@@ -1990,6 +2076,18 @@ public class GameManager : MonoBehaviour
 
         lives--;
         ui.SetLives(lives, maxLives);
+        // Second Dawn: once a run, the last blow doesn't take.
+        if (lives <= 0 && !dawnUsed && Upgrades.Rank(UpgradeId.SecondDawn) > 0)
+        {
+            dawnUsed = true;
+            lives = Mathf.Min(Upgrades.DawnLives, maxLives);
+            ui.SetLives(lives, maxLives);
+            ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
+            Fx.Play(Fx.BoonPillar, ronin.Feet, OniColour, 1.4f);
+            Sfx.Play(Sfx.SoulCollect);
+            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f);
+            return;
+        }
         if (lives <= 0)
         {
             ronin.Explode();
@@ -2038,6 +2136,8 @@ public class GameManager : MonoBehaviour
             $"<color=#{muted}>SCORE</color>  <size=48>{score:000000}</size>        <color=#{muted}>HIGH SCORE</color>  <size=48><color=#{gold}>{highScore:000000}</color></size>\n" +
             $"<color=#{muted}>Reached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}</color>";
         if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
+        if (embersThisRun > 0)
+            body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{embersThisRun} SOUL EMBERS</color>  <color=#{muted}>({Save.Data.embers} to spend on the hill)</color>";
         menu.Show(title, body, new[]
         {
             MenuUI.Item.Button("PLAY AGAIN", () => Reload(true)),

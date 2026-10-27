@@ -180,6 +180,22 @@ public class Ronin : MonoBehaviour
         UpdateLoopClip();
     }
 
+    bool songsLearned;
+
+    // The Flute Songs bought on the hill, added on top of the scene's tuning. The scene reloads for every run, so
+    // this runs once on fresh values.
+    public void LearnSongs()
+    {
+        if (songsLearned) return;
+        songsLearned = true;
+        parryWindow += Upgrades.Rank(UpgradeId.KeenEye) * Upgrades.ParryWindowPerRank;
+        speed += Upgrades.Rank(UpgradeId.SwiftFeet) * Upgrades.SpeedPerRank;
+        shotCooldown *= 1f - Upgrades.Rank(UpgradeId.QuickDraw) * Upgrades.SwingCutPerRank;
+        shurikenCooldown -= Upgrades.Rank(UpgradeId.SpiritShuriken) * Upgrades.ShurikenCutPerRank;
+        parryMissCooldown -= Upgrades.Rank(UpgradeId.SteadyBreath) * Upgrades.MissCutPerRank;
+        invulnerableTime += Upgrades.Rank(UpgradeId.LongShadow) * Upgrades.InvulnerablePerRank;
+    }
+
     void Update()
     {
         moveInput = 0;

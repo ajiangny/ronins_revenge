@@ -180,9 +180,9 @@ public static class Boons
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
-            Description = "A <b>Slash</b> kill encases nearby samurai in ice. Cut one down and it freezes where it stands; strike the ice to <b>Shatter</b> it into shards.",
+            Description = "A <b>Slash</b> kill may encase up to two nearby samurai in ice. Cut one down and it freezes where it stands; strike the ice to <b>Shatter</b> it into shards.",
             StatLabel = "Freeze time:", Values = new[] { 1.5f, 2f, 2.5f }, Format = Seconds,
-            ExtraLabel = "Shards:", ExtraValues = new[] { 2f, 3f, 4f } },
+            ExtraLabel = "Shards:", ExtraValues = new[] { 1f, 2f, 3f } },
         new BoonDefinition { Id = BoonId.GlacialShuriken, Element = Element.Water, Slot = BoonSlot.Special, Name = "Glacial Shuriken",
             Description = "Your <b>Shuriken</b> freezes the whole army: no marching, no arrows.",
             StatLabel = "Freeze time:", Values = new[] { 0.6f, 0.9f, 1.2f }, Format = Seconds },

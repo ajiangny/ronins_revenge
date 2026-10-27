@@ -241,6 +241,10 @@ an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and r
 - **Sword Arts are rarer:** no scroll drops from kills (was 0.5%), scouts 25% (was 40%); portals still offer them.
 - Boss health unchanged: the fights already land in the 60–120 s target.
 
+**Second pass** (two more runs): rounds took 15–40 s with a hit about every other round, but frost builds now made
+50–65% of kills (Epic Frost Blade cleared stage 1 rounds in 8–11 s). **Frost Blade** now encases each samurai in reach
+with a 50% chance, at most 2 per kill (was every one in reach), and its shatter shards are 1 / 2 / 3 (were 2 / 3 / 4).
+
 ## 4. Later
 
 - **Shared statuses.**

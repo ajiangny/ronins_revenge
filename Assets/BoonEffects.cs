@@ -12,6 +12,10 @@ public class BoonEffects
     const float ShurikenArcRadius = 2.6f;
     // Samurai stand 2 apart across and 1.75 apart down, so this reaches the ones beside, above and below.
     const float IceRadius = 2.1f;
+    // Frost Blade: each samurai in reach of a slash kill has this chance to be encased, and at most this many are,
+    // nearest first, so ice can't lock down a whole packed rank from one kill.
+    const float FrostEncaseChance = 0.5f;
+    const int FrostEncaseTargets = 2;
     // Most samurai one fire blast can burn, nearest first; Wildfire's blasts burn more.
     const int BlastTargets = 3;
     const int WildfireBlastTargets = 5;
@@ -62,7 +66,14 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
-                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Encase(value * loadout.FreezeMultiplier);
+                    int encased = 0;
+                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+                    {
+                        if (encased >= FrostEncaseTargets) break;
+                        if (Random.value >= FrostEncaseChance) continue;
+                        target.Encase(value * loadout.FreezeMultiplier);
+                        encased++;
+                    }
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
                     Sfx.Play(Sfx.FrostChill);
                 }

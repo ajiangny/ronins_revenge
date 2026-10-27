@@ -99,6 +99,32 @@ const LINES = {
   Benibana_Echo: [BENIBANA, "[hollow, sorrowful, distant] Forgive me, Oni... he has my bell."],
   Utsusemi_Echo: [UTSUSEMI, "[slow, grinding, straining] The hour... strikes... [urgent whisper] Run... boy."],
   Shirogane_Echo: [SHIROGANE, "[strained, urgent, sorrowful] Move, Oni. [anguished] I cannot hold my blades."],
+
+  // The reactive dialogue's lines (Dialogue.cs): ids are conversation ids, and the words must match its text. Not
+  // generated yet; until they are, they play as subtitles. Run Ninja/Apply Voice Lines after generating them.
+  Benibana_Intro_Three: [BENIBANA, "[cold, counting, bitter] Three times I've killed you. Three bells he swore to silence. [quiet] Not one has stopped ringing."],
+  Benibana_Intro_Bell: [BENIBANA, "[low, confiding, almost tender] The third bell from the left on his belt. The cracked one. [quiet] That one is mine."],
+  Benibana_Intro_Back: [BENIBANA, "[amused, mocking] Back so soon? [bitter] He promised me a bell for that one. I'm still listening."],
+  Benibana_Intro_Fire: [BENIBANA, "[amused, scornful] Fire? You'd burn my smoke? [sultry] Cute."],
+  Benibana_Intro_Dance: [BENIBANA, "[sultry, inviting] Dance with me, demon."],
+  Benibana_Killed: [BENIBANA, "[hushed, listening] Listen... Did a bell stop? [bitter, quiet] ...No. Of course not."],
+  Benibana_Killed_Curtain: [BENIBANA, "[cold, final] Curtain."],
+  Utsusemi_Intro_Tea: [UTSUSEMI, "[slow, ticking] Tick... tock... tea... [confused, softer, almost human] There was tea, once. Why do I... remember tea?"],
+  Utsusemi_Intro_WindDown: [UTSUSEMI, "[strained, then a gentle old man's whisper] Boy. Wind me down. I cannot do it... from in here."],
+  Utsusemi_Intro_Tick: [UTSUSEMI, "[slow, cold] Tick... tock."],
+  Utsusemi_Killed: [UTSUSEMI, "[cold, deliberate] One. I will remember the hour."],
+  Utsusemi_Killed_Counted: [UTSUSEMI, "[cold, clipped] Counted."],
+  Shirogane_Intro_Bell: [SHIROGANE, "[calm, proud, sorrowful] She told you which bell is hers. Mine has never rung. I would not kneel."],
+  Shirogane_Intro_Oath: [SHIROGANE, "[quiet, steady, mournful] We swore to end him together, before the coronation. I kept the oath. [firm] Now you keep it."],
+  Shirogane_Intro_Hesitated: [SHIROGANE, "[soft, disappointed] You hesitated. You never used to."],
+  Shirogane_Intro_Again2: [SHIROGANE, "[calm, resolute] Again, then."],
+  Shirogane_Killed: [SHIROGANE, "[gentle, sad] Not yet, then. I'll wait."],
+  Shirogane_Killed_Rise: [SHIROGANE, "[quiet, firm] Rise."],
+  Kagetsune_Intro_Broken: [KAGETSUNE, "[slow, contemptuous] You broke me once. [booming] I have a thousand more of me."],
+  Kagetsune_Intro_Silent: [KAGETSUNE, "[irritated, contemptuous] She never rang. Do you know how that grates, little demon?"],
+  Kagetsune_Intro_Kneel: [KAGETSUNE, "[deep, commanding] Kneel."],
+  Kagetsune_Killed_Duo: [KAGETSUNE, "[mocking, slow] Two stolen souls, holding hands. How touching. [cold] They'll ring again."],
+  Kagetsune_Killed_Ring: [KAGETSUNE, "[deep, satisfied] Ring."],
 };
 
 const client = new ElevenLabsClient();

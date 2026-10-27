@@ -69,6 +69,11 @@ comes up over the arena while Oni plays the flute, and she becomes the wisp besi
 `ShiroganeFreed`). The rebuilt-Emperor first win is for when runs carry
 over.
 
+**Dialogue, as built:** runs now carry over (`SaveData.cs`) and the reactive system below is in `Dialogue.cs`: boss
+intros (`BossIntro`), the killing boss's last word (`KilledOni`), Oni on the hill after a run (`HubReturn`) and his
+first soul of each element (`FirstElement`) pick from the conversations in the character files. Phase and defeat lines
+are still the fixed ones. The souls behind the boons are written ([Souls.md](Souls.md)) but not wired yet.
+
 ## Consistency rules
 
 - The world is always night until the true ending. Nothing in the game shows a sunrise before it.

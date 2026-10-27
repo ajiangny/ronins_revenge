@@ -69,7 +69,7 @@ with "Dirty trick!" or "You dog!": short, and never as if it's their first fight
 | Phase | "Every step I ever danced was his... This one is mine." |
 | Defeat | "Crimson... suits you... Find my bell, Oni... silence it for them..." |
 
-**For the dialogue system** (`BossIntro`):
+**Reactive dialogue, in game** (`Dialogue.cs`; the new lines are subtitles until voiced) (`BossIntro`):
 
 | Priority | Requires | Text |
 |---|---|---|

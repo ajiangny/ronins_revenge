@@ -46,7 +46,7 @@ lines happen on the hill, after a death. In fights he is silent apart from grunt
 
 ## Lines
 
-None in game yet. Written for the dialogue system ([README](README.md#our-version)):
+In game through the reactive dialogue (`Dialogue.cs`), as subtitles: Oni has no voice yet ([README](README.md#our-version)):
 
 **`HubReturn`** (waking on the hill)
 

@@ -124,7 +124,7 @@ when the chorus starts speaking over him.
 | Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." |
 | The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "Move, Oni. I cannot hold my blades." |
 
-Planned for the reactive dialogue system:
+Reactive dialogue, in game (`Dialogue.cs`; the new lines are subtitles until voiced):
 
 **`BossIntro` variants**
 

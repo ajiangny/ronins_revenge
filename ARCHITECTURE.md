@@ -61,7 +61,23 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).
-  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`).
+  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni. The page also has +1000 EMBERS and RESET SAVE.
+
+## Across runs: save, dialogue, Flute Songs
+
+Hades' loop: what happened in earlier runs changes what is said and how strong Oni starts. Research and numbers in
+[Story/DIALOGUE_RESEARCH.md](Story/DIALOGUE_RESEARCH.md) and [ECONOMY.md](ECONOMY.md).
+
+| What | Where |
+|---|---|
+| The save: runs started and cleared, deaths per boss (`deathsTo`) and wins (`winsVs`) by `BossKind`, how the last run ended (`lastRunCleared`, `lastKiller`), `hubPending`, conversations heard (`seen`/`seenRun`, the run each was last heard in), the repeatables' `shuffleBag`, `embers`, song `ranks` and `songsOff`. One JSON string in `PlayerPrefs` (`"Save"`), cached in `Save.Data` (reset on entering Play mode, which has no domain reload) | `SaveData.cs` (`Save.BeginRun` in `StartGame`, `Save.EndRun(cleared, killer)` in `EndGame`, `Save.BossFelled` in `BossFell`, `Save.Write` also in `Reload`) |
+| Reactive dialogue: a `Conversation` (id, speaker, `DialogueEvent`, `Tier` Story / Reactive / Repeatable, `Req` requirements, `Cooldown` in runs, and either `Lines` or `BuiltIn`, the boss's own `Line()` and clip). `Dialogue.Pick` filters by `Blocked` (heard, cooling down, a `Req` failing), takes the best tier with anything left, the first Story/Reactive one written or a Repeatable from the bag, and marks it heard. No dice in eligibility, so `Explain` is repeatable. Requirements are helpers (`Seen`, `NotSeen`, `LastKiller`, `Deaths`, `DeathsTo`, `WinsVs`, `OfElement`, `Holds`, `HoldsDuo`); `Fill` writes `{Deaths}` in words | `Dialogue.cs` (`Dialogue.All` holds every conversation; keep it in step with `Story/`) |
+| Where they play: `BeginBoss` picks `BossIntro` (a written line replaces the card's typed line and clip, later lines follow as subtitles); `OnRoninHit` picks `KilledOni` from the killing boss (its line is also the end screen text); `Start` on the title runs `HubReturn` when `hubPending` (Oni's words sit beside him, `GameUI.ShowSubtitle(…, beside)`); `TakeBoon` picks Oni's `FirstElement`. `PlayConversation` → `Say` plays each line voiced if `VoiceLibrary` has `Conversation.VoiceId(i)`, else as a subtitle; `Say` marks it a full line so barks wait | `GameManager` |
+| Voices for written lines: `VoiceLibrary` (every clip in `Audio/Voice` by file name), built by `Ninja/Apply Voice Lines`, which also logs the lines still unvoiced. An unvoiced intro line stays on the card long enough to read | `VoiceLibrary.cs`, `Editor/VoiceSetup.cs`, `GameUI.PlayBossIntro` |
+| The souls behind the boons (Akagane, Mizore, Hibiki), written for the boon screen but not wired yet | [Story/Souls.md](Story/Souls.md) |
+| Soul Embers (`Upgrades.PerSamurai`, `PerScout`, `ForBoss`) go into the save as they're earned (`GameManager.Earn`); the end screen tallies `embersThisRun` | `GameManager` |
+| Flute Songs: `UpgradeId`, `Song` (name, max rank, base cost, `Effect` text), `Price` (base × rank + ⌊10 × 1.1^ranks bought⌋), `Buy`, `Spent`/`RefundAll`, `Toggle` (maxed songs only), `Rank` (0 while off). Applied once a run, on top of the scene values: `Ronin.LearnSongs` (parry window, speed, swing, shuriken, missed parry, invulnerability), and in `GameManager` the soul odds (`MaybeDropSoul`), Iron Will's life (`StartGame`), Fate's Thread (`BoonChoiceUI.OfferRedraw`, R; the fresh cards fill the same list) and Second Dawn (`OnRoninHit`, `dawnUsed`) | `Upgrades.cs` |
+| The shop page: `ShowSongs`, a two-column `MenuUI` grid with a `MenuUI.Item.note` line for the selected song; on the title menu once there are embers or songs | `GameManager`, `MenuUI` |
 
 ## Player combat — the Ronin
 
@@ -444,6 +460,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Ronin spirit wisps cut from his base art, elemental ronin recolours, soul and boon icon wiring (`UI/Boons/<BoonId>`), each element's shuriken (`Projectiles/ShurikenArt_<suffix>`, PixelLab; recoloured from the base when missing), the ice statue shell |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
 | Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) and body font (Zen Kaku Gothic New Bold) baked → `GameUI.headerFontBaked` / `bodyFontBaked` (the TTF fields are cleared), `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames`, `Ronin_StandUp_*` → `titleStandFrames` |
+| Apply Voice Lines | `Editor/VoiceSetup.cs` | `VoiceLibrary` from every clip in `Audio/Voice` → `GameManager.voiceLibrary`; logs the written dialogue lines with no clip yet |
 | Apply Web Import Settings | `Editor/WebImportSettings.cs` | Reimports portraits, logo, sound effects and voice lines through the web import hooks |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
 | Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |

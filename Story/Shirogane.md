@@ -78,7 +78,7 @@ falls before Kuon) is voiced, a full line.
 | Defeat | "Even after all this time... you still wield the blade I remember." |
 | Final words | "Go. Finish what we started." |
 
-**For the dialogue system** (`BossIntro`):
+**Reactive dialogue, in game** (`Dialogue.cs`; the new lines are subtitles until voiced) (`BossIntro`):
 
 | Priority | Requires | Text |
 |---|---|---|

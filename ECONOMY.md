@@ -15,24 +15,25 @@ belongs to the boons).
 
 Soul Embers are kept on death: 1 per samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
-five clears.
+five clears. Embers go into the save the moment they're earned, so quitting mid-run keeps them.
 
 ## Spending
 
 Price of the next rank = base × (rank + 1) + ⌊10 × 1.1^ranks bought in total⌋ (the Vampire Survivors formula at half
-its fee). Refund returns everything spent.
+its fee): about 4,600 embers buys every song. Refund returns everything spent, and a maxed song can be switched
+off for a harder run. The shop appears on the title menu once there are embers to spend.
 
 | Song | Fresh → max | Ranks | Base |
 |---|---|---|---|
 | Keen Eye (parry window) | 0.25 → 0.31 s | 2 | 60 |
 | Swift Feet (move speed) | 10 → 11 | 2 | 60 |
 | Quick Draw (swing cooldown) | 0.35 → 0.315 s | 2 | 80 |
-| Spirit Shuriken (cooldown) | 6 → 5 s | 2 | 80 |
+| Spirit Wind (shuriken cooldown) | 6 → 5 s | 2 | 80 |
 | Steady Breath (missed parry) | 2 → 1.5 s | 2 | 80 |
 | Long Shadow (invulnerability after a hit) | 2 → 2.5 s | 1 | 120 |
-| Soul Pull (soul drop chance) | 7% → 9% | 2 | 100 |
+| Soul Pull (soul drop chance, sure soul after) | 7% → 9%, 15 → 13 kills | 2 | 100 |
 | Iron Will (max lives) | 3 → 4 | 1 | 600 |
-| Fate's Thread (one boon reroll a run) | 0 → 1 | 1 | 1,000 |
+| Fate's Thread (one boon redraw a run, R on the boon screen) | 0 → 1 | 1 | 1,000 |
 | Second Dawn (once a run, rise again with 2 lives) | 0 → 1 | 1 | 1,200 |
 
 ## Research

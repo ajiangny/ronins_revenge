@@ -1565,7 +1565,7 @@ public class GameManager : MonoBehaviour
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
             // Framed on her face, her hair spilling off the top and right.
             // Taller than the others, since her face sits so high in the painting, so its top edge stays off screen.
-            closeupHeight = 1450f, closeupFocus = new Vector2(0.45f, 0.3f), closeupAt = new Vector2(0f, 260f),
+            closeupHeight = 1350f, closeupFocus = new Vector2(0.48f, 0.41f), closeupAt = new Vector2(0f, 170f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
             phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
             phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),

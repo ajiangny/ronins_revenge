@@ -52,9 +52,14 @@ of every talk scene, and is framed beside his words on the hill.
 He speaks rarely and briefly, the way Zagreus does at his quietest. A low, tired voice, never a quip. Most of his
 lines happen on the hill, after a death. In fights he is silent apart from grunts.
 
+**In game:** a voice designed for him in ElevenLabs (`ONI` in `Tools/generate-voice.mjs`): a low, quiet, tired
+baritone in his late twenties, slightly hoarse, slow and sparing, weary and haunted, never theatrical. Every written
+line of his is voiced, including Second Dawn's "...Not yet." (`Oni_NotYet`). He speaks through his own audio
+source, so the bosses' voice filters never touch him.
+
 ## Lines
 
-In game through the reactive dialogue (`Dialogue.cs`), as subtitles: Oni has no voice yet ([README](README.md#our-version)):
+In game through the reactive dialogue (`Dialogue.cs`), voiced and subtitled:
 
 **`HubReturn`** (waking on the hill)
 

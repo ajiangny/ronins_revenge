@@ -80,7 +80,7 @@ with "Dirty trick!" or "You dog!": short, and never as if it's their first fight
 | Reactive | holds a Fire boon | "Fire? You'd burn my smoke? Cute." |
 | Repeatable | none | "Dance with me, demon." |
 
-**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, unvoiced). Each plays once, after the boss's
+**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, voiced as `Benibana_<Line>_2` in `Tools/generate-voice.mjs`). Each plays once, after the boss's
 own line; afterwards the intro picks from the lines above, the phase card speaks alone and the defeat scene is the
 boss's line alone.
 

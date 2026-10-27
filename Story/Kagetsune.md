@@ -135,7 +135,7 @@ Reactive dialogue, in game (`Dialogue.cs`, voiced in `Tools/generate-voice.mjs`)
 | Story, once | Shirogane's oath line seen | "She never rang. Do you know how that grates, little demon?" |
 | Repeatable | none | "Kneel." |
 
-**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, unvoiced). Each plays once, after the boss's
+**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, voiced as `Kagetsune_<Line>_2` in `Tools/generate-voice.mjs`). Each plays once, after the boss's
 own line; afterwards the intro picks from the lines above, the phase card speaks alone and the defeat scene is the
 boss's line alone.
 

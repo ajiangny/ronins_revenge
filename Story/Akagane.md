@@ -83,7 +83,7 @@ goes quiet (`Akagane_Meet_Doors`) should land.
 ## Lines
 
 Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). Every conversation's lines play in order;
-Oni's lines are subtitle-only until he has a voice.
+Oni's lines are voiced (`Tools/generate-voice.mjs`); Akagane's are subtitles until he has a voice.
 
 ### `SoulPickup`: first meeting (Story, play once, one per run)
 

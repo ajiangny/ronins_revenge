@@ -1,5 +1,6 @@
-// Generates the bosses' voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
-// Utsusemi's in its designed voice, Shirogane's in Lily's and Kagetsune's in his designed voice (the story behind each is in Story/<Boss>.md).
+// Generates the voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
+// Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice and Oni's in his (the
+// story behind each is in Story/<Name>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
 // from .env.local.
@@ -22,6 +23,9 @@ const SHIROGANE = "pFZP5JQG7iQjIQuC4Bku";
 // Designed in ElevenLabs for Kagetsune: an extremely deep, slow, resonant bass, imperious and contemptuous, as if from
 // inside an iron helm. Unity layers the choir of souls under it (GameManager's choir retune of the voice filters).
 const KAGETSUNE = "icDlqXtTOaetg6DNGlyW";
+// Designed in ElevenLabs for Oni: a low, quiet, tired baritone in his late twenties, slightly hoarse, slow and sparing,
+// weary and haunted, never theatrical. He plays through no voice filters.
+const ONI = "XySBombsrAu9uFxNYdaV";
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -126,6 +130,38 @@ const LINES = {
   Kagetsune_Intro_Kneel: [KAGETSUNE, "[deep, commanding] Kneel."],
   Kagetsune_Killed_Duo: [KAGETSUNE, "[mocking, slow] Two stolen souls, holding hands. How touching. [cold] They'll ring again."],
   Kagetsune_Killed_Ring: [KAGETSUNE, "[deep, satisfied] Ring."],
+
+  // Oni. Ids follow Conversation.VoiceId: a line's conversation id, with _<n> for the nth line of it, so his answer
+  // after a boss's own line is <Boss>_<Line>_2, and in the souls' first meetings his line takes its place in the
+  // exchange. Words match Dialogue.cs.
+  Oni_Hub_First: [ONI, "[waking, quiet, confused] ...The hill. [softly] Her flute. [troubled] Why am I here?"],
+  Oni_Hub_Smoke: [ONI, "[low, uneasy] That smoke. I've breathed it before."],
+  Oni_Hub_Hat: [ONI, "[slow, remembering] That hat... [quiet] I've drunk tea under that hat."],
+  Oni_Hub_Together: [ONI, "[quiet, aching] Together. We were meant to do it together."],
+  Oni_Hub_Ringing: [ONI, "[tired, grim, quiet] He's still ringing."],
+  Oni_NotYet: [ONI, "[strained, getting up] ...Not yet."],
+  Benibana_Intro_2: [ONI, "[low, steady] I didn't walk away. [quiet] Someone cut me loose."],
+  Benibana_Phase_2: [ONI, "[quiet, steady] Then dance it."],
+  Benibana_Defeat_2: [ONI, "[soft, a promise] I'll find it."],
+  Utsusemi_Intro_2: [ONI, "[quiet, uncertain] ...That hat."],
+  Utsusemi_Phase_2: [ONI, "[low, resolute] Then I'll stop you."],
+  Utsusemi_Defeat_2: [ONI, "[stunned, breaking] ...You. [quiet] You sheltered me."],
+  Shirogane_Intro_2: [ONI, "[quiet, searching] ...I remember a flute."],
+  Shirogane_Phase_2: [ONI, "[low, steady] Then remind me."],
+  Shirogane_Defeat_2: [ONI, "[grieving, quiet] Shirogane... [softly] I'm sorry I forgot."],
+  Kagetsune_Intro_2: [ONI, "[low, cold] It stays silent."],
+  Kagetsune_Phase_2: [ONI, "[quiet, hard] Not any more."],
+  Kagetsune_Defeat_2: [ONI, "[quiet, final] They're done ringing for you."],
+  Akagane_Meet_Angry: [ONI, "[quiet, surprised] Warm... [low] Someone in there is still angry."],
+  Akagane_Meet_Copper_3: [ONI, "[quiet, a little ashamed] ...I did."],
+  Akagane_Meet_Doors_3: [ONI, "[low, gentle] You couldn't have known."],
+  Akagane_Meet_Salute_3: [ONI, "[quiet, steady] When this is done."],
+  Mizore_Meet_Steady: [ONI, "[quiet, calming] Cold hands. Steady ones."],
+  Mizore_Meet_Collarbone_2: [ONI, "[quiet, apologetic] ...I don't remember."],
+  Mizore_Meet_Oath_3: [ONI, "[quiet, moved] Did she."],
+  Hibiki_Meet_Out: [ONI, "[low, wry, tired] It wants out as badly as I do."],
+  Hibiki_Meet_Blame_3: [ONI, "[quiet, gentle] Hibiki."],
+  Hibiki_Meet_River: [ONI, "[slow, remembering, tender] The drum by the river. You played it until your hands bled. [quiet] I remember."],
 };
 
 const client = new ElevenLabsClient();

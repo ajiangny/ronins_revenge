@@ -370,6 +370,7 @@ public class GameManager : MonoBehaviour
     // Shirogane's wolf, Kuon, while it is in the fight with a bar of its own.
     SpiritWolf activeWolf;
     AudioSource voice;
+    AudioSource oniVoice;
     // The voice filters: Utsusemi's machine voice (a doubled, ringing, slightly gritty layer over the recorded
     // lines) and Shirogane's spirit voice (a soft, hollow echo, as if from across water) retune the same three.
     Behaviour[] machineVoice;
@@ -400,6 +401,12 @@ public class GameManager : MonoBehaviour
         voice.playOnAwake = false;
         voice.spatialBlend = 0f;
         machineVoice = CreateMachineVoice(voiceObject);
+        // Oni's own source, so a boss's voice filters never colour his lines.
+        var oniObject = new GameObject("OniVoice");
+        oniObject.transform.SetParent(transform, false);
+        oniVoice = oniObject.AddComponent<AudioSource>();
+        oniVoice.playOnAwake = false;
+        oniVoice.spatialBlend = 0f;
     }
 
     // Unity allows one of each filter per source, so each boss's voice is a retuning of the same three: the
@@ -2020,7 +2027,8 @@ public class GameManager : MonoBehaviour
         foreach (DialogueLine line in said.Lines)
         {
             AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(index)) : null;
-            lines.Add(new DialogueScene.Line { who = SpeakerFor(line.Speaker), text = Dialogue.Fill(line.Text, ctx), clip = clip });
+            lines.Add(new DialogueScene.Line { who = SpeakerFor(line.Speaker), text = Dialogue.Fill(line.Text, ctx), clip = clip,
+                source = line.Speaker == "Oni" ? oniVoice : null });
             index++;
         }
         if (lines.Count == 0) yield break;
@@ -2112,10 +2120,12 @@ public class GameManager : MonoBehaviour
         float seconds = clip != null ? clip.length : 2.5f;
         if (clip != null)
         {
+            AudioSource source = speaker == "Oni" ? oniVoice : voice;
             voice.Stop();
-            voice.volume = voiceVolume * Sfx.Volume;
-            voice.clip = clip;
-            voice.Play();
+            oniVoice.Stop();
+            source.volume = voiceVolume * Sfx.Volume;
+            source.clip = clip;
+            source.Play();
             // A conversation is never talked over: barks wait it out.
             speakingFullLine = true;
             Music.Duck(0.3f, seconds + 0.3f);
@@ -2230,7 +2240,13 @@ public class GameManager : MonoBehaviour
             ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
             Fx.Play(Fx.BoonPillar, ronin.Feet, OniColour, 1.4f);
             Sfx.Play(Sfx.SoulCollect);
-            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f);
+            AudioClip notYet = voiceLibrary != null ? voiceLibrary.Find("Oni_NotYet") : null;
+            if (notYet != null)
+            {
+                oniVoice.volume = voiceVolume * Sfx.Volume;
+                oniVoice.PlayOneShot(notYet);
+            }
+            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, notYet != null ? notYet.length + 0.6f : 2f);
             return;
         }
         if (lives <= 0)

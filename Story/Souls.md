@@ -201,7 +201,7 @@ the art brief. They should match each other: same framing, the bound chain runni
   `<conversationId>_<n>.mp3`, `n` counted from 1 over the conversation's lines, including Oni's, as the bosses' takes
   are named. Example: `Akagane_Meet_Angry_2.mp3` is "Angry. Yes. That's the word for it. Hello, Guardsman."
   `Ninja/Apply Voice Lines` gathers them and logs which written lines still have no clip.
-- **Oni's lines have no clip** until he has a voice; skip their `n` (don't renumber), so adding his voice later
+- **Oni's lines are voiced** under their own `n` (`Akagane_Meet_Copper_3` is his "...I did."); the souls' own lines skip those numbers (don't renumber), so adding their voices later
   doesn't rename anything.
 - **Voices to design** (ElevenLabs Voice Design, prompts in each file's **Voice** section): `AKAGANE`, `MIZORE`,
   `HIBIKI`. Add their ids as constants beside `BENIBANA`… in `Tools/generate-voice.mjs`.

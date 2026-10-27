@@ -31,6 +31,8 @@ public class DialogueScene : MonoBehaviour
         public Speaker who;
         public string text;
         public AudioClip clip;
+        // The source to speak through, when not the scene's own (Oni's carries none of the bosses' voice filters).
+        public AudioSource source;
     }
 
     // One side of the stage: a glow in the speaker's colour and their painting, masked to that half of the screen.
@@ -260,6 +262,7 @@ public class DialogueScene : MonoBehaviour
             s.group.alpha = 0f;
         }
         float openedAt = Time.unscaledTime;
+        AudioSource speaker = null;
 
         for (int i = 0; i < lines.Count; i++)
         {
@@ -287,16 +290,14 @@ public class DialogueScene : MonoBehaviour
             lineText.text = line.text;
             lineText.maxVisibleCharacters = 0;
             int length = lineText.text.Length;
-            if (voice != null)
+            if (speaker != null) speaker.Stop();
+            speaker = line.source != null ? line.source : voice;
+            if (speaker != null && line.clip != null)
             {
-                voice.Stop();
-                if (line.clip != null)
-                {
-                    voice.volume = voiceVolume;
-                    voice.clip = line.clip;
-                    voice.Play();
-                    Music.Duck(0.3f, line.clip.length + 0.3f);
-                }
+                speaker.volume = voiceVolume;
+                speaker.clip = line.clip;
+                speaker.Play();
+                Music.Duck(0.3f, line.clip.length + 0.3f);
             }
 
             float lineAt = Time.unscaledTime;
@@ -317,7 +318,7 @@ public class DialogueScene : MonoBehaviour
                 yield return null;
             }
             Sfx.Play(Sfx.UiMove, 0.6f);
-            if (voice != null && voice.clip == line.clip && voice.isPlaying) voice.Stop();
+            if (speaker != null && speaker.isPlaying) speaker.Stop();
         }
 
         for (float t = 0; t < 0.3f; t += Time.unscaledDeltaTime)

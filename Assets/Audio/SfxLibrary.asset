@@ -592,6 +592,39 @@ MonoBehaviour:
     - 2.5151021
     - 3.1233106
     ownSource: 0
+  - id: WaterStep
+    clips:
+    - {fileID: 8300000, guid: 6f142633366f640c2a4d4029a0c2131a, type: 3}
+    - {fileID: 8300000, guid: 85b8a7108f19349a78ee78c39a5b99e5, type: 3}
+    volume: 0.45
+    pitchJitter: 0.1
+    minInterval: 0.2
+    audible:
+    - 0.51743764
+    - 0.5026757
+    ownSource: 0
+  - id: PoolSplash
+    clips:
+    - {fileID: 8300000, guid: 084bfcb7d3c78428288bad21c6ba7c3d, type: 3}
+    - {fileID: 8300000, guid: 40ebbce9042084f69bef821701da8617, type: 3}
+    volume: 0.6
+    pitchJitter: 0.06
+    minInterval: 0.3
+    audible:
+    - 0.9500907
+    - 0.9164626
+    ownSource: 0
+  - id: PoolAmbience
+    clips:
+    - {fileID: 8300000, guid: 94be3faaae9b94ed1b579bfc544f5a3c, type: 3}
+    - {fileID: 8300000, guid: 0b88296ec9b9844549267d08857e6a96, type: 3}
+    volume: 0.35
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 6.060408
+    - 6.060408
+    ownSource: 1
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   templeMusic: {fileID: 8300000, guid: 946fb3b38b2c84813abb8ba5ddced6fa, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}

@@ -861,11 +861,11 @@ MonoBehaviour:
     mapPixelsHigh: 384
     floor:
       serializedVersion: 2
-      x: 0.2
-      y: 0.1
-      width: 0.6
-      height: 0.58
-    wakeSpot: {x: 0.484, y: 0.17}
+      x: 0.17
+      y: 0.08
+      width: 0.69
+      height: 0.61
+    wakeSpot: {x: 0.4985, y: 0.17}
     wakeGlow: {r: 0.45, g: 1, b: 0.9, a: 0.25}
     stations:
     - kind: 0
@@ -875,27 +875,65 @@ MonoBehaviour:
       onMap: 1
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
       reach: 2.2
+      propAt: {x: 0, y: 0}
+      footprint: {x: 0, y: 0}
+      fx: 0
     - kind: 1
       label: FLUTE SONGS
-      spot: {x: 0.3, y: 0.5}
+      spot: {x: 0.2689, y: 0.4219}
       art: {fileID: 21300000, guid: 22ad2a3bf66d8403cb18001d89cc6601, type: 3}
       onMap: 0
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
-      reach: 1.7
+      reach: 2
+      propAt: {x: 185, y: 180}
+      footprint: {x: 2.4, y: 0.6}
+      fx: 1
     - kind: 2
       label: MEMORIAL STONES
-      spot: {x: 0.7, y: 0.5}
+      spot: {x: 0.6933, y: 0.4401}
       art: {fileID: 21300000, guid: f087f93f4f1754d0280b705a2abbdaa6, type: 3}
       onMap: 0
       placeholder: {r: 0.4, g: 0.42, b: 0.45, a: 1}
-      reach: 1.7
+      reach: 2
+      propAt: {x: 477, y: 170}
+      footprint: {x: 4.2, y: 0.6}
+      fx: 3
     - kind: 3
       label: WEAPON RACK
-      spot: {x: 0.69, y: 0.22}
+      spot: {x: 0.7849, y: 0.0885}
       art: {fileID: 21300000, guid: 90a0c0cf039144143977adce078a2436, type: 3}
       onMap: 0
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
-      reach: 1.7
+      reach: 2.2
+      propAt: {x: 562, y: 340}
+      footprint: {x: 2.6, y: 0.5}
+      fx: 2
+    poolCentre: {x: 343, y: 319}
+    poolRadii: {x: 39, y: 30}
+    poolWater: {fileID: 21300000, guid: 44621fbffbe7c4a5388fcfaaf490740c, type: 3}
+    poolRimFront: {fileID: 21300000, guid: 1768617e715ef4025964a755b5b82dd7, type: 3}
+    poolSouls:
+    - {fileID: 21300000, guid: ed48e4220bf8a43208af6c8b98fd6b94, type: 3}
+    - {fileID: 21300000, guid: fdfb878770719468190daf73894d900a, type: 3}
+    - {fileID: 21300000, guid: 6c420bbb0cc7944b3a79a40632d0eb3b, type: 3}
+    - {fileID: 21300000, guid: cd769f9de7e8440eabe9b815247d7019, type: 3}
+    - {fileID: 21300000, guid: 0153e4ed083814fdf9763f863be77ea6, type: 3}
+    - {fileID: 21300000, guid: 9993de2bb0a8b4c0693e3b37b0703878, type: 3}
+    - {fileID: 21300000, guid: 316770743f0c740388bb36e8ccbcca8a, type: 3}
+    - {fileID: 21300000, guid: 5fd15b67d2ac34b4abad7ee99bef3c65, type: 3}
+    lamps:
+    - px: {x: 100, y: 147}
+      colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}
+      radius: 2.6
+    - px: {x: 562, y: 178}
+      colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}
+      radius: 2.6
+    - px: {x: 120, y: 224}
+      colour: {r: 1, g: 0.65, b: 0.35, a: 0.28}
+      radius: 2.2
+    - px: {x: 242, y: 224}
+      colour: {r: 1, g: 0.65, b: 0.35, a: 0.28}
+      radius: 2.2
   deathToTempleTime: 2.4
   travelWalkSpeed: 9
   travelFadeTime: 0.6

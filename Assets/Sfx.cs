@@ -61,6 +61,10 @@ public static class Sfx
     public const string OfudaFlutter = "OfudaFlutter";
     public const string SkullShriek = "SkullShriek";
     public const string DawnChime = "DawnChime";
+    // The temple's spirit pool: a step in it, wading in, and its low murmur while he's in the temple.
+    public const string WaterStep = "WaterStep";
+    public const string PoolSplash = "PoolSplash";
+    public const string PoolAmbience = "PoolAmbience";
 
     const int VoiceCount = 16;
 

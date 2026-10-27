@@ -194,6 +194,24 @@ const SOUNDS = {
       "A peaceful sunrise: soft warm wind chimes and a gentle rising airy shimmer, hopeful and calm, the night " +
       "ending, video game sound effect, no music.",
   },
+  WaterStep: {
+    seconds: 0.5,
+    prompt:
+      "A single soft footstep in ankle-deep still water: a gentle slosh and a small drip, close and quiet, " +
+      "video game sound effect, no music.",
+  },
+  PoolSplash: {
+    seconds: 1,
+    prompt:
+      "Stepping down into a shallow pool of still water: a soft splash with a few droplets falling back and a " +
+      "faint glassy shimmer, calm, video game sound effect, no music.",
+  },
+  PoolAmbience: {
+    seconds: 6,
+    prompt:
+      "A quiet ambient loop of a still spirit pool at night: soft low bubbling, gentle water lapping on stone and " +
+      "a faint airy chime now and then, calm and eerie, loopable, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

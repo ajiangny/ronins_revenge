@@ -284,14 +284,31 @@ public class GameManager : MonoBehaviour
         new SafeArea.Config
         {
             name = "The Temple",
-            floor = Rect.MinMaxRect(0.2f, 0.1f, 0.8f, 0.68f),
-            wakeSpot = new Vector2(0.484f, 0.17f),
+            floor = Rect.MinMaxRect(0.17f, 0.08f, 0.86f, 0.69f),
+            wakeSpot = new Vector2(0.4985f, 0.17f),
+            // The water, in map pixels (TempleLayers cuts the same ellipse out of the map).
+            poolCentre = new Vector2(343f, 319f),
+            poolRadii = new Vector2(39f, 30f),
             stations = new[]
             {
                 new SafeArea.Station { kind = StationKind.Exit, label = "SET OUT", spot = new Vector2(0.5f, 0.68f), onMap = true, reach = 2.2f },
-                new SafeArea.Station { kind = StationKind.FluteSongs, label = "FLUTE SONGS", spot = new Vector2(0.3f, 0.5f) },
-                new SafeArea.Station { kind = StationKind.Memorial, label = "MEMORIAL STONES", spot = new Vector2(0.7f, 0.5f), placeholder = new Color(0.4f, 0.42f, 0.45f) },
-                new SafeArea.Station { kind = StationKind.WeaponRack, label = "WEAPON RACK", spot = new Vector2(0.69f, 0.22f) },
+                // On the stone dais to the left, used from the top of its steps.
+                new SafeArea.Station { kind = StationKind.FluteSongs, label = "FLUTE SONGS", spot = new Vector2(0.2689f, 0.4219f), propAt = new Vector2(185f, 180f),
+                    footprint = new Vector2(2.4f, 0.6f), fx = StationFx.Incense, reach = 2f },
+                // In the kerbed grave nook to the upper right, used from in front of its offerings.
+                new SafeArea.Station { kind = StationKind.Memorial, label = "MEMORIAL STONES", spot = new Vector2(0.6933f, 0.4401f), propAt = new Vector2(477f, 170f),
+                    placeholder = new Color(0.4f, 0.42f, 0.45f), footprint = new Vector2(4.2f, 0.6f), fx = StationFx.Glow, reach = 2f },
+                // On the plank platform under the broken eave, used from its left end.
+                new SafeArea.Station { kind = StationKind.WeaponRack, label = "WEAPON RACK", spot = new Vector2(0.7849f, 0.0885f), propAt = new Vector2(562f, 340f),
+                    footprint = new Vector2(2.6f, 0.5f), fx = StationFx.Glint, reach = 2.2f },
+            },
+            // The ghost-fires at either side, and the two stone lanterns at the dais, lit.
+            lamps = new[]
+            {
+                new SafeArea.Lamp { px = new Vector2(100f, 147f), colour = new Color(0.45f, 1f, 0.9f, 0.2f), radius = 2.6f },
+                new SafeArea.Lamp { px = new Vector2(562f, 178f), colour = new Color(0.45f, 1f, 0.9f, 0.2f), radius = 2.6f },
+                new SafeArea.Lamp { px = new Vector2(120f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
+                new SafeArea.Lamp { px = new Vector2(242f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
             },
         },
     };
@@ -877,7 +894,7 @@ public class GameManager : MonoBehaviour
         yield return null;
         menu.HideFigure();
         ShowSafeArea();
-        ronin.PlaceAt(BodyAt(safeArea.WakePoint + WakeStep));
+        ronin.PlaceAt(BodyAt(safeArea.PoolExit));
         yield return menu.FadePaper(1.2f);
         menu.Hide();
         yield return EnterSafeArea(false, true);
@@ -892,14 +909,11 @@ public class GameManager : MonoBehaviour
         if (backdrop != null) backdrop.Show(area.map);
         blockers.Clear();
         if (safeArea != null) Destroy(safeArea.gameObject);
-        safeArea = SafeArea.Build(area, ui.BodyFont, ronin.SpriteOrder, backdrop != null ? backdrop.GroundBounds : null);
+        safeArea = SafeArea.Build(area, ui.BodyFont, ronin, backdrop != null ? backdrop.GroundBounds : null);
     }
 
     // Safe area spots are where his feet go; he's placed and walked by his body, which stands above them.
     Vector3 BodyAt(Vector3 feet) => feet + (ronin.transform.position - ronin.Feet);
-
-    // Where he stands once out of the pool: a step up from it.
-    static readonly Vector3 WakeStep = Vector3.up * 1.6f;
 
     // Between runs. After a death he wakes in the spirit pool as the dark lifts (Zagreus out of the Styx), climbs out,
     // hears what the run earned and maybe says something; then he walks the temple freely until he sets out.
@@ -911,7 +925,7 @@ public class GameManager : MonoBehaviour
         if (!shown)
         {
             ShowSafeArea();
-            ronin.PlaceAt(BodyAt(safeArea.WakePoint + WakeStep));
+            ronin.PlaceAt(BodyAt(safeArea.PoolExit));
         }
         if (sfxLibrary != null) Music.Play(sfxLibrary.TempleMusic, sfxLibrary.musicVolume);
         if (wake)
@@ -925,7 +939,7 @@ public class GameManager : MonoBehaviour
             ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
             Sfx.Play(Sfx.SoulCollect);
             yield return new WaitForSeconds(0.7f);
-            yield return ronin.WalkTo(BodyAt(safeArea.WakePoint + WakeStep), travelWalkSpeed * 0.3f);
+            yield return ronin.WalkTo(BodyAt(safeArea.PoolExit), travelWalkSpeed * 0.3f);
             if (lastRunEmbers > 0) StartCoroutine(EmberTally(lastRunEmbers));
             lastRunEmbers = 0;
             StartCoroutine(HubReturn());
@@ -934,6 +948,9 @@ public class GameManager : MonoBehaviour
         Vector3 lift = BodyAt(Vector3.zero);
         Rect floor = safeArea.WalkArea;
         ronin.RoamArea = new Rect(floor.x + lift.x, floor.y + lift.y, floor.width, floor.height);
+        Rect[] blocks = safeArea.Blocks;
+        for (int i = 0; i < blocks.Length; i++) blocks[i].position += (Vector2)lift;
+        ronin.RoamBlocks = blocks;
         ronin.Roaming = true;
         ronin.ControlsEnabled = true;
         state = State.Hub;
@@ -1058,6 +1075,7 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ronin.Roaming = false;
+        ronin.RoamBlocks = null;
         safeArea.ShowPrompt(null);
         yield return ronin.WalkTo(BodyAt(safeArea.PointOf(StationKind.Exit)), travelWalkSpeed * 0.6f);
         stageIndex = 0;

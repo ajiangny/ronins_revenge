@@ -19,7 +19,7 @@ public static class AudioSetup
 
     // The march beat comes up to ten times a second; on a source of its own it can't crowd out every other sound.
     // The beam hum loops on its own source for as long as a laser burns.
-    static readonly HashSet<string> OwnSource = new HashSet<string> { Sfx.MarchStep, Sfx.LanternBeam, Sfx.SpiritBeam, Sfx.SoulWail };
+    static readonly HashSet<string> OwnSource = new HashSet<string> { Sfx.MarchStep, Sfx.LanternBeam, Sfx.SpiritBeam, Sfx.SoulWail, Sfx.PoolAmbience };
 
     // id, starting volume, pitch jitter, and the real seconds before it can repeat.
     static readonly (string id, float volume, float jitter, float minInterval)[] Sounds =
@@ -81,6 +81,10 @@ public static class AudioSetup
         (Sfx.OfudaFlutter, 0.7f, 0.05f, 0.3f),
         (Sfx.SkullShriek, 0.6f, 0.08f, 0.2f),
         (Sfx.DawnChime, 0.9f, 0f, 1f),
+        // The temple pool: quiet steps close together, and its murmur under the music.
+        (Sfx.WaterStep, 0.45f, 0.1f, 0.2f),
+        (Sfx.PoolSplash, 0.6f, 0.06f, 0.3f),
+        (Sfx.PoolAmbience, 0.35f, 0f, 1f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

@@ -424,14 +424,26 @@ public static class NinjaArtSetup
         (StationKind.WeaponRack, "Props/Temple_Rack"),
     };
 
+    // The layout (floor, spots, footprints, pool, lamps) is copied from GameManager.DefaultSafeAreas, which is laid out
+    // against the map, since the scene's own copy wins at runtime; the art is wired by kind.
     static void SetUpSafeAreas(GameManager manager)
     {
         var so = new SerializedObject(manager);
         SerializedProperty areas = so.FindProperty("safeAreas");
+        SafeArea.Config[] layouts = GameManager.DefaultSafeAreas();
+        if (areas.arraySize < layouts.Length) areas.arraySize = layouts.Length;
         for (int i = 0; i < areas.arraySize && i < SafeAreaGrounds.Length; i++)
         {
             SerializedProperty area = areas.GetArrayElementAtIndex(i);
             SetMap(area.FindPropertyRelative("map"), SafeAreaGrounds[i].ground, SafeAreaGrounds[i].tint, "Effects/Leaf", new Color(0.55f, 0.6f, 0.65f, 0.4f));
+            if (i < layouts.Length) CopyLayout(area, layouts[i]);
+            area.FindPropertyRelative("poolWater").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.Water);
+            area.FindPropertyRelative("poolRimFront").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.RimFront);
+            SerializedProperty souls = area.FindPropertyRelative("poolSouls");
+            var soulFrames = new List<Sprite>();
+            for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Fx/Temple_Soul_{k}.png") is Sprite frame; k++) soulFrames.Add(frame);
+            souls.arraySize = soulFrames.Count;
+            for (int k = 0; k < soulFrames.Count; k++) souls.GetArrayElementAtIndex(k).objectReferenceValue = soulFrames[k];
             SerializedProperty stations = area.FindPropertyRelative("stations");
             for (int j = 0; j < stations.arraySize; j++)
             {
@@ -443,6 +455,40 @@ public static class NinjaArtSetup
             }
         }
         so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    static void CopyLayout(SerializedProperty area, SafeArea.Config layout)
+    {
+        area.FindPropertyRelative("name").stringValue = layout.name;
+        area.FindPropertyRelative("floor").rectValue = layout.floor;
+        area.FindPropertyRelative("wakeSpot").vector2Value = layout.wakeSpot;
+        area.FindPropertyRelative("poolCentre").vector2Value = layout.poolCentre;
+        area.FindPropertyRelative("poolRadii").vector2Value = layout.poolRadii;
+        SerializedProperty lamps = area.FindPropertyRelative("lamps");
+        lamps.arraySize = layout.lamps.Length;
+        for (int i = 0; i < layout.lamps.Length; i++)
+        {
+            SerializedProperty lamp = lamps.GetArrayElementAtIndex(i);
+            lamp.FindPropertyRelative("px").vector2Value = layout.lamps[i].px;
+            lamp.FindPropertyRelative("colour").colorValue = layout.lamps[i].colour;
+            lamp.FindPropertyRelative("radius").floatValue = layout.lamps[i].radius;
+        }
+        SerializedProperty stations = area.FindPropertyRelative("stations");
+        stations.arraySize = layout.stations.Length;
+        for (int i = 0; i < layout.stations.Length; i++)
+        {
+            SafeArea.Station from = layout.stations[i];
+            SerializedProperty station = stations.GetArrayElementAtIndex(i);
+            station.FindPropertyRelative("kind").enumValueIndex = (int)from.kind;
+            station.FindPropertyRelative("label").stringValue = from.label;
+            station.FindPropertyRelative("spot").vector2Value = from.spot;
+            station.FindPropertyRelative("onMap").boolValue = from.onMap;
+            station.FindPropertyRelative("placeholder").colorValue = from.placeholder;
+            station.FindPropertyRelative("reach").floatValue = from.reach;
+            station.FindPropertyRelative("propAt").vector2Value = from.propAt;
+            station.FindPropertyRelative("footprint").vector2Value = from.footprint;
+            station.FindPropertyRelative("fx").enumValueIndex = (int)from.fx;
+        }
     }
 
     // A missing ground sprite leaves the map empty, which the game reads as "stay where you are".
@@ -503,7 +549,6 @@ public static class NinjaArtSetup
             mist = 2, mistColor = new Color(0.65f, 0.75f, 0.95f, 0.08f),
             motes = 22, moteColor = new Color(0.8f, 0.85f, 1f, 0.55f),
         },
-        // The frozen shrine path: heavy slow snow clouds, a cold hard moon, mist in the hollows and snowflakes in the air.
         // The temple between runs: still air, a little low mist and a few teal spirit motes drifting off the pool.
         ["Temple_Hub"] = new Atmosphere.Settings
         {
@@ -512,6 +557,7 @@ public static class NinjaArtSetup
             mist = 2, mistColor = new Color(0.7f, 0.85f, 0.9f, 0.08f),
             motes = 14, moteColor = new Color(0.45f, 1f, 0.9f, 0.7f),
         },
+        // The frozen shrine path: heavy slow snow clouds, a cold hard moon, mist in the hollows and snowflakes in the air.
         ["Shrine_Stage3"] = new Atmosphere.Settings
         {
             clouds = 3, cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.32f), wind = new Vector2(0.5f, -0.6f),

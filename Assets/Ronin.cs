@@ -85,6 +85,8 @@ public class Ronin : MonoBehaviour
         }
     }
     public Rect RoamArea { get; set; }
+    // Ground in a safe area he walks around (the props' footprints), in the same body space as RoamArea.
+    public Rect[] RoamBlocks { get; set; }
     public Weapon CurrentWeapon { get => weapon; set => weapon = value; }
     // God mode from the dev menu: nothing can hurt him.
     public bool Invincible { get; set; }
@@ -561,10 +563,22 @@ public class Ronin : MonoBehaviour
     {
         var step = new Vector2(moveInput, moveInputY);
         if (step.sqrMagnitude > 1f) step.Normalize();
+        Vector3 from = position;
         position += (Vector3)(step * speed * RoamSpeedScale * Time.fixedDeltaTime);
         Rect area = RoamArea;
         position.x = Mathf.Clamp(position.x, area.xMin, area.xMax);
         position.y = Mathf.Clamp(position.y, area.yMin, area.yMax);
+        // Into a prop, he keeps whichever half of the step doesn't go in, so he slides along it.
+        if (RoamBlocks != null)
+        {
+            foreach (Rect block in RoamBlocks)
+            {
+                if (!block.Contains(position)) continue;
+                if (!block.Contains(new Vector2(position.x, from.y))) position.y = from.y;
+                else if (!block.Contains(new Vector2(from.x, position.y))) position.x = from.x;
+                else position = from;
+            }
+        }
         body.MovePosition(position);
         // A direction with no frames of its own walks on the idle, so he bobs on it, as on a walk without frames.
         roamTime += Time.fixedDeltaTime;
@@ -625,6 +639,37 @@ public class Ronin : MonoBehaviour
         body.position = position;
         transform.position = position;
     }
+
+    // Standing in water this deep (world units), the water hides his feet: a mask over everything below the waterline
+    // clips his sprite, and only his sprite (its range is his order alone). It follows his feet, bob and all, so he
+    // stays in the water as he steps. 0 brings his feet back.
+    public void Wade(float depth)
+    {
+        bool wading = depth > 0f;
+        if (wading && waterline == null)
+        {
+            waterline = new GameObject("Waterline").AddComponent<SpriteMask>();
+            waterline.transform.SetParent(transform, false);
+            waterline.sprite = ProceduralSprites.White;
+            waterline.isCustomRangeActive = true;
+        }
+        if (waterline == null) return;
+        waterline.enabled = wading;
+        sprite.maskInteraction = wading ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
+        if (!wading) return;
+        waterline.frontSortingOrder = sprite.sortingOrder;
+        waterline.backSortingOrder = sprite.sortingOrder - 1;
+        // From well below his feet (the canvas pads them) up to the waterline.
+        const float Below = 0.5f;
+        float width = sprite.bounds.size.x * 1.4f;
+        Vector3 feet = Feet;
+        waterline.transform.position = new Vector3(feet.x, feet.y + (depth - Below) / 2f, feet.z);
+        Vector2 native = waterline.sprite.bounds.size;
+        Vector3 parent = transform.lossyScale;
+        waterline.transform.localScale = new Vector3(width / native.x / parent.x, (depth + Below) / native.y / parent.y, 1f);
+    }
+
+    SpriteMask waterline;
 
     void SetTouchable(bool touchable)
     {

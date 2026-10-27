@@ -332,4 +332,65 @@ public static class ProceduralSprites
         texture.Apply();
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
     }
+
+    // One-pixel ellipse outlines for water ripples, by horizontal radius in pixels (squashed to 0.55 tall, the pool's
+    // perspective). A ripple steps through radii instead of scaling one ring, so its line stays one pixel thick.
+    // Pixels per unit is 1: callers scale by the map's pixel size.
+    static readonly System.Collections.Generic.Dictionary<int, Sprite> rings = new System.Collections.Generic.Dictionary<int, Sprite>();
+
+    public static Sprite Ring(int radius)
+    {
+        radius = Mathf.Max(1, radius);
+        if (rings.TryGetValue(radius, out Sprite cached)) return cached;
+        float rx = radius, ry = Mathf.Max(1f, radius * 0.55f);
+        int width = radius * 2 + 3, height = Mathf.CeilToInt(ry) * 2 + 3;
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        Vector2 centre = new Vector2(width / 2f, height / 2f);
+        // Walk the outline finely and light every pixel it passes through.
+        int steps = Mathf.Max(32, radius * 12);
+        for (int k = 0; k < steps; k++)
+        {
+            float a = k * Mathf.PI * 2f / steps;
+            int x = Mathf.FloorToInt(centre.x + Mathf.Cos(a) * rx), y = Mathf.FloorToInt(centre.y + Mathf.Sin(a) * ry);
+            if (x >= 0 && x < width && y >= 0 && y < height) pixels[y * width + x] = new Color32(255, 255, 255, 255);
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return rings[radius] = Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 1f);
+    }
+
+    // A four-point pixel star, drawn white to be tinted: light catching a blade.
+    public static Sprite Glint => glint != null ? glint : glint = FromPattern(new[]
+    {
+        "...#...",
+        "...#...",
+        "..###..",
+        "#######",
+        "..###..",
+        "...#...",
+        "...#...",
+    });
+    static Sprite glint;
+
+    // Short scattered light dashes on clear, drawn white to be tinted and tiled: light playing on water. Seeded, so
+    // every run's pool looks the same. Pixels per unit 1, like the rings.
+    public static Sprite Caustic => caustic != null ? caustic : caustic = BuildCaustic(96, 64);
+    static Sprite caustic;
+
+    static Sprite BuildCaustic(int width, int height)
+    {
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Repeat };
+        var pixels = new Color32[width * height];
+        var random = new System.Random(381);
+        for (int n = 0; n < 34; n++)
+        {
+            int x = random.Next(width), y = random.Next(height), length = 2 + random.Next(4);
+            byte alpha = (byte)(140 + random.Next(115));
+            for (int i = 0; i < length; i++) pixels[y * width + (x + i) % width] = new Color32(255, 255, 255, alpha);
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 1f);
+    }
 }

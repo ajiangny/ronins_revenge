@@ -566,7 +566,7 @@ public class Ronin : MonoBehaviour
         position.x = Mathf.Clamp(position.x, area.xMin, area.xMax);
         position.y = Mathf.Clamp(position.y, area.yMin, area.yMax);
         body.MovePosition(position);
-        // His only south-facing frames are the idle, so walking that way he bobs on it, as on a walk without frames.
+        // A direction with no frames of its own walks on the idle, so he bobs on it, as on a walk without frames.
         roamTime += Time.fixedDeltaTime;
         bool bob = step != Vector2.zero && loopClip == art.idle;
         sprite.transform.localPosition = spriteRest + (bob ? Vector3.up * (Mathf.Abs(Mathf.Sin(roamTime * 9f)) * 0.12f / transform.lossyScale.y) : Vector3.zero);
@@ -574,7 +574,12 @@ public class Ronin : MonoBehaviour
 
     // Walks him to a spot on his own while his controls are off, to leave one map and enter the next. He passes
     // through cover, and nothing can hit him on the way.
-    public IEnumerator WalkTo(Vector3 target, float walkSpeed) => WalkTo(target, walkSpeed, art.walkUp, art.walkFps);
+    // He faces the way he's going.
+    public IEnumerator WalkTo(Vector3 target, float walkSpeed)
+    {
+        Sprite[] frames = WalkClip(target - body.position);
+        return WalkTo(target, walkSpeed, frames, ClipFps(frames));
+    }
 
     // The same walk on a clip of the caller's choosing, e.g. his run frames slowed down to cross the screen sideways.
     public IEnumerator WalkTo(Vector3 target, float walkSpeed, Sprite[] frames, float fps)
@@ -798,13 +803,47 @@ public class Ronin : MonoBehaviour
     void UpdateLoopClip()
     {
         if (actionPlaying) return;
-        Sprite[] run = moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
-        // Walking up a safe area he shows his back (his walk between maps); walking down he faces us on his idle.
-        if (Roaming && moveInput == 0 && moveInputY > 0 && art.walkUp != null && art.walkUp.Length > 0) run = art.walkUp;
+        // In a safe area he walks all eight ways; in a fight he only sprints along his row.
+        Sprite[] run = Roaming ? WalkClip(new Vector2(moveInput, moveInputY))
+            : moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
         Sprite[] clip = run != null && run.Length > 0 ? run : art.idle;
         if (clip == loopClip) return;
         loopClip = clip;
-        animator.Play(clip, true, null, clip == art.idle ? art.idleFps : clip == art.walkUp ? art.walkFps : art.runFps);
+        animator.Play(clip, true, null, ClipFps(clip));
+    }
+
+    // His clip for a way across the screen, by the nearest of the eight compass points: sideways is his sprint,
+    // the rest his walks. A diagonal without frames of its own falls back to the sprint, and a missing walk up or
+    // down to null, which the callers play as the idle bobbing along.
+    Sprite[] WalkClip(Vector2 direction)
+    {
+        if (direction == Vector2.zero) return null;
+        // 0 is east, counting a quarter turn per two steps anticlockwise.
+        int point = (Mathf.RoundToInt(Mathf.Atan2(direction.y, direction.x) / (Mathf.PI / 4f)) + 8) % 8;
+        switch (point)
+        {
+            case 0: return FirstOf(art.runRight);
+            case 1: return FirstOf(art.walkUpRight, art.runRight);
+            case 2: return FirstOf(art.walkUp);
+            case 3: return FirstOf(art.walkUpLeft, art.runLeft);
+            case 4: return FirstOf(art.runLeft);
+            case 5: return FirstOf(art.walkDownLeft, art.runLeft);
+            case 6: return FirstOf(art.walkDown);
+            default: return FirstOf(art.walkDownRight, art.runRight);
+        }
+    }
+
+    static Sprite[] FirstOf(params Sprite[][] clips)
+    {
+        foreach (Sprite[] clip in clips) if (clip != null && clip.Length > 0) return clip;
+        return null;
+    }
+
+    float ClipFps(Sprite[] clip)
+    {
+        if (clip == art.idle) return art.idleFps;
+        if (clip == art.runLeft || clip == art.runRight) return art.runFps;
+        return art.walkFps;
     }
 
     void PlayAction(Sprite[] clip)

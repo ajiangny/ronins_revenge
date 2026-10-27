@@ -23,7 +23,7 @@ public static class NinjaArtSetup
         // Separate west/east clips rather than one flipped, so his armoured arm stays on the right side.
         ronin.runLeft = Frames("Ronin", "RunWest");
         ronin.runRight = Frames("Ronin", "RunEast");
-        SetUpWalkUp(ronin);
+        SetUpWalks(ronin);
         // The middle of the katana swing: four frames finish inside the 0.35 s attack cooldown while Space is held.
         ronin.slash = Frames("Ronin", "Slash", 1, 2, 3, 4);
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
@@ -353,7 +353,7 @@ public static class NinjaArtSetup
         EditorUtility.SetDirty(Camera.main);
     }
 
-    // The ronin's walk off the field between maps, and the ground of each stage and boss, without touching the prefabs.
+    // The ronin's walks (off the field between maps, and every way around a safe area), and the ground of each stage and boss, without touching the prefabs.
     [MenuItem("Ninja/Apply Maps")]
     public static void ApplyMaps()
     {
@@ -362,18 +362,23 @@ public static class NinjaArtSetup
         {
             scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         }
-        SetUpWalkUp(AssetDatabase.LoadAssetAtPath<CharacterArt>(ArtRoot + "Ronin.asset"));
+        SetUpWalks(AssetDatabase.LoadAssetAtPath<CharacterArt>(ArtRoot + "Ronin.asset"));
         SetUpMaps(Object.FindAnyObjectByType<GameManager>());
         SetUpSafeAreas(Object.FindAnyObjectByType<GameManager>());
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        Debug.Log("Maps and the ronin's walk-up applied. Re-run Ninja/Apply Boon Art to recolour the walk for the elemental ronin.");
+        Debug.Log("Maps and the ronin's walks applied. Re-run Ninja/Apply Boon Art to recolour the walks for the elemental ronin.");
     }
 
-    static void SetUpWalkUp(CharacterArt ronin)
+    static void SetUpWalks(CharacterArt ronin)
     {
         ronin.walkUp = Frames("Ronin", "WalkNorth");
+        ronin.walkDown = Frames("Ronin", "WalkSouth");
+        ronin.walkUpLeft = Frames("Ronin", "WalkNorthWest");
+        ronin.walkUpRight = Frames("Ronin", "WalkNorthEast");
+        ronin.walkDownLeft = Frames("Ronin", "WalkSouthWest");
+        ronin.walkDownRight = Frames("Ronin", "WalkSouthEast");
         ronin.walkFps = 9f;
         EditorUtility.SetDirty(ronin);
     }

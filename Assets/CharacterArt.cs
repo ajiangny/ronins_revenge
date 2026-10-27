@@ -18,6 +18,12 @@ public class CharacterArt : ScriptableObject
     public Sprite[] runRight;
     [Tooltip("The ronin walking away up the screen, between maps. Leave empty to bob on the idle clip instead.")]
     public Sprite[] walkUp;
+    [Tooltip("The ronin walking toward us and on the diagonals, in a safe area. Empty ones fall back to walkUp, the run or the idle bob.")]
+    public Sprite[] walkDown;
+    public Sprite[] walkUpLeft;
+    public Sprite[] walkUpRight;
+    public Sprite[] walkDownLeft;
+    public Sprite[] walkDownRight;
     [Tooltip("The ronin's spirit wisps, one per sprite on a canvas matching his frames; layered on and bobbed in code.")]
     public Sprite[] wisps;
     [Tooltip("Frames that already draw the spirit wisps themselves, so the layered ones hide on them.")]

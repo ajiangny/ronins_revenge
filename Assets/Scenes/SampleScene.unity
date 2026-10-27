@@ -514,6 +514,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c57af3a6022b4440bbded67394cabea6, type: 3}
   - {fileID: 21300000, guid: 1fd3bd4b0419434f865f2a4b67f0953a, type: 3}
   titleStandFps: 8
+  oniCloseup: {fileID: 21300000, guid: f66a475089829402e85baf977f272394, type: 3}
   titleWalkSpeed: 6
   titleFadeTime: 2.2
   elementArt:

@@ -521,7 +521,7 @@ public class GameManager : MonoBehaviour
     GameUI.SpeakerPortrait? PortraitFor(string speaker) => speaker switch
     {
         // His close-up is 1024x1536, cut at the hips; drawn this tall his head and shoulders fill the frame.
-        "Oni" when oniCloseup != null => new GameUI.SpeakerPortrait { art = oniCloseup, focus = new Vector2(0.5f, 0.2f), height = 900f },
+        "Oni" when oniCloseup != null => new GameUI.SpeakerPortrait { art = oniCloseup, focus = new Vector2(0.46f, 0.205f), height = 780f },
         _ => null,
     };
 

@@ -214,8 +214,8 @@ an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and r
 **What changed.**
 - **Portals between rounds** (Hades' chamber doors): each round is fought for a reward chosen at a portal (a soul of a
   shown element, a Spirit Bead, embers, a healing spring, a scroll); a stage's first round is always a soul. The
-  boss's portal opens from round 3; a stage runs up to 5 rounds, the extra ones harder. Samurai no longer drop souls;
-  scouts do 20% of the time. Picking the soul's element at the portal is Hades' "god first, boon second".
+  boss's portal opens from round 3; a stage runs up to 5 rounds, the extra ones harder. Samurai drop souls only rarely
+  (1%, at most one a stage); scouts do 20% of the time. Picking the soul's element at the portal is Hades' "god first, boon second".
 - **Spirit Beads** (Pom of Power): souls no longer offer held boons; a bead raises one held boon a rarity. One follows
   each stage boon, more from bead portals.
 - About **12–16 boons a run**, each a new boon, a slot swap or a capstone.

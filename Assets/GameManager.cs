@@ -69,8 +69,12 @@ public class GameManager : MonoBehaviour
     [Header("Souls and boons")]
     [Tooltip("Built on the Canvas at runtime if left empty.")]
     [SerializeField] BoonChoiceUI boonChoice;
-    [Tooltip("Chance a downed kite scout drops a soul. Otherwise souls only come from the portals' rewards.")]
+    [Tooltip("Chance a downed kite scout drops a soul. Most souls come from the portals' rewards.")]
     [SerializeField, Range(0, 1)] float scoutSoulChance = 0.2f;
+    [Tooltip("Chance any fallen samurai drops a soul: a rare stroke of luck on top of the portals.")]
+    [SerializeField, Range(0, 1)] float killSoulChance = 0.01f;
+    [Tooltip("Most souls that can drop from samurai kills in one stage.")]
+    [SerializeField] int killSoulsPerStage = 1;
     [Tooltip("Once the ronin holds a boon, the chance a soul takes one of his elements (weighted by how many boons of each he holds) instead of a random one.")]
     [SerializeField, Range(0, 1)] float soulElementBias = 0.5f;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
@@ -438,6 +442,8 @@ public class GameManager : MonoBehaviour
     // A scroll that reached the ronin while the round was wrapping up; its arts are offered before the next round.
     bool gatheredScroll;
     int scrollsDropped;
+    // Souls dropped by samurai this stage, for killSoulsPerStage.
+    int killSoulsThisStage;
     // What clearing the current round gives, picked at the portal that led to it.
     PortalReward pendingReward;
     Element pendingElement;
@@ -687,7 +693,27 @@ public class GameManager : MonoBehaviour
         if (state == State.Playing && pause) Pause();
         if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
-        if (state == State.Playing) UpdateScouts();
+        if (state == State.Playing)
+        {
+            UpdateScouts();
+            if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
+        }
+    }
+
+    // How far the army's lowest rank stands above the ronin's head, for the run log.
+    float ArmyGap()
+    {
+        float lowest = float.MaxValue;
+        foreach (Samurai samurai in army.Soldiers) lowest = Mathf.Min(lowest, samurai.transform.position.y);
+        return lowest == float.MaxValue ? float.MaxValue : lowest - ronin.TopY;
+    }
+
+    // The boons held, for the run log.
+    string HeldSummary()
+    {
+        var held = new List<string>();
+        foreach (EquippedBoon boon in loadout.Held) held.Add(boon.Boon.Kind == BoonKind.Normal ? $"{boon.Boon.Name} ({boon.Rarity})" : boon.Boon.Name);
+        return string.Join(", ", held);
     }
 
     // The menu pages. Each sub-page's Back returns to whichever page opened it.
@@ -1370,6 +1396,7 @@ public class GameManager : MonoBehaviour
                 ShowDevMenu(ShowPauseMenu);
             }
         }
+        if (keyboard.f8Key.wasPressedThisFrame) RunLog.Dump();
         if (state != State.Playing) return;
         if (keyboard.f1Key.wasPressedThisFrame)
         {
@@ -1486,6 +1513,13 @@ public class GameManager : MonoBehaviour
         roundIndex = 0;
         ResetLoadout();
         Save.BeginRun();
+        RunLog.Enabled = DevToolsOn;
+        var songs = new List<string>();
+        foreach (Song song in Upgrades.All)
+        {
+            if (Upgrades.Rank(song.Id) > 0) songs.Add($"{song.Name} {Upgrades.Rank(song.Id)}");
+        }
+        RunLog.BeginRun($"Heat {Oaths.Heat}  lives {maxLives}  {(Ronin.Weapon)Save.Data.weapon}{(godMode ? "  GOD MODE" : "")}  songs: {(songs.Count > 0 ? string.Join(", ", songs) : "none")}");
         ui.SetLives(lives, maxLives);
         ui.SetScore(score);
         if (devJumpStage >= 0)
@@ -1519,6 +1553,7 @@ public class GameManager : MonoBehaviour
         // A stage's first round always ends in a soul; later rounds carry what their portal showed.
         if (roundIndex == 0)
         {
+            killSoulsThisStage = 0;
             pendingReward = PortalReward.Soul;
             pendingElement = PickSoulElement();
         }
@@ -1547,6 +1582,7 @@ public class GameManager : MonoBehaviour
         state = State.Playing;
         ronin.ControlsEnabled = true;
         army.Advance();
+        RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
 
@@ -1563,6 +1599,7 @@ public class GameManager : MonoBehaviour
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
+        RunLog.Kill(source);
         Earn(Upgrades.PerSamurai);
         score += samurai.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
@@ -1576,7 +1613,11 @@ public class GameManager : MonoBehaviour
             Fx.Play(Fx.Impact, samurai.transform.position, Color.Lerp(Color.white, spark, 0.6f), source == KillSource.Shuriken ? 1.4f : 1f);
         }
         effects.OnKill(samurai, source);
-        MaybeDropSoul(samurai.transform.position);
+        if (killSoulsThisStage < killSoulsPerStage && Random.value < killSoulChance && activeSoul == null && army.Remaining > 0)
+        {
+            killSoulsThisStage++;
+            MaybeDropSoul(samurai.transform.position);
+        }
         MaybeDropScroll(samurai.transform.position, scrollChancePerKill);
     }
 
@@ -1657,8 +1698,8 @@ public class GameManager : MonoBehaviour
         boonChoice.RefreshHud(loadout);
     }
 
-    // Samurai no longer drop souls (they come from the portals); a scout's soul still waits for one already
-    // falling, and never comes once the round's army is gone.
+    // Most souls come from the portals; a scout's or a rare samurai's waits for one already falling, and never comes
+    // once the round's army is gone.
     void MaybeDropSoul(Vector3 position)
     {
         if (activeSoul != null || army.Remaining == 0) return;
@@ -1907,6 +1948,8 @@ public class GameManager : MonoBehaviour
     void TakeBoon(BoonOffer offer)
     {
         loadout.Take(offer);
+        RunLog.Note(offer.IsUpgrade ? $"bead: {offer.Boon.Name} -> {offer.Rarity}"
+            : offer.Boon.Kind == BoonKind.Normal ? $"took {offer.Boon.Name} ({offer.Rarity})" : $"took {offer.Boon.Name}");
         float value = offer.Boon.ValueAt(offer.Rarity);
         Color colour = offer.Boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(offer.Boon.Element).Color;
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
@@ -2013,6 +2056,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator EndRound()
     {
+        RunLog.EndSegment(lives, maxLives, null);
         state = State.Transition;
         ronin.ControlsEnabled = false;
         IceStatue.CrumbleAll();
@@ -2133,6 +2177,9 @@ public class GameManager : MonoBehaviour
         }
         ronin.ControlsEnabled = false;
         ronin.MoveOnly = false;
+        var shown = new List<string>();
+        foreach (Portal portal in portals) shown.Add(RewardLabel(portal.Reward, portal.Element));
+        RunLog.Note($"portal: {RewardLabel(chosen.Reward, chosen.Element)}  (of {string.Join(" / ", shown)})");
         foreach (Portal portal in portals)
         {
             if (portal != chosen) portal.Close();
@@ -2358,6 +2405,8 @@ public class GameManager : MonoBehaviour
         if (sfxLibrary != null) Music.Play(sfxLibrary.FightMusic(Stage.boss), sfxLibrary.musicVolume);
         state = State.Playing;
         ronin.ControlsEnabled = true;
+        RunLog.Note($"held: {HeldSummary()}");
+        RunLog.BeginSegment($"S{stageIndex + 1} BOSS {Stage.boss} ({activeBoss.MaxHealth} hp)");
         activeBoss.Begin(ronin, army.samuraiPrefab.arrowPrefab);
     }
 
@@ -2694,6 +2743,7 @@ public class GameManager : MonoBehaviour
     // She kneels and fades; her soul rises and becomes the stage's boon.
     IEnumerator BossFell()
     {
+        RunLog.EndSegment(lives, maxLives, null);
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ui.HideBossBar();
@@ -2724,12 +2774,10 @@ public class GameManager : MonoBehaviour
         // Her fall lifts the blood moon.
         if (backdrop != null) backdrop.SetBossMoon(false);
 
-        var element = (Element)Random.Range(0, 3);
-        ElementFx.Glow(where, Boons.Info(element).Color, 1f, 5f, 1f);
-        Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
-        Sfx.Play(Sfx.SoulCollect);
+        ElementFx.Glow(where, Color.white, 1f, 5f, 1f);
         yield return new WaitForSeconds(0.6f);
-        if (!OfferBoons(element, NextStage)) NextStage();
+        // Her soul is the stage's boon: a capstone when one is in reach, Rare or better, then a Spirit Bead.
+        OfferStageBoon();
     }
 
     // The true ending. The bells are silent and the stopped hour moves: the sky warms over the field for the first
@@ -3032,6 +3080,7 @@ public class GameManager : MonoBehaviour
     void OnRoninHit()
     {
         if (state != State.Playing) return;
+        RunLog.Hit();
 
         lives--;
         ui.SetLives(lives, maxLives);
@@ -3080,6 +3129,8 @@ public class GameManager : MonoBehaviour
         state = State.GameOver;
         // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
         if (cleared) embersThisRun += Oaths.ClaimBounty();
+        RunLog.EndSegment(lives, maxLives, null);
+        RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  embers {embersThisRun}  held: {HeldSummary()}");
         Save.EndRun(cleared, killer);
         lastRunEmbers = embersThisRun;
         if (activeBoss != null) activeBoss.Halt();

@@ -2,15 +2,15 @@ using System.Collections;
 using UnityEngine;
 
 // The temple's spirit pool come alive: light plays over the water, rings spread on it now and then and souls drift up
-// out of it. When Oni steps in he wades: the water hides his feet, the near rim stands in front of his shins, rings
-// spread from where he stands and it splashes as he enters and leaves. Built by SafeArea over the pool its map
+// out of it, and a few more wander up off the temple floor. When Oni steps in he wades: the water hides his feet, the
+// near rim stands in front of his shins, rings spread from where he stands and it splashes as he enters and leaves. Built by SafeArea over the pool its map
 // already draws; everything here is code-built on top, and without the water layer it skips the masking.
 public class SoulPool : MonoBehaviour
 {
     static readonly Color Teal = new Color(0.55f, 1f, 0.92f);
     // Sorting orders: the mask's range covers the surface layers only (the ground is -100, props -1, Oni 0).
     const int MaskBack = -13, MaskFront = -6;
-    const int ShimmerOrder = -11, RingOrder = -8, WispOrder = -5;
+    const int ShimmerOrder = -11, RingOrder = -8;
 
     SafeArea area;
     Ronin ronin;
@@ -18,7 +18,6 @@ public class SoulPool : MonoBehaviour
     Sprite[] souls;
     float px;
     bool masked;
-    SpriteRenderer rimFront;
     SpriteRenderer[] shimmer;
     Vector3 shimmerOrigin;
     Vector2 shimmerSize;
@@ -26,7 +25,7 @@ public class SoulPool : MonoBehaviour
     bool inWater;
     SpriteRenderer meniscus;
     Vector3 lastFeet;
-    float nextStep, nextStill, nextIdleRing, nextWisp;
+    float nextStep, nextStill, nextIdleRing, nextWisp, nextStray;
 
     public static SoulPool Build(SafeArea area, SafeArea.Config config, Ronin ronin, Bounds ground)
     {
@@ -72,14 +71,18 @@ public class SoulPool : MonoBehaviour
             mask.frontSortingOrder = MaskFront;
             Overlay(mask.transform, config.poolWater, ground);
         }
+        // The near rim hides his legs rather than being drawn over them: a mask on his order alone, so the map's own
+        // rim shows through, as dark as the moon's shade leaves it. It only bites while he wades (Ronin.Wade).
         if (config.poolRimFront != null)
         {
-            rimFront = new GameObject("RimFront").AddComponent<SpriteRenderer>();
-            rimFront.transform.SetParent(transform, false);
-            rimFront.sprite = config.poolRimFront;
-            rimFront.sortingOrder = ronin.SpriteOrder + 3;
-            rimFront.enabled = false;
-            Overlay(rimFront.transform, config.poolRimFront, ground);
+            var rim = new GameObject("RimFront").AddComponent<SpriteMask>();
+            rim.transform.SetParent(transform, false);
+            rim.sprite = config.poolRimFront;
+            rim.alphaCutoff = 0.5f;
+            rim.isCustomRangeActive = true;
+            rim.backSortingOrder = ronin.SpriteOrder - 1;
+            rim.frontSortingOrder = ronin.SpriteOrder;
+            Overlay(rim.transform, config.poolRimFront, ground);
         }
 
         // Two layers of light dashes drifting opposite ways, each a pair of tiles so it wraps without a gap.
@@ -133,7 +136,14 @@ public class SoulPool : MonoBehaviour
         if (time >= nextWisp)
         {
             nextWisp = time + Random.Range(0.9f, 1.8f);
-            StartCoroutine(Mote(PointInWater(0.6f)));
+            StartCoroutine(Mote(PointInWater(0.6f), 1f));
+        }
+        // Strays: a soul now and then rising off the flagstones anywhere in the temple, fainter than the pool's.
+        if (time >= nextStray)
+        {
+            nextStray = time + Random.Range(0.8f, 1.8f);
+            Rect floor = area.WalkArea;
+            StartCoroutine(Mote(new Vector3(Random.Range(floor.xMin - 1f, floor.xMax + 1f), Random.Range(floor.yMin, floor.yMax), 0f), 0.6f));
         }
 
         Wading();
@@ -149,7 +159,6 @@ public class SoulPool : MonoBehaviour
             inWater = now;
             Splash(feet, now);
         }
-        if (rimFront != null) rimFront.enabled = inWater;
         if (!inWater)
         {
             ronin.Wade(0f);
@@ -255,22 +264,24 @@ public class SoulPool : MonoBehaviour
         Destroy(r.gameObject);
     }
 
-    // A soul drifts up off the water, swaying, and fades: its frames at the map's pixel size, or a soft light.
-    IEnumerator Mote(Vector3 from)
+    // A soul drifts up off the ground, swaying, and fades: its frames at the map's pixel size, or a soft light. It rises
+    // from a spot on the ground, so it's in front of him when that spot is nearer the viewer than his feet.
+    IEnumerator Mote(Vector3 from, float brightness)
     {
         bool drawn = souls != null && souls.Length > 0 && souls[0] != null;
         var r = new GameObject("Soul").AddComponent<SpriteRenderer>();
         r.transform.SetParent(transform, false);
         r.sprite = drawn ? souls[0] : ProceduralSprites.SoftGlow;
         r.transform.localScale = drawn ? Vector3.one * px * souls[0].pixelsPerUnit * Random.Range(0.45f, 0.6f) : Vector3.one * 0.35f;
-        r.sortingOrder = WispOrder;
+        r.sortingOrder = ronin.SpriteOrder - 1;
         float sway = Random.Range(0f, 6f), life = Random.Range(2f, 2.8f);
         Color tint = drawn ? Color.white : Teal;
         for (float t = 0f; t < life; t += Time.deltaTime)
         {
             if (drawn) r.sprite = souls[(int)(t * 10f) % souls.Length];
+            r.sortingOrder = from.y < ronin.Feet.y ? ronin.SpriteOrder + 6 : ronin.SpriteOrder - 1;
             r.transform.position = from + new Vector3(Mathf.Sin(t * 2f + sway) * 0.15f, t * 0.6f, 0f);
-            r.color = new Color(tint.r, tint.g, tint.b, (drawn ? 0.85f : 0.6f) * Mathf.Sin(t / life * Mathf.PI));
+            r.color = new Color(tint.r, tint.g, tint.b, brightness * (drawn ? 0.85f : 0.6f) * Mathf.Sin(t / life * Mathf.PI));
             yield return null;
         }
         Destroy(r.gameObject);

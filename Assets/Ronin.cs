@@ -582,7 +582,7 @@ public class Ronin : MonoBehaviour
         body.MovePosition(position);
         // A direction with no frames of its own walks on the idle, so he bobs on it, as on a walk without frames.
         roamTime += Time.fixedDeltaTime;
-        bool bob = step != Vector2.zero && loopClip == art.idle;
+        bool bob = step != Vector2.zero && (loopClip == art.idle || loopClip == art.idleDown);
         sprite.transform.localPosition = spriteRest + (bob ? Vector3.up * (Mathf.Abs(Mathf.Sin(roamTime * 9f)) * 0.12f / transform.lossyScale.y) : Vector3.zero);
     }
 
@@ -851,7 +851,9 @@ public class Ronin : MonoBehaviour
         // In a safe area he walks all eight ways; in a fight he only sprints along his row.
         Sprite[] run = Roaming ? WalkClip(new Vector2(moveInput, moveInputY))
             : moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
-        Sprite[] clip = run != null && run.Length > 0 ? run : art.idle;
+        // Standing still in a safe area he faces us; in a fight, up the field at the army.
+        Sprite[] still = Roaming && art.idleDown != null && art.idleDown.Length > 0 ? art.idleDown : art.idle;
+        Sprite[] clip = run != null && run.Length > 0 ? run : still;
         if (clip == loopClip) return;
         loopClip = clip;
         animator.Play(clip, true, null, ClipFps(clip));
@@ -886,7 +888,7 @@ public class Ronin : MonoBehaviour
 
     float ClipFps(Sprite[] clip)
     {
-        if (clip == art.idle) return art.idleFps;
+        if (clip == art.idle || clip == art.idleDown) return art.idleFps;
         if (clip == art.runLeft || clip == art.runRight) return art.runFps;
         return art.walkFps;
     }

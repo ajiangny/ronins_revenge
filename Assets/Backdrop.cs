@@ -164,8 +164,21 @@ public class Backdrop : MonoBehaviour
         groundRenderer.transform.localScale = Vector3.one * Mathf.Max(viewWidth / size.x, viewHeight / size.y);
     }
 
-    // Where the ground lies in the world, for things drawn to line up with its pixels; null until it's laid out.
-    public Bounds? GroundBounds => groundRenderer != null && groundRenderer.sprite != null ? groundRenderer.bounds : (Bounds?)null;
+    // Where the ground lies in the world, for things drawn to line up with its pixels. Worked out the way FitGround
+    // lays it, so it's right even before Start (a death reloads the scene straight into the temple); null with no map.
+    public Bounds? GroundBounds
+    {
+        get
+        {
+            Sprite shown = groundRenderer != null ? groundRenderer.sprite : mapPending && pendingMap != null && pendingMap.ground != null ? pendingMap.ground : ground;
+            if (shown == null) return null;
+            Camera cam = Camera.main;
+            float height = 2f * (cam.orthographicSize + 0.5f), width = height * cam.aspect;
+            Vector2 size = shown.bounds.size;
+            float scale = Mathf.Max(width / size.x, height / size.y);
+            return new Bounds(new Vector3(CameraShake.Center.x, CameraShake.Center.y, 0f), size * scale);
+        }
+    }
 
     // Swaps to another map's ground and petals; null (or a map without ground art) brings back the courtyard.
     public void Show(Map map)

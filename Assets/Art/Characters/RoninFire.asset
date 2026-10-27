@@ -109,6 +109,11 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0de89b5b75b1c4fd290ec4b5557c3dac, type: 3}
   - {fileID: 21300000, guid: 0a2451179315c4130a128036cc13213e, type: 3}
   - {fileID: 21300000, guid: 0f52783df97c343fb917e0a1fd1a7c23, type: 3}
+  idleDown:
+  - {fileID: 21300000, guid: 001d6880e89b941109b6da91df3a488e, type: 3}
+  - {fileID: 21300000, guid: 6a9a81a58a5ff4850a0b263e57888ee5, type: 3}
+  - {fileID: 21300000, guid: 7ee1f5a05226c4b38a4096f41d8a48e0, type: 3}
+  - {fileID: 21300000, guid: 5d1fbe9a25f144f769135fb34be707e5, type: 3}
   wisps:
   - {fileID: 21300000, guid: d7abfa3a649264ec2919527d8df12fe5, type: 3}
   - {fileID: 21300000, guid: 407c74c87aeb74533986a29b3c16f83e, type: 3}
@@ -141,6 +146,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 1efd693d773da4729959f6453bfcd6b3, type: 3}
   - {fileID: 21300000, guid: a01436b742b6842eaa658847c6083330, type: 3}
   - {fileID: 21300000, guid: d3d51cf6a19354050b07f7a99b87ea4b, type: 3}
+  - {fileID: 21300000, guid: 5d1fbe9a25f144f769135fb34be707e5, type: 3}
   idleFps: 5
   actionFps: 12
   runFps: 14

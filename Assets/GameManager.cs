@@ -23,7 +23,7 @@ public class ElementArt
 // Owns the game flow: title menu -> stages of rounds -> win/lose menu, plus pause, score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
-    enum State { Title, Transition, Playing, Choosing, Paused, GameOver }
+    enum State { Title, Transition, Playing, Choosing, Paused, GameOver, Dialogue }
 
     const string HighScoreKey = "HighScore";
     // A Spirit Offering taken at full health gives these points, times the stage number.
@@ -88,6 +88,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] float titleStandFps = 8f;
     [Tooltip("Oni's painted close-up, framed beside his lines (set by Ninja/Apply UI Fonts). Empty shows his lines alone.")]
     [SerializeField] Sprite oniCloseup;
+    [Tooltip("The souls' painted close-ups for their dialogue scenes (set by Ninja/Apply UI Fonts). Empty shows the soul-fire instead.")]
+    [SerializeField] Sprite akaganeCloseup;
+    [SerializeField] Sprite mizoreCloseup;
+    [SerializeField] Sprite hibikiCloseup;
     [Tooltip("How fast the ronin walks from his seat to the middle of his row after START, in world units a second.")]
     [SerializeField] float titleWalkSpeed = 6f;
     [Tooltip("Seconds the title page takes to fade into the first stage's field as he walks.")]
@@ -371,6 +375,9 @@ public class GameManager : MonoBehaviour
     Behaviour[] machineVoice;
     // Whether the voice source is playing a full line rather than a bark.
     bool speakingFullLine;
+    DialogueScene dialogueScene;
+    // The souls who have already talked this run: only the first boon screen of each element opens a scene.
+    readonly HashSet<Element> metThisRun = new HashSet<Element>();
     // The take each line played last, so the next call of it picks another.
     readonly Dictionary<BossLine, int> lastTakes = new Dictionary<BossLine, int>();
     Backdrop backdrop;
@@ -481,6 +488,8 @@ public class GameManager : MonoBehaviour
         boonChoice.Bind(ronin, ui);
         menu = ui.gameObject.AddComponent<MenuUI>();
         menu.Bind(ui);
+        dialogueScene = ui.gameObject.AddComponent<DialogueScene>();
+        dialogueScene.Bind(ui);
         baseRoninArt = ronin.art;
         ResetLoadout();
 
@@ -516,8 +525,8 @@ public class GameManager : MonoBehaviour
     // Oni's teal, for the few words he says.
     static readonly Color OniColour = new Color(0.45f, 1f, 0.9f);
 
-    // The close-up framed beside a speaker's lines, by name, or none. Bosses (their VoiceFor close-ups) and the boon
-    // souls can be added here as their conversations come to want one.
+    // The close-up framed beside Oni's words on the title hill. Lines in play show no portrait; conversations get a
+    // full talk scene instead (SpeakerFor).
     GameUI.SpeakerPortrait? PortraitFor(string speaker) => speaker switch
     {
         // His close-up is 1024x1536, cut at the hips; drawn this tall his head and shoulders fill the frame.
@@ -944,6 +953,7 @@ public class GameManager : MonoBehaviour
         lives = maxLives = Mathf.Min(startingLives + Upgrades.Rank(UpgradeId.IronWill), Boons.MaxLives);
         embersThisRun = 0;
         dawnUsed = redrawUsed = false;
+        metThisRun.Clear();
         score = 0;
         highScoreAtStart = highScore;
         stageIndex = 0;
@@ -1268,9 +1278,31 @@ public class GameManager : MonoBehaviour
         var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity);
         if (offers.Count == 0) return false;
 
+        // The first screen of each soul in a run opens with that soul talking to Oni, as Hades' gods do.
+        Conversation greeting = null;
+        if (metThisRun.Add(element))
+        {
+            bool offering = offers.Exists(o => o.Boon.Kind == BoonKind.Offering);
+            greeting = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulPickup, Dialogue.Context(loadout, element, lives, offering));
+        }
+
         state = State.Choosing;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
+        if (greeting != null) StartCoroutine(GreetThenChoose(greeting, element, offers, afterPick, ensureCapstone, minRarity));
+        else ShowBoons(element, offers, afterPick, ensureCapstone, minRarity);
+        return true;
+    }
+
+    IEnumerator GreetThenChoose(Conversation greeting, Element element, List<BoonOffer> offers, System.Action afterPick,
+        bool ensureCapstone, Rarity minRarity)
+    {
+        yield return PlayScene(greeting);
+        ShowBoons(element, offers, afterPick, ensureCapstone, minRarity);
+    }
+
+    void ShowBoons(Element element, List<BoonOffer> offers, System.Action afterPick, bool ensureCapstone, Rarity minRarity)
+    {
         ElementArt art = ArtFor(element);
         boonChoice.Show(element, offers, art?.soulFrames, art?.portrait, index =>
         {
@@ -1291,18 +1323,19 @@ public class GameManager : MonoBehaviour
                 return offers;
             });
         }
-        return true;
     }
+
+    // The soul who catches each element's dead and hands them to Oni (Story/Souls.md).
+    static string SoulOf(Element element) => element switch
+    {
+        Element.Fire => "Akagane",
+        Element.Water => "Mizore",
+        _ => "Hibiki",
+    };
 
     void TakeBoon(BoonOffer offer)
     {
         loadout.Take(offer);
-        // The first soul of each kind he ever takes, Oni remarks on.
-        if (offer.Boon.Kind is BoonKind.Normal or BoonKind.Duo or BoonKind.Legendary)
-        {
-            Conversation said = Dialogue.Pick("Oni", DialogueEvent.FirstElement, Dialogue.Context(loadout, offer.Boon.Element));
-            if (said != null && said.Lines.Length > 0) StartCoroutine(PlayConversation(said, OniColour));
-        }
         float value = offer.Boon.ValueAt(offer.Rarity);
         Color colour = offer.Boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(offer.Boon.Element).Color;
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
@@ -1510,21 +1543,13 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.StageStart, 1f, 0.75f);
         BossVoice lines = VoiceFor(Stage.boss);
         // What the boss says depends on every fight before this one; with nothing written it's its own intro line.
-        Conversation intro = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossIntro, Dialogue.Context(loadout));
-        string introText = activeBoss.Line(BossLine.Intro);
-        AudioClip introClip = lines.intro;
-        if (intro != null && intro.BuiltIn == null && intro.Lines.Length > 0)
-        {
-            introText = Dialogue.Fill(intro.Lines[0].Text, Dialogue.Context());
-            introClip = voiceLibrary != null ? voiceLibrary.Find(intro.VoiceId(0)) : null;
-        }
+        Conversation intro = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossIntro, Dialogue.Context(loadout))
+            ?? Unwritten(BossLine.Intro);
+        // The card only names the boss; the talking happens in the scene after it.
         if (lines.portrait != null && lines.closeup != null)
         {
-            voice.volume = voiceVolume * Sfx.Volume;
             yield return ui.PlayBossIntro(lines.portrait, lines.closeup, lines.closeupHeight, lines.closeupFocus, lines.closeupAt,
-                activeBoss.Title, activeBoss.Epithet, activeBoss.Colour, voice, introClip, introText);
-            // Any answer after the first line plays before the fight.
-            if (intro != null && intro.BuiltIn == null) yield return PlayConversation(intro, activeBoss.Colour, 1);
+                activeBoss.Title, activeBoss.Epithet, activeBoss.Colour, voice, null, null);
         }
         else
         {
@@ -1532,6 +1557,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(2.2f);
             ui.HideBanner();
         }
+        yield return PlayScene(intro);
 
         ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
         // A boss with second-phase portraits gets a card for its arrival, played in its phase break.
@@ -1544,19 +1570,27 @@ public class GameManager : MonoBehaviour
 
     // The second-phase title card: the same cinematic as the intro with the phase art, epithet and line. The music
     // ducks under it as it would under the spoken line.
+    // When Oni has something to answer (a phase exchange not heard yet), the card only names the new form and the
+    // exchange plays as a scene after it; otherwise the card speaks the line itself.
     IEnumerator PlayPhaseCard(Boss boss)
     {
         BossVoice lines = VoiceFor(Stage.boss);
-        AudioClip clip = lines.phase;
+        Conversation exchange = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossPhase, Dialogue.Context(loadout));
+        AudioClip clip = exchange == null ? lines.phase : null;
         Music.Duck(0.3f, (clip != null ? clip.length : 3f) + 2.5f);
         voice.volume = voiceVolume * Sfx.Volume;
         // The wash behind the art follows the transformed painting where its colours change (Utsusemi's molten core).
         Color wash = lines.phaseColour.a > 0f ? lines.phaseColour : boss.Colour;
         yield return ui.PlayBossIntro(lines.phasePortrait, lines.phaseCloseup, lines.phaseCloseupHeight, lines.phaseCloseupFocus,
-            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, boss.Line(BossLine.Phase));
+            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, exchange == null ? boss.Line(BossLine.Phase) : null);
         // The bar carries the name the card just announced.
         ui.RenameBossBar($"{boss.PhaseTitle}, {lines.phaseEpithet}");
+        if (exchange != null) yield return PlayScene(exchange);
     }
+
+    // The boss's own line alone, for a moment nothing is written for.
+    Conversation Unwritten(BossLine line) =>
+        new Conversation { Id = $"{Stage.boss}_{line}", Speaker = Stage.boss.ToString(), BuiltIn = line };
 
     Boss CreateBoss(BossKind kind, Vector3 position)
     {
@@ -1752,6 +1786,8 @@ public class GameManager : MonoBehaviour
     // the wrong move. Only a stagger cries over another bark.
     void OnBossSpoke(Boss boss, BossLine line)
     {
+        // The last words are said in the defeat scene (BossFell), with Oni's answer.
+        if (line == BossLine.Defeat) return;
         // The Emperor's summons and the souls' answers are story, not barks: a gasp mustn't swallow them.
         bool full = line == BossLine.Intro || line == BossLine.Phase || line == BossLine.Defeat || line == BossLine.DefeatFinal
             || line == BossLine.KuonEnraged
@@ -1865,6 +1901,9 @@ public class GameManager : MonoBehaviour
         Music.Stop(1.5f);
         if (!hitStopping) StartCoroutine(HitStop(0.25f));
         Vector3 where = activeBoss.Centre;
+        // Her last words, and Oni's answer, with the field held still at the killing blow.
+        yield return PlayScene(Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossDefeat, Dialogue.Context(loadout))
+            ?? Unwritten(BossLine.Defeat));
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
         // working through the blow that felled her. Each boss's fall takes its own time (Shirogane's is a scene).
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
@@ -1961,6 +2000,99 @@ public class GameManager : MonoBehaviour
     // Her silver, as herself rather than the Emperor's teal.
     static readonly Color FreedColour = new Color(0.72f, 0.9f, 1f);
 
+    // A conversation as a talk scene (DialogueScene) over the frozen field. A boss's built-in line comes first in its
+    // own voice, then the written lines, each voiced when its clip is there. The field, the clock and the ronin's
+    // controls are put back as they were afterwards.
+    IEnumerator PlayScene(Conversation said)
+    {
+        if (said == null) yield break;
+        // A killing blow's hit-stop would hand time back mid-scene.
+        while (hitStopping) yield return null;
+        var lines = new List<DialogueScene.Line>();
+        int index = 0;
+        if (said.BuiltIn is BossLine built && activeBoss != null)
+        {
+            AudioClip clip = VoiceFor(Stage.boss).Take(built, -1, out int take);
+            lines.Add(new DialogueScene.Line { who = SpeakerFor(said.Speaker), text = activeBoss.Line(built, take), clip = clip });
+            index = 1;
+        }
+        DialogueContext ctx = Dialogue.Context();
+        foreach (DialogueLine line in said.Lines)
+        {
+            AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(index)) : null;
+            lines.Add(new DialogueScene.Line { who = SpeakerFor(line.Speaker), text = Dialogue.Fill(line.Text, ctx), clip = clip });
+            index++;
+        }
+        if (lines.Count == 0) yield break;
+
+        State was = state;
+        float timeScale = Time.timeScale;
+        bool controls = ronin.ControlsEnabled;
+        state = State.Dialogue;
+        Time.timeScale = 0f;
+        ronin.ControlsEnabled = false;
+        speakingFullLine = true;
+        // Nothing of the HUD sits over the scene.
+        ui.HideForScene(true);
+        boonChoice.SetHudVisible(false);
+        yield return dialogueScene.Play(lines, voice, voiceVolume * Sfx.Volume);
+        ui.HideForScene(false);
+        boonChoice.SetHudVisible(true);
+        speakingFullLine = false;
+        state = was;
+        Time.timeScale = timeScale;
+        ronin.ControlsEnabled = controls;
+    }
+
+    // The boss cards draw close-ups this much larger than a scene does, where a figure stands about screen height.
+    const float SceneArtScale = 0.72f;
+    // Oni's and the souls' close-ups (1024x1536, cut at the hips) drawn that tall.
+    const float ScenePortraitHeight = 1080f;
+
+    // How a speaker stands in a talk scene: Oni on the right, the boss or soul on the left. A boss in its second
+    // phase wears that phase's painting and epithet. Anyone without a painting shows their soul-fire, or a glow.
+    DialogueScene.Speaker SpeakerFor(string name)
+    {
+        switch (name)
+        {
+            case "Oni":
+                // His painting fills more of its canvas than the others', so it's drawn a little smaller to match faces.
+                return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
+                    focus = new Vector2(0.46f, 0.205f), height = ScenePortraitHeight * 0.9f, right = true };
+            // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces.
+            case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
+            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));
+            case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
+        }
+        if (activeBoss != null && name == Stage.boss.ToString())
+        {
+            BossVoice lines = VoiceFor(Stage.boss);
+            bool phase = activeBoss.SecondPhase && lines.phaseCloseup != null;
+            return new DialogueScene.Speaker
+            {
+                name = phase ? activeBoss.PhaseTitle : activeBoss.Title,
+                epithet = phase ? lines.phaseEpithet : activeBoss.Epithet,
+                colour = activeBoss.Colour,
+                art = phase ? lines.phaseCloseup : lines.closeup,
+                focus = phase ? lines.phaseCloseupFocus : lines.closeupFocus,
+                height = (phase ? lines.phaseCloseupHeight : lines.closeupHeight) * SceneArtScale,
+            };
+        }
+        return new DialogueScene.Speaker { name = name, colour = Color.white };
+    }
+
+    // `eyes` is where the soul's eyes sit in their close-up, 0-1 across and down.
+    DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes) => new DialogueScene.Speaker
+    {
+        name = name,
+        epithet = epithet,
+        colour = Boons.Info(element).Color,
+        art = closeup,
+        focus = eyes,
+        height = ScenePortraitHeight * 0.9f,
+        soulFrames = ArtFor(element)?.soulFrames,
+    };
+
     // A written conversation's lines from `from` on, each voiced when its clip is there, subtitled and waited out.
     // Oni speaks in his teal, anyone else in `colour`.
     IEnumerator PlayConversation(Conversation said, Color colour, int from = 0)
@@ -1988,8 +2120,10 @@ public class GameManager : MonoBehaviour
             speakingFullLine = true;
             Music.Duck(0.3f, seconds + 0.3f);
         }
-        // On the title page Oni speaks from his corner, clear of the menu.
-        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, state == State.Title ? HillSpeech : null, PortraitFor(speaker));
+        // On the title page Oni speaks from his corner, clear of the menu, his portrait standing on the plate; in play
+        // a line is just words.
+        bool hill = state == State.Title;
+        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, hill ? HillSpeech : null, hill ? PortraitFor(speaker) : null);
         yield return new WaitForSeconds(seconds + 0.5f);
     }
 
@@ -2096,7 +2230,7 @@ public class GameManager : MonoBehaviour
             ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
             Fx.Play(Fx.BoonPillar, ronin.Feet, OniColour, 1.4f);
             Sfx.Play(Sfx.SoulCollect);
-            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f, null, PortraitFor("Oni"));
+            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f);
             return;
         }
         if (lives <= 0)

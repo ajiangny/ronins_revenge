@@ -145,6 +145,16 @@ public class GameUI : MonoBehaviour
         foreach (GameObject part in hudParts) part.SetActive(visible);
     }
 
+    // Hides the whole HUD, boss bar too, while a talk scene plays over the field, and brings back what was up before.
+    public void HideForScene(bool hide)
+    {
+        SetHudVisible(!hide);
+        if (hide) bossBarBeforeScene = bossBar.activeSelf;
+        bossBar.SetActive(!hide && bossBarBeforeScene);
+    }
+
+    bool bossBarBeforeScene;
+
     // A reminder over the lives while the dev menu's god mode is on. Built the first time it's needed.
     public void SetGodMode(bool on)
     {
@@ -342,7 +352,7 @@ public class GameUI : MonoBehaviour
     // lit in her colour; then it cross-fades to her close-up while a lower-third title rises in: her epithet over a
     // thin rule, her name under it, in Roman capitals, and her spoken line beneath. The close-up is `closeUpHeight`
     // tall with its `focus` point (0-1 across and down the art) at `focusAt` on screen. Runs on unscaled time; ENTER
-    // or SPACE skips to the fight.
+    // or SPACE skips to the fight. A null `lineText` makes it a name reveal only, for a talk scene to follow.
     public IEnumerator PlayBossIntro(Sprite full, Sprite closeUp, float closeUpHeight, Vector2 focus, Vector2 focusAt,
         string title, string epithet, Color colour, AudioSource voice, AudioClip line, string lineText)
     {
@@ -417,8 +427,9 @@ public class GameUI : MonoBehaviour
 
         const float cardAt = 1.6f;
         const float crossFade = 0.35f;
-        // An unvoiced line (one written for the reactive dialogue but not recorded yet) stays up long enough to read.
-        float lineLength = line != null ? line.length : Mathf.Max(3f, (lineText ?? "").Length / 15f);
+        // An unvoiced line (one written for the reactive dialogue but not recorded yet) stays up long enough to read; with
+        // no line at all the card only names her, and holds just long enough for the title to settle.
+        float lineLength = line != null ? line.length : lineText == null ? 1.4f : Mathf.Max(3f, lineText.Length / 15f);
         float end = cardAt + Mathf.Max(lineLength + 0.6f, 2.6f);
         bool cut = false;
         for (float t = 0; t < end; t += Time.unscaledDeltaTime)

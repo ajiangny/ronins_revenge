@@ -45,6 +45,7 @@ public class Kunai : MonoBehaviour
     bool spent;
     bool launched;
     Func<Transform> pickTarget;
+    float launchedAt;
     Transform target;
     Collider[] targetColliders;
     SpriteRenderer parryAura;
@@ -84,6 +85,7 @@ public class Kunai : MonoBehaviour
         Sprite sprite = null, bool flipSprite = false, float scale = 1f, bool spin = false, float lifetimeMultiplier = 1f)
     {
         launched = true;
+        launchedAt = Time.time;
         Source = source;
         pierceLeft = pierce;
         transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
@@ -187,11 +189,20 @@ public class Kunai : MonoBehaviour
         transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
     }
 
+    // A shot turning at a fixed rate can circle a target that sits inside its turning circle forever, passing
+    // through everything else (a parried Taisho spear spun around its samurai). So the longer it homes, the harder
+    // it turns, and after PassThroughSeconds it stops slipping past the enemies in its way.
+    const float TurnGrowthPerSecond = 3f;
+    const float PassThroughSeconds = 1f;
+
+    float HomingAge => Time.time - launchedAt;
+
     void FixedUpdate()
     {
         if (pickTarget == null || spent) return;
         if (!TargetAlive()) AcquireTarget();
-        if (TargetAlive()) Steer(TargetPoint() - transform.position, homingTurnRate * Time.fixedDeltaTime);
+        float turn = homingTurnRate * (1f + TurnGrowthPerSecond * HomingAge);
+        if (TargetAlive()) Steer(TargetPoint() - transform.position, turn * Time.fixedDeltaTime);
     }
 
     // Slashes forked together (Split Slash) start on the same spot; they must not knock each other out.
@@ -255,7 +266,8 @@ public class Kunai : MonoBehaviour
         // to the enemy it picked (arrows, the samurai in front) except the ronin's cover, which still stops a
         // parried arrow. A parried boss slash cuts through cover too (below).
         bool cover = coll.collider.GetComponentInParent<Blocker>() != null;
-        bool passes = TargetAlive() && !IsTarget(coll.collider) && !(cover && Source != KillSource.Reflected);
+        bool passes = TargetAlive() && !IsTarget(coll.collider) && !(cover && Source != KillSource.Reflected)
+            && (pickTarget == null || HomingAge < PassThroughSeconds);
         if (coll.collider.GetComponentInParent<Kunai>() != null || passes)
         {
             KeepFlying(coll.collider);

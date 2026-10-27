@@ -124,6 +124,18 @@ public class Utsusemi : Boss
     Vector3 Core => OnSprite(58f, 50.5f);
     Vector3 Shoulder => Centre + new Vector3(sprite.bounds.extents.x * 0.5f, sprite.bounds.size.y * 0.1f, 0);
 
+    // The height of its row, taken when the fight first starts. Its dashes down to the ronin's ground return here,
+    // unless something cuts them short.
+    float rowY = float.NaN;
+
+    // Back up to its row if a stagger, a freeze-then-break or a phase break caught it down on the ronin's ground;
+    // otherwise its next move would take the ground for its row and fight from there.
+    IEnumerator BackToRow()
+    {
+        if (float.IsNaN(rowY)) rowY = anchor.y;
+        else if (Mathf.Abs(anchor.y - rowY) > 0.05f) yield return Dash(new Vector3(anchor.x, rowY, anchor.z), 0.25f);
+    }
+
     protected override IEnumerator Fight()
     {
         armored = false;
@@ -134,6 +146,7 @@ public class Utsusemi : Boss
             plantedSword = null;
             PlayIdle();
         }
+        yield return BackToRow();
         while (true)
         {
             while (breaking) yield return null;
@@ -2099,6 +2112,8 @@ public class Utsusemi : Boss
         // A break mid-Hour Strikes drops the armour with the rest of the move.
         armored = false;
         ShowEye(false);
+        // It breaks open in its row, not wherever a cut-short dash left it.
+        yield return BackToRow();
 
         // The mainspring slips: it seizes with a jolt.
         animator.Play(art.hit, false, null, art.actionFps * 0.5f);

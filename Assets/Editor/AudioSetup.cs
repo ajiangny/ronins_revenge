@@ -111,6 +111,14 @@ public static class AudioSetup
         library.sounds = sounds.ToArray();
         library.titleMusic = LoadMusic("TitleMusic");
         library.battleMusic = LoadMusic("BattleMusic");
+        // Stage_<Boss>.mp3 for the rounds, Boss_<Boss>.mp3 for the fight; a missing one falls back to BattleMusic.
+        var stageMusic = new List<SfxLibrary.StageMusic>();
+        foreach (BossKind boss in System.Enum.GetValues(typeof(BossKind)))
+        {
+            if (boss == BossKind.None) continue;
+            stageMusic.Add(new SfxLibrary.StageMusic { boss = boss, rounds = LoadMusic($"Stage_{boss}"), fight = LoadMusic($"Boss_{boss}") });
+        }
+        library.stageMusic = stageMusic.ToArray();
         EditorUtility.SetDirty(library);
         AssetDatabase.SaveAssets();
 
@@ -121,7 +129,18 @@ public static class AudioSetup
         manager.ApplyModifiedPropertiesWithoutUndo();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"Audio applied: {sounds.Count} sounds, title music {(library.titleMusic ? "set" : "missing")}, battle music {(library.battleMusic ? "set" : "missing")}.");
+        Debug.Log($"Audio applied: {sounds.Count} sounds, title music {(library.titleMusic ? "set" : "missing")}, battle music {(library.battleMusic ? "set" : "missing")}, {CountStageTracks(library)} stage and boss tracks.");
+    }
+
+    static int CountStageTracks(SfxLibrary library)
+    {
+        int count = 0;
+        foreach (SfxLibrary.StageMusic music in library.stageMusic)
+        {
+            if (music.rounds != null) count++;
+            if (music.fight != null) count++;
+        }
+        return count;
     }
 
     // <id>.mp3, then <id>_2.mp3, <id>_3.mp3, ... Short effects load decompressed and mono for instant playback.

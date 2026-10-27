@@ -449,6 +449,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 | Parry hit-stop | `GameManager.HitStop` |
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`). A pool voice is free once its clip's audible part has played (`Sound.audible`, measured by Apply Audio, since the generated clips carry long silent tails); the march beat has its own source (`Sound.ownSource`) |
 | Music crossfade and ducking | `Music.cs` |
+| Which track plays where | `SfxLibrary`: `titleMusic` (title, temple, dawn), `stageMusic` per stage keyed by its boss (`RoundsMusic` in `BeginRound`, `FightMusic` once the boss intro ends in `BeginBoss`), `battleMusic` for any stage without its own. Files `Audio/Music/Stage_<Boss>.mp3` / `Boss_<Boss>.mp3`, prompts in `Tools/generate-music.mjs` |
 | Player volume settings (`PlayerPrefs` `MusicVolume`, `SfxVolume`) | `Music.Volume` (applied every frame, so the slider works live), `Sfx.Volume` (also scales boss voice lines) |
 | Boss voicelines | `GameManager.voice` AudioSource (its own `BossVoice` child, with the chorus/echo/distortion machine-voice filters `CreateMachineVoice` turns on for Utsusemi), clips in `Audio/Voice/`; `BossLine` full lines (intro/phase/defeat) vs. barks (hurt, stagger, move callouts) in `OnBossSpoke`: a bark is dropped while anything is still playing (only Stagger cuts in). Moves call out through `Boss.Bark(line, cooldown)`. Lines with several takes (`<Boss>_<Line>_2/_3`, loaded in order by `BossArtSetup.SetTakes`) are picked by `BossVoice.Take`, and their subtitle comes from `Boss.Line(line, take)` |
 
@@ -487,7 +488,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Voice Lines | `Editor/VoiceSetup.cs` | `VoiceLibrary` from every clip in `Audio/Voice` → `GameManager.voiceLibrary`; logs the written dialogue lines with no clip yet |
 | Apply Web Import Settings | `Editor/WebImportSettings.cs` | Reimports portraits, logo, sound effects and voice lines through the web import hooks |
 | Apply VFX | `Editor/FxSetup.cs` | Builds `FxLibrary` from `Art/Sprites/Fx` |
-| Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` |
+| Apply Audio | `Editor/AudioSetup.cs` | Builds `SfxLibrary` from `Audio/Sfx` and `Audio/Music` (including each stage's and boss's track) |
 | Rename To Ronin Theme | `Editor/ThemeRename.cs` | One-off template rename (already run) |
 
 ## Physics

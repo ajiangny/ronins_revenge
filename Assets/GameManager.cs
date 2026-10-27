@@ -1357,7 +1357,7 @@ public class GameManager : MonoBehaviour
             : "The dead march too.";
         ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
-        if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.RoundsMusic(Stage.boss), sfxLibrary.musicVolume);
 
         // The new army marches in under the banner; the round starts once both are done.
         float introEnds = Time.time + (roundIndex == 0 ? levelIntroTime : roundIntroTime);
@@ -1919,7 +1919,7 @@ public class GameManager : MonoBehaviour
         ui.ShowBossBar($"{activeBoss.Title}, {activeBoss.Epithet}", activeBoss.Colour);
         // A boss with second-phase portraits gets a card for its arrival, played in its phase break.
         Boss.PhaseCard = lines.phasePortrait != null && lines.phaseCloseup != null ? PlayPhaseCard : null;
-        if (sfxLibrary != null) Music.Play(sfxLibrary.battleMusic, sfxLibrary.musicVolume);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.FightMusic(Stage.boss), sfxLibrary.musicVolume);
         state = State.Playing;
         ronin.ControlsEnabled = true;
         activeBoss.Begin(ronin, army.samuraiPrefab.arrowPrefab);

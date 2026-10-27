@@ -28,12 +28,41 @@ public class SfxLibrary : ScriptableObject
             audible != null && i < audible.Length && audible[i] > 0f ? audible[i] : clips[i].length;
     }
 
+    // A stage's music, keyed by the boss who ends it so it follows the stage if stages are reordered.
+    [Serializable]
+    public class StageMusic
+    {
+        public BossKind boss;
+        [Tooltip("Plays through the stage's rounds. Empty plays battleMusic.")]
+        public AudioClip rounds;
+        [Tooltip("Plays once the boss's intro is over. Empty plays battleMusic.")]
+        public AudioClip fight;
+    }
+
     public Sound[] sounds;
 
     [Header("Music")]
     public AudioClip titleMusic;
+    [Tooltip("Played wherever a stage has no music of its own.")]
     public AudioClip battleMusic;
+    public StageMusic[] stageMusic;
     [Range(0, 1)] public float musicVolume = 0.45f;
+
+    public AudioClip RoundsMusic(BossKind boss) => OrBattle(MusicFor(boss)?.rounds);
+    public AudioClip FightMusic(BossKind boss) => OrBattle(MusicFor(boss)?.fight);
+
+    // Not ??, which skips Unity's check for a clip that was deleted.
+    AudioClip OrBattle(AudioClip clip) => clip != null ? clip : battleMusic;
+
+    StageMusic MusicFor(BossKind boss)
+    {
+        if (stageMusic == null) return null;
+        foreach (StageMusic music in stageMusic)
+        {
+            if (music != null && music.boss == boss) return music;
+        }
+        return null;
+    }
 
     // Sounds are looked up on every hit and kill, so they are indexed by id on first use (and again if Apply
     // Audio swaps the array).

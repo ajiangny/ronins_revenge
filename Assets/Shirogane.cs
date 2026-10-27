@@ -199,6 +199,8 @@ public class Shirogane : Boss
     protected override IEnumerator Fight()
     {
         exposed = false;
+        // A fight restarted mid-move (the stall watchdog) must not leave Kuon lent to a move that will never end.
+        if (borrowed) ReleaseWolf();
         while (true)
         {
             while (breaking) yield return null;
@@ -2484,6 +2486,14 @@ public class Shirogane : Boss
                 CameraShake.Add(0.02f + 0.06f * full);
             }
             yield return null;
+        }
+
+        // Any wisp still a frame short of the soul when time runs out merges with the rest.
+        for (int i = 0; i < Souls; i++)
+        {
+            Drop(wisps[i]);
+            Drop(wispGlows[i]);
+            wisps[i] = wispGlows[i] = null;
         }
 
         // All have merged: the soul bulges once, then crushes to a white-hot point.

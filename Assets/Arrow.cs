@@ -208,13 +208,16 @@ public class Arrow : MonoBehaviour
         transform.rotation = heading = Quaternion.FromToRotation(Vector3.down, newVelocity);
     }
 
+    // A shot already parried or spent (destroyed) is skipped, so a volley built over several beats stays safe.
     public void IgnoreCollisionsWith(Arrow other)
     {
+        if (this == null || other == null) return;
         foreach (Collider mine in colliders)
         {
+            if (mine == null) continue;
             foreach (Collider theirs in other.colliders)
             {
-                Physics.IgnoreCollision(mine, theirs);
+                if (theirs != null) Physics.IgnoreCollision(mine, theirs);
             }
         }
     }

@@ -515,6 +515,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         for (int i = 0; i < volley.Count; i++)
         {
+            if (volley[i] == null) continue;
             for (int j = 0; j < i; j++) volley[i].IgnoreCollisionsWith(volley[j]);
         }
     }

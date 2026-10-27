@@ -173,7 +173,7 @@ as a subtitle with the bust, not a full panel: the hill is his.
 
 ## The boon screen
 
-Today `BoonChoiceUI.Show` puts Oni's portrait on the left with the caught soul over his palm, a heading
+Today `BoonChoiceUI.Show` puts Oni's painted portrait on the left with the caught soul floating above his palm, a heading
 ("Boons of Fire"), the element subtitle, and three cards. Add, Hades-style:
 
 - **A dialogue strip** across the top of the panel, above the cards: the speaker's **bust** (about 96×96 px source,
@@ -194,6 +194,16 @@ Today `BoonChoiceUI.Show` puts Oni's portrait on the left with the caught soul o
 Busts go in `Assets/Art/Portraits/` (`Akagane_Bust.png`, `Mizore_Bust.png`, `Hibiki_Bust.png`) and are wired the way
 `ElementArt.portrait` is today, through a `Ninja/Apply …` command, not by hand. Each soul file's **Look** section is
 the art brief. They should match each other: same framing, the bound chain running out of frame in every one.
+
+**The souls he holds (built).** Each element's soul on the boon screen is painted for the one who caught it (GPT image
+gen, `Assets/Art/Portraits/Soul_<Fire|Water|Lightning>_Painted.png`); in play the pixel soul frames still drop:
+
+- **Akagane (Fire):** a roaring copper-orange flame, a broken kabuto crescent and his scorched war fan in the fire,
+  his bronze war bell hanging below on a snapped chain.
+- **Mizore (Frost):** a still, upright frost-blue flame with a crane at its core and a silver needle of light through
+  it, frost ferns and hanging snow, her small cracked bell on a fine chain.
+- **Hibiki (Storm):** a restless violet flame spitting lightning around a drum-crest swirl and wave pattern, crossed
+  bachi, and the red festival cord with its tin bells.
 
 ## Voice
 

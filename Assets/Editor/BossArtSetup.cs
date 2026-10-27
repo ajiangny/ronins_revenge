@@ -219,7 +219,7 @@ public static class BossArtSetup
     }
 
     // The intro illustrations are painted, not pixel art: smooth filtering and full size, as UI sprites.
-    static Sprite Portrait(string name)
+    internal static Sprite Portrait(string name)
     {
         string path = PortraitRoot + name + ".png";
         if (AssetImporter.GetAtPath(path) is TextureImporter importer &&

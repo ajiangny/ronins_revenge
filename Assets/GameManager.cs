@@ -18,6 +18,8 @@ public class ElementArt
     public Sprite shuriken;
     [Tooltip("The boon screen's ronin portrait with his spirit wisps in this element's colour.")]
     public Sprite portrait;
+    [Tooltip("The painted soul he holds on the boon screen, drawn for the soul who caught it. Empty uses soulFrames.")]
+    public Sprite heldSoul;
 }
 
 // Owns the game flow: title menu -> stages of rounds -> win/lose menu, plus pause, score, lives, souls and boons.
@@ -1658,7 +1660,8 @@ public class GameManager : MonoBehaviour
     void ShowBoons(Element element, List<BoonOffer> offers, System.Action afterPick, bool ensureCapstone, Rarity minRarity)
     {
         ElementArt art = ArtFor(element);
-        boonChoice.Show(element, offers, art?.soulFrames, art?.portrait, index =>
+        Sprite[] heldSoul = art?.heldSoul != null ? new[] { art.heldSoul } : art?.soulFrames;
+        boonChoice.Show(element, offers, heldSoul, art?.portrait, index =>
         {
             TakeBoon(offers[index]);
             Time.timeScale = 1f;

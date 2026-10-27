@@ -78,7 +78,11 @@ public static class BoonArtSetup
             // Each element has its own drawn shuriken (PixelLab); without it the base one is recoloured.
             Sprite elementShuriken = Load($"Projectiles/ShurikenArt_{suffix}");
             entry.FindPropertyRelative("shuriken").objectReferenceValue = elementShuriken != null ? elementShuriken : Recolor(shuriken, suffix, hue, boost);
-            entry.FindPropertyRelative("portrait").objectReferenceValue = RecolorPortrait(Load("UI/RoninPortrait"), suffix, hue, boost);
+            // The boon screen is painted: Oni_Boon_<suffix> and the soul its catcher holds out. Without the
+            // paintings the pixel portrait is recoloured and the pixel soul is shown.
+            Sprite painted = BossArtSetup.Portrait($"Oni_Boon_{suffix}");
+            entry.FindPropertyRelative("portrait").objectReferenceValue = painted != null ? painted : RecolorPortrait(Load("UI/RoninPortrait"), suffix, hue, boost);
+            entry.FindPropertyRelative("heldSoul").objectReferenceValue = BossArtSetup.Portrait($"Soul_{suffix}_Painted");
         }
 
         GameUI ui = Object.FindAnyObjectByType<GameUI>();
@@ -99,7 +103,8 @@ public static class BoonArtSetup
         foreach (BoonId id in System.Enum.GetValues(typeof(BoonId))) icons.Add(Load("UI/Boons/" + id));
         SetArray(choiceSo.FindProperty("boonIcons"), icons.ToArray());
         SetArray(choiceSo.FindProperty("abilityIcons"), new[] { Load("UI/Abilities/Sword"), Load("UI/Abilities/Shuriken"), Load("UI/Abilities/Parry") });
-        choiceSo.FindProperty("roninPortrait").objectReferenceValue = Load("UI/RoninPortrait");
+        Sprite paintedRonin = BossArtSetup.Portrait("Oni_Boon");
+        choiceSo.FindProperty("roninPortrait").objectReferenceValue = paintedRonin != null ? paintedRonin : Load("UI/RoninPortrait");
         choiceSo.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);

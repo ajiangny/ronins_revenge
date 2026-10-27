@@ -86,6 +86,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] titleStandFrames;
     [Tooltip("Frames per second for the stand-up.")]
     [SerializeField] float titleStandFps = 8f;
+    [Tooltip("Oni's painted close-up, framed beside his lines (set by Ninja/Apply UI Fonts). Empty shows his lines alone.")]
+    [SerializeField] Sprite oniCloseup;
     [Tooltip("How fast the ronin walks from his seat to the middle of his row after START, in world units a second.")]
     [SerializeField] float titleWalkSpeed = 6f;
     [Tooltip("Seconds the title page takes to fade into the first stage's field as he walks.")]
@@ -513,6 +515,15 @@ public class GameManager : MonoBehaviour
 
     // Oni's teal, for the few words he says.
     static readonly Color OniColour = new Color(0.45f, 1f, 0.9f);
+
+    // The close-up framed beside a speaker's lines, by name, or none. Bosses (their VoiceFor close-ups) and the boon
+    // souls can be added here as their conversations come to want one.
+    GameUI.SpeakerPortrait? PortraitFor(string speaker) => speaker switch
+    {
+        // His close-up is 1024x1536, cut at the hips; drawn this tall his head and shoulders fill the frame.
+        "Oni" when oniCloseup != null => new GameUI.SpeakerPortrait { art = oniCloseup, focus = new Vector2(0.5f, 0.2f), height = 900f },
+        _ => null,
+    };
 
     // Back on the hill after a run, Oni sometimes says something before he takes up the flute again.
     IEnumerator HubReturn()
@@ -1978,7 +1989,7 @@ public class GameManager : MonoBehaviour
             Music.Duck(0.3f, seconds + 0.3f);
         }
         // On the title page Oni speaks from his corner, clear of the menu.
-        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, state == State.Title ? HillSpeech : null);
+        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, state == State.Title ? HillSpeech : null, PortraitFor(speaker));
         yield return new WaitForSeconds(seconds + 0.5f);
     }
 
@@ -2085,7 +2096,7 @@ public class GameManager : MonoBehaviour
             ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
             Fx.Play(Fx.BoonPillar, ronin.Feet, OniColour, 1.4f);
             Sfx.Play(Sfx.SoulCollect);
-            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f);
+            ui.ShowSubtitle("Oni", "...Not yet.", OniColour, 2f, null, PortraitFor("Oni"));
             return;
         }
         if (lives <= 0)

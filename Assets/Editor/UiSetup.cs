@@ -5,14 +5,17 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 
-// Wires the UI fonts, the title logo and the title screen's flute-playing ronin (and his stand-up) into the scene. Safe to re-run;
-// anything missing leaves the game's fallback in its place.
+// Wires the UI fonts, the title logo, the title screen's flute-playing ronin (and his stand-up) and Oni's dialogue
+// portrait into the scene. Safe to re-run; anything missing leaves the game's fallback in its place.
 public static class UiSetup
 {
     const string FontRoot = "Assets/Art/Fonts/";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
     const string LogoPath = "Assets/Art/Logo/RoninsRevenge.png";
     const string FluteFrames = "Assets/Art/Sprites/Characters/Ronin";
+    const string OniCloseupPath = "Assets/Art/Portraits/Oni_Closeup.png";
+    // A boss close-up whose import settings Oni's painting shares (smooth, full size, web-compressed).
+    const string BossCloseupPath = "Assets/Art/Portraits/Benibana_Closeup.png";
 
     [MenuItem("Ninja/Apply UI Fonts")]
     public static void Apply()
@@ -38,11 +41,13 @@ public static class UiSetup
         var manager = new SerializedObject(Object.FindAnyObjectByType<GameManager>());
         int flutes = SetFrames(manager.FindProperty("titleFluteFrames"), "Ronin_Flute_");
         int stand = SetFrames(manager.FindProperty("titleStandFrames"), "Ronin_StandUp_");
+        manager.FindProperty("oniCloseup").objectReferenceValue = Painting(OniCloseupPath, BossCloseupPath);
         manager.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"UI fonts and title art applied ({flutes} flute frames, {stand} stand-up frames).");
+        Debug.Log($"UI fonts and title art applied ({flutes} flute frames, {stand} stand-up frames, " +
+                  $"Oni's portrait {(AssetDatabase.LoadAssetAtPath<Sprite>(OniCloseupPath) != null ? "set" : "missing")}).");
     }
 
     // A static SDF font of the game's printable characters, saved with its atlas and material inside it. Delete the
@@ -104,5 +109,30 @@ public static class UiSetup
             importer.SaveAndReimport();
         }
         return AssetDatabase.LoadAssetAtPath<Sprite>(LogoPath);
+    }
+
+    // A painting imported exactly like `like` (a boss portrait), so the two look and compress the same.
+    static Sprite Painting(string path, string like)
+    {
+        if (AssetImporter.GetAtPath(path) is TextureImporter importer && AssetImporter.GetAtPath(like) is TextureImporter model &&
+            (importer.textureType != model.textureType || importer.filterMode != model.filterMode || importer.maxTextureSize != model.maxTextureSize))
+        {
+            var settings = new TextureImporterSettings();
+            model.ReadTextureSettings(settings);
+            importer.SetTextureSettings(settings);
+            importer.spriteImportMode = model.spriteImportMode;
+            importer.maxTextureSize = model.maxTextureSize;
+            importer.textureCompression = model.textureCompression;
+            importer.crunchedCompression = model.crunchedCompression;
+            importer.compressionQuality = model.compressionQuality;
+            foreach (string platform in new[] { "WebGL", "Standalone" })
+            {
+                TextureImporterPlatformSettings platformSettings = model.GetPlatformTextureSettings(platform);
+                platformSettings.name = platform;
+                importer.SetPlatformTextureSettings(platformSettings);
+            }
+            importer.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 }

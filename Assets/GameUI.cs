@@ -66,6 +66,12 @@ public class GameUI : MonoBehaviour
     RectTransform subtitlePlate;
     TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
+    CanvasGroup subtitleGroup;
+    RectTransform portraitFrame;
+    Image portraitEdge;
+    Image portraitGlow;
+    RectTransform portraitArt;
+    Image portraitImage;
     TextMeshProUGUI godModeTag;
     float subtitleUntil;
     Image fade;
@@ -177,12 +183,63 @@ public class GameUI : MonoBehaviour
         Style(subtitleSpeaker, TextStyle.Heading);
         subtitle = CreateText("Line", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200, 100), 34, TextAlignmentOptions.Center, subtitlePlate);
         Style(subtitle, TextStyle.Body);
+        subtitleGroup = subtitlePlate.gameObject.AddComponent<CanvasGroup>();
+        subtitleGroup.blocksRaycasts = false;
+        BuildSpeakerPortrait();
         subtitlePlate.gameObject.SetActive(false);
     }
 
+    // The frame a speaker's close-up is cropped into, standing at the plate's left end like a Hades portrait: a thin
+    // edge in their colour around a night-dark window, lit from behind in their colour so the art never sits on paper.
+    void BuildSpeakerPortrait()
+    {
+        portraitFrame = CreateRect("Portrait", subtitlePlate, Vector2.zero, Vector2.zero, PortraitSize);
+        portraitFrame.pivot = new Vector2(1f, 0f);
+        portraitFrame.anchoredPosition = new Vector2(-PortraitGap, 0f);
+        portraitEdge = portraitFrame.gameObject.AddComponent<Image>();
+        portraitEdge.raycastTarget = false;
+        RectTransform window = Stretch(CreateRect("Window", portraitFrame, Vector2.zero, Vector2.zero, Vector2.zero));
+        window.offsetMin = new Vector2(PortraitEdge, PortraitEdge);
+        window.offsetMax = new Vector2(-PortraitEdge, -PortraitEdge);
+        Image night = window.gameObject.AddComponent<Image>();
+        night.color = new Color(0.03f, 0.025f, 0.06f, 1f);
+        night.raycastTarget = false;
+        window.gameObject.AddComponent<RectMask2D>();
+        portraitGlow = CreateRect("Glow", window, new Vector2(0.5f, 0.5f), new Vector2(0f, 40f), PortraitSize * 1.5f).gameObject.AddComponent<Image>();
+        portraitGlow.sprite = ProceduralSprites.SoftGlow;
+        portraitGlow.raycastTarget = false;
+        portraitArt = CreateRect("Art", window, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.one);
+        portraitImage = portraitArt.gameObject.AddComponent<Image>();
+        portraitImage.raycastTarget = false;
+        // Darkness rising from the frame's foot, so the cut-off art settles into the plate beside it.
+        RectTransform foot = CreateRect("Foot", window, new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 90f));
+        foot.anchorMin = Vector2.zero;
+        foot.anchorMax = new Vector2(1f, 0f);
+        foot.pivot = new Vector2(0.5f, 1f);
+        foot.localScale = new Vector3(1f, -1f, 1f);
+        Image footImage = foot.gameObject.AddComponent<Image>();
+        footImage.sprite = ProceduralSprites.FadeDown;
+        footImage.color = new Color(0.03f, 0.025f, 0.06f, 0.85f);
+        footImage.raycastTarget = false;
+        portraitFrame.gameObject.SetActive(false);
+    }
+
+    static readonly Vector2 PortraitSize = new Vector2(230f, 270f);
+    const float PortraitEdge = 3f, PortraitGap = 14f;
+    // Where the art's focus (the eyes) sits in the frame, 0-1 across and down.
+    static readonly Vector2 PortraitEyes = new Vector2(0.5f, 0.36f);
+    // How long a line takes to fade in, and out once it's done.
+    const float SubtitleFadeIn = 0.2f, SubtitleFadeOut = 0.35f;
+
     void Update()
     {
-        if (subtitlePlate.gameObject.activeSelf && Time.unscaledTime > subtitleUntil) subtitlePlate.gameObject.SetActive(false);
+        if (subtitlePlate.gameObject.activeSelf)
+        {
+            bool showing = Time.unscaledTime <= subtitleUntil;
+            subtitleGroup.alpha = Mathf.MoveTowards(subtitleGroup.alpha, showing ? 1f : 0f,
+                Time.unscaledDeltaTime / (showing ? SubtitleFadeIn : SubtitleFadeOut));
+            if (!showing && subtitleGroup.alpha <= 0f) subtitlePlate.gameObject.SetActive(false);
+        }
         UpdateBanner();
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
@@ -214,15 +271,31 @@ public class GameUI : MonoBehaviour
         bossHealth = Mathf.Clamp01(fraction);
     }
 
+    // A speaker's dialogue portrait: their close-up, the point of it to centre on (0-1 across and down, their eyes),
+    // and how tall the whole art is drawn, so the face fills the frame.
+    public struct SpeakerPortrait
+    {
+        public Sprite art;
+        public Vector2 focus;
+        public float height;
+    }
+
     // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour. Given
     // `beside`, the plate's bottom-left corner sits at that point from the screen's bottom-left instead, next to
-    // whoever is talking (Oni on the title hill).
-    public void ShowSubtitle(string speaker, string text, Color colour, float seconds, Vector2? beside = null)
+    // whoever is talking (Oni on the title hill). Given a `portrait`, their close-up stands framed at the plate's left
+    // (the plate moves over to make room); without one the plate shows alone.
+    public void ShowSubtitle(string speaker, string text, Color colour, float seconds, Vector2? beside = null,
+        SpeakerPortrait? portrait = null)
     {
+        bool framed = portrait.HasValue && portrait.Value.art != null;
+        float room = framed ? PortraitSize.x + PortraitGap : 0f;
         Vector2 anchor = beside.HasValue ? Vector2.zero : new Vector2(0.5f, 0f);
         subtitlePlate.anchorMin = subtitlePlate.anchorMax = anchor;
         subtitlePlate.pivot = anchor;
-        subtitlePlate.anchoredPosition = beside ?? new Vector2(0, 150);
+        // Centred, the portrait and plate are centred together; beside someone, the portrait takes the corner.
+        subtitlePlate.anchoredPosition = (beside ?? new Vector2(0, 150)) + new Vector2(beside.HasValue ? room : room / 2f, 0f);
+        portraitFrame.gameObject.SetActive(framed);
+        if (framed) FramePortrait(portrait.Value, colour);
         subtitleSpeaker.text = speaker != null ? speaker.ToUpperInvariant() : "";
         subtitleSpeaker.color = Color.Lerp(colour, Color.white, 0.25f);
         subtitle.text = text;
@@ -235,7 +308,22 @@ public class GameUI : MonoBehaviour
         subtitleUntil = Time.unscaledTime + seconds;
         // Over any menu page too: Oni speaks on the title hill.
         subtitlePlate.SetAsLastSibling();
+        // A new line fades in unless one is already up.
+        if (!subtitlePlate.gameObject.activeSelf) subtitleGroup.alpha = 0f;
         subtitlePlate.gameObject.SetActive(true);
+    }
+
+    void FramePortrait(SpeakerPortrait portrait, Color colour)
+    {
+        portraitEdge.color = Color.Lerp(colour, new Color(0.1f, 0.09f, 0.12f), 0.45f);
+        portraitGlow.color = new Color(colour.r, colour.g, colour.b, 0.3f);
+        portraitImage.sprite = portrait.art;
+        Rect art = portrait.art.rect;
+        Vector2 size = new Vector2(portrait.height * art.width / art.height, portrait.height);
+        Vector2 window = PortraitSize - 2f * PortraitEdge * Vector2.one;
+        Vector2 eyes = new Vector2((PortraitEyes.x - 0.5f) * window.x, (0.5f - PortraitEyes.y) * window.y);
+        portraitArt.sizeDelta = size;
+        portraitArt.anchoredPosition = eyes - new Vector2((portrait.focus.x - 0.5f) * size.x, (0.5f - portrait.focus.y) * size.y);
     }
 
     // A boss's entrance, in two beats, like a Final Fantasy XIV boss card. Her full-body art fades up on a dark stage

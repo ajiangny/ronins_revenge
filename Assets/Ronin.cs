@@ -578,6 +578,9 @@ public class Ronin : MonoBehaviour
                 else if (!block.Contains(new Vector2(from.x, position.y))) position.x = from.x;
                 else position = from;
             }
+            // Sliding off one wall mustn't put him in another where they meet.
+            foreach (Rect block in RoamBlocks)
+                if (block.Contains(position)) position = from;
         }
         body.MovePosition(position);
         // A direction with no frames of its own walks on the idle, so he bobs on it, as on a walk without frames.

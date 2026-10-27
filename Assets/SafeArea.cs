@@ -70,6 +70,12 @@ public class SafeArea : MonoBehaviour
         [Tooltip("A soul rising off the water, played as it drifts up and fades. Empty: a soft glow rises instead.")]
         public Sprite[] poolSouls = new Sprite[0];
         public Lamp[] lamps = new Lamp[0];
+        [Tooltip("Ground painted on the map he can't walk through (lanterns, a dais's edges, a kerb): rectangles in map pixels, x and y their top-left corner.")]
+        public Rect[] walls = new Rect[0];
+        [Tooltip("Ghost-fires floating over the map: where each flame's foot is, in map pixels from the top-left.")]
+        public Vector2[] spirits = new Vector2[0];
+        [Tooltip("The ghost-fire's flicker, drawn at the map's pixel size, its flame's foot at the canvas's bottom-centre row 38.")]
+        public Sprite[] spiritFrames = new Sprite[0];
     }
 
     static readonly Color Teal = new Color(0.45f, 1f, 0.9f);
@@ -101,6 +107,9 @@ public class SafeArea : MonoBehaviour
     readonly List<Standing> standing = new List<Standing>();
     readonly List<(SpriteRenderer floor, SpriteRenderer flame, Color colour, float seed)> lit = new List<(SpriteRenderer, SpriteRenderer, Color, float)>();
     int propOrder;
+    readonly List<(SpriteRenderer renderer, float footY, float phase)> spirits = new List<(SpriteRenderer, float, float)>();
+    // The ghost-fire frames put the flame's foot this far below the canvas's middle (row 38 of 48), in its pixels.
+    const float SpiritFootBelowMiddle = 14f;
 
     public Config Area => config;
     public Vector3 WakePoint => At(config.wakeSpot);
@@ -178,6 +187,23 @@ public class SafeArea : MonoBehaviour
             standing.Add(s);
         }
 
+        if (mapSpace && area.spiritFrames.Length > 0 && area.spiritFrames[0] != null)
+        {
+            Sprite first = area.spiritFrames[0];
+            for (int i = 0; i < area.spirits.Length; i++)
+            {
+                Vector3 foot = MapToWorld(area.spirits[i]);
+                var r = new GameObject("GhostFire").AddComponent<SpriteRenderer>();
+                r.transform.SetParent(transform, false);
+                r.sprite = first;
+                r.transform.localScale = Vector3.one * mapPixel * first.pixelsPerUnit;
+                r.transform.position = foot + Vector3.up * SpiritFootBelowMiddle * mapPixel;
+                r.sortingOrder = order - 2;
+                // Each flickers out of step with the others.
+                spirits.Add((r, foot.y, i * 2.7f));
+            }
+        }
+
         if (mapSpace)
         {
             for (int i = 0; i < area.lamps.Length; i++)
@@ -186,7 +212,7 @@ public class SafeArea : MonoBehaviour
                 Vector3 flame = MapToWorld(lamp.px);
                 // The light pools on the ground under the flame, flattened by the high view.
                 SpriteRenderer floor = Block("LampLight", ProceduralSprites.SoftGlow, flame + Vector3.down * lamp.radius * 0.25f, new Vector2(lamp.radius * 2f, lamp.radius * 1.3f), lamp.colour, order - 4);
-                SpriteRenderer halo = Block("LampFlame", ProceduralSprites.Glow, flame, Vector2.one * 0.6f, new Color(lamp.colour.r, lamp.colour.g, lamp.colour.b, 0.7f), order + 1);
+                SpriteRenderer halo = Block("LampFlame", ProceduralSprites.Glow, flame, Vector2.one * 0.6f, new Color(lamp.colour.r, lamp.colour.g, lamp.colour.b, 0.7f), order - 3);
                 lit.Add((floor, halo, lamp.colour, i * 7.3f));
             }
         }
@@ -243,6 +269,14 @@ public class SafeArea : MonoBehaviour
         get
         {
             var blocks = new List<Rect>();
+            if (mapSpace)
+            {
+                foreach (Rect wall in config.walls)
+                {
+                    Vector3 corner = MapToWorld(wall.position);
+                    blocks.Add(new Rect(corner.x, corner.y - wall.height * mapPixel, wall.width * mapPixel, wall.height * mapPixel));
+                }
+            }
             foreach (Station station in config.stations)
             {
                 if (station.footprint.x <= 0f || station.footprint.y <= 0f) continue;
@@ -310,6 +344,13 @@ public class SafeArea : MonoBehaviour
                     s.nextFx = float.MaxValue;
                     break;
             }
+        }
+
+        foreach (var (r, footY, phase) in spirits)
+        {
+            r.sprite = config.spiritFrames[(int)((time + phase) * 9f) % config.spiritFrames.Length];
+            // A flame he stands behind is in front of him.
+            r.sortingOrder = feetY > footY ? ronin.SpriteOrder + 5 : propOrder - 1;
         }
 
         foreach (var (floor, flame, colour, seed) in lit)

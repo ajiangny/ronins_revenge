@@ -310,6 +310,17 @@ public class GameManager : MonoBehaviour
                 new SafeArea.Lamp { px = new Vector2(120f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
                 new SafeArea.Lamp { px = new Vector2(242f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
             },
+            // The ghost-fires at either side, lifted off the map so they flicker. The pool is left to the souls.
+            spirits = new[] { new Vector2(100f, 154f), new Vector2(562f, 186f) },
+            // He takes the steps up to the altar's dais and the side step onto the rack's platform; the toro lanterns,
+            // the dais's raised edges, the platform's edges and the grave nook's kerb stand in his way.
+            walls = new[]
+            {
+                new Rect(106f, 198f, 54f, 54f), new Rect(209f, 198f, 45f, 54f),
+                new Rect(126f, 126f, 12f, 72f), new Rect(233f, 126f, 12f, 72f), new Rect(126f, 122f, 119f, 12f),
+                new Rect(416f, 110f, 124f, 90f),
+                new Rect(508f, 206f, 126f, 12f), new Rect(508f, 212f, 12f, 51f), new Rect(508f, 320f, 12f, 26f), new Rect(508f, 334f, 126f, 12f),
+            },
         },
     };
 

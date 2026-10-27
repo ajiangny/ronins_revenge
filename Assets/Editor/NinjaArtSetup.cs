@@ -440,6 +440,11 @@ public static class NinjaArtSetup
             if (i < layouts.Length) CopyLayout(area, layouts[i]);
             area.FindPropertyRelative("poolWater").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.Water);
             area.FindPropertyRelative("poolRimFront").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.RimFront);
+            SerializedProperty fires = area.FindPropertyRelative("spiritFrames");
+            var fireFrames = new List<Sprite>();
+            for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Fx/Temple_GhostFire_{k}.png") is Sprite frame; k++) fireFrames.Add(frame);
+            fires.arraySize = fireFrames.Count;
+            for (int k = 0; k < fireFrames.Count; k++) fires.GetArrayElementAtIndex(k).objectReferenceValue = fireFrames[k];
             SerializedProperty souls = area.FindPropertyRelative("poolSouls");
             var soulFrames = new List<Sprite>();
             for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Fx/Temple_Soul_{k}.png") is Sprite frame; k++) soulFrames.Add(frame);
@@ -474,6 +479,12 @@ public static class NinjaArtSetup
             lamp.FindPropertyRelative("colour").colorValue = layout.lamps[i].colour;
             lamp.FindPropertyRelative("radius").floatValue = layout.lamps[i].radius;
         }
+        SerializedProperty spirits = area.FindPropertyRelative("spirits");
+        spirits.arraySize = layout.spirits.Length;
+        for (int i = 0; i < layout.spirits.Length; i++) spirits.GetArrayElementAtIndex(i).vector2Value = layout.spirits[i];
+        SerializedProperty walls = area.FindPropertyRelative("walls");
+        walls.arraySize = layout.walls.Length;
+        for (int i = 0; i < layout.walls.Length; i++) walls.GetArrayElementAtIndex(i).rectValue = layout.walls[i];
         SerializedProperty stations = area.FindPropertyRelative("stations");
         stations.arraySize = layout.stations.Length;
         for (int i = 0; i < layout.stations.Length; i++)

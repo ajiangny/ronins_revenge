@@ -537,7 +537,7 @@ public class GameManager : MonoBehaviour
     GameUI.SpeakerPortrait? PortraitFor(string speaker) => speaker switch
     {
         // His close-up is 1024x1536, cut at the hips; drawn this tall his head and shoulders fill the frame.
-        "Oni" when oniCloseup != null => new GameUI.SpeakerPortrait { art = oniCloseup, focus = new Vector2(0.46f, 0.205f), height = 780f },
+        "Oni" when oniCloseup != null => new GameUI.SpeakerPortrait { art = oniCloseup, focus = new Vector2(0.46f, 0.236f), height = 780f },
         _ => null,
     };
 
@@ -2066,7 +2066,7 @@ public class GameManager : MonoBehaviour
             case "Oni":
                 // His painting fills more of its canvas than the others', so it's drawn a little smaller to match faces.
                 return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
-                    focus = new Vector2(0.46f, 0.205f), height = ScenePortraitHeight * 0.9f, right = true };
+                    focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 0.9f, right = true };
             // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces.
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
             case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));

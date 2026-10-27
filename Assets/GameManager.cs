@@ -333,6 +333,10 @@ public class GameManager : MonoBehaviour
             },
             // The ghost-fires at either side, lifted off the map so they flicker. The pool is left to the souls.
             spirits = new[] { new Vector2(100f, 154f), new Vector2(562f, 186f) },
+            // The gate's doorway, whose leaves swing open as he comes up; past its threshold he's under its beam and
+            // roof (raised off the map's top, so he stays hidden walking out of view) and between its posts.
+            gateDoors = new Rect(309f, 58f, 70f, 50f),
+            gateOver = new[] { new Rect(284f, -300f, 118f, 358f), new Rect(284f, 58f, 25f, 52f), new Rect(379f, 58f, 23f, 52f) },
             // He takes the steps up to the altar's dais and the side step onto the rack's platform; the toro lanterns,
             // the dais's raised edges, the platform's edges and the grave nook's kerb stand in his way.
             walls = new[]
@@ -1198,7 +1202,8 @@ public class GameManager : MonoBehaviour
             startIndex >= 0 ? startIndex : (int)carried);
     }
 
-    // Through the gate: he walks up to it and out the top, the dark comes down, and the first stage's road opens.
+    // Through the gate: he walks up to it, its doors swing open, he goes out under its beam, the dark comes down, and
+    // the first stage's road opens.
     IEnumerator SetOut()
     {
         state = State.Transition;
@@ -1206,7 +1211,9 @@ public class GameManager : MonoBehaviour
         ronin.Roaming = false;
         ronin.RoamBlocks = null;
         safeArea.ShowPrompt(null);
+        safeArea.HoldGateOpen = true;
         yield return ronin.WalkTo(BodyAt(safeArea.PointOf(StationKind.Exit)), travelWalkSpeed * 0.6f);
+        yield return new WaitUntil(() => safeArea.GateOpened);
         stageIndex = 0;
         yield return TravelTo(stages[0].roundsMap, () =>
         {

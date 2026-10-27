@@ -212,6 +212,18 @@ const SOUNDS = {
       "A quiet ambient loop of a still spirit pool at night: soft low bubbling, gentle water lapping on stone and " +
       "a faint airy chime now and then, calm and eerie, loopable, video game sound effect, no music.",
   },
+  GateOpen: {
+    seconds: 1.2,
+    prompt:
+      "A pair of heavy old wooden temple gate doors swinging open: a long low creak of iron hinges and a soft " +
+      "wooden groan, quiet and eerie at night, video game sound effect, no music.",
+  },
+  GateClose: {
+    seconds: 1,
+    prompt:
+      "A pair of heavy old wooden temple gate doors swinging shut: a short creak of iron hinges ending in a soft " +
+      "dull wooden thud, quiet, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

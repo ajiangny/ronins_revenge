@@ -661,9 +661,10 @@ public class Ronin : MonoBehaviour
             waterline.sprite = ProceduralSprites.White;
             waterline.isCustomRangeActive = true;
         }
+        this.wading = wading;
         if (waterline == null) return;
         waterline.enabled = wading;
-        sprite.maskInteraction = wading ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
+        Mask();
         if (!wading) return;
         waterline.frontSortingOrder = sprite.sortingOrder;
         waterline.backSortingOrder = sprite.sortingOrder - 1;
@@ -678,6 +679,18 @@ public class Ronin : MonoBehaviour
     }
 
     SpriteMask waterline;
+    bool wading, covered;
+
+    // Under something the map draws over him (the temple gate's beam), its masks hide him where it stands, his spirit
+    // wisps with him (the masks reach his order and theirs, one above).
+    public void Cover(bool on)
+    {
+        covered = on;
+        Mask();
+        foreach (SpriteRenderer wisp in wisps) wisp.maskInteraction = on ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
+    }
+
+    void Mask() => sprite.maskInteraction = wading || covered ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
 
     void SetTouchable(bool touchable)
     {

@@ -85,6 +85,9 @@ public static class AudioSetup
         (Sfx.WaterStep, 0.45f, 0.1f, 0.2f),
         (Sfx.PoolSplash, 0.6f, 0.06f, 0.3f),
         (Sfx.PoolAmbience, 0.35f, 0f, 1f),
+        // The temple gate's doors.
+        (Sfx.GateOpen, 0.55f, 0.05f, 0.5f),
+        (Sfx.GateClose, 0.5f, 0.05f, 0.5f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

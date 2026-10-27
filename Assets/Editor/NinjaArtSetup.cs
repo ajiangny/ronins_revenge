@@ -485,6 +485,10 @@ public static class NinjaArtSetup
         SerializedProperty walls = area.FindPropertyRelative("walls");
         walls.arraySize = layout.walls.Length;
         for (int i = 0; i < layout.walls.Length; i++) walls.GetArrayElementAtIndex(i).rectValue = layout.walls[i];
+        area.FindPropertyRelative("gateDoors").rectValue = layout.gateDoors;
+        SerializedProperty over = area.FindPropertyRelative("gateOver");
+        over.arraySize = layout.gateOver.Length;
+        for (int i = 0; i < layout.gateOver.Length; i++) over.GetArrayElementAtIndex(i).rectValue = layout.gateOver[i];
         SerializedProperty stations = area.FindPropertyRelative("stations");
         stations.arraySize = layout.stations.Length;
         for (int i = 0; i < layout.stations.Length; i++)

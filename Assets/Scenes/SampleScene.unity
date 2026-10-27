@@ -1014,6 +1014,28 @@ MonoBehaviour:
     - {fileID: 21300000, guid: bcbd88153020f46df8d257ad59ffaf47, type: 3}
     - {fileID: 21300000, guid: 0453c9acb82ee449e948398436fd84b2, type: 3}
     - {fileID: 21300000, guid: 9b674d92110c847cb86ebcd8af12f788, type: 3}
+    gateDoors:
+      serializedVersion: 2
+      x: 309
+      y: 58
+      width: 70
+      height: 50
+    gateOver:
+    - serializedVersion: 2
+      x: 284
+      y: -300
+      width: 118
+      height: 358
+    - serializedVersion: 2
+      x: 284
+      y: 58
+      width: 25
+      height: 52
+    - serializedVersion: 2
+      x: 379
+      y: 58
+      width: 23
+      height: 52
   deathToTempleTime: 2.4
   travelWalkSpeed: 9
   travelFadeTime: 0.6

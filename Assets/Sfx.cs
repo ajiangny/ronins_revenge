@@ -65,6 +65,9 @@ public static class Sfx
     public const string WaterStep = "WaterStep";
     public const string PoolSplash = "PoolSplash";
     public const string PoolAmbience = "PoolAmbience";
+    // The temple gate's doors swinging open as he comes up to them, and shut behind him.
+    public const string GateOpen = "GateOpen";
+    public const string GateClose = "GateClose";
 
     const int VoiceCount = 16;
 

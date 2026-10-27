@@ -625,6 +625,28 @@ MonoBehaviour:
     - 6.060408
     - 6.060408
     ownSource: 1
+  - id: GateOpen
+    clips:
+    - {fileID: 8300000, guid: 7ad8d56ce4e334a129f17f522813720f, type: 3}
+    - {fileID: 8300000, guid: 2d1b8a08587b24b3bb145f1716e22b2d, type: 3}
+    volume: 0.55
+    pitchJitter: 0.05
+    minInterval: 0.5
+    audible:
+    - 1.1771202
+    - 1.2062358
+    ownSource: 0
+  - id: GateClose
+    clips:
+    - {fileID: 8300000, guid: f57521d2666924847a458823788b76bb, type: 3}
+    - {fileID: 8300000, guid: 7f6283fd82f024c0eafe285f939a2913, type: 3}
+    volume: 0.5
+    pitchJitter: 0.05
+    minInterval: 0.5
+    audible:
+    - 0.91725624
+    - 0.7411791
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   templeMusic: {fileID: 8300000, guid: 946fb3b38b2c84813abb8ba5ddced6fa, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}

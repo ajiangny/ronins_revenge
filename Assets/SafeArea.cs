@@ -76,6 +76,10 @@ public class SafeArea : MonoBehaviour
         public Vector2[] spirits = new Vector2[0];
         [Tooltip("The ghost-fire's flicker, drawn at the map's pixel size, its flame's foot at the canvas's bottom-centre row 38.")]
         public Sprite[] spiritFrames = new Sprite[0];
+        [Tooltip("The gate's doorway on the map, in map pixels (x, y its top-left): its two leaves are cut from it and swing open as he nears the exit. Zero: no doors.")]
+        public Rect gateDoors;
+        [Tooltip("The parts of the gate he passes under once he's through the doorway (its beam and roof, its posts), in map pixels: they hide him there.")]
+        public Rect[] gateOver = new Rect[0];
     }
 
     static readonly Color Teal = new Color(0.45f, 1f, 0.9f);
@@ -111,11 +115,28 @@ public class SafeArea : MonoBehaviour
     // The ghost-fire frames put the flame's foot this far below the canvas's middle (row 38 of 48), in its pixels.
     const float SpiritFootBelowMiddle = 14f;
 
+    // The gate's doors are drawn as the map is, under the moon's shade (Atmosphere's -94), so they match its pixels.
+    const int GateOrder = -96;
+    // How long the doors take to swing, and how narrow a leaf looks turned away from us.
+    const float GateSwingTime = 0.7f;
+    const float GateOpenWidth = 0.14f;
+    SpriteRenderer passage;
+    SpriteRenderer[] leaves;
+    Color leafTint;
+    float gateOpen, threshold;
+    bool gateOpening;
+    // Through the doorway, the gate's beam and posts hide him (Ronin.Cover).
+    bool covered;
+
     public Config Area => config;
     public Vector3 WakePoint => At(config.wakeSpot);
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
+
+    // Held open while he sets out, whether or not he's near; Opened once the leaves have swung all the way.
+    public bool HoldGateOpen { get; set; }
+    public bool GateOpened => leaves == null || gateOpen >= 1f;
 
     // Where he stands once he's climbed out of the pool, just past its far rim; a step up from the wake spot without one.
     public Vector3 PoolExit => pool != null ? MapToWorld(config.poolCentre - new Vector2(0f, config.poolRadii.y + 24f)) : WakePoint + Vector3.up * 1.6f;
@@ -204,6 +225,8 @@ public class SafeArea : MonoBehaviour
             }
         }
 
+        if (mapSpace && area.gateDoors.width > 0f && area.gateDoors.height > 0f) BuildGate(area);
+
         if (mapSpace)
         {
             for (int i = 0; i < area.lamps.Length; i++)
@@ -228,6 +251,90 @@ public class SafeArea : MonoBehaviour
         prompt.rectTransform.sizeDelta = new Vector2(14f, 2f);
         prompt.sortingOrder = order + 20;
         prompt.gameObject.SetActive(false);
+    }
+
+    // The gate's two doors, cut from the map's own pixels and hinged at their outer edges, over the dark road beyond;
+    // and the gate he walks under, as masks on his sprite alone so the map's own (moon-shaded) beam shows over him.
+    void BuildGate(Config area)
+    {
+        Rect doors = area.gateDoors;
+        Vector3 topLeft = MapToWorld(doors.position);
+        Vector3 bottomRight = MapToWorld(doors.position + doors.size);
+        threshold = bottomRight.y;
+        Vector3 middle = (topLeft + bottomRight) / 2f;
+        Vector2 size = new Vector2(bottomRight.x - topLeft.x, topLeft.y - bottomRight.y);
+
+        // Past the doors the road falls away into the dark, a little moonlit stone at its near end.
+        var dark = new Texture2D(1, 16, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        for (int y = 0; y < 16; y++)
+            dark.SetPixel(0, y, Color.Lerp(new Color(0.16f, 0.17f, 0.24f), new Color(0.03f, 0.02f, 0.06f), Mathf.Sqrt(y / 15f)));
+        dark.Apply();
+        passage = Block("GatePassage", Sprite.Create(dark, new Rect(0, 0, 1, 16), new Vector2(0.5f, 0.5f), 16f), middle, size, area.map.groundTint, GateOrder);
+        passage.enabled = false;
+
+        Sprite map = area.map.ground;
+        leafTint = area.map.groundTint;
+        float half = Mathf.Round(doors.width / 2f);
+        leaves = new SpriteRenderer[2];
+        for (int i = 0; i < 2; i++)
+        {
+            // Texture rows count from the bottom; map pixels from the top.
+            float x = map.rect.x + doors.x + (i == 0 ? 0f : half);
+            float y = map.rect.y + map.rect.height - doors.y - doors.height;
+            float width = i == 0 ? half : doors.width - half;
+            Sprite leaf = Sprite.Create(map.texture, new Rect(x, y, width, doors.height), new Vector2(i == 0 ? 0f : 1f, 0.5f), 1f, 0, SpriteMeshType.FullRect);
+            var r = new GameObject(i == 0 ? "GateLeafLeft" : "GateLeafRight").AddComponent<SpriteRenderer>();
+            r.transform.SetParent(transform, false);
+            r.sprite = leaf;
+            r.color = leafTint;
+            r.sortingOrder = GateOrder + 1;
+            r.transform.localScale = Vector3.one * mapPixel;
+            r.transform.position = new Vector3(i == 0 ? topLeft.x : bottomRight.x, middle.y, 0f);
+            leaves[i] = r;
+        }
+
+        foreach (Rect over in area.gateOver)
+        {
+            var mask = new GameObject("GateOver").AddComponent<SpriteMask>();
+            mask.transform.SetParent(transform, false);
+            mask.sprite = ProceduralSprites.White;
+            mask.isCustomRangeActive = true;
+            mask.backSortingOrder = ronin.SpriteOrder - 1;
+            mask.frontSortingOrder = ronin.SpriteOrder + 1;
+            Vector3 corner = MapToWorld(over.position), far = MapToWorld(over.position + over.size);
+            mask.transform.position = (corner + far) / 2f;
+            Vector2 native = mask.sprite.bounds.size;
+            mask.transform.localScale = new Vector3((far.x - corner.x) / native.x, (corner.y - far.y) / native.y, 1f);
+        }
+    }
+
+    void SwingGate()
+    {
+        // The doors open as he comes up to the exit and close behind him when he walks away.
+        bool near = HoldGateOpen;
+        foreach (Station station in config.stations)
+            if (station.kind == StationKind.Exit && Vector2.Distance(ronin.Feet, At(station.spot)) <= station.reach + 0.6f) near = true;
+        if (near != gateOpening && (near || gateOpen > 0f)) Sfx.Play(near ? Sfx.GateOpen : Sfx.GateClose);
+        gateOpening = near;
+        gateOpen = Mathf.MoveTowards(gateOpen, near ? 1f : 0f, Time.deltaTime / GateSwingTime);
+
+        // Eased, and darkening as each leaf turns away from the moon.
+        float k = Mathf.SmoothStep(0f, 1f, gateOpen);
+        passage.enabled = gateOpen > 0f;
+        foreach (SpriteRenderer leaf in leaves)
+        {
+            Vector3 scale = leaf.transform.localScale;
+            leaf.transform.localScale = new Vector3(mapPixel * Mathf.Lerp(1f, GateOpenWidth, k), scale.y, scale.z);
+            leaf.color = Color.Lerp(leafTint, leafTint * new Color(0.45f, 0.45f, 0.5f, 1f), k);
+        }
+
+        // Over the threshold he's under the gate; only an open one lets him through.
+        bool under = ronin.Feet.y > threshold;
+        if (under != covered)
+        {
+            covered = under;
+            ronin.Cover(under);
+        }
     }
 
     SpriteRenderer Block(string name, Sprite sprite, Vector3 position, Vector2 size, Color colour, int order)
@@ -322,6 +429,8 @@ public class SafeArea : MonoBehaviour
         c.a *= 0.75f + 0.3f * Mathf.Sin(Time.time * 1.3f);
         wakeGlow.color = c;
 
+        if (leaves != null && ronin != null) SwingGate();
+
         float time = Time.time;
         float feetY = ronin != null ? ronin.Feet.y : float.MinValue;
         foreach (Standing s in standing)
@@ -398,6 +507,8 @@ public class SafeArea : MonoBehaviour
 
     void OnDestroy()
     {
-        if (ronin != null) ronin.Wade(0f);
+        if (ronin == null) return;
+        ronin.Wade(0f);
+        ronin.Cover(false);
     }
 }

@@ -17,7 +17,7 @@ public class SafeArea : MonoBehaviour
     {
         public StationKind kind;
         public string label = "SET OUT";
-        [Tooltip("Where it stands, as a fraction of the view from its bottom-left (the map is fitted to the view).")]
+        [Tooltip("Where it stands, as a fraction of the map from its bottom-left (of the view, without a map).")]
         public Vector2 spot;
         [Tooltip("Its prop, drawn at the map's pixel size. Empty: a tinted block, or nothing if the map already shows it.")]
         public Sprite art;
@@ -33,11 +33,11 @@ public class SafeArea : MonoBehaviour
     {
         public string name = "The Temple";
         public Backdrop.Map map;
-        [Tooltip("Map pixels top to bottom, so props are drawn at the map's own pixel size.")]
+        [Tooltip("Map pixels top to bottom, for sizing props when the map isn't laid out yet.")]
         public float mapPixelsHigh = 384f;
-        [Tooltip("The open floor he can walk, as fractions of the view.")]
+        [Tooltip("The open floor he can walk, as fractions of the map.")]
         public Rect floor = Rect.MinMaxRect(0.2f, 0.08f, 0.8f, 0.68f);
-        [Tooltip("Where he wakes after a death, as a fraction of the view.")]
+        [Tooltip("Where he wakes after a death, as a fraction of the map.")]
         public Vector2 wakeSpot = new Vector2(0.5f, 0.17f);
         public Color wakeGlow = new Color(0.45f, 1f, 0.9f, 0.25f);
         public Station[] stations = new Station[0];
@@ -48,21 +48,33 @@ public class SafeArea : MonoBehaviour
     Config config;
     TextMeshPro prompt;
     SpriteRenderer wakeGlow;
+    // The rectangle spots are measured in: the map where it lies (it covers the view and may be cropped by it), or the
+    // view without one.
     Vector2 viewSize;
     Vector3 viewOrigin;
+    // World units per map pixel, so props and layers drawn over the map match its pixels exactly.
+    float mapPixel;
+    Bounds ground;
+    bool mapSpace;
 
     public Config Area => config;
     public Vector3 WakePoint => At(config.wakeSpot);
     public Rect WalkArea { get; private set; }
 
-    public static SafeArea Build(Config config, TMP_FontAsset font, int order)
+    public float MapPixel => mapPixel;
+
+    public static SafeArea Build(Config config, TMP_FontAsset font, int order, Bounds? ground)
     {
         var area = new GameObject("SafeArea " + config.name).AddComponent<SafeArea>();
-        area.Lay(config, font, order);
+        area.Lay(config, font, order, ground);
         return area;
     }
 
     public Vector3 At(Vector2 fraction) => viewOrigin + new Vector3(fraction.x * viewSize.x, fraction.y * viewSize.y, 0f);
+
+    // Map pixels count from the top-left, as in the art.
+    public Vector3 MapToWorld(Vector2 px) => new Vector3(ground.min.x + px.x * mapPixel, ground.max.y - px.y * mapPixel, 0f);
+    public Vector2 WorldToMap(Vector3 world) => new Vector2((world.x - ground.min.x) / mapPixel, (ground.max.y - world.y) / mapPixel);
 
     public Vector3 PointOf(StationKind kind)
     {
@@ -71,16 +83,28 @@ public class SafeArea : MonoBehaviour
         return WakePoint;
     }
 
-    void Lay(Config area, TMP_FontAsset font, int order)
+    void Lay(Config area, TMP_FontAsset font, int order, Bounds? groundBounds)
     {
         config = area;
-        Camera cam = Camera.main;
-        viewSize = new Vector2(2f * cam.orthographicSize * cam.aspect, 2f * cam.orthographicSize);
-        viewOrigin = new Vector3(CameraShake.Center.x - viewSize.x / 2f, CameraShake.Center.y - viewSize.y / 2f, 0f);
+        bool mapArt = area.map != null && area.map.ground != null;
+        mapSpace = mapArt && groundBounds.HasValue;
+        if (mapSpace)
+        {
+            ground = groundBounds.Value;
+            viewSize = ground.size;
+            viewOrigin = new Vector3(ground.min.x, ground.min.y, 0f);
+            mapPixel = ground.size.y / area.map.ground.rect.height;
+        }
+        else
+        {
+            Camera cam = Camera.main;
+            viewSize = new Vector2(2f * cam.orthographicSize * cam.aspect, 2f * cam.orthographicSize);
+            viewOrigin = new Vector3(CameraShake.Center.x - viewSize.x / 2f, CameraShake.Center.y - viewSize.y / 2f, 0f);
+            mapPixel = viewSize.y / Mathf.Max(1f, area.mapPixelsHigh);
+            ground = new Bounds((Vector3)CameraShake.Center, viewSize);
+        }
         Vector3 low = At(area.floor.min), high = At(area.floor.max);
         WalkArea = Rect.MinMaxRect(low.x, low.y, high.x, high.y);
-        float mapPixel = viewSize.y / Mathf.Max(1f, area.mapPixelsHigh);
-        bool mapArt = area.map != null && area.map.ground != null;
 
         // Without its map there's still somewhere to wake and a way out.
         if (!mapArt) Block("Pool", ProceduralSprites.Disc, WakePoint, new Vector2(3f, 1.6f), new Color(0.2f, 0.6f, 0.55f), order - 3);
@@ -89,7 +113,7 @@ public class SafeArea : MonoBehaviour
         foreach (Station station in area.stations)
         {
             Vector3 at = At(station.spot);
-            if (station.art != null) Prop(station.kind.ToString(), station.art, at, mapPixel, order - 1);
+            if (station.art != null) Prop(station.kind.ToString(), station.art, at, order - 1);
             else if (!station.onMap || !mapArt) Block(station.kind.ToString(), ProceduralSprites.White, at + Vector3.up * 0.7f, new Vector2(1.8f, 1.4f), station.placeholder, order - 1);
         }
 
@@ -119,7 +143,7 @@ public class SafeArea : MonoBehaviour
         return r;
     }
 
-    void Prop(string name, Sprite sprite, Vector3 at, float mapPixel, int order)
+    void Prop(string name, Sprite sprite, Vector3 at, int order)
     {
         var r = new GameObject(name).AddComponent<SpriteRenderer>();
         r.transform.SetParent(transform, false);
@@ -154,7 +178,7 @@ public class SafeArea : MonoBehaviour
         prompt.gameObject.SetActive(station != null);
         if (station == null) return;
         prompt.text = $"<color=#{ColorUtility.ToHtmlStringRGB(Teal)}>E</color>  {station.label}";
-        float lift = station.art != null ? station.art.bounds.size.y * viewSize.y / Mathf.Max(1f, config.mapPixelsHigh) * station.art.pixelsPerUnit + 0.7f : 1.8f;
+        float lift = station.art != null ? station.art.bounds.size.y * mapPixel * station.art.pixelsPerUnit + 0.7f : 1.8f;
         prompt.transform.position = At(station.spot) + Vector3.up * Mathf.Max(1.2f, lift);
     }
 

@@ -892,7 +892,7 @@ public class GameManager : MonoBehaviour
         if (backdrop != null) backdrop.Show(area.map);
         blockers.Clear();
         if (safeArea != null) Destroy(safeArea.gameObject);
-        safeArea = SafeArea.Build(area, ui.BodyFont, ronin.SpriteOrder);
+        safeArea = SafeArea.Build(area, ui.BodyFont, ronin.SpriteOrder, backdrop != null ? backdrop.GroundBounds : null);
     }
 
     // Safe area spots are where his feet go; he's placed and walked by his body, which stands above them.

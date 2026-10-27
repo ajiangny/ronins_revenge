@@ -164,6 +164,9 @@ public class Backdrop : MonoBehaviour
         groundRenderer.transform.localScale = Vector3.one * Mathf.Max(viewWidth / size.x, viewHeight / size.y);
     }
 
+    // Where the ground lies in the world, for things drawn to line up with its pixels; null until it's laid out.
+    public Bounds? GroundBounds => groundRenderer != null && groundRenderer.sprite != null ? groundRenderer.bounds : (Bounds?)null;
+
     // Swaps to another map's ground and petals; null (or a map without ground art) brings back the courtyard.
     public void Show(Map map)
     {

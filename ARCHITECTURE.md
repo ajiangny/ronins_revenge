@@ -343,7 +343,7 @@ match `BoonChoiceUI.boonIcons`.
 - Art built by `Ninja/Apply Boss Art` (`Editor/BossArtSetup.cs`): `Characters/<Boss>/<Boss>_<Clip>_<i>.png`,
   `Characters/SpiritWolf/SpiritWolf_<Clip>_<i>.png`, `Characters/<Boss>Phase2/<Boss>Phase2_<Clip>_<i>.png` (each boss's
   second-phase form → `GameManager.<boss>PhaseArt` via `PhaseArt()`; Utsusemi's extra clips too → `utsusemiPhase<Clip>`,
-  swapped by `Utsusemi.SetPhaseFrames`), `Portraits/<Boss>_Full/_Closeup.png` (phase cards: `<Boss>_Phase_…`; full-body art is cropped to the figure so all bosses fill the same height), `Audio/Voice/<Boss>_<Line>.mp3`.
+  swapped by `Utsusemi.SetPhaseFrames`), `Portraits/<Boss>_Full/_Closeup.png` (phase cards: `<Boss>_Phase_…`; full-body art is cropped to the figure so all bosses fill the same height; the phase 1 close-ups are transparent 1024×1536 dialogue portraits, framed in `VoiceFor` with every boss's eyes at one point on screen), `Audio/Voice/<Boss>_<Line>.mp3`.
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
 `Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized

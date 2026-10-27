@@ -73,6 +73,19 @@ public class Ronin : MonoBehaviour
     public event Action ParryFizzled;
 
     public bool ControlsEnabled { get; set; }
+    // In a safe area (the temple) he walks anywhere inside RoamArea, up and down too, and can't fight. Nowhere else
+    // does he leave his row.
+    public bool Roaming
+    {
+        get => roaming;
+        set
+        {
+            roaming = value;
+            if (!value && sprite != null) sprite.transform.localPosition = spriteRest;
+        }
+    }
+    public Rect RoamArea { get; set; }
+    public Weapon CurrentWeapon { get => weapon; set => weapon = value; }
     // God mode from the dev menu: nothing can hurt him.
     public bool Invincible { get; set; }
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
@@ -132,6 +145,10 @@ public class Ronin : MonoBehaviour
     float parryUntil;
     bool parryLanded;
     float moveInput;
+    float moveInputY;
+    bool roaming;
+    Vector3 spriteRest;
+    float roamTime;
     Sprite[] loopClip;
     bool actionPlaying;
     bool walking;
@@ -155,6 +172,7 @@ public class Ronin : MonoBehaviour
         Home = transform.position;
         sprite = GetComponentInChildren<SpriteRenderer>();
         animator = sprite.GetComponent<SpriteAnimator>();
+        spriteRest = sprite.transform.localPosition;
         cam = Camera.main;
 
         // The sprite isn't centred on the pivot, so measure it once and clamp/shoot from the real extents.
@@ -199,13 +217,21 @@ public class Ronin : MonoBehaviour
     void Update()
     {
         moveInput = 0;
+        moveInputY = 0;
         bool invulnerable = Time.time < invulnerableUntil;
         sprite.enabled = !invulnerable || Mathf.Repeat(Time.time, 0.2f) < 0.1f;
         sprite.color = Parrying ? Color.Lerp(Color.white, parryColor, 0.5f) : Color.white;
 
         Keyboard keyboard = Keyboard.current;
         Mouse mouse = Mouse.current;
-        if (ControlsEnabled && keyboard != null)
+        if (ControlsEnabled && Roaming && keyboard != null)
+        {
+            if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
+            if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
+            if (keyboard.upArrowKey.isPressed || keyboard.wKey.isPressed) moveInputY += 1;
+            if (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed) moveInputY -= 1;
+        }
+        else if (ControlsEnabled && keyboard != null)
         {
             if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
             if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
@@ -512,6 +538,11 @@ public class Ronin : MonoBehaviour
         if (Parrying) DeflectNearbyArrows();
 
         Vector3 position = body.position;
+        if (Roaming)
+        {
+            Roam(position);
+            return;
+        }
         position.x += moveInput * speed * Loadout.MoveSpeedMultiplier * Time.fixedDeltaTime;
 
         // Keep the whole ronin inside the camera's view.
@@ -521,6 +552,24 @@ public class Ronin : MonoBehaviour
             centerX - halfWidth + screenMargin - minOffsetX,
             centerX + halfWidth - screenMargin - maxOffsetX);
         body.MovePosition(position);
+    }
+
+    // A slower stroll than the fight's sprint, diagonals no faster than straight lines.
+    const float RoamSpeedScale = 0.55f;
+
+    void Roam(Vector3 position)
+    {
+        var step = new Vector2(moveInput, moveInputY);
+        if (step.sqrMagnitude > 1f) step.Normalize();
+        position += (Vector3)(step * speed * RoamSpeedScale * Time.fixedDeltaTime);
+        Rect area = RoamArea;
+        position.x = Mathf.Clamp(position.x, area.xMin, area.xMax);
+        position.y = Mathf.Clamp(position.y, area.yMin, area.yMax);
+        body.MovePosition(position);
+        // His only south-facing frames are the idle, so walking that way he bobs on it, as on a walk without frames.
+        roamTime += Time.fixedDeltaTime;
+        bool bob = step != Vector2.zero && loopClip == art.idle;
+        sprite.transform.localPosition = spriteRest + (bob ? Vector3.up * (Mathf.Abs(Mathf.Sin(roamTime * 9f)) * 0.12f / transform.lossyScale.y) : Vector3.zero);
     }
 
     // Walks him to a spot on his own while his controls are off, to leave one map and enter the next. He passes
@@ -750,10 +799,12 @@ public class Ronin : MonoBehaviour
     {
         if (actionPlaying) return;
         Sprite[] run = moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
+        // Walking up a safe area he shows his back (his walk between maps); walking down he faces us on his idle.
+        if (Roaming && moveInput == 0 && moveInputY > 0 && art.walkUp != null && art.walkUp.Length > 0) run = art.walkUp;
         Sprite[] clip = run != null && run.Length > 0 ? run : art.idle;
         if (clip == loopClip) return;
         loopClip = clip;
-        animator.Play(clip, true, null, clip == art.idle ? art.idleFps : art.runFps);
+        animator.Play(clip, true, null, clip == art.idle ? art.idleFps : clip == art.walkUp ? art.walkFps : art.runFps);
     }
 
     void PlayAction(Sprite[] clip)

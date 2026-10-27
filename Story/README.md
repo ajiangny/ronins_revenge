@@ -40,7 +40,10 @@ new faces on his armor cast as snarling oni.
 
 - **Oni** is free but has nowhere to go. His soul can't pass on while the armor holds everyone he led up the
   mountain, so every death pulls him back to the hill where he and Shirogane used to sit, playing the bone flute
-  she gave him. The title screen is that hill, which makes the menu the game's hub (Hades' House). Each return
+  she gave him. An abandoned temple stands on it, and it is there he wakes, in a pool of the same teal soul-fire he
+  tore himself out of: the game's hub (Hades' House, the pool his Styx). He walks its courtyard between runs: her
+  flute on the altar (the Flute Songs), the memorial stones, the weapon rack, and the gate out. The title screen is
+  the hill outside it. Each return
   wears a little more of his memory away.
 - **The army and the bosses** are souls from the armor, sent out each night in borrowed bodies. When one falls it
   is drawn back into the coffin and forged again, so the army is always full and the bosses remember every fight.
@@ -71,7 +74,7 @@ over.
 
 **Dialogue, as built:** runs now carry over (`SaveData.cs`) and the reactive system below is in `Dialogue.cs`: boss
 intros (`BossIntro`), phase breaks (`BossPhase`) and defeats (`BossDefeat`), the killing boss's last word
-(`KilledOni`), Oni on the hill after a run (`HubReturn`) and the souls on their first boon screen of a run
+(`KilledOni`), Oni waking in the temple after a run (`HubReturn`) and the souls on their first boon screen of a run
 (`SoulPickup`) pick from the conversations in the character files. Intros, defeats and soul greetings play as
 Hades-style talk scenes (the speaker painted large, Oni opposite); a phase break gets a scene only when Oni has an
 answer, otherwise its card speaks. The souls' `SoulPickup` tables are wired; their Duo, Legendary, jealousy and boss
@@ -147,7 +150,7 @@ short, repeatable and never cutting off a full line (`GameManager.OnBossSpoke`).
 | `BossPhase` | Phase card |
 | `BossDefeat` | Boss falls |
 | `KilledOni` | Oni dies to this boss |
-| `HubReturn` | Oni wakes on the hill (title screen) after a death |
+| `HubReturn` | Oni wakes in the temple's spirit pool after a death |
 | `SoulPickup` | First boon screen of each soul in a run (Oni's first-soul lines open the first meetings) |
 | `Capstone` | A Duo or Legendary is taken |
 | `Scroll` | A technique scroll is caught |

@@ -835,6 +835,65 @@ MonoBehaviour:
   bossDepth: 4.5
   roundIntroTime: 1.2
   armyMarchInTime: 1.6
+  safeAreas:
+  - name: The Temple
+    map:
+      ground: {fileID: 21300000, guid: 02dce4580327e4601aa1f7332a7272b0, type: 3}
+      groundTint: {r: 1, g: 1, b: 1, a: 1}
+      petal: {fileID: 21300000, guid: 64a78f05b66c04366a279f25ba26fd6f, type: 3}
+      petalTint: {r: 0.55, g: 0.6, b: 0.65, a: 0.4}
+      blockers: []
+      blockerPattern: 
+      atmosphere:
+        clouds: 2
+        cloudShadow: {r: 0.02, g: 0.03, b: 0.08, a: 0.25}
+        wind: {x: 0.3, y: -0.15}
+        moonlight: {r: 0.75, g: 0.85, b: 1, a: 0.1}
+        shade: 0.35
+        vignette: 0.45
+        mist: 2
+        mistColor: {r: 0.7, g: 0.85, b: 0.9, a: 0.08}
+        motes: 14
+        moteColor: {r: 0.45, g: 1, b: 0.9, a: 0.7}
+    mapPixelsHigh: 384
+    floor:
+      serializedVersion: 2
+      x: 0.2
+      y: 0.1
+      width: 0.6
+      height: 0.58
+    wakeSpot: {x: 0.484, y: 0.17}
+    wakeGlow: {r: 0.45, g: 1, b: 0.9, a: 0.25}
+    stations:
+    - kind: 0
+      label: SET OUT
+      spot: {x: 0.5, y: 0.68}
+      art: {fileID: 0}
+      onMap: 1
+      placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
+      reach: 2.2
+    - kind: 1
+      label: FLUTE SONGS
+      spot: {x: 0.3, y: 0.5}
+      art: {fileID: 21300000, guid: 22ad2a3bf66d8403cb18001d89cc6601, type: 3}
+      onMap: 0
+      placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
+      reach: 1.7
+    - kind: 2
+      label: MEMORIAL STONES
+      spot: {x: 0.7, y: 0.5}
+      art: {fileID: 21300000, guid: f087f93f4f1754d0280b705a2abbdaa6, type: 3}
+      onMap: 0
+      placeholder: {r: 0.4, g: 0.42, b: 0.45, a: 1}
+      reach: 1.7
+    - kind: 3
+      label: WEAPON RACK
+      spot: {x: 0.69, y: 0.22}
+      art: {fileID: 21300000, guid: 90a0c0cf039144143977adce078a2436, type: 3}
+      onMap: 0
+      placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
+      reach: 1.7
+  deathToTempleTime: 2.4
   travelWalkSpeed: 9
   travelFadeTime: 0.6
   stageClearPause: 1

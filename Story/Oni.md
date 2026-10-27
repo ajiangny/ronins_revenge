@@ -34,7 +34,8 @@ of every talk scene, and is framed beside his words on the hill.
 - When the coffin opened, Shirogane cut the tether pulling his soul into the armor. She was sealed in his place.
 - A wandering monk found him half-dead on the Pilgrim's Pass and sheltered him through the first night. The monk
   was taken for it (see [Utsusemi](Utsusemi.md)).
-- Since then he dies and wakes on the hill where he and Shirogane used to sit, playing her flute. Each return takes
+- Since then he dies and wakes in the abandoned temple on the hill where he and Shirogane used to sit, rising out
+  of its pool of teal soul-fire; her flute lies on the temple's altar. Each return takes
   a little more of his memory: by the time he reaches Shirogane he has forgotten their oath to kill the Emperor
   together.
 
@@ -50,7 +51,7 @@ of every talk scene, and is framed beside his words on the hill.
 ## Voice
 
 He speaks rarely and briefly, the way Zagreus does at his quietest. A low, tired voice, never a quip. Most of his
-lines happen on the hill, after a death. In fights he is silent apart from grunts.
+lines happen in the temple on the hill, after a death. In fights he is silent apart from grunts.
 
 **In game:** a voice designed for him in ElevenLabs (`ONI` in `Tools/generate-voice.mjs`): a low, quiet, tired
 baritone in his late twenties, slightly hoarse, slow and sparing, weary and haunted, never theatrical. Every written
@@ -61,7 +62,7 @@ source, so the bosses' voice filters never touch him.
 
 In game through the reactive dialogue (`Dialogue.cs`), voiced and subtitled:
 
-**`HubReturn`** (waking on the hill)
+**`HubReturn`** (waking in the temple's pool, on the hill)
 
 | Priority | Requires | Text |
 |---|---|---|

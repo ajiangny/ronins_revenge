@@ -9,13 +9,14 @@ Shadow Blade is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System
 `GameManager` owns the run and is the hub everything reports to.
 
 ```
-Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─travel─▶ Boss ─▶ stage boon ─travel─▶ next stage / Victory
-                                   │  (soul caught → Choosing: boon screen, time paused)            │
-                                   │  (Esc / P / Start → Paused: pause menu, time paused)            │
-                                   └──── ronin out of lives / army reaches ronin ──▶ GameOver ◀─────┘
+Title ─Start─▶ Choose a journey ─new slot (flute intro)──────────────────────────────┐
+                                └─saved slot──▶ Temple (Hub) ─gate─travel─▶ Stage intro ─▶ Round 1 ─▶ Round 2 ─▶ Round 3 ─travel─▶ Boss ─▶ stage boon ─travel─▶ next stage / Victory
+                                                    ▲         │  (soul caught → Choosing: boon screen, time paused)            │
+                                                    │         │  (Esc / P / Start → Paused: pause menu, time paused)            │
+                                                    └─reload, wakes in the pool ◀── ronin out of lives / army reaches ronin ─┘
 ```
 
-- States: `GameManager.State { Title, Transition, Playing, Choosing, Paused, GameOver }`.
+- States: `GameManager.State { Title, Transition, Playing, Choosing, Paused, GameOver, Dialogue, Hub }`.
 - Menu pages are built in `GameManager` (`ShowTitleMenu`, `ShowPauseMenu`, `ShowControls`, `ShowSettings`,
   `ShowEndMenu`) and shown by `MenuUI`. Sub-pages take a `back` callback so Controls/Settings return to
   whichever page opened them. `Pause` only fires in `Playing`; `Resume` always restores `timeScale = 1`
@@ -54,14 +55,32 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
   `Bow`s and `Dissolve`s and `SecondWisp` rises from her into his shoulder, a "Dawn" card shows, then
   `EndGame("DAWN", …)`. Kagetsune's `RisingSoul`s drive themselves (`FreedSoul`) so they finish after he is gone. Dying to him
   ends on his `BossLine.KilledOni` line instead of the plain defeat text.
-- Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
-  without it.
+- Restart reloads the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload without it. A death
+  (`EndGame` with `cleared` false) has no end screen: `FallToTemple` waits `deathToTempleTime` for the killer's last
+  word, fades to black and `ReloadToSafeArea(true)`; Victory's RETURN TO TEMPLE and the pause menu's RETURN TO TEMPLE
+  (gives up the run, not counted as a death) do the same.
 - **Dev tools (Editor and development builds, `Debug.isDebugBuild`, or release builds while `devToolsInRelease` is on; both via `DevToolsOn`):** a DEV TOOLS page (`ShowDevMenu`) on the
   title and pause menus, or F3, is a two-column grid (`MenuUI.Show(…, gridColumns: 2)`) with a row per stage, its round 1 on the left and its boss on the right; `DevJump` stores the pick in statics,
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).
   `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni. The page also has +1000 EMBERS and RESET SAVE.
+
+## Safe areas: the temple between runs
+
+Hades' House of Hades. Oni's home between runs is the abandoned temple on the hill; it is the **only** place he walks
+in every direction (`Ronin.Roaming`), everywhere else he keeps to his row.
+
+| What | Where |
+|---|---|
+| Save slots (Hades' profiles): `Save.Slots` = 3 keys `Save1..3`, the slot in use in `SaveSlot` (`Save.Use`, `Exists`, `Peek`, `Delete`). A pre-slot `"Save"` key moves into slot one once (`MoveLegacySave`) | `SaveData.cs` |
+| Title START → `ShowSlots` (each slot's runs, embers, deaths, dawns; ERASE A JOURNEY → `ConfirmErase`). `ChooseSlot`: an empty slot is a new game and plays the flute intro straight into the first run (`TitleToGame`), as Hades' first run starts in Tartarus; a saved slot fades the paper off Oni standing in the temple (`TitleToSafeArea`) | `GameManager` |
+| A safe area is data: `SafeArea.Config` (name, `Backdrop.Map`, `floor` and `wakeSpot` as view fractions, `Station[]`, each a `StationKind`, label, spot, prop art, `onMap`, reach). `GameManager.safeAreas` (defaults in `DefaultSafeAreas()`, art from `Ninja/Apply Maps`) holds them; only the first is used so far. To add one, add a Config (and its map/props to `SafeAreaGrounds`/`StationArt` in `NinjaArtSetup`) and pick it in `CurrentSafeArea` | `SafeArea.cs`, `GameManager` |
+| `SafeArea.Build` lays the props at the map's pixel size, a breathing glow over the wake spot and a world-space prompt; placeholders when art is missing (a pool disc, tinted blocks). `Near(feet)` finds the station in reach, `ShowPrompt` floats "E  LABEL" over it. Spots are where his **feet** go; `GameManager.BodyAt` converts for `PlaceAt`/`WalkTo` and the roam clamp | `SafeArea.cs` |
+| Entering: `EnterSafeArea(wake)` hides the HUD, clears the cover (`BlockerWall.Clear`), plays the title theme; on a wake he is placed in the pool as the dark lifts, the soul pillar flares and he climbs out, `EmberTally` shows what the run earned and `HubReturn` plays Oni's line. Then `State.Hub`, `Ronin.Roaming` on, `RoamArea` = the floor | `GameManager` |
+| In the hub, `UpdateSafeArea`: E / Enter / Space / gamepad A uses the station in reach, Esc opens `ShowSafeAreaPause`; a station's page sets `stationOpen` and freezes him (`OpenStation` / `CloseStation`). Stations: **Exit** (the gate, `SetOut`: walks up to it, `TravelTo` stage 1 with `inDark` removing the temple, `StartGame`), **FluteSongs** (`ShowSongs`, the Mirror of Night), **Memorial** (`ShowRecords`: runs, dawns, deaths, each boss met by kills both ways, unmet ones worn smooth; a cut-down Codex), **WeaponRack** (`ShowRack`, Hades' Infernal Arms: katana or kunai, `SaveData.weapon` → `Ronin.CurrentWeapon` at `StartGame`) | `GameManager` |
+| Roaming movement: WASD/arrows in 2D at `RoamSpeedScale` of his speed, no attacks; clips from his existing PixelLab frames: `runLeft`/`runRight` sideways, `walkUp` going up, and his south-facing `idle` with a step bob going down (he has no south walk) | `Ronin.Roam`, `Ronin.UpdateLoopClip` |
+| Art: `Background/Temple_Hub.png` (PixelLab create_image_pro 688×384, styled on `Mountain_Stage4`: gate top centre, spirit pool bottom centre), `Props/Temple_FluteAltar`, `Temple_Memorial`, `Temple_Rack` (64×64); mood `Temple_Hub` in `NinjaArtSetup.Moods` | `Ninja/Apply Maps` |
 
 ## Across runs: save, dialogue, Flute Songs
 
@@ -70,15 +89,15 @@ Hades' loop: what happened in earlier runs changes what is said and how strong O
 
 | What | Where |
 |---|---|
-| The save: runs started and cleared, deaths per boss (`deathsTo`) and wins (`winsVs`) by `BossKind`, how the last run ended (`lastRunCleared`, `lastKiller`), `hubPending`, conversations heard (`seen`/`seenRun`, the run each was last heard in), the repeatables' `shuffleBag`, `embers`, song `ranks` and `songsOff`. One JSON string in `PlayerPrefs` (`"Save"`), cached in `Save.Data` (reset on entering Play mode, which has no domain reload) | `SaveData.cs` (`Save.BeginRun` in `StartGame`, `Save.EndRun(cleared, killer)` in `EndGame`, `Save.BossFelled` in `BossFell`, `Save.Write` also in `Reload`) |
+| The save: runs started and cleared, deaths per boss (`deathsTo`) and wins (`winsVs`) by `BossKind`, how the last run ended (`lastRunCleared`, `lastKiller`), `hubPending`, conversations heard (`seen`/`seenRun`, the run each was last heard in), the repeatables' `shuffleBag`, `embers`, song `ranks` and `songsOff`. One JSON string per save slot in `PlayerPrefs` (`"Save1"`..`"Save3"`, see Safe areas), cached in `Save.Data` (reset on entering Play mode, which has no domain reload) | `SaveData.cs` (`Save.BeginRun` in `StartGame`, `Save.EndRun(cleared, killer)` in `EndGame`, `Save.BossFelled` in `BossFell`, `Save.Write` also in `Reload`) |
 | Reactive dialogue: a `Conversation` (id, speaker, `DialogueEvent`, `Tier` Story / Reactive / Repeatable, `Req` requirements, `Cooldown` in runs, and either `Lines` or `BuiltIn`, the boss's own `Line()` and clip). `Dialogue.Pick` filters by `Blocked` (heard, cooling down, a `Req` failing), takes the best tier with anything left, the first Story/Reactive one written or a Repeatable from the bag, and marks it heard. No dice in eligibility, so `Explain` is repeatable. Requirements are helpers (`Seen`, `NotSeen`, `LastKiller`, `Deaths`, `DeathsTo`, `WinsVs`, `OfElement`, `Holds`, `HoldsDuo`); `Fill` writes `{Deaths}` in words | `Dialogue.cs` (`Dialogue.All` holds every conversation; keep it in step with `Story/`) |
-| Where they play: `BeginBoss` picks `BossIntro`, `PlayPhaseCard` picks `BossPhase`, `BossFell` picks `BossDefeat` (none written plays the boss's own line, `Unwritten`), and `OfferBoons` picks the soul's `SoulPickup` (`SoulOf(element)`) on that element's first screen of the run (`metThisRun`) and shows the cards once its scene ends (`GreetThenChoose` → `ShowBoons`). All four play through `PlayScene` (below). `OnRoninHit` picks `KilledOni` from the killing boss (a subtitle; its line is also the end screen text); `Start` on the title runs `HubReturn` when `hubPending` (Oni's words beside him with his framed close-up, `GameUI.ShowSubtitle(…, beside, PortraitFor)`, the only subtitle that carries a portrait). `PlayConversation` → `Say` plays lines as subtitles, voiced if `VoiceLibrary` has `Conversation.VoiceId(i)`, and marks them full lines so barks wait | `GameManager` |
+| Where they play: `BeginBoss` picks `BossIntro`, `PlayPhaseCard` picks `BossPhase`, `BossFell` picks `BossDefeat` (none written plays the boss's own line, `Unwritten`), and `OfferBoons` picks the soul's `SoulPickup` (`SoulOf(element)`) on that element's first screen of the run (`metThisRun`) and shows the cards once its scene ends (`GreetThenChoose` → `ShowBoons`). All four play through `PlayScene` (below). `OnRoninHit` picks `KilledOni` from the killing boss (a subtitle; its line is also the end screen text); `EnterSafeArea` runs `HubReturn` when `hubPending`, as he climbs out of the temple's pool (a plain subtitle; `Say` still frames his close-up beside his words if one plays on the title page). `PlayConversation` → `Say` plays lines as subtitles, voiced if `VoiceLibrary` has `Conversation.VoiceId(i)`, and marks them full lines so barks wait | `GameManager` |
 | Talk scenes (Hades-style): `PlayScene(conversation)` waits out a hit-stop, sets `State.Dialogue` and `timeScale` 0, hides the HUD and boss bar (`GameUI.HideForScene`), and turns the conversation into `DialogueScene.Line`s: a `BuiltIn` boss line first in its own clip (`BossVoice.Take`), then the written lines with their `VoiceLibrary` clips (a built-in line counts as line 0 of `VoiceId`). `SpeakerFor(name)` stands each speaker: Oni at the right (`oniCloseup`), the boss at the left with its `VoiceFor` close-up (its phase close-up and epithet once `SecondPhase`, drawn at `SceneArtScale` of the card size), a soul at the left with its painting (`akaganeCloseup`…, framed by its eye point) or its soul frames. `DialogueScene.Play` dims the field, lights the speaker and drops the listener back, masks each half (feathered where a painting's canvas edge would show, cut edges pushed off screen), types each line under an ink name tab on the speaker's side, and advances on Space / Enter / click / South after a 0.3 s guard | `DialogueScene.cs`, `GameManager` |
 | Voices for written lines: `VoiceLibrary` (every clip in `Audio/Voice` by file name), built by `Ninja/Apply Voice Lines`, which also logs the lines still unvoiced. Oni's lines (hill, answers, soul meetings, `Oni_NotYet`) play through `GameManager.oniVoice`, a filter-free source beside `BossVoice`, and the souls' through `soulVoice` (`CreateSoulVoice`: a light chorus and short echo, their shared coffin sound); `VoiceOf(speaker)` picks the source per line for `DialogueScene.Line.source` and `Say`. An unvoiced intro line stays on the card long enough to read | `VoiceLibrary.cs`, `Editor/VoiceSetup.cs`, `GameUI.PlayBossIntro` |
 | The souls behind the boons (Akagane, Mizore, Hibiki): their `SoulPickup` conversations are in `Dialogue.All`; Duo, Legendary, jealousy and boss reactions are written but not wired yet | [Story/Souls.md](Story/Souls.md) |
 | Soul Embers (`Upgrades.PerSamurai`, `PerScout`, `ForBoss`) go into the save as they're earned (`GameManager.Earn`); the end screen tallies `embersThisRun` | `GameManager` |
 | Flute Songs: `UpgradeId`, `Song` (name, max rank, base cost, `Effect` text), `Price` (base × rank + ⌊10 × 1.1^ranks bought⌋), `Buy`, `Spent`/`RefundAll`, `Toggle` (maxed songs only), `Rank` (0 while off). Applied once a run, on top of the scene values: `Ronin.LearnSongs` (parry window, speed, swing, shuriken, missed parry, invulnerability), and in `GameManager` the soul odds (`MaybeDropSoul`), Iron Will's life (`StartGame`), Fate's Thread (`BoonChoiceUI.OfferRedraw`, R; the fresh cards fill the same list) and Second Dawn (`OnRoninHit`, `dawnUsed`) | `Upgrades.cs` |
-| The shop page: `ShowSongs`, a two-column `MenuUI` grid with a `MenuUI.Item.note` line for the selected song; on the title menu once there are embers or songs | `GameManager`, `MenuUI` |
+| The shop page: `ShowSongs`, a two-column `MenuUI` grid with a `MenuUI.Item.note` line for the selected song; opened at the temple's flute altar | `GameManager`, `MenuUI` |
 
 ## Player combat — the Ronin
 
@@ -461,7 +480,7 @@ These rebuild assets/prefabs/scene wiring from the art on disk. Run them inside 
 | Apply Sprite Art | `Editor/NinjaArtSetup.cs` | Rebuilds character/projectile prefabs, CharacterArt, blockers, backdrop |
 | Apply Backdrop And Blockers Only | `Editor/NinjaArtSetup.cs` | Just the backdrop/blockers (no prefab ID churn) |
 | Apply Stages | `Editor/NinjaArtSetup.cs` | Copies `GameManager.DefaultStages()` into the scene's `stages` (names, bosses, every round's values), then the maps |
-| Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
+| Apply Maps | `Editor/NinjaArtSetup.cs` | Stage `roundsMap`/`bossMap` (`Background/Pass_Stage<n>`, `Background/Arena_<Boss>`, each with its blocker set from `MapBlockers`), the safe areas' maps and station props (`SetUpSafeAreas`) and the ronin's `walkUp` (`Ronin_WalkNorth_*`); then re-run Apply Boon Art for the elemental walk |
 | Apply Boon Art | `Editor/BoonArtSetup.cs` | Ronin spirit wisps cut from his base art, elemental ronin recolours, soul and boon icon wiring (`UI/Boons/<BoonId>`), each element's shuriken (`Projectiles/ShurikenArt_<suffix>`, PixelLab; recoloured from the base when missing), the ice statue shell |
 | Apply Boss Art | `Editor/BossArtSetup.cs` | Boss CharacterArt, intro portraits and voice → GameManager |
 | Apply UI Fonts | `Editor/UiSetup.cs` | Header font (Cinzel) and body font (Zen Kaku Gothic New Bold) baked → `GameUI.headerFontBaked` / `bodyFontBaked` (the TTF fields are cleared), `Art/Logo/RoninsRevenge.png` → `GameUI.titleLogo`, `Ronin_Flute_*` frames → `GameManager.titleFluteFrames`, `Ronin_StandUp_*` → `titleStandFrames`, `Art/Portraits/Oni_Closeup.png` (imported like Benibana's close-up) → `GameManager.oniCloseup`; `Akagane/Mizore/Hibiki_Closeup.png` → `akaganeCloseup`/`mizoreCloseup`/`hibikiCloseup` (their `_Full.png` imported the same way) |

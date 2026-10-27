@@ -23,12 +23,17 @@ public class ElementArt
 // Owns the game flow: title menu -> stages of rounds -> win/lose menu, plus pause, score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
-    enum State { Title, Transition, Playing, Choosing, Paused, GameOver, Dialogue }
+    enum State { Title, Transition, Playing, Choosing, Paused, GameOver, Dialogue, Hub }
 
     const string HighScoreKey = "HighScore";
     // A Spirit Offering taken at full health gives these points, times the stage number.
     const int OfferingPoints = 500;
     static bool skipTitle;
+    // The next scene load opens in the safe area instead of the title, after a death (he wakes in the pool) or a load.
+    static bool intoSafeArea;
+    static bool wakeInPool;
+    // What the run just ended earned, shown as he wakes.
+    static int lastRunEmbers;
     // Dev menu testing aids. Statics, so god mode and a pending jump survive the scene reload that starts the run.
     static bool godMode;
     static int devJumpStage = -1;
@@ -40,6 +45,8 @@ public class GameManager : MonoBehaviour
     static void ResetSession()
     {
         skipTitle = false;
+        intoSafeArea = wakeInPool = false;
+        lastRunEmbers = 0;
         godMode = false;
         devJumpStage = -1;
         devJumpBoss = false;
@@ -251,6 +258,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] float roundIntroTime = 1.2f;
     [Tooltip("Seconds a new army takes to march down into the field. The round starts once it is in place and the intro time is up.")]
     [SerializeField] float armyMarchInTime = 1.6f;
+    [Header("Safe areas")]
+    [Tooltip("Where Oni lives between runs, walking in every direction. The first is the temple he wakes in; maps, props and spots are set by Ninja/Apply Maps.")]
+    [SerializeField] SafeArea.Config[] safeAreas = DefaultSafeAreas();
+    [Tooltip("Seconds after a death before the temple calls him back.")]
+    [SerializeField] float deathToTempleTime = 2.4f;
+
     [Tooltip("How fast the ronin walks off the field and into the next map.")]
     [SerializeField] float travelWalkSpeed = 9f;
     [Tooltip("Seconds the screen takes to fade to black, and back, between maps.")]
@@ -262,6 +275,25 @@ public class GameManager : MonoBehaviour
 
     // The stages as written in code. The scene keeps its own serialized copy, which wins at runtime; Ninja/Apply Stages
     // copies these into it (maps are wired separately by Ninja/Apply Maps).
+    // The temple on the hill: its gate at the top leads out, its spirit pool at the bottom is where he wakes, and the
+    // flute altar, memorial stones and weapon rack stand on the open flagstones between. Spots match Temple_Hub.png.
+    public static SafeArea.Config[] DefaultSafeAreas() => new[]
+    {
+        new SafeArea.Config
+        {
+            name = "The Temple",
+            floor = Rect.MinMaxRect(0.2f, 0.1f, 0.8f, 0.68f),
+            wakeSpot = new Vector2(0.484f, 0.17f),
+            stations = new[]
+            {
+                new SafeArea.Station { kind = StationKind.Exit, label = "SET OUT", spot = new Vector2(0.5f, 0.68f), onMap = true, reach = 2.2f },
+                new SafeArea.Station { kind = StationKind.FluteSongs, label = "FLUTE SONGS", spot = new Vector2(0.3f, 0.5f) },
+                new SafeArea.Station { kind = StationKind.Memorial, label = "MEMORIAL STONES", spot = new Vector2(0.7f, 0.5f), placeholder = new Color(0.4f, 0.42f, 0.45f) },
+                new SafeArea.Station { kind = StationKind.WeaponRack, label = "WEAPON RACK", spot = new Vector2(0.69f, 0.22f) },
+            },
+        },
+    };
+
     public static StageConfig[] DefaultStages() => new[]
     {
         new StageConfig
@@ -383,6 +415,10 @@ public class GameManager : MonoBehaviour
     // The take each line played last, so the next call of it picks another.
     readonly Dictionary<BossLine, int> lastTakes = new Dictionary<BossLine, int>();
     Backdrop backdrop;
+    SafeArea safeArea;
+    // A station's page is open over the safe area; he stands still under it.
+    bool stationOpen;
+    float stationClosedAt;
 
     void Awake()
     {
@@ -541,6 +577,13 @@ public class GameManager : MonoBehaviour
             skipTitle = false;
             StartGame();
         }
+        else if (intoSafeArea)
+        {
+            intoSafeArea = false;
+            bool wake = wakeInPool;
+            wakeInPool = false;
+            StartCoroutine(EnterSafeArea(wake));
+        }
         else
         {
             state = State.Title;
@@ -548,7 +591,6 @@ public class GameManager : MonoBehaviour
             SetHudVisible(false);
             if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
             ShowTitleMenu();
-            StartCoroutine(HubReturn());
         }
     }
 
@@ -567,7 +609,7 @@ public class GameManager : MonoBehaviour
         _ => null,
     };
 
-    // Back on the hill after a run, Oni sometimes says something before he takes up the flute again.
+    // Back in the temple after a run, Oni sometimes says something as he climbs out of the pool.
     IEnumerator HubReturn()
     {
         if (!Save.Data.hubPending) yield break;
@@ -587,6 +629,7 @@ public class GameManager : MonoBehaviour
         bool pause = (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame))
             || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
         if (state == State.Playing && pause) Pause();
+        if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing) UpdateScouts();
     }
@@ -596,10 +639,8 @@ public class GameManager : MonoBehaviour
     {
         var items = new List<MenuUI.Item>
         {
-            MenuUI.Item.Button("START", () => StartCoroutine(TitleToGame())),
+            MenuUI.Item.Button("START", () => ShowSlots()),
         };
-        // The songs appear once there are embers to spend, like Hades' mirror after the first death.
-        if (Save.Data.embers > 0 || Upgrades.TotalBought > 0) items.Add(MenuUI.Item.Button("FLUTE SONGS", () => ShowSongs(ShowTitleMenu)));
         items.AddRange(new[]
         {
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTitleMenu)),
@@ -765,6 +806,268 @@ public class GameManager : MonoBehaviour
             items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
     }
 
+    // Three journeys side by side, like Hades' save profiles. An empty one is a new game, which starts on the hill
+    // with the old flute intro and goes straight into the first run; a journey already begun opens in the temple.
+    void ShowSlots(int startIndex = -1)
+    {
+        string muted = MenuUI.MutedHex(OnPaper);
+        var items = new List<MenuUI.Item>();
+        bool any = false;
+        for (int i = 0; i < Save.Slots; i++)
+        {
+            int slot = i;
+            SaveData peek = Save.Peek(i);
+            any |= peek != null;
+            string label = peek == null
+                ? $"{Roman(i + 1)}   <color=#{muted}>·</color>   NEW JOURNEY"
+                : $"{Roman(i + 1)}   <color=#{muted}>·</color>   {peek.runsStarted} {(peek.runsStarted == 1 ? "RUN" : "RUNS")}  <color=#{muted}>·</color>  {peek.embers} EMBERS";
+            string note = peek == null
+                ? "An empty slot. It begins on the hill, with her flute."
+                : $"{peek.deaths} {(peek.deaths == 1 ? "death" : "deaths")}  ·  {peek.runsCleared} {(peek.runsCleared == 1 ? "dawn" : "dawns")}  ·  wakes in the temple";
+            items.Add(MenuUI.Item.Button(label, () => ChooseSlot(slot), note));
+        }
+        if (any) items.Add(MenuUI.Item.Button("ERASE A JOURNEY", () => ShowErase(), ""));
+        items.Add(MenuUI.Item.Button("BACK", ShowTitleMenu, ""));
+        menu.Show("CHOOSE A JOURNEY", null, items.ToArray(), ShowTitleMenu, startIndex >= 0 ? startIndex : Save.Slot, paper: OnPaper);
+    }
+
+    void ChooseSlot(int slot)
+    {
+        bool fresh = !Save.Exists(slot);
+        Save.Use(slot);
+        StartCoroutine(fresh ? TitleToGame() : TitleToSafeArea());
+    }
+
+    void ShowErase()
+    {
+        var items = new List<MenuUI.Item>();
+        for (int i = 0; i < Save.Slots; i++)
+        {
+            if (!Save.Exists(i)) continue;
+            int slot = i;
+            items.Add(MenuUI.Item.Button($"ERASE {Roman(i + 1)}", () => ConfirmErase(slot)));
+        }
+        items.Add(MenuUI.Item.Button("BACK", () => ShowSlots()));
+        menu.Show("ERASE A JOURNEY", null, items.ToArray(), () => ShowSlots(), paper: OnPaper);
+    }
+
+    // Erasing can't be undone, so it asks first, with KEEP IT selected.
+    void ConfirmErase(int slot)
+    {
+        string muted = MenuUI.MutedHex(OnPaper);
+        menu.Show($"ERASE {Roman(slot + 1)}?", $"<size=30><color=#{muted}>Every run, song and word heard in this journey is forgotten.</color></size>", new[]
+        {
+            MenuUI.Item.Button("KEEP IT", ShowErase),
+            MenuUI.Item.Button("ERASE", () =>
+            {
+                Save.Delete(slot);
+                Sfx.Play(Sfx.WardShatter);
+                ShowSlots(slot);
+            }),
+        }, ShowErase, paper: OnPaper);
+    }
+
+    // Loading a journey: no flute intro, the page just fades off Oni already standing in the temple.
+    IEnumerator TitleToSafeArea()
+    {
+        state = State.Transition;
+        menu.LeaveTitle();
+        yield return null;
+        menu.HideFigure();
+        ShowSafeArea();
+        ronin.PlaceAt(BodyAt(safeArea.WakePoint + WakeStep));
+        yield return menu.FadePaper(1.2f);
+        menu.Hide();
+        yield return EnterSafeArea(false, true);
+    }
+
+    SafeArea.Config CurrentSafeArea => safeAreas != null && safeAreas.Length > 0 ? safeAreas[0] : DefaultSafeAreas()[0];
+
+    // Swaps in the safe area's map with no cover, and builds its stations.
+    void ShowSafeArea()
+    {
+        SafeArea.Config area = CurrentSafeArea;
+        if (backdrop != null) backdrop.Show(area.map);
+        blockers.Clear();
+        if (safeArea != null) Destroy(safeArea.gameObject);
+        safeArea = SafeArea.Build(area, ui.BodyFont, ronin.SpriteOrder);
+    }
+
+    // Safe area spots are where his feet go; he's placed and walked by his body, which stands above them.
+    Vector3 BodyAt(Vector3 feet) => feet + (ronin.transform.position - ronin.Feet);
+
+    // Where he stands once out of the pool: a step up from it.
+    static readonly Vector3 WakeStep = Vector3.up * 1.6f;
+
+    // Between runs. After a death he wakes in the spirit pool as the dark lifts (Zagreus out of the Styx), climbs out,
+    // hears what the run earned and maybe says something; then he walks the temple freely until he sets out.
+    IEnumerator EnterSafeArea(bool wake, bool shown = false)
+    {
+        state = State.Transition;
+        SetHudVisible(false);
+        ronin.ControlsEnabled = false;
+        if (!shown)
+        {
+            ShowSafeArea();
+            ronin.PlaceAt(BodyAt(safeArea.WakePoint + WakeStep));
+        }
+        if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
+        if (wake)
+        {
+            ronin.PlaceAt(BodyAt(safeArea.WakePoint));
+            yield return ui.FadeTo(1f, 0f);
+            yield return new WaitForSeconds(0.4f);
+            StartCoroutine(ui.FadeTo(0f, 1.4f));
+            yield return new WaitForSeconds(0.6f);
+            Fx.Play(Fx.BoonPillar, ronin.Feet, OniColour, 1.4f);
+            ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
+            Sfx.Play(Sfx.SoulCollect);
+            yield return new WaitForSeconds(0.7f);
+            yield return ronin.WalkTo(BodyAt(safeArea.WakePoint + WakeStep), travelWalkSpeed * 0.3f);
+            if (lastRunEmbers > 0) StartCoroutine(EmberTally(lastRunEmbers));
+            lastRunEmbers = 0;
+            StartCoroutine(HubReturn());
+        }
+        // The floor is where his feet may go; the clamp is on his body.
+        Vector3 lift = BodyAt(Vector3.zero);
+        Rect floor = safeArea.WalkArea;
+        ronin.RoamArea = new Rect(floor.x + lift.x, floor.y + lift.y, floor.width, floor.height);
+        ronin.Roaming = true;
+        ronin.ControlsEnabled = true;
+        state = State.Hub;
+    }
+
+    // What the run he just died on was worth, for a moment, under the stations.
+    IEnumerator EmberTally(int earned)
+    {
+        ui.ShowBanner("Back in the temple", $"+{earned} Soul Embers", $"{Save.Data.embers} to spend at the flute altar", OniColour);
+        yield return new WaitForSeconds(2.8f);
+        ui.HideBanner();
+    }
+
+    // Walking the safe area: the station he's beside shows its prompt; E (or Enter, Space, gamepad A) uses it and Esc
+    // pauses. He stands still while a station's page is open.
+    void UpdateSafeArea(Keyboard keyboard, Gamepad gamepad, bool pause)
+    {
+        if (stationOpen || safeArea == null) return;
+        SafeArea.Station near = safeArea.Near(ronin.Feet);
+        safeArea.ShowPrompt(near);
+        if (pause)
+        {
+            OpenStation(ShowSafeAreaPause);
+            return;
+        }
+        bool use = (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame))
+            || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame);
+        // The press that closed a page mustn't open it again.
+        if (!use || near == null || Time.unscaledTime - stationClosedAt < 0.25f) return;
+        switch (near.kind)
+        {
+            case StationKind.Exit: StartCoroutine(SetOut()); break;
+            case StationKind.FluteSongs: OpenStation(() => ShowSongs(CloseStation)); break;
+            case StationKind.Memorial: OpenStation(() => ShowRecords(CloseStation)); break;
+            case StationKind.WeaponRack: OpenStation(() => ShowRack(CloseStation)); break;
+        }
+    }
+
+    void OpenStation(System.Action show)
+    {
+        stationOpen = true;
+        ronin.ControlsEnabled = false;
+        safeArea.ShowPrompt(null);
+        show();
+    }
+
+    void CloseStation()
+    {
+        menu.Hide();
+        stationOpen = false;
+        stationClosedAt = Time.unscaledTime;
+        if (state == State.Hub) ronin.ControlsEnabled = true;
+    }
+
+    void ShowSafeAreaPause()
+    {
+        var items = new List<MenuUI.Item>
+        {
+            MenuUI.Item.Button("RESUME", CloseStation),
+            MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowSafeAreaPause)),
+            MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowSafeAreaPause)),
+        };
+        if (DevToolsOn) items.Add(MenuUI.Item.Button("DEV TOOLS", () => ShowDevMenu(ShowSafeAreaPause)));
+        items.Add(MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)));
+        menu.Show(CurrentSafeArea.name.ToUpperInvariant(), null, items.ToArray(), CloseStation);
+    }
+
+    // The memorial stones (Hades' Codex, cut down): how the runs went, and each warlord he has met by how often they
+    // have killed him and he them. Ones he hasn't met stay worn smooth.
+    void ShowRecords(System.Action back)
+    {
+        SaveData d = Save.Data;
+        string muted = MenuUI.MutedHex(false);
+        string body = $"<color=#{muted}>RUNS</color>  {d.runsStarted}        <color=#{muted}>DAWNS</color>  {d.runsCleared}        <color=#{muted}>DEATHS</color>  {d.deaths}\n\n<align=left>";
+        string Row(string name, string fell, string felled) => $"<pos=14%>{name}<pos=52%><color=#{muted}>killed him</color>  {fell}<pos=76%><color=#{muted}>fell to him</color>  {felled}\n";
+        body += Row("THE ARMY", d.deathsTo[(int)BossKind.None].ToString(), "-");
+        var listed = new HashSet<BossKind>();
+        foreach (StageConfig stage in stages)
+        {
+            BossKind boss = stage.boss;
+            if (boss == BossKind.None || !listed.Add(boss)) continue;
+            int fell = d.deathsTo[(int)boss], felled = d.winsVs[(int)boss];
+            bool met = fell + felled > 0 || d.SeenIn($"{boss}_Intro") >= 0 || d.seen.Exists(id => id.StartsWith(boss + "_"));
+            body += met ? Row(boss.ToString().ToUpperInvariant(), fell.ToString(), felled.ToString()) : Row($"<color=#{muted}>· · ·</color>", "-", "-");
+        }
+        body += $"</align>\n<size=30><color=#{muted}>Names worn into the old stones. Fewer read clearly every time he wakes.</color></size>";
+        menu.Show("MEMORIAL STONES", body, new[] { MenuUI.Item.Button("BACK", back) }, back);
+    }
+
+    // The weapon rack (Hades' Infernal Arms): the blade he carries out, kept in the save.
+    void ShowRack(System.Action back, int startIndex = -1)
+    {
+        string muted = MenuUI.MutedHex(false);
+        var carried = (Ronin.Weapon)Save.Data.weapon;
+        var blades = new[]
+        {
+            (Ronin.Weapon.Sword, "KATANA", "Slash waves that cut through the ranks. The technique scrolls reshape them."),
+            (Ronin.Weapon.Kunai, "KUNAI", "Thrown blades that strike the first samurai they meet. The elements' blade boons still burn, freeze and arc."),
+        };
+        var items = new List<MenuUI.Item>();
+        foreach (var (weapon, name, note) in blades)
+        {
+            int row = items.Count;
+            Ronin.Weapon pick = weapon;
+            items.Add(MenuUI.Item.Button(weapon == carried ? $"{name}  <color=#{muted}>·  CARRIED</color>" : name, () =>
+            {
+                Save.Data.weapon = (int)pick;
+                Save.Write();
+                ronin.CurrentWeapon = pick;
+                Sfx.Play(Sfx.UiConfirm);
+                ShowRack(back, row);
+            }, note));
+        }
+        items.Add(MenuUI.Item.Button("BACK", back, ""));
+        menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
+            startIndex >= 0 ? startIndex : (int)carried);
+    }
+
+    // Through the gate: he walks up to it and out the top, the dark comes down, and the first stage's road opens.
+    IEnumerator SetOut()
+    {
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+        ronin.Roaming = false;
+        safeArea.ShowPrompt(null);
+        yield return ronin.WalkTo(BodyAt(safeArea.PointOf(StationKind.Exit)), travelWalkSpeed * 0.6f);
+        stageIndex = 0;
+        yield return TravelTo(stages[0].roundsMap, () =>
+        {
+            Destroy(safeArea.gameObject);
+            safeArea = null;
+        });
+        SetHudVisible(true);
+        StartGame();
+    }
+
     void ShowSettings(System.Action back)
     {
         menu.Show("SETTINGS", null, new[]
@@ -794,6 +1097,12 @@ public class GameManager : MonoBehaviour
         var items = new List<MenuUI.Item>
         {
             MenuUI.Item.Button("RESUME", Resume),
+            // Gives up the run (it isn't counted as a death) and wakes in the temple with what it earned.
+            MenuUI.Item.Button("RETURN TO TEMPLE", () =>
+            {
+                lastRunEmbers = embersThisRun;
+                ReloadToSafeArea(true);
+            }),
             MenuUI.Item.Button("RESTART", () => Reload(true)),
             MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowPauseMenu)),
             MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowPauseMenu)),
@@ -880,6 +1189,16 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
+    // A clean scene that opens in the safe area: waking in the pool after a death, or standing by it.
+    static void ReloadToSafeArea(bool wake)
+    {
+        Save.Write();
+        intoSafeArea = true;
+        wakeInPool = wake;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
     static void Quit()
     {
 #if UNITY_EDITOR
@@ -925,6 +1244,7 @@ public class GameManager : MonoBehaviour
         if (keyboard.f3Key.wasPressedThisFrame)
         {
             if (state == State.Title) ShowDevMenu(ShowTitleMenu);
+            else if (state == State.Hub && !stationOpen) OpenStation(() => ShowDevMenu(ShowSafeAreaPause));
             else if (state == State.Playing)
             {
                 Pause();
@@ -983,6 +1303,7 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         ronin.LearnSongs();
+        ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
         lives = maxLives = Mathf.Min(startingLives + Upgrades.Rank(UpgradeId.IronWill), Boons.MaxLives);
         embersThisRun = 0;
         dawnUsed = redrawUsed = false;
@@ -2223,7 +2544,7 @@ public class GameManager : MonoBehaviour
 
     // The ronin walks off the top of the field and the screen fades to black; the next map fades in with fresh cover
     // and he walks up into place from below.
-    IEnumerator TravelTo(Backdrop.Map map)
+    IEnumerator TravelTo(Backdrop.Map map, System.Action inDark = null)
     {
         state = State.Transition;
         ronin.ControlsEnabled = false;
@@ -2240,6 +2561,7 @@ public class GameManager : MonoBehaviour
         yield return ui.FadeTo(1f, travelFadeTime);
         yield return leaving;
 
+        inDark?.Invoke();
         ShowMap(map);
         ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
         yield return new WaitForSeconds(0.3f);
@@ -2311,6 +2633,7 @@ public class GameManager : MonoBehaviour
     {
         state = State.GameOver;
         Save.EndRun(cleared, killer);
+        lastRunEmbers = embersThisRun;
         if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);
         Sfx.Play(sting);
@@ -2320,7 +2643,17 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt(HighScoreKey, highScore);
         PlayerPrefs.Save();
 
-        StartCoroutine(ShowEndMenu(title, message, color));
+        // A death has no end screen: like Zagreus, he's pulled back to the temple and wakes there. A clear still
+        // gets its results.
+        StartCoroutine(cleared ? ShowEndMenu(title, message, color) : FallToTemple());
+    }
+
+    // The killer's last word, then the dark comes down and the temple calls him back.
+    IEnumerator FallToTemple()
+    {
+        yield return new WaitForSecondsRealtime(deathToTempleTime);
+        yield return ui.FadeTo(1f, 1f);
+        ReloadToSafeArea(true);
     }
 
     // A beat to watch the ronin fall (or the last army scatter) before the results come up.
@@ -2334,10 +2667,10 @@ public class GameManager : MonoBehaviour
             $"<color=#{muted}>Reached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}</color>";
         if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
         if (embersThisRun > 0)
-            body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{embersThisRun} SOUL EMBERS</color>  <color=#{muted}>({Save.Data.embers} to spend on the hill)</color>";
+            body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{embersThisRun} SOUL EMBERS</color>  <color=#{muted}>({Save.Data.embers} to spend in the temple)</color>";
         menu.Show(title, body, new[]
         {
-            MenuUI.Item.Button("PLAY AGAIN", () => Reload(true)),
+            MenuUI.Item.Button("RETURN TO TEMPLE", () => ReloadToSafeArea(true)),
             MenuUI.Item.Button("TITLE", () => Reload(false)),
         }, null, 0, color);
     }

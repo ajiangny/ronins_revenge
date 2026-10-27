@@ -73,6 +73,13 @@ public class BlockerWall : MonoBehaviour
         activePattern = own ? mapPattern : null;
     }
 
+    // No cover at all, for the temple between runs.
+    public void Clear()
+    {
+        built.Clear();
+        foreach (Transform child in transform) Destroy(child.gameObject);
+    }
+
     // healthMultiplier toughens every blocker (Glacier Wall).
     public void Rebuild(float healthMultiplier = 1f)
     {

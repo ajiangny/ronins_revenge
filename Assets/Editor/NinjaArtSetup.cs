@@ -364,6 +364,7 @@ public static class NinjaArtSetup
         }
         SetUpWalkUp(AssetDatabase.LoadAssetAtPath<CharacterArt>(ArtRoot + "Ronin.asset"));
         SetUpMaps(Object.FindAnyObjectByType<GameManager>());
+        SetUpSafeAreas(Object.FindAnyObjectByType<GameManager>());
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
@@ -405,6 +406,36 @@ public static class NinjaArtSetup
             SetMap(stage.FindPropertyRelative("bossMap"), boss == BossKind.None ? null : $"Background/Arena_{boss}",
                 boss == BossKind.Benibana ? new Color(0.7f, 0.66f, 0.7f) : Color.white,
                 boss == BossKind.Benibana ? "Effects/Leaf" : null, new Color(0.9f, 0.2f, 0.2f, 0.85f));
+        }
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    // Each safe area's map and station props, by the station's kind. The temple's gate is drawn on its map.
+    static readonly (string ground, Color tint)[] SafeAreaGrounds = { ("Background/Temple_Hub", Color.white) };
+    static readonly (StationKind kind, string art)[] StationArt =
+    {
+        (StationKind.FluteSongs, "Props/Temple_FluteAltar"),
+        (StationKind.Memorial, "Props/Temple_Memorial"),
+        (StationKind.WeaponRack, "Props/Temple_Rack"),
+    };
+
+    static void SetUpSafeAreas(GameManager manager)
+    {
+        var so = new SerializedObject(manager);
+        SerializedProperty areas = so.FindProperty("safeAreas");
+        for (int i = 0; i < areas.arraySize && i < SafeAreaGrounds.Length; i++)
+        {
+            SerializedProperty area = areas.GetArrayElementAtIndex(i);
+            SetMap(area.FindPropertyRelative("map"), SafeAreaGrounds[i].ground, SafeAreaGrounds[i].tint, "Effects/Leaf", new Color(0.55f, 0.6f, 0.65f, 0.4f));
+            SerializedProperty stations = area.FindPropertyRelative("stations");
+            for (int j = 0; j < stations.arraySize; j++)
+            {
+                SerializedProperty station = stations.GetArrayElementAtIndex(j);
+                var kind = (StationKind)station.FindPropertyRelative("kind").enumValueIndex;
+                string art = System.Array.Find(StationArt, entry => entry.kind == kind).art;
+                station.FindPropertyRelative("art").objectReferenceValue =
+                    art != null ? AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + art + ".png") : null;
+            }
         }
         so.ApplyModifiedPropertiesWithoutUndo();
     }
@@ -468,6 +499,14 @@ public static class NinjaArtSetup
             motes = 22, moteColor = new Color(0.8f, 0.85f, 1f, 0.55f),
         },
         // The frozen shrine path: heavy slow snow clouds, a cold hard moon, mist in the hollows and snowflakes in the air.
+        // The temple between runs: still air, a little low mist and a few teal spirit motes drifting off the pool.
+        ["Temple_Hub"] = new Atmosphere.Settings
+        {
+            clouds = 2, cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.25f), wind = new Vector2(0.3f, -0.15f),
+            moonlight = new Color(0.75f, 0.85f, 1f, 0.1f), shade = 0.35f, vignette = 0.45f,
+            mist = 2, mistColor = new Color(0.7f, 0.85f, 0.9f, 0.08f),
+            motes = 14, moteColor = new Color(0.45f, 1f, 0.9f, 0.7f),
+        },
         ["Shrine_Stage3"] = new Atmosphere.Settings
         {
             clouds = 3, cloudShadow = new Color(0.02f, 0.03f, 0.08f, 0.32f), wind = new Vector2(0.5f, -0.6f),

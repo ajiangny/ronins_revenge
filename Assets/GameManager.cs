@@ -371,6 +371,7 @@ public class GameManager : MonoBehaviour
     SpiritWolf activeWolf;
     AudioSource voice;
     AudioSource oniVoice;
+    AudioSource soulVoice;
     // The voice filters: Utsusemi's machine voice (a doubled, ringing, slightly gritty layer over the recorded
     // lines) and Shirogane's spirit voice (a soft, hollow echo, as if from across water) retune the same three.
     Behaviour[] machineVoice;
@@ -407,6 +408,31 @@ public class GameManager : MonoBehaviour
         oniVoice = oniObject.AddComponent<AudioSource>();
         oniVoice.playOnAwake = false;
         oniVoice.spatialBlend = 0f;
+        soulVoice = CreateSoulVoice();
+    }
+
+    // The three souls share a source of their own: they're half in the coffin, so a faint, slow version of the
+    // Emperor's choir (a light chorus under a short hall echo), the same for all three so they read as one family.
+    AudioSource CreateSoulVoice()
+    {
+        var soulObject = new GameObject("SoulVoice");
+        soulObject.transform.SetParent(transform, false);
+        var source = soulObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        var chorus = soulObject.AddComponent<AudioChorusFilter>();
+        chorus.dryMix = 0.85f;
+        chorus.wetMix1 = chorus.wetMix2 = 0.2f;
+        chorus.wetMix3 = 0f;
+        chorus.delay = 35f;
+        chorus.rate = 0.15f;
+        chorus.depth = 0.15f;
+        var echo = soulObject.AddComponent<AudioEchoFilter>();
+        echo.delay = 90f;
+        echo.decayRatio = 0.25f;
+        echo.wetMix = 0.18f;
+        echo.dryMix = 1f;
+        return source;
     }
 
     // Unity allows one of each filter per source, so each boss's voice is a retuning of the same three: the
@@ -2028,7 +2054,7 @@ public class GameManager : MonoBehaviour
         {
             AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(index)) : null;
             lines.Add(new DialogueScene.Line { who = SpeakerFor(line.Speaker), text = Dialogue.Fill(line.Text, ctx), clip = clip,
-                source = line.Speaker == "Oni" ? oniVoice : null });
+                source = VoiceOf(line.Speaker) });
             index++;
         }
         if (lines.Count == 0) yield break;
@@ -2051,6 +2077,15 @@ public class GameManager : MonoBehaviour
         Time.timeScale = timeScale;
         ronin.ControlsEnabled = controls;
     }
+
+    // Who speaks through which source: Oni clean, the souls with their coffin echo, a boss (null) through the scene's
+    // own, retuned per boss.
+    AudioSource VoiceOf(string speaker) => speaker switch
+    {
+        "Oni" => oniVoice,
+        "Akagane" or "Mizore" or "Hibiki" => soulVoice,
+        _ => null,
+    };
 
     // The boss cards draw close-ups this much larger than a scene does, where a figure stands about screen height.
     const float SceneArtScale = 0.72f;
@@ -2120,9 +2155,10 @@ public class GameManager : MonoBehaviour
         float seconds = clip != null ? clip.length : 2.5f;
         if (clip != null)
         {
-            AudioSource source = speaker == "Oni" ? oniVoice : voice;
+            AudioSource source = VoiceOf(speaker) ?? voice;
             voice.Stop();
             oniVoice.Stop();
+            soulVoice.Stop();
             source.volume = voiceVolume * Sfx.Volume;
             source.clip = clip;
             source.Play();

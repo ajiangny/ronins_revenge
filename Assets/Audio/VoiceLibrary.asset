@@ -13,14 +13,84 @@ MonoBehaviour:
   m_Name: VoiceLibrary
   m_EditorClassIdentifier: Assembly-CSharp::VoiceLibrary
   clips:
+  - id: Akagane_Greet_Bodies
+    clip: {fileID: 8300000, guid: cdca290e2f0e84ead965169f6f6ba4e7, type: 3}
+  - id: Akagane_Greet_Change
+    clip: {fileID: 8300000, guid: 2179965a07de14b3e96b3c956e498c0c, type: 3}
+  - id: Akagane_Greet_Clean
+    clip: {fileID: 8300000, guid: 892c9d3f077d048cabe52249e56f107f, type: 3}
+  - id: Akagane_Greet_Copper
+    clip: {fileID: 8300000, guid: e60183e41ec79402d9264310a8b2c32c, type: 3}
+  - id: Akagane_Greet_Lit
+    clip: {fileID: 8300000, guid: d4a27932b14e3461999c57fc5d29d8a8, type: 3}
+  - id: Akagane_Greet_Standing
+    clip: {fileID: 8300000, guid: e173955865c37457e82da5fb342be465, type: 3}
+  - id: Akagane_Greet_Vanguard
+    clip: {fileID: 8300000, guid: dc0ba41fb44d940f384f30d71279781a, type: 3}
+  - id: Akagane_Greet_Waiting
+    clip: {fileID: 8300000, guid: 00e047074c9b24e46867fe6bb4c41867, type: 3}
   - id: Akagane_Meet_Angry
     clip: {fileID: 8300000, guid: 9aed74a9e2f8a43d6b8f9f2010f4ba40, type: 3}
+  - id: Akagane_Meet_Angry_2
+    clip: {fileID: 8300000, guid: f9c1d348e1ea44496bb359a01c300fc3, type: 3}
+  - id: Akagane_Meet_Angry_3
+    clip: {fileID: 8300000, guid: 99212602c3e654e3bbeab80b25b2b28c, type: 3}
+  - id: Akagane_Meet_Bellringers
+    clip: {fileID: 8300000, guid: 66ef86cea69c34b9fb361c899a3de15b, type: 3}
+  - id: Akagane_Meet_Bellringers_2
+    clip: {fileID: 8300000, guid: 0437c5d68394144fe84c2e30581a08f2, type: 3}
+  - id: Akagane_Meet_Copper
+    clip: {fileID: 8300000, guid: c0a7abd6378194f2ab07d6d532c305d5, type: 3}
+  - id: Akagane_Meet_Copper_2
+    clip: {fileID: 8300000, guid: 22dd5199ffd934e898acae7fa2e17ff4, type: 3}
   - id: Akagane_Meet_Copper_3
     clip: {fileID: 8300000, guid: 5e1fb6db9a6914efdaa6524f0eabf52d, type: 3}
+  - id: Akagane_Meet_Doors
+    clip: {fileID: 8300000, guid: b745b916bd4d04aa7896df4b7914d4d7, type: 3}
+  - id: Akagane_Meet_Doors_2
+    clip: {fileID: 8300000, guid: 7f398016a2db84ef2942c7393cfbe0f9, type: 3}
   - id: Akagane_Meet_Doors_3
     clip: {fileID: 8300000, guid: 544862beeacf74a30a1e3f8e37cc90dc, type: 3}
+  - id: Akagane_Meet_Doors_4
+    clip: {fileID: 8300000, guid: b1911df0b7af947d48a5be55826fc37f, type: 3}
+  - id: Akagane_Meet_Men
+    clip: {fileID: 8300000, guid: 45c949278f27f457eb5e3d61c6587280, type: 3}
+  - id: Akagane_Meet_Men_2
+    clip: {fileID: 8300000, guid: 103d8fadf538245848752d92a38884a5, type: 3}
+  - id: Akagane_Meet_Salute
+    clip: {fileID: 8300000, guid: c40c190f9f4514ee4baf0f984a4b72cb, type: 3}
+  - id: Akagane_Meet_Salute_2
+    clip: {fileID: 8300000, guid: f9bb09c1e34c44490953dc62638f84c4, type: 3}
   - id: Akagane_Meet_Salute_3
     clip: {fileID: 8300000, guid: 187f2514223754c2bb6e59845dcf80b5, type: 3}
+  - id: Akagane_Pickup_Cleared
+    clip: {fileID: 8300000, guid: 8c3efc4b3dc0648bc8b8d41044b12990, type: 3}
+  - id: Akagane_Pickup_DiedArmy
+    clip: {fileID: 8300000, guid: 36badfdb6c76d48a2b933bfd27135026, type: 3}
+  - id: Akagane_Pickup_DiedBenibana
+    clip: {fileID: 8300000, guid: 7fb74ccc1c0084d679557cff32e62090, type: 3}
+  - id: Akagane_Pickup_DiedKagetsune
+    clip: {fileID: 8300000, guid: 7a8902708c71f4a70b61d037b68e3ffd, type: 3}
+  - id: Akagane_Pickup_DiedShirogane
+    clip: {fileID: 8300000, guid: bdc3d24caca754b7a9da7d159a7eca9c, type: 3}
+  - id: Akagane_Pickup_DiedUtsusemi
+    clip: {fileID: 8300000, guid: 5e0a26cd38d264e4da1f3880cb1b22db, type: 3}
+  - id: Akagane_Pickup_FirstClear
+    clip: {fileID: 8300000, guid: 1f3ed949ac9cc4d929d27e271335ec42, type: 3}
+  - id: Akagane_Pickup_FirstClear_2
+    clip: {fileID: 8300000, guid: a25a4cda432a94d5ba4012d0229fc8f0, type: 3}
+  - id: Akagane_Pickup_HoldsFrost
+    clip: {fileID: 8300000, guid: d46667b812b314c9cb8f88e8bee15d7b, type: 3}
+  - id: Akagane_Pickup_HoldsStorm
+    clip: {fileID: 8300000, guid: 3e19ff3a03f644358aa39e8d7bd7e82e, type: 3}
+  - id: Akagane_Pickup_ManyDeaths
+    clip: {fileID: 8300000, guid: 6b0e2b503faae457dbbad71642163faa, type: 3}
+  - id: Akagane_Pickup_ManyRuns
+    clip: {fileID: 8300000, guid: bd06af668a68c4ed0b66fbfb9df0395f, type: 3}
+  - id: Akagane_Pickup_Offering
+    clip: {fileID: 8300000, guid: ed27500c348154eee830153f8e6fb0b0, type: 3}
+  - id: Akagane_Pickup_VeryManyRuns
+    clip: {fileID: 8300000, guid: ac7a1c5f535304e3d934767b19f61355, type: 3}
   - id: Benibana_Defeat
     clip: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
   - id: Benibana_Defeat_2
@@ -83,12 +153,86 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
   - id: Benibana_Stagger_2
     clip: {fileID: 8300000, guid: 5d7c70c1af1e04caa814b370ef56b944, type: 3}
+  - id: Hibiki_Greet_Catch
+    clip: {fileID: 8300000, guid: bb133d286e54d461bb01b36481f4e2bd, type: 3}
+  - id: Hibiki_Greet_Cheer
+    clip: {fileID: 8300000, guid: 7a7f022dbace6491a8d429ec273d7b77, type: 3}
+  - id: Hibiki_Greet_Drumroll
+    clip: {fileID: 8300000, guid: 7b8edd8df867f434a961d78400833c97, type: 3}
+  - id: Hibiki_Greet_Faster
+    clip: {fileID: 8300000, guid: 6b4ca27fff70d447aba35359571ade1a, type: 3}
+  - id: Hibiki_Greet_Hi
+    clip: {fileID: 8300000, guid: 9f992695f5ab7445295b5c1a3432aa31, type: 3}
+  - id: Hibiki_Greet_Keep
+    clip: {fileID: 8300000, guid: 28f8607c2202f45f59d7756f8a65517b, type: 3}
+  - id: Hibiki_Greet_Stop
+    clip: {fileID: 8300000, guid: 9034951eabc8a4dbe832b467be916ed7, type: 3}
+  - id: Hibiki_Greet_Thunder
+    clip: {fileID: 8300000, guid: dee7abda46736407eb6bc5dff9db7ef8, type: 3}
+  - id: Hibiki_Meet_Blame
+    clip: {fileID: 8300000, guid: 50731d23ab68040f8afcc883ed097214, type: 3}
+  - id: Hibiki_Meet_Blame_2
+    clip: {fileID: 8300000, guid: 665f4d9be845f40d38f4fe853dcc5b81, type: 3}
   - id: Hibiki_Meet_Blame_3
     clip: {fileID: 8300000, guid: 61ed68230e3f34f2b82a0d2c8f2f5d47, type: 3}
+  - id: Hibiki_Meet_Blame_4
+    clip: {fileID: 8300000, guid: 85e6ff0854d894ec8ac25db15784c39e, type: 3}
+  - id: Hibiki_Meet_Name
+    clip: {fileID: 8300000, guid: 646384c98f4244c068d485fe7c9026c8, type: 3}
+  - id: Hibiki_Meet_Name_3
+    clip: {fileID: 8300000, guid: 9404df49a9f9049cc9d49e540c10b520, type: 3}
+  - id: Hibiki_Meet_Name_4
+    clip: {fileID: 8300000, guid: fc24413d672b44b01ae9bb3ef5742a79, type: 3}
+  - id: Hibiki_Meet_OneBell
+    clip: {fileID: 8300000, guid: 067b81e002e6e43518ad3dd9621db7f0, type: 3}
+  - id: Hibiki_Meet_OneBell_2
+    clip: {fileID: 8300000, guid: 05b331a543e994e968d6a19da8d2bf01, type: 3}
   - id: Hibiki_Meet_Out
     clip: {fileID: 8300000, guid: 4be351b2f76b8467d8763bad133daf56, type: 3}
+  - id: Hibiki_Meet_Out_2
+    clip: {fileID: 8300000, guid: e85e9eed13541463aae3541928f891f5, type: 3}
+  - id: Hibiki_Meet_Out_3
+    clip: {fileID: 8300000, guid: 2ff729ade16b84fc5a31ef56ca9e694b, type: 3}
+  - id: Hibiki_Meet_Procession
+    clip: {fileID: 8300000, guid: a8100fffa35454aca92555934dd17481, type: 3}
+  - id: Hibiki_Meet_Procession_2
+    clip: {fileID: 8300000, guid: e85ae12f13fef4c85ad0c96a23289c00, type: 3}
+  - id: Hibiki_Meet_Procession_3
+    clip: {fileID: 8300000, guid: e47779163798843fb85f6123d8570d55, type: 3}
   - id: Hibiki_Meet_River
     clip: {fileID: 8300000, guid: 71744ab52b9ba46c7b4912cf2f45bd61, type: 3}
+  - id: Hibiki_Meet_River_2
+    clip: {fileID: 8300000, guid: 181f01eadf71e48cf82140f1495318bb, type: 3}
+  - id: Hibiki_Meet_River_3
+    clip: {fileID: 8300000, guid: eda43732bbfc245bb8376751f12e6e8b, type: 3}
+  - id: Hibiki_Pickup_Cleared
+    clip: {fileID: 8300000, guid: c790b4ef14db14a3f817bd862fcbce51, type: 3}
+  - id: Hibiki_Pickup_DiedArmy
+    clip: {fileID: 8300000, guid: a19402afa1d8b473d9da5e0c46234d2c, type: 3}
+  - id: Hibiki_Pickup_DiedBenibana
+    clip: {fileID: 8300000, guid: 5c2ccd61c43e64b3cbb1cc72fcc56f63, type: 3}
+  - id: Hibiki_Pickup_DiedKagetsune
+    clip: {fileID: 8300000, guid: 1175ed8bcb8cd4758b2bb974218a3204, type: 3}
+  - id: Hibiki_Pickup_DiedShirogane
+    clip: {fileID: 8300000, guid: a3a7a6103d6b745fc9f4ab79f6735747, type: 3}
+  - id: Hibiki_Pickup_DiedUtsusemi
+    clip: {fileID: 8300000, guid: db2d724468259453d9b64633096326aa, type: 3}
+  - id: Hibiki_Pickup_FirstClear
+    clip: {fileID: 8300000, guid: f460f63aea89043418e5e7611bb5d932, type: 3}
+  - id: Hibiki_Pickup_FirstClear_2
+    clip: {fileID: 8300000, guid: 2357637a65e8a480eae9f363a5739db6, type: 3}
+  - id: Hibiki_Pickup_FirstClear_3
+    clip: {fileID: 8300000, guid: b2f91d253cd3643f2be857f84a572e3c, type: 3}
+  - id: Hibiki_Pickup_HoldsFire
+    clip: {fileID: 8300000, guid: 59a44c92ef3f04588b9095d684952cdc, type: 3}
+  - id: Hibiki_Pickup_HoldsFrost
+    clip: {fileID: 8300000, guid: b90617e384c164d49816da006792b8c4, type: 3}
+  - id: Hibiki_Pickup_ManyRuns
+    clip: {fileID: 8300000, guid: 806dd927498ac403b9856138f78bd799, type: 3}
+  - id: Hibiki_Pickup_Offering
+    clip: {fileID: 8300000, guid: b0ebc70278c5d4e4cb25d6aad49f16f5, type: 3}
+  - id: Hibiki_Pickup_VeryManyRuns
+    clip: {fileID: 8300000, guid: e4199ebc9b6e44133bdf1239a36b2855, type: 3}
   - id: Kagetsune_Chains
     clip: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
   - id: Kagetsune_CofferSlam
@@ -145,12 +289,84 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 66f2a3984740f46c8905e869dafedf6b, type: 3}
   - id: Kagetsune_Wail
     clip: {fileID: 8300000, guid: 6262f5c2e30024523952f52445162c8a, type: 3}
+  - id: Mizore_Greet_Bleeding
+    clip: {fileID: 8300000, guid: 50dc8de66db9b4fa0b84044295ec648d, type: 3}
+  - id: Mizore_Greet_Breathe
+    clip: {fileID: 8300000, guid: 910dcdc05bca8409896a9fbf2719b620, type: 3}
+  - id: Mizore_Greet_Clean
+    clip: {fileID: 8300000, guid: 8d40c5835988c4a119b03ac1b9d6d86d, type: 3}
+  - id: Mizore_Greet_Hands
+    clip: {fileID: 8300000, guid: 402814e82c57f454c8eb4c4c25326c1e, type: 3}
+  - id: Mizore_Greet_Patient
+    clip: {fileID: 8300000, guid: 79242494b814d4e5ead5137fd9c7b776, type: 3}
+  - id: Mizore_Greet_Pulse
+    clip: {fileID: 8300000, guid: aa25947e8d7c74be997097881493d641, type: 3}
+  - id: Mizore_Greet_Still
+    clip: {fileID: 8300000, guid: 9b3055d6f5b95401295beb9517e08fa0, type: 3}
+  - id: Mizore_Greet_Thanks
+    clip: {fileID: 8300000, guid: 1812e7866f9f14bb3bc93b3aaf6ffa73, type: 3}
+  - id: Mizore_Meet_Collarbone
+    clip: {fileID: 8300000, guid: 41b2cacee1e2d4885aae89b9b0ecff5b, type: 3}
   - id: Mizore_Meet_Collarbone_2
     clip: {fileID: 8300000, guid: ae56e5909213d4a9f93bade73b7f3d3c, type: 3}
+  - id: Mizore_Meet_Collarbone_3
+    clip: {fileID: 8300000, guid: 64896161feeb04dc88b50405dcad2db1, type: 3}
+  - id: Mizore_Meet_Oath
+    clip: {fileID: 8300000, guid: 7c72d222049b640cbaa511df5c8810ac, type: 3}
+  - id: Mizore_Meet_Oath_2
+    clip: {fileID: 8300000, guid: 7614dbacc3b7a4830a999f4397b11e1f, type: 3}
   - id: Mizore_Meet_Oath_3
     clip: {fileID: 8300000, guid: 4a8e4858cb9a2407d927c90c66fda534, type: 3}
+  - id: Mizore_Meet_Oath_4
+    clip: {fileID: 8300000, guid: a76105a1df8dd4bf1a2af2ac24c23b11, type: 3}
+  - id: Mizore_Meet_Prince
+    clip: {fileID: 8300000, guid: 3cd1ae9c4af4f4081a3795860c92d3af, type: 3}
+  - id: Mizore_Meet_Prince_2
+    clip: {fileID: 8300000, guid: 94a2617456d2d47318f10008b12bc93a, type: 3}
+  - id: Mizore_Meet_Prince_3
+    clip: {fileID: 8300000, guid: 64fa42d4901cc42f0a3ad6f701686c42, type: 3}
+  - id: Mizore_Meet_Smiths
+    clip: {fileID: 8300000, guid: 8f8be489abac443d689fcb419b32ad1d, type: 3}
+  - id: Mizore_Meet_Smiths_2
+    clip: {fileID: 8300000, guid: 2cdf8d77bd5e844578bbf9759dbffd3a, type: 3}
+  - id: Mizore_Meet_Smoke
+    clip: {fileID: 8300000, guid: dd6096e84c30b455e8879ebb4a245e8e, type: 3}
+  - id: Mizore_Meet_Smoke_2
+    clip: {fileID: 8300000, guid: f2a9551a3c04c410b92577940330f529, type: 3}
   - id: Mizore_Meet_Steady
     clip: {fileID: 8300000, guid: 9da81ab6b34ce4a10b4514d39b655280, type: 3}
+  - id: Mizore_Meet_Steady_2
+    clip: {fileID: 8300000, guid: 4ec29557c21ae46ecb002f791d3fe212, type: 3}
+  - id: Mizore_Meet_Steady_3
+    clip: {fileID: 8300000, guid: 9d66f05830d904351a13cb7ae09e1d01, type: 3}
+  - id: Mizore_Pickup_Cleared
+    clip: {fileID: 8300000, guid: 44c3d1c2f5e91470aa70fb9f9b54fdcc, type: 3}
+  - id: Mizore_Pickup_DiedArmy
+    clip: {fileID: 8300000, guid: 333cb8907a16946da9e83353d79326dc, type: 3}
+  - id: Mizore_Pickup_DiedBenibana
+    clip: {fileID: 8300000, guid: e0dbd2448c07540cd99a179b818a2b88, type: 3}
+  - id: Mizore_Pickup_DiedKagetsune
+    clip: {fileID: 8300000, guid: d714e1a430561410fb8e4db6867fba62, type: 3}
+  - id: Mizore_Pickup_DiedShirogane
+    clip: {fileID: 8300000, guid: 3e72f9c019d59468ead4313633d02890, type: 3}
+  - id: Mizore_Pickup_DiedUtsusemi
+    clip: {fileID: 8300000, guid: 3b271e861d3704cebb842d6b64a1ef14, type: 3}
+  - id: Mizore_Pickup_FirstClear
+    clip: {fileID: 8300000, guid: 42cbc7e5fd2be465cb10eeac3a7428c0, type: 3}
+  - id: Mizore_Pickup_FirstClear_2
+    clip: {fileID: 8300000, guid: fef8f82b19a8c4bddabd2d0da8756148, type: 3}
+  - id: Mizore_Pickup_HoldsFire
+    clip: {fileID: 8300000, guid: bad2f0421ae7b4b1ca0a87de2e576712, type: 3}
+  - id: Mizore_Pickup_HoldsStorm
+    clip: {fileID: 8300000, guid: 184a2b26d4f204c838215633fdeba635, type: 3}
+  - id: Mizore_Pickup_LowLives
+    clip: {fileID: 8300000, guid: 9e5dfae286de94aeba4fdf0a3046366b, type: 3}
+  - id: Mizore_Pickup_ManyRuns
+    clip: {fileID: 8300000, guid: 494d8d1119bd74590a7b66e2c23f4c3c, type: 3}
+  - id: Mizore_Pickup_Offering
+    clip: {fileID: 8300000, guid: f4b1ac7f370844097888fe0e12a1b704, type: 3}
+  - id: Mizore_Pickup_VeryManyRuns
+    clip: {fileID: 8300000, guid: 005df495e609b44d0b1ecb3d9397cf5b, type: 3}
   - id: Oni_Hub_First
     clip: {fileID: 8300000, guid: 47e965644a7aa47dba1fa577fe327ac8, type: 3}
   - id: Oni_Hub_Hat

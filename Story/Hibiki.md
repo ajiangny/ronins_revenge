@@ -72,6 +72,9 @@ will make him sit still. It always ends with her giving him the boon anyway.
 
 ## Voice
 
+**In game:** voiced in ElevenLabs (`HIBIKI` in `Tools/generate-voice.mjs`), designed from the prompt above. Every
+`SoulPickup` line is voiced; the souls share a faint coffin echo (`GameManager.soulVoice`).
+
 **ElevenLabs voice design prompt:** "A girl of about seventeen with a bright, quick, slightly breathless voice and
 a warm country lilt, no accent. Talks fast, laughs easily, teases. When she turns serious her voice drops and
 catches a little. Energetic and youthful but not babyish or cutesy."

@@ -91,8 +91,8 @@ The same conversation plays whichever soul offers the Duo. Each line's speaker s
 **Built so far:** each soul's `SoulPickup` tables (first meetings, reactions, greetings) are in `Dialogue.cs` and play as
 a talk scene (`DialogueScene`) before the first boon screen of that soul in a run, with the soul's painting
 (`Portraits/<Soul>_Closeup.png`, `_Full.png`) at the left and Oni at the right. `runsSince self ≥ n` became the
-conversation's `Cooldown`, "play once" a Reactive that never comes back. Not yet: `SoulJealous`, `Duo`,
-`Legendary`, `BossAhead`, `BossFelled`, `HubReturn`, the freed beats and the souls' voices. The suggestions below
+conversation's `Cooldown`, "play once" a Reactive that never comes back. Their lines are voiced. Not yet: `SoulJealous`,
+`Duo`, `Legendary`, `BossAhead`, `BossFelled`, `HubReturn` and the freed beats. The suggestions below
 still stand for those.
 
 Everything below is a suggestion for the dialogue system being built in parallel; field names follow
@@ -203,12 +203,12 @@ the art brief. They should match each other: same framing, the bound chain runni
   `Ninja/Apply Voice Lines` gathers them and logs which written lines still have no clip.
 - **Oni's lines are voiced** under their own `n` (`Akagane_Meet_Copper_3` is his "...I did."); the souls' own lines skip those numbers (don't renumber), so adding their voices later
   doesn't rename anything.
-- **Voices to design** (ElevenLabs Voice Design, prompts in each file's **Voice** section): `AKAGANE`, `MIZORE`,
-  `HIBIKI`. Add their ids as constants beside `BENIBANA`… in `Tools/generate-voice.mjs`.
+- **Voices, designed:** `AKAGANE`, `MIZORE`, `HIBIKI` in `Tools/generate-voice.mjs` (Akagane's made angrier, with a
+  Japanese accent). Every `SoulPickup` line is voiced; Duo, Legendary and the other events still need theirs.
 - **Lines:** add `LINES` entries in the existing form, with bracketed delivery tags:
   `Akagane_Meet_Angry_2: [AKAGANE, "[dry, gruff] Angry. Yes. That's the word for it. [low] Hello, Guardsman."]`.
   Duo lines take the speaking soul's voice per line. Then `npm run voice -- <names>` from `Tools/`.
-- **Tuning** (like `GameManager.TuneVoice`): the souls are half in the coffin, so a faint version of Kagetsune's
+- **Tuning, built** as `GameManager.soulVoice`: the souls are half in the coffin, so a faint version of Kagetsune's
   choir: a light, slow chorus and a short hall echo, softer than his, the same for all three so they read as one
   family.
 - Total: about 45 conversations per soul plus 9 Duos, roughly 330 clips. Story and Duo lines first; repeatables

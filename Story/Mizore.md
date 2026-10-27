@@ -73,6 +73,9 @@ that Fire is a patient refusing to rest. She doesn't compete; she just waits for
 
 ## Voice
 
+**In game:** voiced in ElevenLabs (`MIZORE` in `Tools/generate-voice.mjs`), designed from the prompt above. Every
+`SoulPickup` line is voiced; the souls share a faint coffin echo (`GameManager.soulVoice`).
+
 **ElevenLabs voice design prompt:** "An elderly woman of about seventy with a low, dry, unhurried voice and a slight
 rasp. No accent, very clear diction. Precise and clinical, like a doctor giving a diagnosis; she never raises her
 voice. Under the coldness, a reluctant warmth. Quiet and close, as if speaking at a bedside."

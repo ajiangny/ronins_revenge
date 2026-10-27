@@ -71,6 +71,9 @@ insult to the vanguard. Of Mizore, less: he thinks cold is for people who've giv
 
 ## Voice
 
+**In game:** voiced in ElevenLabs (`AKAGANE` in `Tools/generate-voice.mjs`), a Japanese samurai captain in his mid-forties with a strong Japanese accent: a gravelly, harsh, battle-worn baritone, angry and seething, clipped commands (the prompt above, made angrier and accented at the user's request). Every
+`SoulPickup` line is voiced; the souls share a faint coffin echo (`GameManager.soulVoice`).
+
 **ElevenLabs voice design prompt:** "A man in his mid-forties with a gravelly, weathered baritone and a
 parade-ground bark. No accent, clear diction. Clipped, impatient sentences with heat simmering under every word:
 a soldier's anger kept on a short leash. Occasional dry, grudging humour. Close and warm, as if speaking across a
@@ -83,7 +86,7 @@ goes quiet (`Akagane_Meet_Doors`) should land.
 ## Lines
 
 Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). Every conversation's lines play in order;
-Oni's lines are voiced (`Tools/generate-voice.mjs`); Akagane's are subtitles until he has a voice.
+Both Oni's and Akagane's lines are voiced (`Tools/generate-voice.mjs`).
 
 ### `SoulPickup`: first meeting (Story, play once, one per run)
 

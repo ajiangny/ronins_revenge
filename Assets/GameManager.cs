@@ -417,7 +417,10 @@ public class GameManager : MonoBehaviour
     int embersThisRun;
     // Second Dawn and Fate's Thread work once a run.
     bool dawnUsed;
-    bool redrawUsed;
+    // Fate's Thread redraws and Banishing Bell banishes left this run, and the boons banished.
+    int redrawsLeft;
+    int banishesLeft;
+    readonly HashSet<BoonId> banished = new HashSet<BoonId>();
     MenuUI menu;
 
     RoninLoadout loadout;
@@ -825,8 +828,10 @@ public class GameManager : MonoBehaviour
         string muted = MenuUI.MutedHex(paper);
         string ember = paper ? "1E8C7E" : ColorUtility.ToHtmlStringRGB(OniColour);
         var items = new List<MenuUI.Item>();
+        Upgrades.RefundRetired();
         foreach (Song song in Upgrades.All)
         {
+            if (song.Retired) continue;
             UpgradeId id = song.Id;
             int row = items.Count;
             int bought = Upgrades.Bought(id);
@@ -1387,11 +1392,15 @@ public class GameManager : MonoBehaviour
 
     void StartGame()
     {
+        Upgrades.RefundRetired();
         ronin.LearnSongs();
         ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
         lives = maxLives = Mathf.Min(startingLives + Upgrades.Rank(UpgradeId.IronWill), Boons.MaxLives);
         embersThisRun = 0;
-        dawnUsed = redrawUsed = false;
+        dawnUsed = false;
+        redrawsLeft = Upgrades.Rank(UpgradeId.FatesThread);
+        banishesLeft = Upgrades.Rank(UpgradeId.BanishingBell);
+        banished.Clear();
         metThisRun.Clear();
         score = 0;
         highScoreAtStart = highScore;
@@ -1742,7 +1751,7 @@ public class GameManager : MonoBehaviour
     // offers a Spirit Offering instead. False (and nothing shown) only when nothing could be drawn.
     bool OfferBoons(Element element, System.Action afterPick, bool ensureCapstone = false, Rarity minRarity = Rarity.Common)
     {
-        var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity);
+        var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
         if (offers.Count == 0) return false;
 
         // The first screen of each soul in a run opens with that soul talking to Oni, as Hades' gods do.
@@ -1778,19 +1787,31 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             afterPick();
         });
-        // Fate's Thread: one redraw a run. The new cards replace these in the same list, so the pick reads them.
-        if (!redrawUsed && Upgrades.Rank(UpgradeId.FatesThread) > 0)
+        // Fate's Thread and Banishing Bell. The new cards replace these in the same list, so the pick reads them.
+        List<BoonOffer> Refill()
         {
-            boonChoice.OfferRedraw(() =>
+            var fresh = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
+            if (fresh.Count == 0) return null;
+            offers.Clear();
+            offers.AddRange(fresh);
+            OfferRerolls();
+            return offers;
+        }
+        void OfferRerolls()
+        {
+            if (redrawsLeft > 0) boonChoice.OfferRedraw(() =>
             {
-                redrawUsed = true;
-                var fresh = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity);
-                if (fresh.Count == 0) return null;
-                offers.Clear();
-                offers.AddRange(fresh);
-                return offers;
+                redrawsLeft--;
+                return Refill();
+            });
+            if (banishesLeft > 0) boonChoice.OfferBanish(selected =>
+            {
+                banishesLeft--;
+                banished.Add(offers[selected].Boon.Id);
+                return Refill();
             });
         }
+        OfferRerolls();
     }
 
     // The soul who catches each element's dead and hands them to Oni (Story/Souls.md).
@@ -1951,7 +1972,9 @@ public class GameManager : MonoBehaviour
                 Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(pendingElement).Color, 1.4f);
                 Sfx.Play(Sfx.SoulCollect);
                 soulCaught = true;
-                if (OfferBoons(pendingElement, () => picked = true)) yield return new WaitUntil(() => picked);
+                // Ancestral Lore: each stage's first soul is Rare or better.
+                Rarity floor = roundIndex == 0 && Upgrades.Rank(UpgradeId.AncestralLore) > 0 ? Rarity.Rare : Rarity.Common;
+                if (OfferBoons(pendingElement, () => picked = true, false, floor)) yield return new WaitUntil(() => picked);
                 break;
             case PortalReward.Bead:
                 if (OfferBead(() => picked = true)) yield return new WaitUntil(() => picked);
@@ -2079,7 +2102,9 @@ public class GameManager : MonoBehaviour
         if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PortalReward.Scroll, 5f));
 
         var picks = new List<(PortalReward, Element)>();
-        while (picks.Count < portalChoices && weights.Count > 0)
+        // Third Path opens one more.
+        int choices = portalChoices + Upgrades.Rank(UpgradeId.ThirdPath);
+        while (picks.Count < choices && weights.Count > 0)
         {
             float total = 0f;
             foreach (var entry in weights) total += entry.weight;
@@ -2161,10 +2186,17 @@ public class GameManager : MonoBehaviour
     }
 
     // A fallen boss also leaves a Spirit Bead, so the stage's reward raises the build as well as widening it.
+    // Pond's Blessing adds a second after the first boss.
     void BeadThenNextStage()
     {
         state = State.Transition;
-        if (!OfferBead(NextStage)) NextStage();
+        bool blessed = stageIndex == 0 && Upgrades.Rank(UpgradeId.PondsBlessing) > 0;
+        System.Action then = blessed ? () =>
+        {
+            state = State.Transition;
+            if (!OfferBead(NextStage)) NextStage();
+        } : NextStage;
+        if (!OfferBead(then)) then();
     }
 
     // The music cuts out, smoke rolls in across the top of the screen, and the stage's warlord descends.

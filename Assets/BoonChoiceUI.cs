@@ -86,6 +86,8 @@ public class BoonChoiceUI : MonoBehaviour
     Action<int> chosen;
     // Fate's Thread: draws a fresh set of offers, once.
     Func<List<BoonOffer>> redraw;
+    // Banishing Bell: takes the selected card's boon out of the run and returns the fresh cards.
+    Func<int, List<BoonOffer>> banish;
     TextMeshProUGUI hint;
     Color elementColor;
     int selected;
@@ -142,6 +144,7 @@ public class BoonChoiceUI : MonoBehaviour
         offers = boonOffers;
         chosen = onChosen;
         redraw = null;
+        banish = null;
         hint.text = Hints;
         elementColor = colour;
         selected = heardSelection = 0;
@@ -190,18 +193,46 @@ public class BoonChoiceUI : MonoBehaviour
 
     static string Hints => $"{MenuUI.KeyCap("1 2 3", false)}  Quick pick       {MenuUI.KeyCap("↑ ↓", false)}  Select       {MenuUI.KeyCap("Enter", false)}  Choose";
 
-    // Offers one redraw of this screen's cards (R), for the Fate's Thread song.
+    // Offers a redraw of this screen's cards (R), for the Fate's Thread song. The callback may offer another.
     public void OfferRedraw(Func<List<BoonOffer>> draw)
     {
         redraw = draw;
-        hint.text = Hints + $"       {MenuUI.KeyCap("R", false)}  Redraw";
+        UpdateHints();
+    }
+
+    // Offers to banish the selected card's boon for the rest of the run (B), for the Banishing Bell song.
+    public void OfferBanish(Func<int, List<BoonOffer>> banishSelected)
+    {
+        banish = banishSelected;
+        UpdateHints();
+    }
+
+    void UpdateHints()
+    {
+        hint.text = Hints;
+        if (redraw != null) hint.text += $"       {MenuUI.KeyCap("R", false)}  Redraw";
+        if (banish != null) hint.text += $"       {MenuUI.KeyCap("B", false)}  Banish";
     }
 
     void Redraw()
     {
-        List<BoonOffer> fresh = redraw();
+        Func<List<BoonOffer>> draw = redraw;
         redraw = null;
-        hint.text = Hints;
+        UpdateHints();
+        Replace(draw());
+    }
+
+    void Banish()
+    {
+        Func<int, List<BoonOffer>> banishSelected = banish;
+        banish = null;
+        UpdateHints();
+        Replace(banishSelected(selected));
+    }
+
+    // Fresh cards in place of the shown ones.
+    void Replace(List<BoonOffer> fresh)
+    {
         if (fresh == null || fresh.Count == 0) return;
         offers = fresh;
         selected = heardSelection = 0;
@@ -292,6 +323,11 @@ public class BoonChoiceUI : MonoBehaviour
             if (keyboard.rKey.wasPressedThisFrame && redraw != null)
             {
                 Redraw();
+                return;
+            }
+            if (keyboard.bKey.wasPressedThisFrame && banish != null)
+            {
+                Banish();
                 return;
             }
             if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)

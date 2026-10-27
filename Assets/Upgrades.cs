@@ -2,8 +2,14 @@ using System;
 using UnityEngine;
 
 // The Flute Songs: what Oni buys on the hill with Soul Embers between runs (ECONOMY.md). A fresh save plays exactly
-// as the game is tuned; every song only adds on top of the scene's values, and stays small next to the boons.
-public enum UpgradeId { KeenEye, SwiftFeet, QuickDraw, SpiritShuriken, SteadyBreath, LongShadow, SoulPull, IronWill, FatesThread, SecondDawn }
+// as the game is tuned; every song only adds on top of the scene's values. The stat songs stay small next to the
+// boons; the later ones give control over a run's rewards (more portals, redraws, banishes, beads) instead of power.
+// Saves index ranks by this enum, so new songs go on the end and a retired one keeps its place.
+public enum UpgradeId
+{
+    KeenEye, SwiftFeet, QuickDraw, SpiritShuriken, SteadyBreath, LongShadow, SoulPull, IronWill, FatesThread, SecondDawn,
+    ThirdPath, BanishingBell, PondsBlessing, AncestralLore,
+}
 
 public sealed class Song
 {
@@ -13,6 +19,8 @@ public sealed class Song
     public int BaseCost;
     // What the song does at a rank, for the shop's note line.
     public Func<int, string> Effect;
+    // No longer sold; ranks bought before are refunded (Soul Pull, once souls stopped dropping from kills).
+    public bool Retired;
 }
 
 public static class Upgrades
@@ -29,8 +37,6 @@ public static class Upgrades
     public const float ShurikenCutPerRank = 0.5f;
     public const float MissCutPerRank = 0.25f;
     public const float InvulnerablePerRank = 0.5f;
-    public const float SoulChancePerRank = 0.01f;
-    public const int SoulPityPerRank = 1;
     // Second Dawn raises him with this many lives.
     public const int DawnLives = 2;
 
@@ -48,14 +54,22 @@ public static class Upgrades
             Effect = r => $"Missed parry cooldown  -{r * MissCutPerRank:0.00} s" },
         new Song { Id = UpgradeId.LongShadow, Name = "Long Shadow", MaxRank = 1, BaseCost = 120,
             Effect = r => $"Untouchable after a hit  +{r * InvulnerablePerRank:0.0} s" },
-        new Song { Id = UpgradeId.SoulPull, Name = "Soul Pull", MaxRank = 2, BaseCost = 100,
-            Effect = r => $"Soul drop chance  +{r}%, a sure soul {r * SoulPityPerRank} kill{(r == 1 ? "" : "s")} sooner" },
+        new Song { Id = UpgradeId.SoulPull, Name = "Soul Pull", MaxRank = 2, BaseCost = 100, Retired = true,
+            Effect = r => "Souls now come from the portals" },
         new Song { Id = UpgradeId.IronWill, Name = "Iron Will", MaxRank = 1, BaseCost = 600,
             Effect = r => $"Start each run with  +{r} life" },
-        new Song { Id = UpgradeId.FatesThread, Name = "Fate's Thread", MaxRank = 1, BaseCost = 1000,
-            Effect = r => r > 0 ? "Redraw one boon offer a run  (R)" : "Redraw one boon offer a run" },
+        new Song { Id = UpgradeId.FatesThread, Name = "Fate's Thread", MaxRank = 3, BaseCost = 300,
+            Effect = r => $"Redraw a boon offer  {r} time{(r == 1 ? "" : "s")} a run  (R)" },
         new Song { Id = UpgradeId.SecondDawn, Name = "Second Dawn", MaxRank = 1, BaseCost = 1200,
             Effect = r => $"Once a run, rise again with {DawnLives} lives" },
+        new Song { Id = UpgradeId.ThirdPath, Name = "Third Path", MaxRank = 1, BaseCost = 400,
+            Effect = r => "Three portals open after each round, not two" },
+        new Song { Id = UpgradeId.BanishingBell, Name = "Banishing Bell", MaxRank = 2, BaseCost = 350,
+            Effect = r => $"Banish a boon from the run  {r} time{(r == 1 ? "" : "s")} a run  (B)" },
+        new Song { Id = UpgradeId.PondsBlessing, Name = "Pond's Blessing", MaxRank = 1, BaseCost = 500,
+            Effect = r => "A second Spirit Bead after the first boss" },
+        new Song { Id = UpgradeId.AncestralLore, Name = "Ancestral Lore", MaxRank = 1, BaseCost = 600,
+            Effect = r => "Each stage's first soul offers Rare or better" },
     };
 
     public static Song Get(UpgradeId id) => All[(int)id];
@@ -142,4 +156,20 @@ public static class Upgrades
     }
 
     public static void AddEmbers(int embers) => Save.Data.embers += embers;
+
+    // A retired song's ranks come back as embers at their base price, and stop counting toward the surcharge.
+    public static void RefundRetired()
+    {
+        bool changed = false;
+        foreach (Song song in All)
+        {
+            int bought = Ranks[(int)song.Id];
+            if (!song.Retired || bought == 0) continue;
+            for (int r = 0; r < bought; r++) Save.Data.embers += song.BaseCost * (r + 1);
+            Ranks[(int)song.Id] = 0;
+            Save.Data.songsOff.Remove((int)song.Id);
+            changed = true;
+        }
+        if (changed) Save.Write();
+    }
 }

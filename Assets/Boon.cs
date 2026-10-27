@@ -324,13 +324,14 @@ public static class Boons
     // Up to count distinct boons of one element. Like Hades, the first boon of a run is always a core slot boon.
     // ensureCapstone puts an eligible Duo or Legendary in the offer (the stage boon), and no card rolls below minRarity.
     public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int maxLives,
-        bool ensureCapstone = false, Rarity minRarity = Rarity.Common)
+        bool ensureCapstone = false, Rarity minRarity = Rarity.Common, ICollection<BoonId> banished = null)
     {
         var pool = new List<BoonDefinition>();
         var capstones = new List<BoonDefinition>();
         foreach (BoonDefinition boon in All)
         {
             if (boon.Kind == BoonKind.Art || !boon.Offers(element)) continue;
+            if (banished != null && banished.Contains(boon.Id)) continue;
             if (boon.IsCapstone)
             {
                 if (loadout.Find(boon.Id) == null && boon.Requires(loadout)) capstones.Add(boon);

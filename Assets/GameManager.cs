@@ -703,6 +703,13 @@ public class GameManager : MonoBehaviour
             SetGodMode(!godMode);
             ShowDevMenu(back, godModeRow);
         }));
+        // Forgets every run, line heard and song bought, so the game plays as on a first boot.
+        int resetRow = items.Count;
+        items.Add(MenuUI.Item.Button(Save.Data.runsStarted > 0 ? $"RESET SAVE  ({Save.Data.runsStarted} RUNS)" : "RESET SAVE  (FRESH)", () =>
+        {
+            Save.Reset();
+            ShowDevMenu(back, resetRow);
+        }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
         menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll</color></size>",
@@ -842,6 +849,7 @@ public class GameManager : MonoBehaviour
         roundIndex = 0;
         killsSinceSoul = 0;
         ResetLoadout();
+        Save.BeginRun();
         ui.SetLives(lives, maxLives);
         ui.SetScore(score);
         if (devJumpStage >= 0)
@@ -1719,6 +1727,7 @@ public class GameManager : MonoBehaviour
         // Cleared only after a frame: this can run inside the boss's own hit handling, with boon effects still
         // working through the blow that felled her. Each boss's fall takes its own time (Shirogane's is a scene).
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
+        Save.BossFelled(Stage.boss);
         // The Emperor is the end: no boon, the dawn.
         if (Stage.boss == BossKind.Kagetsune && stageIndex == stages.Length - 1)
         {
@@ -1804,7 +1813,7 @@ public class GameManager : MonoBehaviour
         ui.HideBanner();
         yield return new WaitForSeconds(1f);
         EndGame("DAWN", "Kagetsune has fallen and his bells are silent. The sun rises over the hill,\nand Oni plays the flute one last time, with Shirogane beside him.",
-            new Color(1f, 0.72f, 0.45f), Sfx.VictorySting);
+            new Color(1f, 0.72f, 0.45f), Sfx.VictorySting, true);
     }
 
     // Her silver, as herself rather than the Emperor's teal.
@@ -1864,7 +1873,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f), Sfx.VictorySting);
+            EndGame("VICTORY", "Every samurai army has fallen. The temple is safe.", new Color(0.4f, 1f, 0.5f), Sfx.VictorySting, true);
         }
     }
 
@@ -1911,7 +1920,7 @@ public class GameManager : MonoBehaviour
         }
         CameraShake.Add(0.6f);
         ronin.Explode();
-        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
+        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false);
     }
 
     void OnRoninHit()
@@ -1930,13 +1939,16 @@ public class GameManager : MonoBehaviour
                 OnBossSpoke(emperor, BossLine.KilledOni);
                 message = $"\"{emperor.Line(BossLine.KilledOni)}\"";
             }
-            EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting);
+            EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false, activeBoss != null ? Stage.boss : BossKind.None);
         }
     }
 
-    void EndGame(string title, string message, Color color, string sting)
+    // A run that ends in a clear or a death is remembered for the next one; the killer is the boss he fell to, or
+    // None for the army.
+    void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None)
     {
         state = State.GameOver;
+        Save.EndRun(cleared, killer);
         if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);
         Sfx.Play(sting);

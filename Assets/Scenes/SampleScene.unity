@@ -543,6 +543,7 @@ MonoBehaviour:
     portrait: {fileID: 21300000, guid: 40c38b58b0f684bb982f86cf29593207, type: 3}
   fxLibrary: {fileID: 11400000, guid: bd9d599437bb141c490c7f26310fb69e, type: 2}
   sfxLibrary: {fileID: 11400000, guid: cb5383d442ce84581adff5a6908ff42b, type: 2}
+  voiceLibrary: {fileID: 11400000, guid: c2bba46e69e0041d8ba653c9481056e6, type: 2}
   parryHitStop: 0.06
   auraLift: 0.3
   benibanaArt: {fileID: 11400000, guid: af4aa1df3782443738ea1a5b4e5dcece, type: 2}

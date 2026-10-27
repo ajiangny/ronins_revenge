@@ -214,9 +214,15 @@ public class GameUI : MonoBehaviour
         bossHealth = Mathf.Clamp01(fraction);
     }
 
-    // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour.
-    public void ShowSubtitle(string speaker, string text, Color colour, float seconds)
+    // A spoken line shown along the bottom of the screen for `seconds`, with the speaker named in their colour. Given
+    // `beside`, the plate's bottom-left corner sits at that point from the screen's bottom-left instead, next to
+    // whoever is talking (Oni on the title hill).
+    public void ShowSubtitle(string speaker, string text, Color colour, float seconds, Vector2? beside = null)
     {
+        Vector2 anchor = beside.HasValue ? Vector2.zero : new Vector2(0.5f, 0f);
+        subtitlePlate.anchorMin = subtitlePlate.anchorMax = anchor;
+        subtitlePlate.pivot = anchor;
+        subtitlePlate.anchoredPosition = beside ?? new Vector2(0, 150);
         subtitleSpeaker.text = speaker != null ? speaker.ToUpperInvariant() : "";
         subtitleSpeaker.color = Color.Lerp(colour, Color.white, 0.25f);
         subtitle.text = text;
@@ -227,6 +233,8 @@ public class GameUI : MonoBehaviour
         subtitlePlate.sizeDelta = size;
         subtitle.rectTransform.sizeDelta = size;
         subtitleUntil = Time.unscaledTime + seconds;
+        // Over any menu page too: Oni speaks on the title hill.
+        subtitlePlate.SetAsLastSibling();
         subtitlePlate.gameObject.SetActive(true);
     }
 
@@ -309,7 +317,8 @@ public class GameUI : MonoBehaviour
 
         const float cardAt = 1.6f;
         const float crossFade = 0.35f;
-        float lineLength = line != null ? line.length : 3f;
+        // An unvoiced line (one written for the reactive dialogue but not recorded yet) stays up long enough to read.
+        float lineLength = line != null ? line.length : Mathf.Max(3f, (lineText ?? "").Length / 15f);
         float end = cardAt + Mathf.Max(lineLength + 0.6f, 2.6f);
         bool cut = false;
         for (float t = 0; t < end; t += Time.unscaledDeltaTime)

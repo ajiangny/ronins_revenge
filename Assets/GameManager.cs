@@ -98,6 +98,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] FxLibrary fxLibrary;
     [Tooltip("ElevenLabs sound effects and music; built by Ninja/Apply Audio. The game runs silent when it's empty.")]
     [SerializeField] SfxLibrary sfxLibrary;
+    [Tooltip("Every clip in Audio/Voice by name, for the reactive dialogue's lines; built by Ninja/Apply Voice Lines. Lines without a clip are subtitles only.")]
+    [SerializeField] VoiceLibrary voiceLibrary;
     [Tooltip("Real seconds the action freezes when a parry lands, for weight.")]
     [SerializeField] float parryHitStop = 0.06f;
     [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
@@ -497,7 +499,25 @@ public class GameManager : MonoBehaviour
             SetHudVisible(false);
             if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
             ShowTitleMenu();
+            StartCoroutine(HubReturn());
         }
+    }
+
+    // Where Oni's words sit on the title page: just right of him, above his row.
+    static readonly Vector2 HillSpeech = new Vector2(250f, 90f);
+
+    // Oni's teal, for the few words he says.
+    static readonly Color OniColour = new Color(0.45f, 1f, 0.9f);
+
+    // Back on the hill after a run, Oni sometimes says something before he takes up the flute again.
+    IEnumerator HubReturn()
+    {
+        if (!Save.Data.hubPending) yield break;
+        Save.Data.hubPending = false;
+        Conversation said = Dialogue.Pick("Oni", DialogueEvent.HubReturn, Dialogue.Context());
+        if (said == null || said.Lines.Length == 0) yield break;
+        yield return new WaitForSeconds(1.5f);
+        yield return PlayConversation(said, OniColour);
     }
 
     bool DevToolsOn => Debug.isDebugBuild || devToolsInRelease;
@@ -712,7 +732,7 @@ public class GameManager : MonoBehaviour
         }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
-        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll</color></size>",
+        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll  ·  F7 dialogue</color></size>",
             items.ToArray(), back, startIndex, paper: OnPaper, gridColumns: 2);
     }
 
@@ -782,6 +802,14 @@ public class GameManager : MonoBehaviour
     void DevHotkeys(Keyboard keyboard)
     {
         if (keyboard.f4Key.wasPressedThisFrame) SetGodMode(!godMode);
+        // What each speaker could say now, and why the rest can't play.
+        if (keyboard.f7Key.wasPressedThisFrame)
+        {
+            DialogueContext ctx = Dialogue.Context(loadout);
+            string boss = Stage.boss.ToString();
+            Debug.Log(Dialogue.Explain(boss, DialogueEvent.BossIntro, ctx) + Dialogue.Explain(boss, DialogueEvent.KilledOni, ctx)
+                + Dialogue.Explain("Oni", DialogueEvent.HubReturn, ctx));
+        }
         if (keyboard.f3Key.wasPressedThisFrame)
         {
             if (state == State.Title) ShowDevMenu(ShowTitleMenu);
@@ -1173,6 +1201,12 @@ public class GameManager : MonoBehaviour
     void TakeBoon(BoonOffer offer)
     {
         loadout.Take(offer);
+        // The first soul of each kind he ever takes, Oni remarks on.
+        if (offer.Boon.Kind is BoonKind.Normal or BoonKind.Duo or BoonKind.Legendary)
+        {
+            Conversation said = Dialogue.Pick("Oni", DialogueEvent.FirstElement, Dialogue.Context(loadout, offer.Boon.Element));
+            if (said != null && said.Lines.Length > 0) StartCoroutine(PlayConversation(said, OniColour));
+        }
         float value = offer.Boon.ValueAt(offer.Rarity);
         Color colour = offer.Boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(offer.Boon.Element).Color;
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
@@ -1379,11 +1413,22 @@ public class GameManager : MonoBehaviour
         CameraShake.Add(0.4f);
         Sfx.Play(Sfx.StageStart, 1f, 0.75f);
         BossVoice lines = VoiceFor(Stage.boss);
+        // What the boss says depends on every fight before this one; with nothing written it's its own intro line.
+        Conversation intro = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossIntro, Dialogue.Context(loadout));
+        string introText = activeBoss.Line(BossLine.Intro);
+        AudioClip introClip = lines.intro;
+        if (intro != null && intro.BuiltIn == null && intro.Lines.Length > 0)
+        {
+            introText = Dialogue.Fill(intro.Lines[0].Text, Dialogue.Context());
+            introClip = voiceLibrary != null ? voiceLibrary.Find(intro.VoiceId(0)) : null;
+        }
         if (lines.portrait != null && lines.closeup != null)
         {
             voice.volume = voiceVolume * Sfx.Volume;
             yield return ui.PlayBossIntro(lines.portrait, lines.closeup, lines.closeupHeight, lines.closeupFocus, lines.closeupAt,
-                activeBoss.Title, activeBoss.Epithet, activeBoss.Colour, voice, lines.intro, activeBoss.Line(BossLine.Intro));
+                activeBoss.Title, activeBoss.Epithet, activeBoss.Colour, voice, introClip, introText);
+            // Any answer after the first line plays before the fight.
+            if (intro != null && intro.BuiltIn == null) yield return PlayConversation(intro, activeBoss.Colour, 1);
         }
         else
         {
@@ -1819,6 +1864,19 @@ public class GameManager : MonoBehaviour
     // Her silver, as herself rather than the Emperor's teal.
     static readonly Color FreedColour = new Color(0.72f, 0.9f, 1f);
 
+    // A written conversation's lines from `from` on, each voiced when its clip is there, subtitled and waited out.
+    // Oni speaks in his teal, anyone else in `colour`.
+    IEnumerator PlayConversation(Conversation said, Color colour, int from = 0)
+    {
+        DialogueContext ctx = Dialogue.Context();
+        for (int i = from; i < said.Lines.Length; i++)
+        {
+            DialogueLine line = said.Lines[i];
+            AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(i)) : null;
+            yield return Say(line.Speaker, line.Speaker == "Oni" ? OniColour : colour, clip, Dialogue.Fill(line.Text, ctx));
+        }
+    }
+
     // A line spoken outside a fight (the ending): voiced when the clip is there, always subtitled, waited out.
     IEnumerator Say(string speaker, Color colour, AudioClip clip, string text)
     {
@@ -1829,9 +1887,12 @@ public class GameManager : MonoBehaviour
             voice.volume = voiceVolume * Sfx.Volume;
             voice.clip = clip;
             voice.Play();
+            // A conversation is never talked over: barks wait it out.
+            speakingFullLine = true;
             Music.Duck(0.3f, seconds + 0.3f);
         }
-        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f);
+        // On the title page Oni speaks from his corner, clear of the menu.
+        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, state == State.Title ? HillSpeech : null);
         yield return new WaitForSeconds(seconds + 0.5f);
     }
 
@@ -1932,12 +1993,18 @@ public class GameManager : MonoBehaviour
         if (lives <= 0)
         {
             ronin.Explode();
-            // The Emperor has the last word over him.
+            // The boss that killed him has the last word over him.
             string message = "The ronin has fallen.";
-            if (activeBoss is Kagetsune emperor)
+            Conversation last = activeBoss != null ? Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.KilledOni, Dialogue.Context(loadout)) : null;
+            if (last?.BuiltIn is BossLine line)
             {
-                OnBossSpoke(emperor, BossLine.KilledOni);
-                message = $"\"{emperor.Line(BossLine.KilledOni)}\"";
+                OnBossSpoke(activeBoss, line);
+                message = $"\"{activeBoss.Line(line)}\"";
+            }
+            else if (last != null && last.Lines.Length > 0)
+            {
+                StartCoroutine(PlayConversation(last, activeBoss.Colour));
+                message = $"\"{Dialogue.Fill(last.Lines[0].Text, Dialogue.Context())}\"";
             }
             EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false, activeBoss != null ? Stage.boss : BossKind.None);
         }

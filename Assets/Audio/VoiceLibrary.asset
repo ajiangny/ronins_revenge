@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f8dd48272b64496491fcd767f91f6f2, type: 3}
+  m_Name: VoiceLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::VoiceLibrary
+  clips:
+  - id: Benibana_Defeat
+    clip: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
+  - id: Benibana_Echo
+    clip: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
+  - id: Benibana_Hurt
+    clip: {fileID: 8300000, guid: 1bd50a4aa2c0848f6ba1ad9c7ff62879, type: 3}
+  - id: Benibana_Hurt_2
+    clip: {fileID: 8300000, guid: 57f295bc86d894353937206d1b38f318, type: 3}
+  - id: Benibana_Hurt_3
+    clip: {fileID: 8300000, guid: 07f6ee6cadf4c4a4b929d6e0ef855d57, type: 3}
+  - id: Benibana_Iaido
+    clip: {fileID: 8300000, guid: b5889d987020d4c2fbaac7f9346c8ae4, type: 3}
+  - id: Benibana_Iaido_2
+    clip: {fileID: 8300000, guid: f0e8ab66f4e894aaeb1fed3509d6acc0, type: 3}
+  - id: Benibana_Iaido_3
+    clip: {fileID: 8300000, guid: bc16137052dfb40179b20b75d8466dd0, type: 3}
+  - id: Benibana_Intro
+    clip: {fileID: 8300000, guid: 126d0f563be954d7fbaa233b87797292, type: 3}
+  - id: Benibana_Phase
+    clip: {fileID: 8300000, guid: 8973700f7b05041729a016aa2cb0fcf3, type: 3}
+  - id: Benibana_RosaryBloom
+    clip: {fileID: 8300000, guid: 7d16fea8e77ff44fc9ac0cefd825b8bc, type: 3}
+  - id: Benibana_RosaryBloom_2
+    clip: {fileID: 8300000, guid: ebc25f3c5a3d2449b9881479e7171899, type: 3}
+  - id: Benibana_RosaryBloom_3
+    clip: {fileID: 8300000, guid: 8393d91a88d704f50953f22bfabd2c16, type: 3}
+  - id: Benibana_RosaryLash
+    clip: {fileID: 8300000, guid: f84e195f87fe44a7fa5e5436c54c1346, type: 3}
+  - id: Benibana_RosaryLash_2
+    clip: {fileID: 8300000, guid: b031d7823bd2d4c298388b8307471bae, type: 3}
+  - id: Benibana_RosaryLash_3
+    clip: {fileID: 8300000, guid: c7b6deb3a89834713af0b93e2e08be5b, type: 3}
+  - id: Benibana_SmokeRings
+    clip: {fileID: 8300000, guid: da5f91080559c4ec7b86b356f8307e5b, type: 3}
+  - id: Benibana_SmokeRings_2
+    clip: {fileID: 8300000, guid: 27df9020781fe45978c2edc7e90fce01, type: 3}
+  - id: Benibana_SmokeRings_3
+    clip: {fileID: 8300000, guid: 8ba3cb12065ed4ae598f8f4cf7f12fe1, type: 3}
+  - id: Benibana_Stagger
+    clip: {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
+  - id: Benibana_Stagger_2
+    clip: {fileID: 8300000, guid: 5d7c70c1af1e04caa814b370ef56b944, type: 3}
+  - id: Kagetsune_Chains
+    clip: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
+  - id: Kagetsune_CofferSlam
+    clip: {fileID: 8300000, guid: 04daba481377b46ee82f53f953d8deee, type: 3}
+  - id: Kagetsune_Coffin
+    clip: {fileID: 8300000, guid: 421d015ce93eb4de0a494a6669e2d287, type: 3}
+  - id: Kagetsune_Defeat
+    clip: {fileID: 8300000, guid: 7c7729ed3106d4ac399850c0ea09ce24, type: 3}
+  - id: Kagetsune_Hurt
+    clip: {fileID: 8300000, guid: f0464b58c1a3b4156ade381d5d3b6721, type: 3}
+  - id: Kagetsune_Hurt_2
+    clip: {fileID: 8300000, guid: 17e6c1dcb93bd460c893b535d314a283, type: 3}
+  - id: Kagetsune_Hurt_3
+    clip: {fileID: 8300000, guid: baf8e8ac0b7ed4fef83a2f7840872abb, type: 3}
+  - id: Kagetsune_Intro
+    clip: {fileID: 8300000, guid: d44a6532e237143989c1ee837f03e220, type: 3}
+  - id: Kagetsune_KilledOni
+    clip: {fileID: 8300000, guid: 63feb2258bcd14c6a9a58519ad7debd8, type: 3}
+  - id: Kagetsune_LastToll
+    clip: {fileID: 8300000, guid: dd4d5de5cba9e4e5eafb6cf0c1563f86, type: 3}
+  - id: Kagetsune_Ofuda
+    clip: {fileID: 8300000, guid: 259391173c626452eb1bc4a3a78f4f51, type: 3}
+  - id: Kagetsune_Phase
+    clip: {fileID: 8300000, guid: 088e00b81f9894ced9b5e83f9a945974, type: 3}
+  - id: Kagetsune_Stagger
+    clip: {fileID: 8300000, guid: 2960e3ab4536f4a6abb738c58d84a42e, type: 3}
+  - id: Kagetsune_SummonBenibana
+    clip: {fileID: 8300000, guid: d0bb098dd01e544be94b7ad469a3bc42, type: 3}
+  - id: Kagetsune_SummonShirogane
+    clip: {fileID: 8300000, guid: 2d883306e8a4d404b898b598b033d566, type: 3}
+  - id: Kagetsune_SummonUtsusemi
+    clip: {fileID: 8300000, guid: 1ef58837b43fa4902afa6018eac2f72a, type: 3}
+  - id: Kagetsune_Swarm
+    clip: {fileID: 8300000, guid: e466dce6f30e24cd39af3dd2f3d0b2da, type: 3}
+  - id: Kagetsune_ThousandBells
+    clip: {fileID: 8300000, guid: 9627a09e2e2b84261ad521a0358b46f1, type: 3}
+  - id: Kagetsune_Toll
+    clip: {fileID: 8300000, guid: 66f2a3984740f46c8905e869dafedf6b, type: 3}
+  - id: Kagetsune_Wail
+    clip: {fileID: 8300000, guid: 6262f5c2e30024523952f52445162c8a, type: 3}
+  - id: Shirogane_BladeRain
+    clip: {fileID: 8300000, guid: ffe58a554e32747ed8a8c5fad0fd891e, type: 3}
+  - id: Shirogane_Crescent
+    clip: {fileID: 8300000, guid: 7316bb481dc204102984169df7973526, type: 3}
+  - id: Shirogane_Defeat
+    clip: {fileID: 8300000, guid: 5faa645c5f2644f3ca075d7bf787808f, type: 3}
+  - id: Shirogane_DefeatFinal
+    clip: {fileID: 8300000, guid: e88c86627e26c423a880234515dcb1d4, type: 3}
+  - id: Shirogane_Echo
+    clip: {fileID: 8300000, guid: 0447e34cfbda64b3694f9c19576c3253, type: 3}
+  - id: Shirogane_Eclipse
+    clip: {fileID: 8300000, guid: 74635955a71f441cfb3057b37c4bf616, type: 3}
+  - id: Shirogane_Farewell
+    clip: {fileID: 8300000, guid: 05b9c6b72c3504aaebef0312809d3ed5, type: 3}
+  - id: Shirogane_Freed
+    clip: {fileID: 8300000, guid: 5cf9a9098bf1d4752bebb46b13208cb0, type: 3}
+  - id: Shirogane_Hurt
+    clip: {fileID: 8300000, guid: 259c9bfe645a34460bfdc93f8a8ddc9e, type: 3}
+  - id: Shirogane_Hurt_2
+    clip: {fileID: 8300000, guid: b1acac455d56d49f7a06c0359bf14f8f, type: 3}
+  - id: Shirogane_Hurt_3
+    clip: {fileID: 8300000, guid: 4c3f7330c0ad7496b844bafe5898122b, type: 3}
+  - id: Shirogane_Intro
+    clip: {fileID: 8300000, guid: 22b201e05a7d94010905e09e68d3805c, type: 3}
+  - id: Shirogane_KuonEnraged
+    clip: {fileID: 8300000, guid: c356777aa34724943ad3ae5f9781a978, type: 3}
+  - id: Shirogane_Phase
+    clip: {fileID: 8300000, guid: c947dbeb9ed7d4dfca27248a7b0c11e2, type: 3}
+  - id: Shirogane_Stagger
+    clip: {fileID: 8300000, guid: 99e78cff73eda46709a81f8f60805ac8, type: 3}
+  - id: Utsusemi_Defeat
+    clip: {fileID: 8300000, guid: 02a75a57046f8430b9af9a2e168c71ef, type: 3}
+  - id: Utsusemi_Echo
+    clip: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}
+  - id: Utsusemi_HourStrikes
+    clip: {fileID: 8300000, guid: e836e6340eff74b7bbda0181caa34156, type: 3}
+  - id: Utsusemi_Hurt
+    clip: {fileID: 8300000, guid: e261d72157c784654adb568f6fb473cc, type: 3}
+  - id: Utsusemi_Hurt_2
+    clip: {fileID: 8300000, guid: 6f1bad16c944d45799b48a0c9e46942c, type: 3}
+  - id: Utsusemi_Hurt_3
+    clip: {fileID: 8300000, guid: 48e4f08bad8644e05af5b1fa47db8893, type: 3}
+  - id: Utsusemi_Intro
+    clip: {fileID: 8300000, guid: a56e622e912b24336a5dd663a2e52f19, type: 3}
+  - id: Utsusemi_Kasa
+    clip: {fileID: 8300000, guid: cc324ee4c78b8477fad210001b1c5295, type: 3}
+  - id: Utsusemi_Phase
+    clip: {fileID: 8300000, guid: 1b30d9fbdb3de4d1da819f848d500919, type: 3}
+  - id: Utsusemi_Stagger
+    clip: {fileID: 8300000, guid: d8e7c0de73f6e4d93a50192952104d62, type: 3}

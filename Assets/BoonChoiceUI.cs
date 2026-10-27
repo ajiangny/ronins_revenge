@@ -130,6 +130,13 @@ public class BoonChoiceUI : MonoBehaviour
             scroll != null ? new[] { scroll } : null, null, onChosen);
     }
 
+    // A Spirit Bead (Hades' Pom of Power): the held boons it could raise, each card showing the step up.
+    public void ShowBead(List<BoonOffer> upgrades, Action<int> onChosen)
+    {
+        Show("Spirit Bead", "a bead of the temple's prayer string, warm with old devotion.", Boons.BeadColor, upgrades,
+            null, null, onChosen);
+    }
+
     void Show(string heading, string tagline, Color colour, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)
     {
         offers = boonOffers;

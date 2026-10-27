@@ -30,6 +30,8 @@ public class GameManager : MonoBehaviour
     const string HighScoreKey = "HighScore";
     // A Spirit Offering taken at full health gives these points, times the stage number.
     const int OfferingPoints = 500;
+    // Embers a Spirit Bead gives per stage when every boon held is already Epic.
+    const int BeadEmbers = 20;
     static bool skipTitle;
     // The next scene load opens in the safe area instead of the title, after a death (he wakes in the pool) or a load.
     static bool intoSafeArea;
@@ -1567,6 +1569,31 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
     }
 
+    // A Spirit Bead raises one held boon a rarity, like Hades' Pom of Power. With nothing left to raise it's an ember
+    // cache instead, and false (nothing shown).
+    bool OfferBead(System.Action afterPick)
+    {
+        var offers = Boons.DrawBead(loadout, 3);
+        if (offers.Count == 0)
+        {
+            Earn(BeadEmbers * (stageIndex + 1));
+            return false;
+        }
+
+        state = State.Choosing;
+        ronin.ControlsEnabled = false;
+        Time.timeScale = 0f;
+        Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.BeadColor, 1.2f);
+        Sfx.Play(Sfx.SoulCollect, 1f, 1.15f);
+        boonChoice.ShowBead(offers, index =>
+        {
+            TakeBoon(offers[index]);
+            Time.timeScale = 1f;
+            afterPick();
+        });
+        return true;
+    }
+
     // The Sword Arts screen: up to three arts the ronin doesn't hold, like Daedalus's hammer in Hades.
     bool OfferArts(System.Action afterPick)
     {
@@ -1733,8 +1760,6 @@ public class GameManager : MonoBehaviour
                 int gained = Mathf.Min((int)value, Boons.MaxLives - maxLives);
                 maxLives += gained;
                 lives += gained;
-                // From Rare, the pond also mends every life already lost.
-                if (offer.Rarity >= Rarity.Rare) lives = maxLives;
                 ui.SetLives(lives, maxLives);
                 break;
             case BoonId.SpiritOffering:
@@ -1877,7 +1902,14 @@ public class GameManager : MonoBehaviour
         }
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
         Sfx.Play(Sfx.SoulCollect);
-        if (!OfferBoons(element, NextStage, true, Rarity.Rare)) NextStage();
+        if (!OfferBoons(element, BeadThenNextStage, true, Rarity.Rare)) BeadThenNextStage();
+    }
+
+    // A fallen boss also leaves a Spirit Bead, so the stage's reward raises the build as well as widening it.
+    void BeadThenNextStage()
+    {
+        state = State.Transition;
+        if (!OfferBead(NextStage)) NextStage();
     }
 
     // The music cuts out, smoke rolls in across the top of the screen, and the stage's warlord descends.

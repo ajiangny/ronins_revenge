@@ -26,6 +26,19 @@ public sealed class RoninLoadout
 
     public IReadOnlyList<EquippedBoon> Passives => passives;
 
+    // Every boon held, slots first.
+    public IEnumerable<EquippedBoon> Held
+    {
+        get
+        {
+            foreach (EquippedBoon held in slots)
+            {
+                if (held != null) yield return held;
+            }
+            foreach (EquippedBoon held in passives) yield return held;
+        }
+    }
+
     public EquippedBoon InSlot(BoonSlot slot) => slot == BoonSlot.Passive ? null : slots[(int)slot];
 
     public EquippedBoon Find(BoonId id)
@@ -47,11 +60,18 @@ public sealed class RoninLoadout
         return held != null;
     }
 
-    // Takes the offered boon: upgrades it if held, otherwise fills (or replaces) its slot or joins the passives.
+    // Takes the offered boon: raises it if it's a Bead's upgrade, otherwise fills (or replaces) its slot or joins the passives.
     public void Take(BoonOffer offer)
     {
         // An Offering is a heal, not a boon: it doesn't count toward the ronin's elements.
         if (offer.Boon.Kind == BoonKind.Offering) return;
+        // A Spirit Bead's raise is the same boon, so it doesn't count toward its element again.
+        if (offer.IsUpgrade)
+        {
+            EquippedBoon raised = Find(offer.Boon.Id);
+            if (raised != null) raised.Rarity = offer.Rarity;
+            return;
+        }
         // A Sword Art sits with the passives on the HUD but belongs to no element, so it doesn't steer souls.
         if (offer.Boon.Kind == BoonKind.Art)
         {

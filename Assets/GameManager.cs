@@ -683,16 +683,19 @@ public class GameManager : MonoBehaviour
     }
 
     // Testing tools, only in the Editor and development builds: start any stage's first round or boss fight
-    // directly, and toggle god mode.
+    // directly, and toggle god mode. A column per stage would run off the bottom of the screen, so it's a grid:
+    // one row per stage, its first round on the left and its boss on the right.
     void ShowDevMenu(System.Action back, int startIndex = 0)
     {
         var items = new List<MenuUI.Item>();
         for (int i = 0; i < stages.Length; i++)
         {
             int stage = i;
-            items.Add(MenuUI.Item.Button($"STAGE {i + 1}  ·  ROUND 1", () => DevJump(stage, false)));
-            if (stages[i].boss != BossKind.None)
-                items.Add(MenuUI.Item.Button($"STAGE {i + 1}  ·  {stages[i].boss.ToString().ToUpper()}", () => DevJump(stage, true)));
+            items.Add(MenuUI.Item.Button($"STAGE {Roman(i + 1)}  ·  ROUND 1", () => DevJump(stage, false)));
+            // A stage without a boss jumps to its last round instead, so every row keeps two cells.
+            items.Add(stages[i].boss != BossKind.None
+                ? MenuUI.Item.Button($"STAGE {Roman(i + 1)}  ·  {stages[i].boss.ToString().ToUpper()}", () => DevJump(stage, true))
+                : MenuUI.Item.Button($"STAGE {Roman(i + 1)}  ·  LAST ROUND", () => DevJump(stage, true)));
         }
         int godModeRow = items.Count;
         items.Add(MenuUI.Item.Button($"GOD MODE  {(godMode ? "ON" : "OFF")}", () =>
@@ -703,7 +706,7 @@ public class GameManager : MonoBehaviour
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
         menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll</color></size>",
-            items.ToArray(), back, startIndex, paper: OnPaper);
+            items.ToArray(), back, startIndex, paper: OnPaper, gridColumns: 2);
     }
 
     // A jump restarts the run from a clean scene, then StartGame drops it into the chosen fight.

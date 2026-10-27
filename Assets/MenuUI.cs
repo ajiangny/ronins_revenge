@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
-// A full-screen menu page: a title, an optional block of text, and a vertical list of buttons and sliders.
+// A full-screen menu page: a title, an optional block of text, and a vertical list (or a grid) of buttons and sliders.
 // Used for pause, settings, controls and game over; the title screen has its own light layout (ShowTitle). Keyboard, mouse and gamepad all drive it,
 // and it runs on unscaled time so it works while the game is paused.
 public class MenuUI : MonoBehaviour
@@ -28,6 +28,9 @@ public class MenuUI : MonoBehaviour
     const float InputDelay = 0.2f;
     const float RowHeight = 84f;
     const float RowWidth = 760f;
+    // Grid pages (more rows than fit in a column) use narrower cells side by side.
+    const float GridCellWidth = 620f;
+    const float GridGap = 70f;
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
     static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
@@ -83,6 +86,7 @@ public class MenuUI : MonoBehaviour
     // itself fades to show the field.
     bool leaving;
     float leftAt;
+    int columns = 1;
     int selected;
     int heardSelection;
     float shownAt;
@@ -97,11 +101,12 @@ public class MenuUI : MonoBehaviour
 
     // Opens a page, replacing whatever page was showing. `back` runs on Esc / gamepad B; null means Esc does nothing.
     // The title is white (ink on paper) unless given a colour. A `paper` page sits on the title screen's white page
-    // instead of over the dimmed game.
+    // instead of over the dimmed game. With more than one column the items fill a grid row by row.
     public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default,
-        bool paper = false)
+        bool paper = false, int gridColumns = 1)
     {
         items = pageItems;
+        columns = Mathf.Max(1, gridColumns);
         back = onBack;
         SetLight(false);
         SetPaper(paper);
@@ -113,7 +118,7 @@ public class MenuUI : MonoBehaviour
         titleText.fontSize = 96;
         bodyText.text = body ?? "";
         bodyText.gameObject.SetActive(!string.IsNullOrEmpty(body));
-        hintText.text = Hint("↑ ↓", "Select")
+        hintText.text = Hint(columns > 1 ? "↑ ↓ ← →" : "↑ ↓", "Select")
             + (Array.Exists(items, item => item.IsSlider) ? Hint("← →", "Adjust") : "")
             + Hint("Enter", "Confirm")
             + (onBack != null ? Hint("Esc", "Back") : "");
@@ -121,7 +126,7 @@ public class MenuUI : MonoBehaviour
         // Stack title, body and rows down from the top, then centre the whole block on screen.
         const float titleHeight = 150f;
         float bodyHeight = bodyText.gameObject.activeSelf ? bodyText.GetPreferredValues(bodyText.text, 1200f, 0f).y : 0f;
-        float rowsHeight = items.Length * RowHeight;
+        float rowsHeight = GridRows * RowHeight;
         float gap = 36f;
         float total = titleHeight + (bodyHeight > 0f ? bodyHeight + gap : 0f) + gap + rowsHeight;
         float y = total / 2f + 30f;
@@ -152,6 +157,7 @@ public class MenuUI : MonoBehaviour
     public void ShowTitle(string title, Item[] pageItems)
     {
         items = pageItems;
+        columns = 1;
         back = null;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
@@ -324,10 +330,10 @@ public class MenuUI : MonoBehaviour
 
         Keyboard keyboard = Keyboard.current;
         Gamepad gamepad = Gamepad.current;
-        if (Pressed(keyboard?.upArrowKey, keyboard?.wKey, gamepad?.dpad.up, gamepad?.leftStick.up)) selected = (selected + items.Length - 1) % items.Length;
-        if (Pressed(keyboard?.downArrowKey, keyboard?.sKey, gamepad?.dpad.down, gamepad?.leftStick.down)) selected = (selected + 1) % items.Length;
-        if (Pressed(keyboard?.leftArrowKey, keyboard?.aKey, gamepad?.dpad.left, gamepad?.leftStick.left)) Nudge(-SliderStep);
-        if (Pressed(keyboard?.rightArrowKey, keyboard?.dKey, gamepad?.dpad.right, gamepad?.leftStick.right)) Nudge(SliderStep);
+        if (Pressed(keyboard?.upArrowKey, keyboard?.wKey, gamepad?.dpad.up, gamepad?.leftStick.up)) selected = StepVertical(-1);
+        if (Pressed(keyboard?.downArrowKey, keyboard?.sKey, gamepad?.dpad.down, gamepad?.leftStick.down)) selected = StepVertical(1);
+        if (Pressed(keyboard?.leftArrowKey, keyboard?.aKey, gamepad?.dpad.left, gamepad?.leftStick.left)) StepSideways(-1);
+        if (Pressed(keyboard?.rightArrowKey, keyboard?.dKey, gamepad?.dpad.right, gamepad?.leftStick.right)) StepSideways(1);
         if (Pressed(keyboard?.enterKey, keyboard?.numpadEnterKey, keyboard?.spaceKey, gamepad?.buttonSouth))
         {
             Choose(selected);
@@ -372,6 +378,46 @@ public class MenuUI : MonoBehaviour
         return false;
     }
 
+    int GridRows => (items.Length + columns - 1) / columns;
+
+    // Up and down move within the selection's column, wrapping top to bottom. A short last row has no cell under
+    // some columns, so those wrap past it.
+    int StepVertical(int direction)
+    {
+        int column = selected % columns;
+        int row = selected / columns;
+        for (int tries = 0; tries < GridRows; tries++)
+        {
+            row = (row + direction + GridRows) % GridRows;
+            int next = row * columns + column;
+            if (next < items.Length) return next;
+        }
+        return selected;
+    }
+
+    // Left and right adjust a slider, or move along the selection's row on a grid page, wrapping at its ends.
+    void StepSideways(int direction)
+    {
+        if (items[selected].IsSlider || columns == 1)
+        {
+            Nudge(direction * SliderStep);
+            return;
+        }
+        int rowStart = selected / columns * columns;
+        int rowLength = Mathf.Min(columns, items.Length - rowStart);
+        selected = rowStart + (selected - rowStart + direction + rowLength) % rowLength;
+    }
+
+    // Where a cell sits in the rows block: grid columns are centred as a group, and each grid row is one row tall.
+    Vector2 CellPosition(int index, float rowHeight)
+    {
+        int column = index % columns;
+        float x = (column - (columns - 1) / 2f) * (GridCellWidth + GridGap);
+        return new Vector2(columns > 1 ? x : 0f, -rowHeight * (index / columns + 0.5f));
+    }
+
+    float CellWidth => light ? LightRowWidth : columns > 1 ? GridCellWidth : RowWidth;
+
     void Nudge(float amount)
     {
         Item item = items[selected];
@@ -412,7 +458,7 @@ public class MenuUI : MonoBehaviour
         {
             Row row = rows[i];
             float enter = EaseOut(Mathf.Clamp01((elapsed - 0.05f * i) / 0.25f));
-            row.root.anchoredPosition = new Vector2(0, -rowHeight * (i + 0.5f) - 24f * (1f - enter));
+            row.root.anchoredPosition = CellPosition(i, rowHeight) + new Vector2(0, -24f * (1f - enter));
             row.root.GetComponent<CanvasGroup>().alpha = enter * Chrome;
 
             float target = i == selected ? 1f : 0f;
@@ -428,7 +474,7 @@ public class MenuUI : MonoBehaviour
             }
             row.root.localScale = Vector3.one * (1f + 0.08f * k);
             if (row.bar.type == Image.Type.Filled) row.bar.fillAmount = k;
-            else row.bar.rectTransform.sizeDelta = new Vector2(RowWidth * k, row.bar.rectTransform.sizeDelta.y);
+            else row.bar.rectTransform.sizeDelta = new Vector2(CellWidth * k, row.bar.rectTransform.sizeDelta.y);
             row.label.color = onPaper ? Color.Lerp(Ink, InkAccent, k) : Color.Lerp(Idle, Color.white, k);
             // On the red selection bar a red fill would vanish, so it turns white.
             // On paper the bar is a pale wash, so the fill stays red.
@@ -448,7 +494,7 @@ public class MenuUI : MonoBehaviour
         foreach (Row row in rows) Destroy(row.root.gameObject);
         rows.Clear();
 
-        float rowWidth = light ? LightRowWidth : RowWidth;
+        float rowWidth = CellWidth;
         float rowHeight = light ? LightRowHeight : RowHeight;
         for (int i = 0; i < items.Length; i++)
         {
@@ -468,12 +514,12 @@ public class MenuUI : MonoBehaviour
             {
                 // Over the dimmed game the selection is a stroke of red ink, like the stage and boon cards; it paints
                 // on from the left as the marker arrives.
-                row.bar = GameUI.CreateInk(row.root, new Vector2(0.5f, 0.5f), new Vector2(30f, 0), new Vector2(RowWidth + 60f, RowHeight + 10f),
+                row.bar = GameUI.CreateInk(row.root, new Vector2(0.5f, 0.5f), new Vector2(30f, 0), new Vector2(rowWidth + 60f, RowHeight + 10f),
                     new Color(Accent.r, Accent.g, Accent.b, 0.38f));
             }
 
             // A small diamond to the left of the selected label.
-            row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-RowWidth / 2f + 46f, 0), new Vector2(20, 20));
+            row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), new Vector2(-rowWidth / 2f + 46f, 0), new Vector2(20, 20));
             row.marker.localRotation = Quaternion.Euler(0, 0, 45f);
             Image marker = row.marker.gameObject.AddComponent<Image>();
             marker.color = light || onPaper ? InkAccent : Accent;

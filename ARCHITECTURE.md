@@ -57,7 +57,7 @@ Title menu ──Start──▶ Stage intro ──▶ Round 1 ─▶ Round 2 ─
 - Restart / Play Again reload the scene with `skipTitle` set (`Reload(true)`); Quit to Title / Title reload
   without it.
 - **Dev tools (Editor and development builds, `Debug.isDebugBuild`, or release builds while `devToolsInRelease` is on; both via `DevToolsOn`):** a DEV TOOLS page (`ShowDevMenu`) on the
-  title and pause menus, or F3, lists every stage's round 1 and boss; `DevJump` stores the pick in statics,
+  title and pause menus, or F3, is a two-column grid (`MenuUI.Show(…, gridColumns: 2)`) with a row per stage, its round 1 on the left and its boss on the right; `DevJump` stores the pick in statics,
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).

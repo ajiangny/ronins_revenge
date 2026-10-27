@@ -31,7 +31,7 @@ stole, still wearing his shape.
   lattice of teal ghost-fire, with screaming faces in his chest. His horns burn, his eyes turn from red to soul
   teal (the souls are looking out now), and skull spirits swarm free all around him.
 
-Paintings: `Assets/Art/Portraits/Kagetsune_Full.png`, `Kagetsune_Closeup.png` (a transparent dialogue portrait, thigh up and turned left, the coffin-hammer resting on his shoulder) and
+Paintings: `Assets/Art/Portraits/Kagetsune_Full.png`, `Kagetsune_Closeup.png` (transparent, the horned helm over the coffin-hammer resting on his shoulder) and
 `Kagetsune_Phase_Full.png`, `Kagetsune_Phase_Closeup.png` (the Wraith; a gauntlet reaching out around a howling
 skull flame).
 

@@ -16,7 +16,7 @@ This is the shared art direction for Benibana, Utsusemi, Shirogane, Kagetsune, a
 | Deliverable | Exact width × height | Composition |
 | --- | --- | --- |
 | Phase 1 full body | 1024 × 1536 px | Entire character, boots, weapons, hair, and costume within canvas |
-| Phase 1 close-up | 1024 × 1536 px | Transparent dialogue portrait (Hades-style), cut off around the thigh; three-quarter view turned to the viewer's left; eyes about 0.19 down the canvas so the set lines up; nothing clipped at the top or sides |
+| Phase 1 close-up | 1536 × 1024 px | Transparent, head near the top and the figure centred, cut off around the hips; face and identifying accessories clearly readable. Reusable as a dialogue portrait |
 | Phase 2 full body | 1024 × 1536 px | Entire transformed character and essential spirit/effect silhouette |
 | Phase 2 close-up | 1536 × 1024 px | Dramatic introduction framing matching the Phase 2 full-body design |
 
@@ -24,7 +24,7 @@ Dimensions mean the actual saved PNG canvas, not merely the requested aspect rat
 
 Full-body exports should have a clean transparent background. No blurred backdrop, fog wash, bloom halo, depth-of-field blur, or motion blur. Hair, armor, cloth, weapons, and spirit-flame edges must remain crisp. Show spectral material through defined translucent shapes and negative space, not soft-focus smearing. Phase 1 close-ups are transparent too, since they double as dialogue portraits over any scene. Phase 2 close-ups may have opaque cinematic backgrounds, but faces and defining details must remain readable.
 
-The earlier Benibana and Utsusemi Phase 2 full-body exports have irregular dimensions (1047 × 1502 and 1065 × 1477). They are historical sources, not size templates. Standardized exports use 1024 × 1536; Phase 2 close-ups use 1536 × 1024.
+The earlier Benibana and Utsusemi Phase 2 full-body exports have irregular dimensions (1047 × 1502 and 1065 × 1477). They are historical sources, not size templates. Standardized exports use 1024 × 1536; close-ups use 1536 × 1024.
 
 ## Benibana — crimson swordswoman
 

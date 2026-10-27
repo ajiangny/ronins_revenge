@@ -1677,11 +1677,11 @@ public class GameManager : MonoBehaviour
         BossKind.Benibana => new BossVoice
         {
             portrait = benibanaPortrait, closeup = benibanaCloseup,
-            // The close-ups are transparent dialogue portraits cut off at the thigh. Each is shown at the same size with
-            // its eyes on the centre line at the same point on screen, so the set lines up; only the cut-off bottom has
-            // to sit off screen.
+            // The close-ups are transparent 1536x1024 paintings cut off around the hips, the figure centred. Each is
+            // shown centred at the same size, wider than the screen so the art's cut-off sides and bottom sit off it,
+            // with every boss's eyes at the same height; the focus is the eyes' height down the art.
             // Hers: the kiseru raised by her face, its smoke curling up to the left.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.46f, 0.19f), closeupAt = new Vector2(0f, 255f),
+            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.355f), closeupAt = new Vector2(0f, 90f),
             // Unsealed: framed on her face with her loose hair and the drawn blade around her, held back far enough to
             // see her shoulders; raised a touch so the painting's top edge stays off screen.
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
@@ -1694,7 +1694,7 @@ public class GameManager : MonoBehaviour
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed on its slit-eye, the whole hat brim and its pendants on screen.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.45f, 0.19f), closeupAt = new Vector2(0f, 255f),
+            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.225f), closeupAt = new Vector2(0f, 90f),
             // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
             phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
             // Pulled back as far as the painting allows: its left edge limits it, so the slit-eye sits a little left.
@@ -1706,8 +1706,8 @@ public class GameManager : MonoBehaviour
         BossKind.Shirogane => new BossVoice
         {
             portrait = shiroganePortrait, closeup = shiroganeCloseup,
-            // Framed on her face, her hair streaming out to the right.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.4f, 0.19f), closeupAt = new Vector2(0f, 255f),
+            // Her blade drawn low across her, her hair streaming out to the right.
+            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.26f), closeupAt = new Vector2(0f, 90f),
             // The oath card: the pair centred, her face left of the middle and the wolf's head burning to the right.
             phasePortrait = shiroganePhasePortrait, phaseCloseup = shiroganePhaseCloseup, phaseEpithet = Shirogane.OathEpithet,
             phaseCloseupHeight = 1340f, phaseCloseupFocus = new Vector2(0.52f, 0.3f), phaseCloseupAt = new Vector2(40f, 180f),
@@ -1718,8 +1718,8 @@ public class GameManager : MonoBehaviour
         BossKind.Kagetsune => new BossVoice
         {
             portrait = kagetsunePortrait, closeup = kagetsuneCloseup,
-            // Framed on the horned helm and its visor slit; he's the biggest, so his coffin-hammer's fire runs off the top.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.5f, 0.255f), closeupAt = new Vector2(0f, 255f),
+            // The horned helm over the coffin-hammer on his shoulder, filling the frame.
+            closeupHeight = 1400f, closeupFocus = new Vector2(0.5f, 0.245f), closeupAt = new Vector2(0f, 90f),
             // The Wraith: framed on the helm and the howling skull fire, washed in the souls' teal.
             phasePortrait = kagetsunePhasePortrait, phaseCloseup = kagetsunePhaseCloseup, phaseEpithet = Kagetsune.PhaseEpithet,
             phaseCloseupHeight = 1400f, phaseCloseupFocus = new Vector2(0.5f, 0.32f), phaseCloseupAt = new Vector2(0f, 190f),

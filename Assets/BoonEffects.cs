@@ -12,6 +12,9 @@ public class BoonEffects
     const float ShurikenArcRadius = 2.6f;
     // Samurai stand 2 apart across and 1.75 apart down, so this reaches the ones beside, above and below.
     const float IceRadius = 2.1f;
+    // Most samurai one fire blast can burn, nearest first; Wildfire's blasts burn more.
+    const int BlastTargets = 3;
+    const int WildfireBlastTargets = 5;
     const float ShardFreezeSeconds = 1.5f;
     const float BossShardFreezeSeconds = 0.5f;
     // Frost Blade freezes the boss for a quarter of its freeze time, and no more often than this.
@@ -246,8 +249,12 @@ public class BoonEffects
         Sfx.Play(Sfx.FireBlast);
         // Thermal Shock: ice cracks under the heat.
         bool thermal = loadout.Has(BoonId.ThermalShock, out float iceDamage);
+        // A blast burns only the few samurai nearest its heart, so a packed army can't be wiped by chains of them
+        // (the play log had boon effects making about 60% of the kills). Wildfire burns more.
+        int burned = 0, most = loadout.Find(BoonId.Wildfire) != null ? WildfireBlastTargets : BlastTargets;
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
+            if (burned++ >= most) break;
             target.TakeHit(thermal && (target.Encased || army.Frozen) ? (int)iceDamage : 1, KillSource.Effect);
         }
         BurnArrows(position, radius);

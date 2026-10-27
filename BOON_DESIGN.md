@@ -231,7 +231,15 @@ an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and r
 | Blazing Hands, Static Charge | 15 / 25 / 35% | 10 / 18 / 25% |
 | Tidal Renewal Rare | +1 life and heal all | +1 life |
 
-Army difficulty is tuned in a separate pass against a play log of these changes.
+**First balance pass from the play log** (`RunLog`, three runs, one dawn):
+- Rounds without boons took 21–30 s with almost no hits; once a fire build formed, rounds took **5–10 s** even in
+  stage 4, with boon effects making **55–66% of kills**. Rounds hit the player once in about 25; bosses (63–100 s,
+  4–7 hits) were where all the danger was.
+- **Fire blasts burn at most 3 samurai**, nearest first (5 with Wildfire), so chains of blasts can't wipe a packed army.
+- **Armies shoot more:** fire interval ×0.8 in every round, aimed shots +10 points (to at most 60%), divers from
+  stage 1 round 2 (9 s) and a bit more often everywhere (×0.85).
+- **Sword Arts are rarer:** no scroll drops from kills (was 0.5%), scouts 25% (was 40%); portals still offer them.
+- Boss health unchanged: the fights already land in the 60–120 s target.
 
 ## 4. Later
 

@@ -485,6 +485,8 @@ MonoBehaviour:
   devToolsInRelease: 1
   boonChoice: {fileID: 2080831156}
   scoutSoulChance: 0.2
+  killSoulChance: 0.01
+  killSoulsPerStage: 1
   soulElementBias: 0.5
   soulHintArrow: {fileID: 21300000, guid: 7d53a07f399d243cc90de3514dac66f4, type: 3}
   maxRounds: 5
@@ -493,8 +495,8 @@ MonoBehaviour:
   emberCache: 30
   extraRoundSpeedUp: 0.06
   extraRoundFireCut: 0.08
-  scrollChanceFromScout: 0.4
-  scrollChancePerKill: 0.005
+  scrollChanceFromScout: 0.25
+  scrollChancePerKill: 0
   maxScrollsPerRun: 2
   scrollSprite: {fileID: 21300000, guid: 58074e3ad066342478ea1bb0ac61dc08, type: 3}
   heartDropChance: 0.2
@@ -1027,8 +1029,8 @@ MonoBehaviour:
       diveInterval: 0
       baseSpeed: 2.3
       maxSpeedMultiplier: 3.5
-      fireInterval: 1
-      aimedShotChance: 0.2
+      fireInterval: 0.8
+      aimedShotChance: 0.3
       arrowSpeed: 7
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 9
@@ -1036,11 +1038,11 @@ MonoBehaviour:
       topRowY: 8.4
       rowKinds: 0100000000000000i
       scouts: 0
-      diveInterval: 0
+      diveInterval: 9
       baseSpeed: 2.5
       maxSpeedMultiplier: 4
-      fireInterval: 0.9
-      aimedShotChance: 0.25
+      fireInterval: 0.72
+      aimedShotChance: 0.35
       arrowSpeed: 7.5
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 10
@@ -1048,11 +1050,11 @@ MonoBehaviour:
       topRowY: 8.2
       rowKinds: 020000000100000000000000i
       scouts: 1
-      diveInterval: 0
+      diveInterval: 7
       baseSpeed: 2.7
       maxSpeedMultiplier: 4.2
-      fireInterval: 0.8
-      aimedShotChance: 0.3
+      fireInterval: 0.64
+      aimedShotChance: 0.4
       arrowSpeed: 8
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     boss: 1
@@ -1175,11 +1177,11 @@ MonoBehaviour:
       topRowY: 8.3
       rowKinds: 02000000010000000000000003000000i
       scouts: 0
-      diveInterval: 0
+      diveInterval: 7
       baseSpeed: 2.6
       maxSpeedMultiplier: 4
-      fireInterval: 0.85
-      aimedShotChance: 0.3
+      fireInterval: 0.68
+      aimedShotChance: 0.4
       arrowSpeed: 8
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     - columns: 11
@@ -1187,11 +1189,11 @@ MonoBehaviour:
       topRowY: 8.3
       rowKinds: 0100000000000000i
       scouts: 0
-      diveInterval: 6
+      diveInterval: 5.1
       baseSpeed: 2.8
       maxSpeedMultiplier: 4.2
-      fireInterval: 0.8
-      aimedShotChance: 0.3
+      fireInterval: 0.64
+      aimedShotChance: 0.4
       arrowSpeed: 8
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     - columns: 11
@@ -1199,11 +1201,11 @@ MonoBehaviour:
       topRowY: 8.5
       rowKinds: 0200000001000000010000000000000003000000i
       scouts: 1
-      diveInterval: 5
+      diveInterval: 4.2
       baseSpeed: 3
       maxSpeedMultiplier: 4.4
-      fireInterval: 0.75
-      aimedShotChance: 0.35
+      fireInterval: 0.6
+      aimedShotChance: 0.45
       arrowSpeed: 8.5
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     boss: 2
@@ -1326,11 +1328,11 @@ MonoBehaviour:
       topRowY: 8.5
       rowKinds: 0200000004000000010000000000000003000000i
       scouts: 0
-      diveInterval: 6
+      diveInterval: 5.1
       baseSpeed: 3
       maxSpeedMultiplier: 4.4
-      fireInterval: 0.75
-      aimedShotChance: 0.35
+      fireInterval: 0.6
+      aimedShotChance: 0.45
       arrowSpeed: 8.5
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     - columns: 12
@@ -1338,11 +1340,11 @@ MonoBehaviour:
       topRowY: 8.6
       rowKinds: 0200000001000000040000000400000003000000i
       scouts: 1
-      diveInterval: 5
+      diveInterval: 4.2
       baseSpeed: 3.2
       maxSpeedMultiplier: 4.6
-      fireInterval: 0.7
-      aimedShotChance: 0.4
+      fireInterval: 0.56
+      aimedShotChance: 0.5
       arrowSpeed: 9
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     - columns: 12
@@ -1350,11 +1352,11 @@ MonoBehaviour:
       topRowY: 8.8
       rowKinds: 020000000200000004000000010000000400000003000000i
       scouts: 1
-      diveInterval: 4
+      diveInterval: 3.4
       baseSpeed: 3.4
       maxSpeedMultiplier: 4.8
-      fireInterval: 0.65
-      aimedShotChance: 0.45
+      fireInterval: 0.52
+      aimedShotChance: 0.55
       arrowSpeed: 9.5
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     boss: 3
@@ -1477,11 +1479,11 @@ MonoBehaviour:
       topRowY: 8.6
       rowKinds: 0200000005000000010000000400000003000000i
       scouts: 0
-      diveInterval: 5
+      diveInterval: 4.2
       baseSpeed: 3.3
       maxSpeedMultiplier: 4.6
-      fireInterval: 0.7
-      aimedShotChance: 0.4
+      fireInterval: 0.56
+      aimedShotChance: 0.5
       arrowSpeed: 9
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     - columns: 12
@@ -1489,11 +1491,11 @@ MonoBehaviour:
       topRowY: 8.8
       rowKinds: 050000000200000001000000050000000400000003000000i
       scouts: 1
-      diveInterval: 4.5
+      diveInterval: 3.8
       baseSpeed: 3.5
       maxSpeedMultiplier: 4.8
-      fireInterval: 0.66
-      aimedShotChance: 0.45
+      fireInterval: 0.53
+      aimedShotChance: 0.55
       arrowSpeed: 9.5
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     - columns: 13
@@ -1501,11 +1503,11 @@ MonoBehaviour:
       topRowY: 9
       rowKinds: 020000000500000004000000010000000500000003000000i
       scouts: 1
-      diveInterval: 3.5
+      diveInterval: 3
       baseSpeed: 3.6
       maxSpeedMultiplier: 5
-      fireInterval: 0.62
-      aimedShotChance: 0.5
+      fireInterval: 0.5
+      aimedShotChance: 0.6
       arrowSpeed: 10
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     boss: 4

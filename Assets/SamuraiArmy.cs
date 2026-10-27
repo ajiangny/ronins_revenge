@@ -324,7 +324,7 @@ public class SamuraiArmy : MonoBehaviour
         UpdateDives(dt);
     }
 
-    bool IsDiving(Samurai soldier) => dives.Exists(d => d.soldier == soldier);
+    public bool IsDiving(Samurai soldier) => dives.Exists(d => d.soldier == soldier);
 
     // A random samurai from behind the front rank breaks formation; the front stays put so the wall and the shooters hold.
     void StartDive()
@@ -571,6 +571,7 @@ public class SamuraiArmy : MonoBehaviour
     }
 
     // Copies the matches so callers can kill them while the army list changes.
+    // The nearest first, so a capped blast takes the samurai closest to its heart.
     public List<Samurai> SamuraiWithin(Vector3 position, float radius)
     {
         var found = new List<Samurai>();
@@ -579,6 +580,7 @@ public class SamuraiArmy : MonoBehaviour
         {
             if ((soldier.Body.position - position).sqrMagnitude <= radius * radius) found.Add(soldier);
         }
+        found.Sort((a, b) => (a.Body.position - position).sqrMagnitude.CompareTo((b.Body.position - position).sqrMagnitude));
         return found;
     }
 

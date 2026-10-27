@@ -96,9 +96,9 @@ public class GameManager : MonoBehaviour
 
     [Header("Technique scrolls (Sword Arts)")]
     [Tooltip("Chance a downed kite scout also drops a technique scroll.")]
-    [SerializeField, Range(0, 1)] float scrollChanceFromScout = 0.4f;
+    [SerializeField, Range(0, 1)] float scrollChanceFromScout = 0.25f;
     [Tooltip("Chance any fallen samurai drops a technique scroll.")]
-    [SerializeField, Range(0, 1)] float scrollChancePerKill = 0.005f;
+    [SerializeField, Range(0, 1)] float scrollChancePerKill = 0f;
     [Tooltip("Most technique scrolls that can drop in one run, like Hades' two Daedalus Hammers.")]
     [SerializeField] int maxScrollsPerRun = 2;
     [Tooltip("The technique scroll pickup. Wired by Ninja/Apply Boon Art; empty draws a parchment bar on a gold glow.")]
@@ -352,11 +352,11 @@ public class GameManager : MonoBehaviour
             name = "The Bamboo Road",
             rounds = new[]
             {
-                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 1f,   aimedShotChance = 0.2f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
-                new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.9f, aimedShotChance = 0.25f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru } },
-                new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true },
+                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 0.8f,   aimedShotChance = 0.3f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
+                new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.72f, aimedShotChance = 0.35f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f),
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 9f },
+                new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.64f, aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true, diveInterval = 7f },
             },
             boss = BossKind.Benibana,
         },
@@ -365,13 +365,13 @@ public class GameManager : MonoBehaviour
             name = "The Pilgrim's Pass",
             rounds = new[]
             {
-                new LevelConfig { columns = 10, rows = 4, topRowY = 8.3f, baseSpeed = 2.6f, maxSpeedMultiplier = 4f,   fireInterval = 0.85f, aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer } },
-                new LevelConfig { columns = 11, rows = 4, topRowY = 8.3f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.2f, fireInterval = 0.8f,  aimedShotChance = 0.3f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 6f },
-                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.75f, aimedShotChance = 0.35f, arrowSpeed = 8.5f, samuraiColor = new Color(0.4f, 0.6f, 1f),
+                new LevelConfig { columns = 10, rows = 4, topRowY = 8.3f, baseSpeed = 2.6f, maxSpeedMultiplier = 4f,   fireInterval = 0.68f, aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 7f },
+                new LevelConfig { columns = 11, rows = 4, topRowY = 8.3f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.2f, fireInterval = 0.64f,  aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 5.1f },
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.6f, aimedShotChance = 0.45f, arrowSpeed = 8.5f, samuraiColor = new Color(0.4f, 0.6f, 1f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer },
-                    diveInterval = 5f, scouts = true },
+                    diveInterval = 4.2f, scouts = true },
             },
             boss = BossKind.Utsusemi,
         },
@@ -380,13 +380,13 @@ public class GameManager : MonoBehaviour
             name = "The Frozen Shrine",
             rounds = new[]
             {
-                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.75f, aimedShotChance = 0.35f, arrowSpeed = 8.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 6f },
-                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.2f, maxSpeedMultiplier = 4.6f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 9f,   samuraiColor = new Color(0.75f, 0.9f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 5f, scouts = true },
-                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.4f, maxSpeedMultiplier = 4.8f, fireInterval = 0.65f, aimedShotChance = 0.45f, arrowSpeed = 9.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.6f, aimedShotChance = 0.45f, arrowSpeed = 8.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 5.1f },
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.2f, maxSpeedMultiplier = 4.6f, fireInterval = 0.56f,  aimedShotChance = 0.5f,  arrowSpeed = 9f,   samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f, scouts = true },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.4f, maxSpeedMultiplier = 4.8f, fireInterval = 0.52f, aimedShotChance = 0.55f, arrowSpeed = 9.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
-                    diveInterval = 4f, scouts = true },
+                    diveInterval = 3.4f, scouts = true },
             },
             boss = BossKind.Shirogane,
         },
@@ -397,14 +397,14 @@ public class GameManager : MonoBehaviour
             name = "The Mountain Shrine",
             rounds = new[]
             {
-                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.3f, maxSpeedMultiplier = 4.6f, fireInterval = 0.7f,  aimedShotChance = 0.4f,  arrowSpeed = 9f,   samuraiColor = new Color(1f, 0.55f, 0.4f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 5f },
-                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.5f, maxSpeedMultiplier = 4.8f, fireInterval = 0.66f, aimedShotChance = 0.45f, arrowSpeed = 9.5f, samuraiColor = new Color(1f, 0.55f, 0.4f),
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.3f, maxSpeedMultiplier = 4.6f, fireInterval = 0.56f,  aimedShotChance = 0.5f,  arrowSpeed = 9f,   samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.5f, maxSpeedMultiplier = 4.8f, fireInterval = 0.53f, aimedShotChance = 0.55f, arrowSpeed = 9.5f, samuraiColor = new Color(1f, 0.55f, 0.4f),
                     rowKinds = new[] { SamuraiKind.Bellringer, SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
-                    diveInterval = 4.5f, scouts = true },
-                new LevelConfig { columns = 13, rows = 6, topRowY = 9f,   baseSpeed = 3.6f, maxSpeedMultiplier = 5f,   fireInterval = 0.62f, aimedShotChance = 0.5f,  arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    diveInterval = 3.8f, scouts = true },
+                new LevelConfig { columns = 13, rows = 6, topRowY = 9f,   baseSpeed = 3.6f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f, aimedShotChance = 0.6f,  arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.55f, 0.4f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Shieldbearer },
-                    diveInterval = 3.5f, scouts = true },
+                    diveInterval = 3f, scouts = true },
             },
             boss = BossKind.Kagetsune,
         },
@@ -704,7 +704,11 @@ public class GameManager : MonoBehaviour
     float ArmyGap()
     {
         float lowest = float.MaxValue;
-        foreach (Samurai samurai in army.Soldiers) lowest = Mathf.Min(lowest, samurai.transform.position.y);
+        // Divers leave the ranks on purpose, so only the formation counts.
+        foreach (Samurai samurai in army.Soldiers)
+        {
+            if (!army.IsDiving(samurai)) lowest = Mathf.Min(lowest, samurai.transform.position.y);
+        }
         return lowest == float.MaxValue ? float.MaxValue : lowest - ronin.TopY;
     }
 

@@ -38,6 +38,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Raised as the bar refills during a phase break.
     public event Action Healed;
     public event Action Defeated;
+    // Raised once the phase break is over and the second phase starts fighting.
+    public event Action SecondPhaseBegan;
     public event Action<Boss, BossLine> Spoke;
 
     // Set by the GameManager for a boss with phase-two portraits: plays a title card for the new phase (its own
@@ -632,6 +634,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
         while (!sceneDone) yield return null;
         PhaseBreaking = false;
+        SecondPhaseBegan?.Invoke();
         RestartFight();
     }
 

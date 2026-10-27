@@ -37,12 +37,16 @@ public class SfxLibrary : ScriptableObject
         public AudioClip rounds;
         [Tooltip("Plays once the boss's intro is over. Empty plays battleMusic.")]
         public AudioClip fight;
+        [Tooltip("Takes over from the fight track when the boss's second form is revealed. Empty keeps the fight track.")]
+        public AudioClip phase;
     }
 
     public Sound[] sounds;
 
     [Header("Music")]
     public AudioClip titleMusic;
+    [Tooltip("The temple between runs. Empty plays titleMusic.")]
+    public AudioClip templeMusic;
     [Tooltip("Played wherever a stage has no music of its own.")]
     public AudioClip battleMusic;
     public StageMusic[] stageMusic;
@@ -50,6 +54,12 @@ public class SfxLibrary : ScriptableObject
 
     public AudioClip RoundsMusic(BossKind boss) => OrBattle(MusicFor(boss)?.rounds);
     public AudioClip FightMusic(BossKind boss) => OrBattle(MusicFor(boss)?.fight);
+    public AudioClip PhaseMusic(BossKind boss)
+    {
+        AudioClip phase = MusicFor(boss)?.phase;
+        return phase != null ? phase : FightMusic(boss);
+    }
+    public AudioClip TempleMusic => templeMusic != null ? templeMusic : titleMusic;
 
     // Not ??, which skips Unity's check for a clip that was deleted.
     AudioClip OrBattle(AudioClip clip) => clip != null ? clip : battleMusic;

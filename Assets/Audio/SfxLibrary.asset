@@ -593,18 +593,23 @@ MonoBehaviour:
     - 3.1233106
     ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
+  templeMusic: {fileID: 8300000, guid: 946fb3b38b2c84813abb8ba5ddced6fa, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}
   stageMusic:
   - boss: 1
     rounds: {fileID: 8300000, guid: fcf9ce954e4f4441e9b04c7dafc05ac8, type: 3}
     fight: {fileID: 8300000, guid: eead28424392c42029d664a8596aeabf, type: 3}
+    phase: {fileID: 8300000, guid: 4eb783f51d66c4cf7a1baa914ccd4bbe, type: 3}
   - boss: 2
     rounds: {fileID: 8300000, guid: 94f4ff83bded04c589f2f6f0b484a56d, type: 3}
     fight: {fileID: 8300000, guid: 63a50e30cb65044e4832b32d246baa32, type: 3}
+    phase: {fileID: 8300000, guid: fd4d134c8a3964dfbba7d2b604ed9273, type: 3}
   - boss: 3
     rounds: {fileID: 8300000, guid: b9129c3aa86f2474a9062da52c02a48c, type: 3}
     fight: {fileID: 8300000, guid: 9a1072a6795ab4bd3ac197caaf16f67d, type: 3}
+    phase: {fileID: 8300000, guid: 6afa23f1af4dd4f1faa015b44e24d1d3, type: 3}
   - boss: 4
     rounds: {fileID: 8300000, guid: a20c59eff9dec41969902a99fbd7cb02, type: 3}
     fight: {fileID: 8300000, guid: ca4e004458f7b41d6aa457230b100ee4, type: 3}
+    phase: {fileID: 8300000, guid: c916baf7d31714403877bf44be6e1cae, type: 3}
   musicVolume: 0.45

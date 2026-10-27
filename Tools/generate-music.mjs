@@ -1,6 +1,7 @@
 // Generates the game's background music with the ElevenLabs Music API into Assets/Audio/Music,
 // where Ninja/Apply Audio picks it up. Run with `npm run music` (all tracks) or `npm run music -- BattleMusic`.
-// Each stage has its rounds music (Stage_<Boss>) and its boss fight (Boss_<Boss>), written from Story/: see the
+// Each stage has its rounds music (Stage_<Boss>), its boss fight (Boss_<Boss>) and the boss's second form
+// (Phase_<Boss>), and the temple has its own (TempleMusic), all written from Story/: see the
 // character files for why each one sounds the way it does. BattleMusic plays wherever a stage has none.
 // The SDK reads ELEVENLABS_API_KEY, which the npm script loads from .env.local.
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
@@ -121,6 +122,66 @@ const TRACKS = {
       "and a heroic shakuhachi melody of the lone ronin rising against it all. Overwhelming, apocalyptic and defiant, " +
       "about 155 BPM, relentless energy. Instrumental only. Seamless loop: the ending flows straight back into the " +
       "opening with no intro build or fade out.",
+  },
+  // The abandoned temple on the hill where Oni and Shirogane used to sit, where he wakes in the pool of teal soul-
+  // fire between runs, her flute on the altar and a little more of his memory gone each time.
+  TempleMusic: {
+    lengthMs: 120_000,
+    prompt:
+      "Quiet, melancholy hub theme for an abandoned mountain temple at night between battles, in the spirit of a " +
+      "roguelike's safe house. A soft, sparse bone flute melody that drifts in and out like a half-remembered song, " +
+      "gentle koto and harp, a warm low string drone, faint wind chimes and the hush of night wind, a slow distant " +
+      "temple bell. No drums, about 66 BPM, calm, lonely and tender, a place to rest and remember, with a quiet " +
+      "resolve underneath. Instrumental only. Seamless loop: the ending flows straight back into the opening with no " +
+      "intro build or fade out.",
+  },
+  // The Crimson Unsealed: she cuts away her ceremonial robes and stops dancing for an emperor, fighting raw and
+  // furious from inside her own smoke.
+  Phase_Benibana: {
+    lengthMs: 120_000,
+    prompt:
+      "Furious, unrestrained second-phase boss battle: a court dancer who has thrown off her robes and stopped " +
+      "performing. The elegant sword-dance rhythm breaks into savage double-time taiko and frantic shamisen tremolo, " +
+      "sharp hyoshigi cracks, a wailing shakuhachi, distorted bass, and the sacred reed-organ hymn from before now " +
+      "rising loud and defiant over the chaos with tolling church-like bells. Raw, burning and tragic, about 168 BPM, " +
+      "relentless. Instrumental only. Seamless loop: the ending flows straight back into the opening with no intro " +
+      "build or fade out.",
+  },
+  // The Unwound Hour: its mainspring slips, the ticks race, one of Kagetsune's bells tolls to wind it back up, and
+  // it bursts open rather than stop.
+  Phase_Utsusemi: {
+    lengthMs: 120_000,
+    prompt:
+      "Overloaded, breaking-down clockwork for a second-phase boss: an automaton whose mainspring has slipped. " +
+      "Frantic, accelerating ticking percussion in double time, a broken music-box koto skipping and glitching, " +
+      "grinding gears, searing distorted industrial synth bass, pounding taiko, a huge bronze bell tolling like an " +
+      "alarm every few bars, and the sutra chant drone pitched up and straining. Molten, unstable and desperate, " +
+      "about 172 BPM. Instrumental only. Seamless loop: the ending flows straight back into the opening with no intro " +
+      "build or fade out.",
+  },
+  // Oath of the Spectral Wolf: she calls on their oath, her shrine's souls gather and Kuon, its guardian wolf, steps
+  // out to fight beside her.
+  Phase_Shirogane: {
+    lengthMs: 120_000,
+    prompt:
+      "Epic, emotional second-phase duel: a ghost samurai calls on an old oath and her shrine's guardian spirit wolf " +
+      "joins the fight. Full soaring strings and the crossing twin koto lines now blazing, a wordless choir of shrine " +
+      "spirits rising, thundering taiko, deep horn calls like a wolf's howl, ringing shrine bells and icy shimmer, " +
+      "and the tender bamboo flute melody from before returning big and heroic. Grief turned to fire, beautiful and " +
+      "fierce, about 150 BPM. Instrumental only. Seamless loop: the ending flows straight back into the opening with " +
+      "no intro build or fade out.",
+  },
+  // The Unchained Wraith: the coffin's chains snap, the thousand sealed souls turn on him, and he becomes a storm of
+  // the souls he stole.
+  Phase_Kagetsune: {
+    lengthMs: 150_000,
+    prompt:
+      "Chaotic, apocalyptic final boss second phase: an emperor's armor of a thousand imprisoned souls cracks open " +
+      "and the souls turn on him. A vast wailing ghost choir, cracking and clashing bronze bells, snapping-chain " +
+      "metallic percussion, frenzied taiko orchestra, thunderous low brass and racing strings, and the lone ronin's " +
+      "shakuhachi melody rising heroic and hopeful through the storm as the souls fight to be free. Overwhelming and " +
+      "climactic, about 165 BPM. Instrumental only. Seamless loop: the ending flows straight back into the opening " +
+      "with no intro build or fade out.",
   },
 };
 

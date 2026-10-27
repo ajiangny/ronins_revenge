@@ -913,7 +913,7 @@ public class GameManager : MonoBehaviour
             ShowSafeArea();
             ronin.PlaceAt(BodyAt(safeArea.WakePoint + WakeStep));
         }
-        if (sfxLibrary != null) Music.Play(sfxLibrary.titleMusic, sfxLibrary.musicVolume);
+        if (sfxLibrary != null) Music.Play(sfxLibrary.TempleMusic, sfxLibrary.musicVolume);
         if (wake)
         {
             ronin.PlaceAt(BodyAt(safeArea.WakePoint));
@@ -1889,6 +1889,8 @@ public class GameManager : MonoBehaviour
         Boss boss = activeBoss;
         boss.Healed += () => ui.SetBossHealth(boss.BarFraction);
         activeBoss.Defeated += OnBossDefeated;
+        // A boss with no phase card still changes music when its second phase starts; with one, this is a no-op.
+        activeBoss.SecondPhaseBegan += PlayPhaseMusic;
         activeBoss.Spoke += OnBossSpoke;
         effects.Boss = activeBoss;
         yield return activeBoss.Enter(post, 1.6f);
@@ -1935,6 +1937,8 @@ public class GameManager : MonoBehaviour
         Conversation exchange = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossPhase, Dialogue.Context(loadout));
         AudioClip clip = exchange == null ? lines.phase : null;
         Music.Duck(0.3f, (clip != null ? clip.length : 3f) + 2.5f);
+        // The new form brings its own music, rising in under the card.
+        PlayPhaseMusic();
         voice.volume = voiceVolume * Sfx.Volume;
         // The wash behind the art follows the transformed painting where its colours change (Utsusemi's molten core).
         Color wash = lines.phaseColour.a > 0f ? lines.phaseColour : boss.Colour;
@@ -1943,6 +1947,11 @@ public class GameManager : MonoBehaviour
         // The bar carries the name the card just announced.
         ui.RenameBossBar($"{boss.PhaseTitle}, {lines.phaseEpithet}");
         if (exchange != null) yield return PlayScene(exchange);
+    }
+
+    void PlayPhaseMusic()
+    {
+        if (sfxLibrary != null) Music.Play(sfxLibrary.PhaseMusic(Stage.boss), sfxLibrary.musicVolume, 1.5f);
     }
 
     // The boss's own line alone, for a moment nothing is written for.

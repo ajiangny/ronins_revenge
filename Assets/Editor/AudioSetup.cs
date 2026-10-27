@@ -110,13 +110,15 @@ public static class AudioSetup
         }
         library.sounds = sounds.ToArray();
         library.titleMusic = LoadMusic("TitleMusic");
+        library.templeMusic = LoadMusic("TempleMusic");
         library.battleMusic = LoadMusic("BattleMusic");
-        // Stage_<Boss>.mp3 for the rounds, Boss_<Boss>.mp3 for the fight; a missing one falls back to BattleMusic.
+        // Stage_<Boss>.mp3 for the rounds, Boss_<Boss>.mp3 for the fight (a missing one falls back to BattleMusic) and
+        // Phase_<Boss>.mp3 for the second form (missing keeps the fight track).
         var stageMusic = new List<SfxLibrary.StageMusic>();
         foreach (BossKind boss in System.Enum.GetValues(typeof(BossKind)))
         {
             if (boss == BossKind.None) continue;
-            stageMusic.Add(new SfxLibrary.StageMusic { boss = boss, rounds = LoadMusic($"Stage_{boss}"), fight = LoadMusic($"Boss_{boss}") });
+            stageMusic.Add(new SfxLibrary.StageMusic { boss = boss, rounds = LoadMusic($"Stage_{boss}"), fight = LoadMusic($"Boss_{boss}"), phase = LoadMusic($"Phase_{boss}") });
         }
         library.stageMusic = stageMusic.ToArray();
         EditorUtility.SetDirty(library);
@@ -129,7 +131,7 @@ public static class AudioSetup
         manager.ApplyModifiedPropertiesWithoutUndo();
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"Audio applied: {sounds.Count} sounds, title music {(library.titleMusic ? "set" : "missing")}, battle music {(library.battleMusic ? "set" : "missing")}, {CountStageTracks(library)} stage and boss tracks.");
+        Debug.Log($"Audio applied: {sounds.Count} sounds, title music {(library.titleMusic ? "set" : "missing")}, battle music {(library.battleMusic ? "set" : "missing")}, temple music {(library.templeMusic ? "set" : "missing")}, {CountStageTracks(library)} stage, boss and phase tracks.");
     }
 
     static int CountStageTracks(SfxLibrary library)
@@ -139,6 +141,7 @@ public static class AudioSetup
         {
             if (music.rounds != null) count++;
             if (music.fight != null) count++;
+            if (music.phase != null) count++;
         }
         return count;
     }

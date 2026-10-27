@@ -17,7 +17,8 @@ drowned it.
 ## Look
 
 **The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Hibiki_Closeup.png`, with `Hibiki_Full.png`) was painted
-from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+from this brief in the boss portraits' style (GPT image gen), facing right toward Oni. The user's revision dresses her in
+purple storm-patterned robes (cloud and lightning motifs, her Storm colour) and drops the chain.
 
 For the boon screen's pixel bust:
 

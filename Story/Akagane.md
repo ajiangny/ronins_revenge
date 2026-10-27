@@ -17,7 +17,8 @@ always one step below them, and he never once pretended not to mind.
 ## Look
 
 **The painting.** His talk-scene portrait (`Assets/Art/Portraits/Akagane_Closeup.png`, with `Akagane_Full.png`) was painted
-from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+from this brief in the boss portraits' style (GPT image gen), facing right toward Oni. The user's revision drops the
+chain: he's painted without it, the bell hanging free at his chest.
 
 For the boon screen's pixel bust (head and shoulders, facing three-quarters toward Oni's portrait):
 

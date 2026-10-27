@@ -17,7 +17,9 @@ useful.
 ## Look
 
 **The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Mizore_Closeup.png`, with `Mizore_Full.png`) was painted
-from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+from this brief in the boss portraits' style (GPT image gen), then revised by the user: **she's painted as a white
+wolf-woman**, silver-furred with a wolf's face, ears and tail, in the same frosted indigo physician's robes, bell and
+inro, with ice-blue eyes. The art is the reference for how she looks now; the human description below is the earlier brief.
 
 For the boon screen's pixel bust:
 

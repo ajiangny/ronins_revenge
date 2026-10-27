@@ -40,7 +40,8 @@ public class Ronin : MonoBehaviour
     [SerializeField] Weapon weapon = Weapon.Sword;
     public CharacterArt art;
     public float speed = 10f;
-    [SerializeField] float shotCooldown = 0.35f;
+    [Tooltip("Seconds between swings. Kept slow enough that every slash is a choice, as in Space Invaders.")]
+    [SerializeField] float shotCooldown = 0.45f;
     [SerializeField] float invulnerableTime = 2f;
     [SerializeField] float screenMargin = 0.2f;
     [Tooltip("Degrees off its heading that each side slash of Split Slash peels away at.")]

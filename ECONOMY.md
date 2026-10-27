@@ -5,7 +5,7 @@ How strong Oni starts, what he can buy between runs, and the research behind the
 
 ## The decision
 
-A fresh save plays exactly like the game did before the shop: 3 lives, a 0.35 s swing, a 0.25 s parry window, a 6 s
+A fresh save plays exactly like the game did before the shop: 3 lives, a 0.45 s swing, a 0.25 s parry window, a 6 s
 shuriken. The base game is tuned "harder but beatable" and someone may only play it once or twice, so a skilled
 player must be able to win run 1. The shop only adds on top, and keeps to the size Hades and Vampire Survivors land
 on when maxed: about twice the survivability, a little speed, better luck, and no flat damage bonus (damage growth
@@ -27,7 +27,7 @@ off for a harder run. The shop appears on the title menu once there are embers t
 |---|---|---|---|
 | Keen Eye (parry window) | 0.25 → 0.31 s | 2 | 60 |
 | Swift Feet (move speed) | 10 → 11 | 2 | 60 |
-| Quick Draw (swing cooldown) | 0.35 → 0.315 s | 2 | 80 |
+| Quick Draw (swing cooldown) | 0.45 → 0.405 s | 2 | 80 |
 | Spirit Wind (shuriken cooldown) | 6 → 5 s | 2 | 80 |
 | Steady Breath (missed parry) | 2 → 1.5 s | 2 | 80 |
 | Long Shadow (invulnerability after a hit) | 2 → 2.5 s | 1 | 120 |

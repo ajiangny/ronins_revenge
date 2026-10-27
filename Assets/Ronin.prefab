@@ -51,7 +51,7 @@ MonoBehaviour:
   weapon: 0
   art: {fileID: 11400000, guid: 51b137782b7f3451eb1999c3b82adf63, type: 2}
   speed: 10
-  shotCooldown: 0.35
+  shotCooldown: 0.45
   invulnerableTime: 2
   screenMargin: 0.2
   splitAngle: 18

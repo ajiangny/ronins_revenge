@@ -100,8 +100,8 @@ twice in a row. The sources agree on the approach:
   ([his post](https://x.com/kasavin/status/1329487797607043073)). The line count comes from Supergiant's own
   breakdown ([Nintendo Wire](https://nintendowire.com/news/2020/12/30/hades-has-over-300000-words-of-voiced-dialogue-heres-a-handy-breakdown-of-who-speaks-most-and-least/)).
 
-How the shipped script data is organised (my summary of the game's Lua data files, not taken from the sources
-above): every conversation is a record with **requirements** (lines that must have played, lines that must *not*
+The full research, read from the game's shipped Lua scripts, is in [DIALOGUE_RESEARCH.md](DIALOGUE_RESEARCH.md).
+In short: every conversation is a record with **requirements** (lines that must have played, lines that must *not*
 have played, run counts, recent kills or deaths, items held), a **priority** (story-critical conversations jump the
 queue) and **play-once** flags. Short **repeatable** barks sit underneath, so a character always has something to
 say. Whatever plays is recorded in the save, which is what lets a conversation chain over dozens of runs.

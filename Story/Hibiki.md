@@ -16,6 +16,9 @@ drowned it.
 
 ## Look
 
+**The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Hibiki_Closeup.png`, with `Hibiki_Full.png`) was painted
+from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+
 For the boon screen's pixel bust:
 
 - A girl of seventeen with a round, sunburnt face, a gap-toothed grin and quick dark eyes with violet sparks in

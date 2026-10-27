@@ -16,6 +16,9 @@ always one step below them, and he never once pretended not to mind.
 
 ## Look
 
+**The painting.** His talk-scene portrait (`Assets/Art/Portraits/Akagane_Closeup.png`, with `Akagane_Full.png`) was painted
+from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+
 For the boon screen's pixel bust (head and shoulders, facing three-quarters toward Oni's portrait):
 
 - A broad man in his mid-forties with a square, scarred jaw and a close beard going grey, soot on his cheekbones.

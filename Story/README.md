@@ -70,9 +70,12 @@ comes up over the arena while Oni plays the flute, and she becomes the wisp besi
 over.
 
 **Dialogue, as built:** runs now carry over (`SaveData.cs`) and the reactive system below is in `Dialogue.cs`: boss
-intros (`BossIntro`), the killing boss's last word (`KilledOni`), Oni on the hill after a run (`HubReturn`) and his
-first soul of each element (`FirstElement`) pick from the conversations in the character files. Phase and defeat lines
-are still the fixed ones. The souls behind the boons are written ([Souls.md](Souls.md)) but not wired yet.
+intros (`BossIntro`), phase breaks (`BossPhase`) and defeats (`BossDefeat`), the killing boss's last word
+(`KilledOni`), Oni on the hill after a run (`HubReturn`) and the souls on their first boon screen of a run
+(`SoulPickup`) pick from the conversations in the character files. Intros, defeats and soul greetings play as
+Hades-style talk scenes (the speaker painted large, Oni opposite); a phase break gets a scene only when Oni has an
+answer, otherwise its card speaks. The souls' `SoulPickup` tables are wired; their Duo, Legendary, jealousy and boss
+reactions are written ([Souls.md](Souls.md)) but not yet.
 
 ## Consistency rules
 
@@ -145,7 +148,7 @@ short, repeatable and never cutting off a full line (`GameManager.OnBossSpoke`).
 | `BossDefeat` | Boss falls |
 | `KilledOni` | Oni dies to this boss |
 | `HubReturn` | Oni wakes on the hill (title screen) after a death |
-| `FirstElement` | First Fire / Frost / Storm soul of the save |
+| `SoulPickup` | First boon screen of each soul in a run (Oni's first-soul lines open the first meetings) |
 | `Capstone` | A Duo or Legendary is taken |
 | `Scroll` | A technique scroll is caught |
 | `LastLife` | Oni is down to one life in a boss fight |

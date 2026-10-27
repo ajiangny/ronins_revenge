@@ -88,6 +88,13 @@ The same conversation plays whichever soul offers the Duo. Each line's speaker s
 
 # Implementation hooks
 
+**Built so far:** each soul's `SoulPickup` tables (first meetings, reactions, greetings) are in `Dialogue.cs` and play as
+a talk scene (`DialogueScene`) before the first boon screen of that soul in a run, with the soul's painting
+(`Portraits/<Soul>_Closeup.png`, `_Full.png`) at the left and Oni at the right. `runsSince self ≥ n` became the
+conversation's `Cooldown`, "play once" a Reactive that never comes back. Not yet: `SoulJealous`, `Duo`,
+`Legendary`, `BossAhead`, `BossFelled`, `HubReturn`, the freed beats and the souls' voices. The suggestions below
+still stand for those.
+
 Everything below is a suggestion for the dialogue system being built in parallel; field names follow
 `Assets/SaveData.cs` where it already has them.
 

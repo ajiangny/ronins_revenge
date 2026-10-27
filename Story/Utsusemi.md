@@ -77,6 +77,16 @@ seized...".
 | Story, once | seen the previous line | (`Utsusemi_Intro_WindDown`) "Boy. Wind me down. I cannot do it... from in here." |
 | Repeatable | none | "Tick... tock." |
 
+**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, unvoiced). Each plays once, after the boss's
+own line; afterwards the intro picks from the lines above, the phase card speaks alone and the defeat scene is the
+boss's line alone.
+
+| Event | Oni |
+|---|---|
+| `BossIntro`, first meeting | "...That hat." |
+| `BossPhase`, first phase break | "Then I'll stop you." |
+| `BossDefeat`, first defeat | "...You. You sheltered me." |
+
 **`KilledOni`**
 
 | Priority | Requires | Text |

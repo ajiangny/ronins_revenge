@@ -88,6 +88,16 @@ falls before Kuon) is voiced, a full line.
 | Story, once | wins vs. Shirogane ≥ 3 | (`Shirogane_Intro_Oath`) "We swore to end him together, before the coronation. I kept the oath. Now you keep it." |
 | Repeatable | none | "Again, then." |
 
+**Oni's answers, in game** (`Dialogue.cs`; shown in the talk scene, unvoiced). Each plays once, after the boss's
+own line; afterwards the intro picks from the lines above, the phase card speaks alone and the defeat scene is the
+boss's line alone.
+
+| Event | Oni |
+|---|---|
+| `BossIntro`, first meeting | "...I remember a flute." |
+| `BossPhase`, first phase break | "Then remind me." |
+| `BossDefeat`, first defeat | "Shirogane... I'm sorry I forgot." |
+
 **`KilledOni`**
 
 | Priority | Requires | Text |

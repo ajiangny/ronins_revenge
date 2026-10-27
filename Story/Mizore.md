@@ -16,6 +16,9 @@ useful.
 
 ## Look
 
+**The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Mizore_Closeup.png`, with `Mizore_Full.png`) was painted
+from this brief in the boss portraits' style (GPT image gen), facing right toward Oni.
+
 For the boon screen's pixel bust:
 
 - An old woman around seventy, small and very upright. Grey hair pinned back with a single plain comb, a few

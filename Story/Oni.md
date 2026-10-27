@@ -21,8 +21,8 @@ concept painting (`Story/Art/Oni_Original.png`) to match the boss paintings: a l
 and a long braid, a dark robe with gold trim open on the red cloud tattoo, a red oni-faced armoured left arm and
 shoulder, an oni mask at his belt, dark red plated leg armour with jade cloud guards, and his long katana. Two
 changes from the concept: his spirit flames are the game's teal soul-fire (not green), and the robe sits more closed,
-so the bare chest stays plain and unposed. Lit at night, by the moon and his own fire. The close-up is framed beside
-his lines whenever he speaks (the hill, his first soul of each element, Second Dawn).
+so the bare chest stays plain and unposed. Lit at night, by the moon and his own fire. The close-up stands at the right
+of every talk scene, and is framed beside his words on the hill.
 
 ## History
 
@@ -67,7 +67,11 @@ In game through the reactive dialogue (`Dialogue.cs`), as subtitles: Oni has no 
 | Story, once | seen `Shirogane_Intro_Oath` | "Together. We were meant to do it together." |
 | Repeatable | none | (no words; he only plays the flute) |
 
-**`FirstElement`**
+**Answering the bosses** (talk scenes, once each): his replies to each boss's first intro, phase break and defeat
+are in the bosses' files, under "Oni's answers".
+
+**First soul of each element:** his old `FirstElement` lines now open each soul's first meeting
+(`Akagane_Meet_Angry`, `Mizore_Meet_Steady`, `Hibiki_Meet_Out`, in the souls' files).
 
 | Element | Text |
 |---|---|

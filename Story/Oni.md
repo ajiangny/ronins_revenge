@@ -16,6 +16,14 @@ take the colour of the souls lending him power (fire, frost, storm). On the titl
 playing the flute. In the story, his teal is the soul-fire of Kagetsune's armor: he burns with what he tore
 himself out of.
 
+**The portrait.** His painted art (`Assets/Art/Portraits/Oni_Full.png`, `Oni_Closeup.png`) restyles the user's own
+concept painting (`Story/Art/Oni_Original.png`) to match the boss paintings: a lean ronin with black swept-back hair
+and a long braid, a dark robe with gold trim open on the red cloud tattoo, a red oni-faced armoured left arm and
+shoulder, an oni mask at his belt, dark red plated leg armour with jade cloud guards, and his long katana. Two
+changes from the concept: his spirit flames are the game's teal soul-fire (not green), and the robe sits more closed,
+so the bare chest stays plain and unposed. Lit at night, by the moon and his own fire. The close-up is framed beside
+his lines whenever he speaks (the hill, his first soul of each element, Second Dawn).
+
 ## History
 
 - Born in a mountain village below the Emperor's shrine. Rose through the Emperor's guard beside Shirogane until

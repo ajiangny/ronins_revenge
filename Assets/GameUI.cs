@@ -646,8 +646,9 @@ public class GameUI : MonoBehaviour
         levelText.text = $"{stageLine}\n{RoundLine(round, roundCount, scale)}";
     }
 
+    // A roundCount of 0 leaves the total off: with portals a stage runs as many rounds as the player chooses.
     string RoundLine(int round, int roundCount, float scale) =>
-        $"{HudLabel("ROUND", scale)}<size={levelText.fontSize * scale:0.#}>{round}{HudDim($"/{roundCount}")}</size>";
+        $"{HudLabel("ROUND", scale)}<size={levelText.fontSize * scale:0.#}>{round}{(roundCount > 0 ? HudDim($"/{roundCount}") : "")}</size>";
 
     // A HUD row's small dim label, set in the same text as its number so the two share a baseline.
     static string HudLabel(string label, float scale = 1f) =>

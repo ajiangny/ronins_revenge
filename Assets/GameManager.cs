@@ -69,14 +69,26 @@ public class GameManager : MonoBehaviour
     [Header("Souls and boons")]
     [Tooltip("Built on the Canvas at runtime if left empty.")]
     [SerializeField] BoonChoiceUI boonChoice;
-    [Tooltip("Chance that a fallen samurai drops a soul.")]
-    [SerializeField, Range(0, 1)] float soulDropChance = 0.07f;
-    [Tooltip("A soul always drops after this many kills without one.")]
-    [SerializeField] int soulPityKills = 15;
+    [Tooltip("Chance a downed kite scout drops a soul. Otherwise souls only come from the portals' rewards.")]
+    [SerializeField, Range(0, 1)] float scoutSoulChance = 0.2f;
     [Tooltip("Once the ronin holds a boon, the chance a soul takes one of his elements (weighted by how many boons of each he holds) instead of a random one.")]
     [SerializeField, Range(0, 1)] float soulElementBias = 0.5f;
     [Tooltip("Arrow bobbing over the run's souls until the first one is caught. Empty draws a plain gold arrow.")]
     [SerializeField] Sprite soulHintArrow;
+
+    [Header("Portals (Hades' chamber doors)")]
+    [Tooltip("Most rounds a stage can run to; after the last only the boss is left.")]
+    [SerializeField] int maxRounds = 5;
+    [Tooltip("The boss portal opens among the others once this many rounds of the stage are cleared.")]
+    [SerializeField] int bossPortalAfterRound = 3;
+    [Tooltip("Portals to choose from after each round, besides the boss's.")]
+    [SerializeField] int portalChoices = 2;
+    [Tooltip("Embers an ember cache gives, times the stage number.")]
+    [SerializeField] int emberCache = 30;
+    [Tooltip("Rounds past a stage's last configured one repeat it, this much faster (speed) per extra round.")]
+    [SerializeField] float extraRoundSpeedUp = 0.06f;
+    [Tooltip("...and with this much less time between arrows per extra round.")]
+    [SerializeField] float extraRoundFireCut = 0.08f;
 
     [Header("Technique scrolls (Sword Arts)")]
     [Tooltip("Chance a downed kite scout also drops a technique scroll.")]
@@ -419,7 +431,12 @@ public class GameManager : MonoBehaviour
     // A scroll that reached the ronin while the round was wrapping up; its arts are offered before the next round.
     bool gatheredScroll;
     int scrollsDropped;
-    int killsSinceSoul;
+    // What clearing the current round gives, picked at the portal that led to it.
+    PortalReward pendingReward;
+    Element pendingElement;
+    // The escalated config for rounds past a stage's configured ones, built once per round.
+    LevelConfig extraRound;
+    int extraRoundFor = -1;
     // The element F5's next soul brings.
     int devSoulElement;
     // Souls carry a hint arrow until the player has caught one this run.
@@ -596,7 +613,7 @@ public class GameManager : MonoBehaviour
 
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0);
-        ui.SetStage(1, stages.Length, 1, stages[0].rounds.Length);
+        ui.SetStage(1, stages.Length, 1, 0);
         ui.SetLives(startingLives, startingLives);
         // The run opens on the first stage's own ground and cover, behind the title menu too.
         if (backdrop != null) backdrop.Show(stages[0].roundsMap);
@@ -1255,7 +1272,7 @@ public class GameManager : MonoBehaviour
         score += scout.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        if (state == State.Playing) MaybeDropSoul(scout.transform.position, true);
+        if (state == State.Playing && Random.value < scoutSoulChance) MaybeDropSoul(scout.transform.position);
         // Scouts are where scrolls usually come from; it lands beside the soul rather than on it.
         if (state == State.Playing) MaybeDropScroll(scout.transform.position + Vector3.right * 0.9f, scrollChanceFromScout);
     }
@@ -1315,7 +1332,7 @@ public class GameManager : MonoBehaviour
     {
         stageIndex = stage;
         boss &= Stage.boss != BossKind.None;
-        roundIndex = boss ? Stage.rounds.Length - 1 : 0;
+        roundIndex = boss ? Mathf.Min(bossPortalAfterRound, maxRounds) - 1 : 0;
         ShowMap(boss ? BossMap : Stage.roundsMap);
         StartCoroutine(boss ? BeginBoss() : BeginRound());
     }
@@ -1329,7 +1346,42 @@ public class GameManager : MonoBehaviour
     }
 
     StageConfig Stage => stages[stageIndex];
-    LevelConfig Round => Stage.rounds[roundIndex];
+    LevelConfig Round => roundIndex < Stage.rounds.Length ? Stage.rounds[roundIndex] : ExtraRound();
+
+    // A round past the stage's configured ones: its last round again, marching faster and shooting more often, with
+    // a commander in the back rank and, from the second extra round, one more rank (up to six).
+    LevelConfig ExtraRound()
+    {
+        int key = stageIndex * 100 + roundIndex;
+        if (extraRound != null && extraRoundFor == key) return extraRound;
+        LevelConfig last = Stage.rounds[Stage.rounds.Length - 1];
+        int extra = roundIndex - Stage.rounds.Length + 1;
+        int rows = Mathf.Min(last.rows + (extra >= 2 ? 1 : 0), 6);
+        var kinds = new SamuraiKind[rows];
+        for (int i = 0; i < rows; i++)
+        {
+            SamuraiKind[] from = last.rowKinds;
+            kinds[i] = from == null || from.Length == 0 ? SamuraiKind.Ashigaru : from[Mathf.Min(i, from.Length - 1)];
+        }
+        kinds[0] = SamuraiKind.Taisho;
+        extraRound = new LevelConfig
+        {
+            columns = last.columns,
+            rows = rows,
+            topRowY = last.topRowY,
+            rowKinds = kinds,
+            scouts = true,
+            diveInterval = last.diveInterval > 0f ? last.diveInterval * Mathf.Pow(0.8f, extra) : 6f,
+            baseSpeed = last.baseSpeed * (1f + extraRoundSpeedUp * extra),
+            maxSpeedMultiplier = last.maxSpeedMultiplier,
+            fireInterval = last.fireInterval * Mathf.Pow(1f - extraRoundFireCut, extra),
+            aimedShotChance = Mathf.Min(0.7f, last.aimedShotChance + 0.05f * extra),
+            arrowSpeed = last.arrowSpeed,
+            samuraiColor = last.samuraiColor,
+        };
+        extraRoundFor = key;
+        return extraRound;
+    }
     // The boss waits on its own ground; without art for it the duel is fought where the rounds were.
     Backdrop.Map BossMap => Stage.bossMap?.ground != null ? Stage.bossMap : Stage.roundsMap;
 
@@ -1345,7 +1397,6 @@ public class GameManager : MonoBehaviour
         highScoreAtStart = highScore;
         stageIndex = 0;
         roundIndex = 0;
-        killsSinceSoul = 0;
         ResetLoadout();
         Save.BeginRun();
         ui.SetLives(lives, maxLives);
@@ -1378,14 +1429,24 @@ public class GameManager : MonoBehaviour
         ClearProjectiles();
         // Blockers carry their damage from round to round; a new stage brings fresh ones.
         if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        // A stage's first round always ends in a soul; later rounds carry what their portal showed.
+        if (roundIndex == 0)
+        {
+            pendingReward = PortalReward.Soul;
+            pendingElement = PickSoulElement();
+        }
 
         LevelConfig round = Round;
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
-        ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, Stage.rounds.Length);
-        string body = roundIndex > 0 ? "Another army marches in."
+        ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, 0);
+        string body = roundIndex >= Stage.rounds.Length + 1 ? "Their finest march."
+            : roundIndex >= Stage.rounds.Length ? "The army regroups."
+            : roundIndex > 0 ? "Another army marches in."
             : stageIndex == 0 ? "Get ready!"
             : stageIndex == 1 ? "Bigger, faster, angrier armies."
             : "The dead march too.";
+        Color rewardColour = RewardColour(pendingReward, pendingElement);
+        body += $"\n<color=#{ColorUtility.ToHtmlStringRGB(rewardColour)}>Reward: {RewardLabel(pendingReward, pendingElement)}</color>";
         ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.RoundsMusic(Stage.boss), sfxLibrary.musicVolume);
@@ -1505,17 +1566,11 @@ public class GameManager : MonoBehaviour
         boonChoice.RefreshHud(loadout);
     }
 
-    // One soul at a time, never from the round's last samurai (the round ends before it could be caught).
-    // A guaranteed drop (a scout's) still waits for the soul already falling.
-    void MaybeDropSoul(Vector3 position, bool guaranteed = false)
+    // Samurai no longer drop souls (they come from the portals); a scout's soul still waits for one already
+    // falling, and never comes once the round's army is gone.
+    void MaybeDropSoul(Vector3 position)
     {
         if (activeSoul != null || army.Remaining == 0) return;
-        killsSinceSoul++;
-        int pull = Upgrades.Rank(UpgradeId.SoulPull);
-        if (!guaranteed && Random.value >= soulDropChance + pull * Upgrades.SoulChancePerRank
-            && killsSinceSoul < soulPityKills - pull * Upgrades.SoulPityPerRank) return;
-
-        killsSinceSoul = 0;
         SpawnSoul(position, PickSoulElement());
     }
 
@@ -1859,17 +1914,217 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
         IceStatue.CrumbleAll();
         yield return GatherDrops();
+        yield return GrantReward();
 
-        if (roundIndex + 1 < Stage.rounds.Length)
-        {
-            roundIndex++;
-            StartCoroutine(BeginRound());
-        }
-        else
+        // The last round leaves only the boss; before that the ronin picks the next round's reward at a portal.
+        if (roundIndex + 1 >= maxRounds)
         {
             StartCoroutine(StageCleared());
+            yield break;
         }
+        Portal chosen = null;
+        yield return ChoosePortal(p => chosen = p);
+        if (chosen.Reward == PortalReward.Boss)
+        {
+            StartCoroutine(StageCleared());
+            yield break;
+        }
+        pendingReward = chosen.Reward;
+        pendingElement = chosen.Element;
+        roundIndex++;
+        StartCoroutine(BeginRound());
     }
+
+    // The cleared round's reward, given before the portals open.
+    IEnumerator GrantReward()
+    {
+        PortalReward reward = pendingReward;
+        // A spring at full health, or a bead or scroll with nothing left to give, falls back to an ember cache.
+        if (reward == PortalReward.Spring && lives >= maxLives) reward = PortalReward.Embers;
+        if (reward == PortalReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PortalReward.Embers;
+        if (reward == PortalReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PortalReward.Embers;
+
+        bool picked = false;
+        switch (reward)
+        {
+            case PortalReward.Soul:
+                Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(pendingElement).Color, 1.4f);
+                Sfx.Play(Sfx.SoulCollect);
+                soulCaught = true;
+                if (OfferBoons(pendingElement, () => picked = true)) yield return new WaitUntil(() => picked);
+                break;
+            case PortalReward.Bead:
+                if (OfferBead(() => picked = true)) yield return new WaitUntil(() => picked);
+                break;
+            case PortalReward.Scroll:
+                scrollsDropped++;
+                Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ArtColor, 1.2f);
+                Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
+                if (OfferArts(() => picked = true)) yield return new WaitUntil(() => picked);
+                break;
+            case PortalReward.Spring:
+                lives = Mathf.Min(lives + 1, maxLives);
+                ui.SetLives(lives, maxLives);
+                Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
+                Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
+                yield return new WaitForSeconds(0.6f);
+                break;
+            case PortalReward.Embers:
+                int embers = emberCache * (stageIndex + 1);
+                Earn(embers);
+                Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
+                Sfx.Play(Sfx.SoulCollect, 0.9f, 1.2f);
+                ui.ShowSubtitle(null, $"+{embers} Soul Embers", RewardColour(reward, pendingElement), 1.6f);
+                yield return new WaitForSeconds(0.6f);
+                break;
+        }
+        state = State.Transition;
+        ronin.ControlsEnabled = false;
+    }
+
+    // The portals open where the army stood. He walks his row (no attacks), the one above him lights, and stepping
+    // up (Space, W / Up, Enter or E) takes him through it to the next round, unless it's the boss's.
+    IEnumerator ChoosePortal(System.Action<Portal> onChosen)
+    {
+        ClearProjectiles();
+        var rewards = RollPortals();
+        Camera cam = Camera.main;
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        float y = CameraShake.Center.y + cam.orthographicSize * 0.35f;
+        var portals = new List<Portal>();
+        for (int i = 0; i < rewards.Count; i++)
+        {
+            float x = CameraShake.Center.x + halfWidth * 1.2f * ((i + 0.5f) / rewards.Count - 0.5f);
+            (PortalReward reward, Element element) = rewards[i];
+            portals.Add(Portal.Spawn(new Vector3(x, y, 0f), reward, element, RewardColour(reward, element),
+                RewardLabel(reward, element), RewardIcon(reward, element), ui.BodyFont));
+        }
+        Sfx.Play(Sfx.SoulSpawn, 1f, 0.7f);
+        ui.ShowSubtitle(null, "Choose your path: stand under a portal and step in.", Color.white, 3f);
+
+        ronin.MoveOnly = true;
+        ronin.ControlsEnabled = true;
+        float readyAt = Time.time + 0.6f;
+        Portal chosen = null;
+        while (chosen == null)
+        {
+            Portal under = null;
+            float best = float.MaxValue;
+            foreach (Portal portal in portals)
+            {
+                float gap = Mathf.Abs(portal.transform.position.x - ronin.Bounds.center.x);
+                if (gap < best)
+                {
+                    best = gap;
+                    under = portal;
+                }
+            }
+            foreach (Portal portal in portals) portal.SetLit(portal == under);
+            if (Time.time >= readyAt && state == State.Transition && StepIn()) chosen = under;
+            yield return null;
+        }
+        ronin.ControlsEnabled = false;
+        ronin.MoveOnly = false;
+        foreach (Portal portal in portals)
+        {
+            if (portal != chosen) portal.Close();
+        }
+        Sfx.Play(Sfx.SoulCollect, 1f, 0.9f);
+        Fx.Play(Fx.Impact, chosen.transform.position, RewardColour(chosen.Reward, chosen.Element), 1.6f);
+
+        // He lines up under it, then walks up into it; the boss's path goes on through StageCleared's own travel.
+        Vector3 below = new Vector3(chosen.transform.position.x, ronin.transform.position.y, ronin.transform.position.z);
+        yield return ronin.WalkTo(below, travelWalkSpeed * 0.6f);
+        if (chosen.Reward != PortalReward.Boss) yield return ThroughPortal(chosen);
+        chosen.Close();
+        onChosen(chosen);
+    }
+
+    static bool StepIn()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Gamepad gamepad = Gamepad.current;
+        Mouse mouse = Mouse.current;
+        return (keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.wKey.wasPressedThisFrame
+                || keyboard.upArrowKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame))
+            || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)
+            || (mouse != null && mouse.leftButton.wasPressedThisFrame);
+    }
+
+    // Into the portal and out of the dark at his place on the row, on the same ground: the cover keeps its damage
+    // and the stage's music plays on, unlike TravelTo between maps.
+    IEnumerator ThroughPortal(Portal portal)
+    {
+        Camera cam = Camera.main;
+        float bottom = CameraShake.Center.y - cam.orthographicSize;
+        Vector3 from = ronin.transform.position;
+        Coroutine entering = StartCoroutine(ronin.WalkTo(new Vector3(from.x, portal.transform.position.y, from.z), travelWalkSpeed));
+        yield return new WaitUntil(() => ronin.transform.position.y > portal.transform.position.y - 3f);
+        yield return ui.FadeTo(1f, travelFadeTime);
+        yield return entering;
+        portal.Close();
+        ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
+        yield return new WaitForSeconds(0.2f);
+        StartCoroutine(ui.FadeTo(0f, travelFadeTime));
+        yield return ronin.WalkTo(ronin.Home, travelWalkSpeed);
+    }
+
+    // The next round's rewards to choose between: no two of a kind, and the boss's portal once enough rounds are
+    // cleared. Souls are the common pick; springs only show while he's hurt, beads and scrolls only with a use.
+    List<(PortalReward, Element)> RollPortals()
+    {
+        var weights = new List<(PortalReward reward, float weight)> { (PortalReward.Soul, 45f), (PortalReward.Embers, 20f) };
+        if (Boons.DrawBead(loadout, 1).Count > 0) weights.Add((PortalReward.Bead, 20f));
+        if (lives < maxLives) weights.Add((PortalReward.Spring, 10f));
+        if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PortalReward.Scroll, 5f));
+
+        var picks = new List<(PortalReward, Element)>();
+        while (picks.Count < portalChoices && weights.Count > 0)
+        {
+            float total = 0f;
+            foreach (var entry in weights) total += entry.weight;
+            float roll = Random.value * total;
+            int index = 0;
+            while (index < weights.Count - 1 && (roll -= weights[index].weight) >= 0f) index++;
+            PortalReward reward = weights[index].reward;
+            weights.RemoveAt(index);
+            picks.Add((reward, reward == PortalReward.Soul ? PickSoulElement() : Element.Fire));
+        }
+        if (roundIndex + 1 >= bossPortalAfterRound) picks.Add((PortalReward.Boss, Element.Fire));
+        return picks;
+    }
+
+    static readonly Color EmberColour = new Color(1f, 0.55f, 0.25f);
+    static readonly Color SpringColour = new Color(1f, 0.4f, 0.45f);
+    static readonly Color BossPortalColour = new Color(0.85f, 0.15f, 0.2f);
+
+    static Color RewardColour(PortalReward reward, Element element) => reward switch
+    {
+        PortalReward.Soul => Boons.Info(element).Color,
+        PortalReward.Bead => Boons.BeadColor,
+        PortalReward.Scroll => Boons.ArtColor,
+        PortalReward.Spring => SpringColour,
+        PortalReward.Boss => BossPortalColour,
+        _ => EmberColour,
+    };
+
+    string RewardLabel(PortalReward reward, Element element) => reward switch
+    {
+        PortalReward.Soul => $"{Boons.Info(element).Name} Soul",
+        PortalReward.Bead => "Spirit Bead",
+        PortalReward.Scroll => "Technique Scroll",
+        PortalReward.Spring => "Healing Spring",
+        PortalReward.Boss => Stage.boss == BossKind.None ? "Onward" : Stage.boss.ToString(),
+        _ => "Soul Embers",
+    };
+
+    Sprite[] RewardIcon(PortalReward reward, Element element) => reward switch
+    {
+        PortalReward.Soul => ArtFor(element)?.soulFrames,
+        PortalReward.Scroll => scrollSprite != null ? new[] { scrollSprite } : null,
+        PortalReward.Spring => ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
+        _ => null,
+    };
 
     // Every cleared stage earns a boon of a random element, then the next stage begins.
     IEnumerator StageCleared()
@@ -1920,7 +2175,7 @@ public class GameManager : MonoBehaviour
         army.Clear();
         ClearProjectiles();
         ui.HideBanner();
-        ui.SetStage(stageIndex + 1, stages.Length, Stage.rounds.Length, Stage.rounds.Length);
+        ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, 0);
         Music.Stop(0.8f);
         // A moon rises over the duel: blood red for Benibana, cold steel for Utsusemi, spirit blue for Shirogane; for the
         // Emperor none, only a starless dark lit by his soul-fire.

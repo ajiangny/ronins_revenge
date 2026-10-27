@@ -73,6 +73,8 @@ public class Ronin : MonoBehaviour
     public event Action ParryFizzled;
 
     public bool ControlsEnabled { get; set; }
+    // He walks his row but can't attack: choosing a portal between rounds.
+    public bool MoveOnly { get; set; }
     // In a safe area (the temple) he walks anywhere inside RoamArea, up and down too, and can't fight. Nowhere else
     // does he leave his row.
     public bool Roaming
@@ -237,7 +239,9 @@ public class Ronin : MonoBehaviour
         {
             if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
             if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
-
+        }
+        if (ControlsEnabled && !Roaming && !MoveOnly && keyboard != null)
+        {
             bool slash = keyboard.spaceKey.isPressed || (mouse != null && mouse.leftButton.isPressed);
             bool parry = keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame
                 || (mouse != null && mouse.rightButton.wasPressedThisFrame);

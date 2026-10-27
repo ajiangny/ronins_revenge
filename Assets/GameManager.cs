@@ -1538,7 +1538,8 @@ public class GameManager : MonoBehaviour
             portrait = benibanaPortrait, closeup = benibanaCloseup,
             // Each close-up is framed on the face, on the centre line and high enough to clear the title block, big
             // enough that the painting's edges sit off screen.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.47f, 0.27f), closeupAt = new Vector2(0f, 200f),
+            // Hers is held back to waist-up, the kiseru's smoke and the lantern-lit hall around her.
+            closeupHeight = 1450f, closeupFocus = new Vector2(0.48f, 0.31f), closeupAt = new Vector2(0f, 200f),
             // Unsealed: framed on her face with her loose hair and the drawn blade around her, held back far enough to
             // see her shoulders; raised a touch so the painting's top edge stays off screen.
             phasePortrait = benibanaPhasePortrait, phaseCloseup = benibanaPhaseCloseup, phaseEpithet = Benibana.PhaseEpithet,
@@ -1550,8 +1551,9 @@ public class GameManager : MonoBehaviour
         BossKind.Utsusemi => new BossVoice
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
-            // Framed on its slit-eye under the hat brim, the brim running off the top right.
-            closeupHeight = 1600f, closeupFocus = new Vector2(0.52f, 0.27f), closeupAt = new Vector2(0f, 230f),
+            // Framed on its slit-eye with the whole hat brim and its pendants on screen, the pass and the clock in the mist
+            // behind; the hat's tip just touches the top edge.
+            closeupHeight = 1550f, closeupFocus = new Vector2(0.485f, 0.22f), closeupAt = new Vector2(0f, 230f),
             // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
             phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
             // Pulled back as far as the painting allows: its left edge limits it, so the slit-eye sits a little left.

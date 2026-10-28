@@ -472,6 +472,45 @@ public static class ProceduralSprites
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
     }
 
+    // A small gold cog, turning: frames a quarter of a tooth apart, so looping them spins it. Gold with a dark rim
+    // and hub, in colour (not white), for Utsusemi's gear-tooth shots.
+    public static Sprite[] Cog => cog != null ? cog : cog = BuildCog(15, 8, 4);
+    static Sprite[] cog;
+
+    static Sprite[] BuildCog(int size, int teeth, int frames)
+    {
+        var result = new Sprite[frames];
+        var gold = new Color32(232, 184, 78, 255);
+        var light = new Color32(255, 230, 150, 255);
+        var dark = new Color32(70, 44, 18, 255);
+        float centre = (size - 1) / 2f, body = size * 0.33f, tip = size * 0.48f, hub = size * 0.12f;
+        for (int f = 0; f < frames; f++)
+        {
+            float turn = f * (360f / teeth) / frames;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - centre, dy = y - centre, r = Mathf.Sqrt(dx * dx + dy * dy);
+                    float angle = Mathf.Repeat(Mathf.Atan2(dy, dx) * Mathf.Rad2Deg - turn, 360f / teeth) / (360f / teeth);
+                    // A tooth covers the middle half of each step round the rim.
+                    float reach = angle > 0.25f && angle < 0.75f ? tip : body;
+                    Color32 c = new Color32(0, 0, 0, 0);
+                    if (r <= hub) c = dark;
+                    else if (r <= reach - 1f) c = dx + dy > 0 ? light : gold;
+                    else if (r <= reach) c = dark;
+                    pixels[y * size + x] = c;
+                }
+            }
+            texture.SetPixels32(pixels);
+            texture.Apply();
+            result[f] = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+        }
+        return result;
+    }
+
     // A soft tongue of flame, white to be tinted: round at its base, narrowing to a point and fading towards its tip.
     // Pivoted at its base, so it can be stood on a rim and turned outward.
     public static Sprite Flame => flame != null ? flame : flame = BuildFlame(32, 64);

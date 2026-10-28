@@ -562,6 +562,26 @@ MonoBehaviour:
     - {fileID: 21300000, guid: ef674024c35c54dcfa9667801c7d3422, type: 3}
     fps: 10
     loop: 1
+  - id: Utsu_LaceP2
+    frames:
+    - {fileID: 21300000, guid: 89ff0a37f6eea48cc98ecbacc8a2cf5d, type: 3}
+    - {fileID: 21300000, guid: bcb603d315baa46fca8d23d269bb410a, type: 3}
+    - {fileID: 21300000, guid: 7a7f7e1e2e31b47db98e01ba2ecf2ede, type: 3}
+    - {fileID: 21300000, guid: 9e20eed7f4a1a4f618ae2c906a021f74, type: 3}
+    - {fileID: 21300000, guid: 5da67eed80c5a4d54a35c70cd216bcf1, type: 3}
+    - {fileID: 21300000, guid: 13edb1cbea2e04daf91c1bcd91e64d9d, type: 3}
+    fps: 8
+    loop: 1
+  - id: Utsu_ClockFace
+    frames:
+    - {fileID: 21300000, guid: 39f6e1438bb654be18fd1e7c70cf60ec, type: 3}
+    fps: 1
+    loop: 1
+  - id: Utsu_EscapeWheel
+    frames:
+    - {fileID: 21300000, guid: a95b65e35e9264c04b9b2e09b44d9b62, type: 3}
+    fps: 1
+    loop: 1
   - id: Shiro_Crescent
     frames:
     - {fileID: 21300000, guid: 3312beff92a1645a09e6afbfa13adeb5, type: 3}

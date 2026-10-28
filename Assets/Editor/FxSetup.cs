@@ -66,7 +66,8 @@ public static class FxSetup
         (Fx.UtsuSwordFlying, 1, true, new Vector2(0.5f, 1f - 72f / 88f)),
         (Fx.UtsuSwordFlyingP2, 1, true, new Vector2(0.5f, 1f - 72f / 88f)),
         // The ground numerals I to V, one per frame, standing on their base line.
-        (Fx.UtsuNumerals, 1, true, new Vector2(0.5f, 0f)),
+        // A gold clock rim lying flat with the hour inside, centred on the spot it marks.
+        (Fx.UtsuNumerals, 1, true, Centre),
         // Its lasers' bodies, tiled along the beam and scrolled: red, and molten orange in phase 2.
         (Fx.UtsuBeamRed, 18, true, Centre),
         (Fx.UtsuBeamMolten, 18, true, Centre),
@@ -78,6 +79,9 @@ public static class FxSetup
         (Fx.SafeZone, 1, true, new Vector2(0.5f, 1f - 25f / 32f)),
         (Fx.SafeZoneIcon, 1, true, Centre),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
+        (Fx.UtsuLaceP2, 8, true, Centre),
+        (Fx.UtsuClockFace, 1, true, Centre),
+        (Fx.UtsuEscapeWheel, 1, true, Centre),
         (Fx.ShiroCrescent, 14, true, Centre),
         (Fx.ShiroSword, 10, true, Centre),
         (Fx.ShiroOrb, 12, true, Centre),

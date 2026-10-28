@@ -698,7 +698,9 @@ public class Utsusemi : Boss
         float speed = secondPhase ? 3f : 2.6f;
         float left = LeftEdge + 0.4f + offset;
         int columns = Mathf.FloorToInt((RightEdge - 0.4f - left) / spacing) + 1;
-        Sprite[] frames = Fx.Frames(Fx.UtsuLace);
+        // Once unwound its lace burns: dark steel cracked with molten light.
+        Sprite[] frames = secondPhase ? Fx.Frames(Fx.UtsuLaceP2) ?? Fx.Frames(Fx.UtsuLace) : Fx.Frames(Fx.UtsuLace);
+        Color glow = secondPhase ? new Color(Molten.r, Molten.g, Molten.b, 0.35f) : new Color(0.8f, 0.85f, 1f, 0.25f);
         float y0 = anchor.y - 1.6f;
         for (int row = 0; row < rows; row++)
         {
@@ -708,7 +710,7 @@ public class Utsusemi : Boss
                 // Every row leaves the gap clear by its own diamonds, so the offset rows can't close it.
                 if (gaps.Exists(g => Mathf.Abs(x - g) < LatticeGap / 2f + DiamondRadius)) continue;
                 Arrow diamond = BulletHell.Enlist(Shoot(new Vector3(x, y0 + row * 0.9f, 0), Vector3.down * speed));
-                if (frames != null) diamond.Restyle(frames, 8f, Color.white, new Vector2(0.7f, 0.7f), 0.22f, new Color(0.8f, 0.85f, 1f, 0.25f), 0.7f);
+                if (frames != null) diamond.Restyle(frames, 8f, Color.white, new Vector2(0.7f, 0.7f), 0.22f, glow, 0.7f);
                 else
                 {
                     diamond.Restyle(ProceduralSprites.White, Lace, new Vector2(0.42f, 0.42f), 0.22f, new Color(0.8f, 0.85f, 1f, 0.3f), 0.7f);
@@ -1139,8 +1141,8 @@ public class Utsusemi : Boss
     class HourMark
     {
         const float Height = 0.8f;
-        // The numeral art is drawn this many world units wide, about the reach of the blow it marks.
-        const float ArtWidth = 1.9f;
+        // The mark is drawn this many world units wide, about the reach of the blow it marks.
+        const float ArtWidth = 2.1f;
         public float x { get; private set; }
         readonly Utsusemi owner;
         readonly int hour;
@@ -1175,16 +1177,16 @@ public class Utsusemi : Boss
             Sprite[] numerals = Fx.Frames(Fx.UtsuNumerals);
             if (numerals != null)
             {
-                // Its ring sits on the ground line, a touch below the feet so it reads as lying flat.
+                // A gold clock rim lying flat on the ground line with the hour inside, like the clock marks.
                 var art = new GameObject("HourNumeral").AddComponent<SpriteRenderer>();
                 art.sprite = numerals[Mathf.Clamp(hour - 1, 0, numerals.Length - 1)];
-                art.transform.position = new Vector3(x, foot.y - 0.2f, 0);
+                art.transform.position = new Vector3(x, foot.y - 0.1f, 0);
                 art.transform.localScale = Vector3.one * (ArtWidth / art.sprite.bounds.size.x);
                 art.color = tint;
                 art.sortingOrder = 8;
                 owner.transient.Add(art.gameObject);
                 strokes.Add(art);
-                ElementFx.Glow(foot + Vector3.up * 0.5f, tint == Color.white ? Gold : tint, 0.5f, 1.6f, 0.3f);
+                ElementFx.Glow(foot, tint == Color.white ? Gold : tint, 0.5f, 1.6f, 0.3f);
                 return;
             }
 
@@ -2322,7 +2324,7 @@ public class Utsusemi : Boss
             }
             if (t >= nextShot)
             {
-                StartCoroutine(WildLaser(k > 0.45f));
+                StartCoroutine(WildLaser(k > 0.45f, Mathf.Lerp(0.4f, 0.2f, k)));
                 nextShot = t + Mathf.Lerp(WildLaserGapStart, WildLaserGapEnd, k * k) * Random.Range(0.7f, 1.3f);
             }
             yield return null;
@@ -2331,12 +2333,44 @@ public class Utsusemi : Boss
 
     // One wild laser from its eye or core: mostly raking the ground, some flung up and out to the sides, swinging as
     // it fires. It burns the ground where it lands but never hits the ronin.
-    IEnumerator WildLaser(bool molten)
+    IEnumerator WildLaser(bool molten, float preview)
     {
         bool fromEye = Random.value < 0.4f;
         float angle = Random.value < 0.75f ? Random.Range(-160f, -20f) : Random.Range(-15f, 195f);
         float swing = Random.Range(-40f, 40f);
         float seconds = Random.Range(0.18f, 0.32f);
+
+        // Previewed first: a thin flickering line where it will open fire, a fainter one where its swing will end, and
+        // a glow growing on the ground where each lands, so even a wild shot reads before it comes.
+        Color tint = molten ? Molten : CoreRed;
+        Vector3 Reach(Vector3 from, float a, out bool ground)
+        {
+            Vector3 heading = Quaternion.Euler(0, 0, a) * Vector3.right;
+            ground = heading.y < -0.05f;
+            return ground ? from + heading * ((GroundY - from.y) / heading.y) : from + heading * 30f;
+        }
+        SpriteRenderer startLine = Bar(Core, Core, 0.04f, Color.clear, 54);
+        SpriteRenderer endLine = Bar(Core, Core, 0.03f, Color.clear, 54);
+        SpriteRenderer startMark = GroundMark(tint), endMark = GroundMark(tint);
+        for (float t = 0; t < preview; t += Time.deltaTime)
+        {
+            float k = t / preview;
+            float flicker = 0.6f + 0.4f * Mathf.Sin(Time.time * 60f);
+            Vector3 from = fromEye ? Eye : Core;
+            Vector3 start = Reach(from, angle, out bool startGround), end = Reach(from, angle + swing, out bool endGround);
+            Stretch(startLine, from, start, 0.03f + 0.03f * k);
+            Stretch(endLine, from, end, 0.02f);
+            startLine.color = new Color(tint.r, tint.g, tint.b, (0.25f + 0.45f * k) * flicker);
+            endLine.color = new Color(tint.r, tint.g, tint.b, 0.18f * flicker);
+            PlaceMark(startMark, start, startGround, tint, k, 1f);
+            PlaceMark(endMark, end, endGround, tint, k, 0.6f);
+            yield return null;
+        }
+        RemoveTransient(startLine);
+        RemoveTransient(endLine);
+        RemoveTransient(startMark);
+        RemoveTransient(endMark);
+
         Beam beam = MakeBeam(fromEye ? Eye : Core, 0.7f, molten);
         Sfx.Play(Sfx.LanternCharge, 0.3f, Random.Range(1.9f, 2.5f));
         CameraShake.Add(0.06f);
@@ -2349,6 +2383,26 @@ public class Utsusemi : Boss
             yield return null;
         }
         EndBeam(beam);
+    }
+
+    // A soft glow on the ground where a previewed laser will land.
+    SpriteRenderer GroundMark(Color tint)
+    {
+        var mark = new GameObject("LaserMark").AddComponent<SpriteRenderer>();
+        mark.sprite = ProceduralSprites.SoftGlow;
+        mark.sortingOrder = 3;
+        mark.color = Color.clear;
+        transient.Add(mark.gameObject);
+        return mark;
+    }
+
+    static void PlaceMark(SpriteRenderer mark, Vector3 at, bool onGround, Color tint, float k, float strength)
+    {
+        if (mark == null) return;
+        mark.enabled = onGround;
+        mark.transform.position = new Vector3(at.x, at.y, 0.3f);
+        mark.transform.localScale = new Vector3(1.6f, 0.5f, 1f) * (0.5f + 0.7f * k);
+        mark.color = new Color(tint.r, tint.g, tint.b, (0.2f + 0.45f * k) * strength);
     }
 
     void AddCore()
@@ -2406,6 +2460,12 @@ public class Utsusemi : Boss
         float nextEmber = 0f;
         while (!IsDead && sprite != null)
         {
+            // Its fire stands still while it holds time.
+            if (timeHeld)
+            {
+                yield return null;
+                continue;
+            }
             float parent = sprite.transform.lossyScale.x;
             float throb = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
             heat.transform.position = new Vector3(sprite.bounds.center.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0.1f);
@@ -2484,13 +2544,58 @@ public class Utsusemi : Boss
         return base.Fall();
     }
 
-    // A small gold gear tooth: breakable, one of a bullet-hell curtain.
+    // A small spinning gold cog: breakable, one of a bullet-hell curtain. Tinted (the Thirteenth Hour's molten
+    // sparks) it keeps its shape in that colour.
     Arrow GearShot(Vector3 from, Vector3 velocity, Color? tint = null)
     {
         Color c = tint ?? Gold;
         Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
-        shot.Restyle(ProceduralSprites.Disc, c, new Vector2(0.34f, 0.34f), 0.17f, new Color(c.r, c.g, c.b, 0.45f), 0.8f);
+        Color body = tint.HasValue ? Color.Lerp(Color.white, c, 0.6f) : Color.white;
+        shot.Restyle(ProceduralSprites.Cog, 14f, body, new Vector2(0.42f, 0.42f), 0.17f, new Color(c.r, c.g, c.b, 0.45f), 0.9f);
         return shot;
+    }
+
+    // Escapement's escape wheel: a great brass wheel turning behind its body, one tooth a tick.
+    SpriteRenderer escapeWheel;
+    const int WheelTeeth = 30;
+    const float WheelSize = 5.6f;
+    Vector3 WheelCentre => Core + new Vector3(0, 0.5f, 0.4f);
+
+    void ShowEscapeWheel(bool show)
+    {
+        if (show && escapeWheel == null)
+        {
+            Sprite[] frames = Fx.Frames(Fx.UtsuEscapeWheel);
+            if (frames == null) return;
+            escapeWheel = new GameObject("EscapeWheel").AddComponent<SpriteRenderer>();
+            escapeWheel.sprite = frames[0];
+            escapeWheel.sortingOrder = sprite.sortingOrder - 3;
+            transient.Add(escapeWheel.gameObject);
+            // Wider than its body, so the toothed rim rings it like a clock halo instead of hiding behind it.
+            escapeWheel.transform.localScale = Vector3.one * (WheelSize / frames[0].bounds.size.x);
+            escapeWheel.color = new Color(1f, 1f, 1f, 0f);
+        }
+        else if (!show && escapeWheel != null)
+        {
+            RemoveTransient(escapeWheel);
+            escapeWheel = null;
+        }
+    }
+
+    // Steps the wheel on one tooth with a snap and a flash, from where it hangs behind the core.
+    IEnumerator TurnEscapeWheel(float alpha, float seconds)
+    {
+        if (escapeWheel == null) yield break;
+        float from = escapeWheel.transform.eulerAngles.z, to = from - 360f / WheelTeeth;
+        for (float t = 0; t < seconds && escapeWheel != null; t += Time.deltaTime)
+        {
+            float k = Mathf.Clamp01(t / seconds);
+            // Eased hard into a dead stop, like its steps.
+            float eased = 1f - (1f - k) * (1f - k) * (1f - k);
+            escapeWheel.transform.SetPositionAndRotation(WheelCentre, Quaternion.Euler(0, 0, Mathf.Lerp(from, to, eased)));
+            escapeWheel.color = new Color(1f, 0.95f, 0.85f, alpha);
+            yield return null;
+        }
     }
 
     // Escapement: the clock it winds. It rocks side to side like an escapement's anchor, and on every tick its core
@@ -2502,7 +2607,14 @@ public class Utsusemi : Boss
         int ticks = secondPhase ? 14 : 10;
         Sfx.Play(Sfx.GearGrind, 0.5f, 1.6f);
         ElementFx.Glow(Core, BeamColour, 0.7f, 2.5f, 0.4f, transform);
-        yield return Wait(0.45f);
+        // The escape wheel rises behind it, turning up to speed.
+        ShowEscapeWheel(true);
+        for (float t = 0; t < 0.45f && escapeWheel != null; t += Time.deltaTime)
+        {
+            escapeWheel.transform.SetPositionAndRotation(WheelCentre, Quaternion.Euler(0, 0, -t * 90f));
+            escapeWheel.color = new Color(1f, 0.95f, 0.85f, 0.75f * t / 0.45f);
+            yield return null;
+        }
         float home = anchor.x;
         for (int i = 0; i < ticks; i++)
         {
@@ -2512,9 +2624,15 @@ public class Utsusemi : Boss
             yield return Dash(new Vector3(Mathf.Clamp(home + side, LeftEdge + 1.5f, RightEdge - 1.5f), anchor.y, anchor.z), 0.07f);
             Tick(0.7f);
             Vector3 from = Core;
+            bool bell = i % 4 == 3;
+            // Each tick: the wheel snaps on a tooth, and its heart flashes as the shot leaves it.
+            StartCoroutine(TurnEscapeWheel(bell ? 0.95f : 0.75f, 0.12f));
+            Fx.Play(Fx.Impact, from, bell ? BulletHell.Bronze : Gold, bell ? 1.1f : 0.6f);
+            ElementFx.Glow(from, bell ? BulletHell.Bronze : BeamColour, 0.6f, bell ? 3f : 1.6f, 0.2f, transform);
+            if (bell) TimeRipple.Emit(from, 3.5f, 0.35f, 0.5f);
             Vector3 at = ronin.Bounds.center;
             yield return BulletHell.Room(4);
-            if (i % 4 == 3)
+            if (bell)
             {
                 BulletHell.MakeBell(BulletHell.Enlist(Shoot(from, (at - from).normalized * 5f)), 1.1f);
                 Sfx.Play(Sfx.MidnightChime, 0.35f, 1.6f);
@@ -2531,6 +2649,13 @@ public class Utsusemi : Boss
             yield return Wait(Mathf.Lerp(0.6f, secondPhase ? 0.28f : 0.34f, k));
         }
         yield return Dash(new Vector3(home, anchor.y, anchor.z), 0.1f);
+        // The wheel winds down and fades.
+        for (float t = 0; t < 0.35f && escapeWheel != null; t += Time.deltaTime)
+        {
+            escapeWheel.color = new Color(1f, 0.95f, 0.85f, 0.75f * (1f - t / 0.35f));
+            yield return null;
+        }
+        ShowEscapeWheel(false);
         PlayIdle();
     }
 
@@ -2605,12 +2730,16 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.LanternCharge, 0.6f, 0.6f);
         yield return Wait(0.5f);
 
-        // Time stops.
+        // Time stops: the clock falls silent, everything in the air hangs, a clock face fades up over the field and
+        // a ripple spreads from its fist as the colour drains away.
         Vector3 hand = stopFrames != null ? OnSprite(FlamePoints[0].x, FlamePoints[0].y) : Head;
         Sfx.Play(Sfx.MidnightChime, 0.8f, 0.5f);
         Music.Duck(0.2f, 4f);
         CameraShake.Add(0.2f);
+        HoldTime(true);
+        StartCoroutine(ShowClockFace());
         TimeRipple.Emit(hand, 16f, 1f, 1.8f);
+        TimeRipple.Emit(hand, 9f, 0.6f, 1.2f);
         yield return StopFade(0f, 1f, 0.35f);
 
         float lowest = ronin.Bounds.center.y + 5.5f;
@@ -2638,7 +2767,7 @@ public class Utsusemi : Boss
             }
             float y = lowest + r * NeedleRowGap;
             yield return BulletHell.Room(30);
-            needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.7f, new[] { gap }, gapWidth, 0f));
+            needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.8f, new[] { gap }, gapWidth, 0f));
             TimeRipple.Emit(new Vector3(gap, y, 0), 2.5f, 0.6f, 0.5f);
             Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
             lastGap = gap;
@@ -2654,6 +2783,8 @@ public class Utsusemi : Boss
         if (Sfx.Has(Sfx.BellToll)) Sfx.Play(Sfx.BellToll, 0.9f, 1f);
         else Sfx.Play(Sfx.MidnightChime, 1f, 0.9f);
         CameraShake.Add(0.25f);
+        HoldTime(false);
+        StartCoroutine(ShatterClockFace());
         foreach (Arrow needle in needles) if (needle != null) needle.Turn(Vector3.down * NeedleSpeed);
         needles.Clear();
         yield return StopFade(1f, 0f, 0.15f);
@@ -2663,8 +2794,95 @@ public class Utsusemi : Boss
         yield return Wait(0.8f);
     }
 
-    // A molten clock-hand needle: unparryable, through cover, but a cut breaks it.
-    Arrow Needle(Vector3 from, Vector3 velocity) => BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, velocity)), Molten);
+    // A fragment of its burning lace, hung in stopped time: unparryable and through cover, but a cut breaks it.
+    // Without the phase-two lace art, a molten seal-dart.
+    Arrow Needle(Vector3 from, Vector3 velocity)
+    {
+        Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
+        Sprite[] frames = Fx.Frames(Fx.UtsuLaceP2);
+        if (frames == null) return BulletHell.MakeSealDart(shot, Molten);
+        shot.Restyle(frames, 8f, Color.white, new Vector2(0.85f, 0.85f), 0.27f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 1f);
+        // Each hangs at its own tilt, like a shard caught mid-fall.
+        shot.Art.transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
+        shot.Unparryable = true;
+        shot.PassesCover = true;
+        return shot;
+    }
+
+    // While time is held: everything else it has in the air hangs where it is, and its own fire stands still.
+    bool timeHeld;
+    readonly List<(Arrow shot, Vector3 velocity)> held = new List<(Arrow, Vector3)>();
+    SpriteRenderer clockFace;
+
+    void HoldTime(bool hold)
+    {
+        timeHeld = hold;
+        if (hold)
+        {
+            foreach (Arrow shot in FindObjectsByType<Arrow>(FindObjectsSortMode.None))
+            {
+                if (shot == null || !shot.isActiveAndEnabled || needles.Contains(shot)) continue;
+                held.Add((shot, shot.Velocity));
+                shot.Steer(Vector3.zero);
+            }
+        }
+        else
+        {
+            foreach ((Arrow shot, Vector3 velocity) in held) if (shot != null) shot.Steer(velocity);
+            held.Clear();
+        }
+    }
+
+    // The stopped hour made visible: a great clock face fades up over the field, stopped. Without its art, a ring.
+    IEnumerator ShowClockFace()
+    {
+        if (clockFace != null) Destroy(clockFace.gameObject);
+        clockFace = new GameObject("ClockFace").AddComponent<SpriteRenderer>();
+        Sprite[] art = Fx.Frames(Fx.UtsuClockFace);
+        clockFace.sprite = art != null ? art[0] : ProceduralSprites.Ring(64);
+        // Under every shot, so the hanging fragments always read over it.
+        clockFace.sortingOrder = -10;
+        transient.Add(clockFace.gameObject);
+        Vector3 centre = CameraShake.Center;
+        clockFace.transform.position = new Vector3(centre.x, centre.y + 0.6f, 0.5f);
+        float size = Camera.main.orthographicSize * 1.3f;
+        float scale = size / clockFace.sprite.bounds.size.y;
+        for (float t = 0; t < 0.35f && clockFace != null; t += Time.deltaTime)
+        {
+            float k = t / 0.35f;
+            clockFace.transform.localScale = Vector3.one * scale * Mathf.Lerp(1.15f, 1f, 1f - (1f - k) * (1f - k));
+            clockFace.color = new Color(1f, 0.92f, 0.75f, ClockFaceAlpha * k);
+            yield return null;
+        }
+        while (clockFace != null && timeHeld)
+        {
+            // A slow breath while it hangs there, so it reads as held, not gone.
+            clockFace.color = new Color(1f, 0.92f, 0.75f, ClockFaceAlpha * (0.85f + 0.15f * Mathf.Sin(Time.time * 3f)));
+            yield return null;
+        }
+    }
+
+    const float ClockFaceAlpha = 0.28f;
+
+    // Time runs again and the clock face shatters: it flares, swells and is gone in a burst of gear parts.
+    IEnumerator ShatterClockFace()
+    {
+        if (clockFace == null) yield break;
+        SpriteRenderer face = clockFace;
+        clockFace = null;
+        Vector3 at = face.transform.position;
+        if (Fx.Play(Fx.UtsuParts, at, Color.white, 4f) == null) Fx.Play(Fx.Impact, at, Gold, 4f);
+        Debris.BurstSprites(at, art.deathParticles, Gold, 18, 1.2f, 9f);
+        Vector3 from = face.transform.localScale;
+        for (float t = 0; t < 0.3f && face != null; t += Time.deltaTime)
+        {
+            float k = t / 0.3f;
+            face.transform.localScale = from * (1f + 0.25f * k);
+            face.color = new Color(1f, 1f, 0.9f, Mathf.Lerp(0.6f, 0f, k));
+            yield return null;
+        }
+        RemoveTransient(face);
+    }
 
     IEnumerator StopFade(float from, float to, float seconds)
     {
@@ -2680,6 +2898,9 @@ public class Utsusemi : Boss
     void ClearStoppedTime()
     {
         TimeRipple.SetStop(0f);
+        if (timeHeld) HoldTime(false);
+        if (clockFace != null) Destroy(clockFace.gameObject);
+        clockFace = null;
         foreach (Arrow needle in needles) if (needle != null) needle.Pop(Molten);
         needles.Clear();
     }

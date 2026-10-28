@@ -2215,10 +2215,10 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
     }
 
-    const string PathHint = "SPACE / E  to choose";
+    const string PathHint = "E / ENTER  to choose";
 
-    // The paths open where the army stood. He walks his row (no attacks), the one above him lights and the HUD says
-    // what it gives, and stepping up (Space, W / Up, Enter or E) picks it: its reward floats away up the field and
+    // The paths open where the army stood. He walks his row (no attacks); the one he's under lights and a tooltip says
+    // what it gives, and E or Enter picks it: its reward floats away up the field and
     // he follows it to the next round, or to the boss.
     IEnumerator ChoosePath(System.Action<RewardPath> onChosen)
     {
@@ -2242,10 +2242,12 @@ public class GameManager : MonoBehaviour
         float readyAt = Time.time + 0.6f;
         RewardPath chosen = null;
         RewardPath described = null;
+        bool shownOnce = false;
         while (chosen == null)
         {
+            // Only a path he's standing under lights; between them nothing does, and the choose key does nothing.
             RewardPath under = null;
-            float best = float.MaxValue;
+            float best = RewardPath.Reach;
             foreach (RewardPath path in paths)
             {
                 float gap = Mathf.Abs(path.transform.position.x - ronin.Bounds.center.x);
@@ -2256,12 +2258,17 @@ public class GameManager : MonoBehaviour
                 }
             }
             foreach (RewardPath path in paths) path.SetLit(path == under);
-            if (under != described)
+            // Between paths, a quiet prompt rides over his head instead.
+            Vector3 overHead = new Vector3(ronin.Bounds.center.x, ronin.TopY + 1.4f, 0f);
+            if (under != described || !shownOnce)
             {
                 described = under;
-                ui.ShowPathInfo(under.TooltipAnchor, RewardDescription(under.Reward), under.Colour, PathHint);
+                shownOnce = true;
+                if (under != null) ui.ShowPathInfo(under.TooltipAnchor, RewardDescription(under.Reward), under.Colour, PathHint);
+                else ui.ShowPathInfo(overHead, "Walk under a path.", GameUI.MutedColour, "");
             }
-            if (Time.time >= readyAt && state == State.Transition && StepIn()) chosen = under;
+            if (under == null) ui.MovePathInfo(overHead);
+            if (under != null && Time.time >= readyAt && state == State.Transition && ChooseKey()) chosen = under;
             yield return null;
         }
         ui.HidePathInfo();
@@ -2296,15 +2303,15 @@ public class GameManager : MonoBehaviour
         _ => "",
     };
 
-    static bool StepIn()
+    // E or Enter (pad A) chooses a path. Not Space or a click: they slash, and a player still swinging as the army
+    // falls shouldn't take a path unread.
+    static bool ChooseKey()
     {
         Keyboard keyboard = Keyboard.current;
         Gamepad gamepad = Gamepad.current;
-        Mouse mouse = Mouse.current;
-        return (keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.wKey.wasPressedThisFrame
-                || keyboard.upArrowKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame))
-            || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame)
-            || (mouse != null && mouse.leftButton.wasPressedThisFrame);
+        return (keyboard != null && (keyboard.eKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame
+                || keyboard.numpadEnterKey.wasPressedThisFrame))
+            || (gamepad != null && gamepad.buttonSouth.wasPressedThisFrame);
     }
 
     // After the reward up the field into the dark, and out of it at his place on the row, on the same ground: the cover

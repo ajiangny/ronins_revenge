@@ -267,6 +267,9 @@ public class GameUI : MonoBehaviour
         pathShown = false;
     }
 
+    // Keeps the tooltip as it is but hangs it from a new point, for one that follows him.
+    public void MovePathInfo(Vector3 anchor) => pathAnchor = anchor;
+
     void PlacePathInfo()
     {
         Camera cam = Camera.main;

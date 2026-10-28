@@ -19,6 +19,9 @@ public class RewardPath : MonoBehaviour
     // Gives up on the icon once it's this long gone, wherever it is.
     const float RiseTime = 3f;
 
+    // How far either side of it (in world units) the ronin counts as under it; between paths none is.
+    public const float Reach = 1.4f;
+
     public PathReward Reward { get; private set; }
     public Element Element { get; private set; }
     public Color Colour => colour;

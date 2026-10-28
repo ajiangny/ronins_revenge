@@ -24,7 +24,7 @@ public enum BoonId
     InfernoShuriken, GlacialShuriken, ThunderShuriken,
     BurningRiposte, FrozenRiposte, ThunderRiposte,
     BlazingHands, Kindling,
-    TidalRenewal, GlacierWall,
+    TidalRenewal, GlacierShell,
     StormStep, StaticCharge,
     ThermalShock, PlasmaArc, Superconductor,
     Wildfire, StillWater, RaijinsDrum,
@@ -197,9 +197,10 @@ public static class Boons
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
             Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
-        new BoonDefinition { Id = BoonId.GlacierWall, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Wall",
-            Description = "Rebuild every <b>Blocker</b> now, sheathed in ice, and for every stage after.",
-            StatLabel = "Blocker health:", Values = new[] { 0.25f, 0.5f, 1f }, Format = Percent },
+        // Once Glacier Wall (tougher cover, which only stopped his own slashes the more); now a shell on him alone.
+        new BoonDefinition { Id = BoonId.GlacierShell, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Shell",
+            Description = "A shell of ice takes one blow for you, then <b>Shatters</b> into homing shards. It grows back over time.",
+            StatLabel = "Regrows in:", Values = new[] { 18f, 13f, 9f }, Format = Seconds },
 
         // Lightning: jolt. Chains and speed.
         new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",

@@ -109,6 +109,7 @@ public class BoonChoiceUI : MonoBehaviour
     readonly HudSlot[] hudSlots = new HudSlot[3];
     RectTransform passiveRow;
     readonly List<Image> passiveIcons = new List<Image>();
+    IReadOnlyList<EquippedBoon> hudPassives = new List<EquippedBoon>();
     readonly List<TextMeshProUGUI> passiveTips = new List<TextMeshProUGUI>();
     CanvasGroup tips;
     static readonly string[] SlotKeys = { "Space", "W", "Shift" };
@@ -503,6 +504,13 @@ public class BoonChoiceUI : MonoBehaviour
     {
         hudSlots[(int)BoonSlot.Special].cooldown.fillAmount = 1f - ronin.ShurikenCharge;
         hudSlots[(int)BoonSlot.Parry].cooldown.fillAmount = 1f - ronin.ParryCharge;
+        // Glacier Shell's icon stays dim while the shell grows back.
+        for (int i = 0; i < hudPassives.Count && i < passiveIcons.Count; i++)
+        {
+            if (hudPassives[i].Boon.Id != BoonId.GlacierShell) continue;
+            Color c = passiveIcons[i].color;
+            passiveIcons[i].color = new Color(c.r, c.g, c.b, ronin.ShellCharge >= 1f ? 1f : 0.3f + 0.4f * ronin.ShellCharge);
+        }
 
         // Names and keys stay hidden so the column is small; holding Tab (or the gamepad's View button) shows them.
         bool held = (Keyboard.current != null && Keyboard.current.tabKey.isPressed)
@@ -536,6 +544,7 @@ public class BoonChoiceUI : MonoBehaviour
             }
         }
 
+        hudPassives = loadout.Passives;
         while (passiveIcons.Count < loadout.Passives.Count)
         {
             // Passives stack up the column above the ability slots.

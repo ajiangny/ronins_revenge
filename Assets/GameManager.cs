@@ -1665,7 +1665,7 @@ public class GameManager : MonoBehaviour
     {
         if (backdrop != null) backdrop.Show(map);
         blockers.Use(map?.blockers, map?.blockerPattern);
-        blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        blockers.Rebuild();
     }
 
     StageConfig Stage => stages[stageIndex];
@@ -1790,7 +1790,7 @@ public class GameManager : MonoBehaviour
             yield return tutorial.Drills();
         }
         // Blockers carry their damage from round to round; a new stage brings fresh ones.
-        if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
+        if (roundIndex == 0) blockers.Rebuild();
         // A stage's first round always ends in a soul; later rounds carry what their path showed.
         if (roundIndex == 0)
         {
@@ -2266,13 +2266,6 @@ public class GameManager : MonoBehaviour
                     score += OfferingPoints * (stageIndex + 1);
                     highScore = Mathf.Max(highScore, score);
                     ui.SetScore(score);
-                }
-                break;
-            case BoonId.GlacierWall:
-                blockers.Rebuild(loadout.BlockerHealthMultiplier);
-                foreach (Vector3 spot in blockers.BlockerPositions)
-                {
-                    Fx.Play(Fx.IceBurst, spot, Color.white, 1.3f);
                 }
                 break;
         }

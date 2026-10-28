@@ -245,6 +245,60 @@ public class Ronin : MonoBehaviour
         if (UltimateFill >= 1f) UltimateFilled?.Invoke();
     }
 
+    // Glacier Shell: a bubble of ice that takes one blow for him, bursts into homing shards and grows back after the
+    // boon's time (shorter at each rarity, so a Spirit Bead quickens it).
+    const int ShellShards = 5;
+    const float ShellGrace = 1f;
+    static readonly Color ShellColour = new Color(0.65f, 0.9f, 1f);
+    float shellBrokenAt = float.NegativeInfinity;
+    SpriteRenderer shell;
+
+    bool ShellUp => Loadout.Has(BoonId.GlacierShell, out float regrow) && Time.time - shellBrokenAt >= regrow;
+    // 0 right after it breaks, 1 while it's up; the HUD dims the boon's icon until then.
+    public float ShellCharge => Loadout.Has(BoonId.GlacierShell, out float regrow) ? Mathf.Clamp01((Time.time - shellBrokenAt) / regrow) : 1f;
+
+    void BreakShell(Vector3 contact)
+    {
+        shellBrokenAt = Time.time;
+        invulnerableUntil = Time.time + ShellGrace;
+        Vector3 at = Bounds.center;
+        Fx.Play(Fx.IceBurst, at, Color.white, 1.8f);
+        Debris.BurstSprites(contact, art.deathParticles, ShellColour, 12, 1f, 6f);
+        Sfx.Play(Sfx.WardShatter, 1f, 1.1f);
+        Sfx.Play(Sfx.FrostChill);
+        CameraShake.Add(0.2f);
+        for (int i = 0; i < ShellShards; i++) LaunchIceShard(at, RiposteTarget, ShellShardFreeze);
+    }
+
+    // As long as a shard from a shattered statue holds what it hits.
+    const float ShellShardFreeze = 1.5f;
+
+    // The shell's bubble: a pale glow round him that breathes while it's up and is gone while it regrows.
+    void UpdateShell()
+    {
+        bool up = ShellUp && ControlsEnabled && !Roaming;
+        if (shell == null)
+        {
+            if (!up) return;
+            shell = new GameObject("GlacierShell").AddComponent<SpriteRenderer>();
+            shell.transform.SetParent(transform, false);
+            shell.sprite = ProceduralSprites.Glow;
+        }
+        if (up && !shell.enabled)
+        {
+            // Grows back with a shimmer.
+            Fx.Play(Fx.IceBurst, Bounds.center, Color.white, 1.1f);
+            Sfx.Play(Sfx.FrostChill, 0.5f, 1.4f);
+        }
+        shell.enabled = up;
+        if (!up) return;
+        float breathe = Mathf.Sin(Time.time * 3f);
+        shell.transform.position = Bounds.center + Vector3.forward * 0.05f;
+        shell.transform.localScale = Vector3.one * (Bounds.size.y * (1.5f + 0.04f * breathe) / transform.lossyScale.y);
+        shell.sortingOrder = sprite.sortingOrder + 1;
+        shell.color = new Color(ShellColour.r, ShellColour.g, ShellColour.b, 0.3f + 0.06f * breathe);
+    }
+
     // Dev tools (F9): a full bar at once.
     public void FillUltimate()
     {
@@ -333,6 +387,7 @@ public class Ronin : MonoBehaviour
             if (keyboard.qKey.wasPressedThisFrame && (Allowed & Moves.Ultimate) != 0 && UltimateReady) StartUltimate();
         }
         UpdateUltimate();
+        UpdateShell();
         UpdateLoopClip();
     }
 
@@ -949,6 +1004,11 @@ public class Ronin : MonoBehaviour
     public void TakeHit(Vector3 contact)
     {
         if (!ControlsEnabled || Invincible || Shielded || Time.time < invulnerableUntil) return;
+        if (ShellUp)
+        {
+            BreakShell(contact);
+            return;
+        }
 
         invulnerableUntil = Time.time + invulnerableTime;
         HitFlash.Flash(sprite);

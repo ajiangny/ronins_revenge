@@ -43,7 +43,6 @@ public class BlockerWall : MonoBehaviour
     [SerializeField] float sideInset = 2.5f;
     [SerializeField] float gap = 0.05f;
 
-    float healthMultiplier = 1f;
     // The set Rebuild builds from: the courtyard's own, unless the map on show brought its own (Use).
     BlockerType[] activeTypes;
     string activePattern;
@@ -80,10 +79,8 @@ public class BlockerWall : MonoBehaviour
         foreach (Transform child in transform) Destroy(child.gameObject);
     }
 
-    // healthMultiplier toughens every blocker (Glacier Wall).
-    public void Rebuild(float healthMultiplier = 1f)
+    public void Rebuild()
     {
-        this.healthMultiplier = healthMultiplier;
         built.Clear();
         foreach (Transform child in transform)
         {
@@ -151,10 +148,8 @@ public class BlockerWall : MonoBehaviour
         var art = new GameObject("Sprite").AddComponent<SpriteRenderer>();
         art.transform.SetParent(blocker.transform, false);
         art.sprite = look[0];
-        // Glacier Wall's tougher blockers are sheathed in ice.
-        if (healthMultiplier > 1f) art.color = new Color(0.75f, 0.9f, 1f);
         art.transform.localScale = Vector3.one * (type.height / art.sprite.bounds.size.y);
 
-        blocker.AddComponent<Blocker>().Init(Mathf.CeilToInt(type.health * healthMultiplier), art, look, type.debris);
+        blocker.AddComponent<Blocker>().Init(type.health, art, look, type.debris);
     }
 }

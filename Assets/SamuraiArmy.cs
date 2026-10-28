@@ -32,6 +32,12 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] int shieldHealth = 2;
     [Tooltip("The Bellringer's own look. Wired by Ninja/Apply Sprite Art; empty draws it as a bronze-tinted Bushi.")]
     [SerializeField] CharacterArt bellringerArt;
+    [Tooltip("The Shieldbearer's own look (a dead man behind a temple door). Wired by Ninja/Apply Sprite Art; empty draws it as a steel-tinted Bushi.")]
+    [SerializeField] CharacterArt shieldbearerArt;
+    [Tooltip("The Yurei's own look (an onryo in a burial kimono). Wired by Ninja/Apply Sprite Art; empty draws it as a cyan Bushi.")]
+    [SerializeField] CharacterArt yureiArt;
+    [Tooltip("The kite scout's own look (a corpse lashed to a torn kite). Wired by Ninja/Apply Sprite Art; empty flies the Ashigaru, tinted red.")]
+    [SerializeField] CharacterArt scoutArt;
     [Tooltip("Bellringers take this many hits to fall.")]
     [SerializeField] int bellHealth = 2;
     [Tooltip("Average seconds between tolls. One living bellringer rings each time.")]
@@ -236,7 +242,7 @@ public class SamuraiArmy : MonoBehaviour
                 Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY + entryOffset, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
-                soldier.Bronzed = kind == SamuraiKind.Bellringer && bellringerArt == null;
+                soldier.StandIn = OwnArt(kind) == null;
                 soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
                     kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth
                     : kind == SamuraiKind.Bellringer ? bellHealth : 1);
@@ -320,12 +326,23 @@ public class SamuraiArmy : MonoBehaviour
 
     // Taisho wear the commander's look, archers the Bushi's and Ashigaru the foot soldier's, so each kind reads at a glance.
     // Yurei are Bushi ghosts: the Bushi art, drawn translucent and cyan by the samurai itself.
+    // The kinds that once borrowed the Bushi art have their own; null until it's drawn.
+    CharacterArt OwnArt(SamuraiKind kind) => kind switch
+    {
+        SamuraiKind.Bellringer => bellringerArt,
+        SamuraiKind.Shieldbearer => shieldbearerArt,
+        SamuraiKind.Yurei => yureiArt,
+        _ => null,
+    };
+
+    // The kite scout's art, or null to fly the Ashigaru as before.
+    public CharacterArt ScoutArt => scoutArt;
+
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {
         SamuraiKind.Taisho => samuraiByRow[0],
-        SamuraiKind.Bellringer when bellringerArt != null => bellringerArt,
-        SamuraiKind.Bellringer => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
-        SamuraiKind.Archer or SamuraiKind.Shieldbearer or SamuraiKind.Yurei => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
+        SamuraiKind.Bellringer or SamuraiKind.Shieldbearer or SamuraiKind.Yurei when OwnArt(kind) != null => OwnArt(kind),
+        SamuraiKind.Archer or SamuraiKind.Bellringer or SamuraiKind.Shieldbearer or SamuraiKind.Yurei => samuraiByRow[Mathf.Min(1, samuraiByRow.Length - 1)],
         _ => samuraiByRow[samuraiByRow.Length - 1],
     };
 

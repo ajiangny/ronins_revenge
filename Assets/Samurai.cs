@@ -8,9 +8,10 @@ public class Samurai : MonoBehaviour, IHittable
     // Encased samurai are drawn fully icy with a pale halo, so they stand out from the army's lighter frost tint.
     static readonly Color IceColor = new Color(0.45f, 0.85f, 1f);
     static readonly Color IceGlow = new Color(0.6f, 0.9f, 1f, 0.7f);
-    // Shieldbearers wear steel-blue armour so the front wall reads apart from the archers behind it.
+    // Without their own art, shieldbearers wear steel-blue armour so the front wall reads apart from the archers.
     static readonly Color ShieldColor = new Color(0.6f, 0.72f, 0.95f);
-    // Yurei are ghosts: a pale cyan, see-through body over a soft spirit glow, so they read as dead at a glance.
+    // Yurei are bodiless souls: a pale cyan, see-through body over a soft spirit glow, so they read apart from the
+    // walking dead at a glance. On their own onryo art the cyan is lighter, so the white burial kimono still reads.
     static readonly Color GhostColor = new Color(0.6f, 0.95f, 1f);
     static readonly Color GhostGlow = new Color(0.4f, 0.9f, 1f, 0.45f);
     static readonly Color GhostArrow = new Color(0.55f, 0.95f, 1f);
@@ -88,8 +89,9 @@ public class Samurai : MonoBehaviour, IHittable
     // Shieldbearers and bellringers never shoot, so the rank behind them looses over their heads.
     public bool CanFireKind => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer;
 
-    // Without its own art a bellringer is a bronze-tinted Bushi.
-    public bool Bronzed { get; set; }
+    // Wearing the Bushi art because its kind has none of its own yet: a shieldbearer is then tinted steel, a
+    // bellringer bronze and a yurei a stronger cyan, so each still reads apart from the archers.
+    public bool StandIn { get; set; }
 
     public void Fire(float arrowSpeed)
     {
@@ -267,15 +269,15 @@ public class Samurai : MonoBehaviour, IHittable
         }
         frost = amount;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
-        if (Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);
-        if (Bronzed) clan = Color.Lerp(clan, BronzeColor, 0.65f);
+        if (StandIn && Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);
+        if (StandIn && Kind == SamuraiKind.Bellringer) clan = Color.Lerp(clan, BronzeColor, 0.65f);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
         {
-            body = Color.Lerp(body, GhostColor, 0.7f);
+            body = Color.Lerp(body, GhostColor, StandIn ? 0.7f : 0.35f);
             body.a = 0.65f + 0.15f * Mathf.Sin(Time.time * 2.2f + ghostPhase);
         }
         animator.Renderer.color = body;

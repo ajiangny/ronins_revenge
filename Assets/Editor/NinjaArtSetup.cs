@@ -16,7 +16,10 @@ public static class NinjaArtSetup
     [MenuItem("Ninja/Apply Sprite Art")]
     public static void Apply()
     {
-        Sprite[] samuraiParticles = { Load("Effects/Petal"), Load("Effects/Smoke") };
+        // The army is dead (Story/Army.md): it falls to bone chips and ash once they're drawn, petals and smoke until then.
+        Sprite[] samuraiParticles = HasSprite("Effects/Bone") && HasSprite("Effects/Ash")
+            ? new[] { Load("Effects/Bone"), Load("Effects/Ash") }
+            : new[] { Load("Effects/Petal"), Load("Effects/Smoke") };
 
         CharacterArt ronin = SaveArt("Ronin", Frames("Ronin", "Idle"), Frames("Ronin", "Throw", 2, 3, 4),
             Frames("Ronin", "Hit", 2, 3), null, new[] { Load("Effects/Spark"), Load("Effects/Smoke") }, 5f, 12f);
@@ -29,8 +32,12 @@ public static class NinjaArtSetup
         CharacterArt ashigaru = SamuraiArt("Ashigaru", samuraiParticles);
         CharacterArt bushi = SamuraiArt("Bushi", samuraiParticles);
         CharacterArt taisho = SamuraiArt("Taisho", samuraiParticles);
-        // The Bellringer's own look, once its frames exist; without them the army tints the Bushi bronze.
-        CharacterArt bellringer = AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + "Characters/Bellringer/Bellringer_March_0.png") != null ? SamuraiArt("Bellringer", samuraiParticles) : null;
+        // The kinds that once borrowed the Bushi art get their own once their frames exist; without them the army
+        // tints the Bushi (bronze, steel, cyan) and the scout flies the Ashigaru.
+        CharacterArt bellringer = OwnSamuraiArt("Bellringer", samuraiParticles);
+        CharacterArt shieldbearer = OwnSamuraiArt("Shieldbearer", samuraiParticles);
+        CharacterArt yurei = OwnSamuraiArt("Yurei", samuraiParticles);
+        CharacterArt scout = OwnSamuraiArt("Scout", samuraiParticles);
 
         EditPrefab("Assets/Samurai.prefab", root =>
         {
@@ -87,6 +94,9 @@ public static class NinjaArtSetup
             var army = root.GetComponent<SamuraiArmy>();
             Set(army, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
             Set(army, "bellringerArt", bellringer);
+            Set(army, "shieldbearerArt", shieldbearer);
+            Set(army, "yureiArt", yurei);
+            Set(army, "scoutArt", scout);
             // The army's trampling and landing checks use the samurai collider's world radius; rows are spread to fit the bigger bodies.
             SetFloat(army, "samuraiRadius", 0.5f * SamuraiScale);
             SetFloat(army, "spacingY", 1.75f);
@@ -631,9 +641,17 @@ public static class NinjaArtSetup
 
     static CharacterArt SamuraiArt(string name, Sprite[] particles)
     {
-        // The template walk is 4 frames; the fall-back death is 7, of which every other frame reads fine at speed.
-        return SaveArt(name, Frames(name, "March"), null, null, Frames(name, "Death", 2, 4, 6), particles, 6f, 8f);
+        // The walk is 4 frames; the death is 7 or more, of which every other frame from the third reads fine at speed.
+        Sprite[] death = Frames(name, "Death");
+        var picked = new System.Collections.Generic.List<Sprite>();
+        for (int i = 2; i < death.Length; i += 2) picked.Add(death[i]);
+        return SaveArt(name, Frames(name, "March"), null, null, picked.ToArray(), particles, 6f, 8f);
     }
+
+    static CharacterArt OwnSamuraiArt(string name, Sprite[] particles) =>
+        HasSprite($"Characters/{name}/{name}_March_0") ? SamuraiArt(name, particles) : null;
+
+    static bool HasSprite(string path) => AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + path + ".png") != null;
 
     static CharacterArt SaveArt(string name, Sprite[] idle, Sprite[] attack, Sprite[] hit, Sprite[] death,
         Sprite[] particles, float idleFps, float actionFps)

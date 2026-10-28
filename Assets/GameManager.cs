@@ -1597,7 +1597,9 @@ public class GameManager : MonoBehaviour
     {
         if (!Round.scouts || activeScout != null || activeBoss != null || Time.time < nextScoutTime) return;
         nextScoutTime = Time.time + Random.Range(15f, 25f);
-        activeScout = Scout.Spawn(army.samuraiByRow[army.samuraiByRow.Length - 1], Round.topRowY + 1.4f, OnScoutKilled);
+        bool kiteArt = army.ScoutArt != null;
+        CharacterArt scoutArt = kiteArt ? army.ScoutArt : army.samuraiByRow[army.samuraiByRow.Length - 1];
+        activeScout = Scout.Spawn(scoutArt, kiteArt, Round.topRowY + 1.4f, OnScoutKilled);
     }
 
     void OnScoutKilled(Scout scout)

@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 
-// A kite-borne scout that crosses the top of the screen now and then, like the mystery ship in Space Invaders.
-// One hit brings it down for bonus points and a soul. Built in code, so it needs no prefab.
+// A kite-borne scout that crosses the top of the screen now and then, like the mystery ship in Space Invaders: a
+// dead signal-kite flier lashed to his torn kite (Story/Army.md). One hit brings it down for bonus points and a soul.
+// Built in code, so it needs no prefab; without its own art it flies the Ashigaru, tinted red.
 [RequireComponent(typeof(Rigidbody))]
 public class Scout : MonoBehaviour, IHittable
 {
@@ -12,6 +13,9 @@ public class Scout : MonoBehaviour, IHittable
     const int SamuraiLayer = 7;
     static readonly int[] BonusPoints = { 100, 150, 300 };
     static readonly Color KiteColor = new Color(1f, 0.55f, 0.45f);
+    // On its own art the scout keeps its colours under a pale grave-light; the stand-in keeps the warm glow.
+    static readonly Color GhostGlow = new Color(0.75f, 0.9f, 0.85f, 0.4f);
+    static readonly Color WarmGlow = new Color(1f, 0.5f, 0.3f, 0.45f);
 
     public int Points { get; private set; }
 
@@ -26,7 +30,7 @@ public class Scout : MonoBehaviour, IHittable
     bool dead;
 
     // Enters from just off one side of the screen at height y and flies to the other.
-    public static Scout Spawn(CharacterArt art, float y, Action<Scout> onKilled)
+    public static Scout Spawn(CharacterArt art, bool ownArt, float y, Action<Scout> onKilled)
     {
         Camera cam = Camera.main;
         float halfWidth = cam.orthographicSize * cam.aspect;
@@ -54,11 +58,11 @@ public class Scout : MonoBehaviour, IHittable
         var view = new GameObject("Sprite") { layer = SamuraiLayer };
         view.transform.SetParent(go.transform, false);
         scout.sprite = view.AddComponent<SpriteRenderer>();
-        scout.sprite.color = KiteColor;
+        scout.sprite.color = ownArt ? Color.white : KiteColor;
         scout.sprite.flipX = direction < 0;
         view.AddComponent<SpriteAnimator>().Play(art.idle, true, null, art.idleFps * 2f);
-        // A warm glow so the scout reads as something special against the sky.
-        Kunai.CreateGlow(go.transform, 1.4f, scout.sprite.sortingOrder - 1, new Color(1f, 0.5f, 0.3f, 0.45f));
+        // A glow so the scout reads as something special against the sky.
+        Kunai.CreateGlow(go.transform, 1.4f, scout.sprite.sortingOrder - 1, ownArt ? GhostGlow : WarmGlow);
         Sfx.Play(Sfx.SoulSpawn, 0.7f, 0.7f);
         return scout;
     }

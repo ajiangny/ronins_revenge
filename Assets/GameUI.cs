@@ -895,17 +895,17 @@ public class GameUI : MonoBehaviour
         bossDivider = CreateRect("Divider", back, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4, 18));
         bossDivider.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 1f);
         // The stance meter: a thin gold strip hung under the health bar.
-        RectTransform poiseFrame = CreateRect("Poise", frame, new Vector2(0.5f, 0f), new Vector2(0, -5), new Vector2(904, 8));
+        RectTransform poiseFrame = CreateRect("Poise", frame, new Vector2(0.5f, 0f), new Vector2(0, -9), new Vector2(904, 12));
         poiseFrame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
-        RectTransform poiseBack = CreateRect("Back", poiseFrame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(898, 4));
+        RectTransform poiseBack = CreateRect("Back", poiseFrame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(898, 7));
         poiseBack.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
         poiseFill = Stretch(CreateRect("Fill", poiseBack, Vector2.zero, Vector2.zero, Vector2.zero));
         poiseFill.anchorMax = new Vector2(0f, 1f);
         poiseFillImage = poiseFill.gameObject.AddComponent<Image>();
         poiseFillImage.color = PoiseColour;
         // Each half's name under it, small, so the split reads without a legend.
-        bossLabelLeft = CreateText("LabelLeft", new Vector2(0.25f, 0f), new Vector2(0, -22), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
-        bossLabelRight = CreateText("LabelRight", new Vector2(0.75f, 0f), new Vector2(0, -22), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        bossLabelLeft = CreateText("LabelLeft", new Vector2(0.25f, 0f), new Vector2(0, -26), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        bossLabelRight = CreateText("LabelRight", new Vector2(0.75f, 0f), new Vector2(0, -26), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
         foreach (TextMeshProUGUI label in new[] { bossLabelLeft, bossLabelRight })
         {
             label.characterSpacing = 3;

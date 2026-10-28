@@ -24,6 +24,8 @@ public class SaveData
     public int lastDeathCause;
     public int[] deathsByCause = new int[DeathCauses];
     public int deathStreak;
+    // The element he held most when the last run ended (Element), or -1: whose soul speaks in the temple.
+    public int lastRunElement = -1;
     public const int DeathCauses = 7;
     // A death or a win not yet answered on the hill.
     public bool hubPending;
@@ -174,9 +176,10 @@ public static class Save
     }
 
     // A finished run: a clear, or a death and what caused it. Restarting or quitting mid-run records nothing.
-    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None)
+    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null)
     {
         SaveData d = Data;
+        d.lastRunElement = mostHeld is Element element ? (int)element : -1;
         // A boss's blow is the boss's, whatever it threw.
         if (!cleared && killer != BossKind.None) cause = DeathCause.Boss;
         bool same = !cleared && !d.lastRunCleared && d.lastDeathCause == (int)cause && d.lastKiller == (int)killer;

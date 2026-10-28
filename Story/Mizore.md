@@ -171,11 +171,11 @@ Her Duos (Thermal Shock with Akagane, Superconductor with Hibiki) are in
 | `Mizore_Felled_Shirogane` | `BossFelled` | Reactive, once | `felled = Shirogane` | **Mizore:** "She was smiling under that. She hid pain from me the same way." |
 | `Mizore_Felled_Any` | `BossFelled` | Repeatable | none | **Mizore:** "Done. Let me look at you." |
 
-### `HubReturn` (optional, on the hill)
+### `SoulHub` (in the temple, after a run he mostly held their element)
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
-| `Mizore_Hub_First` | Story, once | `lastRunElement = Frost` | **Mizore:** "Her flute. You still hold it like it might break. Good." |
+| `Mizore_Hub_First` | Story, once | `lastRunElement = Frost` | **Mizore:** "Her flute, on the altar. You still look at it like it might break. Good." |
 | `Mizore_Hub_Kagetsune` | Reactive | `lastRunElement = Frost`, `lastKiller = Kagetsune`, `runsSince Mizore_Hub_Kagetsune ≥ 4` | **Mizore:** "You'll live. That's my professional opinion. It's been wrong every night so far." |
 | `Mizore_Hub_Rest` | Repeatable | `lastRunElement = Frost` | **Mizore:** "Rest. Then go again." |
 

@@ -6,7 +6,10 @@ using UnityEngine;
 // Hades-style reactive dialogue (Story/README.md, Story/DIALOGUE_RESEARCH.md): many conversations written for
 // situations, and the game picks the one that fits what has happened across runs.
 // Poguru's: Tutorial is played by id (Dialogue.Find); the rest are his barks and his talk at the temple nest.
-public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk }
+// The souls' boon-screen talks beyond SoulPickup (GameManager.SoulTalk): a Legendary or Duo on offer, the boss just
+// felled or still ahead, another soul's element leading (SoulJealous), and a line in the temple after a run (SoulHub).
+public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk,
+    Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub }
 
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
 // the Repeatables, which every event has so nobody ever goes silent.
@@ -47,8 +50,11 @@ public struct DialogueContext
     // Lives left right now, and whether this boon screen is a Spirit Offering (souls with nothing left to give).
     public int Lives;
     public bool Offering;
-    // The boss just felled, for Poguru's boss-down barks.
+    // The boss just felled, for Poguru's boss-down barks and the souls' boon after it.
     public BossKind? Boss;
+    // The boss at the end of the stage being played, before its fight; and the boons on this screen.
+    public BossKind? NextBoss;
+    public List<BoonId> Offers;
 }
 
 // One requirement, with the words the debug view prints for it.
@@ -88,10 +94,24 @@ public static class Dialogue
     public static Req LivesLeft(int n) => new Req($"{n} lives left", c => c.Lives == n);
     public static Req Offering => new Req("a Spirit Offering", c => c.Offering);
     public static Req HoldsDuo => new Req("holds a Duo", c => c.Loadout != null && HasDuo(c.Loadout));
+    public static Req OffersBoon(BoonId boon) => new Req($"offers {boon}", c => c.Offers != null && c.Offers.Contains(boon));
+    public static Req NextBoss(BossKind boss) => new Req($"{boss} ahead", c => c.NextBoss == boss);
+    // Another soul's element leads: 3+ of its boons, and 2+ more than the speaking soul's (Story/Souls.md#souljealous).
+    public static Req Most(Element element) => new Req($"mostly {element}", c => Leads(c, element));
+    public static Req Rival => new Req("another soul leads", c => c.Element is Element own
+        && Array.Exists((Element[])Enum.GetValues(typeof(Element)), e => e != own && Leads(c, e)));
+    public static Req LastRunElement(Element element) => new Req($"mostly {element} last run", c => c.Save.lastRunElement == (int)element);
     public static Req Felled(BossKind boss) => new Req($"just felled {boss}", c => c.Boss == boss);
     // Met in any way: fought, heard, or killed by.
     public static Req Met(BossKind boss) => new Req($"met {boss}", c => c.Save.deathsTo[(int)boss] + c.Save.winsVs[(int)boss] > 0
         || c.Save.seen.Exists(id => id.StartsWith(boss + "_")));
+
+    static bool Leads(DialogueContext c, Element element)
+    {
+        if (c.Loadout == null || c.Element == element || c.Loadout.DominantElement != element) return false;
+        int lead = c.Loadout.ElementCount(element);
+        return lead >= 3 && lead >= (c.Element is Element own ? c.Loadout.ElementCount(own) : 0) + 2;
+    }
 
     static bool HasDuo(RoninLoadout loadout)
     {
@@ -386,6 +406,147 @@ public static class Dialogue
         Talk("Hibiki_Greet_Drumroll", "Hibiki", Soul, Repeat, When(),
             Say("Hibiki", "Drumroll, please... It's me again!")),
 
+        // The souls' other talks (Story/Souls.md, each soul's file): their Legendaries, the Duos (two souls, whichever
+        // offers it), the boss felled or ahead, jealousy when another soul's element leads, and a line in the temple.
+        Talk("Akagane_Legendary_Wildfire", "Akagane", DialogueEvent.Legendary, Story, When(OffersBoon(BoonId.Wildfire)),
+            Say("Akagane", "Wildfire. Every man of the vanguard, burning at once."), Say("Akagane", "Their arrows won't reach you through it. Nothing will.")),
+        Talk("Akagane_Legendary_Again", "Akagane", DialogueEvent.Legendary, Repeat, When(OffersBoon(BoonId.Wildfire)),
+            Say("Akagane", "All of it, Guardsman. Take all of it.")),
+        Talk("Mizore_Legendary_StillWater", "Mizore", DialogueEvent.Legendary, Story, When(OffersBoon(BoonId.StillWater)),
+            Say("Mizore", "Still Water. Slow the pulse and a fever loses its hurry."), Say("Mizore", "So does an army.")),
+        Talk("Mizore_Legendary_Again", "Mizore", DialogueEvent.Legendary, Repeat, When(OffersBoon(BoonId.StillWater)),
+            Say("Mizore", "Slower. Slower. There.")),
+        Talk("Hibiki_Legendary_Drum", "Hibiki", DialogueEvent.Legendary, Story, When(OffersBoon(BoonId.RaijinsDrum)),
+            Say("Hibiki", "My drum! He threw it in the coffin with us, can you believe that?"), Say("Hibiki", "Every eighth beat's for the village. Count with me!")),
+        Talk("Hibiki_Legendary_Again", "Hibiki", DialogueEvent.Legendary, Repeat, When(OffersBoon(BoonId.RaijinsDrum)),
+            Say("Hibiki", "Six, seven, EIGHT!")),
+        Talk("Duo_ThermalShock_First", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.ThermalShock)),
+            Say("Mizore", "Heat after cold. It cracks stone, and anything standing in it."), Say("Akagane", "You agree with me? Someone write the date down."), Say("Mizore", "I agree with the fire, Captain. You only carry it.")),
+        Talk("Duo_ThermalShock_Arm", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.ThermalShock), Seen("Duo_ThermalShock_First"), RunsSince("Duo_ThermalShock_First", 2)),
+            Say("Akagane", "My arm still aches where you set it, physician."), Say("Mizore", "You're dead, Captain. It's in your head."), Say("Akagane", "...It's in my head because you set it wrong.")),
+        Talk("Duo_ThermalShock_Again", "Duo", DialogueEvent.Duo, Repeat, When(OffersBoon(BoonId.ThermalShock)),
+            Say("Akagane", "Freeze them, physician."), Say("Mizore", "Burn them, Captain. Mind your sleeves.")),
+        Talk("Duo_PlasmaArc_First", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.PlasmaArc)),
+            Say("Hibiki", "Captain! You and me! Thunder and fire, like the summer festival!"), Say("Akagane", "Your festival fireworks burned down my supply tent, girl. The night before the coronation."), Say("Hibiki", "It was a beautiful fire."), Say("Akagane", "...It was.")),
+        Talk("Duo_PlasmaArc_Pace", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.PlasmaArc), Seen("Duo_PlasmaArc_First"), RunsSince("Duo_PlasmaArc_First", 2)),
+            Say("Akagane", "My men marched up that mountain to your drum. You set a terrible pace."), Say("Hibiki", "You kept up, though."), Say("Akagane", "We always kept up. That was the trouble.")),
+        Talk("Duo_PlasmaArc_Again", "Duo", DialogueEvent.Duo, Repeat, When(OffersBoon(BoonId.PlasmaArc)),
+            Say("Hibiki", "Strike and burn!"), Say("Akagane", "You strike. I'll burn.")),
+        Talk("Duo_Superconductor_First", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.Superconductor)),
+            Say("Hibiki", "Grandmother! You're in here too?"), Say("Mizore", "I'm not your grandmother. ...Give me your hand. Steady."), Say("Hibiki", "Your hands were cold that night, too. I didn't mind.")),
+        Talk("Duo_Superconductor_Count", "Duo", DialogueEvent.Duo, Story, When(OffersBoon(BoonId.Superconductor), Seen("Duo_Superconductor_First"), RunsSince("Duo_Superconductor_First", 2)),
+            Say("Mizore", "I counted your pulse to the end, that night. I lost count at the bells."), Say("Hibiki", "I know. I heard you say steady. It helped."), Say("Mizore", "...Then we'll do it again. Quick, Hibiki. But careful.")),
+        Talk("Duo_Superconductor_Again", "Duo", DialogueEvent.Duo, Repeat, When(OffersBoon(BoonId.Superconductor)),
+            Say("Mizore", "Quick, but careful."), Say("Hibiki", "Quick AND careful!")),
+        Cooled(Once, Talk("Akagane_Felled_Benibana", "Akagane", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Benibana)),
+            Say("Akagane", "Down she goes. It was a good dance. I'll only say that once."))),
+        Cooled(Once, Talk("Akagane_Felled_Utsusemi", "Akagane", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Utsusemi)),
+            Say("Akagane", "Listen. The ticking's stopped. My men owed him that."))),
+        Cooled(Once, Talk("Akagane_Felled_Shirogane", "Akagane", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Shirogane)),
+            Say("Akagane", "She let you through. She never once let me."))),
+        Cooled(Once, Talk("Mizore_Felled_Benibana", "Mizore", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Benibana)),
+            Say("Mizore", "She'll mend. They always come back, here. That's the sickness."))),
+        Cooled(Once, Talk("Mizore_Felled_Utsusemi", "Mizore", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Utsusemi)),
+            Say("Mizore", "Wound down, for a while. Kinder than anything else in these mountains."))),
+        Cooled(Once, Talk("Mizore_Felled_Shirogane", "Mizore", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Shirogane)),
+            Say("Mizore", "She was smiling under that. She hid pain from me the same way."))),
+        Cooled(Once, Talk("Hibiki_Felled_Benibana", "Hibiki", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Benibana)),
+            Say("Hibiki", "Ha! ...Sorry. She's sad, isn't she. I shouldn't cheer."))),
+        Cooled(Once, Talk("Hibiki_Felled_Utsusemi", "Hibiki", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Utsusemi)),
+            Say("Hibiki", "Sleep well, tea monk."))),
+        Cooled(Once, Talk("Hibiki_Felled_Shirogane", "Hibiki", DialogueEvent.BossFelled, Tier.Reactive, When(Felled(BossKind.Shirogane)),
+            Say("Hibiki", "She smiled at you. Did you see? Right at the end. She smiled!"))),
+        Talk("Akagane_Felled_Any", "Akagane", DialogueEvent.BossFelled, Repeat, When(),
+            Say("Akagane", "One more down. Forward.")),
+        Talk("Mizore_Felled_Any", "Mizore", DialogueEvent.BossFelled, Repeat, When(),
+            Say("Mizore", "Done. Let me look at you.")),
+        Talk("Hibiki_Felled_Any", "Hibiki", DialogueEvent.BossFelled, Repeat, When(),
+            Say("Hibiki", "Down! Who's next?")),
+        Talk("Akagane_Ahead_Benibana", "Akagane", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Benibana)),
+            Say("Akagane", "The dancer's at the end of this road. Her smoke put my whole vanguard on its knees. Don't breathe it.")),
+        Talk("Akagane_Ahead_BenibanaBell", "Akagane", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Benibana), Seen("Benibana_Intro_Bell")),
+            Say("Akagane", "She showed you which bell is hers? ...Then I'll stop cursing her. Mostly.")),
+        Talk("Akagane_Ahead_Utsusemi", "Akagane", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Utsusemi)),
+            Say("Akagane", "My men took that monk. In borrowed bodies, on his orders, but my men. Give the old man an end.")),
+        Talk("Akagane_Ahead_Shirogane", "Akagane", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Shirogane)),
+            Say("Akagane", "Silver's up there. She beat me every time. Don't you dare lose to her for the wrong reasons.")),
+        Talk("Akagane_Ahead_Kagetsune", "Akagane", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Kagetsune)),
+            Say("Akagane", "I knelt to him for twenty years. Make him kneel once.")),
+        Talk("Mizore_Ahead_Benibana", "Mizore", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Benibana)),
+            Say("Mizore", "The dancer came to me for her ankles. I saw the rosary under her sleeve and said nothing. I'm glad I said nothing.")),
+        Talk("Mizore_Ahead_Utsusemi", "Mizore", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Utsusemi)),
+            Say("Mizore", "A soul wound into gears. I'd like to see how it was done. Then I'd like to undo it.")),
+        Talk("Mizore_Ahead_Shirogane", "Mizore", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Shirogane)),
+            Say("Mizore", "She guards high on the left. She always did. I stitched that side of her more than once.")),
+        Talk("Mizore_Ahead_Kagetsune", "Mizore", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Kagetsune)),
+            Say("Mizore", "Remember that he's afraid, Oni. It's all he has ever been.")),
+        Talk("Mizore_Ahead_KagetsuneWon", "Mizore", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Kagetsune), WinsVs(BossKind.Kagetsune, 1)),
+            Say("Mizore", "He was nine, and holding my sleeve. Now he's holding a thousand of us instead. Let go of him for me.")),
+        Talk("Hibiki_Ahead_Benibana", "Hibiki", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Benibana)),
+            Say("Hibiki", "The dancer's up ahead! She was so beautiful. Then everyone got so sleepy. ...Oh.")),
+        Talk("Hibiki_Ahead_Utsusemi", "Hibiki", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Utsusemi)),
+            Say("Hibiki", "That's the tea monk's hat! He let us kids wear it at the well. That's not him in there, Oni. It can't be.")),
+        Talk("Hibiki_Ahead_UtsusemiTea", "Hibiki", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Utsusemi), Seen("Utsusemi_Intro_WindDown")),
+            Say("Hibiki", "He asked you to wind him down. So he is in there. ...Be gentle. As gentle as you can.")),
+        Talk("Hibiki_Ahead_Shirogane", "Hibiki", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Shirogane)),
+            Say("Hibiki", "Lady Shirogane let me hold her sword once. Don't tell her I dropped it.")),
+        Talk("Hibiki_Ahead_Kagetsune", "Hibiki", DialogueEvent.BossAhead, Story, When(NextBoss(BossKind.Kagetsune)),
+            Say("Hibiki", "Our drum against his bells. Let's be louder this time.")),
+        Talk("Akagane_Ahead_Any", "Akagane", DialogueEvent.BossAhead, Repeat, When(),
+            Say("Akagane", "Warlord ahead. Burn hot.")),
+        Talk("Mizore_Ahead_Any", "Mizore", DialogueEvent.BossAhead, Repeat, When(),
+            Say("Mizore", "Something heavy ahead. Breathe before you go in.")),
+        Talk("Hibiki_Ahead_Any", "Hibiki", DialogueEvent.BossAhead, Repeat, When(),
+            Say("Hibiki", "Big one coming! Ba-dum, ba-dum!")),
+        Cooled(Once, Talk("Akagane_Jealous_Hibiki", "Akagane", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Lightning)),
+            Say("Akagane", "The drummer's spark, all over you. You'd take a village girl's speed over the vanguard's fire?"), Say("Hibiki", "He would! He did!"), Say("Akagane", "Quiet, girl."))),
+        Cooled(Once, Talk("Akagane_Jealous_Mizore", "Akagane", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Water)),
+            Say("Akagane", "You're half frozen, Guardsman. The physician's cold is for people who've given up."), Say("Mizore", "The physician's cold is why you still have two arms, Captain."))),
+        Talk("Akagane_Jealous_Storm", "Akagane", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Lightning)),
+            Say("Akagane", "Fast won't save you. Fire will.")),
+        Talk("Akagane_Jealous_Frost", "Akagane", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Water)),
+            Say("Akagane", "Thaw out. Here.")),
+        Talk("Akagane_Jealous_Back", "Akagane", DialogueEvent.SoulJealous, Repeat, When(Rival),
+            Say("Akagane", "Remembered who your captain is?")),
+        Cooled(Once, Talk("Mizore_Jealous_Akagane", "Mizore", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Fire)),
+            Say("Mizore", "You're burning up, Oni. The Captain never knew when to stop either."), Say("Akagane", "And yet I'm the one he keeps choosing."), Say("Mizore", "Fevers are popular, Captain. Briefly."))),
+        Cooled(Once, Talk("Mizore_Jealous_Hibiki", "Mizore", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Lightning)),
+            Say("Mizore", "All that speed. Quick is how fevers spread."), Say("Hibiki", "Quick is how you get there first, Grandmother!"), Say("Mizore", "I'm not your grandmother."))),
+        Talk("Mizore_Jealous_Fire", "Mizore", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Fire)),
+            Say("Mizore", "Too hot. Sit down.")),
+        Talk("Mizore_Jealous_Storm", "Mizore", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Lightning)),
+            Say("Mizore", "Slow down before you shake apart.")),
+        Talk("Mizore_Jealous_Back", "Mizore", DialogueEvent.SoulJealous, Repeat, When(Rival),
+            Say("Mizore", "Back for the cold, then. They always come back for the cold.")),
+        Cooled(Once, Talk("Hibiki_Jealous_Akagane", "Hibiki", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Fire)),
+            Say("Hibiki", "You picked Captain Kettle? Over me? He doesn't even smile!"), Say("Akagane", "I smile when it's earned."), Say("Hibiki", "When was the last time?"), Say("Akagane", "...Take her boon, Guardsman."))),
+        Cooled(Once, Talk("Hibiki_Jealous_Mizore", "Hibiki", DialogueEvent.SoulJealous, Tier.Reactive, When(Most(Element.Water)),
+            Say("Hibiki", "You're all frosty and careful. Grandmother's made you sit still, hasn't she."), Say("Mizore", "Someone has to."), Say("Hibiki", "Not tonight!"))),
+        Talk("Hibiki_Jealous_Fire", "Hibiki", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Fire)),
+            Say("Hibiki", "Fire's so slow. Watch this instead!")),
+        Talk("Hibiki_Jealous_Frost", "Hibiki", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Water)),
+            Say("Hibiki", "Wake up, frosty! Thunder's here!")),
+        Talk("Hibiki_Jealous_Back", "Hibiki", DialogueEvent.SoulJealous, Repeat, When(Rival),
+            Say("Hibiki", "You came back to me! I knew it. Mostly knew it.")),
+        Talk("Akagane_Hub_First", "Akagane", DialogueEvent.SoulHub, Story, When(LastRunElement(Element.Fire)),
+            Say("Akagane", "So this is where you go. A temple pool and a flute. I always wondered.")),
+        Cooled(4, Talk("Akagane_Hub_Army", "Akagane", DialogueEvent.SoulHub, Tier.Reactive, When(LastRunElement(Element.Fire), LastDiedToArmy),
+            Say("Akagane", "Up. My men are already marching."))),
+        Talk("Akagane_Hub_Rise", "Akagane", DialogueEvent.SoulHub, Repeat, When(LastRunElement(Element.Fire)),
+            Say("Akagane", "On your feet, Guardsman.")),
+        Talk("Mizore_Hub_First", "Mizore", DialogueEvent.SoulHub, Story, When(LastRunElement(Element.Water)),
+            Say("Mizore", "Her flute, on the altar. You still look at it like it might break. Good.")),
+        Cooled(4, Talk("Mizore_Hub_Kagetsune", "Mizore", DialogueEvent.SoulHub, Tier.Reactive, When(LastRunElement(Element.Water), LastKiller(BossKind.Kagetsune)),
+            Say("Mizore", "You'll live. That's my professional opinion. It's been wrong every night so far."))),
+        Talk("Mizore_Hub_Rest", "Mizore", DialogueEvent.SoulHub, Repeat, When(LastRunElement(Element.Water)),
+            Say("Mizore", "Rest. Then go again.")),
+        Talk("Hibiki_Hub_First", "Hibiki", DialogueEvent.SoulHub, Story, When(LastRunElement(Element.Lightning)),
+            Say("Hibiki", "You can see the village roofs from up here! ...Well. Where they were.")),
+        Cooled(4, Talk("Hibiki_Hub_Song", "Hibiki", DialogueEvent.SoulHub, Tier.Reactive, When(LastRunElement(Element.Lightning)),
+            Say("Hibiki", "Play the river song! ...No? Fine. I'll hum it."))),
+        Talk("Hibiki_Hub_Up", "Hibiki", DialogueEvent.SoulHub, Repeat, When(LastRunElement(Element.Lightning)),
+            Say("Hibiki", "Up, up, up!")),
+
         // Poguru, the Lost Dragon in Oni's left wisp (Story/Poguru.md). The tutorial's lines are played by id.
         Tut("Poguru_Tut_Wake", P("ONI! ONI! WAKE UP! Scary dead soldiers are coming!"), O("...Who are you."),
             P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!"), P("No time! Do you remember how to fight?")),
@@ -573,8 +734,9 @@ public static class Dialogue
     }
 
     public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false,
-        BossKind? boss = null) =>
-        new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss };
+        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null) =>
+        new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss,
+            NextBoss = nextBoss, Offers = offers };
 
     // Why a conversation can't play now, or null if it can. No dice are rolled here, so the answer is repeatable.
     static string Blocked(Conversation c, DialogueContext ctx)
@@ -592,11 +754,13 @@ public static class Dialogue
     // The conversation for this moment: the best tier with anything eligible; within it the first Story or Reactive
     // one written, or a Repeatable drawn from a bag that refills once all of them have played. It's recorded as
     // heard. Null when nothing is written for this speaker and event.
-    public static Conversation Pick(string speaker, DialogueEvent evt, DialogueContext ctx)
+    // Tiers outside best..worst are left out, so a caller can try one event's Story lines before another's.
+    public static Conversation Pick(string speaker, DialogueEvent evt, DialogueContext ctx, Tier best = Story, Tier worst = Repeat)
     {
         var eligible = All.FindAll(c => c.Speaker == speaker && c.Event == evt && Blocked(c, ctx) == null);
         foreach (Tier tier in new[] { Story, Tier.Reactive, Repeat })
         {
+            if (tier < best || tier > worst) continue;
             var options = eligible.FindAll(c => c.Tier == tier);
             if (options.Count == 0) continue;
             Conversation chosen = tier == Repeat ? FromBag(options, ctx.Save) : options[0];

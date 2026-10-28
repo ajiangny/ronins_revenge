@@ -774,9 +774,19 @@ public class GameManager : MonoBehaviour
         if (!Save.Data.hubPending) yield break;
         Save.Data.hubPending = false;
         Conversation said = Dialogue.Pick("Oni", DialogueEvent.HubReturn, Dialogue.Context());
+        Color colour = OniColour;
+        // With nothing of his own to say, the soul he leaned on most last run may speak instead.
+        if ((said == null || said.Lines.Length == 0) && Save.Data.lastRunElement >= 0)
+        {
+            var element = (Element)Save.Data.lastRunElement;
+            var ctx = Dialogue.Context(null, element);
+            said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Story, Tier.Reactive);
+            if (said == null && Random.value < 0.4f) said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Repeatable);
+            colour = Boons.Info(element).Color;
+        }
         if (said == null || said.Lines.Length == 0) yield break;
         yield return new WaitForSeconds(1.5f);
-        yield return PlayConversation(said, OniColour);
+        yield return PlayConversation(said, colour);
     }
 
     // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended.
@@ -2289,18 +2299,17 @@ public class GameManager : MonoBehaviour
 
     // Pauses on the boon screen and runs afterPick once a boon is taken. An element with nothing left to give
     // offers a Spirit Offering instead. False (and nothing shown) only when nothing could be drawn.
-    bool OfferBoons(Element element, System.Action afterPick, bool ensureCapstone = false, Rarity minRarity = Rarity.Common)
+    // `felled` is the boss whose fall this boon rewards.
+    bool OfferBoons(Element element, System.Action afterPick, bool ensureCapstone = false, Rarity minRarity = Rarity.Common,
+        BossKind? felled = null)
     {
         var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
         if (offers.Count == 0) return false;
 
-        // The first screen of each soul in a run opens with that soul talking to Oni, as Hades' gods do.
-        Conversation greeting = null;
-        if (metThisRun.Add(element))
-        {
-            bool offering = offers.Exists(o => o.Boon.Kind == BoonKind.Offering);
-            greeting = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulPickup, Dialogue.Context(loadout, element, lives, offering));
-        }
+        bool offering = offers.Exists(o => o.Boon.Kind == BoonKind.Offering);
+        BossKind? ahead = felled == null && activeBoss == null && Stage.boss != BossKind.None ? Stage.boss : (BossKind?)null;
+        var ctx = Dialogue.Context(loadout, element, lives, offering, felled, ahead, offers.ConvertAll(o => o.Boon.Id));
+        Conversation greeting = SoulTalk(element, ctx, metThisRun.Add(element));
 
         state = State.Choosing;
         ronin.ControlsEnabled = false;
@@ -2308,6 +2317,28 @@ public class GameManager : MonoBehaviour
         if (greeting != null) StartCoroutine(GreetThenChoose(greeting, element, offers, afterPick, ensureCapstone, minRarity));
         else ShowBoons(element, offers, afterPick, ensureCapstone, minRarity);
         return true;
+    }
+
+    // What the soul says as the boon screen opens, in Story/Souls.md's order: a Legendary or Duo on offer always gets
+    // its line; the boss just felled, a first meeting, the boss ahead, jealousy and the greetings only on the first
+    // screen of each soul in a run, as Hades' gods do. Null when nothing's said.
+    static Conversation SoulTalk(Element element, DialogueContext ctx, bool first)
+    {
+        string soul = SoulOf(element);
+        Conversation said = Dialogue.Pick(soul, DialogueEvent.Legendary, ctx) ?? Dialogue.Pick("Duo", DialogueEvent.Duo, ctx);
+        if (said != null) return said;
+        if (ctx.Boss != null) said = Dialogue.Pick(soul, DialogueEvent.BossFelled, ctx);
+        if (said != null || !first) return said;
+        said = Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Story, Tier.Story)
+            ?? Dialogue.Pick(soul, DialogueEvent.BossAhead, ctx, Tier.Story, Tier.Reactive)
+            ?? Dialogue.Pick(soul, DialogueEvent.SoulJealous, ctx, Tier.Story, Tier.Reactive)
+            ?? Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Reactive, Tier.Reactive);
+        if (said != null) return said;
+        // The everyday lines: a grumble when another soul leads, now and then a word about the boss ahead, else hello.
+        float roll = Random.value;
+        if (roll < 0.5f) said = Dialogue.Pick(soul, DialogueEvent.SoulJealous, ctx, Tier.Repeatable);
+        if (said == null && roll > 0.7f && ctx.NextBoss != null) said = Dialogue.Pick(soul, DialogueEvent.BossAhead, ctx, Tier.Repeatable);
+        return said ?? Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Repeatable);
     }
 
     IEnumerator GreetThenChoose(Conversation greeting, Element element, List<BoonOffer> offers, System.Action afterPick,
@@ -2825,7 +2856,8 @@ public class GameManager : MonoBehaviour
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(element).Color, 1.4f);
         Sfx.Play(Sfx.SoulCollect);
         Rarity floor = Oaths.Rank(OathId.FadedSpirits) >= 2 ? Rarity.Common : Rarity.Rare;
-        if (!OfferBoons(element, BeadThenNextStage, true, floor)) BeadThenNextStage();
+        BossKind? felled = Stage.boss != BossKind.None ? Stage.boss : (BossKind?)null;
+        if (!OfferBoons(element, BeadThenNextStage, true, floor, felled)) BeadThenNextStage();
     }
 
     // A fallen boss also leaves a Spirit Bead, so the stage's reward raises the build as well as widening it.
@@ -3859,7 +3891,7 @@ public class GameManager : MonoBehaviour
         if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  notes {notesThisRun}  held: {HeldSummary()}");
-        Save.EndRun(cleared, killer, cause);
+        Save.EndRun(cleared, killer, cause, loadout.DominantElement);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);

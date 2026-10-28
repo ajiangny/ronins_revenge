@@ -175,11 +175,11 @@ His Duos (Thermal Shock with Mizore, Plasma Arc with Hibiki) are two-soul conver
 | `Akagane_Felled_Shirogane` | `BossFelled` | Reactive, once | `felled = Shirogane` | **Akagane:** "She let you through. She never once let me." |
 | `Akagane_Felled_Any` | `BossFelled` | Repeatable | none | **Akagane:** "One more down. Forward." |
 
-### `HubReturn` (optional, on the hill)
+### `SoulHub` (in the temple, after a run he mostly held their element)
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
-| `Akagane_Hub_First` | Story, once | `lastRunElement = Fire` | **Akagane:** "So this is where you go. A hill and a flute. I always wondered." |
+| `Akagane_Hub_First` | Story, once | `lastRunElement = Fire` | **Akagane:** "So this is where you go. A temple pool and a flute. I always wondered." |
 | `Akagane_Hub_Army` | Reactive | `lastRunElement = Fire`, `lastKiller = Army`, `runsSince Akagane_Hub_Army ≥ 4` | **Akagane:** "Up. My men are already marching." |
 | `Akagane_Hub_Rise` | Repeatable | `lastRunElement = Fire` | **Akagane:** "On your feet, Guardsman." |
 

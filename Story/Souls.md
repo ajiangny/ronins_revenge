@@ -93,9 +93,14 @@ a talk scene (`DialogueScene`) before the first boon screen of that soul in a ru
 (`Portraits/<Soul>_Closeup.png`, `_Full.png`) at the left and Oni at the right. `runsSince self ≥ n` became the
 conversation's `Cooldown`, "play once" a Reactive that never comes back. Their lines are voiced. Each talk opens on
 the soul's sting, as Hades' gods announce themselves (`Sfx.SoulSting<Fire|Frost|Storm>`, `GameManager.StingFor`):
-Akagane's war-drum boom and flame, Mizore's ice chimes over a singing bowl, Hibiki's taiko drumroll into a thunderclap. Not yet: `SoulJealous`,
-`Duo`, `Legendary`, `BossAhead`, `BossFelled`, `HubReturn` and the freed beats. The suggestions below
-still stand for those.
+Akagane's war-drum boom and flame, Mizore's ice chimes over a singing bowl, Hibiki's taiko drumroll into a thunderclap.
+
+Also built and voiced, in the order of "When each event fires" below (`GameManager.SoulTalk`): `Legendary`, `Duo`
+(speaker id `"Duo"`, so either soul offering it plays it), `BossFelled` (the boon after a boss), `BossAhead` (its
+Repeatable about one first screen in three), `SoulJealous` (`Dialogue.Most` / `Rival`; its Repeatables about half the
+time a rival leads), and the souls' temple lines as the `SoulHub` event (`SaveData.lastRunElement`; Story and Reactive
+always, a Repeatable 40% of the time, only when Oni has nothing of his own to say). Later screens of a soul in the
+same run stay quiet unless a Legendary or Duo is on offer. Not yet: the freed beats.
 
 Everything below is a suggestion for the dialogue system being built in parallel; field names follow
 `Assets/SaveData.cs` where it already has them.

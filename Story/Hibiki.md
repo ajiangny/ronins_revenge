@@ -171,7 +171,7 @@ Her Duos (Plasma Arc with Akagane, Superconductor with Mizore) are in
 | `Hibiki_Felled_Shirogane` | `BossFelled` | Reactive, once | `felled = Shirogane` | **Hibiki:** "She smiled at you. Did you see? Right at the end. She smiled!" |
 | `Hibiki_Felled_Any` | `BossFelled` | Repeatable | none | **Hibiki:** "Down! Who's next?" |
 
-### `HubReturn` (optional, on the hill)
+### `SoulHub` (in the temple, after a run he mostly held their element)
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|

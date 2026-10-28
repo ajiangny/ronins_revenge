@@ -534,10 +534,12 @@ public class Shirogane : Boss
         return shot;
     }
 
-    // A blade of blue spirit flame cast from her katana; it can be cut down by a slash.
+    // A blade of blue spirit flame cast from her katana; it takes two slashes to cut down, so slashing up her
+    // column can't stop the fans by itself.
     Arrow Crescent(Vector3 from, Vector3 velocity)
     {
         Arrow wave = Fire(from, velocity);
+        wave.Toughness = 2;
         Sprite[] frames = Fx.Frames(Fx.ShiroCrescent);
         if (frames != null) wave.Restyle(frames, 14f, Color.white, new Vector2(2.2f, 1.4f), 0.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.45f), 2.4f);
         else wave.Restyle(ProceduralSprites.Glow, Cyan, new Vector2(2f, 0.8f), 0.4f, new Color(Cyan.r, Cyan.g, Cyan.b, 0.5f), 2.4f);

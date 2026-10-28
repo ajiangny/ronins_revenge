@@ -22,7 +22,7 @@ public class Utsusemi : Boss
     enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight }
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
-    float Recovery => secondPhase ? 0.45f : 0.9f;
+    float Recovery => secondPhase ? 0.35f : 0.7f;
     float ComboChance => secondPhase ? 0.85f : 0.65f;
     int MaxCombo => secondPhase ? 3 : 2;
     float StepTime => secondPhase ? 0.11f : 0.16f;
@@ -688,18 +688,19 @@ public class Utsusemi : Boss
         yield return HoldArmor(shell, 0.3f);
         Tick(0.4f);
         yield return HoldArmor(shell, 0.25f);
-        armored = false;
-        foreach (SpriteRenderer part in shell) RemoveTransient(part);
 
-        // The dashes: each one locks onto wherever the ronin stands now.
+        // The dashes: each one locks onto wherever the ronin stands now. It keeps its shell while it takes aim, so the
+        // hours give him an opening only while it is down on his ground.
         for (int hour = 1; hour <= count; hour++)
         {
             Beat();
             Tick(0.9f);
-            yield return Wait(beat);
-            yield return LockOnDash(hour, row);
+            yield return HoldArmor(shell, beat);
+            yield return LockOnDash(hour, row, shell);
             PlayIdle();
         }
+        armored = false;
+        foreach (SpriteRenderer part in shell) RemoveTransient(part);
 
         Beat();
         yield return StrikeTheHour(count + 1);
@@ -741,18 +742,18 @@ public class Utsusemi : Boss
 
     // One hour struck where the ronin stands: a red sight line from its eye follows him, then locks on, and the
     // hour's numeral rises there. After a short window to step off, it dashes down onto the spot and chops it.
-    IEnumerator LockOnDash(int hour, Vector3 row)
+    IEnumerator LockOnDash(int hour, Vector3 row, SpriteRenderer[] shell)
     {
         float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
         float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
         SpriteRenderer sight = Bar(Eye, Spot(x), 0.05f, new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.4f));
-        float track = secondPhase ? 0.4f : 0.5f;
-        for (float t = 0; t < track; t += Time.deltaTime * Tempo)
+        // Armoured while it aims from its row.
+        Armour(shell, true);
+        yield return HoldArmor(shell, secondPhase ? 0.4f : 0.5f, () =>
         {
             x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
             Stretch(sight, Eye, Spot(x), 0.05f);
-            yield return null;
-        }
+        });
 
         // Locked: the hour's numeral rises where he stood, and the dodge window opens.
         var mark = new HourMark(this, hour, x);
@@ -760,20 +761,26 @@ public class Utsusemi : Boss
         Tick(0.7f);
         Vector3 spot = Spot(x);
         sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
-        float window = secondPhase ? 0.3f : 0.4f;
-        for (float t = 0; t < window; t += Time.deltaTime * Tempo)
-        {
-            Stretch(sight, Eye, spot, 0.07f);
-            yield return null;
-        }
+        yield return HoldArmor(shell, secondPhase ? 0.3f : 0.4f, () => Stretch(sight, Eye, spot, 0.07f));
         RemoveTransient(sight);
 
+        // The shell drops as it leaves its row: down on his ground it can be struck.
+        Armour(shell, false);
         yield return Dash(new Vector3(x, Landing(), row.z), HourDashTime);
         yield return Chop(x, mark, 36f, 0.08f);
         yield return Dash(row, HourDashTime);
     }
 
     Vector3 Spot(float x) => new Vector3(x, GroundY + 0.15f, 0);
+
+    void Armour(SpriteRenderer[] shell, bool on)
+    {
+        armored = on;
+        foreach (SpriteRenderer part in shell)
+        {
+            if (part != null) part.enabled = on;
+        }
+    }
 
     bool armored;
     protected override bool SuperArmor => armored;

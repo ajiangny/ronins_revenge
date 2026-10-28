@@ -125,8 +125,17 @@ public class Utsusemi : Boss
     // The red slit-eye under the hat brim and the lantern heart in its chest, where its frames draw them. The second
     // form, drawn from its painting on a larger canvas, has them elsewhere (PhaseBreak moves them).
     Vector2 eyePixel = new Vector2(57.5f, 38.5f), corePixel = new Vector2(58f, 50.5f);
-    Vector3 Eye => OnSprite(eyePixel.x, eyePixel.y);
-    Vector3 Core => OnSprite(corePixel.x, corePixel.y);
+    // The painted second form stands lower and leans in its empty-handed pose (the sword planted, as its lasers
+    // fire), so its eye and core sit elsewhere there.
+    static readonly Vector2 UnarmedEyePixel = new Vector2(77.5f, 51f), UnarmedCorePixel = new Vector2(78.5f, 66.5f);
+    bool painted;
+    bool InUnarmedPose => painted && sprite.sprite != null
+        && ((unarmedIdle != null && unarmedIdle.Length > 0 && sprite.sprite == unarmedIdle[0])
+            || (bareUnarmedIdle != null && bareUnarmedIdle.Length > 0 && sprite.sprite == bareUnarmedIdle[0]));
+    Vector3 Eye => InUnarmedPose ? OnSprite(UnarmedEyePixel.x, UnarmedEyePixel.y) : OnSprite(eyePixel.x, eyePixel.y);
+    Vector3 Core => InUnarmedPose ? OnSprite(UnarmedCorePixel.x, UnarmedCorePixel.y) : OnSprite(corePixel.x, corePixel.y);
+    // Its raised fist at the height of its Stop clip, where time stops from.
+    static readonly Vector2 FistPixel = new Vector2(109f, 40f);
     Vector3 Shoulder => Centre + new Vector3(sprite.bounds.extents.x * 0.5f, sprite.bounds.size.y * 0.1f, 0);
 
     // The height of its row, taken when the fight first starts. Its dashes down to the ronin's ground return here,
@@ -2244,7 +2253,7 @@ public class Utsusemi : Boss
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
         WearPhaseArt();
         // The painting-drawn second form (152 px frames) carries its own burnt look; only the old recolour needs dimming.
-        bool painted = art.idle != null && art.idle.Length > 0 && art.idle[0].rect.width > 140f;
+        painted = art.idle != null && art.idle.Length > 0 && art.idle[0].rect.width > 140f;
         if (painted)
         {
             eyePixel = new Vector2(76.5f, 44.5f);
@@ -2522,6 +2531,8 @@ public class Utsusemi : Boss
         while (coreGlow != null && !IsDead)
         {
             float pulse = Mathf.Pow(Mathf.Abs(Mathf.Sin(Time.time * 4f)), 4f);
+            // On the heart in whatever pose it's in.
+            coreGlow.transform.position = Core + Vector3.back * 0.3f;
             coreGlow.color = new Color(CoreMolten.r, CoreMolten.g, CoreMolten.b, 0.45f + 0.45f * pulse);
             coreGlow.transform.localScale = Vector3.one * (1.2f + 0.5f * pulse) / transform.lossyScale.x;
             yield return null;
@@ -2738,14 +2749,14 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.LanternCharge, 0.6f, 0.6f);
         yield return Wait(0.5f);
 
-        // Time stops: the clock falls silent, everything in the air hangs, a clock face fades up over the field and
-        // a ripple spreads from its fist as the colour drains away.
-        Vector3 hand = stopFrames != null ? OnSprite(FlamePoints[0].x, FlamePoints[0].y) : Head;
+        // Time stops: the clock falls silent, everything in the air hangs, and the air warps out from its raised fist
+        // as the colour drains away.
+        Vector3 Fist() => stopFrames != null ? OnSprite(FistPixel.x, FistPixel.y) : Head;
+        Vector3 hand = Fist();
         Sfx.Play(Sfx.MidnightChime, 0.8f, 0.5f);
         Music.Duck(0.2f, 4f);
         CameraShake.Add(0.2f);
         HoldTime(true);
-        StartCoroutine(ShowClockFace());
         // The world warps hard as time stops: a great ring out from its fist and a tighter one inside it.
         TimeRipple.Emit(hand, 18f, 3f, 1.6f, band: 1.3f);
         TimeRipple.Emit(hand, 9f, 2f, 1.1f, band: 0.8f);
@@ -2782,23 +2793,25 @@ public class Utsusemi : Boss
             lastGap = gap;
             yield return Wait(0.55f);
         }
-        // Held: a moment to read the rows and walk, the stopped clock throbbing slow rings through the frozen air.
+        // Held: a moment to read the rows and walk, its fist throbbing slow rings through the frozen air.
         Beat();
         for (float t = 0; t < 0.9f; t += HeldPulse)
         {
-            if (clockFace != null) TimeRipple.Emit(clockFace.transform.position, 12f, 1.4f, 0.8f, band: 1f);
+            TimeRipple.Emit(Fist(), 12f, 1.4f, 0.8f, band: 1f);
             yield return Wait(HeldPulse);
         }
 
         // The ripples rush back into its hand, a bell tolls, and time runs again.
         // The warps rush back into its fist, hard, before time runs again.
+        hand = Fist();
         TimeRipple.Emit(hand, 18f, 3f, 0.6f, inward: true, band: 1.3f);
         yield return Wait(0.6f);
         if (Sfx.Has(Sfx.BellToll)) Sfx.Play(Sfx.BellToll, 0.9f, 1f);
         else Sfx.Play(Sfx.MidnightChime, 1f, 0.9f);
         CameraShake.Add(0.25f);
         HoldTime(false);
-        StartCoroutine(ShatterClockFace());
+        // Time snaps back with a shockwave out from its fist.
+        TimeRipple.Emit(hand, 18f, 2.6f, 0.7f, band: 1.2f);
         foreach (Arrow needle in needles) if (needle != null) needle.Turn(Vector3.down * NeedleSpeed);
         needles.Clear();
         yield return StopFade(1f, 0f, 0.15f);
@@ -2829,7 +2842,6 @@ public class Utsusemi : Boss
     // While time is held: everything else it has in the air hangs where it is, and its own fire stands still.
     bool timeHeld;
     readonly List<(Arrow shot, Vector3 velocity)> held = new List<(Arrow, Vector3)>();
-    SpriteRenderer clockFace;
 
     void HoldTime(bool hold)
     {
@@ -2848,59 +2860,6 @@ public class Utsusemi : Boss
             foreach ((Arrow shot, Vector3 velocity) in held) if (shot != null) shot.Steer(velocity);
             held.Clear();
         }
-    }
-
-    // The stopped hour made visible: a great clock face fades up over the field, stopped. Without its art, a ring.
-    IEnumerator ShowClockFace()
-    {
-        if (clockFace != null) Destroy(clockFace.gameObject);
-        clockFace = new GameObject("ClockFace").AddComponent<SpriteRenderer>();
-        Sprite[] art = Fx.Frames(Fx.UtsuClockFace);
-        clockFace.sprite = art != null ? art[0] : ProceduralSprites.Ring(64);
-        // Under every shot, so the hanging fragments always read over it.
-        clockFace.sortingOrder = -10;
-        transient.Add(clockFace.gameObject);
-        Vector3 centre = CameraShake.Center;
-        clockFace.transform.position = new Vector3(centre.x, centre.y + 0.6f, 0.5f);
-        float size = Camera.main.orthographicSize * 1.3f;
-        float scale = size / clockFace.sprite.bounds.size.y;
-        for (float t = 0; t < 0.35f && clockFace != null; t += Time.deltaTime)
-        {
-            float k = t / 0.35f;
-            clockFace.transform.localScale = Vector3.one * scale * Mathf.Lerp(1.15f, 1f, 1f - (1f - k) * (1f - k));
-            clockFace.color = new Color(1f, 0.92f, 0.75f, ClockFaceAlpha * k);
-            yield return null;
-        }
-        while (clockFace != null && timeHeld)
-        {
-            // A slow breath while it hangs there, so it reads as held, not gone.
-            clockFace.color = new Color(1f, 0.92f, 0.75f, ClockFaceAlpha * (0.85f + 0.15f * Mathf.Sin(Time.time * 3f)));
-            yield return null;
-        }
-    }
-
-    const float ClockFaceAlpha = 0.28f;
-
-    // Time runs again and the clock face shatters: it flares, swells and is gone in a burst of gear parts.
-    IEnumerator ShatterClockFace()
-    {
-        if (clockFace == null) yield break;
-        SpriteRenderer face = clockFace;
-        clockFace = null;
-        Vector3 at = face.transform.position;
-        if (Fx.Play(Fx.UtsuParts, at, Color.white, 4f) == null) Fx.Play(Fx.Impact, at, Gold, 4f);
-        Debris.BurstSprites(at, art.deathParticles, Gold, 18, 1.2f, 9f);
-        // Time snaps back with a shockwave through the air from where the clock hung.
-        TimeRipple.Emit(at, 18f, 2.6f, 0.7f, band: 1.2f);
-        Vector3 from = face.transform.localScale;
-        for (float t = 0; t < 0.3f && face != null; t += Time.deltaTime)
-        {
-            float k = t / 0.3f;
-            face.transform.localScale = from * (1f + 0.25f * k);
-            face.color = new Color(1f, 1f, 0.9f, Mathf.Lerp(0.6f, 0f, k));
-            yield return null;
-        }
-        RemoveTransient(face);
     }
 
     // A brief grey flicker toward stopped time and back (Escapement's bell); never while time is really held.
@@ -2929,8 +2888,6 @@ public class Utsusemi : Boss
     {
         TimeRipple.SetStop(0f);
         if (timeHeld) HoldTime(false);
-        if (clockFace != null) Destroy(clockFace.gameObject);
-        clockFace = null;
         foreach (Arrow needle in needles) if (needle != null) needle.Pop(Molten);
         needles.Clear();
     }

@@ -52,8 +52,7 @@ public static class Fx
     public const string UtsuCracking = "Utsu_Cracking";
     // Its second form's lace: dark steel cracked with molten light, like its halo shards.
     public const string UtsuLaceP2 = "Utsu_LaceP2";
-    // The Stopped Hour's clock face, hung over the field while time is held, and Escapement's turning escape wheel.
-    public const string UtsuClockFace = "Utsu_ClockFace";
+    // Escapement's turning escape wheel.
     public const string UtsuEscapeWheel = "Utsu_EscapeWheel";
     // The reusable safe-zone marker (SafeZone): its ward (left post, tiled band, right post) and its shield icon.
     public const string SafeZone = "SafeZone";

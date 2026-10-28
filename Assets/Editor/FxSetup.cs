@@ -80,7 +80,6 @@ public static class FxSetup
         (Fx.SafeZoneIcon, 1, true, Centre),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
         (Fx.UtsuLaceP2, 8, true, Centre),
-        (Fx.UtsuClockFace, 1, true, Centre),
         (Fx.UtsuEscapeWheel, 1, true, Centre),
         (Fx.ShiroCrescent, 14, true, Centre),
         (Fx.ShiroSword, 10, true, Centre),

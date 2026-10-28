@@ -2285,7 +2285,8 @@ MonoBehaviour:
   portraitHeight: 1350
   portraitCorner: {x: -250, y: -601}
   portraitSoulPoint: {x: 0.8, y: -0.06}
-  heldSoulSize: 420
+  heldSoulShift: {x: -170, y: 0}
+  heldSoulSize: 500
   boonIcons:
   - {fileID: 21300000, guid: 8e4e7da24ce444d6c92f050039575e14, type: 3}
   - {fileID: 21300000, guid: 52247c19adab34a4fb4a7be81011334b, type: 3}

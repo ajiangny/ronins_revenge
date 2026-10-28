@@ -111,7 +111,9 @@ public static class ProceduralSprites
 
     public static Sprite ShadowOf(Sprite source, out float scale)
     {
-        if (shadows.TryGetValue(source, out var cached))
+        // A cached shadow is gone after leaving Play mode (its texture is destroyed, but this static dictionary lives
+        // on without a domain reload), so it's made again.
+        if (shadows.TryGetValue(source, out var cached) && cached.shadow != null)
         {
             scale = cached.scale;
             return cached.shadow;

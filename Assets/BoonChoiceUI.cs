@@ -60,9 +60,9 @@ public class BoonChoiceUI : MonoBehaviour
     [Tooltip("Where the caught soul floats over the ronin's open palm, as a fraction of the painting from its top-left corner.")]
     [SerializeField] Vector2 portraitSoulPoint = new Vector2(0.8f, -0.06f);
     [Tooltip("Shifts the held soul (and its swirl, pocket and shadow) from his palm, so the selected card's marker doesn't overlap it.")]
-    [SerializeField] Vector2 heldSoulShift = new Vector2(-110f, 0f);
+    [SerializeField] Vector2 heldSoulShift = new Vector2(-170f, 0f);
     [Tooltip("On-screen size of the soul in his hand.")]
-    [SerializeField] float heldSoulSize = 420f;
+    [SerializeField] float heldSoulSize = 500f;
     [Tooltip("One icon per boon, in BoonId order.")]
     [SerializeField] Sprite[] boonIcons;
     [Tooltip("Default icons for the Attack (sword), Shuriken and Parry slots before they hold a boon.")]

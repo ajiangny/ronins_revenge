@@ -158,19 +158,27 @@ public class Benibana : Boss
         var columns = new List<float> { here, ClampToScreen(here + side * 3.4f) };
         if (secondPhase) columns.Add(ClampToScreen(here - side * 3.4f));
         if (Random.value < 0.5f) Bark(BossLine.RosaryLash, 6f);
+        // Once the bands show, the lash is coming: a stagger breaks her stance, not the chain already swung.
+        yield return Launch(Lash(columns));
+    }
 
+    // The rest of the Rosary Lash, launched: it plays out in real time even if she's staggered meanwhile.
+    IEnumerator Lash(List<float> columns)
+    {
         // A wide red band on each column that narrows to a line over three beats, brightening on each, so the strike
         // lands as it closes. Faint while wide so it doesn't hide the field.
         const float TellWidth = 2.4f, LineWidth = 0.1f;
         var tells = new List<SpriteRenderer>();
         foreach (float x in columns)
         {
-            tells.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), TellWidth, new Color(Crimson.r, Crimson.g, Crimson.b, 0.2f)));
+            SpriteRenderer tell = Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), TellWidth, new Color(Crimson.r, Crimson.g, Crimson.b, 0.2f));
+            Detach(tell.gameObject);
+            tells.Add(tell);
         }
         float beatTime = secondPhase ? 0.22f : 0.3f;
         float tellTime = beatTime * 3f;
         int beatsPlayed = 0;
-        for (float t = 0; t < tellTime; t += Time.deltaTime * Tempo)
+        for (float t = 0; t < tellTime; t += Time.deltaTime)
         {
             if (t >= beatsPlayed * beatTime)
             {
@@ -194,7 +202,9 @@ public class Benibana : Boss
         {
             Vector3 top = new Vector3(x, TopOfScreen, 0);
             Vector3 bottom = new Vector3(x, GroundY, 0);
-            chains.Add(Chain(top, bottom));
+            GameObject chain = Chain(top, bottom);
+            Detach(chain);
+            chains.Add(chain);
             if (Fx.Play(Fx.BeniChainImpact, bottom + Vector3.up * 0.3f, Color.white, 1.8f) == null)
             {
                 Fx.Play(Fx.Impact, bottom + Vector3.up * 0.4f, Color.white, 1.6f);
@@ -202,12 +212,12 @@ public class Benibana : Boss
             Debris.BurstSprites(bottom, art.deathParticles, Silver, 10, 0.8f, 7f);
             SmashBlockers(x, top.y, bottom.y);
         }
-        foreach (SpriteRenderer tell in tells) Destroy(tell.gameObject);
+        foreach (SpriteRenderer tell in tells) if (tell != null) Destroy(tell.gameObject);
         CameraShake.Add(0.35f);
         Sfx.Play(Sfx.BlockerBreak, 1f, 0.8f);
 
         // The chain is a wall while it hangs: touching it costs a life, and parrying does nothing.
-        for (float t = 0; t < 1f; t += Time.deltaTime * Mathf.Max(Tempo, 0.5f))
+        for (float t = 0; t < 1f; t += Time.deltaTime)
         {
             foreach (float x in columns)
             {
@@ -228,7 +238,7 @@ public class Benibana : Boss
         }
         foreach (GameObject chain in chains)
         {
-            transient.Remove(chain);
+            if (chain == null) continue;
             foreach (SpriteRenderer link in chain.GetComponentsInChildren<SpriteRenderer>()) Fader.Fade(link, 0.25f);
             Destroy(chain, 0.3f);
         }

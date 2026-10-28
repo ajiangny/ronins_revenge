@@ -210,6 +210,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         fighting = false;
         StopAllCoroutines();
         ClearTransient();
+        ClearLaunched();
         OnCleared();
     }
 
@@ -296,6 +297,32 @@ public abstract class Boss : MonoBehaviour, IHittable
         fight = null;
         ClearTransient();
         if (!IsDead) PlayIdle();
+    }
+
+    // An attack's parts that have already left the boss (weights swinging, a chain slammed down): a stagger breaks
+    // its stance but not these, which play out on their own. Only a halt or its fall clears them.
+    readonly List<GameObject> launched = new List<GameObject>();
+
+    // Moves something out of `transient`, so a stagger no longer clears it.
+    protected void Detach(GameObject thing)
+    {
+        if (thing == null) return;
+        transient.Remove(thing);
+        launched.Add(thing);
+    }
+
+    // Runs the rest of an attack that has already been launched on its own, outside the fight loop, so a stagger
+    // doesn't cut it short. Yield on it to wait for it while nothing interrupts. Launched parts keep real time (not
+    // boss time): the daze is the boss's, not its attack's. Detach whatever they draw.
+    protected Coroutine Launch(IEnumerator rest) => StartCoroutine(rest);
+
+    void ClearLaunched()
+    {
+        foreach (GameObject thing in launched)
+        {
+            if (thing != null) Destroy(thing);
+        }
+        launched.Clear();
     }
 
     protected void ClearTransient()
@@ -680,6 +707,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         fighting = false;
         StopAllCoroutines();
         ClearTransient();
+        ClearLaunched();
         OnCleared();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Defeated?.Invoke();

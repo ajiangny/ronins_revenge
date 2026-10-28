@@ -106,6 +106,18 @@ public class Ronin : MonoBehaviour
     public event Action UltimateEnded;
     // He walks his row but can't attack: choosing a portal between rounds.
     public bool MoveOnly { get; set; }
+    // Held in a boss's stopped time (Utsusemi's Stopped Hour): he can't move, attack or parry, and stands frozen
+    // mid-frame until time runs again.
+    public bool TimeHeld
+    {
+        get => timeHeld;
+        set
+        {
+            timeHeld = value;
+            if (animator != null) animator.enabled = !value;
+        }
+    }
+    bool timeHeld;
     // In a safe area (the temple) he walks anywhere inside RoamArea, up and down too, and can't fight. Nowhere else
     // does he leave his row.
     public bool Roaming
@@ -372,12 +384,12 @@ public class Ronin : MonoBehaviour
             if (keyboard.upArrowKey.isPressed || keyboard.wKey.isPressed) moveInputY += 1;
             if (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed) moveInputY -= 1;
         }
-        else if (ControlsEnabled && keyboard != null)
+        else if (ControlsEnabled && !timeHeld && keyboard != null)
         {
             moveInput = Controls.MoveX(keyboard);
         }
         // The moves' buttons are the control scheme's (Controls); using the other scheme's switches to it.
-        if (ControlsEnabled && !Roaming && !MoveOnly && keyboard != null)
+        if (ControlsEnabled && !Roaming && !MoveOnly && !timeHeld && keyboard != null)
         {
             Controls.Detect(keyboard, mouse);
             if (Controls.Slash(keyboard, mouse) && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)

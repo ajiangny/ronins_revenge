@@ -153,7 +153,7 @@ public class Utsusemi : Boss
     protected override IEnumerator Fight()
     {
         armored = false;
-        // A fight restarted mid-Stopped Hour (a stagger) lets time run again and drops the needles it had set.
+        // A fight restarted mid-Stopped Hour lets time run again (the ronin too) and bursts the cleaves it had hung.
         ClearStoppedTime();
         // A fight restarted mid-laser (a stagger) clears the planted sword with the attack: it's back in hand.
         if (swordOut)
@@ -227,7 +227,8 @@ public class Utsusemi : Boss
         // While its sword wheels it fights on with the moves that need no blade.
         if (swordWheeling)
         {
-            var bladeless = new List<Move> { Move.Lattice, Move.PlumbLines, Move.Escapement };
+            var bladeless = new List<Move> { Move.Lattice, Move.Escapement };
+            if (!plumbsOut) bladeless.Add(Move.PlumbLines);
             if (lastMove is Move previous) bladeless.Remove(previous);
             return bladeless[Random.Range(0, bladeless.Count)];
         }
@@ -238,7 +239,8 @@ public class Utsusemi : Boss
             return lasers[Random.Range(0, lasers.Count)];
         }
         if (!hourStruck && movesSinceHours >= 2 && lastMove != Move.HourStrikes) return Move.HourStrikes;
-        var options = new List<Move> { Move.Lattice, Move.PlumbLines, Move.Escapement };
+        var options = new List<Move> { Move.Lattice, Move.Escapement };
+        if (!plumbsOut) options.Add(Move.PlumbLines);
         if (hatsOut == 0) options.Add(Move.KasaWheel);
         if (!hourStruck) options.Add(Move.HourStrikes);
         // Once unwound, the hat counts twice, so the lace and plumbs come up less often between lasers.
@@ -1329,6 +1331,26 @@ public class Utsusemi : Boss
         IgnoreEachOther(new List<Arrow>(weights));
         Sfx.Play(Sfx.ShurikenThrow, 0.7f, 0.4f);
 
+        // The weights are away: a stagger now breaks its stance but not the swing, which plays out on its own.
+        for (int i = 0; i < count; i++)
+        {
+            if (threads[i] != null) Detach(threads[i].gameObject);
+            if (portals[i] != null) Detach(portals[i].gameObject);
+        }
+        plumbsOut = true;
+        yield return Launch(SwingPlumbs(weights, threads, portals, pivots, length, drop, swing, damp, reel, fadeIn));
+    }
+
+    // Plumb Lines has weights swinging: it won't open more portals until they're reeled in.
+    bool plumbsOut;
+
+    // The Plumb Lines' swing, launched: the drop, the pendulum wave, the damping and the reel, in real time whatever
+    // happens to the automaton meanwhile, then the portals close.
+    IEnumerator SwingPlumbs(Arrow[] weights, SpriteRenderer[] threads, Transform[] portals, Vector3[] pivots, float length,
+        float drop, float swing, float damp, float reel, float fadeIn)
+    {
+        int count = weights.Length;
+
         // Where each weight hung last, so a cut thread snaps where it was.
         var lastHang = new Vector3[count];
         const float amplitude = 28f * Mathf.Deg2Rad;
@@ -1339,7 +1361,7 @@ public class Utsusemi : Boss
         float nextTick = drop + halfPeriod * 0.5f;
         float total = drop + swing + damp + reel;
         // Steered once per physics step: a velocity worked out from a render frame's delta overshoots the next step.
-        for (float t = 0; t < total; t += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f))
+        for (float t = 0; t < total; t += Time.fixedDeltaTime)
         {
             Beat();
             float swingT = t - drop;
@@ -1364,7 +1386,8 @@ public class Utsusemi : Boss
                 {
                     // Cut loose: the thread snaps and whips back up into its portal, which closes after it.
                     if (threads[i] == null) continue;
-                    StartCoroutine(SnapThread(threads[i], pivots[i], lastHang[i], portals[i]));
+                    if (portals[i] != null) StartCoroutine(SnapThread(threads[i], pivots[i], lastHang[i], portals[i]));
+                    else if (threads[i] != null) Destroy(threads[i].gameObject);
                     threads[i] = null;
                     portals[i] = null;
                     continue;
@@ -1392,10 +1415,11 @@ public class Utsusemi : Boss
             RemoveTransient(threads[i]);
         }
         Sfx.Play(Sfx.HatClang, 0.35f, 1.6f);
+        plumbsOut = false;
         for (int i = 0; i < count; i++)
         {
-            StartCoroutine(ClosePortal(portals[i]));
-            yield return Wait(0.06f);
+            if (portals[i] != null) StartCoroutine(ClosePortal(portals[i]));
+            yield return new WaitForSeconds(0.06f);
         }
     }
 
@@ -2457,6 +2481,7 @@ public class Utsusemi : Boss
         embers.Clear();
         ClearStoppedTime();
         TimeRipple.Clear();
+        plumbsOut = false;
     }
 
     // One world pixel of its sprite, so its fire is drawn on its own pixel grid.
@@ -2794,32 +2819,29 @@ public class Utsusemi : Boss
         PlayIdle();
     }
 
-    // The Stopped Hour's needles, hung in the air while time is held.
-    readonly List<Arrow> needles = new List<Arrow>();
-    int stoppedHours;
-    const float NeedleSpeed = 6f;
-    // Rows hang this far apart, so they land a third of a second apart once released.
-    const float NeedleRowGap = 1.9f;
+    // The Stopped Hour's cleaves, hung in the air while time is held.
+    readonly List<Arrow> stoppedCleaves = new List<Arrow>();
+    // How far apart they come for him once time runs, so each is its own parry.
+    const float CleaveGap = 0.55f;
+    const float StoppedCleaveSpeed = 9.5f;
 
-    // Stopped Hour: the hour it keeps, held still. It raises its burning fist and the world stops: colour drains, the
-    // clock falls silent, and a ripple spreads from its hand. While time is held it hangs rows of molten needles in
-    // the air over the ronin, each set where he stands as it's placed, each with one way through; he alone can still
-    // move. Then the ripples rush back into its hand, a bell tolls and every needle falls at once, the lowest row
-    // first. Needles break to a cut but fizzle a parry: read the rows and walk the gaps, or cut your own.
+    // Stopped Hour: the hour it keeps, held still. It raises its burning fist and time stops: colour drains, the clock
+    // falls silent, the air warps out from its fist, and everything stands frozen, the ronin too: he can't move,
+    // strike or parry. Only Utsusemi moves. It steps through the stopped world to three places around him, and at each
+    // swings, leaving a great hour cleave hanging in the air aimed at him. Back in its row, the warps rush into its
+    // fist, a bell tolls and time runs: the cleaves come for him one after another, homing and unbreakable. Each is a
+    // parry, like the hour cleave; sent back, it jams its gears.
     IEnumerator StoppedHour()
     {
-        stoppedHours++;
-        int rows = stoppedHours > 1 ? 3 : 2;
-        float gapWidth = Mathf.Max(BulletHell.MinGap, 3.4f - 0.4f * (stoppedHours - 1));
-        float lo = LeftEdge + 0.6f + gapWidth / 2f, hi = RightEdge - 0.6f - gapWidth / 2f;
+        Vector3 row = anchor;
 
         if (stopFrames != null) PlayFrames(stopFrames, 0, -1, true, 10f);
         else PlayAction(art.parry);
         Sfx.Play(Sfx.LanternCharge, 0.6f, 0.6f);
         yield return Wait(0.5f);
 
-        // Time stops: the clock falls silent, everything in the air hangs, and the air warps out from its raised fist
-        // as the colour drains away.
+        // Time stops: the clock falls silent, everything in the air hangs, the ronin with it, and the air warps out
+        // from its raised fist as the colour drains away.
         Vector3 Fist() => stopFrames != null ? OnSprite(FistPixel.x, FistPixel.y) : Head;
         Vector3 hand = Fist();
         Sfx.Play(Sfx.MidnightChime, 0.8f, 0.5f);
@@ -2830,39 +2852,37 @@ public class Utsusemi : Boss
         TimeRipple.Emit(hand, 18f, 3f, 1.6f, band: 1.3f);
         TimeRipple.Emit(hand, 9f, 2f, 1.1f, band: 0.8f);
         yield return StopFade(0f, 1f, 0.35f);
+        yield return Wait(0.25f);
 
-        float lowest = ronin.Bounds.center.y + 5.5f;
-        float lastGap = ronin.Bounds.center.x;
-        for (int r = 0; r < rows; r++)
+        // Three places around him, either side and then straight over him, in an order he can't count on.
+        float roninX = ronin.Bounds.center.x;
+        float lo = LeftEdge + 1.6f, hi = RightEdge - 1.6f;
+        float side = Random.value < 0.5f ? -1f : 1f;
+        var spots = new[]
+        {
+            new Vector3(Mathf.Clamp(roninX + side * 5f, lo, hi), row.y - 1.8f, row.z),
+            new Vector3(Mathf.Clamp(roninX - side * 5f, lo, hi), row.y - 1.8f, row.z),
+            new Vector3(Mathf.Clamp(roninX, lo, hi), row.y + 0.2f, row.z),
+        };
+        stoppedCleaves.Clear();
+        foreach (Vector3 spot in spots)
         {
             Beat();
-            float here = ronin.Bounds.center.x;
-            float gap;
-            if (r == 0)
-            {
-                // Over where he stands, with its way through a few steps off to one side.
-                float side = Random.value < 0.5f ? -1f : 1f;
-                gap = here + side * Random.Range(3f, 6f);
-                if (gap < lo || gap > hi) gap = here - side * Random.Range(3f, 6f);
-                gap = Mathf.Clamp(gap, lo, hi);
-            }
-            else
-            {
-                // Each higher row lands a beat later, its way through a step on from the last row's.
-                float seconds = NeedleRowGap / NeedleSpeed;
-                float want = lastGap + (Random.value < 0.5f ? -1f : 1f) * BulletHell.MaxDodgeSpeed * seconds;
-                gap = BulletHell.NextGap(lastGap, want, seconds * 0.9f, lo, hi);
-                BulletHell.GapOk(lastGap, gap, seconds, gapWidth, "Stopped Hour");
-            }
-            float y = lowest + r * NeedleRowGap;
-            yield return BulletHell.Room(30);
-            needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.8f, new[] { gap }, gapWidth, 0f));
-            TimeRipple.Emit(new Vector3(gap, y, 0), 4f, 1.8f, 0.6f, band: 0.7f);
+            // It steps through stopped time, the air rippling where it lands.
+            yield return Dash(spot, 0.14f);
+            TimeRipple.Emit(Centre, 6f, 1.6f, 0.5f, band: 0.7f);
+            const float swingFps = 22f;
+            PlayFrames(slashFrames, 1, -1, false, swingFps);
+            yield return Wait(slashFrames != null ? (SlashReleaseFrame - 1) / swingFps : 0.15f);
+            stoppedCleaves.Add(HangCleave(Centre + (ronin.Bounds.center - Centre).normalized * 1.4f));
+            Sfx.Play(Sfx.HourSlash, 0.5f, 0.8f);
             Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
-            lastGap = gap;
-            yield return Wait(0.55f);
+            yield return Wait(0.3f);
         }
-        // Held: a moment to read the rows and walk, its fist throbbing slow rings through the frozen air.
+        yield return Dash(row, 0.16f);
+        PlayIdle();
+
+        // Held: a beat to see what's coming, its fist throbbing slow rings through the frozen air.
         Beat();
         for (float t = 0; t < 0.9f; t += HeldPulse)
         {
@@ -2870,8 +2890,7 @@ public class Utsusemi : Boss
             yield return Wait(HeldPulse);
         }
 
-        // The ripples rush back into its hand, a bell tolls, and time runs again.
-        // The warps rush back into its fist, hard, before time runs again.
+        // The warps rush back into its fist, hard, a bell tolls, and time runs again.
         hand = Fist();
         TimeRipple.Emit(hand, 18f, 3f, 0.6f, inward: true, band: 1.3f);
         yield return Wait(0.6f);
@@ -2881,53 +2900,89 @@ public class Utsusemi : Boss
         HoldTime(false);
         // Time snaps back with a shockwave out from its fist.
         TimeRipple.Emit(hand, 18f, 2.6f, 0.7f, band: 1.2f);
-        foreach (Arrow needle in needles) if (needle != null) needle.Turn(Vector3.down * NeedleSpeed);
-        needles.Clear();
-        yield return StopFade(1f, 0f, 0.15f);
+        StartCoroutine(StopFade(1f, 0f, 0.15f));
         Tick(0.8f);
+        // The cleaves are loosed: a stagger from the first parried one won't stop the others coming.
+        var loosed = new List<Arrow>(stoppedCleaves);
+        stoppedCleaves.Clear();
+        yield return Launch(LooseCleaves(loosed));
         PlayIdle();
         Beat();
-        yield return Wait(0.8f);
+        yield return Wait(0.6f);
+    }
+
+    // An hour cleave left hanging in stopped time, facing the ronin: unbreakable, sent back only by a parry.
+    Arrow HangCleave(Vector3 from)
+    {
+        Vector3 aim = (ronin.Bounds.center - from).normalized;
+        // Launched a hair's breadth so it turns to face him, then held dead still.
+        Arrow cleave = Own(Shoot(from, aim * 0.01f));
+        cleave.Steer(Vector3.zero);
+        Sprite[] frames = Fx.Frames(Fx.UtsuHourSlash);
+        if (frames != null) cleave.Restyle(frames, 14f, Color.white, new Vector2(4.2f, 2.8f), 0.9f, new Color(Molten.r, Molten.g, Molten.b, 0.6f), 3.6f);
+        else cleave.Restyle(ProceduralSprites.White, new Color(0.9f, 0.93f, 1f), new Vector2(4f, 0.4f), 0.9f, new Color(Molten.r, Molten.g, Molten.b, 0.6f), 3.6f);
+        cleave.MakeUnbreakable();
+        cleave.MakeReflectable(transform);
+        ElementFx.Glow(from, Molten, 0.8f, 2.4f, 0.25f);
+        return cleave;
+    }
+
+    // Time runs: each hanging cleave turns on the ronin and hunts him, a beat after the last. Real time, launched.
+    IEnumerator LooseCleaves(List<Arrow> cleaves)
+    {
+        foreach (Arrow cleave in cleaves)
+        {
+            if (cleave == null) continue;
+            cleave.Turn((ronin.Bounds.center - cleave.transform.position).normalized * StoppedCleaveSpeed);
+            StartCoroutine(Pursue(cleave, StoppedCleaveSpeed));
+            Sfx.Play(Sfx.HourSlash, 0.8f, 1.1f);
+            CameraShake.Add(0.15f);
+            yield return new WaitForSeconds(CleaveGap);
+        }
     }
 
     // How often the stopped clock sends a ring through the frozen air while it holds.
     const float HeldPulse = 0.45f;
 
-    // A fragment of its burning lace, hung in stopped time: unparryable and through cover, but a cut breaks it.
-    // Without the phase-two lace art, a molten seal-dart.
-    Arrow Needle(Vector3 from, Vector3 velocity)
-    {
-        Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
-        Sprite[] frames = Fx.Frames(Fx.UtsuLaceP2);
-        if (frames == null) return BulletHell.MakeSealDart(shot, Molten);
-        shot.Restyle(frames, 8f, Color.white, new Vector2(0.85f, 0.85f), 0.27f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 1f);
-        // Each hangs at its own tilt, like a shard caught mid-fall.
-        shot.Art.transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
-        shot.Unparryable = true;
-        shot.PassesCover = true;
-        return shot;
-    }
-
-    // While time is held: everything else it has in the air hangs where it is, and its own fire stands still.
+    // While time is held: everything else in the air hangs where it is, its own fire stands still, and the ronin
+    // stands frozen mid-frame, his own shots with him.
     bool timeHeld;
     readonly List<(Arrow shot, Vector3 velocity)> held = new List<(Arrow, Vector3)>();
+    readonly List<(Kunai shot, Rigidbody body, Vector3 velocity)> heldKunai = new List<(Kunai, Rigidbody, Vector3)>();
 
     void HoldTime(bool hold)
     {
         timeHeld = hold;
+        if (ronin != null) ronin.TimeHeld = hold;
         if (hold)
         {
             foreach (Arrow shot in FindObjectsByType<Arrow>(FindObjectsSortMode.None))
             {
-                if (shot == null || !shot.isActiveAndEnabled || needles.Contains(shot)) continue;
+                if (shot == null || !shot.isActiveAndEnabled || stoppedCleaves.Contains(shot)) continue;
                 held.Add((shot, shot.Velocity));
                 shot.Steer(Vector3.zero);
+            }
+            foreach (Kunai shot in FindObjectsByType<Kunai>(FindObjectsSortMode.None))
+            {
+                var body = shot.GetComponent<Rigidbody>();
+                if (body == null) continue;
+                heldKunai.Add((shot, body, body.linearVelocity));
+                // Its own steering (homing, spinning) stops too, so it can't drift on.
+                shot.enabled = false;
+                body.linearVelocity = Vector3.zero;
             }
         }
         else
         {
             foreach ((Arrow shot, Vector3 velocity) in held) if (shot != null) shot.Steer(velocity);
             held.Clear();
+            foreach ((Kunai shot, Rigidbody body, Vector3 velocity) in heldKunai)
+            {
+                if (shot == null) continue;
+                shot.enabled = true;
+                body.linearVelocity = velocity;
+            }
+            heldKunai.Clear();
         }
     }
 
@@ -2952,13 +3007,13 @@ public class Utsusemi : Boss
         TimeRipple.SetStop(to);
     }
 
-    // Lets time run again and bursts any needles still hung in the air (the move cut short).
+    // Lets time run again, frees the ronin, and bursts any cleaves still hung in the air (the move cut short).
     void ClearStoppedTime()
     {
         TimeRipple.SetStop(0f);
         if (timeHeld) HoldTime(false);
-        foreach (Arrow needle in needles) if (needle != null) needle.Pop(Molten);
-        needles.Clear();
+        foreach (Arrow cleave in stoppedCleaves) if (cleave != null) cleave.Pop(Molten);
+        stoppedCleaves.Clear();
     }
 
     // The Thirteenth Hour comes once, under this share of its last bar.

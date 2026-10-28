@@ -65,9 +65,9 @@ public class MenuUI : MonoBehaviour
     const float GridGap = 70f;
     // A card page's cells: tall panels side by side, one per choice.
     const float CardWidth = 580f;
-    const float CardHeight = 480f;
+    const float CardHeight = 470f;
     // Where a card's lines start under its heading, and how tall each is (its key caps and mouse icons).
-    const float CardLinesTop = 136f;
+    const float CardLinesTop = 140f;
     const float CardLineHeight = 58f;
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
@@ -184,21 +184,25 @@ public class MenuUI : MonoBehaviour
         float bodyHeight = bodyText.gameObject.activeSelf ? bodyText.GetPreferredValues(bodyText.text, 1200f, 0f).y : 0f;
         float rowsHeight = GridRows * PageRowHeight;
         float gap = 36f;
+        // On a card page the line under the title belongs to it, so it sits close under the title.
+        float titleGap = cards && bodyHeight > 0f ? 0f : gap;
+        // Cards stand a little further below that line, so it reads as the title's, not the cards'.
+        float bodyGap = cards ? gap + 34f : gap;
         // The selected item's note sits just under the rows, so it can never run into the last one.
         const float noteHeight = 60f;
         bool hasNote = noteText.gameObject.activeSelf;
-        float total = titleHeight + (bodyHeight > 0f ? bodyHeight + gap : 0f) + gap + rowsHeight + (hasNote ? gap / 2f + noteHeight : 0f);
+        float total = titleHeight + (bodyHeight > 0f ? bodyHeight + titleGap + bodyGap - gap : 0f) + gap + rowsHeight + (hasNote ? gap / 2f + noteHeight : 0f);
         float y = total / 2f + 30f;
 
         titleReveal.anchoredPosition = new Vector2(0, y - titleHeight / 2f);
         titleReveal.sizeDelta = new Vector2(1800f, titleHeight + 60f);
         titleText.rectTransform.sizeDelta = new Vector2(1800f, titleHeight + 60f);
-        y -= titleHeight + gap;
+        y -= titleHeight + (bodyHeight > 0f ? titleGap : gap);
         if (bodyHeight > 0f)
         {
             bodyText.rectTransform.anchoredPosition = new Vector2(0, y);
             bodyText.rectTransform.sizeDelta = new Vector2(1200f, bodyHeight + 10f);
-            y -= bodyHeight + gap;
+            y -= bodyHeight + bodyGap;
         }
         rowsRoot.anchoredPosition = new Vector2(0, y);
         noteText.rectTransform.anchoredPosition = new Vector2(0, y - rowsHeight - gap / 2f);
@@ -691,7 +695,7 @@ public class MenuUI : MonoBehaviour
         panel.color = onPaper ? Color.Lerp(Paper, Ink, 0.035f) : new Color(0f, 0f, 0f, 0.6f);
         panel.raycastTarget = false;
 
-        row.label = GameUI.CreateText(row.root, ui.TitleFont, "Heading", new Vector2(0.5f, 1f), new Vector2(0f, -62f),
+        row.label = GameUI.CreateText(row.root, ui.TitleFont, "Heading", new Vector2(0.5f, 1f), new Vector2(0f, -34f),
             new Vector2(width - 40f, 70f), 46, TextAlignmentOptions.Center);
         row.label.textWrappingMode = TextWrappingModes.NoWrap;
         row.label.text = item.label;
@@ -699,7 +703,7 @@ public class MenuUI : MonoBehaviour
         ui.Style(row.label, TextStyle.Title);
         if (onPaper) row.label.fontSharedMaterial = row.label.font.material;
 
-        Image rule = GameUI.CreateRect("Rule", row.root, new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(180f, 2f)).gameObject.AddComponent<Image>();
+        Image rule = GameUI.CreateRect("Rule", row.root, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(180f, 2f)).gameObject.AddComponent<Image>();
         rule.sprite = ProceduralSprites.White;
         rule.color = new Color(ink.r, ink.g, ink.b, 0.3f);
         rule.raycastTarget = false;

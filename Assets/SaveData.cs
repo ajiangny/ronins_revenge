@@ -38,6 +38,10 @@ public class SaveData
     public int[] oaths = new int[0];
     public int bestHeatCleared;
     public bool oathsUnsealed;
+    // Poguru's tutorial: settled once it's been finished or skipped, so it isn't offered again; replay asks for it
+    // on the next run (set at his nest, and while a tutorial is under way, so a death in it offers it again).
+    public bool tutorialSettled;
+    public bool tutorialReplay;
 
     public int SeenIn(string id)
     {

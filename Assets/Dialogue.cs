@@ -5,7 +5,8 @@ using UnityEngine;
 
 // Hades-style reactive dialogue (Story/README.md, Story/DIALOGUE_RESEARCH.md): many conversations written for
 // situations, and the game picks the one that fits what has happened across runs.
-public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup }
+// Poguru's: Tutorial is played by id (Dialogue.Find); the rest are his barks and his talk at the temple nest.
+public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk }
 
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
 // the Repeatables, which every event has so nobody ever goes silent.
@@ -46,6 +47,8 @@ public struct DialogueContext
     // Lives left right now, and whether this boon screen is a Spirit Offering (souls with nothing left to give).
     public int Lives;
     public bool Offering;
+    // The boss just felled, for Poguru's boss-down barks.
+    public BossKind? Boss;
 }
 
 // One requirement, with the words the debug view prints for it.
@@ -81,6 +84,10 @@ public static class Dialogue
     public static Req LivesLeft(int n) => new Req($"{n} lives left", c => c.Lives == n);
     public static Req Offering => new Req("a Spirit Offering", c => c.Offering);
     public static Req HoldsDuo => new Req("holds a Duo", c => c.Loadout != null && HasDuo(c.Loadout));
+    public static Req Felled(BossKind boss) => new Req($"just felled {boss}", c => c.Boss == boss);
+    // Met in any way: fought, heard, or killed by.
+    public static Req Met(BossKind boss) => new Req($"met {boss}", c => c.Save.deathsTo[(int)boss] + c.Save.winsVs[(int)boss] > 0
+        || c.Save.seen.Exists(id => id.StartsWith(boss + "_")));
 
     static bool HasDuo(RoninLoadout loadout)
     {
@@ -374,10 +381,110 @@ public static class Dialogue
             Say("Hibiki", "Here! Catch!")),
         Talk("Hibiki_Greet_Drumroll", "Hibiki", Soul, Repeat, When(),
             Say("Hibiki", "Drumroll, please... It's me again!")),
+
+        // Poguru, the Lost Dragon in Oni's left wisp (Story/Poguru.md). The tutorial's lines are played by id.
+        Tut("Poguru_Tut_Wake", P("ONI! ONI! THE ARMY IS COMING!"), O("...Who are you."),
+            P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!"), P("No time! Do you remember how to fight?")),
+        Tut("Poguru_Tut_Again", P("Oni! Army! Again! Want the lesson again? I LOVE the lesson.")),
+        Tut("Poguru_Tut_Yay", P("Yay! Stay close to me. I mean, I'll stay close to you!")),
+        Tut("Poguru_Tut_Skip", P("Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly.")),
+        Tut("Poguru_Tut_Basics", P("Bad guys up there, you down here. They march down, you stop them!"),
+            P("This is SLASH. Press SPACE and a cut flies up. Whoosh!"),
+            P("Your Spirit SHURIKEN! Press W. Big and sparkly, but it needs a little nap after."),
+            P("And PARRY! Press SHIFT just before an arrow bonks you, and it goes right back at them!"),
+            P("Beat the whole army. I'll float nearby and bonk arrows. ...Try not to make me bonk too many.")),
+        Tut("Poguru_Block_1", P("Bonk! Got it!")),
+        Tut("Poguru_Block_3", P("Ow. Okay. Still fine!")),
+        Tut("Poguru_Block_6", P("Oni, you can ALSO move, you know!")),
+        Tut("Poguru_Block_10", P("My HEAD is not a SHIELD!")),
+        Tut("Poguru_Block_Break", P("That's it! Dragon break! You're on your own for five seconds!")),
+        Tut("Poguru_Block_Back", P("...Fine. FINE. I'm back. Hmph.")),
+        Tut("Poguru_Tut_LookOut", P("LOOK OUT!!!")),
+        Tut("Poguru_Tut_Hearts", P("Waaah! It went right through me! Are you okay?!"), O("...Fine."),
+            P("Those hearts in the corner are your lives. Lose them all and it's back to the temple. It's damp there."),
+            P("Good news! I've been saving a heart soul. For emergencies. This is an emergency!"),
+            P("Hearts fall out of broken cover sometimes. Once in a blue moon a soldier drops one too!")),
+        Tut("Poguru_Tut_Collect", P("Go get it! It's on your row!")),
+        Tut("Poguru_Tut_Collected", P("Yummy! I mean... healthy!")),
+        Tut("Poguru_Tut_Reward", P("Ooooo! Pretty cool soul!"), P("Wait... it looks like someone familiar...")),
+        Tut("Poguru_Tut_Boons", P("Souls lend you their power. That's a boon!"), P("Pick ONE. Up and down to look, ENTER to take it."),
+            P("They change your slash, shuriken or parry. Or pick the shiniest. That's what I'd do.")),
+        Tut("Poguru_Tut_Paths", P("Paths! Each leads to your next fight. What's floating in it is your prize for winning."),
+            P("Walk under one and press E. After a few rounds, one of them leads to the boss!")),
+        Tut("Poguru_Tut_Done", P("Looks like you DO remember how to fight!"), P("Let's hurry and free everyone!!"),
+            O("...Back in the wisp."), P("Going! Shutting up! ...Mostly!")),
+
+        // His barks: a line out of the wisp, then back in.
+        Line("Poguru_Round_Go", Pog, DialogueEvent.PoguruRound, Repeat, "Go go go!"),
+        Line("Poguru_Round_Snacks", Pog, DialogueEvent.PoguruRound, Repeat, "More of them! Do they ever bring snacks?"),
+        Line("Poguru_Round_Wave", Pog, DialogueEvent.PoguruRound, Repeat, "Hi, army! He's going to beat you now! ...Sorry!"),
+        Line("Poguru_Round_Breathe", Pog, DialogueEvent.PoguruRound, Repeat, "Deep breaths! Like me! Hff hff hff."),
+        Line("Poguru_Round_Count", Pog, DialogueEvent.PoguruRound, Repeat, "I counted them. There's... a lot."),
+        Line("Poguru_Soul_Shiny", Pog, DialogueEvent.PoguruSoul, Repeat, "Shiny! Can I hold it? No? Okay."),
+        Line("Poguru_Soul_Thanks", Pog, DialogueEvent.PoguruSoul, Repeat, "A friend from the coffin! Say thank you, Oni!"),
+        Line("Poguru_Soul_Glow", Pog, DialogueEvent.PoguruSoul, Repeat, "You're glowing! I'm glowing too. Solidarity."),
+        Line("Poguru_Boss_Benibana", Pog, DialogueEvent.PoguruBoss, Story, "Smoke lady's gone! I kept one petal.",
+            Felled(BossKind.Benibana), WinsVs(BossKind.Benibana, 1)),
+        Line("Poguru_Boss_Utsusemi", Pog, DialogueEvent.PoguruBoss, Story, "The ticking stopped! Is it lunchtime?",
+            Felled(BossKind.Utsusemi), WinsVs(BossKind.Utsusemi, 1)),
+        Line("Poguru_Boss_Shirogane", Pog, DialogueEvent.PoguruBoss, Story, "She looked so sad... Wisps can't cry. I checked.",
+            Felled(BossKind.Shirogane), WinsVs(BossKind.Shirogane, 1)),
+        Line("Poguru_Boss_Won", Pog, DialogueEvent.PoguruBoss, Repeat, "WE WON! I mean, you won. I helped. Emotionally."),
+        Line("Poguru_Boss_Wiggle", Pog, DialogueEvent.PoguruBoss, Repeat, "Victory wiggle! ...No? Okay."),
+        Line("Poguru_Wake_First", Pog, DialogueEvent.PoguruWake, Story, "Back in the damp temple. ...But I like that you're here.", Deaths(1)),
+        Reaction("Poguru_Wake_Army", Pog, DialogueEvent.PoguruWake, 3, "Those soldiers were VERY pointy today.", LastDiedToArmy),
+        Reaction("Poguru_Wake_Benibana", Pog, DialogueEvent.PoguruWake, 3, "Her smoke made me sneeze.", LastKiller(BossKind.Benibana)),
+        Reaction("Poguru_Wake_Utsusemi", Pog, DialogueEvent.PoguruWake, 3, "Tick, tock, ow.", LastKiller(BossKind.Utsusemi)),
+        Reaction("Poguru_Wake_Shirogane", Pog, DialogueEvent.PoguruWake, 3, "She hits SO hard.", LastKiller(BossKind.Shirogane)),
+        Reaction("Poguru_Wake_Kagetsune", Pog, DialogueEvent.PoguruWake, 3, "I hid in your wisp the whole time. I'm not proud.", LastKiller(BossKind.Kagetsune)),
+        Line("Poguru_Wake_Up", Pog, DialogueEvent.PoguruWake, Repeat, "Up you get! The pool's warm. Ish."),
+        Line("Poguru_Wake_Hug", Pog, DialogueEvent.PoguruWake, Repeat, "Wisp hug! Very warm. Very small."),
+        // Subtitle only: the count changes, so it can't be recorded.
+        Line("Poguru_Wake_Count", Pog, DialogueEvent.PoguruWake, Repeat, "That's {deaths}! I'm keeping count."),
+
+        // His talk at the temple nest, once a visit.
+        Talk("Poguru_Talk_Who", Pog, PogTalk, Story, When(), O("Where did you come from."),
+            P("Your wisp! The left one. It's cosy. I think I was always there, I just woke up late."),
+            P("I'm a dragon! Probably. A small one. Lost. That's my title!")),
+        Talk("Poguru_Talk_Cape", Pog, PogTalk, Story, When(Seen("Poguru_Talk_Who"), RunsSince("Poguru_Talk_Who", 1)), O("That red cloth."),
+            P("My cape! It smells like festival lanterns. Do you know why?"), O("...No.")),
+        Talk("Poguru_Talk_Remember", Pog, PogTalk, Story, When(Runs(3)),
+            P("Every time you wake up, you forget a little. So I remember for you!"),
+            P("Mostly the wrong things. Did you used to like plums?"), O("...I did.")),
+        Talk("Poguru_Talk_Silver", Pog, PogTalk, Story, When(Met(BossKind.Shirogane)),
+            P("When the silver lady's near, your wisps go all warm. Is she a friend?"), O("...She was.")),
+        Talk("Poguru_Talk_Dawn", Pog, PogTalk, Story, When(Clears(1)),
+            P("The sun! I'd never seen it! It's very bright. I hid. But I peeked!")),
+        Talk("Poguru_Talk_Nap", Pog, PogTalk, Repeat, When(),
+            P("I was napping. In your wisp. Which is in you. So technically you were napping too.")),
+        Talk("Poguru_Talk_Rawr", Pog, PogTalk, Repeat, When(), P("Rawr. That's my fierce face. Was it fierce? Don't answer.")),
+        Talk("Poguru_Talk_GhostFire", Pog, PogTalk, Repeat, When(), P("I tried eating a ghost-fire. It tasted like Tuesday.")),
+        Talk("Poguru_Talk_Flute", Pog, PogTalk, Repeat, When(), P("Play the flute later? The wisps dance when you do."), O("...Maybe.")),
     };
 
-    public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false) =>
-        new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering };
+    const string Pog = "Poguru";
+    const DialogueEvent PogTalk = DialogueEvent.PoguruTalk;
+    static DialogueLine P(string text) => Say(Pog, text);
+    static DialogueLine O(string text) => Say("Oni", text);
+
+    // A tutorial conversation: never picked, only played by id.
+    static Conversation Tut(string id, params DialogueLine[] lines) => Talk(id, Pog, DialogueEvent.Tutorial, Repeat, When(), lines);
+
+    // A conversation by its id, recorded as heard when `mark` (so the Story ones it unlocks follow on); null if unwritten.
+    public static Conversation Find(string id, bool mark = true)
+    {
+        Conversation found = All.Find(c => c.Id == id);
+        if (found != null && mark)
+        {
+            global::Save.Data.MarkSeen(id, global::Save.Run);
+            global::Save.Write();
+        }
+        return found;
+    }
+
+    public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false,
+        BossKind? boss = null) =>
+        new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss };
 
     // Why a conversation can't play now, or null if it can. No dice are rolled here, so the answer is repeatable.
     static string Blocked(Conversation c, DialogueContext ctx)

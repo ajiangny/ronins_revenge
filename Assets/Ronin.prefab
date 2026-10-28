@@ -194,6 +194,8 @@ MonoBehaviour:
   parryRadius: 1.1
   ultimateHits: 40
   ultimateDuration: 10
+  cloneOffset: 1.6
+  cloneGlide: 16
 --- !u!54 &-5681516107360910860
 Rigidbody:
   m_ObjectHideFlags: 0

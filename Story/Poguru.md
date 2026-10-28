@@ -56,7 +56,8 @@ caped spirit. They live outside the repo and must never be committed.
 ## Voice
 
 Silly, excitable, kind and short. He shouts in capitals when he panics and puts himself down for a laugh. He's the
-comic contrast to Oni, who never jokes; Oni answers him with "..." and a few words.
+comic contrast to Oni, who never jokes; Oni answers him with "..." and a few words. He roasts Oni for every death,
+and does Oni's voice at him (a deep, slow, deadpan growl of "...No.") when Oni turns him down.
 
 **In game:** a voice designed for him in ElevenLabs (`POGURU` in `Tools/generate-voice.mjs`): a tiny cartoon
 baby-dragon spirit, young, boyish, high and bright but warm (not shrill), fast and breathless, giggly, with comedic
@@ -143,6 +144,41 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | | Repeatable | | `Poguru_Wake_Hug` | "Wisp hug! Very warm. Very small." |
 | | Repeatable | | `Poguru_Wake_Count` | "That's {deaths}! I'm keeping count." (subtitle only: the number changes) |
 
+### Roasts at the wake (`PoguruWake`, Reactive, ahead of the wake lines above)
+
+He roasts whatever struck the last blow (`SaveData.lastDeathCause`: a boss, or the army's arrow, spear, ghost arrow,
+diving soldier, or the army reaching the ground). Each rests for its cooldown after it plays, so dying the same way
+again gets the next one. About half draw a word back from Oni: a dry clapback or a grunt, said over his head. All
+voiced (`Poguru_Roast_*`).
+
+| Requires | Cooldown | Id | Lines |
+|---|---|---|---|
+| same death 5 runs in a row | 4 | `Poguru_Roast_StreakFive` | P: "Five in a row! The same way! Is this a plan? Is it a secret plan?" · Oni: "...Yes." · P: "Oh! ...Oh no. It isn't, is it." |
+| same death 3 runs in a row | 3 | `Poguru_Roast_StreakThree` | P: "Three times. Same way. In a row. I'm making a chart." · Oni: "Don't." · P: "It has STICKERS." |
+| an arrow, 10th arrow death | once | `Poguru_Roast_ArrowsTen` | P: "That's ten arrows now. I've started naming them. That one was Pointy Jiro." |
+| the army reached him, 5th time | once | `Poguru_Roast_InvasionFive` | P: "Five times they've marched all the way down to you. Their poor feet must be SO tired." · Oni: "So am I." |
+| an arrow | 3 | `Poguru_Roast_Arrow` | P: "An ARROW? The pointy stick? The thing you cut in half for FUN?" |
+| an arrow | 3 | `Poguru_Roast_ArrowSlash` | P: "You know you can slash those, right? Swish! Snap! Like that!" · Oni: "...I know." · P: "Do you, though?" |
+| an arrow | 3 | `Poguru_Roast_ArrowOne` | P: "One little arrow. Out of a thousand. You found the ONE." · Oni: "Hmph." |
+| a Taisho's spear | 3 | `Poguru_Roast_Spear` | P: "The big red spear! The one I TOLD you about! You PARRY those! It was in the lesson!" |
+| a Taisho's spear | 3 | `Poguru_Roast_SpearCatch` | P: "Were you trying to catch it? With your face?" · Oni: "...It was fast." · P: "It's a SPEAR, Oni. Fast is its whole job." |
+| a Taisho's spear | 3 | `Poguru_Roast_SpearRed` | P: "Glowing. Red. Spear. That's three warnings in one!" · Oni: "Tch." |
+| a Yurei's ghost arrow | 3 | `Poguru_Roast_Ghost` | P: "The ghosty arrows go right through cover! You hid behind a rock from a GHOST." |
+| a Yurei's ghost arrow | 3 | `Poguru_Roast_GhostHide` | P: "You hid SO well! From the wrong thing!" · Oni: "...I noticed." |
+| a diving soldier | 3 | `Poguru_Roast_Diver` | P: "A soldier jumped on you. He just... jumped. Like a big bony frog!" |
+| a diving soldier | 3 | `Poguru_Roast_DiverHug` | P: "He only wanted a hug, Oni. A deadly, bony hug." · Oni: "Then you hug him next time." · P: "...Fair." |
+| the army reached him | 3 | `Poguru_Roast_Invasion` | P: "They walked. They just WALKED to you. Very slowly. For a very long time." |
+| the army reached him | 3 | `Poguru_Roast_InvasionRow` | P: "Thin out the bottom row! I say it EVERY time! It's on my tips page!" · Oni: "...You have a tips page?" · P: "I have a TIPS PAGE!" |
+| the army reached him | 3 | `Poguru_Roast_InvasionNose` | P: "Were you napping? They marched right up to your nose!" · Oni: "I was awake." · P: "Your nose wasn't." |
+| Benibana | 3 | `Poguru_Roast_Benibana` | P: "You fell asleep in the middle of a sword fight! Napping is MY thing!" |
+| Benibana | 3 | `Poguru_Roast_BenibanaDance` | P: "She danced. You lost. To a DANCE." · Oni: "...It was a good dance." |
+| Utsusemi | 3 | `Poguru_Roast_Utsusemi` | P: "Hide behind the rock! I said ROCK! You hid behind... air!" · Oni: "The rock fell apart." · P: "So you hide behind a DIFFERENT rock!" |
+| Utsusemi | 3 | `Poguru_Roast_UtsusemiPoint` | P: "Big shiny laser. I pointed. I flew out and POINTED, Oni." · Oni: "Hmph." |
+| Shirogane | 3 | `Poguru_Roast_Shirogane` | P: "She beat you with a sword! YOU have a sword! It's practically the same sword!" |
+| Shirogane | 3 | `Poguru_Roast_ShiroganeWolf` | P: "Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!" · Oni: "Tch." |
+| Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! But his hammer is SO big. Like, unfair big." · Oni: "I'll get under it." · P: "Good thing you're short!" |
+| Kagetsune | 3 | `Poguru_Roast_KagetsuneBells` | P: "All those bells! I couldn't even hear myself cheer for you!" |
+
 ### Temple talk (`PoguruTalk`, at his nest)
 
 | Priority | Requires | Id | Lines |
@@ -152,6 +188,8 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | Story | 3 runs | `Poguru_Talk_Remember` | P: "Every time you wake up, you forget a little. So I remember for you!" · P: "Mostly the wrong things. Did you used to like plums?" · Oni: "...I did." |
 | Story | met Shirogane | `Poguru_Talk_Silver` | P: "When the silver lady's near, your wisps go all warm. Is she a friend?" · Oni: "...She was." |
 | Story | a dawn | `Poguru_Talk_Dawn` | P: "The sun! I'd never seen it! It's very bright. I hid. But I peeked!" |
+| Story | 4 runs | `Poguru_Talk_Impression` | P: "We should name the pool! I'm thinking... Splashy." · Oni: "...No." · P (a deep, deadpan impression of Oni): "'...No.' 'Hmph.' 'Back in the wisp.' Ooh, look at me, I'm Oni, I'm all brooding." · Oni: "I don't sound like that." · P (the impression): "'I don't sound like that.'" · Oni: "Tch." · P: "Splashy it is!" |
+| Repeatable | heard Impression | `Poguru_Talk_ImpressionNest` | P: "Can my nest be bigger? Pleeease?" · Oni: "No." · P (the impression): "'No.' Hehe. Still got it." |
 | Repeatable | | `Poguru_Talk_Nap` | P: "I was napping. In your wisp. Which is in you. So technically you were napping too." |
 | Repeatable | | `Poguru_Talk_Rawr` | P: "Rawr. That's my fierce face. Was it fierce? Don't answer." |
 | Repeatable | | `Poguru_Talk_GhostFire` | P: "I tried eating a ghost-fire. It tasted like Tuesday." |

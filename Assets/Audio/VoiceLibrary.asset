@@ -409,6 +409,106 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 909c57353308644409c175082349ad31, type: 3}
   - id: Poguru_Rage_Charge
     clip: {fileID: 8300000, guid: 99e0dac687aa5483f8c1a1a7d2017a81, type: 3}
+  - id: Poguru_Roast_Arrow
+    clip: {fileID: 8300000, guid: 45edb4fa2dc06410d9c5955896884c6d, type: 3}
+  - id: Poguru_Roast_ArrowOne
+    clip: {fileID: 8300000, guid: a127efd17c7294c1497ec64c550df75e, type: 3}
+  - id: Poguru_Roast_ArrowOne_2
+    clip: {fileID: 8300000, guid: f348e939ea4744e5ba87b630957b099a, type: 3}
+  - id: Poguru_Roast_ArrowSlash
+    clip: {fileID: 8300000, guid: 9846d9d30bfec4e23a57b42835b555bf, type: 3}
+  - id: Poguru_Roast_ArrowSlash_2
+    clip: {fileID: 8300000, guid: d84f51f9e4c57457ca1bc88e280ac836, type: 3}
+  - id: Poguru_Roast_ArrowSlash_3
+    clip: {fileID: 8300000, guid: d0c29cf1cdb7d40e58fcc6bad093abae, type: 3}
+  - id: Poguru_Roast_ArrowsTen
+    clip: {fileID: 8300000, guid: b15e96bf8db2844e5a0c066343ee1550, type: 3}
+  - id: Poguru_Roast_Benibana
+    clip: {fileID: 8300000, guid: de845d194ab8941d1bf2ebbb126c5aad, type: 3}
+  - id: Poguru_Roast_BenibanaDance
+    clip: {fileID: 8300000, guid: f4073a3d8a88c48ffb6dc250b802b03f, type: 3}
+  - id: Poguru_Roast_BenibanaDance_2
+    clip: {fileID: 8300000, guid: 2c7f56071837a4bac9bf0b587506711a, type: 3}
+  - id: Poguru_Roast_Diver
+    clip: {fileID: 8300000, guid: 0154834235cf84490ab3a0eb69b0be7f, type: 3}
+  - id: Poguru_Roast_DiverHug
+    clip: {fileID: 8300000, guid: 005e7942e5ce841d7831820ccad947c9, type: 3}
+  - id: Poguru_Roast_DiverHug_2
+    clip: {fileID: 8300000, guid: ca633ad4be1d344159aaed3e764227e2, type: 3}
+  - id: Poguru_Roast_DiverHug_3
+    clip: {fileID: 8300000, guid: 66841ccc4ea014199a875be0a3c2bc3c, type: 3}
+  - id: Poguru_Roast_Ghost
+    clip: {fileID: 8300000, guid: efcc1ffb34e484dbab5c4b2115e2f1ca, type: 3}
+  - id: Poguru_Roast_GhostHide
+    clip: {fileID: 8300000, guid: 8c404bd75ffd845db99ec59d4881ec5a, type: 3}
+  - id: Poguru_Roast_GhostHide_2
+    clip: {fileID: 8300000, guid: 4ab99d013eb4545bdb51c8a271159291, type: 3}
+  - id: Poguru_Roast_Invasion
+    clip: {fileID: 8300000, guid: 21ab1d1e9df45474b933b22216c23203, type: 3}
+  - id: Poguru_Roast_InvasionFive
+    clip: {fileID: 8300000, guid: 541414713fdfd4439bfe8b302686947a, type: 3}
+  - id: Poguru_Roast_InvasionFive_2
+    clip: {fileID: 8300000, guid: cf37bd032fe664e8793798516cbc98ea, type: 3}
+  - id: Poguru_Roast_InvasionNose
+    clip: {fileID: 8300000, guid: d054a93f6216b4d0285bedef1c47fdc6, type: 3}
+  - id: Poguru_Roast_InvasionNose_2
+    clip: {fileID: 8300000, guid: 61dd36c1b6e6545e78017b1de5ad7525, type: 3}
+  - id: Poguru_Roast_InvasionNose_3
+    clip: {fileID: 8300000, guid: 5f1788dbf87114bbba81aab1409f423b, type: 3}
+  - id: Poguru_Roast_InvasionRow
+    clip: {fileID: 8300000, guid: 9f738159e474c41628d2d06ef00dd716, type: 3}
+  - id: Poguru_Roast_InvasionRow_2
+    clip: {fileID: 8300000, guid: 992065d246daa48ceaad39e6fad1b486, type: 3}
+  - id: Poguru_Roast_InvasionRow_3
+    clip: {fileID: 8300000, guid: 9308e91b44fb64ad39f8ac556e286f2a, type: 3}
+  - id: Poguru_Roast_Kagetsune
+    clip: {fileID: 8300000, guid: d8e25418d480d4545bf0817925a71eb6, type: 3}
+  - id: Poguru_Roast_Kagetsune_2
+    clip: {fileID: 8300000, guid: 565b3d5e2fb814deeafec6fc5a39c844, type: 3}
+  - id: Poguru_Roast_Kagetsune_3
+    clip: {fileID: 8300000, guid: bb28b6e9565a64d82a56951b7b5ce9c8, type: 3}
+  - id: Poguru_Roast_KagetsuneBells
+    clip: {fileID: 8300000, guid: d135da530c058443c96939cc4573a693, type: 3}
+  - id: Poguru_Roast_Shirogane
+    clip: {fileID: 8300000, guid: 93d35cf15e9784a57b000207a1efec72, type: 3}
+  - id: Poguru_Roast_ShiroganeWolf
+    clip: {fileID: 8300000, guid: 607595a499c7b43e0bac63098df08eef, type: 3}
+  - id: Poguru_Roast_ShiroganeWolf_2
+    clip: {fileID: 8300000, guid: 4d318a8136c7b4fc69d2ffc00dae062e, type: 3}
+  - id: Poguru_Roast_Spear
+    clip: {fileID: 8300000, guid: f6f4bc9dcf7c84e90a93daf94e05f700, type: 3}
+  - id: Poguru_Roast_SpearCatch
+    clip: {fileID: 8300000, guid: 857f0d2f77042428494d676fc36c1a6b, type: 3}
+  - id: Poguru_Roast_SpearCatch_2
+    clip: {fileID: 8300000, guid: 2cfb3edbacd2348bc9b4f9d3d30799d9, type: 3}
+  - id: Poguru_Roast_SpearCatch_3
+    clip: {fileID: 8300000, guid: 264031c4cf737488aa10eb510aaf9e02, type: 3}
+  - id: Poguru_Roast_SpearRed
+    clip: {fileID: 8300000, guid: d35dbf8ef15ea4dda8f1c3fe509a1d8b, type: 3}
+  - id: Poguru_Roast_SpearRed_2
+    clip: {fileID: 8300000, guid: 7e7ba3de985e543a3a38ac630442487d, type: 3}
+  - id: Poguru_Roast_StreakFive
+    clip: {fileID: 8300000, guid: 9d19158340c6544c79f70a54bbe5ec07, type: 3}
+  - id: Poguru_Roast_StreakFive_2
+    clip: {fileID: 8300000, guid: 409213fab14ce48dcbc34562219c7ba5, type: 3}
+  - id: Poguru_Roast_StreakFive_3
+    clip: {fileID: 8300000, guid: eee80e4c658e74a6e9e9613e71e10382, type: 3}
+  - id: Poguru_Roast_StreakThree
+    clip: {fileID: 8300000, guid: 08fdb3ad4a3e94a86b39d653845bf06d, type: 3}
+  - id: Poguru_Roast_StreakThree_2
+    clip: {fileID: 8300000, guid: 542a82c006dc24cb4b08f21a220ef093, type: 3}
+  - id: Poguru_Roast_StreakThree_3
+    clip: {fileID: 8300000, guid: 08999263798e5499f9444cf736ddf621, type: 3}
+  - id: Poguru_Roast_Utsusemi
+    clip: {fileID: 8300000, guid: 380f8192c95e64934ad1f8b76dd4da78, type: 3}
+  - id: Poguru_Roast_Utsusemi_2
+    clip: {fileID: 8300000, guid: 943abb338a20d46488049981c9d2f5da, type: 3}
+  - id: Poguru_Roast_Utsusemi_3
+    clip: {fileID: 8300000, guid: fa15068641aad4297abf7253b1591d55, type: 3}
+  - id: Poguru_Roast_UtsusemiPoint
+    clip: {fileID: 8300000, guid: 051394dcf62864474995cebbc368ff9e, type: 3}
+  - id: Poguru_Roast_UtsusemiPoint_2
+    clip: {fileID: 8300000, guid: c76efc35c8ef4479181d82134fccd946, type: 3}
   - id: Poguru_Round_Breathe
     clip: {fileID: 8300000, guid: bf3eabf68fa524adeb06f242488b18c5, type: 3}
   - id: Poguru_Round_Count
@@ -439,6 +539,26 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 84ab4633035134090a288ffb2a207d2b, type: 3}
   - id: Poguru_Talk_GhostFire
     clip: {fileID: 8300000, guid: 1d53fdb53f8c94d63b10ac4931739edf, type: 3}
+  - id: Poguru_Talk_Impression
+    clip: {fileID: 8300000, guid: 8d586c2b3f7334b1582598bfd103c454, type: 3}
+  - id: Poguru_Talk_Impression_2
+    clip: {fileID: 8300000, guid: dadb9e563b1684f71bde94c12160ffba, type: 3}
+  - id: Poguru_Talk_Impression_3
+    clip: {fileID: 8300000, guid: 45b8c835ab86e4a52bff0fe366a0ec15, type: 3}
+  - id: Poguru_Talk_Impression_4
+    clip: {fileID: 8300000, guid: 86761bbb2934643959732f3e2d110084, type: 3}
+  - id: Poguru_Talk_Impression_5
+    clip: {fileID: 8300000, guid: c9a647d6707234e6f8934d1a06250b0f, type: 3}
+  - id: Poguru_Talk_Impression_6
+    clip: {fileID: 8300000, guid: 1ba912bf10e3d49ad8409c17d447e1ea, type: 3}
+  - id: Poguru_Talk_Impression_7
+    clip: {fileID: 8300000, guid: a0ec3785fc38846e5b07376709cb9d4c, type: 3}
+  - id: Poguru_Talk_ImpressionNest
+    clip: {fileID: 8300000, guid: e70911b2113e1444a8bb03ca309c93d9, type: 3}
+  - id: Poguru_Talk_ImpressionNest_2
+    clip: {fileID: 8300000, guid: 951eddf77c34f49129aff9d35f09ea3c, type: 3}
+  - id: Poguru_Talk_ImpressionNest_3
+    clip: {fileID: 8300000, guid: 423f8600a9c514c71b83c31fd5dcb90d, type: 3}
   - id: Poguru_Talk_Nap
     clip: {fileID: 8300000, guid: 1d812fc8dad6c41ec9d38e703ef04cdc, type: 3}
   - id: Poguru_Talk_Rawr

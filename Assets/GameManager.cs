@@ -802,7 +802,13 @@ public class GameManager : MonoBehaviour
         if (said == null || said.Lines.Length == 0) yield break;
         poguru.PopOut();
         yield return new WaitForSecondsRealtime(0.5f);
-        yield return new WaitForSecondsRealtime(SayAsPoguru(said));
+        // A roast can draw a word back from Oni, said over his own head.
+        for (int i = 0; i < said.Lines.Length; i++)
+        {
+            Vector3? over = said.Lines[i].Speaker == "Oni" ? new Vector3(ronin.Bounds.center.x, ronin.Bounds.max.y + 0.3f, 0f)
+                : poguru.IsOut ? poguru.Centre + Vector3.up * 0.8f : (Vector3?)null;
+            yield return new WaitForSecondsRealtime(SayLine(said, i, over));
+        }
         // In the temple he goes to his nest instead.
         if (state == State.Hub && safeArea != null) poguru.PerchAt(NestPoint);
         else poguru.ReturnToWisp();

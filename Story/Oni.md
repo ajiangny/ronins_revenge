@@ -51,7 +51,9 @@ of every talk scene, and is framed beside his words on the hill.
 
 ## Voice
 
-He speaks rarely and briefly, the way Zagreus does at his quietest. A low, tired voice, never a quip. Most of his
+He speaks rarely and briefly, the way Zagreus does at his quietest. A low, tired voice, never a quip. The one
+exception is Poguru: when the dragon roasts him for a death, Oni sometimes answers with a dry, flat word back
+("...It was fast.", "Then you hug him next time.") or just a grunt ("Hmph.", "Tch."). Most of his
 lines happen in the temple on the hill, after a death. In fights he is silent apart from grunts.
 
 **In game:** a voice designed for him in ElevenLabs (`ONI` in `Tools/generate-voice.mjs`): a low, quiet, tired

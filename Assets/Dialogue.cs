@@ -471,6 +471,44 @@ public static class Dialogue
         Line("Poguru_Boss_Won", Pog, DialogueEvent.PoguruBoss, Repeat, "WE WON! I mean, you won. I helped. Emotionally."),
         Line("Poguru_Boss_Wiggle", Pog, DialogueEvent.PoguruBoss, Repeat, "Victory wiggle! ...No? Okay."),
         Line("Poguru_Wake_First", Pog, DialogueEvent.PoguruWake, Story, "Back in the damp temple. ...But I like that you're here.", Deaths(1)),
+        // His roasts of whatever struck the last blow, ahead of the gentler wake lines. Each cause has a few, resting
+        // between runs, so dying the same way again gets the next one; now and then Oni answers back.
+        Roast("Poguru_Roast_StreakFive", 4, When(Streak(5)), P("Five in a row! The same way! Is this a plan? Is it a secret plan?"),
+            O("...Yes."), P("Oh! ...Oh no. It isn't, is it.")),
+        Roast("Poguru_Roast_StreakThree", 3, When(Streak(3)), P("Three times. Same way. In a row. I'm making a chart."), O("Don't."),
+            P("It has STICKERS.")),
+        Roast("Poguru_Roast_ArrowsTen", Once, When(DiedTo(DeathCause.Arrow), DeathsBy(DeathCause.Arrow, 10)),
+            P("That's ten arrows now. I've started naming them. That one was Pointy Jiro.")),
+        Roast("Poguru_Roast_InvasionFive", Once, When(DiedTo(DeathCause.Invasion), DeathsBy(DeathCause.Invasion, 5)),
+            P("Five times they've marched all the way down to you. Their poor feet must be SO tired."), O("So am I.")),
+        Roast("Poguru_Roast_Arrow", 3, When(DiedTo(DeathCause.Arrow)), P("An ARROW? The pointy stick? The thing you cut in half for FUN?")),
+        Roast("Poguru_Roast_ArrowSlash", 3, When(DiedTo(DeathCause.Arrow)), P("You know you can slash those, right? Swish! Snap! Like that!"),
+            O("...I know."), P("Do you, though?")),
+        Roast("Poguru_Roast_ArrowOne", 3, When(DiedTo(DeathCause.Arrow)), P("One little arrow. Out of a thousand. You found the ONE."), O("Hmph.")),
+        Roast("Poguru_Roast_Spear", 3, When(DiedTo(DeathCause.Spear)), P("The big red spear! The one I TOLD you about! You PARRY those! It was in the lesson!")),
+        Roast("Poguru_Roast_SpearCatch", 3, When(DiedTo(DeathCause.Spear)), P("Were you trying to catch it? With your face?"), O("...It was fast."),
+            P("It's a SPEAR, Oni. Fast is its whole job.")),
+        Roast("Poguru_Roast_SpearRed", 3, When(DiedTo(DeathCause.Spear)), P("Glowing. Red. Spear. That's three warnings in one!"), O("Tch.")),
+        Roast("Poguru_Roast_Ghost", 3, When(DiedTo(DeathCause.GhostArrow)), P("The ghosty arrows go right through cover! You hid behind a rock from a GHOST.")),
+        Roast("Poguru_Roast_GhostHide", 3, When(DiedTo(DeathCause.GhostArrow)), P("You hid SO well! From the wrong thing!"), O("...I noticed.")),
+        Roast("Poguru_Roast_Diver", 3, When(DiedTo(DeathCause.Diver)), P("A soldier jumped on you. He just... jumped. Like a big bony frog!")),
+        Roast("Poguru_Roast_DiverHug", 3, When(DiedTo(DeathCause.Diver)), P("He only wanted a hug, Oni. A deadly, bony hug."),
+            O("Then you hug him next time."), P("...Fair.")),
+        Roast("Poguru_Roast_Invasion", 3, When(DiedTo(DeathCause.Invasion)), P("They walked. They just WALKED to you. Very slowly. For a very long time.")),
+        Roast("Poguru_Roast_InvasionRow", 3, When(DiedTo(DeathCause.Invasion)), P("Thin out the bottom row! I say it EVERY time! It's on my tips page!"),
+            O("...You have a tips page?"), P("I have a TIPS PAGE!")),
+        Roast("Poguru_Roast_InvasionNose", 3, When(DiedTo(DeathCause.Invasion)), P("Were you napping? They marched right up to your nose!"),
+            O("I was awake."), P("Your nose wasn't.")),
+        Roast("Poguru_Roast_Benibana", 3, When(LastKiller(BossKind.Benibana)), P("You fell asleep in the middle of a sword fight! Napping is MY thing!")),
+        Roast("Poguru_Roast_BenibanaDance", 3, When(LastKiller(BossKind.Benibana)), P("She danced. You lost. To a DANCE."), O("...It was a good dance.")),
+        Roast("Poguru_Roast_Utsusemi", 3, When(LastKiller(BossKind.Utsusemi)), P("Hide behind the rock! I said ROCK! You hid behind... air!"),
+            O("The rock fell apart."), P("So you hide behind a DIFFERENT rock!")),
+        Roast("Poguru_Roast_UtsusemiPoint", 3, When(LastKiller(BossKind.Utsusemi)), P("Big shiny laser. I pointed. I flew out and POINTED, Oni."), O("Hmph.")),
+        Roast("Poguru_Roast_Shirogane", 3, When(LastKiller(BossKind.Shirogane)), P("She beat you with a sword! YOU have a sword! It's practically the same sword!")),
+        Roast("Poguru_Roast_ShiroganeWolf", 3, When(LastKiller(BossKind.Shirogane)), P("Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!"), O("Tch.")),
+        Roast("Poguru_Roast_Kagetsune", 3, When(LastKiller(BossKind.Kagetsune)), P("So close! But his hammer is SO big. Like, unfair big."),
+            O("I'll get under it."), P("Good thing you're short!")),
+        Roast("Poguru_Roast_KagetsuneBells", 3, When(LastKiller(BossKind.Kagetsune)), P("All those bells! I couldn't even hear myself cheer for you!")),
         Reaction("Poguru_Wake_Army", Pog, DialogueEvent.PoguruWake, 3, "Those soldiers were VERY pointy today.", LastDiedToArmy),
         Reaction("Poguru_Wake_Benibana", Pog, DialogueEvent.PoguruWake, 3, "Her smoke made me sneeze.", LastKiller(BossKind.Benibana)),
         Reaction("Poguru_Wake_Utsusemi", Pog, DialogueEvent.PoguruWake, 3, "Tick, tock, ow.", LastKiller(BossKind.Utsusemi)),
@@ -494,6 +532,12 @@ public static class Dialogue
             P("When the silver lady's near, your wisps go all warm. Is she a friend?"), O("...She was.")),
         Talk("Poguru_Talk_Dawn", Pog, PogTalk, Story, When(Clears(1)),
             P("The sun! I'd never seen it! It's very bright. I hid. But I peeked!")),
+        // He does Oni's voice at him (voiced as a deep, deadpan impression).
+        Talk("Poguru_Talk_Impression", Pog, PogTalk, Story, When(Runs(4)), P("We should name the pool! I'm thinking... Splashy."), O("...No."),
+            P("'...No.' 'Hmph.' 'Back in the wisp.' Ooh, look at me, I'm Oni, I'm all brooding."), O("I don't sound like that."),
+            P("'I don't sound like that.'"), O("Tch."), P("Splashy it is!")),
+        Talk("Poguru_Talk_ImpressionNest", Pog, PogTalk, Repeat, When(Seen("Poguru_Talk_Impression")),
+            P("Can my nest be bigger? Pleeease?"), O("No."), P("'No.' Hehe. Still got it.")),
         Talk("Poguru_Talk_Nap", Pog, PogTalk, Repeat, When(),
             P("I was napping. In your wisp. Which is in you. So technically you were napping too.")),
         Talk("Poguru_Talk_Rawr", Pog, PogTalk, Repeat, When(), P("Rawr. That's my fierce face. Was it fierce? Don't answer.")),
@@ -508,6 +552,10 @@ public static class Dialogue
     // The tutorial's soldiers, in the soldier voice (SOLDIER in Tools/generate-voice.mjs).
     public const string Soldier = "Ashigaru";
     static DialogueLine S(string text) => Say(Soldier, text);
+
+    // A roast at the temple, resting `cooldown` runs after it plays.
+    static Conversation Roast(string id, int cooldown, Req[] requires, params DialogueLine[] lines) =>
+        Cooled(cooldown, Talk(id, Pog, DialogueEvent.PoguruWake, Tier.Reactive, requires, lines));
 
     // A tutorial conversation: never picked, only played by id.
     static Conversation Tut(string id, params DialogueLine[] lines) => Talk(id, Pog, DialogueEvent.Tutorial, Repeat, When(), lines);

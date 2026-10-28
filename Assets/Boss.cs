@@ -89,6 +89,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     public int MaxHealth { get; private set; }
     // Damage let through super armour that hasn't yet added up to a whole hit point.
     float armorChip;
+    // The shadow slashes' half points, likewise.
+    float shadowChip;
     public float HealthFraction => (float)Health / MaxHealth;
     // What the HUD bar shows: her own health, unless she shares the bar with a partner (Shirogane and Kuon).
     public virtual float BarFraction => HealthFraction;
@@ -581,6 +583,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead || Down || PhaseBreaking) return;
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
+        damage = Damage.Lessen(damage, source, ref shadowChip);
         if (SuperArmor)
         {
             // Only a sliver gets through; slivers add up until they're worth a whole hit point.

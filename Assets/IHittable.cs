@@ -15,4 +15,19 @@ public static class Damage
         KillSource.Reflected => 0,
         _ => 1,
     };
+
+    // The ronin's own hits that set off boon effects: not effects themselves, and not the lesser shadow slashes.
+    public static bool Procs(KillSource source) => source != KillSource.Effect && source != KillSource.Shadow;
+
+    // What a boss or Kuon takes from a lesser slash: half, with the halves adding up until they make a whole point.
+    public const float ShadowShare = 0.5f;
+
+    public static int Lessen(int damage, KillSource source, ref float chip)
+    {
+        if (source != KillSource.Shadow) return damage;
+        chip += damage * ShadowShare;
+        int whole = UnityEngine.Mathf.FloorToInt(chip);
+        chip -= whole;
+        return whole;
+    }
 }

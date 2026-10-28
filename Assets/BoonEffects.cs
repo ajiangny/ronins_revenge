@@ -88,7 +88,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value);
                 break;
         }
-        if (source != KillSource.Effect) BeatDrum();
+        if (Damage.Procs(source)) BeatDrum();
     }
 
     // The kill effects, triggered by hits on the boss: fire bursts on her (and burns her smoke), frost slows her,
@@ -124,7 +124,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
                 break;
         }
-        if (source != KillSource.Effect) BeatDrum();
+        if (Damage.Procs(source)) BeatDrum();
     }
 
     // A fireball or ice shard sent back by a parry has struck something.
@@ -322,7 +322,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) WolfBlast(point, value);
                 break;
         }
-        if (source != KillSource.Effect) BeatDrum();
+        if (Damage.Procs(source)) BeatDrum();
     }
 
     // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.

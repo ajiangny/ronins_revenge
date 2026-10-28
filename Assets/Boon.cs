@@ -249,7 +249,7 @@ public static class Boons
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
         new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",
-            Description = "A moment into its flight, every <b>Slash</b> splits: two smaller slashes peel off to either side.",
+            Description = "A moment into its flight, every <b>Slash</b> splits: two smaller, weaker slashes peel off to either side.",
             StatLabel = "Side slashes:", Values = new[] { 2f, 2f, 2f }, Format = Plus },
         new BoonDefinition { Id = BoonId.PiercingSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Piercing Slash",
             Description = "Your <b>Slash</b> cuts through samurai and arrows instead of stopping at the first.",

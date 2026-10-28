@@ -187,8 +187,8 @@ public class IceStatue : MonoBehaviour, IHittable
 
     public void TakeHit(int damage, KillSource source)
     {
-        // Effects never break the ice, so shards can't set off a chain of statues.
-        if (broken || source == KillSource.Effect) return;
+        // Effects never break the ice, so shards can't set off a chain of statues; nor do the lesser shadow slashes.
+        if (broken || !Damage.Procs(source)) return;
         Burst(1.5f);
         Shattered?.Invoke(transform.position);
     }

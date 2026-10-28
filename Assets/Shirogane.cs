@@ -2682,6 +2682,8 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public bool Targetable => Armed && !IsBroken && !hidden && shown > 0.5f;
     public Vector3 Centre => sprite.bounds.center;
     float dazedUntil;
+    // Half points from shadow slashes that haven't yet made a whole one.
+    float shadowChip;
     Collider hitbox;
 
     Shirogane owner;
@@ -2834,6 +2836,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
         }
         // Dazed, it can't guard itself: every other blow lands twice as hard.
         else if (Dazed) damage *= 2;
+        damage = Damage.Lessen(damage, source, ref shadowChip);
         Health = Mathf.Max(0, Health - damage);
         HitFlash.Flash(sprite, 0.1f);
         Sfx.Play(Sfx.BossHit, 0.8f, 1.25f);

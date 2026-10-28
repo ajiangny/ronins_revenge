@@ -461,17 +461,17 @@ public class Ronin : MonoBehaviour
     }
 
     // One slash (or kunai) per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
-    // homing ghost, Piercing Slash applies to every one of them, and Shadow Clone's shadow swings with him.
+    // homing ghost, Piercing Slash applies to every one of them, and the Shadow Clone ultimate's shadow swings with him.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
         Kunai slash = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, 1f);
-        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, source, projectileSprite, parent));
+        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent));
         if (shadow != null && shadow.enabled)
         {
-            // The shadow's slash is its own (it splits and pierces too) but never echoes, and wears the shadow's colours.
-            Kunai shade = LaunchSlash(prefab, new Vector3(MirrorX(Muzzle.x), Muzzle.y, 0f), Vector3.up, source, projectileSprite, 1f);
+            // The shadow's slash is a lesser one (half damage to bosses, no boon effects): it pierces, but never splits
+            // or echoes, and wears the shadow's colours.
+            Kunai shade = LaunchSlash(prefab, new Vector3(MirrorX(Muzzle.x), Muzzle.y, 0f), Vector3.up, KillSource.Shadow, projectileSprite, 1f);
             shade.Tint(Color.Lerp(attackTint, ShadowGlow, 0.6f), ShadowGlow);
-            if (Loadout.Has(BoonId.SplitSlash, out _)) shade.SplitAfter(SplitDelay, parent => SplitOff(prefab, source, projectileSprite, parent));
             Fx.Play(Fx.SlashArc, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y + 0.35f, 0f), ShadowGlow, 0.8f);
         }
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
@@ -492,13 +492,14 @@ public class Ronin : MonoBehaviour
         return projectile;
     }
 
-    // Split Slash: two smaller slashes peel off either side of the one in flight, which flies on.
-    void SplitOff(GameObject prefab, KillSource source, Sprite projectileSprite, Kunai parent)
+    // Split Slash: two smaller, lesser slashes (half damage to bosses, no boon effects) peel off either side of the
+    // one in flight, which flies on.
+    void SplitOff(GameObject prefab, Sprite projectileSprite, Kunai parent)
     {
         Vector3 at = parent.transform.position;
         Vector3 heading = parent.transform.up;
-        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, source, projectileSprite, SplitScale);
-        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, source, projectileSprite, SplitScale);
+        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, KillSource.Shadow, projectileSprite, SplitScale);
+        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, KillSource.Shadow, projectileSprite, SplitScale);
         left.IgnoreCollisionsWith(parent);
         right.IgnoreCollisionsWith(parent);
         left.IgnoreCollisionsWith(right);

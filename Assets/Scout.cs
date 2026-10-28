@@ -62,7 +62,7 @@ public class Scout : MonoBehaviour, IHittable
         scout.sprite.flipX = direction < 0;
         view.AddComponent<SpriteAnimator>().Play(art.idle, true, null, art.idleFps * 2f);
         // A glow so the scout reads as something special against the sky.
-        Kunai.CreateGlow(go.transform, 1.4f, scout.sprite.sortingOrder - 1, ownArt ? GhostGlow : WarmGlow);
+        Projectile.CreateGlow(go.transform, 1.4f, scout.sprite.sortingOrder - 1, ownArt ? GhostGlow : WarmGlow);
         Sfx.Play(Sfx.SoulSpawn, 0.7f, 0.7f);
         return scout;
     }

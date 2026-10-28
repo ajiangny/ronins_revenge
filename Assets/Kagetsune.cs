@@ -400,7 +400,7 @@ public class Kagetsune : Boss
     }
 
     // A parried skull is a soul stolen back: it flies home at him wrapped in its own teal fire, ringing as it goes.
-    static void FreeSoul(Kunai riposte)
+    static void FreeSoul(Projectile riposte)
     {
         if (riposte == null) return;
         riposte.Tint(new Color(0.8f, 1f, 0.95f), Teal);

@@ -6,7 +6,7 @@ public interface IHittable
 
 public static class Damage
 {
-    // A slash or kunai is one point; the shuriken and parried arrows hit harder, which matters against armour and bosses.
+    // A slash is one point; the shuriken and parried arrows hit harder, which matters against armour and bosses.
     // A boss's own slash parried back does no damage: it only breaks her stance, opening her to double damage.
     public static int Of(KillSource source) => source switch
     {

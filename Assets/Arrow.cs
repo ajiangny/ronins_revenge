@@ -25,7 +25,7 @@ public class Arrow : MonoBehaviour
     public Sprite Sprite => art.sprite;
     public SpriteRenderer Art => art;
     public Color Color => art.color;
-    // A Taisho's spear: kunai and arrows break on it and it cuts through cover, so it can only be dodged or parried.
+    // A Taisho's spear: slashes and arrows break on it and it cuts through cover, so it can only be dodged or parried.
     public bool Unbreakable { get; private set; }
     // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
     public bool PassesCover { get; set; }
@@ -33,9 +33,9 @@ public class Arrow : MonoBehaviour
     // (Shirogane's).
     public bool PassesShots { get; set; }
     // What a parry sent back in its place (the first, for a spread), so its thrower can tell when that's gone.
-    public Kunai Riposte { get; set; }
+    public Projectile Riposte { get; set; }
     // Told what a parry sent back in its place, so its thrower can dress it (the Emperor's skulls fly home as freed souls).
-    public System.Action<Kunai> Parried { get; set; }
+    public System.Action<Projectile> Parried { get; set; }
     // A crimson seal-dart: the parry fizzles on it, so it can only be dodged.
     public bool Unparryable { get; set; }
     // One of a bullet-hell curtain's: a parry sends only a few of these back (Ronin.RiposteCap) and pops the rest,
@@ -54,7 +54,7 @@ public class Arrow : MonoBehaviour
         colliders = GetComponentsInChildren<Collider>();
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
-        glow = Kunai.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
+        glow = Projectile.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
         ArrowShadow.Attach(this);
     }
 
@@ -239,7 +239,7 @@ public class Arrow : MonoBehaviour
         }
         if (Reflectable)
         {
-            Kunai riposte = coll.collider.GetComponentInParent<Kunai>();
+            Projectile riposte = coll.collider.GetComponentInParent<Projectile>();
             if (riposte != null && riposte.Source == KillSource.Reflected)
             {
                 Shatter();
@@ -263,7 +263,7 @@ public class Arrow : MonoBehaviour
         }
         // A tough shot (Shirogane's crescents) takes more than one plain slash to cut down; the slash is still spent.
         // The shuriken, a piercing slash and a parried shot break it outright.
-        else if (Toughness > 1 && coll.collider.GetComponentInParent<Kunai>() is Kunai cut && !cut.CutsArrows
+        else if (Toughness > 1 && coll.collider.GetComponentInParent<Projectile>() is Projectile cut && !cut.CutsArrows
             && !cut.Spinning && cut.Source != KillSource.Reflected && cut.Source != KillSource.Deflected)
         {
             Toughness--;

@@ -61,7 +61,7 @@ public class BoonEffects
     // never sets off Flame Blade's as well.
     bool FlameBursts(float share)
     {
-        if (Kunai.Striking != null && Kunai.Striking.Kindled) return false;
+        if (Projectile.Striking != null && Projectile.Striking.Kindled) return false;
         EquippedBoon flame = loadout.Find(BoonId.FlameBlade);
         return flame != null && Random.value < Boons.FlameChanceAt(flame.Rarity) * share;
     }
@@ -73,7 +73,6 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-            case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
@@ -162,7 +161,6 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-            case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) BossBlast(point, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
@@ -210,7 +208,7 @@ public class BoonEffects
             else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, value);
             else if (!BossFight) Blast(point, value);
         }
-        // Frozen Riposte shards encase the samurai they hit themselves (Kunai.FreezeOnHit); only the boss is left.
+        // Frozen Riposte shards encase the samurai they hit themselves (Projectile.FreezeOnHit); only the boss is left.
         if (loadout.Has(BoonId.FrozenRiposte, out _))
         {
             if (BossFight && ReferenceEquals(target, Boss))
@@ -221,7 +219,7 @@ public class BoonEffects
         }
     }
 
-    public void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
+    public void OnShurikenThrown(Vector3 muzzle, Projectile shuriken)
     {
         // Thunder Shuriken: lightning arcs off the blade into what it flies past, boss included.
         if (loadout.Has(BoonId.ThunderShuriken, out float arcChance) && shuriken != null)
@@ -322,7 +320,7 @@ public class BoonEffects
         Sfx.Play(Sfx.WardShatter, 0.8f, 1.2f);
     }
 
-    // Flame Kunai, Inferno Shuriken and Burning Riposte: everything within the radius burns.
+    // Flame Blade, Inferno Shuriken and Burning Riposte: everything within the radius burns.
     void Blast(Vector3 position, float radius)
     {
         radius += loadout.Value(BoonId.Wildfire);
@@ -387,7 +385,6 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-            case KillSource.Kunai:
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) WolfBlast(point, value);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 break;

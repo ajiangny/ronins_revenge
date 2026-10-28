@@ -336,7 +336,7 @@ public class Tutorial : MonoBehaviour
 
         bool done = false;
         Action fired = () => done = true;
-        Action<Vector3, Kunai> thrown = (_, __) => done = true;
+        Action<Vector3, Projectile> thrown = (_, __) => done = true;
         ronin.Slashed += fired;
         ronin.ShurikenThrown += thrown;
         ronin.ParryStarted += fired;

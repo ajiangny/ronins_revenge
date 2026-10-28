@@ -31,7 +31,7 @@ public class SaveData
     // Indexed by UpgradeId: ranks bought, and the maxed songs switched off.
     public int[] ranks = new int[0];
     public List<int> songsOff = new List<int>();
-    // The blade taken from the temple's weapon rack (Ronin.Weapon).
+    // The blade taken from the temple's weapon rack: 0 is the katana, the only one so far.
     public int weapon;
     // The ultimate taken from the rack beside it (Ronin.Ultimate).
     public int ultimate;

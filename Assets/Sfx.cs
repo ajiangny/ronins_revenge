@@ -7,7 +7,6 @@ using UnityEngine;
 public static class Sfx
 {
     public const string SwordSlash = "SwordSlash";
-    public const string KunaiThrow = "KunaiThrow";
     public const string ShurikenThrow = "ShurikenThrow";
     public const string ParrySwing = "ParrySwing";
     public const string Deflect = "Deflect";

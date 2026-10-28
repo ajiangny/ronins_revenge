@@ -645,8 +645,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     public void TakeHit(int damage, KillSource source)
     {
         if (IsDead || Down || PhaseBreaking) return;
-        // Read before the hit lands: a boon's nested hit would clear Kunai.Striking.
-        bool setPiece = source == KillSource.Reflected && Kunai.Striking != null && Kunai.Striking.SetPiece;
+        // Read before the hit lands: a boon's nested hit would clear Projectile.Striking.
+        bool setPiece = source == KillSource.Reflected && Projectile.Striking != null && Projectile.Striking.SetPiece;
         float stance = setPiece ? Damage.SetPieceStance : Damage.Stance(source);
         if (ronin != null) stance *= ronin.StanceBoost(source);
         if (Staggered) damage *= 2;

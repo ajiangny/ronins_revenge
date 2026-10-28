@@ -26,7 +26,7 @@ public class Blocker : MonoBehaviour
     void OnCollisionEnter(Collision coll)
     {
         // The Spirit Shuriken passes over the ronin's own cover.
-        if (coll.collider.GetComponentInParent<Kunai>() is { Spinning: true }) return;
+        if (coll.collider.GetComponentInParent<Projectile>() is { Spinning: true }) return;
         if (coll.collider.GetComponentInParent<Arrow>() is { PassesCover: true }) return;
         Hit(coll.GetContact(0).point);
     }

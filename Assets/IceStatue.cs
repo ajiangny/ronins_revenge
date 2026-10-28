@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // A samurai cut down while held in ice doesn't fall: it leaves the formation and stands frozen where it died.
-// The ronin's next hit on it (a slash, kunai, shuriken or riposte, never a boon effect) bursts it into ice shards,
+// The ronin's next hit on it (a slash, shuriken or riposte, never a boon effect) bursts it into ice shards,
 // which BoonEffects sends at the samurai nearby. Left alone it melts away, so the ice has to be used quickly rather than
 // stockpiled across the field. Built in code, from the samurai's last frame; the melt is drawn in code too.
 public class IceStatue : MonoBehaviour, IHittable
@@ -65,7 +65,7 @@ public class IceStatue : MonoBehaviour, IHittable
         statue.body.color = IceColor;
         // The ice block is a child of the body, so it slumps and spreads with it as it melts.
         statue.shell = Samurai.AddIceShell(statue.body, shell);
-        statue.glow = Kunai.CreateGlow(go.transform, 1.8f, source.sortingOrder - 1, IceGlow);
+        statue.glow = Projectile.CreateGlow(go.transform, 1.8f, source.sortingOrder - 1, IceGlow);
 
         // The ronin's shots find it by its collider, sized to the frame it froze in.
         Bounds bounds = source.bounds;

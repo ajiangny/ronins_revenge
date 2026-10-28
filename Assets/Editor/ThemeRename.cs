@@ -10,7 +10,7 @@ public static class ThemeRename
 
     static readonly (string from, string to)[] Prefabs =
     {
-        ("Alien", "Samurai"), ("AlienBullet", "Arrow"), ("AlienFleet", "SamuraiArmy"), ("Spaceship", "Ronin"), ("Dart", "Kunai"),
+        ("Alien", "Samurai"), ("AlienBullet", "Arrow"), ("AlienFleet", "SamuraiArmy"), ("Spaceship", "Ronin"), ("Dart", "Projectile"),
     };
 
     static readonly (string from, string to)[] SceneObjects =
@@ -21,7 +21,7 @@ public static class ThemeRename
     // Renamed in place, so the physics collision matrix (stored by layer index) is kept.
     static readonly (string from, string to)[] Layers =
     {
-        ("Spaceship", "Ronin"), ("Alien", "Samurai"), ("Bullet", "Kunai"), ("Alien_Bullet", "Arrow"),
+        ("Spaceship", "Ronin"), ("Alien", "Samurai"), ("Bullet", "Projectile"), ("Alien_Bullet", "Arrow"),
     };
 
     [MenuItem("Ninja/Rename To Ronin Theme")]

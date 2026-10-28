@@ -185,7 +185,7 @@ public class Shirogane : Boss
 
     void Start()
     {
-        bladeGlow = Kunai.CreateGlow(sprite.transform, 1.6f / transform.lossyScale.x, sprite.sortingOrder - 1, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
+        bladeGlow = Projectile.CreateGlow(sprite.transform, 1.6f / transform.lossyScale.x, sprite.sortingOrder - 1, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
         bladeGlow.transform.localPosition = new Vector3(0f, -0.1f, 0.05f);
         StartCoroutine(PulseBlades());
         wolf = SpiritWolf.Create(this, wolfIdle, wolfHowl, wolfCharge, wolfVanish, wolfMaw, transform.lossyScale.x, sprite.sortingOrder - 1);
@@ -2541,7 +2541,7 @@ public class Shirogane : Boss
     {
         Vector3 feet = new Vector3(Centre.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0);
         auraFlames = Fx.Play(Fx.Aura(Element.Water), feet, new Color(0.5f, 0.9f, 1f, 0.9f), 3.2f, transform, sprite.sortingOrder - 1);
-        auraGlow = Kunai.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
+        auraGlow = Projectile.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
         StartCoroutine(PulseAura(auraGlow));
     }
 
@@ -2767,7 +2767,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
                 wolf.eyes[i] = eye;
             }
         }
-        wolf.glow = Kunai.CreateGlow(go.transform, 2.6f / scale, order - 1, new Color(0.3f, 0.9f, 1f, 0.3f));
+        wolf.glow = Projectile.CreateGlow(go.transform, 2.6f / scale, order - 1, new Color(0.3f, 0.9f, 1f, 0.3f));
         // A box over the body, inside the art's padding; off until it is armed and in sight.
         Bounds frame = wolf.sprite.bounds;
         var box = go.AddComponent<BoxCollider>();

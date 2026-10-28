@@ -63,7 +63,7 @@ public static class NinjaArtSetup
             Set(root.GetComponent<Ronin>(), "slashPrefab", BuildSlashWave());
         });
 
-        EditPrefab("Assets/Kunai.prefab", root =>
+        EditPrefab("Assets/Projectile.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
@@ -71,10 +71,11 @@ public static class NinjaArtSetup
             capsule.direction = 1;
             capsule.radius = 0.1f;
             capsule.height = 0.46f;
-            // The kunai flies point-first, so it doesn't spin. Drawn at half size to match the samurai arrows.
-            GameObject kunai = AddSprite(root, "Kunai", Load("Projectiles/Kunai"), Vector3.zero, false);
-            kunai.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-            Set(root.GetComponent<Kunai>(), "spinner", (Object)null);
+            // Every launch swaps in its own art (shuriken, fireball, ice shard, parried arrow); the shuriken is only the
+            // stand-in until that art exists. Drawn at half size to match the samurai arrows.
+            GameObject art = AddSprite(root, "Art", Load("Projectiles/Shuriken"), Vector3.zero, false);
+            art.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
+            Set(root.GetComponent<Projectile>(), "spinner", (Object)null);
         });
 
         EditPrefab("Assets/Arrow.prefab", root =>
@@ -114,17 +115,17 @@ public static class NinjaArtSetup
         EditorSceneManager.SaveScene(scene);
 
         AssetDatabase.SaveAssets();
-        Debug.Log("Ninja sprite art applied to Samurai, Ronin, Kunai, SlashWave, Arrow, SamuraiArmy, the BlockerWall and the Backdrop.");
+        Debug.Log("Ninja sprite art applied to Samurai, Ronin, Projectile, SlashWave, Arrow, SamuraiArmy, the BlockerWall and the Backdrop.");
     }
 
-    // The katana's crescent wave: a Kunai projectile with a wide, flat hitbox. Built from a copy of the kunai prefab
-    // so it keeps its layer and rigidbody. Returns null (the ronin then throws kunai) until the art exists.
+    // The katana's crescent wave: a Projectile with a wide, flat hitbox. Built from a copy of the projectile prefab
+    // so it keeps its layer and rigidbody. Returns null (the ronin then swings the plain projectile) until the art exists.
     static GameObject BuildSlashWave()
     {
         const string path = "Assets/SlashWave.prefab";
         Sprite wave = AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + "Projectiles/SlashWave.png");
         if (wave == null) return null;
-        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) AssetDatabase.CopyAsset("Assets/Kunai.prefab", path);
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) AssetDatabase.CopyAsset("Assets/Projectile.prefab", path);
 
         EditPrefab(path, root =>
         {
@@ -132,10 +133,10 @@ public static class NinjaArtSetup
             root.transform.localScale = Vector3.one;
             var box = root.AddComponent<BoxCollider>();
             box.size = new Vector3(0.6f, 0.25f, 0.4f);
-            // Drawn at half size like the kunai; Kunai.artScale brings it back up.
+            // Drawn at half size like the projectile; Projectile.artScale brings it back up.
             GameObject art = AddSprite(root, "SlashWave", wave, Vector3.zero, false);
             art.transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-            Set(root.GetComponent<Kunai>(), "spinner", (Object)null);
+            Set(root.GetComponent<Projectile>(), "spinner", (Object)null);
         });
         return AssetDatabase.LoadAssetAtPath<GameObject>(path);
     }

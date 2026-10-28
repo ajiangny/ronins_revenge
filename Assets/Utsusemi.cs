@@ -575,7 +575,7 @@ public class Utsusemi : Boss
             Sfx.Play(sword ? Sfx.ParryClang : Sfx.HatClang);
             // Parried: it circles the automaton as the ronin's riposte, and is only back once that fades. (The
             // destroyed arrow still holds what replaced it.) Struck the ronin or cut short: a while bare instead.
-            Kunai riposte = hat.Riposte;
+            Projectile riposte = hat.Riposte;
             if (riposte != null)
             {
                 while (riposte != null) yield return null;
@@ -1743,7 +1743,7 @@ public class Utsusemi : Boss
             look.sortingOrder = 4;
         }
         // A ward round the blade, showing how far its cover reaches.
-        SpriteRenderer ward = Kunai.CreateGlow(sword.transform, 1f, 3, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.5f));
+        SpriteRenderer ward = Projectile.CreateGlow(sword.transform, 1f, 3, new Color(SwordGlow.r, SwordGlow.g, SwordGlow.b, 0.5f));
         ward.transform.localScale = new Vector3(SwordCoverWidth * 1.6f, SwordCoverHeight * 1.3f, 1f);
 
         Blocker cover = sword.AddComponent<Blocker>();
@@ -2445,7 +2445,7 @@ public class Utsusemi : Boss
 
     void AddCore()
     {
-        coreGlow = Kunai.CreateGlow(sprite.transform, 1.4f, sprite.sortingOrder + 1, CoreMolten);
+        coreGlow = Projectile.CreateGlow(sprite.transform, 1.4f, sprite.sortingOrder + 1, CoreMolten);
         coreGlow.transform.position = Core + Vector3.back * 0.3f;
         StartCoroutine(PulseCore());
     }
@@ -3013,7 +3013,7 @@ public class Utsusemi : Boss
     // stands frozen mid-frame, his own shots with him.
     bool timeHeld;
     readonly List<(Arrow shot, Vector3 velocity)> held = new List<(Arrow, Vector3)>();
-    readonly List<(Kunai shot, Rigidbody body, Vector3 velocity)> heldKunai = new List<(Kunai, Rigidbody, Vector3)>();
+    readonly List<(Projectile shot, Rigidbody body, Vector3 velocity)> heldShots = new List<(Projectile, Rigidbody, Vector3)>();
 
     void HoldTime(bool hold)
     {
@@ -3027,11 +3027,11 @@ public class Utsusemi : Boss
                 held.Add((shot, shot.Velocity));
                 shot.Steer(Vector3.zero);
             }
-            foreach (Kunai shot in FindObjectsByType<Kunai>(FindObjectsSortMode.None))
+            foreach (Projectile shot in FindObjectsByType<Projectile>(FindObjectsSortMode.None))
             {
                 var body = shot.GetComponent<Rigidbody>();
                 if (body == null) continue;
-                heldKunai.Add((shot, body, body.linearVelocity));
+                heldShots.Add((shot, body, body.linearVelocity));
                 // Its own steering (homing, spinning) stops too, so it can't drift on.
                 shot.enabled = false;
                 body.linearVelocity = Vector3.zero;
@@ -3041,13 +3041,13 @@ public class Utsusemi : Boss
         {
             foreach ((Arrow shot, Vector3 velocity) in held) if (shot != null) shot.Steer(velocity);
             held.Clear();
-            foreach ((Kunai shot, Rigidbody body, Vector3 velocity) in heldKunai)
+            foreach ((Projectile shot, Rigidbody body, Vector3 velocity) in heldShots)
             {
                 if (shot == null) continue;
                 shot.enabled = true;
                 body.linearVelocity = velocity;
             }
-            heldKunai.Clear();
+            heldShots.Clear();
         }
     }
 

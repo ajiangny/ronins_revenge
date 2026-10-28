@@ -24,17 +24,6 @@ MonoBehaviour:
     - 0.4170975
     - 0.5187982
     ownSource: 0
-  - id: KunaiThrow
-    clips:
-    - {fileID: 8300000, guid: 593e7bd861b264cf88e093c158e8348a, type: 3}
-    - {fileID: 8300000, guid: 79da46443a86e4e75a592ce0177c0878, type: 3}
-    volume: 0.55
-    pitchJitter: 0.08
-    minInterval: 0.05
-    audible:
-    - 0.31566894
-    - 0.52562356
-    ownSource: 0
   - id: ShurikenThrow
     clips:
     - {fileID: 8300000, guid: d8e6b6839af83411f8b83cc69cca7b03, type: 3}

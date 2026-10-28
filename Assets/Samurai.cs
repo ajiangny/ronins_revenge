@@ -77,7 +77,7 @@ public class Samurai : MonoBehaviour, IHittable
 
         if (kind == SamuraiKind.Yurei)
         {
-            ghostGlow = Kunai.CreateGlow(transform, 1.5f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, GhostGlow);
+            ghostGlow = Projectile.CreateGlow(transform, 1.5f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, GhostGlow);
             ghostPhase = Random.value * Mathf.PI * 2f;
         }
         SetFrost(0);
@@ -235,7 +235,7 @@ public class Samurai : MonoBehaviour, IHittable
         if (IsDead) return;
         encasedUntil = Mathf.Max(encasedUntil, Time.time + seconds);
         animator.enabled = false;
-        if (iceGlow == null) iceGlow = Kunai.CreateGlow(transform, 1.6f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, IceGlow);
+        if (iceGlow == null) iceGlow = Projectile.CreateGlow(transform, 1.6f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, IceGlow);
         Fx.Play(Fx.IceBurst, transform.position, Color.white, 0.9f);
         SetFrost(frost);
     }

@@ -14,7 +14,6 @@ public class ElementArt
     public Sprite[] soulFrames;
     public CharacterArt ronin;
     public Sprite slash;
-    public Sprite kunai;
     public Sprite shuriken;
     [Tooltip("The boon screen's ronin portrait with his spirit wisps in this element's colour.")]
     public Sprite portrait;
@@ -1397,35 +1396,20 @@ public class GameManager : MonoBehaviour
         menu.Show("TIPS", body, new[] { MenuUI.Item.Button("BACK", back) }, back);
     }
 
-    // The weapon rack (Hades' Infernal Arms): the blade he carries out, kept in the save.
+    // The weapon rack (Hades' Infernal Arms): the blade he carries out. The katana is the only one so far.
     void ShowRack(System.Action back, int startIndex = -1)
     {
         string muted = MenuUI.MutedHex(false);
-        var carried = (Ronin.Weapon)Save.Data.weapon;
-        var blades = new[]
+        var items = new List<MenuUI.Item>
         {
-            (Ronin.Weapon.Sword, "KATANA", "Slash waves that cut through the ranks. The technique scrolls reshape them."),
-            (Ronin.Weapon.Kunai, "KUNAI", "Thrown blades that strike the first samurai they meet. The elements' blade boons still burn, freeze and arc."),
+            MenuUI.Item.Button($"KATANA  <color=#{muted}>·  CARRIED</color>", () => Sfx.Play(Sfx.UiConfirm),
+                "Slash waves that cut through the ranks. The technique scrolls reshape them."),
         };
-        var items = new List<MenuUI.Item>();
-        foreach (var (weapon, name, note) in blades)
-        {
-            int row = items.Count;
-            Ronin.Weapon pick = weapon;
-            items.Add(MenuUI.Item.Button(weapon == carried ? $"{name}  <color=#{muted}>·  CARRIED</color>" : name, () =>
-            {
-                Save.Data.weapon = (int)pick;
-                Save.Write();
-                ronin.CurrentWeapon = pick;
-                Sfx.Play(Sfx.UiConfirm);
-                ShowRack(back, row);
-            }, note));
-        }
         // The ultimate (SaveData.ultimate) isn't offered here while Shadow Clone is the only one; it comes back once
         // there are more to choose between.
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
-            startIndex >= 0 ? startIndex : (int)carried);
+            startIndex >= 0 ? startIndex : 0);
     }
 
     // Through the gate: he walks up to it, its doors swing open, he goes out under its beam, the dark comes down, and
@@ -1746,7 +1730,6 @@ public class GameManager : MonoBehaviour
     {
         Upgrades.RefundRetired();
         ronin.LearnSongs();
-        ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
         ronin.CurrentUltimate = (Ronin.Ultimate)Save.Data.ultimate;
         lives = maxLives = Mathf.Clamp(startingLives + Upgrades.Rank(UpgradeId.IronWill) - Oaths.Rank(OathId.FrailBody), 1, Boons.MaxLives);
         Boss.HealthScale = 1f + Oaths.Rank(OathId.IronGenerals) * Oaths.BossHealthPerRank;
@@ -1772,7 +1755,7 @@ public class GameManager : MonoBehaviour
         {
             if (Upgrades.Rank(song.Id) > 0) songs.Add($"{song.Name} {Upgrades.Rank(song.Id)}");
         }
-        RunLog.BeginRun($"Heat {Oaths.Heat}  lives {maxLives}  {(Ronin.Weapon)Save.Data.weapon}{(godMode ? "  GOD MODE" : "")}  songs: {(songs.Count > 0 ? string.Join(", ", songs) : "none")}");
+        RunLog.BeginRun($"Heat {Oaths.Heat}  lives {maxLives}{(godMode ? "  GOD MODE" : "")}  songs: {(songs.Count > 0 ? string.Join(", ", songs) : "none")}");
         ui.SetLives(lives, maxLives);
         ui.SetScore(score);
         if (devJumpStage >= 0)
@@ -1896,7 +1879,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
+    void OnShurikenThrown(Vector3 muzzle, Projectile shuriken)
     {
         if (state == State.Playing) effects.OnShurikenThrown(muzzle, shuriken);
     }
@@ -2323,14 +2306,13 @@ public class GameManager : MonoBehaviour
         Element? special = loadout.SlotElement(BoonSlot.Special);
         Element? parry = loadout.SlotElement(BoonSlot.Parry);
         Sprite slash = attack is Element a ? ArtFor(a)?.slash : null;
-        Sprite kunai = attack is Element a1 ? ArtFor(a1)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
         // The animated aura replaces the plain glow when its art exists.
         bool animatedAura = primary is Element a2 && Fx.Has(Fx.Aura(a2));
         Color glowAura = primary is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
         ronin.SetLook(look, glowAura,
-            slash, kunai, StandInTint(attack, slash), ElementColor(attack),
+            slash, StandInTint(attack, slash), ElementColor(attack),
             shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
@@ -3713,9 +3695,9 @@ public class GameManager : MonoBehaviour
     // Hearts are kept for GatherDrops, which heals him with them or fades them into points.
     static void ClearProjectiles()
     {
-        foreach (Kunai kunai in FindObjectsByType<Kunai>())
+        foreach (Projectile projectile in FindObjectsByType<Projectile>())
         {
-            Destroy(kunai.gameObject);
+            Destroy(projectile.gameObject);
         }
         foreach (Arrow arrow in FindObjectsByType<Arrow>())
         {

@@ -11,8 +11,6 @@ public enum Moves { None = 0, Slash = 1, Shuriken = 2, Parry = 4, Ultimate = 8, 
 [RequireComponent(typeof(Rigidbody))]
 public class Ronin : MonoBehaviour
 {
-    // The main attack on Space. The kunai is kept for a later weapon-select screen.
-    public enum Weapon { Sword, Kunai }
     // The ultimate chosen at the temple, kept in the save by its int: new ones go on the end.
     public enum Ultimate { ShadowClone }
 
@@ -39,11 +37,10 @@ public class Ronin : MonoBehaviour
     const float RiposteShardFreeze = 1.5f;
 
     [Header("Inscribed")]
-    [Tooltip("Thrown kunai, and the Spirit Shuriken and parry ripostes, which reuse the same projectile.")]
-    [FormerlySerializedAs("dartPrefab")] public GameObject kunaiPrefab;
+    [Tooltip("The plain projectile behind the Spirit Shuriken, parry ripostes, fireballs and ice shards.")]
+    [FormerlySerializedAs("projectilePrefab"), FormerlySerializedAs("dartPrefab")] public GameObject projectilePrefab;
     [Tooltip("The crescent wave each katana swing sends up the screen.")]
     public GameObject slashPrefab;
-    [SerializeField] Weapon weapon = Weapon.Sword;
     public CharacterArt art;
     public float speed = 10f;
     [Tooltip("Seconds between swings. Kept slow enough that every slash is a choice, as in Space Invaders.")]
@@ -58,10 +55,10 @@ public class Ronin : MonoBehaviour
     [SerializeField] float wispPeriod = 1.8f;
 
     [Header("Spirit Shuriken")]
-    [Tooltip("Leave empty to throw a big spinning kunai until the shuriken art is in.")]
+    [Tooltip("Leave empty to throw the projectile prefab's own art, spinning, until the shuriken art is in.")]
     [SerializeField] Sprite shurikenSprite;
     [SerializeField] float shurikenCooldown = 6f;
-    [Tooltip("Scales the whole shuriken, hitbox included (the art is also drawn larger by Kunai.artScale).")]
+    [Tooltip("Scales the whole shuriken, hitbox included (the art is also drawn larger by Projectile.artScale).")]
     [SerializeField] float shurikenScale = 2.6f;
     [SerializeField] float shurikenSpeed = 0.75f;
 
@@ -85,7 +82,7 @@ public class Ronin : MonoBehaviour
     public event Action Hit;
     // Raised on every swing (a slash or Kindling's fireball).
     public event Action Slashed;
-    public event Action<Vector3, Kunai> ShurikenThrown;
+    public event Action<Vector3, Projectile> ShurikenThrown;
     // Raised as a parry starts, landed or not.
     public event Action ParryStarted;
     // Raised once per parry, on the first arrow it deflects.
@@ -134,7 +131,6 @@ public class Ronin : MonoBehaviour
     public Rect RoamArea { get; set; }
     // Ground in a safe area he walks around (the props' footprints), in the same body space as RoamArea.
     public Rect[] RoamBlocks { get; set; }
-    public Weapon CurrentWeapon { get => weapon; set => weapon = value; }
     // God mode from the dev menu: nothing can hurt him.
     public bool Invincible { get; set; }
     // Poguru's tutorial keeps him unhurt until its spear, apart from god mode.
@@ -233,7 +229,6 @@ public class Ronin : MonoBehaviour
     bool walking;
 
     // The current elemental look: art set, projectile sprites and colours.
-    Sprite kunaiSprite;
     Sprite slashSprite;
     Color attackTint = Color.white;
     Color attackGlow = DefaultGlow;
@@ -277,8 +272,8 @@ public class Ronin : MonoBehaviour
         UpdateLoopClip();
     }
 
-    void OnEnable() => Kunai.Landed += ChargeUltimate;
-    void OnDisable() => Kunai.Landed -= ChargeUltimate;
+    void OnEnable() => Projectile.Landed += ChargeUltimate;
+    void OnDisable() => Projectile.Landed -= ChargeUltimate;
 
     // Each of his own blows on an enemy fills the bar a notch; boon effects and the shadow's slashes don't.
     void ChargeUltimate(KillSource source, IHittable target)
@@ -453,7 +448,7 @@ public class Ronin : MonoBehaviour
         {
             if (!show) return;
             shadow = new GameObject("ShadowClone").AddComponent<SpriteRenderer>();
-            shadowGlow = Kunai.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, Color.clear);
+            shadowGlow = Projectile.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, Color.clear);
         }
         float x = transform.position.x;
         float halfWidth = cam.orthographicSize * cam.aspect;
@@ -504,7 +499,7 @@ public class Ronin : MonoBehaviour
     Color CloneGlow => Loadout.SlotElement(BoonSlot.Ultimate) is Element e ? Color.Lerp(ShadowGlow, Boons.Info(e).Color, 0.6f) : ShadowGlow;
 
     // A clone's projectile: its own colours over his attack's.
-    void Shade(Kunai projectile, Color tint) => projectile.Tint(Color.Lerp(tint, CloneGlow, 0.6f), CloneGlow);
+    void Shade(Projectile projectile, Color tint) => projectile.Tint(Color.Lerp(tint, CloneGlow, 0.6f), CloneGlow);
 
     void OnDestroy()
     {
@@ -607,9 +602,7 @@ public class Ronin : MonoBehaviour
             ThrowFireball(Muzzle, false);
             if (CloneOut) ThrowFireball(CloneMuzzle, true);
         }
-        // Without the slash prefab (art not applied yet) the sword falls back to throwing kunai.
-        else if (weapon == Weapon.Sword && slashPrefab != null) Slash();
-        else ThrowKunai();
+        else Slash();
         lastShot = Time.time;
     }
 
@@ -619,10 +612,10 @@ public class Ronin : MonoBehaviour
     void ThrowFireball(Vector3 from, bool clone)
     {
         Color fire = Boons.Info(Element.Fire).Color;
-        Kunai fireball = SpawnProjectile(kunaiPrefab, from);
+        Projectile fireball = SpawnProjectile(projectilePrefab, from);
         Sprite[] frames = Fx.Frames(Fx.Fireball);
         bool hasArt = frames != null && frames.Length > 0;
-        fireball.Launch(Vector3.up, KindlingSpeed, 0, clone ? KillSource.Clone : KillSource.Slash, hasArt ? null : kunaiSprite,
+        fireball.Launch(Vector3.up, KindlingSpeed, 0, clone ? KillSource.Clone : KillSource.Slash, null,
             scale: KindlingScale, lifetimeMultiplier: 2f);
         if (hasArt)
         {
@@ -652,7 +645,8 @@ public class Ronin : MonoBehaviour
     // Each swing of the katana sends a crescent of spirit energy up the screen.
     void Slash()
     {
-        Fan(slashPrefab, KillSource.Slash, slashSprite);
+        // Without the slash prefab (art not applied yet) the plain projectile stands in for the crescent.
+        Fan(slashPrefab != null ? slashPrefab : projectilePrefab, KillSource.Slash, slashSprite);
         Sfx.Play(Sfx.SwordSlash);
         Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, attackGlow, 0.5f), 0.8f, transform);
         PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
@@ -666,14 +660,7 @@ public class Ronin : MonoBehaviour
         PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
     }
 
-    void ThrowKunai()
-    {
-        Fan(kunaiPrefab, KillSource.Kunai, kunaiSprite);
-        Sfx.Play(Sfx.KunaiThrow);
-        PlayAction(art.attack);
-    }
-
-    // One slash (or kunai) per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
+    // One slash per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
     // homing ghost, Piercing Slash applies to every one of them, and the Shadow Clone swings with him: the same fan
     // from beside him, every blade of it a lesser one (KillSource.Clone) in its colours.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
@@ -686,19 +673,19 @@ public class Ronin : MonoBehaviour
 
     void FanFrom(GameObject prefab, KillSource source, Sprite projectileSprite, Vector3 from, bool clone)
     {
-        Kunai slash = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
+        Projectile slash = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
         if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent, clone));
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
-            Kunai ghost = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, EchoScale, clone);
+            Projectile ghost = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, EchoScale, clone);
             ghost.Home(RiposteTarget);
             ghost.ParryAura(clone ? CloneGlow : Color.Lerp(Color.white, attackGlow, 0.5f));
         }
     }
 
-    Kunai LaunchSlash(GameObject prefab, Vector3 position, Vector3 direction, KillSource source, Sprite projectileSprite, float scale, bool clone = false)
+    Projectile LaunchSlash(GameObject prefab, Vector3 position, Vector3 direction, KillSource source, Sprite projectileSprite, float scale, bool clone = false)
     {
-        Kunai projectile = SpawnProjectile(prefab, position);
+        Projectile projectile = SpawnProjectile(prefab, position);
         bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
         projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale);
         projectile.CutsArrows = pierces;
@@ -709,13 +696,13 @@ public class Ronin : MonoBehaviour
 
     // Split Slash: two smaller, lesser slashes (half damage to bosses, no boon effects) peel off either side of the
     // one in flight, which flies on. A clone's slash forks into the clone's own.
-    void SplitOff(GameObject prefab, Sprite projectileSprite, Kunai parent, bool clone)
+    void SplitOff(GameObject prefab, Sprite projectileSprite, Projectile parent, bool clone)
     {
         Vector3 at = parent.transform.position;
         Vector3 heading = parent.transform.up;
         KillSource source = clone ? KillSource.Clone : KillSource.Shadow;
-        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, source, projectileSprite, SplitScale, clone);
-        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, source, projectileSprite, SplitScale, clone);
+        Projectile left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, source, projectileSprite, SplitScale, clone);
+        Projectile right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, source, projectileSprite, SplitScale, clone);
         left.IgnoreCollisionsWith(parent);
         right.IgnoreCollisionsWith(parent);
         left.IgnoreCollisionsWith(right);
@@ -725,12 +712,12 @@ public class Ronin : MonoBehaviour
     // A big spinning blade that flies straight up through every samurai in its column.
     void ThrowShuriken()
     {
-        Kunai shuriken = SpawnProjectile(kunaiPrefab, Muzzle);
+        Projectile shuriken = SpawnProjectile(projectilePrefab, Muzzle);
         bool hasArt = shurikenSprite != null;
         // Thunder Shuriken hurls it far faster.
         float speed = shurikenSpeed * (Loadout.Has(BoonId.ThunderShuriken, out _) ? ThunderShurikenSpeed : 1f);
         shuriken.Launch(Vector3.up, speed, int.MaxValue, KillSource.Shuriken,
-            hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
+            hasArt ? shurikenSprite : null, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
         shuriken.Tint(shurikenTint, shurikenGlow);
         lastShuriken = Time.time;
         Sfx.Play(Sfx.ShurikenThrow);
@@ -743,9 +730,9 @@ public class Ronin : MonoBehaviour
     // sets off none of the shuriken boons (it raises no ShurikenThrown).
     void CloneShuriken(float speed, bool hasArt)
     {
-        Kunai shuriken = SpawnProjectile(kunaiPrefab, CloneMuzzle);
+        Projectile shuriken = SpawnProjectile(projectilePrefab, CloneMuzzle);
         shuriken.Launch(Vector3.up, speed, int.MaxValue, KillSource.Clone,
-            hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
+            hasArt ? shurikenSprite : null, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
         shuriken.Spinning = true;
         Shade(shuriken, shurikenTint);
     }
@@ -783,16 +770,16 @@ public class Ronin : MonoBehaviour
         }
     }
 
-    Kunai SpawnProjectile(GameObject prefab, Vector3 position)
+    Projectile SpawnProjectile(GameObject prefab, Vector3 position)
     {
-        return Instantiate(prefab, position, Quaternion.identity).GetComponent<Kunai>();
+        return Instantiate(prefab, position, Quaternion.identity).GetComponent<Projectile>();
     }
 
     // An elemental riposte: animated fireball or ice shard art when it exists, otherwise the parried arrow in the
     // element's colour.
-    Kunai SpawnRiposte(Vector3 position, Vector3 direction, int pierce, float scale, string fxId, float drawSize, SpriteRenderer arrowArt, Color color)
+    Projectile SpawnRiposte(Vector3 position, Vector3 direction, int pierce, float scale, string fxId, float drawSize, SpriteRenderer arrowArt, Color color)
     {
-        Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+        Projectile riposte = SpawnProjectile(projectilePrefab, position);
         Sprite[] frames = Fx.Frames(fxId);
         bool hasArt = frames != null && frames.Length > 0;
         riposte.Launch(direction, 1.1f, pierce, KillSource.Deflected, flipSprite: !hasArt, scale: scale, lifetimeMultiplier: 2f);
@@ -820,7 +807,7 @@ public class Ronin : MonoBehaviour
         Color frost = Boons.Info(Element.Water).Color;
         Transform first = picker();
         Vector3 direction = first != null ? (first.position - from).normalized : Vector3.up;
-        Kunai shard = SpawnProjectile(kunaiPrefab, from);
+        Projectile shard = SpawnProjectile(projectilePrefab, from);
         shard.Launch(direction, 0.8f, 0, KillSource.Effect, scale: 1.1f, lifetimeMultiplier: 2f);
         shard.Home(picker);
         Sprite[] frames = Fx.Frames(Fx.IceShard);
@@ -1036,7 +1023,7 @@ public class Ronin : MonoBehaviour
             SpriteRenderer arrowArt = arrow.Art;
             Vector3 position = arrow.transform.position;
             if (!arrow.TryDeflect()) continue;
-            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+            Projectile riposte = SpawnProjectile(projectilePrefab, position);
             riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Clone, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
             riposte.Home(RiposteTarget);
             riposte.Mimic(arrowArt);
@@ -1068,12 +1055,12 @@ public class Ronin : MonoBehaviour
         if (!arrow.TryDeflect()) return;
 
         Vector3 position = arrow.transform.position;
-        Kunai sent;
+        Projectile sent;
         // Homing shots curve, so they get longer to reach a far target. Boss slashes are drawn leading downwards, so
         // like a parried arrow the copy is flipped to lead the way back.
         if (reflect)
         {
-            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+            Projectile riposte = SpawnProjectile(projectilePrefab, position);
             riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, flipSprite: true, scale: 2.4f, lifetimeMultiplier: 2f);
             riposte.SetPiece = arrow.SetPiece;
             riposte.Tint(arrowColor, arrowColor);
@@ -1086,7 +1073,7 @@ public class Ronin : MonoBehaviour
         else if (Loadout.Has(BoonId.BurningRiposte, out _))
         {
             Color fire = Boons.Info(Element.Fire).Color;
-            Kunai fireball = SpawnRiposte(position, Vector3.up, heavy ? 2 : 0, 2.2f, Fx.Fireball, FireballSize, arrowArt, fire);
+            Projectile fireball = SpawnRiposte(position, Vector3.up, heavy ? 2 : 0, 2.2f, Fx.Fireball, FireballSize, arrowArt, fire);
             fireball.Impacted += OnRiposteImpact;
             sent = fireball;
         }
@@ -1094,11 +1081,11 @@ public class Ronin : MonoBehaviour
         {
             Color frost = Boons.Info(Element.Water).Color;
             int count = (int)shards;
-            var spread = new Kunai[count];
+            var spread = new Projectile[count];
             for (int i = 0; i < count; i++)
             {
                 float angle = count > 1 ? Mathf.Lerp(-ShardSpread, ShardSpread, i / (count - 1f)) : 0f;
-                Kunai shard = SpawnRiposte(position, Quaternion.Euler(0, 0, angle) * Vector3.up, 0, 1.2f, Fx.IceShard, ShardSize, arrowArt, frost);
+                Projectile shard = SpawnRiposte(position, Quaternion.Euler(0, 0, angle) * Vector3.up, 0, 1.2f, Fx.IceShard, ShardSize, arrowArt, frost);
                 shard.FreezeOnHit = RiposteShardFreeze * Loadout.FreezeMultiplier;
                 shard.Impacted += OnRiposteImpact;
                 for (int j = 0; j < i; j++) shard.IgnoreCollisionsWith(spread[j]);
@@ -1110,7 +1097,7 @@ public class Ronin : MonoBehaviour
         {
             // The scale only sizes the hitbox; Mimic draws the arrow at its own size. The arrow art points down,
             // so it's flipped to lead the way back up. A parried Taisho spear keeps its weight and runs through two samurai.
-            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+            Projectile riposte = SpawnProjectile(projectilePrefab, position);
             riposte.Launch(Vector3.up, 1.1f, heavy ? 2 : 0, KillSource.Deflected, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
             riposte.Tint(Color.white, parryColor);
             riposte.Home(RiposteTarget);
@@ -1181,7 +1168,7 @@ public class Ronin : MonoBehaviour
 
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
     // A null glow colour keeps the default spirit-flame teal.
-    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Sprite kunai, Color attackColor, Color? attackHalo,
+    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Color attackColor, Color? attackHalo,
         Sprite shuriken, Color shurikenColor, Color? shurikenHalo, Color parry)
     {
         attackGlow = attackHalo ?? DefaultGlow;
@@ -1194,7 +1181,6 @@ public class Ronin : MonoBehaviour
             if (!actionPlaying) UpdateLoopClip();
         }
         slashSprite = slash;
-        kunaiSprite = kunai;
         attackTint = attackColor;
         if (shuriken != null) shurikenSprite = shuriken;
         shurikenTint = shurikenColor;

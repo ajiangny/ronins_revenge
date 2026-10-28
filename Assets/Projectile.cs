@@ -3,15 +3,16 @@ using UnityEngine;
 
 // What killed a samurai. Boon effects only trigger on the ronin's own attacks, never on other effects' kills,
 // so explosions and lightning can't chain into each other forever. Reflected is a boss's own slash parried back at it.
-// Slash is the katana's crescent wave; new values go on the end so saved ints keep their meaning.
+// Slash is the katana's crescent wave. Retired was the old thrown kunai and keeps its slot, as new values go on the end,
+// so saved ints keep their meaning.
 // Shadow is a lesser slash (a Split Slash fork) and Clone anything the Shadow Clone ultimate sends (slashes, fireballs,
 // shuriken, ripostes): one point, half damage to bosses, no boon effects, and neither fills the ultimate, so the extra
 // blades add reach without multiplying everything else. Clone is kept apart so the Ultimate boons can act on it alone.
-public enum KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash, Shadow, Clone }
+public enum KillSource { Retired, Shuriken, Deflected, Effect, Reflected, Slash, Shadow, Clone }
 
-// Every projectile the ronin sends upward: katana slash waves, thrown kunai, the Spirit Shuriken and parried arrows.
+// Every projectile the ronin sends upward: katana slash waves, the Spirit Shuriken, fireballs, ice shards and parried arrows.
 [RequireComponent(typeof(Rigidbody))]
-public class Kunai : MonoBehaviour
+public class Projectile : MonoBehaviour
 {
     [Header("Inscribed")]
     [SerializeField] float speed = 18f;
@@ -32,13 +33,13 @@ public class Kunai : MonoBehaviour
     [Tooltip("Seconds between the fading afterimages a parried shot leaves behind.")]
     [SerializeField] float afterimageInterval = 0.035f;
 
-    public KillSource Source { get; private set; } = KillSource.Kunai;
+    public KillSource Source { get; private set; } = KillSource.Slash;
     // Raised with the contact point whenever this shot damages something (fireball and ice shard ripostes).
     public event Action<Vector3, IHittable> Impacted;
     // Any of the ronin's projectiles has damaged something (it fills his ultimate).
     public static event Action<KillSource, IHittable> Landed;
     // The projectile whose hit is being dealt right now, so the kill it causes can be traced back to it.
-    public static Kunai Striking { get; private set; }
+    public static Projectile Striking { get; private set; }
     // A parried set piece on its way home, which hits a boss's stance far harder than a plain parried slash.
     public bool SetPiece { get; set; }
     // Kindling's fireball, which sets off no Flame Blade blast of its own.
@@ -64,7 +65,7 @@ public class Kunai : MonoBehaviour
     SpriteRenderer parryAura;
     Color parryColor;
     float nextAfterimage;
-    Action<Kunai> split;
+    Action<Projectile> split;
     float splitAt;
 
     void Awake()
@@ -90,7 +91,7 @@ public class Kunai : MonoBehaviour
 
     void Start()
     {
-        if (!launched) Launch(Vector3.up, 1f, 0, KillSource.Kunai);
+        if (!launched) Launch(Vector3.up, 1f, 0, KillSource.Slash);
     }
 
     // direction is normalised by the caller; sprite (optional) replaces the prefab's art.
@@ -220,7 +221,7 @@ public class Kunai : MonoBehaviour
     }
 
     // Slashes forked together (Split Slash) start on the same spot; they must not knock each other out.
-    public void IgnoreCollisionsWith(Kunai other)
+    public void IgnoreCollisionsWith(Projectile other)
     {
         foreach (Collider mine in GetComponentsInChildren<Collider>())
         {
@@ -232,7 +233,7 @@ public class Kunai : MonoBehaviour
     }
 
     // Split Slash: calls back once, this many seconds into the flight, so the ronin can fork it.
-    public void SplitAfter(float seconds, Action<Kunai> onSplit)
+    public void SplitAfter(float seconds, Action<Projectile> onSplit)
     {
         split = onSplit;
         splitAt = Time.time + seconds;
@@ -242,7 +243,7 @@ public class Kunai : MonoBehaviour
     {
         if (split != null && !spent && Time.time >= splitAt)
         {
-            Action<Kunai> fork = split;
+            Action<Projectile> fork = split;
             split = null;
             fork(this);
         }
@@ -271,7 +272,7 @@ public class Kunai : MonoBehaviour
         Fader.Fade(ghost, 0.18f);
     }
 
-    // The kunai decides what its hit does, so piercing doesn't depend on which OnCollisionEnter Unity calls first.
+    // The projectile decides what its hit does, so piercing doesn't depend on which OnCollisionEnter Unity calls first.
     void OnCollisionEnter(Collision coll)
     {
         if (spent) return;
@@ -282,7 +283,7 @@ public class Kunai : MonoBehaviour
         bool cover = coll.collider.GetComponentInParent<Blocker>() != null;
         bool passes = TargetAlive() && !IsTarget(coll.collider) && !(cover && Source != KillSource.Reflected)
             && (pickTarget == null || HomingAge < PassThroughSeconds);
-        if (coll.collider.GetComponentInParent<Kunai>() != null || passes)
+        if (coll.collider.GetComponentInParent<Projectile>() != null || passes)
         {
             KeepFlying(coll.collider);
             return;

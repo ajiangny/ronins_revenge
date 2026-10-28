@@ -326,7 +326,18 @@ public class Ronin : MonoBehaviour
         }
     }
 
-    bool Parrying => Time.time < parryUntil;
+    public bool Parrying => Time.time < parryUntil;
+
+    // A samurai lunging or diving at him met the parry: the clash lands like a parried arrow (the parry is ready
+    // again at once), and the samurai is flung away by the army.
+    public void ParryBody(Vector3 at)
+    {
+        Debris.BurstSprites(at, art.deathParticles, parryColor, 6, 0.7f, 5f);
+        Fx.Play(Fx.Impact, at, Color.Lerp(Color.white, parryColor, 0.6f), 1.3f);
+        Sfx.Play(Sfx.Deflect);
+        CameraShake.Add(0.2f);
+        LandParry();
+    }
 
     float Charge(float lastUse, float cooldown) => Mathf.Clamp01((Time.time - lastUse) / (cooldown * Loadout.AbilityCooldownMultiplier));
 

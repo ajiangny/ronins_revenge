@@ -483,6 +483,21 @@ public static class ProceduralSprites
         return rings[radius] = Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), 1f);
     }
 
+    // A pixel exclamation mark, drawn white to be tinted: a samurai about to launch itself at the ronin.
+    public static Sprite Exclaim => exclaim != null ? exclaim : exclaim = FromPattern(new[]
+    {
+        ".##.",
+        "####",
+        "####",
+        "####",
+        ".##.",
+        ".##.",
+        "....",
+        ".##.",
+        ".##.",
+    });
+    static Sprite exclaim;
+
     // A four-point pixel star, drawn white to be tinted: light catching a blade.
     public static Sprite Glint => glint != null ? glint : glint = FromPattern(new[]
     {

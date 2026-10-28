@@ -47,6 +47,20 @@ public class SamuraiArmy : MonoBehaviour
     [Tooltip("How far above the top of the view the army's front rank starts before it marches in.")]
     [SerializeField] float entryMargin = 1f;
 
+    [Header("Last stand")]
+    [Tooltip("How far below the top of the cover the army's front rank stops descending. From there it walks the cover's row, smashing it, and its front rank lunges at the ronin instead of the run ending.")]
+    [SerializeField] float holdDepth = 2f;
+    [Tooltip("Average seconds between lunges once the army holds the cover's row.")]
+    [SerializeField] float lungeInterval = 2.4f;
+    [Tooltip("Seconds a lunger shakes under its warning before it launches.")]
+    [SerializeField] float lungeWarning = 0.7f;
+    [Tooltip("Seconds the lunge takes to reach (and pass) the ronin.")]
+    [SerializeField] float lungeDuration = 0.35f;
+    [Tooltip("Seconds a lunger takes to walk back into its slot.")]
+    [SerializeField] float lungeReturn = 0.6f;
+    [Tooltip("How close a lunging or diving samurai must come to a parrying ronin to be flung away.")]
+    [SerializeField] float parryReach = 1.3f;
+
     [Header("Divers")]
     [Tooltip("Seconds a diver flashes in place before it breaks formation.")]
     [SerializeField] float diveWarning = 0.6f;
@@ -72,6 +86,10 @@ public class SamuraiArmy : MonoBehaviour
         public float elapsed;
         public int phase;
         public bool hitRonin;
+        // A lunge from the front rank, straight at the ronin, rather than a swoop from behind it.
+        public bool lunge;
+        // Flung away by a parry: its velocity, while it arcs off to die.
+        public Vector3 fling;
         public readonly HashSet<Blocker> trampled = new HashSet<Blocker>();
     }
 
@@ -84,6 +102,10 @@ public class SamuraiArmy : MonoBehaviour
     float nextShotTime;
     float nextSpearTime;
     float nextDiveTime;
+    float nextLungeTime;
+    // The front rank reached the cover: no more drops, and lunges begin.
+    bool holding;
+    float lastBottom = float.PositiveInfinity;
     float nextBellTime;
     float hasteUntil;
     Samurai ringing;
@@ -133,6 +155,8 @@ public class SamuraiArmy : MonoBehaviour
         level = config;
         target = player;
         landingY = landingLineY;
+        holding = false;
+        lastBottom = float.PositiveInfinity;
         blockerTopY = blockerTop;
         direction = 1f;
         dropRemaining = 0f;
@@ -264,7 +288,15 @@ public class SamuraiArmy : MonoBehaviour
         if (dropRemaining > 0)
         {
             float drop = Mathf.Min(dropSpeed * dt, dropRemaining);
-            dropRemaining -= drop;
+            // The front rank stops in the cover's row: from there it walks along it and lunges.
+            float room = lastBottom - samuraiRadius - HoldY;
+            if (drop >= room)
+            {
+                drop = Mathf.Max(0f, room);
+                dropRemaining = 0f;
+                if (!holding) BeginHolding();
+            }
+            dropRemaining = Mathf.Max(0f, dropRemaining - drop);
             step = Vector3.down * drop;
         }
         else
@@ -285,6 +317,7 @@ public class SamuraiArmy : MonoBehaviour
             right = Mathf.Max(right, position.x);
             bottom = Mathf.Min(bottom, position.y);
         }
+        if (bottom < float.PositiveInfinity) lastBottom = bottom;
 
         // The resting camera position: a screen shake mustn't move the army's turning points.
         float centerX = CameraShake.Center.x;
@@ -292,7 +325,7 @@ public class SamuraiArmy : MonoBehaviour
         if (dropRemaining <= 0 && (direction > 0 && right >= centerX + bound || direction < 0 && left <= centerX - bound))
         {
             direction = -direction;
-            dropRemaining = dropDistance;
+            dropRemaining = holding ? 0f : dropDistance;
         }
 
         if (bottom - samuraiRadius <= blockerTopY)
@@ -321,6 +354,10 @@ public class SamuraiArmy : MonoBehaviour
         {
             StartDive();
         }
+        if (holding && Time.time >= nextLungeTime)
+        {
+            StartLunge();
+        }
         UpdateDives(dt);
     }
 
@@ -336,8 +373,34 @@ public class SamuraiArmy : MonoBehaviour
         if (candidates.Count == 0) return;
 
         Samurai diver = candidates[UnityEngine.Random.Range(0, candidates.Count)];
-        diver.WarnDive();
+        diver.WarnDive(diveWarning);
         dives.Add(new Dive { soldier = diver, slot = diver.Body.position });
+    }
+
+    // Where the front rank holds: inside the cover's row, but always clear of the ronin's head.
+    float HoldY => Mathf.Max(blockerTopY - holdDepth, landingY + 0.6f);
+
+    // The army has reached the cover. In the original the run would end here; instead it holds this row and its
+    // front rank starts throwing itself at the ronin, who must parry or take the blow.
+    void BeginHolding()
+    {
+        holding = true;
+        nextLungeTime = Time.time + lungeInterval * 0.5f;
+        Sfx.Play(Sfx.SamuraiCry, 1f, 0.9f);
+        CameraShake.Add(0.25f);
+    }
+
+    // One of the front rank nearest the ronin shakes under a red "!" and then lunges straight at him.
+    void StartLunge()
+    {
+        nextLungeTime = Time.time + lungeInterval * UnityEngine.Random.Range(0.7f, 1.3f);
+        if (target == null || dives.Exists(d => d.lunge)) return;
+        List<Samurai> front = soldiers.FindAll(s => !s.Encased && !IsDiving(s) && s.Body.position.y <= lastBottom + 0.3f);
+        if (front.Count == 0) return;
+        front.Sort((a, b) => Mathf.Abs(a.Body.position.x - target.position.x).CompareTo(Mathf.Abs(b.Body.position.x - target.position.x)));
+        Samurai lunger = front[UnityEngine.Random.Range(0, Mathf.Min(3, front.Count))];
+        lunger.WarnDive(lungeWarning);
+        dives.Add(new Dive { soldier = lunger, slot = lunger.Body.position, lunge = true });
     }
 
     void UpdateDives(float dt)
@@ -346,6 +409,20 @@ public class SamuraiArmy : MonoBehaviour
         {
             Dive dive = dives[i];
             dive.elapsed += dt;
+            if (dive.phase == 3)
+            {
+                // Parried: it arcs away under gravity, spinning, then falls dead.
+                dive.fling += Vector3.down * (18f * dt);
+                dive.soldier.Body.MovePosition(dive.soldier.Body.position + dive.fling * dt);
+                dive.soldier.transform.Rotate(0f, 0f, Mathf.Sign(dive.fling.x) * -540f * dt);
+                if (dive.elapsed >= 0.45f) dive.soldier.Kill(KillSource.Deflected);
+                continue;
+            }
+            if (dive.lunge)
+            {
+                UpdateLunge(dive, i);
+                continue;
+            }
             switch (dive.phase)
             {
                 case 0:
@@ -367,7 +444,7 @@ public class SamuraiArmy : MonoBehaviour
                     Vector3 position = Bezier(dive.p0, dive.p1, dive.p2, dive.p3, t * t * (1.6f - 0.6f * t));
                     dive.soldier.Body.MovePosition(position);
                     DiveContact(dive, position);
-                    if (t < 1f) break;
+                    if (dive.phase != 1 || t < 1f) break;
                     dive.phase = 2;
                     dive.elapsed = 0f;
                     break;
@@ -382,7 +459,44 @@ public class SamuraiArmy : MonoBehaviour
         }
     }
 
-    // A diver barges through blockers and costs the ronin a life if it reaches him.
+    // Shakes in its slot under the warning, lunges in a straight line through where the ronin stood, then walks
+    // back to its slot (which has kept marching).
+    void UpdateLunge(Dive dive, int index)
+    {
+        switch (dive.phase)
+        {
+            case 0:
+                float shake = Mathf.Sin(dive.elapsed * 60f) * 0.08f;
+                dive.soldier.Body.MovePosition(dive.slot + Vector3.right * shake);
+                if (dive.elapsed < lungeWarning) return;
+                Vector3 at = target.position;
+                Vector3 toward = (at - dive.slot).normalized;
+                dive.p0 = dive.slot;
+                dive.p1 = at + toward * 1.2f;
+                dive.phase = 1;
+                dive.elapsed = 0f;
+                Sfx.Play(Sfx.ParrySwing, 0.8f, 0.8f);
+                return;
+            case 1:
+                float t = Mathf.Clamp01(dive.elapsed / lungeDuration);
+                Vector3 position = Vector3.Lerp(dive.p0, dive.p1, t * t);
+                dive.soldier.Body.MovePosition(position);
+                DiveContact(dive, position);
+                if (dive.phase != 1 || t < 1f) return;
+                dive.p2 = position;
+                dive.phase = 2;
+                dive.elapsed = 0f;
+                return;
+            default:
+                float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(dive.elapsed / lungeReturn));
+                dive.soldier.Body.MovePosition(Vector3.Lerp(dive.p2, dive.slot, u));
+                if (u >= 1f) dives.RemoveAt(index);
+                return;
+        }
+    }
+
+    // A diver or lunger barges through blockers and costs the ronin a life if it reaches him, unless he parries
+    // it: then it's flung away, wearing his parry colour, and dies.
     void DiveContact(Dive dive, Vector3 position)
     {
         int hits = Physics.OverlapSphereNonAlloc(position, samuraiRadius, overlapBuffer);
@@ -390,7 +504,20 @@ public class SamuraiArmy : MonoBehaviour
         {
             if (overlapBuffer[i].TryGetComponent(out Blocker block) && dive.trampled.Add(block)) block.Hit(position);
         }
-        if (!dive.hitRonin && target.TryGetComponent(out Ronin ronin) && (target.position - position).sqrMagnitude < 0.8f * 0.8f)
+        if (dive.hitRonin || !target.TryGetComponent(out Ronin ronin)) return;
+        float distance = (ronin.Bounds.center - position).magnitude;
+        if (ronin.Parrying && distance < parryReach)
+        {
+            ronin.ParryBody(position);
+            dive.soldier.Knock(Color.Lerp(Color.white, ronin.ParryColor, 0.7f));
+            float away = position.x >= ronin.Bounds.center.x ? 1f : -1f;
+            dive.fling = new Vector3(away * 9f, 7f, 0f);
+            dive.phase = 3;
+            dive.elapsed = 0f;
+            dive.hitRonin = true;
+            return;
+        }
+        if ((target.position - position).sqrMagnitude < 0.8f * 0.8f)
         {
             dive.hitRonin = true;
             ronin.TakeHit(position);

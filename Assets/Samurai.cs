@@ -50,6 +50,10 @@ public class Samurai : MonoBehaviour, IHittable
     SpriteRenderer iceGlow;
     SpriteRenderer ghostGlow;
     float ghostPhase;
+    SpriteRenderer alert;
+    SpriteRenderer alertGlow;
+    float alertUntil;
+    Color? knockTint;
 
     void Awake()
     {
@@ -133,12 +137,63 @@ public class Samurai : MonoBehaviour, IHittable
         Fx.Play(Fx.Impact, transform.position, TollColor, 1.4f);
     }
 
-    // A flash and a battle cry just before it breaks formation to dive.
-    public void WarnDive()
+    static readonly Color AlertColor = new Color(1f, 0.35f, 0.2f);
+
+    // A flash, a battle cry and a red "!" over its head just before it breaks formation to dive or lunge at the
+    // ronin, for as long as the warning lasts.
+    public void WarnDive(float seconds)
     {
         HitFlash.Flash(animator.Renderer, 0.18f);
         Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.5f, 0.4f), 0.8f);
         Sfx.Play(Sfx.SamuraiCry, 0.7f, 1.2f);
+        if (alert == null)
+        {
+            alert = new GameObject("Alert").AddComponent<SpriteRenderer>();
+            alert.sprite = ProceduralSprites.Exclaim;
+            alert.color = AlertColor;
+            alert.sortingOrder = animator.Renderer.sortingOrder + 5;
+            alertGlow = new GameObject("AlertGlow").AddComponent<SpriteRenderer>();
+            alertGlow.sprite = ProceduralSprites.Glow;
+            alertGlow.color = new Color(AlertColor.r, AlertColor.g, AlertColor.b, 0.55f);
+            alertGlow.sortingOrder = alert.sortingOrder - 1;
+        }
+        alertUntil = Time.time + seconds;
+    }
+
+    // Parried: it takes the parry's colour as it's flung away, before it dies.
+    public void Knock(Color colour)
+    {
+        knockTint = colour;
+        HitFlash.Flash(animator.Renderer, 0.15f);
+        animator.Renderer.color = colour;
+        HideAlert();
+    }
+
+    // Bobs and pulses over its head, above the sprite's top whatever its size.
+    void OnDestroy() => HideAlert();
+
+    void UpdateAlert()
+    {
+        if (alert == null) return;
+        if (Time.time >= alertUntil || IsDead)
+        {
+            HideAlert();
+            return;
+        }
+        float top = animator.Renderer.bounds.max.y;
+        float pulse = 1f + 0.15f * Mathf.Sin(Time.time * 20f);
+        alert.transform.position = new Vector3(transform.position.x, top + 0.5f + 0.08f * Mathf.Sin(Time.time * 14f), -0.2f);
+        alert.transform.localScale = Vector3.one * (0.9f * pulse);
+        alertGlow.transform.position = alert.transform.position + Vector3.forward * 0.01f;
+        alertGlow.transform.localScale = Vector3.one * (1.1f * pulse / ProceduralSprites.Glow.bounds.size.x);
+    }
+
+    void HideAlert()
+    {
+        if (alert != null) Destroy(alert.gameObject);
+        if (alertGlow != null) Destroy(alertGlow.gameObject);
+        alert = null;
+        alertGlow = null;
     }
 
     // A spiked shell of icicles drawn over the statue a samurai leaves when it dies frozen. Living samurai held in ice
@@ -169,6 +224,7 @@ public class Samurai : MonoBehaviour, IHittable
 
     void Update()
     {
+        UpdateAlert();
         // A ghost's body breathes in and out of sight, slowly, each on its own beat.
         if (ghostGlow != null && !Encased && !IsDead) SetFrost(frost);
         if (iceGlow == null || Encased) return;
@@ -188,6 +244,11 @@ public class Samurai : MonoBehaviour, IHittable
     public void SetFrost(float amount)
     {
         if (IsDead) return;
+        if (knockTint is Color knocked)
+        {
+            animator.Renderer.color = knocked;
+            return;
+        }
         frost = amount;
         Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
         if (Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);

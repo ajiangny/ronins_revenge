@@ -160,7 +160,12 @@ match `BoonChoiceUI.boonIcons`.
 ### Samurai army (the "invaders")
 - `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
   (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
-  raises `ArmyReachedRonin` when it lands. Rounds with `LevelConfig.diveInterval` send a samurai from behind the
+  holds once its front rank reaches the cover's row (`HoldY` from `holdDepth`, `BeginHolding`: no more drops, it walks that row
+  and `ErodeBlockers` smashes the cover) and starts lunges (`StartLunge`/`UpdateLunge`: a front-rank samurai near the ronin
+  shakes under `Samurai.WarnDive`'s red "!" (`ProceduralSprites.Exclaim`), lunges through where he stood and walks back).
+  `ArmyReachedRonin` (a landing at `Ronin.TopY`) is only a safeguard now. In `DiveContact` a parrying ronin (`Ronin.Parrying`,
+  within `parryReach`) flings a lunger or diver away (`Ronin.ParryBody`, `Samurai.Knock` tints it, dive phase 3 arcs it off,
+  then `Kill(KillSource.Deflected)`). Rounds with `LevelConfig.diveInterval` send a samurai from behind the
   front rank on a telegraphed bezier swoop at the ronin (`StartDive`/`UpdateDives`): it hits blockers (`Blocker.Hit`)
   and the ronin, then glides back into its marching slot; divers are left out of the edge, landing and front-column
   checks. Also hosts the army-wide freeze and spatial queries

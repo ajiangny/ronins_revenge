@@ -2331,6 +2331,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: bce89d85e2d0a40ab816c7ec2b1f06bc, type: 3}
     - target: {fileID: -8270462056835086372, guid: 34725686c1348b247a77b3f974763d41, type: 3}
+      propertyPath: holdDepth
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8270462056835086372, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: alienCounter
       value: 
       objectReference: {fileID: 970817118}

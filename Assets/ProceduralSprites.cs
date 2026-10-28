@@ -13,6 +13,7 @@ public static class ProceduralSprites
     static Sprite mouseLeft, mouseRight;
     static Sprite fadeDown;
     static Sprite swirl;
+    static Sprite flame;
 
     static readonly string[][] NotePatterns =
     {
@@ -458,6 +459,32 @@ public static class ProceduralSprites
         texture.SetPixels32(pixels);
         texture.Apply();
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
+    // A soft tongue of flame, white to be tinted: round at its base, narrowing to a point and fading towards its tip.
+    // Pivoted at its base, so it can be stood on a rim and turned outward.
+    public static Sprite Flame => flame != null ? flame : flame = BuildFlame(32, 64);
+
+    static Sprite BuildFlame(int width, int height)
+    {
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        for (int y = 0; y < height; y++)
+        {
+            // 0 at the base, 1 at the tip. The body is widest a fifth of the way up and narrows to the point.
+            float v = (y + 0.5f) / height;
+            float half = Mathf.Min(1f, v * 5f + 0.35f) * Mathf.Pow(1f - v, 0.75f);
+            for (int x = 0; x < width; x++)
+            {
+                float u = Mathf.Abs((x + 0.5f) / width * 2f - 1f);
+                float a = half > 0f ? Mathf.Clamp01(1f - u / half) : 0f;
+                a = a * a * Mathf.Pow(1f - v, 0.6f);
+                pixels[y * width + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0f), height);
     }
 
     static Sprite Circle(int size, bool soft, FilterMode filter = FilterMode.Point)

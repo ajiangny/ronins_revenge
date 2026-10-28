@@ -117,6 +117,27 @@ public class BoonChoiceUI : MonoBehaviour
     const float SlotSize = 68f;
     const float SlotGap = 12f;
 
+    // The ultimate's medallion at the foot of the slot column: its icon, a violet ring that fills round it as he
+    // strikes and drains while it runs, and a soft fire on its rim while it's ready.
+    RectTransform ultimate;
+    Image ultimateCharge;
+    Image ultimateIcon;
+    TextMeshProUGUI ultimateLetter;
+    TextMeshProUGUI ultimateTip;
+    Image ultimateHalo;
+    readonly List<Image> ultimateFlames = new List<Image>();
+    // Each tongue's height on the rim: tall over the top, low underneath, as fire burns upward.
+    readonly List<float> ultimateFlameHeights = new List<float>();
+    float ultimateFire;
+    bool ultimateWasReady;
+    bool hudVisible = true;
+    static readonly Color UltimateColour = new Color(0.62f, 0.45f, 1f);
+    const int UltimateFlames = 16;
+    // Kept faint: the fire says "ready" without pulling the eye off the field.
+    const float UltimateFlameAlpha = 0.45f;
+    // Poguru's tutorial hides it: it can't fill then, and his drills point only at the three slots they teach.
+    public bool UltimateShown { get; set; } = true;
+
     public bool IsOpen => panel != null && panel.activeSelf;
     // While Poguru explains the cards over the open screen, nothing can be picked.
     public bool InputLocked { get; set; }
@@ -504,6 +525,7 @@ public class BoonChoiceUI : MonoBehaviour
     {
         hudSlots[(int)BoonSlot.Special].cooldown.fillAmount = 1f - ronin.ShurikenCharge;
         hudSlots[(int)BoonSlot.Parry].cooldown.fillAmount = 1f - ronin.ParryCharge;
+        UpdateUltimate();
         // Glacier Shell's icon stays dim while the shell grows back.
         for (int i = 0; i < hudPassives.Count && i < passiveIcons.Count; i++)
         {
@@ -695,6 +717,7 @@ public class BoonChoiceUI : MonoBehaviour
     // The ability slots and passives; hidden behind the title menu.
     public void SetHudVisible(bool visible)
     {
+        hudVisible = visible;
         foreach (HudSlot slot in hudSlots) slot.ring.gameObject.SetActive(visible);
         passiveRow.gameObject.SetActive(visible);
         tips.gameObject.SetActive(visible);
@@ -739,6 +762,85 @@ public class BoonChoiceUI : MonoBehaviour
         }
 
         passiveRow = GameUI.CreateRect("Passives", transform, corner, new Vector2(35f, 170f + hudSlots.Length * (SlotSize + SlotGap)), new Vector2(46, 400));
+        BuildUltimate(new Vector2(24f, 170f - SlotSize - SlotGap));
+    }
+
+    // Built like a slot: a ring, a dark inner disc and the icon, with the charge drawn as a second ring between them
+    // and the flames and a faint halo behind.
+    void BuildUltimate(Vector2 position)
+    {
+        ultimate = GameUI.CreateRect("Ultimate", transform, Vector2.zero, position, new Vector2(SlotSize, SlotSize));
+        ultimate.SetSiblingIndex(tips.transform.GetSiblingIndex());
+        Vector2 centre = new Vector2(0.5f, 0.5f);
+        ultimateHalo = CreateImage("Halo", ultimate, centre, Vector2.zero, new Vector2(SlotSize * 2.1f, SlotSize * 2.1f), ProceduralSprites.SoftGlow);
+        // Tongues stand on the rim and lean upward, the way fire rises off a burning ring, rather than radiating out.
+        for (int i = 0; i < UltimateFlames; i++)
+        {
+            float angle = i * 360f / UltimateFlames;
+            Vector2 outward = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            float lean = Mathf.LerpAngle(angle, 90f, 0.65f);
+            Image flame = CreateImage("Flame", ultimate, centre, outward * (SlotSize * 0.44f), new Vector2(18f, 22f), ProceduralSprites.Flame);
+            flame.rectTransform.pivot = new Vector2(0.5f, 0.1f);
+            flame.rectTransform.localRotation = Quaternion.Euler(0f, 0f, lean - 90f);
+            ultimateFlames.Add(flame);
+            ultimateFlameHeights.Add(0.45f + 0.75f * Mathf.Clamp01(0.5f + 0.5f * outward.y));
+        }
+        Image ring = CreateImage("Ring", ultimate, centre, Vector2.zero, new Vector2(SlotSize, SlotSize), ProceduralSprites.Disc);
+        ring.color = new Color(0.32f, 0.3f, 0.36f);
+        ultimateCharge = CreateImage("Charge", ultimate, centre, Vector2.zero, new Vector2(SlotSize, SlotSize), ProceduralSprites.Disc);
+        ultimateCharge.type = Image.Type.Filled;
+        ultimateCharge.fillMethod = Image.FillMethod.Radial360;
+        ultimateCharge.fillOrigin = (int)Image.Origin360.Top;
+        ultimateCharge.fillClockwise = true;
+        ultimateCharge.color = UltimateColour;
+        float inner = SlotSize - 10f;
+        Image back = CreateImage("Inner", ultimate, centre, Vector2.zero, new Vector2(inner, inner), ProceduralSprites.Disc);
+        back.color = new Color(0.06f, 0.04f, 0.09f);
+        ultimateIcon = CreateImage("Icon", ultimate, centre, Vector2.zero, new Vector2(inner - 6f, inner - 6f), null);
+        ultimateIcon.preserveAspect = true;
+        ultimateLetter = GameUI.CreateText(ultimate, font, "Letter", centre, Vector2.zero, new Vector2(inner, inner), 30, TextAlignmentOptions.Center);
+        ui.Style(ultimateLetter, TextStyle.Hud);
+        BoonDefinition clone = Boons.Get(BoonId.ShadowClone);
+        SetIcon(ultimateIcon, ultimateLetter, clone, UltimateColour);
+        ultimateTip = CreateTip(position + new Vector2(SlotSize + 14f, SlotSize / 2f));
+        ultimateTip.text = $"{MenuUI.KeyCap("Q", false)}  Ultimate";
+    }
+
+    void UpdateUltimate()
+    {
+        bool shown = hudVisible && UltimateShown;
+        ultimate.gameObject.SetActive(shown);
+        ultimateTip.gameObject.SetActive(shown);
+        if (!shown) return;
+
+        bool ready = ronin.UltimateReady, active = ronin.UltimateActive;
+        ultimateCharge.fillAmount = ronin.UltimateFill;
+        // Dim while it fills, lit once it's ready or running.
+        bool lit = ready || active;
+        Color iconColour = ultimateIcon.sprite != ProceduralSprites.Disc ? Color.white : UltimateColour * 0.7f;
+        ultimateIcon.color = lit ? iconColour : new Color(iconColour.r * 0.6f, iconColour.g * 0.6f, iconColour.b * 0.6f, 0.5f);
+        ultimateLetter.alpha = lit ? 1f : 0.5f;
+
+        // The rim's fire fades in when it's ready and out once it's used; each tongue flickers on its own.
+        ultimateFire = Mathf.MoveTowards(ultimateFire, ready ? 1f : 0f, Time.unscaledDeltaTime / 0.3f);
+        float t = Time.unscaledTime;
+        for (int i = 0; i < ultimateFlames.Count; i++)
+        {
+            Image flame = ultimateFlames[i];
+            flame.enabled = ultimateFire > 0f;
+            if (!flame.enabled) continue;
+            float flicker = Mathf.PerlinNoise(i * 7.3f, t * 3f);
+            float sway = Mathf.PerlinNoise(i * 3.1f + 50f, t * 2f) - 0.5f;
+            flame.rectTransform.localScale = new Vector3(1f + 0.15f * sway, ultimateFlameHeights[i] * (0.8f + 0.4f * flicker), 1f);
+            Color tint = Color.Lerp(UltimateColour, Color.white, 0.25f + 0.25f * flicker);
+            flame.color = new Color(tint.r, tint.g, tint.b, UltimateFlameAlpha * ultimateFire * (0.6f + 0.4f * flicker));
+        }
+        float breathe = 0.5f + 0.5f * Mathf.Sin(t * 2.2f);
+        ultimateHalo.color = new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b,
+            ultimateFire * (0.14f + 0.06f * breathe) + (active ? 0.12f : 0f));
+
+        if (ready && !ultimateWasReady) Sfx.Play(Sfx.BladeRing, 0.6f, 1.4f);
+        ultimateWasReady = ready;
     }
 
     // A key and name to the right of a HUD icon, shown while the player holds Tab. `position` is from the screen's

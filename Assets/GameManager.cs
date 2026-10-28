@@ -825,7 +825,7 @@ public class GameManager : MonoBehaviour
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
         ronin.UltimateLocked = tutorial.Active;
-        ui.SetUltimate(UltimateName(ronin.CurrentUltimate), ronin.UltimateFill, ronin.UltimateReady, ronin.UltimateActive);
+        boonChoice.UltimateShown = !tutorial.Active;
     }
 
     // The ultimates the temple offers, by Ronin.Ultimate: their names and what they do.

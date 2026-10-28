@@ -289,7 +289,7 @@ public class Utsusemi : Boss
             if (hit != null)
             {
                 hit.Demolish();
-                GroundFire.Light(new Vector3(end.x, rowY, 0));
+                GroundFire.Scorch(new Vector3(end.x, rowY, 0));
                 CameraShake.Add(0.12f);
             }
             yield return null;
@@ -1513,6 +1513,7 @@ public class Utsusemi : Boss
     // cutting him if he hasn't moved.
     IEnumerator ThrowSword(float x, int hour = 1)
     {
+        swordHour = hour;
         Vector3 ground = new Vector3(x, GroundY + 0.15f, 0);
         var mark = new HourMark(this, hour, x);
         mark.Show();
@@ -1622,6 +1623,11 @@ public class Utsusemi : Boss
         return cover;
     }
 
+    // The numeral the sword was thrown under, raised again when it takes the sword back.
+    int swordHour = 1;
+    // Seconds between the reclaim's warning and its dash down onto the sword.
+    const float ReclaimWarning = 0.7f;
+
     // It takes its sword back: the blade glints, it dashes down onto it, wrenches it out of the ground with a strike
     // that cuts anyone still sheltering there, and dashes back to its row.
     IEnumerator ReclaimSword()
@@ -1637,7 +1643,11 @@ public class Utsusemi : Boss
         ElementFx.Glow(plantedSword.transform.position, Color.white, 0.9f, 2.5f, 0.4f);
         Sfx.Play(Sfx.ParryClang, 0.5f, 1.6f);
         Tick(0.9f);
-        yield return Wait(secondPhase ? 0.45f : 0.55f);
+        // The sword's numeral rises again under it, as before an Hour Strikes dash, so the shelter reads as the
+        // next target: play-testers stayed by the sword and took the chop. A longer window to step off than before.
+        var mark = new HourMark(this, swordHour, x);
+        mark.Show();
+        yield return Wait(ReclaimWarning);
 
         Beat();
         yield return Dash(new Vector3(x, Landing(), row.z));
@@ -1645,7 +1655,7 @@ public class Utsusemi : Boss
         transient.Remove(plantedSword.gameObject);
         plantedSword = null;
         swordOut = false;
-        yield return Chop(x, null);
+        yield return Chop(x, mark);
         yield return Dash(row);
         PlayIdle();
     }
@@ -2029,7 +2039,7 @@ public class Utsusemi : Boss
         {
             beam.nextFire = Time.time + 0.25f;
             beam.lastFireX = to.x;
-            GroundFire.Light(to);
+            GroundFire.Scorch(to);
         }
     }
 

@@ -492,7 +492,7 @@ MonoBehaviour:
   maxRounds: 5
   bossPortalAfterRound: 3
   portalChoices: 2
-  emberCache: 30
+  noteCache: 30
   extraRoundSpeedUp: 0.06
   extraRoundFireCut: 0.08
   scrollChanceFromScout: 0.25
@@ -518,15 +518,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 79fc1f568d93b4f9d9faac0805e0c9ad, type: 3}
   - {fileID: 21300000, guid: 056092887edf440bbb08af45de44c8c3, type: 3}
   beadPainted: {fileID: 21300000, guid: d4029fcd1c2b94106b6e8b05a23cc5af, type: 3}
-  emberFrames:
-  - {fileID: 21300000, guid: c236ef01b98e44b828d2a5ca6905abe7, type: 3}
-  - {fileID: 21300000, guid: 7fadcbdd997ae431eb05b1ac7081b9a4, type: 3}
-  - {fileID: 21300000, guid: 862faee8c78ea4f73a493b5146283ead, type: 3}
-  - {fileID: 21300000, guid: 996ac5b693da1432fa357062c0a4180c, type: 3}
-  - {fileID: 21300000, guid: a86136cf3d444431eade9ce63015cc97, type: 3}
-  - {fileID: 21300000, guid: e08c8edbc11a54d888dde969a9fcd482, type: 3}
-  - {fileID: 21300000, guid: 7c59e5ad3d88a46c7a0f73a342856453, type: 3}
-  - {fileID: 21300000, guid: b0180b54a83c84859b7af41220399fd5, type: 3}
+  noteFrames:
+  - {fileID: 21300000, guid: 1d6716d97909a46f487831c363f98a1f, type: 3}
+  - {fileID: 21300000, guid: 550aba9ce2669434a9d09b5e3e72f535, type: 3}
+  - {fileID: 21300000, guid: 2bac45021f776499cb465648801d9863, type: 3}
+  - {fileID: 21300000, guid: 49ad05c7eee164764834de7fa184402e, type: 3}
+  - {fileID: 21300000, guid: 6fde2bc88c16d4641ab709a2312e4f05, type: 3}
+  - {fileID: 21300000, guid: bf7954be758774370ac4fc703ca4f1d8, type: 3}
+  - {fileID: 21300000, guid: e70ccf9f1e0b7491081735039595f2b1, type: 3}
+  - {fileID: 21300000, guid: aefda9e986e8843c0b253e65113880b4, type: 3}
   springFrames:
   - {fileID: 21300000, guid: ae48a273b9f7443ce95d73940b2f416c, type: 3}
   - {fileID: 21300000, guid: bc1e6f367be104bffbdc5d25ae8b6b5d, type: 3}

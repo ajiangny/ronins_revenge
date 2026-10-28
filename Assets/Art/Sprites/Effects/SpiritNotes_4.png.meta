@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b0180b54a83c84859b7af41220399fd5
+guid: 6fde2bc88c16d4641ab709a2312e4f05
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2675846357093906115
-    second: EmberCache_7_0
+      213: 5665453335762609500
+    second: SpiritNotes_4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: EmberCache_7_0
+      name: SpiritNotes_4_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 44
-        height: 44
+        width: 46
+        height: 46
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d3905eb5aeb7ddad0800000000000000
-      internalID: -2675846357093906115
+      spriteID: c55aea1cacbbf9e40800000000000000
+      internalID: 5665453335762609500
       vertices: []
       indices: 
       edges: []

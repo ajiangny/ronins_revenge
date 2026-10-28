@@ -28,6 +28,12 @@ MonoBehaviour:
   runLeft: []
   runRight: []
   walkUp: []
+  walkDown: []
+  walkUpLeft: []
+  walkUpRight: []
+  walkDownLeft: []
+  walkDownRight: []
+  idleDown: []
   wisps: []
   framesWithWisps: []
   idleFps: 6
@@ -35,5 +41,5 @@ MonoBehaviour:
   runFps: 14
   walkFps: 8
   deathParticles:
-  - {fileID: 21300000, guid: 9d9c4cf23357b4ef99eb76e0909de878, type: 3}
-  - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}
+  - {fileID: 21300000, guid: abbbbb4d9318467987aa796201c60a43, type: 3}
+  - {fileID: 21300000, guid: e40ba3856f1b401d94c0fb09495e3a08, type: 3}

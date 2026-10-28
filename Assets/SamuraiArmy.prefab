@@ -63,6 +63,9 @@ MonoBehaviour:
   taishoHealth: 2
   shieldHealth: 2
   bellringerArt: {fileID: 11400000, guid: 2ab58ebda15d8479fa6115667328309f, type: 2}
+  shieldbearerArt: {fileID: 11400000, guid: 11a7b1f7e62ec470ba8b2116257a03af, type: 2}
+  yureiArt: {fileID: 11400000, guid: c9d85c480bf09477ab57a5c43d7337ed, type: 2}
+  scoutArt: {fileID: 11400000, guid: bc3301291f93744afad25a525491e5e1, type: 2}
   bellHealth: 2
   bellInterval: 6
   tollWarning: 0.6

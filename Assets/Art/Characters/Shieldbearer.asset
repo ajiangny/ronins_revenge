@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Shieldbearer
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: a3b65579c7a14626b8c1598ae2cad90a, type: 3}
+  - {fileID: 21300000, guid: a0e8b478811d4ee898d5f7fabe651791, type: 3}
+  - {fileID: 21300000, guid: 998e27a364554657a0a5f656468346c4, type: 3}
+  - {fileID: 21300000, guid: abd5653c79fe400ab3b1517463c4e5fb, type: 3}
+  attack: []
+  hit: []
+  death:
+  - {fileID: 21300000, guid: 1e37314c0693411abb1a82506a258739, type: 3}
+  - {fileID: 21300000, guid: 36f116621c3a40e594a069971e2ff36e, type: 3}
+  - {fileID: 21300000, guid: 9d93e3443d7847548a7a4ebed38c411f, type: 3}
+  parry: []
+  slash: []
+  runLeft: []
+  runRight: []
+  walkUp: []
+  walkDown: []
+  walkUpLeft: []
+  walkUpRight: []
+  walkDownLeft: []
+  walkDownRight: []
+  idleDown: []
+  wisps: []
+  framesWithWisps: []
+  idleFps: 6
+  actionFps: 8
+  runFps: 14
+  walkFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: abbbbb4d9318467987aa796201c60a43, type: 3}
+  - {fileID: 21300000, guid: e40ba3856f1b401d94c0fb09495e3a08, type: 3}

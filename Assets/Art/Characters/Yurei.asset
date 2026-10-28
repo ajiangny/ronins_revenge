@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Yurei
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: 45ed2a648d4448229c72a84125781fea, type: 3}
+  - {fileID: 21300000, guid: 39c47d23a1c742139f26ff481f13805f, type: 3}
+  - {fileID: 21300000, guid: c722df0a36f34502bf2a67ccf0501656, type: 3}
+  - {fileID: 21300000, guid: 18383e3edea34edd801721cbe9852def, type: 3}
+  attack: []
+  hit: []
+  death:
+  - {fileID: 21300000, guid: 97d289425853410fac80f4181b93a5c4, type: 3}
+  - {fileID: 21300000, guid: aa67e08015d54feb845a8f7a364dcb32, type: 3}
+  - {fileID: 21300000, guid: ed4e38d83dd54c658026e628dcd25129, type: 3}
+  parry: []
+  slash: []
+  runLeft: []
+  runRight: []
+  walkUp: []
+  walkDown: []
+  walkUpLeft: []
+  walkUpRight: []
+  walkDownLeft: []
+  walkDownRight: []
+  idleDown: []
+  wisps: []
+  framesWithWisps: []
+  idleFps: 6
+  actionFps: 8
+  runFps: 14
+  walkFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: abbbbb4d9318467987aa796201c60a43, type: 3}
+  - {fileID: 21300000, guid: e40ba3856f1b401d94c0fb09495e3a08, type: 3}

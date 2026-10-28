@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75fdd4a8669c74d6c94da84c5c9cdaa3, type: 3}
+  m_Name: Scout
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterArt
+  idle:
+  - {fileID: 21300000, guid: e1736f86e8b344a4bad38b9377ee6763, type: 3}
+  - {fileID: 21300000, guid: 979891eb095b4a228e98228698525f88, type: 3}
+  - {fileID: 21300000, guid: 4c2b41624a0a466e9bb414bbecac168e, type: 3}
+  - {fileID: 21300000, guid: a14d711fd842481483d26ebadce5fac8, type: 3}
+  attack: []
+  hit: []
+  death:
+  - {fileID: 21300000, guid: fc87af1c56a7474ab792159f22a3be99, type: 3}
+  - {fileID: 21300000, guid: 5f49325a332346f99c8bd18ec1b12a2e, type: 3}
+  - {fileID: 21300000, guid: df2a57350f3244c28712e7b5ab0a2d86, type: 3}
+  parry: []
+  slash: []
+  runLeft: []
+  runRight: []
+  walkUp: []
+  walkDown: []
+  walkUpLeft: []
+  walkUpRight: []
+  walkDownLeft: []
+  walkDownRight: []
+  idleDown: []
+  wisps: []
+  framesWithWisps: []
+  idleFps: 6
+  actionFps: 8
+  runFps: 14
+  walkFps: 8
+  deathParticles:
+  - {fileID: 21300000, guid: abbbbb4d9318467987aa796201c60a43, type: 3}
+  - {fileID: 21300000, guid: e40ba3856f1b401d94c0fb09495e3a08, type: 3}

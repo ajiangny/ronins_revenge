@@ -22,17 +22,17 @@ public static class Damage
 
     public static bool IsLesser(KillSource source) => source == KillSource.Shadow || source == KillSource.Clone;
 
-    // How much of a boss's stance meter a hit fills (1 is a full meter, and a stagger). Plain cuts barely dent it,
-    // parried shots and the shuriken chip at it, and her own slash sent back takes a solid chunk. Boon effects add
+    // How much of a boss's stance meter a hit fills (1 is a full meter, and a stagger). Plain cuts and parried shots
+    // barely dent it, the shuriken chips at it, and her own slash sent back takes a solid chunk. Boon effects add
     // nothing, so a pile of procs can't lock a boss in place.
     public static float Stance(KillSource source) => source switch
     {
         KillSource.Reflected => 0.15f,
-        KillSource.Deflected => 0.07f,
-        KillSource.Shuriken => 0.06f,
-        KillSource.Shadow or KillSource.Clone => 0.0075f,
+        KillSource.Deflected => 0.02f,
+        KillSource.Shuriken => 0.1f,
+        KillSource.Shadow or KillSource.Clone => 0.0025f,
         KillSource.Effect => 0f,
-        _ => 0.015f,
+        _ => 0.005f,
     };
 
     // A parry-only set piece sent home (the hour cleave, the Last Toll, the Soul Coffin, the Fang) fills the most.

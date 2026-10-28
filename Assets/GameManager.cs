@@ -1005,14 +1005,12 @@ public class GameManager : MonoBehaviour
         bool paper = OnPaper;
         string muted = MenuUI.MutedHex(paper);
         string Key(string key) => MenuUI.KeyCap(key, paper);
-        string Keys(Moves move) => string.Join("    or    ", System.Array.ConvertAll(Controls.Bindings(move), Key));
+        string Keys(Moves move) => SchemeKeys(Controls.Current, move, paper, "    or    ");
         string Row(string action, string keys) => $"<pos=20%><color=#{muted}>{action}</color><pos=50%>{keys}\n";
         bool mouse = Controls.UsesMouse;
-        string move = mouse ? Key("A") + "  " + Key("D")
-            : Key("←") + "  " + Key("→") + "    or    " + Key("A") + "  " + Key("D");
         menu.Show("CONTROLS",
             "<align=left>" +
-            Row("Move", move) +
+            Row("Move", SchemeMoveKeys(Controls.Current, paper, "    or    ")) +
             Row("Slash (hold)", Keys(Moves.Slash)) +
             Row("Parry arrows", Keys(Moves.Parry)) +
             Row("Spirit Shuriken", Keys(Moves.Shuriken)) +
@@ -1030,6 +1028,44 @@ public class GameManager : MonoBehaviour
                 }, ""),
                 MenuUI.Item.Button("BACK", back),
             }, back, startIndex, paper: paper);
+    }
+
+    // A move's keys in a scheme as key caps, `or` between alternatives (the controls page and the new journey's cards).
+    static string SchemeKeys(Controls.Scheme scheme, Moves move, bool paper, string or) =>
+        string.Join(or, System.Array.ConvertAll(Controls.Bindings(move, scheme), key => MenuUI.KeyCap(key, paper)));
+
+    static string SchemeMoveKeys(Controls.Scheme scheme, bool paper, string or)
+    {
+        string Key(string key) => MenuUI.KeyCap(key, paper);
+        string ad = Key("A") + "  " + Key("D");
+        return scheme == Controls.Scheme.KeyboardMouse ? ad : Key("←") + "  " + Key("→") + or + ad;
+    }
+
+    // A new journey asks how Oni will fight before the flute intro, so Poguru's lessons show the right keys from the
+    // first one. Two cards, the current scheme preselected; Esc goes back to the journeys.
+    void ShowSchemeChoice(int slot)
+    {
+        string muted = MenuUI.MutedHex(true);
+        string or = $" <color=#{muted}>or</color> ";
+        string Row(string action, string keys) => $"<color=#{muted}>{action}</color><pos=38%>{keys}\n";
+        MenuUI.Item Card(Controls.Scheme scheme, string tagline) => MenuUI.Item.Card(Controls.Name(scheme),
+            $"<align=center><color=#{muted}>{tagline}</color></align>\n" +
+            Row("Move", SchemeMoveKeys(scheme, true, or)) +
+            Row("Slash", SchemeKeys(scheme, Moves.Slash, true, or)) +
+            Row("Parry", SchemeKeys(scheme, Moves.Parry, true, or)) +
+            Row("Shuriken", SchemeKeys(scheme, Moves.Shuriken, true, or)) +
+            Row("Ultimate", SchemeKeys(scheme, Moves.Ultimate, true, or)),
+            () =>
+            {
+                Controls.Current = scheme;
+                Save.Use(slot);
+                StartCoroutine(TitleToGame());
+            });
+        menu.Show("HOW WILL YOU FIGHT?", $"<size=30><color=#{muted}>You can change this any time under CONTROLS.</color></size>", new[]
+        {
+            Card(Controls.Scheme.Keyboard, "Both hands on the keys."),
+            Card(Controls.Scheme.KeyboardMouse, "Move with the keys, strike with the mouse."),
+        }, () => ShowSlots(slot), (int)Controls.Current, paper: true);
     }
 
     // The shop on the hill, laid out as a table: each song's name, its ranks as pips and the price of the next in Spirit
@@ -1102,9 +1138,13 @@ public class GameManager : MonoBehaviour
 
     void ChooseSlot(int slot)
     {
-        bool fresh = !Save.Exists(slot);
+        if (!Save.Exists(slot))
+        {
+            ShowSchemeChoice(slot);
+            return;
+        }
         Save.Use(slot);
-        StartCoroutine(fresh ? TitleToGame() : TitleToSafeArea());
+        StartCoroutine(TitleToSafeArea());
     }
 
     void ShowErase()

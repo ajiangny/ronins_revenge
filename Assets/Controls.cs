@@ -94,8 +94,11 @@ public static class Controls
         ? move switch { Moves.Slash => "Left Click", Moves.Shuriken => "Space", Moves.Parry => "Right Click", _ => "E" }
         : move switch { Moves.Slash => "Space", Moves.Shuriken => "X", Moves.Parry => "C", _ => "Z" };
 
-    // Every binding of a move in the current scheme, for the controls page: "or" between alternatives.
-    public static string[] Bindings(Moves move) => UsesMouse
+    // Every binding of a move in a scheme (the current one by default), for the controls page and the new journey's
+    // choice: "or" between alternatives.
+    public static string[] Bindings(Moves move) => Bindings(move, Current);
+
+    public static string[] Bindings(Moves move, Scheme scheme) => scheme == Scheme.KeyboardMouse
         ? move switch
         {
             Moves.Slash => new[] { "LEFT CLICK" },

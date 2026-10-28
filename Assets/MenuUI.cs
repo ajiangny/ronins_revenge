@@ -23,11 +23,15 @@ public class MenuUI : MonoBehaviour
         public string detail;
         public int pips;
         public int pipsMax;
+        // A card's text under its heading (a page of cards side by side, like the new journey's control choice).
+        public string card;
 
         public bool IsSlider => set != null;
         public bool IsTableRow => detail != null || pipsMax > 0;
+        public bool IsCard => card != null;
 
         public static Item Button(string label, Action chosen, string note = null) => new Item { label = label, chosen = chosen, note = note };
+        public static Item Card(string label, string card, Action chosen) => new Item { label = label, card = card, chosen = chosen };
         public static Item Slider(string label, Func<float> get, Action<float> set) => new Item { label = label, get = get, set = set };
     }
 
@@ -46,6 +50,9 @@ public class MenuUI : MonoBehaviour
     const float PipSize = 13f;
     const float PipSpacing = 24f;
     const float GridGap = 70f;
+    // A card page's cells: tall panels side by side, one per choice.
+    const float CardWidth = 580f;
+    const float CardHeight = 480f;
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
     static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
@@ -67,6 +74,7 @@ public class MenuUI : MonoBehaviour
         public Image fillImage;
         public TextMeshProUGUI value;
         public TextMeshProUGUI detail;
+        public Image frame;
         public float shownSelect;
     }
 
@@ -99,6 +107,8 @@ public class MenuUI : MonoBehaviour
     float nextNoteAt;
     int nextNoteKind;
     float figurePixel;
+    // The title page's figure stays on every paper page opened from it, so START can stand him up from any of them.
+    bool figureWanted;
     // Set once START is chosen: the title page stops taking input while its logo and rows fade, then the paper
     // itself fades to show the field.
     bool leaving;
@@ -106,6 +116,8 @@ public class MenuUI : MonoBehaviour
     int columns = 1;
     // Set while the page has table rows: shorter, wider cells with left-aligned labels.
     bool table;
+    // Set while every item is a card: one row of panels, picked with left and right.
+    bool cards;
     int selected;
     int heardSelection;
     float shownAt;
@@ -125,11 +137,14 @@ public class MenuUI : MonoBehaviour
         bool paper = false, int gridColumns = 1)
     {
         items = pageItems;
-        columns = Mathf.Max(1, gridColumns);
+        cards = items.Length > 0 && Array.TrueForAll(items, item => item.IsCard);
+        columns = cards ? items.Length : Mathf.Max(1, gridColumns);
         table = Array.Exists(items, item => item.IsTableRow);
         back = onBack;
         SetLight(false);
         SetPaper(paper);
+        figure.gameObject.SetActive(paper && figureWanted);
+        figure.color = Color.white;
         selected = heardSelection = Mathf.Clamp(startIndex, 0, items.Length - 1);
         shownAt = Time.unscaledTime;
 
@@ -142,7 +157,7 @@ public class MenuUI : MonoBehaviour
         noteText.color = paper ? Ink : Color.white;
         if (paper) noteText.fontSharedMaterial = noteText.font.material;
         else ui.Style(noteText, TextStyle.Body);
-        hintText.text = Hint(columns > 1 ? "↑ ↓ ← →" : "↑ ↓", "Select")
+        hintText.text = Hint(cards ? "← →" : columns > 1 ? "↑ ↓ ← →" : "↑ ↓", "Select")
             + (Array.Exists(items, item => item.IsSlider) ? Hint("← →", "Adjust") : "")
             + Hint("Enter", "Confirm")
             // In a browser Esc can be taken by fullscreen, so the web build names Backspace too.
@@ -189,6 +204,7 @@ public class MenuUI : MonoBehaviour
         items = pageItems;
         columns = 1;
         table = false;
+        cards = false;
         back = null;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
@@ -226,6 +242,7 @@ public class MenuUI : MonoBehaviour
         notePixel = notesFrom.HasValue ? pixelSize : 0f;
         figurePixel = pixelSize;
         bool shown = frames != null && frames.Length > 0;
+        figureWanted = shown;
         figure.gameObject.SetActive(shown);
         if (!shown) return;
         figure.sprite = frames[0];
@@ -257,6 +274,7 @@ public class MenuUI : MonoBehaviour
 
     public void HideFigure()
     {
+        figureWanted = false;
         figureAnimator.Play(null, 0f);
         figure.gameObject.SetActive(false);
     }
@@ -452,8 +470,8 @@ public class MenuUI : MonoBehaviour
         return new Vector2(columns > 1 ? x : 0f, -rowHeight * (index / columns + 0.5f));
     }
 
-    float CellWidth => light ? LightRowWidth : table ? TableCellWidth : columns > 1 ? GridCellWidth : RowWidth;
-    float PageRowHeight => light ? LightRowHeight : table ? TableRowHeight : RowHeight;
+    float CellWidth => cards ? CardWidth : light ? LightRowWidth : table ? TableCellWidth : columns > 1 ? GridCellWidth : RowWidth;
+    float PageRowHeight => cards ? CardHeight : light ? LightRowHeight : table ? TableRowHeight : RowHeight;
 
     void Nudge(float amount)
     {
@@ -489,6 +507,14 @@ public class MenuUI : MonoBehaviour
             hintText.alpha = 0.55f * Chrome;
             figure.color = new Color(1f, 1f, 1f, rise);
         }
+        else if (onPaper)
+        {
+            // Leaving the title from one of its pages fades that page's words like the title's own.
+            titleText.alpha = Chrome;
+            bodyText.alpha = Chrome;
+            noteText.alpha = Chrome;
+            hintText.alpha = 0.55f * Chrome;
+        }
         float rowHeight = PageRowHeight;
 
         for (int i = 0; i < rows.Count; i++)
@@ -501,6 +527,15 @@ public class MenuUI : MonoBehaviour
             float target = i == selected ? 1f : 0f;
             row.shownSelect = Mathf.MoveTowards(row.shownSelect, target, dt / 0.12f);
             float k = EaseOut(row.shownSelect);
+            if (cards)
+            {
+                // The chosen card lifts a touch, its frame and heading turning red.
+                row.root.anchoredPosition += new Vector2(0f, 14f * k);
+                row.root.localScale = Vector3.one * (1f + 0.04f * k);
+                row.frame.color = Color.Lerp(new Color(Ink.r, Ink.g, Ink.b, 0.22f), InkAccent, k);
+                row.label.color = Color.Lerp(Ink, InkAccent, k);
+                continue;
+            }
             row.marker.localScale = Vector3.one * k;
             if (light)
             {
@@ -540,6 +575,12 @@ public class MenuUI : MonoBehaviour
             row.root = GameUI.CreateRect("Item" + i, rowsRoot, new Vector2(0.5f, 1f), Vector2.zero, new Vector2(rowWidth, rowHeight - 8f));
             row.root.pivot = new Vector2(0.5f, 0.5f);
             row.root.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            if (cards)
+            {
+                BuildCard(row, items[i], rowWidth, rowHeight - 8f);
+                rows.Add(row);
+                continue;
+            }
 
             if (light || onPaper)
             {
@@ -617,6 +658,49 @@ public class MenuUI : MonoBehaviour
             }
             rows.Add(row);
         }
+    }
+
+    // A card: a pale panel in a thin ink frame, its heading in the title face over a short rule, and its text below.
+    void BuildCard(Row row, Item item, float width, float height)
+    {
+        Color ink = onPaper ? Ink : Idle;
+        row.frame = Stretch(GameUI.CreateRect("Frame", row.root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        row.frame.sprite = ProceduralSprites.White;
+        row.frame.raycastTarget = false;
+        RectTransform inside = Stretch(GameUI.CreateRect("Panel", row.root, Vector2.zero, Vector2.zero, Vector2.zero));
+        inside.offsetMin = new Vector2(3f, 3f);
+        inside.offsetMax = new Vector2(-3f, -3f);
+        Image panel = inside.gameObject.AddComponent<Image>();
+        panel.sprite = ProceduralSprites.White;
+        panel.color = onPaper ? Color.Lerp(Paper, Ink, 0.035f) : new Color(0f, 0f, 0f, 0.6f);
+        panel.raycastTarget = false;
+
+        row.label = GameUI.CreateText(row.root, ui.TitleFont, "Heading", new Vector2(0.5f, 1f), new Vector2(0f, -62f),
+            new Vector2(width - 40f, 70f), 46, TextAlignmentOptions.Center);
+        row.label.textWrappingMode = TextWrappingModes.NoWrap;
+        row.label.text = item.label;
+        row.label.characterSpacing = 4;
+        ui.Style(row.label, TextStyle.Title);
+        if (onPaper) row.label.fontSharedMaterial = row.label.font.material;
+
+        Image rule = GameUI.CreateRect("Rule", row.root, new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(180f, 2f)).gameObject.AddComponent<Image>();
+        rule.sprite = ProceduralSprites.White;
+        rule.color = new Color(ink.r, ink.g, ink.b, 0.3f);
+        rule.raycastTarget = false;
+
+        TextMeshProUGUI body = GameUI.CreateText(row.root, ui.BodyFont, "Body", new Vector2(0.5f, 1f), new Vector2(0f, -140f),
+            new Vector2(width - 70f, height - 160f), 30, TextAlignmentOptions.TopLeft);
+        body.rectTransform.pivot = new Vector2(0.5f, 1f);
+        body.richText = true;
+        body.textWrappingMode = TextWrappingModes.Normal;
+        body.text = item.card;
+        body.color = ink;
+        ui.Style(body, TextStyle.Body);
+        if (onPaper) body.fontSharedMaterial = body.font.material;
+
+        // Cards have no bar or marker; Animate never reaches for them on a card page.
+        row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+        row.marker.gameObject.SetActive(false);
     }
 
     // A table row's right-hand columns: the value right-aligned at the edge, and the rank pips (small diamonds like the
@@ -707,8 +791,8 @@ public class MenuUI : MonoBehaviour
     // screen's tune seems to come from him.
     void UpdateNotes()
     {
-        bool playing = light && figure.gameObject.activeSelf && notePixel > 0f;
-        bool shown = light && figure.gameObject.activeSelf;
+        bool playing = (light || onPaper) && figure.gameObject.activeSelf && notePixel > 0f;
+        bool shown = (light || onPaper) && figure.gameObject.activeSelf;
         float now = Time.unscaledTime;
         if (playing && now >= nextNoteAt)
         {

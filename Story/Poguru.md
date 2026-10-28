@@ -87,6 +87,9 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 | `Poguru_Tut_ParryIt` | P (held until the parry): "That spear's cursed! Kagetsune's blacksmiths forge them with nasty magic. You can't cut it or break it. PARRY IT!" |
 | `Tut_Flee` | Ashigaru (the spearman): "Th-that's not natural! CAPTAAAIN!" · Ashigaru (the coward): "Wait for meee!" · P: "Hehe! Run away! ...Wait. Where are they running TO?" |
 | `Poguru_Tut_Backup` | P: "Uh oh. He brought a LOT of backup." · Oni: "...Good." · P: "Okay! I'll bonk every arrow I can. I'm a very good bonker. You do the rest!" |
+| `Poguru_Tut_Ultimate` | P (partway into the round, as he fills the ultimate's medallion): "You're doing great! Here, have some of my soul-fire!" |
+| `Poguru_Tut_UltimateIt` | P (held until Oni presses Q): "Your medallion's full! Let your SHADOW out!" |
+| `Poguru_Tut_Clone` | P (the Shadow Clone steps out beside Oni): "Two Onis! It copies everything you do. Just weaker. Like me!" |
 | `Poguru_Block_1` / `_3` / `_6` / `_10` | P: "Bonk! Got it!" / "Ow. Okay. Still fine!" / "Oni, you can ALSO move, you know!" / "My HEAD is not a SHIELD!" |
 | `Poguru_Block_15` / `_20` / `_30` / `_45` | P: "I'M BONKING SO HARD RIGHT NOW!" / "Oni! Swing the sword! The SWORD!" / "My head is RINGING!" / "I am going to EXPLODE!" |
 | `Poguru_Block_More` | P (every 15 more): "BONK! BONK! BOOOONK!" |
@@ -153,6 +156,7 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 | SPEARS | "The glowing red ones go right through cover. Move!" |
 | HEARTS | "From broken cover, and rarely a soldier. At full lives they wait on your row." |
 | THE ARMY | "If it reaches your row, it's over. Thin out the bottom rank!" |
+| ULTIMATE (Q) | "Hits fill the bottom medallion. Your shadow fights beside you!" |
 | BOONS | "One per soul. Hold TAB in a fight to see what your icons do." |
 | PATHS | "Walk under, press E. The boss's path opens after round three." |
 | SPIRIT NOTES | "They stay even when you fall. Spend them at the flute altar." |

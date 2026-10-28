@@ -827,7 +827,7 @@ public class GameManager : MonoBehaviour
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
         ronin.UltimateLocked = tutorial.Active;
-        boonChoice.UltimateShown = !tutorial.Active;
+        boonChoice.UltimateShown = !tutorial.Active || tutorial.ShowsUltimate;
     }
 
     // The ultimates, by Ronin.Ultimate, named for the run log.
@@ -1374,6 +1374,7 @@ public class GameManager : MonoBehaviour
             Row("SPEARS", "The glowing red ones go right through cover. Move!") +
             Row("HEARTS", "From broken cover, and rarely a soldier. At full lives they wait on your row.") +
             Row("THE ARMY", "If it reaches your row, it's over. Thin out the bottom rank!") +
+            Row("ULTIMATE (Q)", "Hits fill the bottom medallion. Your shadow fights beside you!") +
             Row("BOONS", "One per soul. Hold TAB in a fight to see what your icons do.") +
             Row("PATHS", "Walk under, press E. The boss's path opens after round three.") +
             Row("SPIRIT NOTES", "They stay even when you fall. Spend them at the flute altar.") +

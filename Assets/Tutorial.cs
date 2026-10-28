@@ -10,7 +10,8 @@ using UnityEngine.UI;
 // shuriken, a spearman for the parry, and a coward who runs with him for the army). Each lesson holds the field still
 // at its moment, points at its slot with its keys and lets only that move go on. The army then comes; Poguru bonks
 // every arrow at Oni (who can't be hurt until the spear), crosser by the bonk, and if it reaches the cover his rage
-// bursts and wipes it out. A spear he can't stop then goes through him, he hands over a heart, and he explains the
+// bursts and wipes it out. Partway through he pours his soul-fire into the ultimate's medallion and holds the field
+// for its lesson, so the Shadow Clone fights the rest of the round at Oni's side. A spear he can't stop then goes through him, he hands over a heart, and he explains the
 // reward, the boon cards and the paths as each first comes up. It's done once round 2 starts. GameManager calls the
 // hooks below; a death or a dev jump aborts it, and since nothing is settled until it's finished or skipped, the next
 // run offers it again.
@@ -27,6 +28,9 @@ public class Tutorial : MonoBehaviour
     // Blocks at which he's as cross as he gets.
     const float FullAnger = 45f;
     const float RageSpeed = 12f;
+    // The ultimate's lesson comes once the army is down to this share, or after this long, whichever is first.
+    const float UltimateAtRemaining = 0.6f;
+    const float UltimateAfter = 7f;
 
     GameManager game;
     bool armed;
@@ -59,6 +63,9 @@ public class Tutorial : MonoBehaviour
 
     public bool Armed => armed;
     public bool Active { get; private set; }
+    // The ultimate's medallion stays hidden through the tutorial until its lesson.
+    public bool ShowsUltimate { get; private set; }
+    Coroutine ultimateDrill;
 
     // A new journey is offered it; so is any run after the REPLAY switch at his nest, or a death mid-tutorial.
     public static bool ShouldOffer(SaveData d) => d.tutorialReplay || (!d.tutorialSettled && d.runsStarted == 0);
@@ -69,7 +76,7 @@ public class Tutorial : MonoBehaviour
     public void Arm(bool offer)
     {
         armed = offer;
-        Active = guarding = raged = false;
+        Active = guarding = raged = ShowsUltimate = false;
         spearDone = rewardDone = boonsDone = pathsDone = false;
     }
 
@@ -308,7 +315,11 @@ public class Tutorial : MonoBehaviour
     // A held lesson: once `moment` comes the field stops, Poguru's yell and the move's keys hang beside Oni (on the
     // side away from the shot, `threatX`), he points at the move's slot, and only that move lets play go on, fired by
     // the real press (Ronin reads input with time stopped) or a harness's Press.
-    IEnumerator Lesson(Moves move, BoonSlot slot, string yellId, Func<bool> moment, float threatX)
+    IEnumerator Lesson(Moves move, BoonSlot slot, string yellId, Func<bool> moment, float threatX) =>
+        Lesson(move, game.BoonChoice.SlotRect(slot), Keys(slot), yellId, moment, threatX);
+
+    // The same, pointing at any HUD medallion (the ultimate's) with its own keys.
+    IEnumerator Lesson(Moves move, RectTransform target, KeyGlyph[] keys, string yellId, Func<bool> moment, float threatX)
     {
         yield return new WaitUntil(moment);
         Ronin ronin = game.Ronin;
@@ -321,7 +332,7 @@ public class Tutorial : MonoBehaviour
         game.Poguru.Play(game.PoguruClips.gasp, true);
         Conversation yell = Dialogue.Find(yellId, false);
         game.SayLine(yell, 0, null, false);
-        ShowLesson(slot, yell, PromptOnRight(threatX < ronin.Bounds.center.x));
+        ShowLesson(target, keys, yell, PromptOnRight(threatX < ronin.Bounds.center.x));
 
         bool done = false;
         Action fired = () => done = true;
@@ -329,11 +340,13 @@ public class Tutorial : MonoBehaviour
         ronin.Slashed += fired;
         ronin.ShurikenThrown += thrown;
         ronin.ParryStarted += fired;
+        ronin.UltimateStarted += fired;
         pressed = Moves.None;
         yield return new WaitUntil(() => done || pressed == move);
         ronin.Slashed -= fired;
         ronin.ShurikenThrown -= thrown;
         ronin.ParryStarted -= fired;
+        ronin.UltimateStarted -= fired;
         if (!done) ronin.Perform(move);
 
         HideLesson();
@@ -372,12 +385,12 @@ public class Tutorial : MonoBehaviour
         return lessonLayer;
     }
 
-    void ShowLesson(BoonSlot slot, Conversation yell, bool onRight)
+    void ShowLesson(RectTransform target, KeyGlyph[] keys, Conversation yell, bool onRight)
     {
         RectTransform layer = LessonLayer();
         game.BoonChoice.LiftSlots(layer);
         BuildPointer(layer);
-        Point(slot);
+        PointAt(target, target.sizeDelta.x, keys);
 
         HidePrompt();
         GameUI ui = game.Ui;
@@ -393,10 +406,10 @@ public class Tutorial : MonoBehaviour
         words.text = yell != null && yell.Lines.Length > 0 ? yell.Lines[0].Text : "";
         words.color = GameManager.PoguruColour;
         ui.Style(words, TextStyle.Hud);
-        RectTransform keys = ui.CreateKeyRow(prompt, 30, Keys(slot));
-        keys.anchorMin = keys.anchorMax = new Vector2(onRight ? 0f : 1f, 0.5f);
-        keys.pivot = new Vector2(onRight ? 0f : 1f, 1f);
-        keys.anchoredPosition = new Vector2(0f, -6f);
+        RectTransform keyCaps = ui.CreateKeyRow(prompt, 30, keys);
+        keyCaps.anchorMin = keyCaps.anchorMax = new Vector2(onRight ? 0f : 1f, 0.5f);
+        keyCaps.pivot = new Vector2(onRight ? 0f : 1f, 1f);
+        keyCaps.anchoredPosition = new Vector2(0f, -6f);
     }
 
     void HideLesson()
@@ -419,6 +432,8 @@ public class Tutorial : MonoBehaviour
         BoonSlot.Special => new[] { KeyGlyph.Key("W"), KeyGlyph.Key("↑") },
         _ => new[] { KeyGlyph.Key("SHIFT"), KeyGlyph.Key("↓"), KeyGlyph.MouseRight },
     };
+
+    static KeyGlyph[] Keys(Moves move) => move == Moves.Ultimate ? new[] { KeyGlyph.Key("Q") } : Keys(BoonSlot.Attack);
 
     // Beat 3: the army the coward fetched has marched in. Poguru's had a look.
     public IEnumerator Backup()
@@ -443,6 +458,35 @@ public class Tutorial : MonoBehaviour
         poguru.Guard(true);
         game.Army.Holding -= OnHolding;
         game.Army.Holding += OnHolding;
+        if (ultimateDrill != null) StopCoroutine(ultimateDrill);
+        ultimateDrill = StartCoroutine(UltimateDrill());
+    }
+
+    // Partway into the round, Poguru gives Oni a full medallion and teaches Q; the clone then fights beside him. The
+    // bar stays locked for the rest of the tutorial (GameManager), so it's a gift, not something he earns yet. Left
+    // out if the army reaches the cover first (his rage ends the round).
+    IEnumerator UltimateDrill()
+    {
+        SamuraiArmy army = game.Army;
+        int start = Mathf.Max(1, army.Remaining);
+        float began = Time.time;
+        bool Over() => !guarding || raged || army.Remaining == 0;
+        yield return new WaitUntil(() => Over() || army.Remaining <= start * UltimateAtRemaining || Time.time - began >= UltimateAfter);
+        if (Over()) yield break;
+
+        Ronin ronin = game.Ronin;
+        float said = PoguruSays("Poguru_Tut_Ultimate");
+        ShowsUltimate = true;
+        ronin.FillUltimate();
+        Fx.Play(Fx.SmokePuff, ronin.Bounds.center, GameManager.PoguruColour, 1.2f);
+        float until = Time.time + said;
+        while (Time.time < until && !Over()) yield return null;
+        if (Over()) yield break;
+        yield return Lesson(Moves.Ultimate, game.BoonChoice.UltimateRect, Keys(Moves.Ultimate), "Poguru_Tut_UltimateIt",
+            () => true, ronin.Bounds.center.x + 1f);
+        yield return new WaitForSeconds(0.6f);
+        if (!Over()) PoguruSays("Poguru_Tut_Clone");
+        ultimateDrill = null;
     }
 
     void OnBlocked(int count)
@@ -678,6 +722,9 @@ public class Tutorial : MonoBehaviour
     public void Abort()
     {
         armed = false;
+        if (ultimateDrill != null) StopCoroutine(ultimateDrill);
+        ultimateDrill = null;
+        ShowsUltimate = false;
         if (!Active && !guarding) return;
         Active = false;
         StopGuarding();
@@ -723,12 +770,6 @@ public class Tutorial : MonoBehaviour
             pointer.pivot = new Vector2(0.5f, 0f);
         }
         PointAt(null, 0f);
-    }
-
-    void Point(BoonSlot slot)
-    {
-        RectTransform rect = game.BoonChoice.SlotRect(slot);
-        PointAt(rect, rect.sizeDelta.x, Keys(slot));
     }
 
     void PointAt(RectTransform target, float width, KeyGlyph[] keys = null)

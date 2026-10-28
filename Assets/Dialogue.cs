@@ -405,6 +405,10 @@ public static class Dialogue
         // The army they fetched: he guards it to the end, crosser by the bonk, and bursts if it reaches the cover.
         Tut("Poguru_Tut_Backup", P("Uh oh. He brought a LOT of backup."), O("...Good."),
             P("Okay! I'll bonk every arrow I can. I'm a very good bonker. You do the rest!")),
+        // Partway through the round he fills the ultimate's medallion and holds the field for Q.
+        Tut("Poguru_Tut_Ultimate", P("You're doing great! Here, have some of my soul-fire!")),
+        Tut("Poguru_Tut_UltimateIt", P("Your medallion's full! Let your SHADOW out!")),
+        Tut("Poguru_Tut_Clone", P("Two Onis! It copies everything you do. Just weaker. Like me!")),
         Tut("Poguru_Block_1", P("Bonk! Got it!")),
         Tut("Poguru_Block_3", P("Ow. Okay. Still fine!")),
         Tut("Poguru_Block_6", P("Oni, you can ALSO move, you know!")),

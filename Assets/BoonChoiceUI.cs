@@ -146,6 +146,8 @@ public class BoonChoiceUI : MonoBehaviour
 
     // A HUD ability slot's ring, for pointing at it.
     public RectTransform SlotRect(BoonSlot slot) => hudSlots[(int)slot].ring.rectTransform;
+    // The ultimate's medallion, for pointing at it.
+    public RectTransform UltimateRect => ultimate;
 
     // Moves the ability slots onto `layer` (a talk scene's overlay, which covers the screen as the canvas does, so
     // they stay put) to show them over the scene's dark; DropSlots puts them back.
@@ -156,6 +158,8 @@ public class BoonChoiceUI : MonoBehaviour
             slot.ring.rectTransform.SetParent(layer, false);
             slot.ring.gameObject.SetActive(true);
         }
+        // The medallion only while it's on show (the tutorial hides it until its own lesson).
+        if (UltimateShown) ultimate.SetParent(layer, false);
     }
 
     public void DropSlots()
@@ -166,6 +170,11 @@ public class BoonChoiceUI : MonoBehaviour
             slot.ring.rectTransform.SetParent(transform, false);
             // Back under the tooltips, where they were built.
             slot.ring.rectTransform.SetSiblingIndex(tips.transform.GetSiblingIndex());
+        }
+        if (ultimate.parent != transform)
+        {
+            ultimate.SetParent(transform, false);
+            ultimate.SetSiblingIndex(tips.transform.GetSiblingIndex());
         }
     }
 

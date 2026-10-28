@@ -37,10 +37,14 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Razing the cover | It walked every road; it knows every place Oni could hide. |
 | Kasa Wheel | The monk's own hat, thrown at the boy who once slept under it. Once it breaks into a halo, its pieces fly apart and come at him from three sides: even the shelter he remembers is broken. |
 | Lace Lattice | His shroud, unravelling. |
+| Escapement | The clock it winds, rocking on its anchor: every tick a shot, every fourth a bell (Kagetsune's, answering). |
+| Pendulum Kick | The monk would never let the boy stand under a falling weight. The machine swings him off anyway. |
 | Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one, then hunts him down the hours again with its blade. |
 | Plumb Lines | The weights of the clock it winds. |
 | Phase break | The mainspring slips: it overloads, its lasers firing wild as it cracks open from the heart, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
 | Heart Lantern / Midnight | Its core: the monk's soul, burning as fuel. |
+| Stopped Hour | The stopped night itself. It keeps the hour Kagetsune froze; for a moment it holds the world there too, and only Oni, whose soul tore free of that night, can move in it. |
+| The Thirteenth Hour | The hour that should never come. Near the end it turns its own heart into a clock face and burns down to it. |
 
 ## Relationships
 

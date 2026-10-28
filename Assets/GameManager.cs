@@ -343,7 +343,7 @@ public class GameManager : MonoBehaviour
                     footprint = new Vector2(2.6f, 0.5f), fx = StationFx.Glint, reach = 2.2f },
                 // On the flagstones to the lower left, between the dais and the pool, used from its right side.
                 new SafeArea.Station { kind = StationKind.Oaths, label = "OATH STONE", spot = new Vector2(0.3125f, 0.1f), propAt = new Vector2(190f, 334f),
-                    placeholder = new Color(0.32f, 0.36f, 0.3f), footprint = new Vector2(2f, 0.5f), fx = StationFx.Glow, reach = 2f },
+                    placeholder = new Color(0.32f, 0.36f, 0.3f), footprint = new Vector2(2f, 0.5f), fx = StationFx.Glow, glowColour = Oaths.HeatColour, reach = 2f },
             },
             // The ghost-fires at either side, and the two stone lanterns at the dais, lit.
             lamps = new[]
@@ -1015,7 +1015,9 @@ public class GameManager : MonoBehaviour
         // The oath stone stands in chains until the first dawn.
         foreach (SafeArea.Station station in area.stations)
         {
-            if (station.kind == StationKind.Oaths) station.label = Oaths.Unlocked && Save.Data.oathsUnsealed ? "OATH STONE" : "SEALED STONE";
+            if (station.kind != StationKind.Oaths) continue;
+            station.isSealed = !(Oaths.Unlocked && Save.Data.oathsUnsealed);
+            station.label = station.isSealed ? "SEALED STONE" : "OATH STONE";
         }
         safeArea = SafeArea.Build(area, ui.BodyFont, ronin, backdrop != null ? backdrop.GroundBounds : null);
     }
@@ -1075,6 +1077,7 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.ChainSnap);
         Fx.Play(Fx.Impact, stone, Oaths.HeatColour, 2.2f);
         ElementFx.Glow(stone, Oaths.HeatColour, 1f, 5f, 1.2f);
+        safeArea.Unseal(StationKind.Oaths);
         foreach (SafeArea.Station station in CurrentSafeArea.stations)
         {
             if (station.kind == StationKind.Oaths) station.label = "OATH STONE";
@@ -1094,15 +1097,19 @@ public class GameManager : MonoBehaviour
             OathId id = oath.Id;
             int row = items.Count;
             int rank = Oaths.Rank(id);
-            string pips = $"<color=#{(rank > 0 ? heat : muted)}>{rank}/{oath.MaxRank}</color>";
             string note = rank > 0 ? $"{oath.Effect(rank)}   <color=#{muted}>·  Enter to {(rank < oath.MaxRank ? "swear deeper" : "release it")}</color>"
                 : $"{oath.Effect(1)}   <color=#{muted}>·  Enter to swear</color>";
-            items.Add(MenuUI.Item.Button($"{oath.Name.ToUpperInvariant()}  {pips}", () =>
+            MenuUI.Item item = MenuUI.Item.Button(oath.Name.ToUpperInvariant(), () =>
             {
                 Oaths.Cycle(id);
                 Sfx.Play(Oaths.Rank(id) > 0 ? Sfx.ChainSnap : Sfx.UiMove);
                 ShowOaths(back, row);
-            }, note));
+            }, note);
+            // A table row like the Flute Songs': its ranks as pips, and the Heat it adds.
+            item.pips = rank;
+            item.pipsMax = oath.MaxRank;
+            item.detail = rank > 0 ? $"<color=#{heat}>+{rank}</color>" : "";
+            items.Add(item);
         }
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         int nextBounty = 0;

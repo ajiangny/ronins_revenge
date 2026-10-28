@@ -978,52 +978,62 @@ MonoBehaviour:
       label: SET OUT
       spot: {x: 0.5, y: 0.68}
       art: {fileID: 0}
+      sealedArt: {fileID: 0}
       onMap: 1
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
       reach: 2.2
       propAt: {x: 0, y: 0}
       footprint: {x: 0, y: 0}
       fx: 0
+      glowColour: {r: 0, g: 0, b: 0, a: 0}
     - kind: 1
       label: FLUTE SONGS
       spot: {x: 0.2689, y: 0.4219}
       art: {fileID: 21300000, guid: 22ad2a3bf66d8403cb18001d89cc6601, type: 3}
+      sealedArt: {fileID: 0}
       onMap: 0
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
       reach: 2
       propAt: {x: 185, y: 180}
       footprint: {x: 2.4, y: 0.6}
       fx: 1
+      glowColour: {r: 0, g: 0, b: 0, a: 0}
     - kind: 2
       label: MEMORIAL STONES
       spot: {x: 0.6933, y: 0.4401}
       art: {fileID: 21300000, guid: f087f93f4f1754d0280b705a2abbdaa6, type: 3}
+      sealedArt: {fileID: 0}
       onMap: 0
       placeholder: {r: 0.4, g: 0.42, b: 0.45, a: 1}
       reach: 2
       propAt: {x: 477, y: 170}
       footprint: {x: 4.2, y: 0.6}
       fx: 3
+      glowColour: {r: 0, g: 0, b: 0, a: 0}
     - kind: 3
       label: WEAPON RACK
       spot: {x: 0.7849, y: 0.0885}
       art: {fileID: 21300000, guid: 90a0c0cf039144143977adce078a2436, type: 3}
+      sealedArt: {fileID: 0}
       onMap: 0
       placeholder: {r: 0.4, g: 0.32, b: 0.25, a: 1}
       reach: 2.2
       propAt: {x: 562, y: 340}
       footprint: {x: 2.6, y: 0.5}
       fx: 2
+      glowColour: {r: 0, g: 0, b: 0, a: 0}
     - kind: 4
       label: OATH STONE
       spot: {x: 0.3125, y: 0.1}
-      art: {fileID: 0}
+      art: {fileID: 21300000, guid: 1857b5b90a1df442e8dcc3aeb0b95a9e, type: 3}
+      sealedArt: {fileID: 21300000, guid: 315d71a24522c4e5ca1302108a6040e3, type: 3}
       onMap: 0
       placeholder: {r: 0.32, g: 0.36, b: 0.3, a: 1}
       reach: 2
       propAt: {x: 190, y: 334}
       footprint: {x: 2, y: 0.5}
       fx: 3
+      glowColour: {r: 1, g: 0.42, b: 0.25, a: 1}
     poolCentre: {x: 343, y: 319}
     poolRadii: {x: 39, y: 30}
     poolWater: {fileID: 21300000, guid: 44621fbffbe7c4a5388fcfaaf490740c, type: 3}

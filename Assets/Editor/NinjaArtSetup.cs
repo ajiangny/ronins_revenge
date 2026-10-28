@@ -423,6 +423,7 @@ public static class NinjaArtSetup
         (StationKind.FluteSongs, "Props/Temple_FluteAltar"),
         (StationKind.Memorial, "Props/Temple_Memorial"),
         (StationKind.WeaponRack, "Props/Temple_Rack"),
+        (StationKind.Oaths, "Props/Temple_OathStone"),
     };
 
     // The layout (floor, spots, footprints, pool, lamps) is copied from GameManager.DefaultSafeAreas, which is laid out
@@ -458,6 +459,9 @@ public static class NinjaArtSetup
                 string art = System.Array.Find(StationArt, entry => entry.kind == kind).art;
                 station.FindPropertyRelative("art").objectReferenceValue =
                     art != null ? AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + art + ".png") : null;
+                // A station that starts sealed (the oath stone in chains) has a second sprite for it.
+                station.FindPropertyRelative("sealedArt").objectReferenceValue =
+                    art != null ? AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + art + "_Sealed.png") : null;
             }
         }
         so.ApplyModifiedPropertiesWithoutUndo();
@@ -504,6 +508,7 @@ public static class NinjaArtSetup
             station.FindPropertyRelative("propAt").vector2Value = from.propAt;
             station.FindPropertyRelative("footprint").vector2Value = from.footprint;
             station.FindPropertyRelative("fx").enumValueIndex = (int)from.fx;
+            station.FindPropertyRelative("glowColour").colorValue = from.glowColour;
         }
     }
 

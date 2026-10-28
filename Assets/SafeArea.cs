@@ -24,6 +24,10 @@ public class SafeArea : MonoBehaviour
         public Vector2 spot;
         [Tooltip("Its prop, drawn at the map's pixel size. Empty: a tinted block, or nothing if the map already shows it.")]
         public Sprite art;
+        [Tooltip("Its prop while it's sealed (the oath stone in its chains). Empty: its art.")]
+        public Sprite sealedArt;
+        // Set by the game before the area is built; Unseal clears it.
+        [System.NonSerialized] public bool isSealed;
         [Tooltip("Drawn on the map itself (the temple gate), so no prop and no placeholder.")]
         public bool onMap;
         public Color placeholder = new Color(0.4f, 0.32f, 0.25f);
@@ -34,6 +38,8 @@ public class SafeArea : MonoBehaviour
         [Tooltip("The ground its prop stands on that he can't walk through (width, depth in world units), from its base. Zero: none.")]
         public Vector2 footprint;
         public StationFx fx;
+        [Tooltip("The Glow fx's colour. Clear: the souls' teal. A sealed station doesn't glow.")]
+        public Color glowColour;
     }
 
     // A flame on the map (a lantern, a candle) that lights the ground around it and flickers.
@@ -195,7 +201,14 @@ public class SafeArea : MonoBehaviour
         {
             Vector3 at = BaseOf(station);
             SpriteRenderer r = null;
-            if (station.art != null) r = Prop(station.kind.ToString(), station.art, at, order - 1);
+            Sprite art = station.isSealed && station.sealedArt != null ? station.sealedArt : station.art;
+            if (art != null)
+            {
+                // Both looks of a sealed station share a canvas; it stands by the sealed one's base in either, so
+                // the broken chains lying in front of it don't lift it.
+                r = Prop(station.kind.ToString(), station.sealedArt != null ? station.sealedArt : art, at, order - 1);
+                r.sprite = art;
+            }
             else if (!station.onMap || !mapArt) r = Block(station.kind.ToString(), ProceduralSprites.White, at + Vector3.up * 0.7f, new Vector2(1.8f, 1.4f), station.placeholder, order - 1);
             if (r == null) continue;
             // A soft shadow where it meets the ground, so it stands on the floor rather than floating over it.
@@ -366,6 +379,17 @@ public class SafeArea : MonoBehaviour
         return r;
     }
 
+    // A sealed station's chains are gone: its prop changes to its own art where it stands, and its glow comes up.
+    public void Unseal(StationKind kind)
+    {
+        foreach (Standing s in standing)
+        {
+            if (s.station.kind != kind || !s.station.isSealed) continue;
+            s.station.isSealed = false;
+            if (s.station.art != null) s.renderer.sprite = s.station.art;
+        }
+    }
+
     // Where a station's prop stands: its place on the map, or just behind the spot he uses it from, so he faces it.
     Vector3 BaseOf(Station station) =>
         mapSpace && station.propAt != Vector2.zero ? MapToWorld(station.propAt) : At(station.spot) + Vector3.up * 0.2f;
@@ -437,7 +461,11 @@ public class SafeArea : MonoBehaviour
         {
             // Behind its base he's hidden by it; in front, he hides it.
             s.renderer.sortingOrder = feetY > s.baseY ? ronin.SpriteOrder + 5 : propOrder;
-            if (s.glow != null) s.glow.color = new Color(Teal.r, Teal.g, Teal.b, 0.07f + 0.04f * Mathf.Sin(time * 0.9f));
+            if (s.glow != null)
+            {
+                Color glow = s.station.glowColour.a > 0f ? s.station.glowColour : Teal;
+                s.glow.color = new Color(glow.r, glow.g, glow.b, s.station.isSealed ? 0f : 0.07f + 0.04f * Mathf.Sin(time * 0.9f));
+            }
             if (time < s.nextFx) continue;
             switch (s.station.fx)
             {

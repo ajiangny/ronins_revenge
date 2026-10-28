@@ -11,6 +11,7 @@ public static class ProceduralSprites
     static Sprite disc;
     static Sprite arrowDown;
     static Sprite fadeDown;
+    static Sprite swirl;
 
     static readonly string[][] NotePatterns =
     {
@@ -164,6 +165,10 @@ public static class ProceduralSprites
     // Opaque at the top fading to clear at the bottom, for shading behind the HUD.
     public static Sprite FadeDown => fadeDown != null ? fadeDown : fadeDown = BuildFadeDown(32);
 
+    // Soft spiral arms curling in to a bright middle, smoothly filtered and drawn white to be tinted: a vortex of spirit
+    // light (SwirlUI turns layers of it). Arms are wispy, thinning and fading towards the rim.
+    public static Sprite Swirl => swirl != null ? swirl : swirl = BuildSwirl(256, 3, 2.6f);
+
     // Little pixel music notes (a single eighth note and a beamed pair), drawn white to be tinted.
     public static Sprite Note(int kind) => notes[kind % NotePatterns.Length] != null
         ? notes[kind % NotePatterns.Length]
@@ -306,6 +311,37 @@ public static class ProceduralSprites
             {
                 float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(r, r)) / r;
                 float a = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.35f, 1f, d));
+                pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
+    static Sprite BuildSwirl(int size, int arms, float twist)
+    {
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[size * size];
+        float half = size / 2f;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = (x + 0.5f - half) / half, dy = (y + 0.5f - half) / half;
+                float r = Mathf.Sqrt(dx * dx + dy * dy);
+                if (r >= 1f) continue;
+                // A log spiral: the angle each arm sits at grows with the log of the radius, so they curl in tighter
+                // towards the middle. A second, finer set of arms breaks them into wisps.
+                float angle = Mathf.Atan2(dy, dx);
+                float bend = twist * Mathf.Log(r + 0.04f);
+                float main = Mathf.Pow(0.5f + 0.5f * Mathf.Cos(arms * (angle - bend)), 3f);
+                float wisps = 0.5f + 0.5f * Mathf.Cos(arms * 2f * (angle - bend * 1.3f) + 1.7f);
+                float arm = main * (0.65f + 0.35f * wisps);
+                // Bright at the heart, the arms thinning out to nothing at the rim.
+                float fade = Mathf.Pow(1f - r, 1.6f);
+                float core = Mathf.Pow(Mathf.Clamp01(1f - r * 3f), 2f);
+                float a = Mathf.Clamp01(arm * fade + core * 0.6f);
                 pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
             }
         }

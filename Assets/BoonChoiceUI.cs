@@ -72,6 +72,7 @@ public class BoonChoiceUI : MonoBehaviour
     Image portrait;
     Vector2 portraitHome;
     Image portraitGlow;
+    SwirlUI swirl;
     SpriteAnimatorUI portraitAnimator;
     Image heldSoul;
     Image heldSoulGlow;
@@ -179,7 +180,9 @@ public class BoonChoiceUI : MonoBehaviour
             heldSoul.gameObject.SetActive(false);
             heldSoulGlow.color = Color.clear;
         }
-        portraitGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.6f);
+        // A soft wash under the swirl; any brighter and a pale element (the steel of Sword Arts) turns the corner white.
+        portraitGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.22f);
+        swirl.Colour = elementColor;
 
         for (int i = 0; i < cards.Length; i++)
         {
@@ -379,6 +382,7 @@ public class BoonChoiceUI : MonoBehaviour
         float breath = Mathf.Sin(Time.unscaledTime * 1.8f) * 5f;
         portrait.rectTransform.anchoredPosition = portraitHome + new Vector2((enter - 1f) * 160f, breath);
         portrait.color = new Color(portrait.color.r, portrait.color.g, portrait.color.b, enter);
+        swirl.Strength = Mathf.Clamp01(elapsed / 0.6f);
         heldSoul.color = new Color(1f, 1f, 1f, enter);
         heldSoul.rectTransform.anchoredPosition = heldSoulGlow.rectTransform.anchoredPosition + new Vector2(0f, 6f * Mathf.Sin(Time.unscaledTime * 3f));
         heldSoulGlow.rectTransform.localScale = Vector3.one * (0.9f + 0.15f * pulse);
@@ -483,9 +487,12 @@ public class BoonChoiceUI : MonoBehaviour
             ? new Vector2((portraitSoulPoint.x - 0.5f) * portraitSize.x, (0.5f - portraitSoulPoint.y) * portraitSize.y)
             : Vector2.zero;
 
+        // A vortex of the element's light turns behind the soul in his hand, filling the corner above him.
+        swirl = SwirlUI.Create("Swirl", root, portraitAnchor, portraitHome + (hasArt ? portraitSize / 2f + palm : Vector2.zero),
+            hasArt ? 1400f : 820f);
         // The element's glow sits behind the soul in his hand.
         portraitGlow = CreateImage("PortraitGlow", root, portraitAnchor, portraitHome + (hasArt ? portraitSize / 2f + palm : Vector2.zero),
-            hasArt ? new Vector2(1100, 1100) : new Vector2(640, 640), ProceduralSprites.Glow);
+            hasArt ? new Vector2(1100, 1100) : new Vector2(640, 640), ProceduralSprites.SoftGlow);
         portraitGlow.rectTransform.pivot = center;
         portrait = CreateImage("Portrait", root, portraitAnchor, portraitHome, portraitSize, null);
         portrait.preserveAspect = true;

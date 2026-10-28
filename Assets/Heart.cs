@@ -1,8 +1,11 @@
 using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 // A heart that sometimes falls out of a broken blocker. Like a soul it settles on the ronin's row; catching it heals
-// a lost life. At full health he can't take it, so it waits there until he's been hurt.
+// a lost life. At full health he can't take it, so it waits there until he's been hurt, or until the round ends and
+// it fades away into points.
 public class Heart : Pickup
 {
     static readonly Color Red = new Color(1f, 0.3f, 0.35f);
@@ -34,6 +37,48 @@ public class Heart : Pickup
         else heart.body.color = Color.Lerp(Red, Color.white, 0.3f);
         Fx.Play(Fx.Impact, go.transform.position, Red, 0.8f);
         return heart;
+    }
+
+    public const float DissipateTime = 0.8f;
+    static readonly Color PointsColour = new Color(1f, 0.84f, 0.42f);
+
+    // A spare heart at the round's end: it stops where it is and fades upward, leaving its worth in points.
+    public void Dissipate(int points, TMP_FontAsset font)
+    {
+        StartCoroutine(Fade(points, font));
+        // No longer a pickup: it can't be gathered or caught while it fades.
+        enabled = false;
+    }
+
+    IEnumerator Fade(int points, TMP_FontAsset font)
+    {
+        Fx.Play(Fx.Impact, transform.position, Red, 0.9f);
+        TextMeshPro text = new GameObject("Points").AddComponent<TextMeshPro>();
+        text.transform.SetParent(transform, false);
+        if (font != null) text.font = font;
+        text.fontSize = 6f;
+        text.alignment = TextAlignmentOptions.Center;
+        text.text = $"+{points}";
+        text.color = PointsColour;
+        text.outlineWidth = 0.2f;
+        text.outlineColor = Color.black;
+        text.rectTransform.sizeDelta = new Vector2(3f, 1f);
+        text.sortingOrder = 46;
+
+        Vector3 from = transform.position;
+        Color bodyTint = body.color;
+        for (float t = 0f; t < DissipateTime; t += Time.deltaTime)
+        {
+            float k = t / DissipateTime;
+            transform.position = from + Vector3.up * (0.8f * GameUI.EaseOut(k));
+            body.transform.localScale *= 1f + Time.deltaTime * 0.6f;
+            body.color = new Color(bodyTint.r, bodyTint.g, bodyTint.b, 1f - k);
+            glow.color = new Color(Red.r, Red.g, Red.b, 0.45f * (1f - k));
+            // The points hold, then fade in the last third.
+            text.alpha = Mathf.Clamp01((1f - k) * 3f);
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 
     protected override bool CanCollect => canHeal == null || canHeal();

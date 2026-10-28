@@ -72,6 +72,14 @@ public class GameUI : MonoBehaviour
     float shownBossHealth2 = 1f;
     float bossHealth2 = 1f;
 
+    RectTransform pathPlate;
+    CanvasGroup pathGroup;
+    Image pathIcon;
+    SpriteAnimatorUI pathIconAnimator;
+    TextMeshProUGUI pathText;
+    TextMeshProUGUI pathHint;
+    bool pathShown;
+
     RectTransform subtitlePlate;
     TextMeshProUGUI subtitleSpeaker;
     TextMeshProUGUI subtitle;
@@ -94,6 +102,7 @@ public class GameUI : MonoBehaviour
         BuildHud();
         BuildBossBar();
         BuildSubtitle();
+        BuildPathInfo();
         BuildBanner();
         BuildFade();
     }
@@ -188,6 +197,67 @@ public class GameUI : MonoBehaviour
         return text;
     }
 
+    // While the ronin chooses his next path, what the one he's lined up with gives: its looping icon beside a line
+    // naming the reward and what it does, on a dark plate across the top of the empty field, with how to take it
+    // in small text beneath.
+    void BuildPathInfo()
+    {
+        pathPlate = CreateRect("PathInfo", transform, new Vector2(0.5f, 1f), new Vector2(0, -36), new Vector2(900, PathIconSize + 28f));
+        Image plate = pathPlate.gameObject.AddComponent<Image>();
+        plate.color = new Color(0.02f, 0.01f, 0.04f, 0.72f);
+        plate.raycastTarget = false;
+
+        RectTransform icon = CreateRect("Icon", pathPlate, new Vector2(0f, 0.5f), new Vector2(20f + PathIconSize / 2f, 0f), new Vector2(PathIconSize, PathIconSize));
+        icon.pivot = new Vector2(0.5f, 0.5f);
+        pathIcon = icon.gameObject.AddComponent<Image>();
+        pathIcon.preserveAspect = true;
+        pathIcon.raycastTarget = false;
+        pathIconAnimator = icon.gameObject.AddComponent<SpriteAnimatorUI>();
+
+        pathText = CreateText("Line", new Vector2(0f, 0.5f), new Vector2(PathIconSize + 40f, 0f), new Vector2(1000, PathIconSize), 34, TextAlignmentOptions.Left, pathPlate);
+        pathText.rectTransform.pivot = new Vector2(0f, 0.5f);
+        Style(pathText, TextStyle.Body);
+        pathText.lineSpacing = 0f;
+
+        pathHint = CreateText("Hint", new Vector2(0.5f, 0f), new Vector2(0, -10), new Vector2(1000, 40), 24, TextAlignmentOptions.Top, pathPlate);
+        pathHint.rectTransform.pivot = new Vector2(0.5f, 1f);
+        pathHint.color = MutedColour;
+        pathHint.characterSpacing = 4;
+        Style(pathHint, TextStyle.Hint);
+
+        pathGroup = pathPlate.gameObject.AddComponent<CanvasGroup>();
+        pathGroup.blocksRaycasts = false;
+        pathPlate.gameObject.SetActive(false);
+    }
+
+    const float PathIconSize = 92f;
+
+    // Describes the path he's lined up with: `title` in the reward's colour, then what it does. Without icon art a
+    // disc in its colour stands in.
+    public void ShowPathInfo(Sprite[] icon, string title, string description, Color colour, string hint)
+    {
+        bool hasArt = icon != null && icon.Length > 0 && icon[0] != null;
+        pathIconAnimator.Play(hasArt ? icon : null, 8f);
+        pathIcon.sprite = hasArt ? icon[0] : ProceduralSprites.Disc;
+        pathIcon.color = hasArt ? Color.white : Color.Lerp(colour, Color.white, 0.4f);
+        Color named = Color.Lerp(colour, Color.white, 0.35f);
+        pathText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(named)}>{title}:</color> {description}";
+        pathHint.text = hint;
+        // Fit the plate to the line, wrapping past 1000 wide.
+        Vector2 size = pathText.GetPreferredValues(pathText.text, 1000f, 0f);
+        float width = Mathf.Min(size.x, 1000f);
+        pathText.rectTransform.sizeDelta = new Vector2(width, PathIconSize);
+        pathPlate.sizeDelta = new Vector2(PathIconSize + 40f + width + 32f, Mathf.Max(PathIconSize, size.y) + 28f);
+        if (!pathPlate.gameObject.activeSelf) pathGroup.alpha = 0f;
+        pathPlate.gameObject.SetActive(true);
+        pathShown = true;
+    }
+
+    public void HidePathInfo()
+    {
+        pathShown = false;
+    }
+
     // A spoken line sits on a dark plate sized to fit it, with the speaker's name above.
     void BuildSubtitle()
     {
@@ -258,6 +328,11 @@ public class GameUI : MonoBehaviour
             if (!showing && subtitleGroup.alpha <= 0f) subtitlePlate.gameObject.SetActive(false);
         }
         UpdateBanner();
+        if (pathPlate.gameObject.activeSelf)
+        {
+            pathGroup.alpha = Mathf.MoveTowards(pathGroup.alpha, pathShown ? 1f : 0f, Time.unscaledDeltaTime / SubtitleFadeIn);
+            if (!pathShown && pathGroup.alpha <= 0f) pathPlate.gameObject.SetActive(false);
+        }
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;

@@ -38,6 +38,8 @@ public class GameManager : MonoBehaviour
     const string HighScoreKey = "HighScore";
     // A Spirit Offering taken at full health gives these points, times the stage number.
     const int OfferingPoints = 500;
+    // A spare heart left at a round's end fades into these points, times the stage number.
+    const int SpareHeartPoints = 250;
     // Spirit Notes a Spirit Bead gives per stage when every boon held is already Epic.
     const int BeadNotes = 20;
     static bool skipTitle;
@@ -471,8 +473,8 @@ public class GameManager : MonoBehaviour
     int scrollsDropped;
     // Souls dropped by samurai this stage, for killSoulsPerStage.
     int killSoulsThisStage;
-    // What clearing the current round gives, picked at the portal that led to it.
-    PortalReward pendingReward;
+    // What clearing the current round gives, picked at the path that led to it.
+    PathReward pendingReward;
     Element pendingElement;
     // The escalated config for rounds past a stage's configured ones, built once per round.
     LevelConfig extraRound;
@@ -1598,11 +1600,11 @@ public class GameManager : MonoBehaviour
         ClearProjectiles();
         // Blockers carry their damage from round to round; a new stage brings fresh ones.
         if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
-        // A stage's first round always ends in a soul; later rounds carry what their portal showed.
+        // A stage's first round always ends in a soul; later rounds carry what their path showed.
         if (roundIndex == 0)
         {
             killSoulsThisStage = 0;
-            pendingReward = PortalReward.Soul;
+            pendingReward = PathReward.Soul;
             pendingElement = PickSoulElement();
         }
 
@@ -1881,14 +1883,31 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
     }
 
-    // At the end of a round every soul still out, and every heart he can use, flies to the ronin. A soul caught on
-    // the way offers its boons before the game moves on; spare hearts stay on his row for later.
+    // At the end of a round every soul still out, and every heart he can use, flies to the ronin. Hearts heal him up
+    // to full; any left over fade away into points, so none linger into the next round. A soul caught on the way
+    // offers its boons before the game moves on.
     IEnumerator GatherDrops()
     {
         Pickup.GatherAll();
         float giveUp = Time.time + 2f;
         while (Pickup.Gathering > 0 && Time.time < giveUp) yield return null;
         Pickup.StopGathering();
+
+        // Disabled ones are already fading.
+        Heart[] spare = System.Array.FindAll(FindObjectsByType<Heart>(), h => h.enabled);
+        foreach (Heart heart in spare)
+        {
+            int points = SpareHeartPoints * (stageIndex + 1);
+            score += points;
+            heart.Dissipate(points, ui.BodyFont);
+        }
+        if (spare.Length > 0)
+        {
+            highScore = Mathf.Max(highScore, score);
+            ui.SetScore(score);
+            Sfx.Play(Sfx.SoulCollect, 0.6f, 1.5f);
+            yield return new WaitForSeconds(Heart.DissipateTime);
+        }
 
         bool picked = false;
         if (gatheredSoul is Element element)
@@ -2118,15 +2137,15 @@ public class GameManager : MonoBehaviour
         yield return GatherDrops();
         yield return GrantReward();
 
-        // The last round leaves only the boss; before that the ronin picks the next round's reward at a portal.
+        // The last round leaves only the boss; before that the ronin picks the next round's reward on a path.
         if (roundIndex + 1 >= maxRounds)
         {
             StartCoroutine(StageCleared());
             yield break;
         }
-        Portal chosen = null;
-        yield return ChoosePortal(p => chosen = p);
-        if (chosen.Reward == PortalReward.Boss)
+        RewardPath chosen = null;
+        yield return ChoosePath(p => chosen = p);
+        if (chosen.Reward == PathReward.Boss)
         {
             StartCoroutine(StageCleared());
             yield break;
@@ -2137,22 +2156,27 @@ public class GameManager : MonoBehaviour
         StartCoroutine(BeginRound());
     }
 
-    // The Long Road holds the boss's portal back a round per rank.
+    // The Long Road holds the boss's path back a round per rank.
     int BossPortalAfter => Mathf.Min(bossPortalAfterRound + Oaths.Rank(OathId.LongRoad), maxRounds);
 
-    // The cleared round's reward, given before the portals open.
+    // The cleared round's reward, given before the paths open: it gathers out of the air in the middle of the field,
+    // where the army stood, and is pulled into the ronin before it's given.
     IEnumerator GrantReward()
     {
-        PortalReward reward = pendingReward;
+        PathReward reward = pendingReward;
         // A spring at full health, or a bead or scroll with nothing left to give, falls back to a Lost Melody.
-        if (reward == PortalReward.Spring && lives >= maxLives) reward = PortalReward.Notes;
-        if (reward == PortalReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PortalReward.Notes;
-        if (reward == PortalReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PortalReward.Notes;
+        if (reward == PathReward.Spring && lives >= maxLives) reward = PathReward.Notes;
+        if (reward == PathReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PathReward.Notes;
+        if (reward == PathReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PathReward.Notes;
+
+        RewardSpirit spirit = RewardSpirit.Spawn(CameraShake.Center, RewardIcon(reward, pendingElement),
+            RewardColour(reward, pendingElement), ronin);
+        yield return new WaitUntil(() => spirit == null);
 
         bool picked = false;
         switch (reward)
         {
-            case PortalReward.Soul:
+            case PathReward.Soul:
                 Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(pendingElement).Color, 1.4f);
                 Sfx.Play(Sfx.SoulCollect);
                 soulCaught = true;
@@ -2160,23 +2184,25 @@ public class GameManager : MonoBehaviour
                 Rarity floor = roundIndex == 0 && Upgrades.Rank(UpgradeId.AncestralLore) > 0 ? Rarity.Rare : Rarity.Common;
                 if (OfferBoons(pendingElement, () => picked = true, false, floor)) yield return new WaitUntil(() => picked);
                 break;
-            case PortalReward.Bead:
+            case PathReward.Bead:
+                Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.BeadColor, 1.2f);
+                Sfx.Play(Sfx.SoulCollect, 1f, 1.1f);
                 if (OfferBead(() => picked = true)) yield return new WaitUntil(() => picked);
                 break;
-            case PortalReward.Scroll:
+            case PathReward.Scroll:
                 scrollsDropped++;
                 Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ArtColor, 1.2f);
                 Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
                 if (OfferArts(() => picked = true)) yield return new WaitUntil(() => picked);
                 break;
-            case PortalReward.Spring:
+            case PathReward.Spring:
                 lives = Mathf.Min(lives + 1, maxLives);
                 ui.SetLives(lives, maxLives);
                 Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
                 Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
                 yield return new WaitForSeconds(0.6f);
                 break;
-            case PortalReward.Notes:
+            case PathReward.Notes:
                 int notes = noteCache * (stageIndex + 1);
                 Earn(notes);
                 Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
@@ -2189,66 +2215,87 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
     }
 
-    // The portals open where the army stood. He walks his row (no attacks), the one above him lights, and stepping
-    // up (Space, W / Up, Enter or E) takes him through it to the next round, unless it's the boss's.
-    IEnumerator ChoosePortal(System.Action<Portal> onChosen)
+    const string PathHint = "Walk under a path  ·  Space / E to choose it";
+
+    // The paths open where the army stood. He walks his row (no attacks), the one above him lights and the HUD says
+    // what it gives, and stepping up (Space, W / Up, Enter or E) picks it: its reward floats away up the field and
+    // he follows it to the next round, or to the boss.
+    IEnumerator ChoosePath(System.Action<RewardPath> onChosen)
     {
         ClearProjectiles();
-        var rewards = RollPortals();
+        var rewards = RollPaths();
         Camera cam = Camera.main;
         float halfWidth = cam.orthographicSize * cam.aspect;
         float y = CameraShake.Center.y + cam.orthographicSize * 0.35f;
-        var portals = new List<Portal>();
+        var paths = new List<RewardPath>();
         for (int i = 0; i < rewards.Count; i++)
         {
             float x = CameraShake.Center.x + halfWidth * 1.2f * ((i + 0.5f) / rewards.Count - 0.5f);
-            (PortalReward reward, Element element) = rewards[i];
-            portals.Add(Portal.Spawn(new Vector3(x, y, 0f), reward, element, RewardColour(reward, element),
+            (PathReward reward, Element element) = rewards[i];
+            paths.Add(RewardPath.Spawn(new Vector3(x, y, 0f), reward, element, RewardColour(reward, element),
                 RewardLabel(reward, element), RewardIcon(reward, element), ui.BodyFont));
         }
         Sfx.Play(Sfx.SoulSpawn, 1f, 0.7f);
-        ui.ShowSubtitle(null, "Choose your path: stand under a portal and step in.", Color.white, 3f);
 
         ronin.MoveOnly = true;
         ronin.ControlsEnabled = true;
         float readyAt = Time.time + 0.6f;
-        Portal chosen = null;
+        RewardPath chosen = null;
+        RewardPath described = null;
         while (chosen == null)
         {
-            Portal under = null;
+            RewardPath under = null;
             float best = float.MaxValue;
-            foreach (Portal portal in portals)
+            foreach (RewardPath path in paths)
             {
-                float gap = Mathf.Abs(portal.transform.position.x - ronin.Bounds.center.x);
+                float gap = Mathf.Abs(path.transform.position.x - ronin.Bounds.center.x);
                 if (gap < best)
                 {
                     best = gap;
-                    under = portal;
+                    under = path;
                 }
             }
-            foreach (Portal portal in portals) portal.SetLit(portal == under);
+            foreach (RewardPath path in paths) path.SetLit(path == under);
+            if (under != described)
+            {
+                described = under;
+                ui.ShowPathInfo(under.IconFrames, RewardLabel(under.Reward, under.Element), RewardDescription(under.Reward),
+                    under.Colour, PathHint);
+            }
             if (Time.time >= readyAt && state == State.Transition && StepIn()) chosen = under;
             yield return null;
         }
+        ui.HidePathInfo();
         ronin.ControlsEnabled = false;
         ronin.MoveOnly = false;
         var shown = new List<string>();
-        foreach (Portal portal in portals) shown.Add(RewardLabel(portal.Reward, portal.Element));
-        RunLog.Note($"portal: {RewardLabel(chosen.Reward, chosen.Element)}  (of {string.Join(" / ", shown)})");
-        foreach (Portal portal in portals)
+        foreach (RewardPath path in paths) shown.Add(RewardLabel(path.Reward, path.Element));
+        RunLog.Note($"path: {RewardLabel(chosen.Reward, chosen.Element)}  (of {string.Join(" / ", shown)})");
+        foreach (RewardPath path in paths)
         {
-            if (portal != chosen) portal.Close();
+            if (path != chosen) path.Close();
         }
-        Sfx.Play(Sfx.SoulCollect, 1f, 0.9f);
-        Fx.Play(Fx.Impact, chosen.transform.position, RewardColour(chosen.Reward, chosen.Element), 1.6f);
-
-        // He lines up under it, then walks up into it; the boss's path goes on through StageCleared's own travel.
-        Vector3 below = new Vector3(chosen.transform.position.x, ronin.transform.position.y, ronin.transform.position.z);
-        yield return ronin.WalkTo(below, travelWalkSpeed * 0.6f);
-        if (chosen.Reward != PortalReward.Boss) yield return ThroughPortal(chosen);
-        chosen.Close();
+        // The pick floats away up the field, to come back as the next round's reward; he sets off after it, on to the
+        // next round on the same ground, or the boss's path goes on through StageCleared's own travel.
+        chosen.Release();
+        Sfx.Play(Sfx.SoulSpawn, 1f, 1.2f);
+        yield return new WaitForSeconds(0.35f);
+        if (chosen.Reward != PathReward.Boss) yield return WalkOn(chosen.transform.position.x);
         onChosen(chosen);
     }
+
+    // What each path gives, for the HUD while he chooses.
+    string RewardDescription(PathReward reward) => reward switch
+    {
+        PathReward.Soul => "Receive a boon from a lost soul.",
+        PathReward.Bead => "Raise one of your boons to the next rarity.",
+        PathReward.Scroll => "Learn a Sword Art that reshapes your blade.",
+        PathReward.Spring => "Restore one lost life.",
+        PathReward.Notes => $"Gain {noteCache * (stageIndex + 1)} Spirit Notes to spend at the temple.",
+        PathReward.Boss => Stage.boss == BossKind.None ? "Leave this stage behind."
+            : "Face the stage's warlord. Felling them grants a rare boon and a Spirit Bead.",
+        _ => "",
+    };
 
     static bool StepIn()
     {
@@ -2261,34 +2308,35 @@ public class GameManager : MonoBehaviour
             || (mouse != null && mouse.leftButton.wasPressedThisFrame);
     }
 
-    // Into the portal and out of the dark at his place on the row, on the same ground: the cover keeps its damage
-    // and the stage's music plays on, unlike TravelTo between maps.
-    IEnumerator ThroughPortal(Portal portal)
+    // After the reward up the field into the dark, and out of it at his place on the row, on the same ground: the cover
+    // keeps its damage and the stage's music plays on, unlike TravelTo between maps.
+    IEnumerator WalkOn(float towardX)
     {
         Camera cam = Camera.main;
+        float top = CameraShake.Center.y + cam.orthographicSize;
         float bottom = CameraShake.Center.y - cam.orthographicSize;
         Vector3 from = ronin.transform.position;
-        Coroutine entering = StartCoroutine(ronin.WalkTo(new Vector3(from.x, portal.transform.position.y, from.z), travelWalkSpeed));
-        yield return new WaitUntil(() => ronin.transform.position.y > portal.transform.position.y - 3f);
+        Coroutine leaving = StartCoroutine(ronin.WalkTo(new Vector3(towardX, top + 2f, from.z), travelWalkSpeed));
+        // The fade starts as he nears the top, so he's gone into the dark just as it closes.
+        yield return new WaitUntil(() => ronin.transform.position.y > top - 4f);
         yield return ui.FadeTo(1f, travelFadeTime);
-        yield return entering;
-        portal.Close();
+        yield return leaving;
         ronin.PlaceAt(new Vector3(ronin.Home.x, bottom - 2f, ronin.Home.z));
         yield return new WaitForSeconds(0.2f);
         StartCoroutine(ui.FadeTo(0f, travelFadeTime));
         yield return ronin.WalkTo(ronin.Home, travelWalkSpeed);
     }
 
-    // The next round's rewards to choose between: no two of a kind, and the boss's portal once enough rounds are
+    // The next round's rewards to choose between: no two of a kind, and the boss's path once enough rounds are
     // cleared. Souls are the common pick; springs only show while he's hurt, beads and scrolls only with a use.
-    List<(PortalReward, Element)> RollPortals()
+    List<(PathReward, Element)> RollPaths()
     {
-        var weights = new List<(PortalReward reward, float weight)> { (PortalReward.Soul, 45f), (PortalReward.Notes, 20f) };
-        if (Boons.DrawBead(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PortalReward.Bead, 20f));
-        if (lives < maxLives) weights.Add((PortalReward.Spring, 10f));
-        if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PortalReward.Scroll, 5f));
+        var weights = new List<(PathReward reward, float weight)> { (PathReward.Soul, 45f), (PathReward.Notes, 20f) };
+        if (Boons.DrawBead(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PathReward.Bead, 20f));
+        if (lives < maxLives) weights.Add((PathReward.Spring, 10f));
+        if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PathReward.Scroll, 5f));
 
-        var picks = new List<(PortalReward, Element)>();
+        var picks = new List<(PathReward, Element)>();
         // Third Path opens one more.
         int choices = portalChoices + Upgrades.Rank(UpgradeId.ThirdPath);
         while (picks.Count < choices && weights.Count > 0)
@@ -2298,11 +2346,11 @@ public class GameManager : MonoBehaviour
             float roll = Random.value * total;
             int index = 0;
             while (index < weights.Count - 1 && (roll -= weights[index].weight) >= 0f) index++;
-            PortalReward reward = weights[index].reward;
+            PathReward reward = weights[index].reward;
             weights.RemoveAt(index);
-            picks.Add((reward, reward == PortalReward.Soul ? PickSoulElement() : Element.Fire));
+            picks.Add((reward, reward == PathReward.Soul ? PickSoulElement() : Element.Fire));
         }
-        if (roundIndex + 1 >= BossPortalAfter) picks.Add((PortalReward.Boss, Element.Fire));
+        if (roundIndex + 1 >= BossPortalAfter) picks.Add((PathReward.Boss, Element.Fire));
         return picks;
     }
 
@@ -2312,34 +2360,34 @@ public class GameManager : MonoBehaviour
     static readonly Color SpringColour = new Color(1f, 0.4f, 0.45f);
     static readonly Color BossPortalColour = new Color(0.85f, 0.15f, 0.2f);
 
-    static Color RewardColour(PortalReward reward, Element element) => reward switch
+    static Color RewardColour(PathReward reward, Element element) => reward switch
     {
-        PortalReward.Soul => Boons.Info(element).Color,
-        PortalReward.Bead => Boons.BeadColor,
-        PortalReward.Scroll => Boons.ArtColor,
-        PortalReward.Spring => SpringColour,
-        PortalReward.Boss => BossPortalColour,
+        PathReward.Soul => Boons.Info(element).Color,
+        PathReward.Bead => Boons.BeadColor,
+        PathReward.Scroll => Boons.ArtColor,
+        PathReward.Spring => SpringColour,
+        PathReward.Boss => BossPortalColour,
         _ => NoteColour,
     };
 
-    string RewardLabel(PortalReward reward, Element element) => reward switch
+    string RewardLabel(PathReward reward, Element element) => reward switch
     {
-        PortalReward.Soul => $"{Boons.Info(element).Name} Soul",
-        PortalReward.Bead => "Spirit Bead",
-        PortalReward.Scroll => "Technique Scroll",
-        PortalReward.Spring => "Healing Spring",
-        PortalReward.Boss => Stage.boss == BossKind.None ? "Onward" : Stage.boss.ToString(),
+        PathReward.Soul => $"{Boons.Info(element).Name} Soul",
+        PathReward.Bead => "Spirit Bead",
+        PathReward.Scroll => "Technique Scroll",
+        PathReward.Spring => "Healing Spring",
+        PathReward.Boss => Stage.boss == BossKind.None ? "Onward" : Stage.boss.ToString(),
         _ => "Lost Melody",
     };
 
-    Sprite[] RewardIcon(PortalReward reward, Element element) => reward switch
+    Sprite[] RewardIcon(PathReward reward, Element element) => reward switch
     {
-        PortalReward.Soul => ArtFor(element)?.soulFrames,
-        PortalReward.Scroll => scrollFrames,
-        PortalReward.Bead => beadFrames,
-        PortalReward.Notes => NoteIcon,
-        PortalReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
-        PortalReward.Boss => BossIconOf(stages[stageIndex].boss),
+        PathReward.Soul => ArtFor(element)?.soulFrames,
+        PathReward.Scroll => scrollFrames,
+        PathReward.Bead => beadFrames,
+        PathReward.Notes => NoteIcon,
+        PathReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
+        PathReward.Boss => BossIconOf(stages[stageIndex].boss),
         _ => null,
     };
 
@@ -3255,7 +3303,7 @@ public class GameManager : MonoBehaviour
         }, null, 0, color);
     }
 
-    // Hearts are kept: they wait on the ronin's row until he needs one.
+    // Hearts are kept for GatherDrops, which heals him with them or fades them into points.
     static void ClearProjectiles()
     {
         foreach (Kunai kunai in FindObjectsByType<Kunai>())

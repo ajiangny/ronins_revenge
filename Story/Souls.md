@@ -48,7 +48,7 @@ Code names differ from screen names: `Element.Fire` = Fire, `Element.Water` = Fr
 | Soul | Element | Core boons (family) | Passives | Legendary |
 |---|---|---|---|---|
 | Akagane | `Fire` | Flame Blade, Inferno Shuriken, Burning Riposte (Blast) | Blazing Hands, Kindling | **Wildfire**: "Every man of the vanguard, burning at once." |
-| Mizore | `Water` | Frost Blade, Glacial Shuriken, Frozen Riposte (Ice) | Tidal Renewal (her medicine), Glacier Wall | **Still Water**: "Slow the pulse and a fever loses its hurry." |
+| Mizore | `Water` | Frost Blade, Glacial Shuriken, Frozen Riposte (Ice) | Tidal Renewal (her medicine), Glacier Shell | **Still Water**: "Slow the pulse and a fever loses its hurry." |
 | Hibiki | `Lightning` | Storm Blade, Thunder Shuriken, Thunder Riposte (Strike) | Storm Step, Static Charge | **Raijin's Drum**: her own festival drum. |
 
 | Duo | Souls | Their bond |

@@ -245,6 +245,21 @@ an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and r
 50–65% of kills (Epic Frost Blade cleared stage 1 rounds in 8–11 s). **Frost Blade** now encases each samurai in reach
 with a 50% chance, at most 2 per kill (was every one in reach), and its shatter shards are 1 / 2 / 3 (were 2 / 3 / 4).
 
+**Third pass (play testers):** Flame Blade + Shadow Clone + Split Slash trivialised the game. Flame Blade blasted on
+every slash kill and added a point to every boss hit; the shadow doubled every slash at full strength with every boon
+proc; Split added two more. Bosses with slow, static moves (Utsusemi's Hour Strikes) took free damage, and Shirogane's
+crescent fans were cut down before they arrived.
+- **Shadow Clone became an ultimate** (`Ronin.Ultimate`), chosen at the temple: a bar filled by 40 of the ronin's own
+  hits, unleashed with Q for 10 s of fighting. Its slashes are `KillSource.Shadow`: half damage to bosses, no boon effects,
+  no charge. It left the scroll pool (Split, Piercing, Echo remain).
+- **Split Slash's side slashes** are `Shadow` slashes too.
+- **Fire:** Flame Blade bursts on 40 / 55 / 70% of slash kills (on a boss hit, 60% of that); blasts burn 2 samurai (4 with
+  Wildfire); Kindling 6 / 5 / 4 swings and its fireball no longer also sets off Flame Blade; Blazing Hands 8 / 14 / 20%.
+- **Storm:** Storm Blade 45 / 60 / 80%, Thunder Shuriken 40 / 55 / 70%, Static Charge 15 / 22 / 30%, Raijin's Drum every 6 hits.
+- **Glacier Wall → Glacier Shell** (`BoonId.GlacierShell`): tougher cover also stopped the player's own slashes, so it was
+  rarely taken. Now a shell of ice takes one blow, bursts into 5 homing shards and regrows in 18 / 13 / 9 s (a bead shortens it).
+- **Cover** is rebuilt every round.
+
 ## 4. Later
 
 - **Shared statuses.**

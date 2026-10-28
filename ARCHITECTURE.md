@@ -20,7 +20,9 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
 - Menu pages are built in `GameManager` (`ShowTitleMenu`, `ShowPauseMenu`, `ShowControls`, `ShowSettings`,
   `ShowEndMenu`) and shown by `MenuUI`. Sub-pages take a `back` callback so Controls/Settings return to
   whichever page opened them. `Pause` only fires in `Playing`; `Resume` always restores `timeScale = 1`
-  (a pause can cut off a parry hit-stop).
+  (a pause can cut off a parry hit-stop). In a browser, fullscreen takes Esc: `Plugins/WebGL/FullscreenKeys.jslib`
+  (`LockEscapeInFullscreen`, called from `Start`) locks Escape with the Keyboard Lock API where it exists, and
+  `GameManager.Update` pauses when the web build leaves fullscreen mid-fight (`wasFullScreen`); P and Backspace also work.
 - Content is data: `GameManager.stages` is a `StageConfig[]` (`StageConfig.cs`). Each stage has a name,
   `LevelConfig[] rounds` (`LevelConfig.cs`) and a `BossKind boss`. Four stages: "The Bamboo Road" (three
   rounds, then Benibana), "The Pilgrim's Pass" (three rounds with Shieldbearers and divers, then Utsusemi), "The
@@ -41,8 +43,7 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   `extraRoundSpeedUp`/`extraRoundFireCut` per extra round, +5% aimed, a Taisho top row, one more row from the second.
 - **Run log (dev tools):** `RunLog` appends a line per round and boss (time, hits, lives, kills by source with the effect share, frozen time, the army's closest approach), the portals and boons taken and the run's end to `runlog.txt` in `Application.persistentDataPath`; F8 prints the current run.
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `EndRound` → `ChoosePath` / `StageCleared` → `BeginBoss` / `OfferStageBoon`,
-  `NextStage` → `EnterStage`, `EndGame`. Blockers are rebuilt only when a stage starts (or on a new map), so they
-  wear down across its rounds.
+  `NextStage` → `EnterStage`, `EndGame`. Blockers are rebuilt at the start of every round (`BeginRound`) and on a new map.
 - **Rounds:** `BeginRound` spawns the army above the view and `SamuraiArmy.MarchIn` marches it down to its slots
   under the banner (`armyMarchInTime`). Until `Advance` the army is `Entering`: its colliders are off, `TakeHit`/`Kill`
   do nothing, and `Soldiers` and the boon queries read it as empty, so nothing from the last round can touch it.
@@ -171,19 +172,22 @@ Hades' loop: what happened in earlier runs changes what is said and how strong O
 | What | Where |
 |---|---|
 | Movement, input, screen clamp, cooldowns, lives/invulnerability | `Ronin.cs` (reads `Keyboard.current` directly) |
-| Kindling: every Nth swing `Ronin.Attack` calls `ThrowFireball` instead (Fireball fx frames at twice the riposte size, `KillSource.Slash`, `CutsArrows`); its hit raises `Ronin.FireballImpact` → `BoonEffects.OnFireballImpact`, a `KindlingRadius` blast | `Ronin`, `BoonEffects` |
-| Sword slash (Space / Left Click), reshaped by the Sword Arts | `Ronin.Attack` → `Ronin.Slash` → `Ronin.Fan` → `LaunchSlash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`). Piercing Slash sets the pierce count and `Kunai.CutsArrows`, Shadow Clone (`Ronin.UpdateShadowClone`, a flipped, darkened copy of his frame mirrored across `CameraShake.Center` by `MirrorX`, no collider) sends a second slash from the mirrored muzzle; Split Slash forks it with `Kunai.SplitAfter` → `Ronin.SplitOff`; Echo Slash adds a homing ghost (`Kunai.Home(RiposteTarget)`) |
+| Kindling: every Nth swing `Ronin.Attack` calls `ThrowFireball` instead (Fireball fx frames at twice the riposte size, `KillSource.Slash`, `CutsArrows`); its hit raises `Ronin.FireballImpact` → `BoonEffects.OnFireballImpact`, a `KindlingRadius` blast. The fireball is `Kunai.Kindled`, so its kill doesn't also roll Flame Blade's blast (`BoonEffects.FlameBursts` reads `Kunai.Striking`) | `Ronin`, `BoonEffects` |
+| Sword slash (Space / Left Click), reshaped by the Sword Arts | `Ronin.Attack` → `Ronin.Slash` → `Ronin.Fan` → `LaunchSlash` → `SlashWave.prefab` (a `Kunai` with a wide hitbox, `KillSource.Slash`). Piercing Slash sets the pierce count and `Kunai.CutsArrows`, the Shadow Clone ultimate's shadow (below) sends a second, `KillSource.Shadow` slash from the mirrored muzzle; Split Slash forks the slash with `Kunai.SplitAfter` → `Ronin.SplitOff` into two `KillSource.Shadow` side slashes; Echo Slash adds a homing ghost (`Kunai.Home(RiposteTarget)`) |
 | Kunai throw (kept for a future weapon select) | `Ronin.weapon = Kunai` → `Ronin.ThrowKunai` → `Kunai.prefab`; also the fallback while `slashPrefab` is unset |
 | Spirit Shuriken (W / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
 | Parry (Shift / Down / Right Click), 0.25 s window; a landed parry resets its cooldown, a miss costs 2 s (`parryMissCooldown`) | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target and blockers. With Burning Riposte it's a fireball, with Frozen Riposte a fan of ice shards (`Ronin.SpawnRiposte`, `Kunai.Animate` with `Fx.Fireball` / `Fx.IceShard` frames); their hits raise `Kunai.Impacted` → `Ronin.RiposteImpact` → `BoonEffects.OnRiposteImpact` |
-| Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)` |
+| Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)`; Glacier Shell (`ShellUp`, `BreakShell`) takes the blow first: no life lost, `ShellShards` homing `LaunchIceShard`s, `ShellGrace` s of invulnerability, then it regrows after the boon's value in seconds (`UpdateShell` draws the bubble; `ShellCharge` dims its HUD icon in `BoonChoiceUI.UpdateHud`) |
+| Ultimate (Q): `Ronin.Ultimate` (append-only, `SaveData.ultimate`, picked on the temple's weapon rack page, `ShowRack`; only `ShadowClone` so far). `Kunai.Landed` (static, raised on every projectile hit) fills `UltimateFill` by 1/`ultimateHits` for each `Damage.Procs` hit on a samurai, scout, boss or Kuon; `UltimateLocked` while the tutorial runs. `StartUltimate` sets `UltimateActive`, and `UpdateUltimate` drains the bar over `ultimateDuration` only while he's fighting. Shadow Clone: `UpdateShadowClone` (a flipped, darkened copy of his frame mirrored across `CameraShake.Center` by `MirrorX`, no collider) shows while it runs. HUD: `GameUI.SetUltimate` (an ink bar beside the lives, glowing with a Q key cap when full), fed each frame by `GameManager.Update`; F9 fills it (`FillUltimate`) | `Ronin`, `GameUI`, `GameManager` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
 | Spirit wisps (bobbing beside him on idle, parry and walk frames, which were drawn without them) | `Ronin.UpdateWisps` from `CharacterArt.wisps`, cut from `Ronin_Base` and recoloured per element by Apply Boon Art; hidden on `CharacterArt.framesWithWisps` (run, hit, throw), which draw their own |
 | Ronin events | `Hit`, `ShurikenThrown`, `Parried`, `RiposteImpact` (GameManager subscribes) |
 
 All player projectiles use the `Kunai` component (slash waves, kunai, shuriken, ripostes); `Kunai.cs` also defines
-`KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash }`. The Attack-slot boons (Flame/Frost/Storm Blade)
-trigger on both `Slash` and `Kunai`. Damage per source is `Damage.Of` in `IHittable.cs` (slash and kunai 1, shuriken 3, deflected 2, reflected 0: a parried boss slash only staggers).
+`KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash, Shadow }`. The Attack-slot boons (Flame/Frost/Storm Blade)
+trigger on both `Slash` and `Kunai`. `Shadow` is a lesser slash (the shadow's, Split Slash's forks): `Damage.Procs` is false for it
+and for `Effect` (no boon effects, no drum beat, no statue burst, no ultimate charge), and `Damage.Lessen` halves what it deals
+to a boss or Kuon (`Boss.shadowChip`/`SpiritWolf.shadowChip` carry the half points). Damage per source is `Damage.Of` in `IHittable.cs` (slash and kunai 1, shuriken 3, deflected 2, reflected 0: a parried boss slash only staggers).
 Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: `Samurai`, `Scout`, `Boss`.
 
 ## Boons (Hades-style upgrades)
@@ -198,7 +202,7 @@ Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: 
 | Effects in play (blasts, encase, freeze, lightning, boss versions) | `BoonEffects.cs` (`OnKill`, `OnBossHit`, `OnShurikenThrown`, `OnParried`, `OnRiposteImpact`, `OnStatueShattered`). Storm Blade arcs to a random samurai within `StormBladeRange`. Thunder Shuriken speeds the shuriken up (`Ronin.ThunderShurikenSpeed`) and `OnShurikenThrown` adds `ShurikenStorm` to it, which gives each samurai or boss it passes within `ShurikenArcRadius` one roll to be arced. Sideways lightning (Storm Blade, Thunder Riposte, Thunder Shuriken, Superconductor) uses `Chain` → `ElementFx.Chain`, an arc between the two samurai; sky strikes use `ElementFx.Bolt` and `Fx.LightningStrike` |
 | Ice shell: `Samurai.AddIceShell` lays `SamuraiArmy.IceShell` (`Art/Sprites/Effects/IceShell.png`, PixelLab, wired by `Ninja/Apply Boon Art`) over ice statues only (living encased samurai keep just the tint and halo), as a child of the body so it melts with it; without the art only the ice tint and halo show | `Samurai`, `IceStatue` |
 | Ice statues: a samurai killed while `Encased` (any source) leaves the army as an `IceStatue` (code-built from its last frame, on the Samurai layer). The ronin's next non-`Effect` hit raises `IceStatue.Shattered` → `BoonEffects.OnStatueShattered`, which sends `Boons.IceShardsAt` (Frost Blade's `ExtraValues`) homing shards (`Ronin.LaunchIceShard`, `KillSource.Effect`, non-piercing). Shards and Frozen Riposte shards set `Kunai.FreezeOnHit`, encasing before they damage, so their kills freeze too. Left unhit, a statue melts (`SolidTime` 3 s, then `Melt` over `MeltTime` 1.6 s: slump, meltwater tint, drips and a puddle, all code-drawn) and can't be burst past `BreakableUntil`. Statues crumble in `EndRound` (`CrumbleAll`) | `IceStatue.cs`, `Samurai.Kill`, `Kunai`, `Ronin` |
-| Sword Arts (Hades' Daedalus Hammer): `BoonKind.Art` boons with no element (`Boons.ArtColor` steel), never in soul draws, offered by `Boons.DrawArts` from a technique scroll. `GameManager.MaybeDropScroll` (`scrollChanceFromScout` 40%, `scrollChancePerKill` 0.5%, `maxScrollsPerRun` 2, one at a time) → `TechniqueScroll` → `OnScrollCollected` / `GatherDrops` → `OfferArts` → `BoonChoiceUI.ShowArts` (holding out `scrollPainted`, or the pixel `scrollFrames` without it; the pickup loops `scrollFrames`). Arts join the passives (`RoninLoadout.Take`) without counting toward elements | `Boon.cs`, `TechniqueScroll.cs`, `GameManager`, `Ronin`, `Kunai` |
+| Sword Arts (Hades' Daedalus Hammer): `BoonKind.Art` boons with no element (`Boons.ArtColor` steel), never in soul draws, offered by `Boons.DrawArts` from a technique scroll (Split, Piercing, Echo; `ShadowClone` keeps its id and icon but is the ultimate now, never drawn). `GameManager.MaybeDropScroll` (`scrollChanceFromScout` 40%, `scrollChancePerKill` 0.5%, `maxScrollsPerRun` 2, one at a time) → `TechniqueScroll` → `OnScrollCollected` / `GatherDrops` → `OfferArts` → `BoonChoiceUI.ShowArts` (holding out `scrollPainted`, or the pixel `scrollFrames` without it; the pickup loops `scrollFrames`). Arts join the passives (`RoninLoadout.Take`) without counting toward elements | `Boon.cs`, `TechniqueScroll.cs`, `GameManager`, `Ronin`, `Kunai` |
 | Pickups: souls and hearts fall to the ronin's row and wait there; at a round's end (`GameManager.EndRound`, and `BossFell`) `GameManager.GatherDrops` flies every one he can use to him (`Pickup.GatherAll`, `Pickup.CanCollect`) and offers a soul caught that way | `Pickup.cs` (base: fall, rest, magnet, collect), `Soul.cs`, `Heart.cs`, `TechniqueScroll.cs` |
 | Lives are health: `GameManager.lives` out of `maxLives`, which only Tidal Renewal raises (to `Boons.MaxLives`). The HUD shows the life heart (`UI/LifeHeart`, a crimson heart in teal soul-fire) per life and the same heart tinted `SpentLife` per lost one (`GameUI.SetLives`); dropped hearts draw it `Heart.Size` across | `GameManager`, `GameUI` |
 | Heart drops (`heartDropChance`, 20%) heal one lost life; at full health a heart can't be taken (`GameManager.CanHeal`) and waits on his row, surviving `ClearProjectiles`, until the round's end, where `GatherDrops` heals him with it or fades it into points (`Heart.Dissipate`). A fallen samurai drops one too, rarely (`killHeartChance`, 0.5%): only to a hit that isn't a boon effect, only while he's hurt, at most once a stage (`killHeartThisStage`), as Poguru promises in the tutorial | `Blocker.Broken` (hits only, not trampling or a boss razing) → `GameManager.OnBlockerBroken` / `OnHeartCollected`; `OnSamuraiKilled`; art is `GameUI.LifeIcon` |
@@ -215,12 +219,16 @@ match `BoonChoiceUI.boonIcons`.
   (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
   holds once its front rank reaches the cover's row (`HoldY` from `holdDepth`, `BeginHolding`: no more drops, it walks that row
   and `ErodeBlockers` smashes the cover) and starts lunges (`StartLunge`/`UpdateLunge`: a front-rank samurai near the ronin
-  shakes under `Samurai.WarnDive`'s red "!" (`ProceduralSprites.Exclaim`), lunges through where he stood and walks back).
+  shakes under `Samurai.WarnDive`'s red "!" (`ProceduralSprites.Exclaim`, white-edged, popping in), lunges through where he stood at a
+  steady `lungeSpeed` (its `duration` from the distance) and walks back). Every warning (`Warn`: `WarnDive`, a `BladeRing`, a small
+  shake) also draws `DrawTell`, a red streak from the samurai to the ronin and a mark at his `Feet`, until it launches. One at a time:
+  no lunge while any diver is out, and no dives once `holding`.
   `ArmyReachedRonin` (a landing at `Ronin.TopY`) is only a safeguard now. In `DiveContact` a parrying ronin (`Ronin.Parrying`,
   within `parryReach`) flings a lunger or diver away (`Ronin.ParryBody`, `Samurai.Knock` tints it, dive phase 3 arcs it off,
   then `Kill(KillSource.Deflected)`). Rounds with `LevelConfig.diveInterval` send a samurai from behind the
   front rank on a telegraphed bezier swoop at the ronin (`StartDive`/`UpdateDives`): it hits blockers (`Blocker.Hit`)
-  and the ronin, then glides back into its marching slot; divers are left out of the edge, landing and front-column
+  and the ronin, ends just past his row (`InView` keeps its turning points inside the view), then glides back up from there
+  into its marching slot, in sight the whole way; divers are left out of the edge, landing and front-column
   checks. Also hosts the army-wide freeze and spatial queries
   (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
 - `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint, and `Encase` (ice from Frost Blade / Frozen Riposte: holds its fire, and the ronin's next hit kills it outright).
@@ -237,7 +245,8 @@ match `BoonChoiceUI.boonIcons`.
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Yurei the Bushi's).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
-  Arrows break on each other unless both have `PassesShots` (Shirogane's).
+  Arrows break on each other unless both have `PassesShots` (Shirogane's). `Toughness` (Shirogane's crescents: 2) is how
+  many plain slashes it takes to cut one; the shuriken, a piercing slash and parried shots break it outright.
   `MakeUnbreakable` makes the Taisho spear: it passes through slashes, kunai, arrows and blockers and only stops on the
   ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). `Tint` recolours a
   plain arrow (the yurei's). Its yari art
@@ -292,7 +301,7 @@ match `BoonChoiceUI.boonIcons`.
   drifts through cover, `Arrow.PassesCover`), Hour Strikes (announced in super armour, `Boss.SuperArmor`, which blocks stagger and freeze and lets only `ArmorDamageTaken`, 5%, of each hit's damage through
   while `HoldArmor` shows `ArmorShell`, a gold outline of eight one-pixel-offset silhouettes drawn with the
   `SpriteFlash` shader, whose colour comes from `_FlashColor` in a property block; `LaserHour` lasers each hour where the ronin stands (a sight line that tracks him, locks, then an eye laser that hits him if he hasn't moved); then for each hour `LockOnDash`
-  tracks him with the sight line again, locks, raises an `HourMark` (the `Fx.UtsuNumerals` frame for that hour, I to V, or numerals drawn from bars without the art; it `Struck()` flares red), and after a dodge window `Dash`es down from its row onto that spot, chops it with its own chop frames and dashes back; then `StrikeTheHour` (the next hour's `HourMark`, slid along under the ronin by `MoveTo`) from its row flings a giant
+  tracks him with the sight line again (still in its armour, `Armour(shell, true)`, which drops only as it dashes), locks, raises an `HourMark` (the `Fx.UtsuNumerals` frame for that hour, I to V, or numerals drawn from bars without the art; it `Struck()` flares red), and after a dodge window `Dash`es down from its row onto that spot, chops it with its own chop frames and dashes back; then `StrikeTheHour` (the next hour's `HourMark`, slid along under the ronin by `MoveTo`) from its row flings a giant
   unbreakable, reflectable cleave that `HuntRonin` steers onto him, so only a parry answers it; parried, it jams and
   staggers, `OnStaggered`. Its dash, chop and hour-slash frames come from `GameManager.utsusemiDash`/`Chop`/`HourSlash` via
   `SetSwordFrames`, with the thrust frames as the fallback), Plumb Lines (weights hang from `Utsu_PlumbPortal` portals opened above and behind it; a cut thread plays `SnapThread`/`DropLooseEnd`, built in code; it `Pace`s about from the first portal until the swings die,
@@ -447,8 +456,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
 
 ## Environment
 
-- `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild(healthMultiplier)`
-  (Glacier Wall uses the multiplier for ice blockers); sites are spread across the view minus `sideInset` at each side, so
+- `BlockerWall.cs` / `Blocker.cs` — courtyard cover (bushes 5 HP, lanterns 8 HP), `Rebuild()` every round; sites are spread across the view minus `sideInset` at each side, so
   the outer ones stay off a map's edge scenery. A `Backdrop.Map` can bring its own `blockers` and
   `blockerPattern`; `BlockerWall.Use` switches to them for every later `Rebuild` (null goes back to the courtyard's).
   Each `BlockerType` can have extra `variants` (`Look`s), and every blocker built picks one at random (`PickLook`),

@@ -3384,9 +3384,9 @@ public class GameManager : MonoBehaviour
         switch (name)
         {
             case "Oni":
-                // His painting fills more of its canvas than the others', so it's drawn a little smaller to match faces.
+                // Drawn a little taller than the bosses (1080) so the hero holds his own against them on screen.
                 return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
-                    focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 0.9f, right = true };
+                    focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 1.1f, right = true };
             // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces.
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
             case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));

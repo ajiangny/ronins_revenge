@@ -483,7 +483,7 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   `GameUI.SpeakerPortrait`, a close-up plus the point to centre on and the height to draw it, cropped into a framed
   night-dark window at the plate's left, or standing on the plate when it sits `beside` someone), boss intro (a null
   `lineText` makes it a name reveal only, for a talk scene to follow). `ShowSubtitleOver` hangs a line over whoever says
-  it in the field (narrow wrap, kept on screen, a point in their colour aimed at them; below their head near the top),
+  it in the field (narrow wrap, kept on screen; below their head near the top),
   used through `GameManager.SayLine(…, over)` by Poguru's barks and the tutorial's soldiers, who bob as they speak
   (`TrainingSoldier.Speak`). Talk scenes are `DialogueScene.cs`, built the
   same way from the shared parts below. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the

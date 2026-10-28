@@ -154,9 +154,10 @@ public class Tutorial : MonoBehaviour
         yield return Line("Tut_Soldiers", 2, null, ronin.Bounds.center);
         yield return Line("Tut_Soldiers", 3, null, poguru.Centre);
 
-        // The slash: the archer steps into Oni's column and shoots straight down. Held mid-flight, Oni's cut breaks
-        // the arrow; then he's to cut the archer down, who keeps shooting (and Poguru bonking) till he falls.
-        archer.MoveTo(new Vector3(ronin.Bounds.center.x, line));
+        // The slash: the archer steps out in front of the line into Oni's column (clear of whoever stands there in
+        // the line) and shoots straight down. Held mid-flight, Oni's cut breaks the arrow; then he's to cut the archer
+        // down, who keeps shooting (and Poguru bonking) till he falls.
+        archer.MoveTo(new Vector3(ronin.Bounds.center.x, line - ArcherStep));
         yield return new WaitUntil(() => !archer.Moving);
         // Only the soldier of the lesson at hand can be hit: a wide slash mustn't take the chargers early.
         archer.Untouchable = false;
@@ -298,6 +299,8 @@ public class Tutorial : MonoBehaviour
     float PoguruSays(string id) => game.SayLine(Dialogue.Find(id, false), 0, Beside(game.Poguru.Centre));
 
     const float SoldierHead = 0.35f;
+    // How far in front of the soldiers' line the archer steps to shoot.
+    const float ArcherStep = 1.6f;
 
     // The top of the head of whoever stands at this point (a soldier, Oni, Poguru), where his line hangs.
     static Vector3 Beside(Vector3 world) => world + Vector3.up * 0.8f;

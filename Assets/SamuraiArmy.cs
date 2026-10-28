@@ -53,9 +53,9 @@ public class SamuraiArmy : MonoBehaviour
     [Tooltip("Average seconds between lunges once the army holds the cover's row.")]
     [SerializeField] float lungeInterval = 2.4f;
     [Tooltip("Seconds a lunger shakes under its warning before it launches.")]
-    [SerializeField] float lungeWarning = 0.7f;
-    [Tooltip("Seconds the lunge takes to reach (and pass) the ronin.")]
-    [SerializeField] float lungeDuration = 0.35f;
+    [SerializeField] float lungeWarning = 0.85f;
+    [Tooltip("Average speed of a lunge, in units a second. Its time comes from the distance, so a lunger from further off isn't faster.")]
+    [SerializeField] float lungeSpeed = 10f;
     [Tooltip("Seconds a lunger takes to walk back into its slot.")]
     [SerializeField] float lungeReturn = 0.6f;
     [Tooltip("How close a lunging or diving samurai must come to a parrying ronin to be flung away.")]
@@ -63,10 +63,10 @@ public class SamuraiArmy : MonoBehaviour
 
     [Header("Divers")]
     [Tooltip("Seconds a diver flashes in place before it breaks formation.")]
-    [SerializeField] float diveWarning = 0.6f;
-    [Tooltip("Seconds the swoop takes from its slot to below the screen.")]
+    [SerializeField] float diveWarning = 0.85f;
+    [Tooltip("Seconds the swoop takes from its slot down past the ronin's row.")]
     [SerializeField] float diveDuration = 1.7f;
-    [Tooltip("Seconds a diver takes to glide back into its slot from above the screen.")]
+    [Tooltip("Seconds a diver takes to glide back up into its slot from the end of its swoop.")]
     [SerializeField] float diveReturn = 1.2f;
 
     public event Action<Samurai, KillSource> SamuraiKilled;
@@ -86,6 +86,8 @@ public class SamuraiArmy : MonoBehaviour
         public Vector3 slot;
         public Vector3 p0, p1, p2, p3;
         public float elapsed;
+        // A lunge's flight time, from its distance.
+        public float duration;
         public int phase;
         public bool hitRonin;
         // A lunge from the front rank, straight at the ronin, rather than a swoop from behind it.
@@ -93,6 +95,62 @@ public class SamuraiArmy : MonoBehaviour
         // Flung away by a parry: its velocity, while it arcs off to die.
         public Vector3 fling;
         public readonly HashSet<Blocker> trampled = new HashSet<Blocker>();
+        // The warning drawn while it shakes: a red streak from it to the ronin and a mark on the ground under him.
+        public SpriteRenderer streak, mark;
+
+        public void ClearTell()
+        {
+            if (streak != null) Destroy(streak.gameObject);
+            if (mark != null) Destroy(mark.gameObject);
+        }
+    }
+
+    static readonly Color TellColour = new Color(1f, 0.25f, 0.15f);
+
+    // A red streak from the samurai to where it will strike and a pulsing mark on the ronin's row, brightening as the
+    // warning runs out, so a dive is seen coming even from the edge of the eye.
+    void DrawTell(Dive dive, float warning)
+    {
+        if (dive.streak == null)
+        {
+            dive.streak = new GameObject("DiveStreak").AddComponent<SpriteRenderer>();
+            dive.streak.sprite = ProceduralSprites.White;
+            dive.streak.sortingOrder = 3;
+            dive.mark = new GameObject("DiveMark").AddComponent<SpriteRenderer>();
+            dive.mark.sprite = ProceduralSprites.Glow;
+            dive.mark.sortingOrder = 1;
+        }
+        float k = Mathf.Clamp01(dive.elapsed / warning);
+        float flicker = 0.75f + 0.25f * Mathf.Sin(Time.time * 30f);
+        Vector3 from = dive.soldier.Body.position, to = TellPoint();
+        Vector3 along = to - from;
+        dive.streak.transform.position = (from + to) * 0.5f + Vector3.forward * 0.1f;
+        dive.streak.transform.rotation = Quaternion.FromToRotation(Vector3.up, along.sqrMagnitude > 0.0001f ? along : Vector3.down);
+        dive.streak.transform.localScale = new Vector3(0.06f + 0.08f * k, along.magnitude, 1f) / ProceduralSprites.White.bounds.size.x;
+        dive.streak.color = new Color(TellColour.r, TellColour.g, TellColour.b, (0.2f + 0.5f * k) * flicker);
+        float size = (1.4f + 0.5f * k) / ProceduralSprites.Glow.bounds.size.x;
+        dive.mark.transform.position = new Vector3(to.x, to.y, 0.1f);
+        dive.mark.transform.localScale = new Vector3(size, size * 0.4f, 1f);
+        dive.mark.color = new Color(TellColour.r, TellColour.g, TellColour.b, (0.35f + 0.5f * k) * flicker);
+    }
+
+    // The ronin's feet, where the mark lies.
+    Vector3 TellPoint() => target.TryGetComponent(out Ronin ronin) ? ronin.Feet : target.position;
+
+    // The swoop's turning points kept inside the view, so a diver never leaves the screen at the sides.
+    Vector3 InView(Vector3 point)
+    {
+        float bound = HalfWidth() - edgeMargin;
+        point.x = Mathf.Clamp(point.x, CameraShake.Center.x - bound, CameraShake.Center.x + bound);
+        return point;
+    }
+
+    // A warning the ronin can't miss: the "!", a sharp ring and a small jolt.
+    void Warn(Samurai soldier, float seconds)
+    {
+        soldier.WarnDive(seconds);
+        Sfx.Play(Sfx.BladeRing, 0.5f, 1.8f);
+        CameraShake.Add(0.08f);
     }
 
     LevelConfig level;
@@ -235,6 +293,7 @@ public class SamuraiArmy : MonoBehaviour
             Destroy(soldier.gameObject);
         }
         soldiers.Clear();
+        foreach (Dive dive in dives) dive.ClearTell();
         dives.Clear();
         advancing = false;
         Entering = false;
@@ -369,13 +428,14 @@ public class SamuraiArmy : MonoBehaviour
     void StartDive()
     {
         nextDiveTime = Time.time + level.diveInterval * UnityEngine.Random.Range(0.7f, 1.3f);
-        if (target == null || dives.Count > 0) return;
+        // Once the army holds the cover's row its lunges take over: a swoop from there would come out of nowhere.
+        if (target == null || dives.Count > 0 || holding) return;
         List<Samurai> candidates = soldiers.FindAll(s => !s.Encased && FrontSamuraiInColumn(s.Column) != s);
         if (candidates.Count == 0) candidates = soldiers.FindAll(s => !s.Encased);
         if (candidates.Count == 0) return;
 
         Samurai diver = candidates[UnityEngine.Random.Range(0, candidates.Count)];
-        diver.WarnDive(diveWarning);
+        Warn(diver, diveWarning);
         dives.Add(new Dive { soldier = diver, slot = diver.Body.position });
     }
 
@@ -397,12 +457,13 @@ public class SamuraiArmy : MonoBehaviour
     void StartLunge()
     {
         nextLungeTime = Time.time + lungeInterval * UnityEngine.Random.Range(0.7f, 1.3f);
-        if (target == null || dives.Exists(d => d.lunge)) return;
+        // One at a time: never a lunge while a diver is still out.
+        if (target == null || dives.Count > 0) return;
         List<Samurai> front = soldiers.FindAll(s => !s.Encased && !IsDiving(s) && s.Body.position.y <= lastBottom + 0.3f);
         if (front.Count == 0) return;
         front.Sort((a, b) => Mathf.Abs(a.Body.position.x - target.position.x).CompareTo(Mathf.Abs(b.Body.position.x - target.position.x)));
         Samurai lunger = front[UnityEngine.Random.Range(0, Mathf.Min(3, front.Count))];
-        lunger.WarnDive(lungeWarning);
+        Warn(lunger, lungeWarning);
         dives.Add(new Dive { soldier = lunger, slot = lunger.Body.position, lunge = true });
     }
 
@@ -432,13 +493,16 @@ public class SamuraiArmy : MonoBehaviour
                     // Shudders in place as a warning, then picks its line at the ronin as it is right now.
                     float shake = Mathf.Sin(dive.elapsed * 60f) * 0.08f;
                     dive.soldier.Body.MovePosition(dive.slot + Vector3.right * shake);
+                    DrawTell(dive, diveWarning);
                     if (dive.elapsed < diveWarning) break;
+                    dive.ClearTell();
                     float side = dive.slot.x < target.position.x ? -1f : 1f;
-                    float bottom = CameraShake.Center.y - cam.orthographicSize - 1.5f;
+                    // It swoops down through the ronin's row and ends just past him, still on screen.
+                    float bottom = Mathf.Max(target.position.y - 0.4f, CameraShake.Center.y - cam.orthographicSize + 0.6f);
                     dive.p0 = dive.slot;
-                    dive.p1 = dive.slot + new Vector3(side * 3.5f, 0.5f, 0);
+                    dive.p1 = InView(dive.slot + new Vector3(side * 3.5f, 0.5f, 0));
                     dive.p2 = new Vector3(target.position.x, target.position.y + 3f, 0);
-                    dive.p3 = new Vector3(target.position.x - side * 1.5f, bottom, 0);
+                    dive.p3 = InView(new Vector3(target.position.x - side * 1.5f, bottom, 0));
                     dive.phase = 1;
                     dive.elapsed = 0f;
                     break;
@@ -448,14 +512,14 @@ public class SamuraiArmy : MonoBehaviour
                     dive.soldier.Body.MovePosition(position);
                     DiveContact(dive, position);
                     if (dive.phase != 1 || t < 1f) break;
+                    dive.p3 = position;
                     dive.phase = 2;
                     dive.elapsed = 0f;
                     break;
                 default:
-                    // Drops back in from above the screen and settles into its marching slot.
-                    float top = CameraShake.Center.y + cam.orthographicSize + 1.5f;
+                    // Glides back up from the end of its swoop into its marching slot, in plain sight.
                     float u = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(dive.elapsed / diveReturn));
-                    dive.soldier.Body.MovePosition(Vector3.Lerp(new Vector3(dive.slot.x, top, 0), dive.slot, u));
+                    dive.soldier.Body.MovePosition(Vector3.Lerp(dive.p3, dive.slot, u));
                     if (u >= 1f) dives.RemoveAt(i);
                     break;
             }
@@ -471,18 +535,22 @@ public class SamuraiArmy : MonoBehaviour
             case 0:
                 float shake = Mathf.Sin(dive.elapsed * 60f) * 0.08f;
                 dive.soldier.Body.MovePosition(dive.slot + Vector3.right * shake);
+                DrawTell(dive, lungeWarning);
                 if (dive.elapsed < lungeWarning) return;
+                dive.ClearTell();
                 Vector3 at = target.position;
                 Vector3 toward = (at - dive.slot).normalized;
                 dive.p0 = dive.slot;
                 dive.p1 = at + toward * 1.2f;
+                // Its time comes from the distance at a steady speed, so one from further along the rank isn't faster.
+                dive.duration = Mathf.Max(0.25f, (dive.p1 - dive.p0).magnitude / Mathf.Max(1f, lungeSpeed));
                 dive.phase = 1;
                 dive.elapsed = 0f;
                 Sfx.Play(Sfx.ParrySwing, 0.8f, 0.8f);
                 return;
             case 1:
-                float t = Mathf.Clamp01(dive.elapsed / lungeDuration);
-                Vector3 position = Vector3.Lerp(dive.p0, dive.p1, t * t);
+                float t = Mathf.Clamp01(dive.elapsed / dive.duration);
+                Vector3 position = Vector3.Lerp(dive.p0, dive.p1, Mathf.SmoothStep(0f, 1f, t));
                 dive.soldier.Body.MovePosition(position);
                 DiveContact(dive, position);
                 if (dive.phase != 1 || t < 1f) return;
@@ -717,7 +785,12 @@ public class SamuraiArmy : MonoBehaviour
     public void OnSamuraiKilled(Samurai soldier, KillSource source)
     {
         if (!soldiers.Remove(soldier)) return;
-        dives.RemoveAll(d => d.soldier == soldier);
+        dives.RemoveAll(d =>
+        {
+            if (d.soldier != soldier) return false;
+            d.ClearTell();
+            return true;
+        });
         // A bell silenced: a soul set free. Its quiet chime, and the next toll comes later.
         if (soldier.Kind == SamuraiKind.Bellringer)
         {

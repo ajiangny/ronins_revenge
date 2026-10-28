@@ -70,6 +70,12 @@ MonoBehaviour:
   tollFireScale: 0.5
   silenceDelay: 2
   entryMargin: 1
-  diveWarning: 0.6
+  holdDepth: 2
+  lungeInterval: 2.4
+  lungeWarning: 0.85
+  lungeSpeed: 10
+  lungeReturn: 0.6
+  parryReach: 1.3
+  diveWarning: 0.85
   diveDuration: 1.7
   diveReturn: 1.2

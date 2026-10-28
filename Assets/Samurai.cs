@@ -53,7 +53,9 @@ public class Samurai : MonoBehaviour, IHittable
     float ghostPhase;
     SpriteRenderer alert;
     SpriteRenderer alertGlow;
+    SpriteRenderer alertEdge;
     float alertUntil;
+    float alertSince;
     Color? knockTint;
 
     void Awake()
@@ -140,8 +142,8 @@ public class Samurai : MonoBehaviour, IHittable
 
     static readonly Color AlertColor = new Color(1f, 0.35f, 0.2f);
 
-    // A flash, a battle cry and a red "!" over its head just before it breaks formation to dive or lunge at the
-    // ronin, for as long as the warning lasts.
+    // A flash, a battle cry and a big red "!" edged in white over its head just before it breaks formation to dive or
+    // lunge at the ronin, for as long as the warning lasts. It pops in oversized so it catches the eye.
     public void WarnDive(float seconds)
     {
         HitFlash.Flash(animator.Renderer, 0.18f);
@@ -153,11 +155,16 @@ public class Samurai : MonoBehaviour, IHittable
             alert.sprite = ProceduralSprites.Exclaim;
             alert.color = AlertColor;
             alert.sortingOrder = animator.Renderer.sortingOrder + 5;
+            alertEdge = new GameObject("AlertEdge").AddComponent<SpriteRenderer>();
+            alertEdge.sprite = ProceduralSprites.Exclaim;
+            alertEdge.color = Color.white;
+            alertEdge.sortingOrder = alert.sortingOrder - 1;
             alertGlow = new GameObject("AlertGlow").AddComponent<SpriteRenderer>();
             alertGlow.sprite = ProceduralSprites.Glow;
-            alertGlow.color = new Color(AlertColor.r, AlertColor.g, AlertColor.b, 0.55f);
-            alertGlow.sortingOrder = alert.sortingOrder - 1;
+            alertGlow.color = new Color(AlertColor.r, AlertColor.g, AlertColor.b, 0.75f);
+            alertGlow.sortingOrder = alert.sortingOrder - 2;
         }
+        alertSince = Time.time;
         alertUntil = Time.time + seconds;
     }
 
@@ -183,18 +190,25 @@ public class Samurai : MonoBehaviour, IHittable
         }
         float top = animator.Renderer.bounds.max.y;
         float pulse = 1f + 0.15f * Mathf.Sin(Time.time * 20f);
-        alert.transform.position = new Vector3(transform.position.x, top + 0.5f + 0.08f * Mathf.Sin(Time.time * 14f), -0.2f);
-        alert.transform.localScale = Vector3.one * (0.9f * pulse);
+        // Pops in at twice its size and settles over the first fifth of a second.
+        float pop = 1f + 1f * (1f - Mathf.Clamp01((Time.time - alertSince) / 0.2f));
+        float size = 1.5f * pulse * pop;
+        alert.transform.position = new Vector3(transform.position.x, top + 0.75f + 0.08f * Mathf.Sin(Time.time * 14f), -0.2f);
+        alert.transform.localScale = Vector3.one * size;
+        alertEdge.transform.position = alert.transform.position + Vector3.forward * 0.005f;
+        alertEdge.transform.localScale = new Vector3(size * 1.45f, size * 1.2f, 1f);
         alertGlow.transform.position = alert.transform.position + Vector3.forward * 0.01f;
-        alertGlow.transform.localScale = Vector3.one * (1.1f * pulse / ProceduralSprites.Glow.bounds.size.x);
+        alertGlow.transform.localScale = Vector3.one * (2f * pulse * pop / ProceduralSprites.Glow.bounds.size.x);
     }
 
     void HideAlert()
     {
         if (alert != null) Destroy(alert.gameObject);
         if (alertGlow != null) Destroy(alertGlow.gameObject);
+        if (alertEdge != null) Destroy(alertEdge.gameObject);
         alert = null;
         alertGlow = null;
+        alertEdge = null;
     }
 
     // A spiked shell of icicles drawn over the statue a samurai leaves when it dies frozen. Living samurai held in ice

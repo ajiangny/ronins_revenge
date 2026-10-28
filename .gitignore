@@ -127,3 +127,6 @@ mono_crash*.json
 
 # Unbaked voice takes kept by Tools/generate-voice.mjs for --fx-only
 Tools/.voice-raw/
+
+# Burst output of a WebGL build, written beside Assets by Unity
+/Data/

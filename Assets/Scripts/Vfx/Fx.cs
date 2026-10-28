@@ -56,9 +56,6 @@ public static class Fx
     public const string UtsuLaceP2 = "Utsu_LaceP2";
     // Escapement's turning escape wheel.
     public const string UtsuEscapeWheel = "Utsu_EscapeWheel";
-    // The reusable safe-zone marker (SafeZone): its ward (left post, tiled band, right post) and its shield icon.
-    public const string SafeZone = "SafeZone";
-    public const string SafeZoneIcon = "SafeZoneIcon";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
     // The rocks its overload shakes loose: three looks (the stage's Rock, RockB and RockC blockers), each intact,
     // cracked and nearly broken, so frame look * 3 + state.

@@ -550,18 +550,6 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 006186ba9b4a948bab284ea3abf8941c, type: 3}
     fps: 1
     loop: 1
-  - id: SafeZone
-    frames:
-    - {fileID: 21300000, guid: 15e2a8428ea2b4d4591b123441398760, type: 3}
-    - {fileID: 21300000, guid: 840d76cab35f94cf0875121ddd3a9d28, type: 3}
-    - {fileID: 21300000, guid: 6531df64da11648e6a045300a38639e5, type: 3}
-    fps: 1
-    loop: 1
-  - id: SafeZoneIcon
-    frames:
-    - {fileID: 21300000, guid: 01eb0a90eddf04267a05b1794359469e, type: 3}
-    fps: 1
-    loop: 1
   - id: Utsu_PlumbPortal
     frames:
     - {fileID: 21300000, guid: 1dfbf83e74b4540c0bc299fe81af413b, type: 3}

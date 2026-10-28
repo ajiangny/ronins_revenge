@@ -76,9 +76,6 @@ public static class FxSetup
         (Fx.UtsuHaloShards, 1, true, Centre),
         // Its phase 1 body cracking open stage by stage, standing on its feet like its character frames.
         (Fx.UtsuCracking, 1, true, new Vector2(0.5f, 0f)),
-        // The safe-zone ward stands on its ground line; its icon floats from its middle.
-        (Fx.SafeZone, 1, true, new Vector2(0.5f, 1f - 25f / 32f)),
-        (Fx.SafeZoneIcon, 1, true, Centre),
         (Fx.UtsuPlumbPortal, 10, true, Centre),
         (Fx.UtsuLaceP2, 8, true, Centre),
         (Fx.UtsuEscapeWheel, 1, true, Centre),

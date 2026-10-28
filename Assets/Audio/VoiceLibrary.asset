@@ -387,10 +387,16 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 3bb686985b9b34d2ba73eecdc1f27f9e, type: 3}
   - id: Poguru_Block_10
     clip: {fileID: 8300000, guid: 8d998a7c1c54d4a5da89fc90b57f165d, type: 3}
-  - id: Poguru_Block_Back
-    clip: {fileID: 8300000, guid: b92820a2dc60b4559a96383dae75eff9, type: 3}
-  - id: Poguru_Block_Break
-    clip: {fileID: 8300000, guid: 37007f25109d14fc6aeb627ce320f48a, type: 3}
+  - id: Poguru_Block_15
+    clip: {fileID: 8300000, guid: 399a79c758ee54506ba2e0a43816b32d, type: 3}
+  - id: Poguru_Block_20
+    clip: {fileID: 8300000, guid: 5d9bffae0548545b381ab55f13b3757f, type: 3}
+  - id: Poguru_Block_30
+    clip: {fileID: 8300000, guid: d86639c4e7d4145a4967e46ccb3db4ac, type: 3}
+  - id: Poguru_Block_45
+    clip: {fileID: 8300000, guid: 34e254fdf986e4423b229ba3e368420a, type: 3}
+  - id: Poguru_Block_More
+    clip: {fileID: 8300000, guid: cdaaef7086e454306a692db592fdc095, type: 3}
   - id: Poguru_Boss_Benibana
     clip: {fileID: 8300000, guid: 18bd07604d52f464c8f6d0ace8bad6c4, type: 3}
   - id: Poguru_Boss_Shirogane
@@ -401,6 +407,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 26008b03cdd2348c98c69cc11b093b9c, type: 3}
   - id: Poguru_Boss_Won
     clip: {fileID: 8300000, guid: 909c57353308644409c175082349ad31, type: 3}
+  - id: Poguru_Rage_Charge
+    clip: {fileID: 8300000, guid: 99e0dac687aa5483f8c1a1a7d2017a81, type: 3}
   - id: Poguru_Round_Breathe
     clip: {fileID: 8300000, guid: bf3eabf68fa524adeb06f242488b18c5, type: 3}
   - id: Poguru_Round_Count
@@ -453,16 +461,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 8d886d7a4f3014b8ba14fa6a5883691f, type: 3}
   - id: Poguru_Tut_Again
     clip: {fileID: 8300000, guid: 68072a10f7b56424cb54545b29fc5c3f, type: 3}
-  - id: Poguru_Tut_Basics
-    clip: {fileID: 8300000, guid: 842f583465a124b26b9a12c7d805e29e, type: 3}
-  - id: Poguru_Tut_Basics_2
-    clip: {fileID: 8300000, guid: 4a388f978ebdb408d83858c27d69939a, type: 3}
-  - id: Poguru_Tut_Basics_3
-    clip: {fileID: 8300000, guid: 7d1392a449fe04e8ab0dc7d4ba858cdf, type: 3}
-  - id: Poguru_Tut_Basics_4
-    clip: {fileID: 8300000, guid: c4058fcb762044a029f9687dc28ef846, type: 3}
-  - id: Poguru_Tut_Basics_5
-    clip: {fileID: 8300000, guid: ce50fb717df004beb9ebdc50f379e98b, type: 3}
+  - id: Poguru_Tut_Backup
+    clip: {fileID: 8300000, guid: 44f5f6169b6034ee5a3c433f10c85673, type: 3}
+  - id: Poguru_Tut_Backup_2
+    clip: {fileID: 8300000, guid: e30a2007fb66e4f3b84ecf11f1867ecc, type: 3}
+  - id: Poguru_Tut_Backup_3
+    clip: {fileID: 8300000, guid: b08e09f6f8597407d95e14d3f06b95fd, type: 3}
   - id: Poguru_Tut_Boons
     clip: {fileID: 8300000, guid: b7188e0133ed44c3eb3cc3c796dfc421, type: 3}
   - id: Poguru_Tut_Boons_2
@@ -493,20 +497,34 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 4468fc1d346a54a95a577ec847544f03, type: 3}
   - id: Poguru_Tut_LookOut
     clip: {fileID: 8300000, guid: 8655ca69f0f6242c0ad348bfb7e94c05, type: 3}
-  - id: Poguru_Tut_Parried
-    clip: {fileID: 8300000, guid: 9a8cc627509d84336ab57eda14272364, type: 3}
-  - id: Poguru_Tut_Parry
-    clip: {fileID: 8300000, guid: da1bc9090c8d54931b9c4d75382cb796, type: 3}
+  - id: Poguru_Tut_ParryIt
+    clip: {fileID: 8300000, guid: 86214657c43b44e9d8237de51a0885f4, type: 3}
   - id: Poguru_Tut_Paths
     clip: {fileID: 8300000, guid: 054e5b55978884464a689f4e6e0f8ed2, type: 3}
   - id: Poguru_Tut_Paths_2
     clip: {fileID: 8300000, guid: 5befc05be2d304f93a6e05b996318194, type: 3}
+  - id: Poguru_Tut_Raged
+    clip: {fileID: 8300000, guid: b086a572f338d44d6b7f29adc9f27524, type: 3}
+  - id: Poguru_Tut_Raged_2
+    clip: {fileID: 8300000, guid: 923e238a96aa34d82aab1aec8a69b3bb, type: 3}
+  - id: Poguru_Tut_Raged_3
+    clip: {fileID: 8300000, guid: d82d83719669947499682afb0f0973a5, type: 3}
+  - id: Poguru_Tut_Raged_4
+    clip: {fileID: 8300000, guid: d7b77ced7458d4e519b13a685466e562, type: 3}
   - id: Poguru_Tut_Reward
     clip: {fileID: 8300000, guid: 212fefc55cf7e47678b47a54f6338c74, type: 3}
   - id: Poguru_Tut_Reward_2
     clip: {fileID: 8300000, guid: 5d146adfe7fc04e26b4e0c2925def6f5, type: 3}
+  - id: Poguru_Tut_ShurikenIt
+    clip: {fileID: 8300000, guid: 322e50d95ff104e0c82b55280f1111a7, type: 3}
   - id: Poguru_Tut_Skip
     clip: {fileID: 8300000, guid: 622f84f76fee448fa80ada8723b421c9, type: 3}
+  - id: Poguru_Tut_SlashIt
+    clip: {fileID: 8300000, guid: 1bb609e9ac90c43cb86ee85c6af87629, type: 3}
+  - id: Poguru_Tut_Stopped
+    clip: {fileID: 8300000, guid: a378f7d1da13847e086edc6572da80e7, type: 3}
+  - id: Poguru_Tut_TakeHim
+    clip: {fileID: 8300000, guid: 63c57350e6f624eee9bb35166340cba4, type: 3}
   - id: Poguru_Tut_Wake
     clip: {fileID: 8300000, guid: f8fa7391eb743485bb6ddb5ef219d521, type: 3}
   - id: Poguru_Tut_Wake_2
@@ -583,6 +601,28 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 12bed8dab79ab437c9158d83cc29cc80, type: 3}
   - id: Shirogane_Stagger
     clip: {fileID: 8300000, guid: 99e78cff73eda46709a81f8f60805ac8, type: 3}
+  - id: Tut_Charge_Taunt
+    clip: {fileID: 8300000, guid: 8de3680bef60a429bb9668bf278cbc1e, type: 3}
+  - id: Tut_Flee
+    clip: {fileID: 8300000, guid: 6b2f8b4714e294d6d8732e4d58b6cd6f, type: 3}
+  - id: Tut_Flee_2
+    clip: {fileID: 8300000, guid: 7905da28c13c0435ab0851cc1dc12a1a, type: 3}
+  - id: Tut_Flee_3
+    clip: {fileID: 8300000, guid: 0a92ac343cf7b4aec9c882b32c5be67e, type: 3}
+  - id: Tut_Slash_Fall
+    clip: {fileID: 8300000, guid: 83a3ae6f29e2f4dd4805edc5a3424320, type: 3}
+  - id: Tut_Slash_Taunt
+    clip: {fileID: 8300000, guid: 34a098b4fba084784a6aec3cf9c9aacf, type: 3}
+  - id: Tut_Soldiers
+    clip: {fileID: 8300000, guid: 437f6c5e2c3d042b0a76fb9a761f6679, type: 3}
+  - id: Tut_Soldiers_2
+    clip: {fileID: 8300000, guid: 05d4d20b2a5714ea6ab5417113336581, type: 3}
+  - id: Tut_Soldiers_3
+    clip: {fileID: 8300000, guid: 933c414f5fbb94736aaa4b1b9600e5ce, type: 3}
+  - id: Tut_Soldiers_4
+    clip: {fileID: 8300000, guid: c3f2205001d4a46bca2664fcb6ea1d80, type: 3}
+  - id: Tut_Spear_Taunt
+    clip: {fileID: 8300000, guid: b74b1c508752047c0812cfe1d0bd690b, type: 3}
   - id: Utsusemi_Defeat
     clip: {fileID: 8300000, guid: 02a75a57046f8430b9af9a2e168c71ef, type: 3}
   - id: Utsusemi_Defeat_2

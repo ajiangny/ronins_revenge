@@ -1,6 +1,7 @@
 // Generates the voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
-// Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice, Oni's in his, Poguru's in his and the three
-// souls' in theirs (the story behind each is in Story/<Name>.md).
+// Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice, Oni's in his, Poguru's
+// in his, the tutorial's soldiers' in theirs and the three souls' in theirs (the story behind each is in
+// Story/<Name>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
 // from .env.local.
@@ -36,6 +37,9 @@ const HIBIKI = "2R377yXvV0jHG7sPjbOY";
 // but warm (not shrill), fast and breathless, giggly, with comedic gasps and whines. Unity plays him through a light
 // chorus (GameManager.poguruVoice).
 const POGURU = "vHGbxklwUU4QPMN7Wam1";
+// Designed in ElevenLabs for the tutorial's soldiers: a gruff, sneering middle-aged foot soldier of Kagetsune's army,
+// rough and swaggering with a coward underneath, a period-drama villain grunt. All of them share it.
+const SOLDIER = "r3povynJfMX3y8tUT4Jg";
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -287,27 +291,47 @@ const LINES = {
   // Poguru, the Lost Dragon (Story/Poguru.md): the tutorial, his barks and his temple talk. Ids follow
   // Conversation.VoiceId; Oni's replies inside his conversations are in Oni's voice. Poguru_Wake_Count fills in a
   // death count, so it stays a subtitle.
-  Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! THE ARMY IS COMING!"],
+  Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! WAKE UP! [terrified, fast] Scary soldiers are coming!"],
   Poguru_Tut_Wake_2: [ONI, "[low, tired, flat] ...Who are you."],
   Poguru_Tut_Wake_3: [POGURU, "[proud, puffed up] Poguru! The Lost Dragon! [giggles] I live in your wisp. Rent-free!"],
   Poguru_Tut_Wake_4: [POGURU, "[gasps, fast, breathless] No time! Do you remember how to fight?"],
-  Poguru_Tut_Again: [POGURU, "[excited, fast] Oni! Army! Again! [eager] Want the lesson again? [giggles] I LOVE the lesson."],
-  Poguru_Tut_Yay: [POGURU, "[cheering] Yay! Stay close to me. [flustered, correcting himself] I mean, I'll stay close to you!"],
+  Poguru_Tut_Again: [POGURU, "[excited, fast] Oni! Wake up! Soldiers! Again! [eager] Want the lesson again? [giggles] I LOVE the lesson."],
+  Poguru_Tut_Yay: [POGURU, "[cheering] Yay! [nervous, fast] Stay close. They're coming!"],
   Poguru_Tut_Skip: [POGURU, "[fast, eager] Okay okay okay! I'll be in your wisp. Cheering. [whispering] Quietly. [giggles] Mostly."],
-  Poguru_Tut_Basics: [POGURU, "[excited, explaining fast] Bad guys up there, you down here. They march down, you stop them!"],
-  Poguru_Tut_Basics_2: [POGURU, "[excited] This is your SLASH! Your sword sends a cut flying up the field. [playful] Whoosh!"],
-  Poguru_Tut_Basics_3: [POGURU, "[awed] Your Spirit SHURIKEN! Big and sparkly, [sleepy, cute] but it needs a little nap after."],
-  Poguru_Tut_Basics_4: [POGURU, "[excited] And PARRY! Time it just before an arrow bonks you, [delighted] and it goes right back at them!"],
-  Poguru_Tut_Basics_5: [POGURU, "[proud] Beat the whole army. I'll float nearby and bonk arrows. [nervous giggle] ...Try not to make me bonk too many."],
+  Tut_Soldiers: [SOLDIER, "[gruff, sneering shout] There he is! [mocking] The Emperor's runaway dog."],
+  Tut_Soldiers_2: [SOLDIER, "[swaggering, menacing] Lord Kagetsune wants his demon back. [barking an order] Come quietly!"],
+  Tut_Soldiers_3: [ONI, "[low, tired, flat] ...No."],
+  Tut_Soldiers_4: [POGURU, "[squeaks] Eep! [panicked, fast] Five of them! [flustered, trying to stay calm] Okay, okay, one at a time!"],
+  Tut_Slash_Taunt: [SOLDIER, "[snarling shout] Eat this, traitor!"],
+  Poguru_Tut_SlashIt: [POGURU, "[urgent, fast] An arrow! SLASH it! [excited] Your cut breaks it clean in half!"],
+  Poguru_Tut_TakeHim: [POGURU, "[fierce, cheering] Now take him down!"],
+  Tut_Slash_Fall: [SOLDIER, "[dying grunt, choking] Gah...!"],
+  Tut_Charge_Taunt: [SOLDIER, "[rough battle shout] Rush him! Together!"],
+  Poguru_Tut_ShurikenIt: [POGURU, "[urgent, fast] Two in a row! [excited] Throw your SHURIKEN, it flies right through them both!"],
+  Poguru_Tut_Stopped: [POGURU, "[gleeful] Stopped in their tracks! [cackles] Ha!"],
+  Tut_Spear_Taunt: [SOLDIER, "[smug, sneering] Let's see you cut THIS. [proud, gloating] Blessed steel from the Emperor's own forge!"],
+  Poguru_Tut_ParryIt: [POGURU, "[panicked, very fast] That spear's cursed! Kagetsune's blacksmiths forge them with nasty magic. [frantic] You can't cut it or break it. [shouting] PARRY IT!"],
+  Tut_Flee: [SOLDIER, "[terrified, stammering] Th-that's not natural! [screaming, running away] CAPTAAAIN!"],
+  Tut_Flee_2: [SOLDIER, "[whimpering, higher pitched, cowardly wail] Wait for meee!"],
+  Tut_Flee_3: [POGURU, "[giggling, taunting] Hehe! Run away! [pause, suddenly worried] ...Wait. Where are they running TO?"],
+  Poguru_Tut_Backup: [POGURU, "[dismayed, small voice] Uh oh. [gulps] He brought a LOT of backup."],
+  Poguru_Tut_Backup_2: [ONI, "[low, tired, flat] ...Good."],
+  Poguru_Tut_Backup_3: [POGURU, "[nervous, then determined] Okay! I'll bonk every arrow I can. [proud] I'm a very good bonker. [brave] You do the rest!"],
+  Poguru_Block_15: [POGURU, "[straining, shouting through effort] I'M BONKING SO HARD RIGHT NOW!"],
+  Poguru_Block_20: [POGURU, "[exasperated, whiny shout] Oni! Swing the sword! The SWORD!"],
+  Poguru_Block_30: [POGURU, "[dizzy, cross, groaning] My head is RINGING!"],
+  Poguru_Block_45: [POGURU, "[shaking with fury, about to snap] I am going to EXPLODE!"],
+  Poguru_Block_More: [POGURU, "[furious, squeaky shouting] BONK! BONK! BOOOONK!"],
+  Poguru_Rage_Charge: [POGURU, "[growling, building to a roar] THAT'S IT! [louder, furious] THAT IS IT!! [roaring] RAAAAAGH!!!"],
+  Poguru_Tut_Raged: [POGURU, "[frantic yelling] ONI!! WERE YOU NAPPING?!"],
+  Poguru_Tut_Raged_2: [POGURU, "[furious, squeaky] I did EVERYTHING! [indignant shout] I'm a SUPPORT dragon! SUPPORT!"],
+  Poguru_Tut_Raged_3: [ONI, "[low, tired, flat] ...You were doing fine."],
+  Poguru_Tut_Raged_4: [POGURU, "[huffy, pouting] HMPH!"],
   Poguru_Block_1: [POGURU, "[proud, quick] Bonk! Got it!"],
   Poguru_Block_3: [POGURU, "[wincing, then brave] Ow. Okay. Still fine!"],
   Poguru_Block_6: [POGURU, "[whiny, exasperated] Oni, you can ALSO move, you know!"],
   Poguru_Block_10: [POGURU, "[whiny, indignant shout] My HEAD is not a SHIELD!"],
-  Poguru_Block_Break: [POGURU, "[huffy, fed up] That's it! Dragon break! You're on your own for five seconds!"],
-  Poguru_Block_Back: [POGURU, "[grumpy sigh] ...Fine. FINE. I'm back. [pouty] Hmph."],
   Poguru_Tut_Win: [POGURU, "[overjoyed, giggling] We did it! Victory wiggle! [singsong] Wiggle wiggle wiggle..."],
-  Poguru_Tut_Parry: [POGURU, "[panicked, squeaky shout] ONI! ONE MORE! PARRY IT!!"],
-  Poguru_Tut_Parried: [POGURU, "[amazed, delighted] WHOA! Right back at him! [proud] See? You DO remember!"],
   Poguru_Tut_LookOut: [POGURU, "[panicked, squeaky shout] LOOK OUT!!!"],
   Poguru_Tut_Hearts: [POGURU, "[wailing, panicked] Waaah! It went right through me! [worried, fast] Are you okay?!"],
   Poguru_Tut_Hearts_2: [ONI, "[low, tired, flat] ...Fine."],

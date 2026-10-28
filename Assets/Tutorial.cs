@@ -54,7 +54,10 @@ public class Tutorial : MonoBehaviour
     RectTransform keyRow;
     // His yell and the move's keys, hung beside Oni while the lesson holds the field.
     RectTransform prompt;
+    RectTransform promptKeys;
     bool promptOnRight;
+    // The move a held lesson is teaching, so its keys can be redrawn if the control scheme changes mid-lesson.
+    Moves lessonMove = Moves.None;
 
     // A test harness's press for a held lesson (synthetic keys don't reach an unfocused Game view), like
     // DialogueScene.Advance.
@@ -71,6 +74,9 @@ public class Tutorial : MonoBehaviour
     public static bool ShouldOffer(SaveData d) => d.tutorialReplay || (!d.tutorialSettled && d.runsStarted == 0);
 
     public void Bind(GameManager manager) => game = manager;
+
+    void OnEnable() => Controls.Changed += RedrawLessonKeys;
+    void OnDisable() => Controls.Changed -= RedrawLessonKeys;
 
     // At the start of a run: whether its first round opens on the offer.
     public void Arm(bool offer)
@@ -340,6 +346,7 @@ public class Tutorial : MonoBehaviour
         game.Poguru.Play(game.PoguruClips.gasp, true);
         Conversation yell = Dialogue.Find(yellId, false);
         game.SayLine(yell, 0, null, false);
+        lessonMove = move;
         ShowLesson(target, keys, yell, PromptOnRight(threatX < ronin.Bounds.center.x));
 
         bool done = false;
@@ -416,14 +423,31 @@ public class Tutorial : MonoBehaviour
         words.text = yell != null && yell.Lines.Length > 0 ? yell.Lines[0].Text : "";
         words.color = GameManager.PoguruColour;
         ui.Style(words, TextStyle.Hud);
-        RectTransform keyCaps = ui.CreateKeyRow(prompt, 30, keys);
-        keyCaps.anchorMin = keyCaps.anchorMax = new Vector2(onRight ? 0f : 1f, 0.5f);
-        keyCaps.pivot = new Vector2(onRight ? 0f : 1f, 1f);
-        keyCaps.anchoredPosition = new Vector2(0f, -6f);
+        BuildPromptKeys(keys);
+    }
+
+    // The move's keys under his yell, on the same side.
+    void BuildPromptKeys(KeyGlyph[] keys)
+    {
+        if (promptKeys != null) Destroy(promptKeys.gameObject);
+        promptKeys = game.Ui.CreateKeyRow(prompt, 30, keys);
+        promptKeys.anchorMin = promptKeys.anchorMax = new Vector2(promptOnRight ? 0f : 1f, 0.5f);
+        promptKeys.pivot = new Vector2(promptOnRight ? 0f : 1f, 1f);
+        promptKeys.anchoredPosition = new Vector2(0f, -6f);
+    }
+
+    // The player picked up the other scheme's buttons mid-lesson (Controls.Detect): show that scheme's keys.
+    void RedrawLessonKeys()
+    {
+        if (lessonMove == Moves.None || prompt == null) return;
+        KeyGlyph[] keys = Controls.Glyphs(lessonMove);
+        BuildPromptKeys(keys);
+        if (pointedSlot != null) PointAt(pointedSlot, pointedWidth, keys, true);
     }
 
     void HideLesson()
     {
+        lessonMove = Moves.None;
         ClearPointer();
         game.BoonChoice.DropSlots();
         HidePrompt();
@@ -775,7 +799,7 @@ public class Tutorial : MonoBehaviour
         PointAt(null, 0f);
     }
 
-    void PointAt(RectTransform target, float width, KeyGlyph[] keys = null)
+    void PointAt(RectTransform target, float width, KeyGlyph[] keys = null, bool silent = false)
     {
         pointedSlot = target;
         pointedWidth = width;
@@ -789,7 +813,7 @@ public class Tutorial : MonoBehaviour
             keyRow.anchorMin = keyRow.anchorMax = Vector2.zero;
             keyRow.pivot = new Vector2(0f, 0.5f);
         }
-        if (pointedSlot != null) Sfx.Play(Sfx.UiMove, 0.5f, 1.4f);
+        if (pointedSlot != null && !silent) Sfx.Play(Sfx.UiMove, 0.5f, 1.4f);
     }
 
     void ClearPointer()

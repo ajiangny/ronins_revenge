@@ -19,7 +19,7 @@ public class Utsusemi : Boss
     static readonly Color GhostBlue = new Color(0.4f, 0.62f, 1f);
     static readonly Color GhostGold = new Color(1f, 0.8f, 0.35f);
 
-    enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight }
+    enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight, Escapement, StoppedHour }
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
     float Recovery => secondPhase ? 0.35f : 0.7f;
@@ -144,6 +144,8 @@ public class Utsusemi : Boss
     protected override IEnumerator Fight()
     {
         armored = false;
+        // A fight restarted mid-Stopped Hour (a stagger) lets time run again and drops the needles it had set.
+        ClearStoppedTime();
         // A fight restarted mid-laser (a stagger) clears the planted sword with the attack: it's back in hand.
         if (swordOut)
         {
@@ -158,16 +160,29 @@ public class Utsusemi : Boss
             // Winding: it stands still for a beat between combos. This is the opening.
             yield return Wait(Recovery);
 
+            // Low on its last bar, once: the Thirteenth Hour.
+            if (secondPhase && !thirteenthStruck && Health <= MaxHealth * ThirteenthAt && !swordOut && !swordWheeling)
+            {
+                yield return ThirteenthHour();
+                continue;
+            }
+
             int combo = 1;
             while (combo < MaxCombo && Random.value < ComboChance) combo++;
-            bool hourStruck = false;
+            bool hourStruck = false, kicked = false;
             for (int i = 0; i < combo; i++)
             {
                 Beat();
+                // Too many cuts taken from right underneath it: it swings clear first, once a combo.
+                if (!kicked && Camped)
+                {
+                    kicked = true;
+                    yield return PendulumKick();
+                }
                 Move move = NextMove(hourStruck);
                 // A short shuffle to a new spot before a move, not a long walk: the lasers walk to the centre
                 // themselves, and a combo's follow-ups often go straight in.
-                bool laser = move == Move.HeartLantern || move == Move.Midnight;
+                bool laser = move == Move.HeartLantern || move == Move.Midnight || move == Move.StoppedHour;
                 if (!laser && (i == 0 || Random.value < 0.5f))
                 {
                     yield return Stride(NearX(1.8f, 3.6f));
@@ -187,36 +202,38 @@ public class Utsusemi : Boss
                     case Move.PlumbLines: yield return PlumbLines(); break;
                     case Move.HeartLantern: yield return HeartLantern(); break;
                     case Move.Midnight: yield return Midnight(); break;
+                    case Move.Escapement: yield return Escapement(); break;
+                    case Move.StoppedHour: yield return StoppedHour(); break;
                 }
             }
         }
     }
 
     // Never the same move twice in a row; the Hour Strikes come at most once a combo but at least every third move,
-    // so the parry rhythm stays part of the fight. No new hat while one is still out. Once its core opens, the lasers
-    // (the Heart Lantern and Midnight) take over: one at least every other move, alternating, with the lace and the
-    // plumbs as rarer filler between them.
+    // so the parry rhythm stays part of the fight. No new hat while one is still out. Once its core opens, the laser
+    // moves (the Heart Lantern, Midnight and the Stopped Hour) take over: one at least every third move and often
+    // sooner, never the same one twice running, so the order can't be counted off.
     Move NextMove(bool hourStruck)
     {
-        // While its sword wheels it fights on with the moves that need no blade: the lace and the plumbs.
-        if (swordWheeling) return lastMove == Move.PlumbLines ? Move.Lattice : lastMove == Move.Lattice ? Move.PlumbLines
-            : Random.value < 0.5f ? Move.Lattice : Move.PlumbLines;
-        if (secondPhase && movesSinceLaser >= 1)
+        // While its sword wheels it fights on with the moves that need no blade.
+        if (swordWheeling)
         {
-            if (lastLaser == Move.HeartLantern) return Move.Midnight;
-            if (lastLaser == Move.Midnight) return Move.HeartLantern;
-            return Random.value < 0.5f ? Move.HeartLantern : Move.Midnight;
+            var bladeless = new List<Move> { Move.Lattice, Move.PlumbLines, Move.Escapement };
+            if (lastMove is Move previous) bladeless.Remove(previous);
+            return bladeless[Random.Range(0, bladeless.Count)];
+        }
+        if (secondPhase && (movesSinceLaser >= 2 || (movesSinceLaser == 1 && Random.value < 0.5f)))
+        {
+            var lasers = new List<Move> { Move.HeartLantern, Move.Midnight, Move.StoppedHour };
+            if (lastLaser is Move previous) lasers.Remove(previous);
+            return lasers[Random.Range(0, lasers.Count)];
         }
         if (!hourStruck && movesSinceHours >= 2 && lastMove != Move.HourStrikes) return Move.HourStrikes;
-        var options = new List<Move> { Move.Lattice, Move.PlumbLines };
+        var options = new List<Move> { Move.Lattice, Move.PlumbLines, Move.Escapement };
         if (hatsOut == 0) options.Add(Move.KasaWheel);
         if (!hourStruck) options.Add(Move.HourStrikes);
-        if (secondPhase)
-        {
-            // The hat and the blade count twice, so the lace and plumbs come up less often between lasers.
-            if (hatsOut == 0) options.Add(Move.KasaWheel);
-            if (!hourStruck) options.Add(Move.HourStrikes);
-        }
+        // Once unwound, the hat counts twice, so the lace and plumbs come up less often between lasers.
+        if (secondPhase && hatsOut == 0) options.Add(Move.KasaWheel);
         if (lastMove is Move last) options.RemoveAll(m => m == last);
         if (options.Count == 0) options.Add(Move.Lattice);
         return options[Random.Range(0, options.Count)];
@@ -490,6 +507,7 @@ public class Utsusemi : Boss
         float pace = secondPhase ? 0.85f : 1f;
         float[] legSeconds = { 0.9f * pace, 0.7f * pace, 1f * pace };
         float nextTassel = Time.time + 0.3f;
+        bool fanned = false;
         int dotsGone = 0;
         float total = legSeconds[0] + legSeconds[1] + legSeconds[2];
         bool knockedAway = false;
@@ -522,6 +540,15 @@ public class Utsusemi : Boss
             // The trail fades out behind the hat as it flies.
             int passed = Mathf.Min(trail.Count, Mathf.FloorToInt(trail.Count * t / total));
             for (; dotsGone < passed; dotsGone++) RemoveTransient(trail[dotsGone]);
+            // Climbing home on its last leg, once well above the ronin, the hat spits a fan of gear teeth down at him.
+            // Never lower: a shot along his own row is one he couldn't step out of.
+            if (!sword && haloPiece < 0 && !fanned && t >= legSeconds[0] + legSeconds[1]
+                && hat.transform.position.y - ronin.Bounds.center.y > HatFanHeight)
+            {
+                fanned = true;
+                BulletHell.Fan((from, v) => GearShot(from, v), hat.transform.position, ronin.Bounds.center, 3, 8f, 6.5f);
+                Sfx.Play(Sfx.HatClang, 0.4f, 1.7f);
+            }
             if (!sword && haloPiece < 0 && t < legSeconds[0] && Time.time >= nextTassel)
             {
                 nextTassel = Time.time + (secondPhase ? 0.3f : 0.4f);
@@ -622,39 +649,65 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.FrostChill, 0.6f, 0.8f);
         yield return Wait(0.35f);
 
-        int layers = secondPhase ? 2 : 1;
+        // Two layers with two ways through (three layers with one, once unwound). Each layer's ways through step on
+        // from the last's, never further than he can follow before it lands.
+        int layers = secondPhase ? 3 : 2;
+        float interval = secondPhase ? 0.6f : 0.8f;
+        float lo = LeftEdge + 1.6f, hi = RightEdge - 1.6f;
+        var gaps = new List<float>();
+        for (int g = 0; g < (secondPhase ? 1 : 2); g++) gaps.Add(PickGap(gaps, lo, hi));
         for (int layer = 0; layer < layers; layer++)
         {
-            if (layer > 0) yield return Wait(0.6f);
-            SpinLattice(layer * 0.55f, secondPhase ? 1 : 2);
+            if (layer > 0)
+            {
+                yield return Wait(interval);
+                for (int g = 0; g < gaps.Count; g++)
+                {
+                    float want = gaps[g] + Random.Range(-1f, 1f) * BulletHell.MaxDodgeSpeed * interval;
+                    float next = BulletHell.NextGap(gaps[g], want, interval * 0.9f, lo, hi);
+                    BulletHell.GapOk(gaps[g], next, interval, LatticeGap, "Lace Lattice");
+                    gaps[g] = next;
+                }
+            }
+            yield return BulletHell.Room(60);
+            SpinLattice((layer % 2) * 0.55f, gaps);
             Sfx.Play(Sfx.WardShatter, 0.5f, 1.8f);
         }
     }
 
-    void SpinLattice(float offset, int gaps)
+    // The clear width of each way through the lace, edge to edge.
+    const float LatticeGap = 2.4f;
+    const float DiamondRadius = 0.22f;
+
+    // A way through somewhere in the field, well apart from any already chosen.
+    static float PickGap(List<float> taken, float lo, float hi)
+    {
+        float x = Random.Range(lo, hi);
+        for (int tries = 0; tries < 12; tries++)
+        {
+            x = Random.Range(lo, hi);
+            if (taken.TrueForAll(g => Mathf.Abs(g - x) >= 4f)) break;
+        }
+        return x;
+    }
+
+    void SpinLattice(float offset, List<float> gaps)
     {
         const float spacing = 1.1f;
         const int rows = 3;
         float speed = secondPhase ? 3f : 2.6f;
         float left = LeftEdge + 0.4f + offset;
         int columns = Mathf.FloorToInt((RightEdge - 0.4f - left) / spacing) + 1;
-        // Each gap is two columns wide, enough for the ronin to slip through.
-        var open = new HashSet<int>();
-        for (int g = 0; g < gaps; g++)
-        {
-            int c = Random.Range(1, columns - 2);
-            open.Add(c);
-            open.Add(c + 1);
-        }
         Sprite[] frames = Fx.Frames(Fx.UtsuLace);
         float y0 = anchor.y - 1.6f;
         for (int row = 0; row < rows; row++)
         {
             for (int c = 0; c < columns; c++)
             {
-                if (open.Contains(c)) continue;
                 float x = left + c * spacing + (row % 2 == 1 ? spacing / 2f : 0f);
-                Arrow diamond = Own(Shoot(new Vector3(x, y0 + row * 0.9f, 0), Vector3.down * speed));
+                // Every row leaves the gap clear by its own diamonds, so the offset rows can't close it.
+                if (gaps.Exists(g => Mathf.Abs(x - g) < LatticeGap / 2f + DiamondRadius)) continue;
+                Arrow diamond = BulletHell.Enlist(Shoot(new Vector3(x, y0 + row * 0.9f, 0), Vector3.down * speed));
                 if (frames != null) diamond.Restyle(frames, 8f, Color.white, new Vector2(0.7f, 0.7f), 0.22f, new Color(0.8f, 0.85f, 1f, 0.25f), 0.7f);
                 else
                 {
@@ -678,7 +731,8 @@ public class Utsusemi : Boss
     // back, it jams the gears and staggers the automaton. In the second phase there are five hours, faster.
     IEnumerator HourStrikes()
     {
-        int count = secondPhase ? 5 : 3;
+        int count = secondPhase ? 4 : 3;
+        int lasers = secondPhase ? 3 : 2;
         // The dashes come fast: a short tick before each, and a quick blow.
         float beat = secondPhase ? 0.18f : 0.24f;
         Vector3 row = anchor;
@@ -690,7 +744,9 @@ public class Utsusemi : Boss
         SpriteRenderer[] shell = ArmorShell();
         Sfx.Play(Sfx.GearGrind, 0.6f, 1.4f);
         yield return HoldArmor(shell, 0.3f);
-        for (int i = 0; i < count; i++) yield return LaserHour(shell);
+        // The shell drops once the move is called: it lasers the hours open to the blade.
+        Armour(shell, false);
+        for (int i = 0; i < lasers; i++) yield return LaserHour(shell);
         yield return HoldArmor(shell, 0.3f);
         Tick(0.4f);
         yield return HoldArmor(shell, 0.25f);
@@ -702,7 +758,7 @@ public class Utsusemi : Boss
             Beat();
             Tick(0.9f);
             yield return HoldArmor(shell, beat);
-            yield return LockOnDash(hour, row, shell);
+            yield return LockOnDash(hour, row, shell, hour == count ? RewindSeconds : 0f);
             PlayIdle();
         }
         armored = false;
@@ -730,7 +786,7 @@ public class Utsusemi : Boss
         Tick(0.7f);
         Vector3 spot = Spot(x);
         sight.color = new Color(1f, 0.55f, 0.5f, 0.85f);
-        yield return HoldArmor(shell, secondPhase ? 0.25f : 0.35f, () => Stretch(sight, Eye, spot, 0.07f));
+        yield return HoldArmor(shell, secondPhase ? 0.3f : 0.35f, () => Stretch(sight, Eye, spot, 0.07f));
         RemoveTransient(sight);
 
         Beam beam = MakeBeam(Eye, 0.8f);
@@ -752,7 +808,10 @@ public class Utsusemi : Boss
 
     // One hour struck where the ronin stands: a red sight line from its eye follows him, then locks on, and the
     // hour's numeral rises there. After a short window to step off, it dashes down onto the spot and chops it.
-    IEnumerator LockOnDash(int hour, Vector3 row, SpriteRenderer[] shell)
+    // After the last hour it stays down on his ground this long, winding itself back up: the opening.
+    const float RewindSeconds = 1.2f;
+
+    IEnumerator LockOnDash(int hour, Vector3 row, SpriteRenderer[] shell, float linger)
     {
         float lo = LeftEdge + 1.2f, hi = RightEdge - 1.2f;
         float x = Mathf.Clamp(ronin.Bounds.center.x, lo, hi);
@@ -778,6 +837,19 @@ public class Utsusemi : Boss
         Armour(shell, false);
         yield return Dash(new Vector3(x, Landing(), row.z), HourDashTime);
         yield return Chop(x, mark, 36f, 0.08f);
+        if (linger > 0f)
+        {
+            // The hours spent, it winds itself back up where it landed: gears grinding, slow ticks, open to the blade.
+            Sfx.Play(Sfx.GearGrind, 0.6f, 0.8f);
+            if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 1.6f) == null) Fx.Play(Fx.Impact, Centre, Gold, 1.4f);
+            PlayIdle();
+            for (float t = 0; t < linger; t += 0.3f)
+            {
+                Beat();
+                Sfx.Play(Sfx.ClockTick, 0.5f, 0.6f);
+                yield return Wait(0.3f);
+            }
+        }
         yield return Dash(row, HourDashTime);
     }
 
@@ -2154,8 +2226,9 @@ public class Utsusemi : Boss
         yield return new WaitForSeconds(0.4f);
         yield return Overload();
 
-        // It stops dead. A bell tolls once.
+        // It stops dead. A bell tolls once, and the air ripples with it.
         Sfx.Play(Sfx.MidnightChime, 1f, 0.7f);
+        TimeRipple.Emit(Centre, 14f, 0.8f, 1.2f);
         yield return new WaitForSeconds(0.55f);
 
         // Then it breaks open: gears and parts burst off it, the hat shatters into a halo and the core blazes out.
@@ -2213,7 +2286,7 @@ public class Utsusemi : Boss
     }
 
     // How long it overloads before it stops dead, and how far apart its wild lasers fire at the start and the end.
-    const float OverloadSeconds = 3.4f;
+    const float OverloadSeconds = 2.4f;
     const float WildLaserGapStart = 0.45f, WildLaserGapEnd = 0.07f;
 
     // It overloads: it shudders in place while cracks spread from its core over its body and hat, its clock racing,
@@ -2307,6 +2380,8 @@ public class Utsusemi : Boss
     {
         foreach (Ember e in embers) if (e.r != null) Destroy(e.r.gameObject);
         embers.Clear();
+        ClearStoppedTime();
+        TimeRipple.Clear();
     }
 
     // Its second form burns, as in its painting: flame tongues lick its raised claw and the torn hem, and embers lift
@@ -2408,4 +2483,296 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.GearGrind, 1f, 0.6f);
         return base.Fall();
     }
+
+    // A small gold gear tooth: breakable, one of a bullet-hell curtain.
+    Arrow GearShot(Vector3 from, Vector3 velocity, Color? tint = null)
+    {
+        Color c = tint ?? Gold;
+        Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
+        shot.Restyle(ProceduralSprites.Disc, c, new Vector2(0.34f, 0.34f), 0.17f, new Color(c.r, c.g, c.b, 0.45f), 0.8f);
+        return shot;
+    }
+
+    // Escapement: the clock it winds. It rocks side to side like an escapement's anchor, and on every tick its core
+    // spits a small fan of gear teeth at the ronin, the beat quickening as it goes. Every fourth tick is a bronze bell:
+    // parried, it rings out and bursts the teeth around it. Once unwound, crimson darts bracket him on the off-beats,
+    // so standing still is right as often as stepping.
+    IEnumerator Escapement()
+    {
+        int ticks = secondPhase ? 14 : 10;
+        Sfx.Play(Sfx.GearGrind, 0.5f, 1.6f);
+        ElementFx.Glow(Core, BeamColour, 0.7f, 2.5f, 0.4f, transform);
+        yield return Wait(0.45f);
+        float home = anchor.x;
+        for (int i = 0; i < ticks; i++)
+        {
+            Beat();
+            float k = i / (ticks - 1f);
+            float side = (i % 2 == 0 ? 1f : -1f) * 0.45f;
+            yield return Dash(new Vector3(Mathf.Clamp(home + side, LeftEdge + 1.5f, RightEdge - 1.5f), anchor.y, anchor.z), 0.07f);
+            Tick(0.7f);
+            Vector3 from = Core;
+            Vector3 at = ronin.Bounds.center;
+            yield return BulletHell.Room(4);
+            if (i % 4 == 3)
+            {
+                BulletHell.MakeBell(BulletHell.Enlist(Shoot(from, (at - from).normalized * 5f)), 1.1f);
+                Sfx.Play(Sfx.MidnightChime, 0.35f, 1.6f);
+            }
+            else if (secondPhase && i % 2 == 1)
+            {
+                // Either side of him, a clear stretch between: the step he'd take is the one they punish.
+                foreach (float off in new[] { -1.9f, 1.9f })
+                {
+                    BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, (at + Vector3.right * off - from).normalized * 7.5f)), BulletHell.Crimson);
+                }
+            }
+            else BulletHell.Fan((f, v) => GearShot(f, v), from, at, 3, secondPhase ? 9f : 8f, secondPhase ? 7.5f : 6.5f);
+            yield return Wait(Mathf.Lerp(0.6f, secondPhase ? 0.28f : 0.34f, k));
+        }
+        yield return Dash(new Vector3(home, anchor.y, anchor.z), 0.1f);
+        PlayIdle();
+    }
+
+    // Cuts the ronin landed from almost underneath it, by time. Too many too fast and it kicks clear (Pendulum Kick).
+    readonly List<float> campHits = new List<float>();
+    const float CampRange = 1.6f, CampWindow = 3f;
+    const int CampHits = 8;
+
+    protected override void OnDamaged()
+    {
+        if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - Centre.x) < CampRange) campHits.Add(Time.time);
+    }
+
+    bool Camped
+    {
+        get
+        {
+            campHits.RemoveAll(t => Time.time - t > CampWindow);
+            return campHits.Count >= CampHits;
+        }
+    }
+
+    // Pendulum Kick: he has stood under it hacking away. It swings aside like a pendulum and its core bursts a ring
+    // of gear teeth with one clear arc, past it on the far side: the answer is to move, not to keep cutting.
+    IEnumerator PendulumKick()
+    {
+        campHits.Clear();
+        float away = ronin.Bounds.center.x < Centre.x ? 1f : -1f;
+        Tick(0.9f);
+        ElementFx.Glow(Core, BeamColour, 0.8f, 2f, 0.25f, transform);
+        Sfx.Play(Sfx.GearGrind, 0.5f, 1.8f);
+        yield return Wait(0.3f);
+        float x = Mathf.Clamp(anchor.x + away * 2.2f, LeftEdge + 1.5f, RightEdge - 1.5f);
+        yield return Dash(new Vector3(x, anchor.y, anchor.z), 0.12f);
+        Sfx.Play(Sfx.HatClang, 0.7f, 1.3f);
+        CameraShake.Add(0.15f);
+        yield return BulletHell.Room(18);
+        Vector3 from = Core;
+        Vector3 clear = new Vector3(x + away * 3f, ronin.Bounds.center.y, 0);
+        float clearAngle = Vector3.SignedAngle(Vector3.right, clear - from, Vector3.forward);
+        for (int i = 0; i < 18; i++)
+        {
+            float a = i * 20f + 10f;
+            if (Mathf.Abs(Mathf.DeltaAngle(a, clearAngle)) < 16f) continue;
+            GearShot(from, Quaternion.Euler(0, 0, a) * Vector3.right * 6f);
+        }
+        yield return Wait(0.4f);
+        PlayIdle();
+    }
+
+    // The Stopped Hour's needles, hung in the air while time is held.
+    readonly List<Arrow> needles = new List<Arrow>();
+    int stoppedHours;
+    const float NeedleSpeed = 6f;
+    // Rows hang this far apart, so they land a third of a second apart once released.
+    const float NeedleRowGap = 1.9f;
+
+    // Stopped Hour: the hour it keeps, held still. It raises its burning fist and the world stops: colour drains, the
+    // clock falls silent, and a ripple spreads from its hand. While time is held it hangs rows of molten needles in
+    // the air over the ronin, each set where he stands as it's placed, each with one way through; he alone can still
+    // move. Then the ripples rush back into its hand, a bell tolls and every needle falls at once, the lowest row
+    // first. Needles break to a cut but fizzle a parry: read the rows and walk the gaps, or cut your own.
+    IEnumerator StoppedHour()
+    {
+        stoppedHours++;
+        int rows = stoppedHours > 1 ? 3 : 2;
+        float gapWidth = Mathf.Max(BulletHell.MinGap, 3.4f - 0.4f * (stoppedHours - 1));
+        float lo = LeftEdge + 0.6f + gapWidth / 2f, hi = RightEdge - 0.6f - gapWidth / 2f;
+
+        if (stopFrames != null) PlayFrames(stopFrames, 0, -1, true, 10f);
+        else PlayAction(art.parry);
+        Sfx.Play(Sfx.LanternCharge, 0.6f, 0.6f);
+        yield return Wait(0.5f);
+
+        // Time stops.
+        Vector3 hand = stopFrames != null ? OnSprite(FlamePoints[0].x, FlamePoints[0].y) : Head;
+        Sfx.Play(Sfx.MidnightChime, 0.8f, 0.5f);
+        Music.Duck(0.2f, 4f);
+        CameraShake.Add(0.2f);
+        TimeRipple.Emit(hand, 16f, 1f, 1.8f);
+        yield return StopFade(0f, 1f, 0.35f);
+
+        float lowest = ronin.Bounds.center.y + 5.5f;
+        float lastGap = ronin.Bounds.center.x;
+        for (int r = 0; r < rows; r++)
+        {
+            Beat();
+            float here = ronin.Bounds.center.x;
+            float gap;
+            if (r == 0)
+            {
+                // Over where he stands, with its way through a few steps off to one side.
+                float side = Random.value < 0.5f ? -1f : 1f;
+                gap = here + side * Random.Range(3f, 6f);
+                if (gap < lo || gap > hi) gap = here - side * Random.Range(3f, 6f);
+                gap = Mathf.Clamp(gap, lo, hi);
+            }
+            else
+            {
+                // Each higher row lands a beat later, its way through a step on from the last row's.
+                float seconds = NeedleRowGap / NeedleSpeed;
+                float want = lastGap + (Random.value < 0.5f ? -1f : 1f) * BulletHell.MaxDodgeSpeed * seconds;
+                gap = BulletHell.NextGap(lastGap, want, seconds * 0.9f, lo, hi);
+                BulletHell.GapOk(lastGap, gap, seconds, gapWidth, "Stopped Hour");
+            }
+            float y = lowest + r * NeedleRowGap;
+            yield return BulletHell.Room(30);
+            needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.7f, new[] { gap }, gapWidth, 0f));
+            TimeRipple.Emit(new Vector3(gap, y, 0), 2.5f, 0.6f, 0.5f);
+            Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
+            lastGap = gap;
+            yield return Wait(0.55f);
+        }
+        // Held: a moment to read the rows and walk.
+        Beat();
+        yield return Wait(0.9f);
+
+        // The ripples rush back into its hand, a bell tolls, and time runs again.
+        TimeRipple.Emit(hand, 16f, 0.9f, 0.6f, inward: true);
+        yield return Wait(0.6f);
+        if (Sfx.Has(Sfx.BellToll)) Sfx.Play(Sfx.BellToll, 0.9f, 1f);
+        else Sfx.Play(Sfx.MidnightChime, 1f, 0.9f);
+        CameraShake.Add(0.25f);
+        foreach (Arrow needle in needles) if (needle != null) needle.Turn(Vector3.down * NeedleSpeed);
+        needles.Clear();
+        yield return StopFade(1f, 0f, 0.15f);
+        Tick(0.8f);
+        PlayIdle();
+        Beat();
+        yield return Wait(0.8f);
+    }
+
+    // A molten clock-hand needle: unparryable, through cover, but a cut breaks it.
+    Arrow Needle(Vector3 from, Vector3 velocity) => BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, velocity)), Molten);
+
+    IEnumerator StopFade(float from, float to, float seconds)
+    {
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            TimeRipple.SetStop(Mathf.Lerp(from, to, t / seconds));
+            yield return null;
+        }
+        TimeRipple.SetStop(to);
+    }
+
+    // Lets time run again and bursts any needles still hung in the air (the move cut short).
+    void ClearStoppedTime()
+    {
+        TimeRipple.SetStop(0f);
+        foreach (Arrow needle in needles) if (needle != null) needle.Pop(Molten);
+        needles.Clear();
+    }
+
+    // The Thirteenth Hour comes once, under this share of its last bar.
+    const float ThirteenthAt = 0.15f;
+    const float ThirteenthSeconds = 10f;
+    // Each sweep of its hand over one half of the ground, its warning line included.
+    const float HandSeconds = 2.5f, HandTell = 0.7f;
+    bool thirteenthStruck;
+
+    // The Thirteenth Hour: the hour that should never come. Low on its last bar it strides to the middle and its core
+    // turns like a clock face: a spiral of molten sparks wheels out while its heart's beam, one hand, sweeps one half
+    // of the ground and then the other, a warning line before each. It can be cut down throughout: a last stand,
+    // not a wall.
+    IEnumerator ThirteenthHour()
+    {
+        thirteenthStruck = true;
+        float mid = CameraShake.Center.x;
+        yield return Stride(mid);
+        Sfx.Play(Sfx.MidnightChime, 1f, 0.6f);
+        Music.Duck(0.25f, 3f);
+        TimeRipple.Emit(Core, 12f, 0.8f, 1.4f);
+        ElementFx.Glow(Core, Molten, 1f, 5f, 0.6f, transform);
+        yield return Wait(0.8f);
+
+        // The spiral's beat is worked out from its height, so one arm's landings sit a gap apart (as BulletHell.Spiral).
+        const float spin = 38f, sparkSpeed = 5f, sparkRadius = 0.17f;
+        // Only arms pointing down fire, so six keep two or three raining at once.
+        const int arms = 6;
+        float height = Mathf.Max(1f, Core.y - ronin.Bounds.center.y);
+        float interval = Mathf.Max(0.08f, (BulletHell.MinGap + 2f * sparkRadius) / (height * spin * Mathf.Deg2Rad));
+        float nextSpark = 0f;
+        bool left = ronin.Bounds.center.x > mid;
+        int sweep = -1;
+        Beam hand = null;
+        SpriteRenderer guide = null;
+        for (float t = 0; t < ThirteenthSeconds && !IsDead; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        {
+            Beat();
+            if (t >= nextSpark)
+            {
+                nextSpark = t + interval;
+                for (int a = 0; a < arms; a++)
+                {
+                    float angle = Mathf.Repeat(spin * t + 360f * a / arms + 180f, 360f) - 180f;
+                    if (Mathf.Abs(angle) > 80f) continue;
+                    GearShot(Core, Quaternion.Euler(0, 0, angle) * Vector3.down * sparkSpeed, Molten);
+                }
+            }
+
+            // The hand: each sweep takes the other half of the ground.
+            int now = (int)(t / HandSeconds);
+            if (now != sweep)
+            {
+                sweep = now;
+                left = !left;
+                if (hand != null) EndBeam(hand);
+                hand = null;
+                TimeRipple.Emit(Core, 6f, 0.4f, 0.7f);
+                Tick(0.9f);
+            }
+            float s = t - sweep * HandSeconds;
+            float dir = left ? -1f : 1f;
+            float reach = (left ? mid - LeftEdge : RightEdge - mid) - 0.5f;
+            if (s < HandTell)
+            {
+                // A thin warning line down the half it's about to sweep.
+                Vector3 mark = new Vector3(mid + dir * reach * 0.55f, GroundY, 0);
+                if (guide == null) guide = Bar(Core, mark, 0.06f, new Color(Molten.r, Molten.g, Molten.b, 0.5f));
+                Stretch(guide, Core, mark, 0.06f + 0.05f * Mathf.PingPong(t * 8f, 1f));
+            }
+            else
+            {
+                if (guide != null) RemoveTransient(guide);
+                guide = null;
+                if (hand == null) hand = MakeBeam(Core, 1.2f, true);
+                float u = (s - HandTell) / (HandSeconds - HandTell);
+                // Out from under it to the edge and back, never quite under its own feet.
+                float x = mid + dir * (0.9f + (reach - 0.9f) * Mathf.Sin(u * Mathf.PI));
+                Vector3 end = BeamEnd(x, out _);
+                DrawBeam(hand, Core, end, false, true);
+                HitIfCrossed(Core, end);
+            }
+            yield return null;
+        }
+        if (hand != null) EndBeam(hand);
+        if (guide != null) RemoveTransient(guide);
+        Tick(0.9f);
+        PlayIdle();
+        yield return Wait(0.5f);
+    }
+
+    // The return leg's fan of gear teeth only fires from at least this high above the ronin.
+    const float HatFanHeight = 4f;
 }

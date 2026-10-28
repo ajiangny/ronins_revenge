@@ -1821,8 +1821,8 @@ public class GameManager : MonoBehaviour
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, 0);
         string body = roundIndex >= Stage.rounds.Length + 1 ? "Their finest march."
-            : roundIndex >= Stage.rounds.Length ? "The army regroups."
-            : roundIndex > 0 ? "Another army marches in."
+            : roundIndex >= Stage.rounds.Length ? "The dead regroup."
+            : roundIndex > 0 ? "Another army of the dead marches in."
             : stageIndex == 0 ? "Get ready!"
             : stageIndex == 1 ? "Bigger, faster, angrier armies."
             : "The dead march too.";
@@ -3596,7 +3596,7 @@ public class GameManager : MonoBehaviour
         }
         CameraShake.Add(0.6f);
         ronin.Explode();
-        EndGame("DEFEATED", "The samurai reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false);
+        EndGame("DEFEATED", "The dead reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false);
     }
 
     void OnRoninHit()

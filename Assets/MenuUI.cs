@@ -145,7 +145,8 @@ public class MenuUI : MonoBehaviour
         hintText.text = Hint(columns > 1 ? "↑ ↓ ← →" : "↑ ↓", "Select")
             + (Array.Exists(items, item => item.IsSlider) ? Hint("← →", "Adjust") : "")
             + Hint("Enter", "Confirm")
-            + (onBack != null ? Hint("Esc", "Back") : "");
+            // In a browser Esc can be taken by fullscreen, so the web build names Backspace too.
+            + (onBack != null ? Hint(Application.platform == RuntimePlatform.WebGLPlayer ? "Esc / Bksp" : "Esc", "Back") : "");
 
         // Stack title, body and rows down from the top, then centre the whole block on screen.
         const float titleHeight = 150f;

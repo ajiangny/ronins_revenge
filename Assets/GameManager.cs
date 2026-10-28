@@ -678,9 +678,20 @@ public class GameManager : MonoBehaviour
         IceStatue.Shattered -= OnStatueShattered;
     }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [System.Runtime.InteropServices.DllImport("__Internal")] static extern void LockEscapeInFullscreen();
+#endif
+
+    // Fullscreen last frame, so leaving it mid-fight (Esc in a browser that won't hand the key over) pauses the game.
+    bool wasFullScreen;
+
     void Start()
     {
         Time.timeScale = 1f;
+#if UNITY_WEBGL && !UNITY_EDITOR
+        LockEscapeInFullscreen();
+#endif
+        wasFullScreen = Screen.fullScreen;
         if (boonChoice == null) boonChoice = ui.gameObject.AddComponent<BoonChoiceUI>();
         boonChoice.Bind(ronin, ui);
         menu = ui.gameObject.AddComponent<MenuUI>();
@@ -801,7 +812,10 @@ public class GameManager : MonoBehaviour
         Gamepad gamepad = Gamepad.current;
         bool pause = (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame))
             || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
-        if (state == State.Playing && pause) Pause();
+        // In a browser Esc may only leave fullscreen without the game seeing it, so leaving fullscreen pauses too.
+        bool leftFullScreen = Application.platform == RuntimePlatform.WebGLPlayer && wasFullScreen && !Screen.fullScreen;
+        wasFullScreen = Screen.fullScreen;
+        if (state == State.Playing && (pause || leftFullScreen)) Pause();
         if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
         resources.SetVisible(state == State.Hub);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
@@ -971,8 +985,9 @@ public class GameManager : MonoBehaviour
             Row("Slash", Key("SPACE") + "    or    " + Key("LEFT CLICK")) +
             Row("Spirit Shuriken", Key("W") + "    or    " + Key("↑")) +
             Row("Parry arrows", Key("SHIFT") + "  " + Key("↓") + "    or    " + Key("RIGHT CLICK")) +
+            Row("Ultimate (when full)", Key("Q")) +
             Row("Show ability names", "hold " + Key("TAB")) +
-            Row("Pause", Key("ESC")) +
+            Row("Pause", Key("ESC") + "    or    " + Key("P")) +
             "</align>\n" +
             $"Clear three samurai armies in each of the {stages.Length} stages.\nA warlord waits at the end of every stage.\n" +
             "Fallen samurai may drop spirit souls. Catch one to choose a boon.",

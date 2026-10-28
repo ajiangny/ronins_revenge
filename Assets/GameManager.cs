@@ -22,6 +22,14 @@ public class ElementArt
     public Sprite heldSoul;
 }
 
+// The icon a boss's portal shows: something of theirs (Benibana's kiseru, Utsusemi's hat, Kuon's head, Kagetsune's helm).
+[System.Serializable]
+public class BossIcon
+{
+    public BossKind boss;
+    public Sprite[] frames;
+}
+
 // Owns the game flow: title menu -> stages of rounds -> win/lose menu, plus pause, score, lives, souls and boons.
 public class GameManager : MonoBehaviour
 {
@@ -101,8 +109,20 @@ public class GameManager : MonoBehaviour
     [SerializeField, Range(0, 1)] float scrollChancePerKill = 0f;
     [Tooltip("Most technique scrolls that can drop in one run, like Hades' two Daedalus Hammers.")]
     [SerializeField] int maxScrollsPerRun = 2;
-    [Tooltip("The technique scroll pickup. Wired by Ninja/Apply Boon Art; empty draws a parchment bar on a gold glow.")]
-    [SerializeField] Sprite scrollSprite;
+    [Tooltip("The technique scroll pickup's loop, also its portal's icon. Wired by Ninja/Apply Boon Art; empty draws a parchment bar on a gold glow.")]
+    [SerializeField] Sprite[] scrollFrames;
+    [Tooltip("The painted scroll held out on the Sword Arts screen. Empty uses scrollFrames.")]
+    [SerializeField] Sprite scrollPainted;
+    [Tooltip("The Spirit Bead portal's icon, looped. Empty: a glow in the bead's colour.")]
+    [SerializeField] Sprite[] beadFrames;
+    [Tooltip("The painted bead held out on the Spirit Bead screen. Empty uses beadFrames.")]
+    [SerializeField] Sprite beadPainted;
+    [Tooltip("The ember cache portal's icon, looped.")]
+    [SerializeField] Sprite[] emberFrames;
+    [Tooltip("The healing spring portal's icon, looped. Empty uses the life icon.")]
+    [SerializeField] Sprite[] springFrames;
+    [Tooltip("Each boss portal's icon, by the boss waiting behind it.")]
+    [SerializeField] BossIcon[] bossIcons;
     [Tooltip("Chance that a blocker worn down by hits drops a heart, which heals a lost life.")]
     [SerializeField, Range(0, 1)] float heartDropChance = 0.2f;
     [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
@@ -1748,7 +1768,7 @@ public class GameManager : MonoBehaviour
 
     void SpawnScroll(Vector3 position)
     {
-        activeScroll = TechniqueScroll.Spawn(position, scrollSprite, ronin, OnScrollCollected);
+        activeScroll = TechniqueScroll.Spawn(position, scrollFrames, ronin, OnScrollCollected);
         // The first scroll of a run carries the gold arrow, like the first soul.
         if (scrollsDropped <= 1) activeScroll.ShowHint(soulHintArrow);
     }
@@ -1783,7 +1803,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.BeadColor, 1.2f);
         Sfx.Play(Sfx.SoulCollect, 1f, 1.15f);
-        boonChoice.ShowBead(offers, index =>
+        boonChoice.ShowBead(offers, Held(beadPainted, beadFrames), index =>
         {
             TakeBoon(offers[index]);
             Time.timeScale = 1f;
@@ -1801,7 +1821,7 @@ public class GameManager : MonoBehaviour
         state = State.Choosing;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
-        boonChoice.ShowArts(offers, scrollSprite, index =>
+        boonChoice.ShowArts(offers, Held(scrollPainted, scrollFrames), index =>
         {
             TakeBoon(offers[index]);
             Time.timeScale = 1f;
@@ -2289,10 +2309,24 @@ public class GameManager : MonoBehaviour
     Sprite[] RewardIcon(PortalReward reward, Element element) => reward switch
     {
         PortalReward.Soul => ArtFor(element)?.soulFrames,
-        PortalReward.Scroll => scrollSprite != null ? new[] { scrollSprite } : null,
-        PortalReward.Spring => ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
+        PortalReward.Scroll => scrollFrames,
+        PortalReward.Bead => beadFrames,
+        PortalReward.Embers => emberFrames,
+        PortalReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
+        PortalReward.Boss => BossIconOf(stages[stageIndex].boss),
         _ => null,
     };
+
+    Sprite[] BossIconOf(BossKind boss)
+    {
+        if (bossIcons == null) return null;
+        foreach (BossIcon icon in bossIcons)
+            if (icon.boss == boss) return icon.frames;
+        return null;
+    }
+
+    // What a boon screen holds out: the painting, or the pixel loop without one.
+    static Sprite[] Held(Sprite painted, Sprite[] frames) => painted != null ? new[] { painted } : frames;
 
     // Every cleared stage earns a boon of a random element, then the next stage begins.
     IEnumerator StageCleared()

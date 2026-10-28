@@ -6,13 +6,14 @@ public enum PortalReward { Soul, Bead, Embers, Spring, Scroll, Boss }
 
 // A spirit gate that opens where the army stood once a round is cleared, like Hades' chamber doors: each shows the
 // reward of the round behind it, and the ronin picks one by standing under it. Built in code; without art it is a
-// tall glow in the reward's colour around the reward's icon.
+// tall glow in the reward's colour around the reward's icon (a disc without art).
 public class Portal : MonoBehaviour
 {
     const float Width = 1.5f;
     const float Height = 2.4f;
     const float OpenTime = 0.5f;
     const float CloseTime = 0.35f;
+    const float IconSize = 1.3f;
 
     public PortalReward Reward { get; private set; }
     public Element Element { get; private set; }
@@ -44,7 +45,8 @@ public class Portal : MonoBehaviour
         if (portal.iconFrames != null)
         {
             Sprite first = portal.iconFrames[0];
-            portal.icon.transform.localScale = Vector3.one * (0.9f / Mathf.Max(first.bounds.size.x, first.bounds.size.y));
+            // Most of the portal's width, so the reward's art reads at a glance.
+            portal.icon.transform.localScale = Vector3.one * (IconSize / Mathf.Max(first.bounds.size.x, first.bounds.size.y));
         }
         else
         {

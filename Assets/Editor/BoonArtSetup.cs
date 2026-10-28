@@ -89,7 +89,23 @@ public static class BoonArtSetup
         if (!ui.TryGetComponent(out BoonChoiceUI choice)) choice = ui.gameObject.AddComponent<BoonChoiceUI>();
         managerSo.FindProperty("boonChoice").objectReferenceValue = choice;
         managerSo.FindProperty("soulHintArrow").objectReferenceValue = Load("UI/SoulArrow");
-        managerSo.FindProperty("scrollSprite").objectReferenceValue = Load("Effects/TechniqueScroll");
+        // The portal rewards' loops (PixelLab objects, see ARCHITECTURE's Portals), and the bead and scroll held out
+        // on their boon screens.
+        SetArray(managerSo.FindProperty("scrollFrames"), Frames("Effects/TechniqueScroll_"));
+        SetArray(managerSo.FindProperty("beadFrames"), Frames("Effects/SpiritBead_"));
+        SetArray(managerSo.FindProperty("emberFrames"), Frames("Effects/EmberCache_"));
+        SetArray(managerSo.FindProperty("springFrames"), Frames("Effects/HealingSpring_"));
+        managerSo.FindProperty("scrollPainted").objectReferenceValue = BossArtSetup.Portrait("TechniqueScroll_Painted");
+        managerSo.FindProperty("beadPainted").objectReferenceValue = BossArtSetup.Portrait("SpiritBead_Painted");
+        SerializedProperty bossIcons = managerSo.FindProperty("bossIcons");
+        var kinds = System.Array.FindAll((BossKind[])System.Enum.GetValues(typeof(BossKind)), kind => kind != BossKind.None);
+        bossIcons.arraySize = kinds.Length;
+        for (int i = 0; i < kinds.Length; i++)
+        {
+            SerializedProperty icon = bossIcons.GetArrayElementAtIndex(i);
+            icon.FindPropertyRelative("boss").enumValueIndex = (int)kinds[i];
+            SetArray(icon.FindPropertyRelative("frames"), Frames($"Effects/BossIcon_{kinds[i]}_"));
+        }
         managerSo.ApplyModifiedPropertiesWithoutUndo();
 
         // The spiked ice shell drawn over ice statues.

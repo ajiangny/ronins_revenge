@@ -126,17 +126,17 @@ public class BoonChoiceUI : MonoBehaviour
     }
 
     // The Sword Arts screen for a technique scroll: the same layout in polished steel, the scroll in the ronin's hand.
-    public void ShowArts(List<BoonOffer> artOffers, Sprite scroll, Action<int> onChosen)
+    public void ShowArts(List<BoonOffer> artOffers, Sprite[] scroll, Action<int> onChosen)
     {
         Show("Sword Arts", "a secret technique of the blade, written by a master long dead.", Boons.ArtColor, artOffers,
-            scroll != null ? new[] { scroll } : null, null, onChosen);
+            scroll, null, onChosen);
     }
 
     // A Spirit Bead (Hades' Pom of Power): the held boons it could raise, each card showing the step up.
-    public void ShowBead(List<BoonOffer> upgrades, Action<int> onChosen)
+    public void ShowBead(List<BoonOffer> upgrades, Sprite[] bead, Action<int> onChosen)
     {
         Show("Spirit Bead", "a bead of the temple's prayer string, warm with old devotion.", Boons.BeadColor, upgrades,
-            null, null, onChosen);
+            bead, null, onChosen);
     }
 
     void Show(string heading, string tagline, Color colour, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)

@@ -17,7 +17,7 @@ public class TechniqueScroll : Pickup
     SpriteRenderer glow;
     SpriteRenderer hint;
 
-    public static TechniqueScroll Spawn(Vector3 position, Sprite art, Ronin ronin, Action<TechniqueScroll> onCollected)
+    public static TechniqueScroll Spawn(Vector3 position, Sprite[] frames, Ronin ronin, Action<TechniqueScroll> onCollected)
     {
         var go = new GameObject("TechniqueScroll");
         go.transform.position = new Vector3(position.x, position.y, -0.5f);
@@ -26,12 +26,14 @@ public class TechniqueScroll : Pickup
         scroll.collected = onCollected;
 
         scroll.glow = CreateLayer(go.transform, "Glow", ProceduralSprites.Glow, 1.8f, 40);
-        bool hasArt = art != null;
-        scroll.body = CreateLayer(go.transform, "Scroll", hasArt ? art : ProceduralSprites.White, 1f, 41);
+        bool hasArt = frames != null && frames.Length > 0 && frames[0] != null;
+        scroll.body = CreateLayer(go.transform, "Scroll", hasArt ? frames[0] : ProceduralSprites.White, 1f, 41);
         if (hasArt)
         {
+            Sprite art = frames[0];
             // Sized to about two thirds of a unit across, whatever the art's pixel density.
             scroll.body.transform.localScale = Vector3.one * (0.7f / Mathf.Max(art.bounds.size.x, art.bounds.size.y));
+            if (frames.Length > 1) scroll.body.gameObject.AddComponent<SpriteAnimator>().Play(frames, true, null, 8f);
         }
         else
         {

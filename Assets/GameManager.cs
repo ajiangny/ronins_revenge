@@ -491,6 +491,7 @@ public class GameManager : MonoBehaviour
     int devSoulElement;
     // Souls carry a hint arrow until the player has caught one this run.
     bool soulCaught;
+    bool firstBoonTaken;
     FxPlayer aura;
     bool hitStopping;
     // The crimson-shot hint shows once a session.
@@ -746,6 +747,40 @@ public class GameManager : MonoBehaviour
         if (said == null || said.Lines.Length == 0) yield break;
         yield return new WaitForSeconds(1.5f);
         yield return PlayConversation(said, OniColour);
+    }
+
+    // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended.
+    IEnumerator WakeTalk()
+    {
+        bool pending = Save.Data.hubPending;
+        yield return HubReturn();
+        if (!pending) yield break;
+        yield return new WaitForSeconds(0.6f);
+        yield return PoguruBark(DialogueEvent.PoguruWake);
+    }
+
+    // Poguru pops out of the wisp for a line and goes back in. Nothing is picked (or marked heard) unless it can play:
+    // not in the tutorial, never over a full line or while he's already out, and only in play, between beats or in
+    // the temple.
+    IEnumerator PoguruBark(DialogueEvent evt, float chance = 1f, BossKind? boss = null)
+    {
+        if (tutorial.Active || poguru.IsOut || FullLinePlaying) yield break;
+        if (state != State.Playing && state != State.Transition && state != State.Hub) yield break;
+        if (Random.value >= chance) yield break;
+        Conversation said = Dialogue.Pick("Poguru", evt, Dialogue.Context(loadout, null, lives, false, boss));
+        if (said == null || said.Lines.Length == 0) yield break;
+        poguru.PopOut();
+        yield return new WaitForSecondsRealtime(0.5f);
+        yield return new WaitForSecondsRealtime(SayAsPoguru(said));
+        poguru.ReturnToWisp();
+    }
+
+    bool FullLinePlaying => dialogueScene.IsPlaying || (speakingFullLine && (voice.isPlaying || oniVoice.isPlaying || soulVoice.isPlaying));
+
+    IEnumerator SoulBark()
+    {
+        yield return new WaitForSecondsRealtime(0.8f);
+        yield return PoguruBark(DialogueEvent.PoguruSoul);
     }
 
     bool DevToolsOn => Debug.isDebugBuild || devToolsInRelease;
@@ -1088,7 +1123,7 @@ public class GameManager : MonoBehaviour
             yield return ronin.WalkTo(BodyAt(safeArea.PoolExit), travelWalkSpeed * 0.3f);
             if (lastRunNotes > 0) StartCoroutine(NoteTally(lastRunNotes));
             lastRunNotes = 0;
-            StartCoroutine(HubReturn());
+            StartCoroutine(WakeTalk());
         }
         // The floor is where his feet may go; the clamp is on his body.
         Vector3 lift = BodyAt(Vector3.zero);
@@ -1468,7 +1503,8 @@ public class GameManager : MonoBehaviour
             DialogueContext ctx = Dialogue.Context(loadout);
             string boss = Stage.boss.ToString();
             Debug.Log(Dialogue.Explain(boss, DialogueEvent.BossIntro, ctx) + Dialogue.Explain(boss, DialogueEvent.KilledOni, ctx)
-                + Dialogue.Explain("Oni", DialogueEvent.HubReturn, ctx));
+                + Dialogue.Explain("Oni", DialogueEvent.HubReturn, ctx) + Dialogue.Explain("Poguru", DialogueEvent.PoguruWake, ctx)
+                + Dialogue.Explain("Poguru", DialogueEvent.PoguruTalk, ctx));
         }
         if (keyboard.f3Key.wasPressedThisFrame)
         {
@@ -1678,6 +1714,7 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = true;
         army.Advance();
         tutorial.RoundStarted();
+        if (!tutorial.Active) StartCoroutine(PoguruBark(DialogueEvent.PoguruRound, 0.2f));
         RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
@@ -1790,6 +1827,7 @@ public class GameManager : MonoBehaviour
     {
         loadout = new RoninLoadout();
         soulCaught = false;
+        firstBoonTaken = false;
         scrollsDropped = 0;
         gatheredScroll = false;
         ronin.Loadout = loadout;
@@ -2076,6 +2114,12 @@ public class GameManager : MonoBehaviour
     void TakeBoon(BoonOffer offer)
     {
         loadout.Take(offer);
+        // The run's first boon gets a word from Poguru once the screen has closed.
+        if (!firstBoonTaken && offer.Boon.Kind != BoonKind.Art && !offer.IsUpgrade)
+        {
+            firstBoonTaken = true;
+            StartCoroutine(SoulBark());
+        }
         RunLog.Note(offer.IsUpgrade ? $"bead: {offer.Boon.Name} -> {offer.Rarity}"
             : offer.Boon.Kind == BoonKind.Normal ? $"took {offer.Boon.Name} ({offer.Rarity})" : $"took {offer.Boon.Name}");
         float value = offer.Boon.ValueAt(offer.Rarity);
@@ -2962,6 +3006,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
         Earn(Upgrades.ForBoss(Stage.boss));
         Save.BossFelled(Stage.boss);
+        // Poguru has a word for a fallen warlord; the Emperor's fall has the dawn instead.
+        if (Stage.boss != BossKind.Kagetsune) yield return PoguruBark(DialogueEvent.PoguruBoss, 1f, Stage.boss);
         // The Emperor is the end: no boon, the dawn.
         if (Stage.boss == BossKind.Kagetsune && stageIndex == stages.Length - 1)
         {

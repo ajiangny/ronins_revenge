@@ -47,6 +47,7 @@ of every talk scene, and is framed beside his words on the hill.
 | [Shirogane](Shirogane.md) | His sworn partner; the soul that saved his. He remembers her less each run, and that frightens him more than she does. |
 | [Benibana](Benibana.md) | At first, the dancer whose smoke helped doom the court. Later, the person most like him. |
 | [Utsusemi](Utsusemi.md) | The monk who saved him, worn as a shell. He doesn't recognise him until the gears slip. |
+| [Poguru](Poguru.md) | The chatterbox in his left wisp. Oni answers him in two words and sends him back in, and would miss him badly. |
 
 ## Voice
 

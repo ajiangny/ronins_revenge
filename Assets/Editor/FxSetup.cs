@@ -8,8 +8,8 @@ using UnityEngine;
 public static class FxSetup
 {
     const string FxRoot = "Assets/Art/Sprites/Fx/";
-    const string LibraryPath = "Assets/Art/Fx/FxLibrary.asset";
-    const string FlashMaterialPath = "Assets/Art/Fx/HitFlash.mat";
+    const string LibraryPath = "Assets/Art/FxLibrary.asset";
+    const string FlashMaterialPath = "Assets/Art/Materials/HitFlash.mat";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
     // id, frames per second, loops, and where the effect's anchor sits in its canvas (0..1 from the bottom-left).

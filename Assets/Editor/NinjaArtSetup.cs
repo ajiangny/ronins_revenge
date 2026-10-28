@@ -39,7 +39,7 @@ public static class NinjaArtSetup
         CharacterArt yurei = OwnSamuraiArt("Yurei", samuraiParticles);
         CharacterArt scout = OwnSamuraiArt("Scout", samuraiParticles);
 
-        EditPrefab("Assets/Samurai.prefab", root =>
+        EditPrefab("Assets/Prefabs/Samurai.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: true);
             root.transform.localScale = Vector3.one * SamuraiScale;
@@ -48,7 +48,7 @@ public static class NinjaArtSetup
             Set(root.GetComponent<Samurai>(), "spearSprite", Load("Projectiles/Spear"));
         });
 
-        EditPrefab("Assets/Ronin.prefab", root =>
+        EditPrefab("Assets/Prefabs/Ronin.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             // Ronin measures its sprite's world bounds at runtime, so clamping and TopY follow this scale.
@@ -63,7 +63,7 @@ public static class NinjaArtSetup
             Set(root.GetComponent<Ronin>(), "slashPrefab", BuildSlashWave());
         });
 
-        EditPrefab("Assets/Projectile.prefab", root =>
+        EditPrefab("Assets/Prefabs/Projectile.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
@@ -78,7 +78,7 @@ public static class NinjaArtSetup
             Set(root.GetComponent<Projectile>(), "spinner", (Object)null);
         });
 
-        EditPrefab("Assets/Arrow.prefab", root =>
+        EditPrefab("Assets/Prefabs/Arrow.prefab", root =>
         {
             StripVisuals(root, keepRootCollider: false);
             root.transform.localScale = Vector3.one;
@@ -90,7 +90,7 @@ public static class NinjaArtSetup
         });
 
         // Row 0 is the Taisho (30 pts), rows 1-2 Bushi (20), the rest Ashigaru (10), as in SamuraiArmy.PointsForRow.
-        EditPrefab("Assets/SamuraiArmy.prefab", root =>
+        EditPrefab("Assets/Prefabs/SamuraiArmy.prefab", root =>
         {
             var army = root.GetComponent<SamuraiArmy>();
             Set(army, "samuraiByRow", new Object[] { taisho, bushi, bushi, ashigaru });
@@ -122,10 +122,10 @@ public static class NinjaArtSetup
     // so it keeps its layer and rigidbody. Returns null (the ronin then swings the plain projectile) until the art exists.
     static GameObject BuildSlashWave()
     {
-        const string path = "Assets/SlashWave.prefab";
+        const string path = "Assets/Prefabs/SlashWave.prefab";
         Sprite wave = AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + "Projectiles/SlashWave.png");
         if (wave == null) return null;
-        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) AssetDatabase.CopyAsset("Assets/Projectile.prefab", path);
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(path) == null) AssetDatabase.CopyAsset("Assets/Prefabs/Projectile.prefab", path);
 
         EditPrefab(path, root =>
         {

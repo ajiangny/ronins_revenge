@@ -7,7 +7,7 @@ using UnityEngine.Rendering.Universal;
 public static class ScreenRippleSetup
 {
     const string ShaderName = "Ninja/TimeRipple";
-    const string MaterialPath = "Assets/Art/Fx/TimeRipple.mat";
+    const string MaterialPath = "Assets/Art/Materials/TimeRipple.mat";
 
     [MenuItem("Ninja/Apply Screen Ripples")]
     public static void Apply()

@@ -45,14 +45,14 @@ public static class BoonArtSetup
         Sprite shuriken = Load("Projectiles/Shuriken");
         if (shuriken != null)
         {
-            GameObject root = PrefabUtility.LoadPrefabContents("Assets/Ronin.prefab");
+            GameObject root = PrefabUtility.LoadPrefabContents("Assets/Prefabs/Ronin.prefab");
             try
             {
                 var so = new SerializedObject(root.GetComponent<Ronin>());
                 so.FindProperty("shurikenSprite").objectReferenceValue = shuriken;
                 so.FindProperty("kunaiSprite").objectReferenceValue = Load("Projectiles/Kunai");
                 so.ApplyModifiedPropertiesWithoutUndo();
-                PrefabUtility.SaveAsPrefabAsset(root, "Assets/Ronin.prefab");
+                PrefabUtility.SaveAsPrefabAsset(root, "Assets/Prefabs/Ronin.prefab");
             }
             finally
             {

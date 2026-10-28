@@ -32,6 +32,8 @@ public class GameUI : MonoBehaviour
 
     public TMP_FontAsset Font => font;
     public Sprite LifeIcon => lifeIcon;
+    // The lives row, which Poguru's hearts lesson lifts out of a talk's dark.
+    public RectTransform LivesRow => livesRow;
     public TMP_FontAsset BodyFont => bodyFontBaked != null ? bodyFontBaked : BuildFont(bodyFont, ref bodyAsset, BodySampling, BodyPadding);
     public TMP_FontAsset TitleFont => headerFontBaked != null ? headerFontBaked : BuildFont(headerFont, ref headerAsset, HeaderSampling, HeaderPadding);
     public const int BodySampling = 72, BodyPadding = 12, HeaderSampling = 90, HeaderPadding = 16;

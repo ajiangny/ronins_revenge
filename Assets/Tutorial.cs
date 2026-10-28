@@ -31,6 +31,8 @@ public class Tutorial : MonoBehaviour
     Image slotGlow;
     Sprite[] pointFrames;
     RectTransform pointedSlot;
+    // How wide what he points at is drawn (a slot, or the row of lives), so he hovers just past it.
+    float pointedWidth;
 
     public bool Armed => armed;
     public bool Active { get; private set; }
@@ -216,7 +218,22 @@ public class Tutorial : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         poguru.Hover();
-        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Hearts"), new GameManager.TalkOptions { keepHud = true });
+        // The lives are lifted out of the dark and pointed at on the line about them.
+        RectTransform lives = game.Ui.LivesRow;
+        Transform livesHome = lives.parent;
+        int livesIndex = lives.GetSiblingIndex();
+        lives.SetParent(game.Scene.Overlay, false);
+        BuildPointer(game.Scene.Overlay);
+        float livesWidth = game.MaxLives * (lives.childCount > 0 ? ((RectTransform)lives.GetChild(0)).sizeDelta.x + 6f : 40f);
+        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Hearts"), new GameManager.TalkOptions
+        {
+            keepHud = true,
+            poguruRight = true,
+            onLine = line => PointAt(line == 2 ? lives : null, livesWidth),
+        });
+        ClearPointer();
+        lives.SetParent(livesHome, false);
+        lives.SetSiblingIndex(livesIndex);
 
         // The heart goes down on his row, on its emptier side.
         float x = ronin.Bounds.center.x < centre.x ? centre.x + half * 0.45f : centre.x - half * 0.45f;
@@ -260,7 +277,9 @@ public class Tutorial : MonoBehaviour
     {
         if (!Active || pathsDone) yield break;
         pathsDone = true;
-        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Paths"), new GameManager.TalkOptions { keepHud = true });
+        // Once they've formed, and lightly dimmed, so the talk is about paths he can see.
+        yield return new WaitForSeconds(1f);
+        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Paths"), new GameManager.TalkOptions { keepHud = true, dim = 0.3f });
     }
 
     // Beat 8: round 2's army has marched in; he's satisfied and goes back in the wisp.
@@ -323,7 +342,14 @@ public class Tutorial : MonoBehaviour
 
     void Point(BoonSlot? slot)
     {
-        pointedSlot = slot is BoonSlot s ? game.BoonChoice.SlotRect(s) : null;
+        RectTransform rect = slot is BoonSlot s ? game.BoonChoice.SlotRect(s) : null;
+        PointAt(rect, rect != null ? rect.sizeDelta.x : 0f);
+    }
+
+    void PointAt(RectTransform target, float width)
+    {
+        pointedSlot = target;
+        pointedWidth = width;
         if (pointer != null) pointer.gameObject.SetActive(pointedSlot != null);
         if (slotGlow != null) slotGlow.gameObject.SetActive(pointedSlot != null);
         if (pointedSlot != null) Sfx.Play(Sfx.UiMove, 0.5f, 1.4f);
@@ -343,8 +369,10 @@ public class Tutorial : MonoBehaviour
     {
         if (pointer == null || pointedSlot == null) return;
         float now = Time.unscaledTime;
-        Vector2 size = pointedSlot.sizeDelta;
-        Vector2 middle = pointedSlot.anchoredPosition + size / 2f;
+        // Both are anchored and pivoted at their bottom-left (the lives row at its left middle).
+        Vector2 size = new Vector2(pointedWidth, pointedSlot.sizeDelta.y);
+        Vector2 corner = pointedSlot.anchoredPosition - Vector2.Scale(pointedSlot.pivot, pointedSlot.sizeDelta);
+        Vector2 middle = corner + size / 2f;
         float bob = Mathf.Abs(Mathf.Sin(now * 4f)) * 14f;
         pointer.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + bob, 0f);
         if (pointFrames != null) pointerImage.sprite = pointFrames[(int)(now * 8f) % pointFrames.Length];

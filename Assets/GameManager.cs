@@ -3172,8 +3172,8 @@ public class GameManager : MonoBehaviour
     static readonly Color FreedColour = new Color(0.72f, 0.9f, 1f);
 
     // How a talk plays: over the HUD or with it left as it is (keepHud: the tutorial's pointing, a temple talk, a talk
-    // over the boon screen), how dark the field goes, Poguru on the right instead of the left, and a call as each line
-    // comes up.
+    // over the boon screen), how dark the field goes, Poguru on the right instead of the left (and Oni on the left), and
+    // a call as each line comes up.
     public struct TalkOptions
     {
         public bool keepHud;
@@ -3203,7 +3203,9 @@ public class GameManager : MonoBehaviour
         {
             AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(index)) : null;
             DialogueScene.Speaker who = SpeakerFor(line.Speaker);
-            if (line.Speaker == "Poguru" && options.poguruRight) who.right = true;
+            // Poguru on the right puts Oni on the left, so the two still face each other.
+            if (options.poguruRight && line.Speaker == "Poguru") who.right = true;
+            else if (options.poguruRight && line.Speaker == "Oni") who.right = false;
             int shown = lines.Count;
             lines.Add(new DialogueScene.Line { who = who, text = Dialogue.Fill(line.Text, ctx), clip = clip,
                 source = VoiceOf(line.Speaker), shown = options.onLine != null ? () => options.onLine(shown) : null });
@@ -3252,6 +3254,7 @@ public class GameManager : MonoBehaviour
     public MenuUI Menu => menu;
     public BoonChoiceUI BoonChoice => boonChoice;
     public DialogueScene Scene => dialogueScene;
+    public GameUI Ui => ui;
     public int Lives => lives;
     public int MaxLives => maxLives;
 

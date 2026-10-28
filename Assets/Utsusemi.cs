@@ -2819,21 +2819,32 @@ public class Utsusemi : Boss
         PlayIdle();
     }
 
-    // The Stopped Hour's cleaves, hung in the air while time is held.
+    // The Stopped Hour's lace fragments and cleaves, hung in the air while time is held.
+    readonly List<Arrow> needles = new List<Arrow>();
     readonly List<Arrow> stoppedCleaves = new List<Arrow>();
+    int stoppedHours;
+    const float NeedleSpeed = 6f;
+    // Rows hang this far apart, so they land a third of a second apart once released.
+    const float NeedleRowGap = 1.9f;
     // How far apart they come for him once time runs, so each is its own parry.
     const float CleaveGap = 0.55f;
     const float StoppedCleaveSpeed = 9.5f;
 
     // Stopped Hour: the hour it keeps, held still. It raises its burning fist and time stops: colour drains, the clock
     // falls silent, the air warps out from its fist, and everything stands frozen, the ronin too: he can't move,
-    // strike or parry. Only Utsusemi moves. It steps through the stopped world to three places around him, and at each
-    // swings, leaving a great hour cleave hanging in the air aimed at him. Back in its row, the warps rush into its
-    // fist, a bell tolls and time runs: the cleaves come for him one after another, homing and unbreakable. Each is a
-    // parry, like the hour cleave; sent back, it jams its gears.
+    // strike or parry. Only Utsusemi moves. It hangs rows of its burning lace in the air over him, each with one way
+    // through, then steps through the stopped world to three places around him, and at each swings, leaving a great
+    // hour cleave hanging aimed at him. Back in its row, the warps rush into its fist, a bell tolls and time runs: the
+    // lace falls, lowest row first, and as the last rows pass, the cleaves come for him one after another, homing and
+    // unbreakable. Walk the gaps, then parry each cleave; sent back, they jam its gears. Each Stopped Hour adds a row
+    // and narrows the gaps.
     IEnumerator StoppedHour()
     {
+        stoppedHours++;
         Vector3 row = anchor;
+        int rows = stoppedHours > 1 ? 3 : 2;
+        float gapWidth = Mathf.Max(BulletHell.MinGap, 3.4f - 0.4f * (stoppedHours - 1));
+        float gapLo = LeftEdge + 0.6f + gapWidth / 2f, gapHi = RightEdge - 0.6f - gapWidth / 2f;
 
         if (stopFrames != null) PlayFrames(stopFrames, 0, -1, true, 10f);
         else PlayAction(art.parry);
@@ -2852,7 +2863,39 @@ public class Utsusemi : Boss
         TimeRipple.Emit(hand, 18f, 3f, 1.6f, band: 1.3f);
         TimeRipple.Emit(hand, 9f, 2f, 1.1f, band: 0.8f);
         yield return StopFade(0f, 1f, 0.35f);
-        yield return Wait(0.25f);
+
+        // The lace: rows hung over him, the first with its way through a few steps off to one side (time runs before
+        // he has to reach it), each higher row landing a beat later with its gap a step on from the last's.
+        needles.Clear();
+        float lowest = ronin.Bounds.center.y + 5.5f;
+        float lastGap = ronin.Bounds.center.x;
+        for (int r = 0; r < rows; r++)
+        {
+            Beat();
+            float gap;
+            if (r == 0)
+            {
+                float away = Random.value < 0.5f ? -1f : 1f;
+                gap = lastGap + away * Random.Range(2.5f, 4.5f);
+                if (gap < gapLo || gap > gapHi) gap = lastGap - away * Random.Range(2.5f, 4.5f);
+                gap = Mathf.Clamp(gap, gapLo, gapHi);
+                BulletHell.GapOk(lastGap, gap, (lowest - ronin.Bounds.center.y) / NeedleSpeed, gapWidth, "Stopped Hour");
+            }
+            else
+            {
+                float seconds = NeedleRowGap / NeedleSpeed;
+                float want = lastGap + (Random.value < 0.5f ? -1f : 1f) * BulletHell.MaxDodgeSpeed * seconds;
+                gap = BulletHell.NextGap(lastGap, want, seconds * 0.9f, gapLo, gapHi);
+                BulletHell.GapOk(lastGap, gap, seconds, gapWidth, "Stopped Hour");
+            }
+            float y = lowest + r * NeedleRowGap;
+            yield return BulletHell.Room(30);
+            needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.8f, new[] { gap }, gapWidth, 0f));
+            TimeRipple.Emit(new Vector3(gap, y, 0), 4f, 1.8f, 0.6f, band: 0.7f);
+            Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
+            lastGap = gap;
+            yield return Wait(0.45f);
+        }
 
         // Three places around him, either side and then straight over him, in an order he can't count on.
         float roninX = ronin.Bounds.center.x;
@@ -2902,10 +2945,15 @@ public class Utsusemi : Boss
         TimeRipple.Emit(hand, 18f, 2.6f, 0.7f, band: 1.2f);
         StartCoroutine(StopFade(1f, 0f, 0.15f));
         Tick(0.8f);
-        // The cleaves are loosed: a stagger from the first parried one won't stop the others coming.
+        // The lace falls at once, the lowest row first.
+        foreach (Arrow needle in needles) if (needle != null) needle.Turn(Vector3.down * NeedleSpeed);
+        float lastRowLands = (lowest + (rows - 1) * NeedleRowGap - ronin.Bounds.center.y) / NeedleSpeed;
+        needles.Clear();
+        // Then, as the last rows pass, the cleaves: launched, so a stagger from the first parried one won't stop the
+        // others coming.
         var loosed = new List<Arrow>(stoppedCleaves);
         stoppedCleaves.Clear();
-        yield return Launch(LooseCleaves(loosed));
+        yield return Launch(LooseCleaves(loosed, Mathf.Max(0.3f, lastRowLands - 0.7f)));
         PlayIdle();
         Beat();
         yield return Wait(0.6f);
@@ -2927,9 +2975,11 @@ public class Utsusemi : Boss
         return cleave;
     }
 
-    // Time runs: each hanging cleave turns on the ronin and hunts him, a beat after the last. Real time, launched.
-    IEnumerator LooseCleaves(List<Arrow> cleaves)
+    // Time runs: after `delay`, each hanging cleave turns on the ronin and hunts him, a beat after the last. Real time,
+    // launched; they hang where they are until their turn.
+    IEnumerator LooseCleaves(List<Arrow> cleaves, float delay)
     {
+        yield return new WaitForSeconds(delay);
         foreach (Arrow cleave in cleaves)
         {
             if (cleave == null) continue;
@@ -2943,6 +2993,21 @@ public class Utsusemi : Boss
 
     // How often the stopped clock sends a ring through the frozen air while it holds.
     const float HeldPulse = 0.45f;
+
+    // A fragment of its burning lace, hung in stopped time: unparryable and through cover, but a cut breaks it.
+    // Without the phase-two lace art, a molten seal-dart.
+    Arrow Needle(Vector3 from, Vector3 velocity)
+    {
+        Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
+        Sprite[] frames = Fx.Frames(Fx.UtsuLaceP2);
+        if (frames == null) return BulletHell.MakeSealDart(shot, Molten);
+        shot.Restyle(frames, 8f, Color.white, new Vector2(0.85f, 0.85f), 0.27f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 1f);
+        // Each hangs at its own tilt, like a shard caught mid-fall.
+        shot.Art.transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));
+        shot.Unparryable = true;
+        shot.PassesCover = true;
+        return shot;
+    }
 
     // While time is held: everything else in the air hangs where it is, its own fire stands still, and the ronin
     // stands frozen mid-frame, his own shots with him.
@@ -2958,7 +3023,7 @@ public class Utsusemi : Boss
         {
             foreach (Arrow shot in FindObjectsByType<Arrow>(FindObjectsSortMode.None))
             {
-                if (shot == null || !shot.isActiveAndEnabled || stoppedCleaves.Contains(shot)) continue;
+                if (shot == null || !shot.isActiveAndEnabled || stoppedCleaves.Contains(shot) || needles.Contains(shot)) continue;
                 held.Add((shot, shot.Velocity));
                 shot.Steer(Vector3.zero);
             }
@@ -3014,6 +3079,8 @@ public class Utsusemi : Boss
         if (timeHeld) HoldTime(false);
         foreach (Arrow cleave in stoppedCleaves) if (cleave != null) cleave.Pop(Molten);
         stoppedCleaves.Clear();
+        foreach (Arrow needle in needles) if (needle != null) needle.Pop(Molten);
+        needles.Clear();
     }
 
     // The Thirteenth Hour comes once, under this share of its last bar.

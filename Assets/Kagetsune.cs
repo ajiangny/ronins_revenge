@@ -976,7 +976,7 @@ public class Kagetsune : Boss
         else bell.Restyle(ProceduralSprites.Disc, Bronze, new Vector2(1.7f, 2f), 0.7f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.55f), 3f);
         bell.MakeUnbreakable();
         bell.MakeReflectable(transform);
-        StartCoroutine(Pursue(bell, 8.5f));
+        StartCoroutine(Pursue(bell, 8.5f, face: false));
         Toll(1f, 0.5f);
         if (Hardened) ClosingRing((bell.transform.position.y - Row) / 8.5f);
         yield return Wait(1.6f);
@@ -1234,7 +1234,7 @@ public class Kagetsune : Boss
         coffin.MakeUnbreakable();
         coffin.MakeReflectable(transform);
         coffinThrownAt = Time.time;
-        StartCoroutine(Pursue(coffin, 9f));
+        StartCoroutine(Pursue(coffin, 9f, face: false));
         // Seal-darts fall either side of him, so running wide only trades the coffin for the darts.
         foreach (float offset in new[] { -2.6f, 2.6f, -5.2f, 5.2f })
         {

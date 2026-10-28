@@ -43,7 +43,7 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Plumb Lines | The weights of the clock it winds. |
 | Phase break | The mainspring slips: it overloads, its lasers firing wild as it cracks open from the heart, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
 | Heart Lantern / Midnight | Its core: the monk's soul, burning as fuel. |
-| Stopped Hour | The stopped night itself. It keeps the hour Kagetsune froze; for a moment it holds the world there too, Oni with it, and only the machine moves, setting the hours on him one by one, as on that night. |
+| Stopped Hour | The stopped night itself. It keeps the hour Kagetsune froze; for a moment it holds the world there too, Oni with it, and only the machine moves, hanging its burning shroud over him and setting the hours on him one by one, as on that night. |
 | The Thirteenth Hour | The hour that should never come. Near the end it turns its own heart into a clock face and burns down to it. |
 
 ## Relationships

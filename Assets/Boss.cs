@@ -475,13 +475,17 @@ public abstract class Boss : MonoBehaviour, IHittable
         return lanes;
     }
 
-    // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried.
-    protected IEnumerator Pursue(Arrow shot, float speed)
+    // Steers a shot onto the ronin's lane as fast as he can run: it can't be outrun, only parried. A blade (`face`)
+    // turns to point where it's going as it curves, so a crescent always leads with its edge; a bell or coffin
+    // doesn't tilt.
+    protected IEnumerator Pursue(Arrow shot, float speed, bool face = true)
     {
         while (shot != null && ronin != null && shot.transform.position.y > ronin.Bounds.center.y)
         {
             float dx = ronin.Bounds.center.x - shot.transform.position.x;
-            shot.Steer(new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -speed, 0));
+            Vector3 velocity = new Vector3(Mathf.Clamp(dx * 6f, -ronin.speed * 1.1f, ronin.speed * 1.1f), -speed, 0);
+            if (face) shot.Turn(velocity);
+            else shot.Steer(velocity);
             yield return new WaitForFixedUpdate();
         }
     }

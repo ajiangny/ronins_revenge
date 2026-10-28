@@ -578,6 +578,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 7e679cca9e67f4fa7a9a0cf97ec60616, type: 3}
     - {fileID: 21300000, guid: fce5ffcd9e5aa4c6297c9f066dbfa6d6, type: 3}
   heartDropChance: 0.2
+  killHeartChance: 0.005
   titleFluteFrames:
   - {fileID: 21300000, guid: 5b5e752b773b04742ad3c376d61a6708, type: 3}
   - {fileID: 21300000, guid: c0c1e3013bcda481bae1205f9a7ae8e6, type: 3}
@@ -603,6 +604,53 @@ MonoBehaviour:
   akaganeCloseup: {fileID: 21300000, guid: fbb18dca375914fd88f76bd84a2b38b9, type: 3}
   mizoreCloseup: {fileID: 21300000, guid: b5c3a3e041e3946158e6a725a709c327, type: 3}
   hibikiCloseup: {fileID: 21300000, guid: 1c1a8e443b485410fb586a6a7a21cc7c, type: 3}
+  poguruArt:
+    idle:
+    - {fileID: 21300000, guid: 3bf6ddac069384009b50def4167cbab8, type: 3}
+    - {fileID: 21300000, guid: f7de35394ea5346c6bc2fa37eb12888a, type: 3}
+    - {fileID: 21300000, guid: 2a50a0ffd10034fc4acdd85da68e44e0, type: 3}
+    - {fileID: 21300000, guid: cac78f76e945b475eb75776794795bf2, type: 3}
+    - {fileID: 21300000, guid: 6eff788ee783f4e9ab66d4ca5c802d78, type: 3}
+    - {fileID: 21300000, guid: a4ae03ac2e2dc4b4c9cb3866c306e587, type: 3}
+    talk:
+    - {fileID: 21300000, guid: 0eaabd2bd3d494d459573cdf04f4f99e, type: 3}
+    - {fileID: 21300000, guid: 3852393ebd631421a9314f4882eb5a4b, type: 3}
+    - {fileID: 21300000, guid: fd6cb5c68932c48958688cb4c4c5b6d2, type: 3}
+    - {fileID: 21300000, guid: a8a66ff44b2b5467da10201359545170, type: 3}
+    pop:
+    - {fileID: 21300000, guid: e0a1ce4bb9d9f475fbf312149184cb50, type: 3}
+    - {fileID: 21300000, guid: ccb737f4b885b491abee5286c74b1f5b, type: 3}
+    - {fileID: 21300000, guid: b35a36e76b42246eeb7b048dd44b97a4, type: 3}
+    - {fileID: 21300000, guid: ed16ee93edc264ca5b5994e64bc6affe, type: 3}
+    - {fileID: 21300000, guid: 86c8c68da702a4652985bfe7128cac62, type: 3}
+    - {fileID: 21300000, guid: d4b02e3eeb0b14225bcf79622539e9d0, type: 3}
+    bonk:
+    - {fileID: 21300000, guid: 556ee361a06eb40c3871e77120db845a, type: 3}
+    - {fileID: 21300000, guid: ba19cec2052fb464091128fd52d5d075, type: 3}
+    - {fileID: 21300000, guid: b7dda4b7ca85a45a1933198006974084, type: 3}
+    - {fileID: 21300000, guid: 7a316bbcdbe9545f2a3e076a24c827fd, type: 3}
+    annoyed:
+    - {fileID: 21300000, guid: 5f679476030684ce1a3c589d7af8983e, type: 3}
+    - {fileID: 21300000, guid: c10743167313f464c9157a7541fb694e, type: 3}
+    - {fileID: 21300000, guid: 28a80084b0f9e47ef898d85dd155d8bc, type: 3}
+    - {fileID: 21300000, guid: 06a4ccf9cecd94be8b8e71591f570caa, type: 3}
+    point:
+    - {fileID: 21300000, guid: a207c6afef9f54e1f88e78d16cd685ad, type: 3}
+    - {fileID: 21300000, guid: 286abd8d464384c218ed257f77ff9de3, type: 3}
+    - {fileID: 21300000, guid: 898a888c964a54859bd2db26aef4107f, type: 3}
+    - {fileID: 21300000, guid: bfc963cb026f543afaa4741688c2a67f, type: 3}
+    gasp:
+    - {fileID: 21300000, guid: 5b1bc778f49964aa790be594efcef0f1, type: 3}
+    - {fileID: 21300000, guid: 3a253692e02684ee197bafa81b916c58, type: 3}
+    - {fileID: 21300000, guid: f19fd4c6e5c714f46b3fc677cea4e5a3, type: 3}
+    - {fileID: 21300000, guid: 077fa403d78034c17b5dfb1a10c7034a, type: 3}
+    cheer:
+    - {fileID: 21300000, guid: 7620d5889595a45f7afd108dc671b09d, type: 3}
+    - {fileID: 21300000, guid: 82b17ad066c7b494fa53179c60f1138e, type: 3}
+    - {fileID: 21300000, guid: db7f9765511ee4579bea1dc9563684f6, type: 3}
+    - {fileID: 21300000, guid: 28968084b04e5474383456cec7ab288d, type: 3}
+    fps: 8
+  poguruCloseup: {fileID: 21300000, guid: c119b0c9bf211480394c877eae55cb09, type: 3}
   titleWalkSpeed: 6
   titleFadeTime: 2.2
   elementArt:
@@ -779,7 +827,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 44bbf0963d384338bd7271be99fcbbf7, type: 3}
   - {fileID: 21300000, guid: e20718ad8a404c108f7794d7a3ad39dc, type: 3}
   - {fileID: 21300000, guid: 4d351524484941f982cd89c74f5c9835, type: 3}
-  - {fileID: 21300000, guid: dcc58a84084348d2a32f2bcefaee7e8e, type: 3}
   utsusemiPhaseSwordThrow:
   - {fileID: 21300000, guid: 489cbf2f6783435a89268bc92358af63, type: 3}
   - {fileID: 21300000, guid: 71c9f73d84404d2d972b195b49daa98d, type: 3}
@@ -789,6 +836,15 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 7882adefd26845e2a3be2dd6ed4ac89f, type: 3}
   - {fileID: 21300000, guid: f5d88e3d07874867a38a7a1af211dc47, type: 3}
   - {fileID: 21300000, guid: 62c1dab049564057a2ce3a3f2df5a465, type: 3}
+  utsusemiPhaseStop:
+  - {fileID: 21300000, guid: 9348615578cc144a79c541fcf3090e57, type: 3}
+  - {fileID: 21300000, guid: 56bd34c62e2e64feeb88d783da46bfb8, type: 3}
+  - {fileID: 21300000, guid: 7884f64318bae47e499d462ac36685c5, type: 3}
+  - {fileID: 21300000, guid: 8bf1eb19e6c88400389fd2eb49463ad3, type: 3}
+  - {fileID: 21300000, guid: f4ede7c1433c14df4a6c3a3036b4738e, type: 3}
+  - {fileID: 21300000, guid: ee0c8829aa7df42b7bad7a9ffa338e50, type: 3}
+  - {fileID: 21300000, guid: 71053797907044f3c96423ddc4a40b2b, type: 3}
+  - {fileID: 21300000, guid: 3b97151cb267845f6abcafd84888a5de, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
   utsusemiPhasePortrait: {fileID: 21300000, guid: 6f79b413cf9144dedbf9a160b5348d4f, type: 3}
@@ -1034,6 +1090,18 @@ MonoBehaviour:
       footprint: {x: 2, y: 0.5}
       fx: 3
       glowColour: {r: 1, g: 0.42, b: 0.25, a: 1}
+    - kind: 5
+      label: POGURU
+      spot: {x: 0.6105, y: 0.215}
+      art: {fileID: 21300000, guid: 925818a223db94eb3abd26c6cd0343be, type: 3}
+      sealedArt: {fileID: 0}
+      onMap: 0
+      placeholder: {r: 0.3, g: 0.45, b: 0.55, a: 1}
+      reach: 1.8
+      propAt: {x: 452, y: 292}
+      footprint: {x: 1.2, y: 0.4}
+      fx: 3
+      glowColour: {r: 0.45, g: 0.85, b: 1, a: 1}
     poolCentre: {x: 343, y: 319}
     poolRadii: {x: 39, y: 30}
     poolWater: {fileID: 21300000, guid: 44621fbffbe7c4a5388fcfaaf490740c, type: 3}
@@ -2324,6 +2392,9 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6e727abde0b314be7a1d832ef6a187b9, type: 3}
   - {fileID: 21300000, guid: 17b6f686a00a64712a78857366f3c6fc, type: 3}
   - {fileID: 21300000, guid: 0f428897711e04425b91bb5ab05790a2, type: 3}
+  - {fileID: 21300000, guid: 867ab3f6b2f3340c7adb173db415dc29, type: 3}
+  - {fileID: 21300000, guid: 6139e317cd8954d39ab7a52418dfeb94, type: 3}
+  - {fileID: 21300000, guid: f172ea4cdcd444cdc8723c1f04570e16, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}
   - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}
@@ -2358,15 +2429,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8103599808207149700, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.82382
+      value: -3.9602
       objectReference: {fileID: 0}
     - target: {fileID: 8103599808207149700, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.84367
+      value: -0.15
       objectReference: {fileID: 0}
     - target: {fileID: 8103599808207149700, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 11.4691
       objectReference: {fileID: 0}
     - target: {fileID: 8103599808207149700, guid: 34725686c1348b247a77b3f974763d41, type: 3}
       propertyPath: m_LocalRotation.w

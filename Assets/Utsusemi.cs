@@ -637,7 +637,8 @@ public class Utsusemi : Boss
             eye.transform.position = (SecondPhase ? Eye : Head) + Vector3.back * 0.3f;
             eye.transform.localScale = new Vector3(0.25f, 0.7f, 1f) / transform.lossyScale.x;
             eye.sprite = ProceduralSprites.Glow;
-            eye.color = CoreRed;
+            // Molten like its beams once its core has opened.
+            eye.color = SecondPhase ? CoreMolten : CoreRed;
             eye.sortingOrder = 45;
         }
         else if (!open && eye != null)
@@ -2071,8 +2072,11 @@ public class Utsusemi : Boss
             colour = colour,
             art = Fx.Frames(molten ? Fx.UtsuBeamMolten : Fx.UtsuBeamRed),
             glow = Bar(from, from, 1f, new Color(colour.r, colour.g, colour.b, 0.35f), 53),
-            // The flare at its source sits under the beam itself, so the laser reads on top of the glow.
-            flare = Fx.Play(Fx.UtsuBeamFlare, from, molten ? MoltenTint : Color.white, flareSize, transform, 54),
+            // The flare at its source sits under the beam itself, so the laser reads on top of the glow. The molten
+            // beam's is drawn in its own orange and gold, a little larger; without that art the red one is tinted.
+            flare = molten && Fx.Frames(Fx.UtsuBeamFlareP2) != null
+                ? Fx.Play(Fx.UtsuBeamFlareP2, from, Color.white, flareSize * 1.3f, transform, 54)
+                : Fx.Play(Fx.UtsuBeamFlare, from, molten ? MoltenTint : Color.white, flareSize, transform, 54),
             hit = Fx.Play(Fx.UtsuBeamHit, from, molten ? MoltenTint : Color.white, 1.3f, null, 57),
         };
         if (beam.art != null)

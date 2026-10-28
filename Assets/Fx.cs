@@ -36,6 +36,8 @@ public static class Fx
     public const string UtsuParts = "Utsu_Parts";
     public const string UtsuCharge = "Utsu_Charge";
     public const string UtsuBeamFlare = "Utsu_BeamFlare";
+    // The same flare in the molten beam's orange and gold, for its second form.
+    public const string UtsuBeamFlareP2 = "Utsu_BeamFlareP2";
     public const string UtsuBeamHit = "Utsu_BeamHit";
     public const string UtsuBurn = "Utsu_Burn";
     public const string UtsuChop = "Utsu_Chop";

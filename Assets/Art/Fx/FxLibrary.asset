@@ -397,6 +397,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 556ddd848c50e48f59a0c7b6723f0500, type: 3}
     fps: 14
     loop: 1
+  - id: Utsu_BeamFlareP2
+    frames:
+    - {fileID: 21300000, guid: 73d80513da3e74697a39a46ecb09478f, type: 3}
+    - {fileID: 21300000, guid: 39bef6e54e4234d7fb0566e8385d1c7d, type: 3}
+    - {fileID: 21300000, guid: 7f7a909a4d444452b80d832d426bdda3, type: 3}
+    - {fileID: 21300000, guid: d7e7eaad4aac44c2f9ae5fc10e737842, type: 3}
+    - {fileID: 21300000, guid: ce61aa65198fd4e1c92c69d40d2fe976, type: 3}
+    - {fileID: 21300000, guid: 894d3c6dfcc644f5ea160d474dabfa81, type: 3}
+    - {fileID: 21300000, guid: 6feb967ba6dd94016b9d4794fc716f58, type: 3}
+    - {fileID: 21300000, guid: b323a2dc2d29f4bdda03671b66fa8a3b, type: 3}
+    fps: 14
+    loop: 1
   - id: Utsu_BeamHit
     frames:
     - {fileID: 21300000, guid: b3002c59f073f4e1a9c6d7ca50e96908, type: 3}

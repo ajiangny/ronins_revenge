@@ -51,6 +51,7 @@ public static class FxSetup
         (Fx.UtsuParts, 14, false, Centre),
         (Fx.UtsuCharge, 16, false, Centre),
         (Fx.UtsuBeamFlare, 14, true, Centre),
+        (Fx.UtsuBeamFlareP2, 14, true, Centre),
         // Anchored on the hot spot where the beam lands, so the sparks and smoke rise above it.
         (Fx.UtsuBeamHit, 16, true, new Vector2(0.5f, 1f - 32f / 40f)),
         // The ground fire stands on its base line.

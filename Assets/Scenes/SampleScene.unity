@@ -507,7 +507,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4a046d24b3f5e4636b082a506d27f3d4, type: 3}
   - {fileID: 21300000, guid: 3a4f449e98e2747a9bbe8d27a699d144, type: 3}
   - {fileID: 21300000, guid: 42019f9d6fbab457db9bda9882b616c2, type: 3}
-  scrollPainted: {fileID: 0}
+  scrollPainted: {fileID: 21300000, guid: dd7155e0a73234273912eac69740a4b3, type: 3}
   beadFrames:
   - {fileID: 21300000, guid: 2f6e083b8025547d8ab58b67ed2e28bf, type: 3}
   - {fileID: 21300000, guid: 5f5452429afa94628a61902bac865be6, type: 3}
@@ -517,7 +517,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 26317a45d1b494816b67287db7c06b85, type: 3}
   - {fileID: 21300000, guid: 79fc1f568d93b4f9d9faac0805e0c9ad, type: 3}
   - {fileID: 21300000, guid: 056092887edf440bbb08af45de44c8c3, type: 3}
-  beadPainted: {fileID: 0}
+  beadPainted: {fileID: 21300000, guid: d4029fcd1c2b94106b6e8b05a23cc5af, type: 3}
   emberFrames:
   - {fileID: 21300000, guid: c236ef01b98e44b828d2a5ca6905abe7, type: 3}
   - {fileID: 21300000, guid: 7fadcbdd997ae431eb05b1ac7081b9a4, type: 3}

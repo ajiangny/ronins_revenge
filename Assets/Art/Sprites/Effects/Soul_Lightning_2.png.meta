@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 58074e3ad066342478ea1bb0ac61dc08
+guid: 2e13fa25424f040158803a06bc2470bf
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3855533883143893968
-    second: TechniqueScroll_0
+      213: 7447119938893729753
+    second: Soul_Lightning_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TechniqueScroll_0
+      name: Soul_Lightning_2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 48
+        height: 48
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 03cc9bb5c546e7ac0800000000000000
-      internalID: -3855533883143893968
+      spriteID: 9df4d7db02c795760800000000000000
+      internalID: 7447119938893729753
       vertices: []
       indices: 
       edges: []

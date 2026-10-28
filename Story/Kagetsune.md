@@ -153,6 +153,16 @@ boss's line alone.
 | Reactive | Oni holds a Duo boon | "Two stolen souls, holding hands. How touching. They'll ring again." |
 | Repeatable | none | "Ring." |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Kagetsune_Intro_Fire` | `BossIntro` | Reactive, rests 4 | `holds Fire` | **Kagetsune:** "My captain's fire. He knelt to me for twenty years. He will kneel again." |
+| `Kagetsune_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Kagetsune:** "Mizore. She told me everyone dies. I have made very sure she was wrong."<br>**Oni:** "She wasn't." |
+| `Kagetsune_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Kagetsune:** "The village drum. I had it thrown in with them. Did you think its beat was yours, little demon?" |
+
 ## Keep consistent
 
 - No moon motifs: bells, souls, seals and horns are his.

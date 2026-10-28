@@ -105,6 +105,16 @@ boss's line alone.
 | Story, once | first time | "Not yet, then. I'll wait." |
 | Repeatable | none | "Rise." |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Shirogane_Intro_Fire` | `BossIntro` | Reactive, rests 4 | `holds Fire` | **Shirogane:** "Copper's fire. Akagane never once beat me. Let's see if he does through you." |
+| `Shirogane_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Shirogane:** "Mizore's cold. She stitched me more often than I let you know. Guard your left." |
+| `Shirogane_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Shirogane:** "The drummer girl. She dropped my sword in the mud. ...Tell her I laughed."<br>**Oni:** "...I'll tell her." |
+
 ## Arc across runs
 
 A test, then reminders, then the oath given back (`Shirogane_Intro_Oath`), which also unlocks Oni's own memory of

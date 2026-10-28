@@ -179,6 +179,16 @@ voiced (`Poguru_Roast_*`).
 | Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! But his hammer is SO big. Like, unfair big." · Oni: "I'll get under it." · P: "Good thing you're short!" |
 | Kagetsune | 3 | `Poguru_Roast_KagetsuneBells` | P: "All those bells! I couldn't even hear myself cheer for you!" |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Poguru_Soul_Fire` | `PoguruSoul` | Reactive, rests 3 | `holds Fire` | **Poguru:** "Ooh, toasty! The grumpy captain likes you!" |
+| `Poguru_Soul_Frost` | `PoguruSoul` | Reactive, rests 3 | `holds Frost` | **Poguru:** "Brr! The wolf granny made you all frosty!" |
+| `Poguru_Soul_Storm` | `PoguruSoul` | Reactive, rests 3 | `holds Storm` | **Poguru:** "My scales are all fizzy! Is that the drummer girl?" |
+
 ### Temple talk (`PoguruTalk`, at his nest)
 
 | Priority | Requires | Id | Lines |

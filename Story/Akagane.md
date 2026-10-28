@@ -183,6 +183,16 @@ His Duos (Thermal Shock with Mizore, Plasma Arc with Hibiki) are two-soul conver
 | `Akagane_Hub_Army` | Reactive | `lastRunElement = Fire`, `lastKiller = Army`, `runsSince Akagane_Hub_Army ≥ 4` | **Akagane:** "Up. My men are already marching." |
 | `Akagane_Hub_Rise` | Repeatable | `lastRunElement = Fire` | **Akagane:** "On your feet, Guardsman." |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Akagane_Poguru` | `SoulPickup` | Reactive, once | `seen Akagane_Meet_Copper` | **Akagane:** "What is that, at your shoulder."<br>**Poguru:** "A SUPPORT dragon!"<br>**Akagane:** "The vanguard had a dog once. It was braver."<br>**Poguru:** "HEY." |
+| `Akagane_Cut_Mizore` | `SoulPickup` | Reactive, rests 5 | `holds Frost`, `seen Akagane_Meet_Angry` | **Akagane:** "Fire's ready, Guardsman. Use it."<br>**Mizore:** "You'll scorch his hands again, Captain."<br>**Akagane:** "Hands heal."<br>**Mizore:** "Not in here, they don't." |
+| `Akagane_Hub_Salute` | `SoulHub` | Story | `lastRunElement = Fire`, `seen Akagane_Meet_Salute` | **Akagane:** "Still not done, Guardsman?"<br>**Oni:** "No."<br>**Akagane:** "Good. I haven't practised the salute." |
+
 ## Arc across runs
 
 Contempt ("Hello, Guardsman"), then the old rivalry said out loud (copper and silver), then his men, then the

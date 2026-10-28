@@ -179,6 +179,16 @@ Her Duos (Thermal Shock with Akagane, Superconductor with Hibiki) are in
 | `Mizore_Hub_Kagetsune` | Reactive | `lastRunElement = Frost`, `lastKiller = Kagetsune`, `runsSince Mizore_Hub_Kagetsune ≥ 4` | **Mizore:** "You'll live. That's my professional opinion. It's been wrong every night so far." |
 | `Mizore_Hub_Rest` | Repeatable | `lastRunElement = Frost` | **Mizore:** "Rest. Then go again." |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Mizore_Poguru` | `SoulPickup` | Reactive, once | `seen Mizore_Meet_Collarbone` | **Mizore:** "Your little dragon is running warm. Hold still, creature."<br>**Poguru:** "Is it bad? Do I have a fever?"<br>**Mizore:** "Dragons don't get fevers."<br>**Poguru:** "...Do souls?"<br>**Mizore:** "...Take the boon, Oni." |
+| `Mizore_Cut_Hibiki` | `SoulPickup` | Reactive, rests 5 | `holds Storm`, `seen Mizore_Meet_Steady` | **Mizore:** "Hold still, Oni. Let me see."<br>**Hibiki:** "He CAN'T hold still, Grandmother, he's got my spark!"<br>**Mizore:** "Then I'll work quickly." |
+| `Mizore_Hub_Sleep` | `SoulHub` | Story | `lastRunElement = Frost`, `runs ≥ 6` | **Mizore:** "Do you sleep, in between?"<br>**Oni:** "...I play."<br>**Mizore:** "That'll do. Doctor's orders." |
+
 ## Arc across runs
 
 A clinician at a bedside, then the physician who remembers Oni's past better than he does, then the smoke she was

@@ -97,6 +97,15 @@ boss's line alone.
 | Story, once | first time | "Listen... Did a bell stop? ...No. Of course not." |
 | Repeatable | none | "Curtain." |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Benibana_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Benibana:** "The physician's cold on your hands. She treated my ankles once. She never asked why they bled." |
+| `Benibana_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Benibana:** "The drummer girl's spark. She watched me dance with her mouth open. I'm sorry she stayed for the end." |
+
 ## Arc across runs
 
 Mockery, then envy, then the night she realises no bell has ever gone quiet, then telling Oni which bell is hers

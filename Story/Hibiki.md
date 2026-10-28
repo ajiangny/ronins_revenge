@@ -179,6 +179,16 @@ Her Duos (Plasma Arc with Akagane, Superconductor with Mizore) are in
 | `Hibiki_Hub_Song` | Reactive | `lastRunElement = Storm`, `runsSince Hibiki_Hub_Song ≥ 4` | **Hibiki:** "Play the river song! ...No? Fine. I'll hum it." |
 | `Hibiki_Hub_Up` | Repeatable | `lastRunElement = Storm` | **Hibiki:** "Up, up, up!" |
 
+### Crossovers
+
+Lines with the other characters (all voiced).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Hibiki_Poguru` | `SoulPickup` | Reactive, once | `seen Hibiki_Meet_Name` | **Hibiki:** "Wait. Is that the festival dragon? The paper one, with the red cape?"<br>**Poguru:** "I'm a REAL dragon!"<br>**Hibiki:** "You've got its cape! We paraded that dragon round the well every summer!"<br>**Poguru:** "...So THAT'S why it smells like lanterns." |
+| `Hibiki_Cut_Akagane` | `SoulPickup` | Reactive, rests 5 | `holds Fire`, `seen Hibiki_Meet_Out` | **Hibiki:** "Oni! Hi! Oh, you've got Captain Kettle's fire on you."<br>**Akagane:** "Captain Akagane, girl."<br>**Hibiki:** "Captain Kettle Akagane."<br>**Akagane:** "...Take her boon before I boil." |
+| `Hibiki_Hub_RiverSong` | `SoulHub` | Story | `lastRunElement = Storm`, `seen Hibiki_Meet_River` | **Hibiki:** "You remembered the river. Do you remember the song too?"<br>**Oni:** "...It goes up at the end."<br>**Hibiki:** "It goes UP at the end! Yes! Ba-dum!" |
+
 ## Arc across runs
 
 Pure joy at finding him, then the hurt of being forgotten, laughed off. Then the procession, the pride that's

@@ -71,16 +71,16 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 
 | Id | Lines |
 |---|---|
-| `Poguru_Tut_Wake` | P: "ONI! ONI! WAKE UP! Scary soldiers are coming!" · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" · P: "No time! Do you remember how to fight?" |
+| `Poguru_Tut_Wake` | P: "ONI! ONI! WAKE UP! Scary dead soldiers are coming!" · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" · P: "No time! Do you remember how to fight?" |
 | `Poguru_Tut_Again` | P: "Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson." |
 | `Poguru_Tut_Yay` | P: "Yay! Stay close. They're coming!" |
 | `Poguru_Tut_Skip` | P: "Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly." |
-| `Tut_Soldiers` | Ashigaru: "There he is! The Emperor's runaway dog." · Ashigaru: "Lord Kagetsune wants his demon back. Come quietly!" · Oni: "...No." · P: "Eep! Five of them! Okay, okay, one at a time!" |
-| `Tut_Slash_Taunt` | Ashigaru (the archer): "Eat this, traitor!" |
+| `Tut_Soldiers` | Ashigaru: "There he is... the Emperor's runaway dog." · Ashigaru: "The coffin wants its demon back. Come... quietly." · Oni: "...No." · P: "Eep! Five of them! Okay, okay, one at a time!" |
+| `Tut_Slash_Taunt` | Ashigaru (the archer): "Join us, traitor!" |
 | `Poguru_Tut_SlashIt` | P (the field holds until Oni slashes): "An arrow! SLASH it! Your cut breaks it clean in half!" |
 | `Poguru_Tut_TakeHim` | P: "Now take him down!" |
-| `Tut_Slash_Fall` | Ashigaru: "Gah...!" |
-| `Tut_Charge_Taunt` | Ashigaru (the chargers): "Rush him! Together!" |
+| `Tut_Slash_Fall` | Ashigaru: "Not... again...!" |
+| `Tut_Charge_Taunt` | Ashigaru (the chargers): "Drag him down! Together!" |
 | `Poguru_Tut_ShurikenIt` | P (held until the shuriken): "Two in a row! Throw your SHURIKEN, it flies right through them both!" |
 | `Poguru_Tut_Stopped` | P: "Stopped in their tracks! Ha!" |
 | `Tut_Spear_Taunt` | Ashigaru (the spearman): "Let's see you cut THIS. Blessed steel from the Emperor's own forge!" |
@@ -162,7 +162,8 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 - He never fights and never takes damage. In the tutorial he only bonks arrows aside, and the spear passes through him.
   He never gives up guarding Oni, however cross he gets; the only thing he ever "attacks" with is the rage that bursts
   out of him if Oni leaves the whole army to him.
-- The tutorial's soldiers (speaker "Ashigaru", the `SOLDIER` voice) are generic grunts: sneering, and a little cowardly.
+- The tutorial's soldiers (speaker "Ashigaru", the `SOLDIER` voice with its baked ghost filter) are generic dead
+  grunts ([Army.md](Army.md)): sneering, rasping, and still a little cowardly.
 - He lives in Oni's **left** wisp (wisp 0). When he's out, that wisp is hidden.
 - Teal is soul-fire: his body is teal, and only his cape is red.
 - Short lines. One joke at most per line. He is kind even when he's annoyed.

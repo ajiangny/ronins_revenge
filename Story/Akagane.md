@@ -44,10 +44,11 @@ For the boon screen's pixel bust (head and shoulders, facing three-quarters towa
 - **The doors.** At the coronation Kagetsune ordered the vanguard to hold the hall's doors, facing out. Akagane
   set them there himself. When Benibana's smoke came through the hall his men were the last to feel it: they heard
   the coffin open behind them, and couldn't turn around in time. He was guarding the wrong side of the door.
-- **Since.** His men are the army Oni cuts down every night, sent out in borrowed bodies. When one of them falls
-  angry enough, Akagane catches the soul before the coffin can, and lends its fire to the one man he'd most like to
-  hit.
-- **The Bellringers** at the Mountain Shrine were his shrine watch. Their tolls are what drive his men forward now.
+- **Since.** His men are the army Oni cuts down every night, sent out in the bodies they died in at those doors,
+  rotted and gone to bone ([Army.md](Army.md)). When one of them falls angry enough, Akagane catches the soul before
+  the coffin can, and lends its fire to the one man he'd most like to hit.
+- **The Bellringers** at the Mountain Shrine were his shrine watch, dead at their posts. Their tolls are what drive
+  his men forward now.
 
 ## How a Fire soul reaches Oni
 

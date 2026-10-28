@@ -14,6 +14,7 @@ writing a line, a scene or art for them**, and update it when something about th
 | **Shirogane** | The Forsaken Blade / Oath of the Spectral Wolf | Oni's sworn partner, now a ghost. Stage 3 boss. | [Shirogane.md](Shirogane.md) |
 | **Kuon** | The Shrine Guardian | Shirogane's spirit wolf, her family shrine's guardian. Fought beside her in her phase 2. | [Kuon.md](Kuon.md) |
 | **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
+| **The army** | — | The dead of the Night of a Thousand Bells, marching in the bodies they died in. Every round's enemies. | [Army.md](Army.md) |
 | **Poguru** | The Lost Dragon | A baby dragon of soul-fire living in Oni's left wisp. His guide, the tutorial, comic relief; never fights. | [Poguru.md](Poguru.md) |
 
 ## The betrayal
@@ -46,9 +47,11 @@ new faces on his armor cast as snarling oni.
   flute on the altar (the Flute Songs), the memorial stones, the weapon rack, and the gate out. The title screen is
   the hill outside it. Each return
   wears a little more of his memory away.
-- **The army and the bosses** are souls from the armor, sent out each night in borrowed bodies. When one falls it
-  is drawn back into the coffin and forged again, so the army is always full and the bosses remember every fight.
-  The yurei of the Frozen Shrine are the souls the armor hasn't bothered to give bodies to.
+- **The army and the bosses** are souls from the armor, sent out each night. The army walks in the bodies it died
+  in on the Night of a Thousand Bells: rotted armour and bone, a faint teal ember of soul in each eye slit
+  ([Army.md](Army.md)). When one falls its body crumbles to bones and ash and its soul is drawn back into the coffin
+  and forged again, so the army is always full and the bosses remember every fight. The yurei of the Frozen Shrine
+  are the souls whose bodies are gone, so the armor hasn't bothered to give them one.
 - **The endless night.** The last bell froze the hour, and Utsusemi winds the clock that holds it there. The moons
   over the boss fights (blood, steel, spirit) belong to the bosses, not to Kagetsune.
 - **Boons.** When a soldier dies, its soul sometimes slips past the coffin's pull as a Fire, Frost or Storm soul.

@@ -1789,8 +1789,8 @@ public class GameManager : MonoBehaviour
             blockers.Clear();
             yield return tutorial.Drills();
         }
-        // Blockers carry their damage from round to round; a new stage brings fresh ones.
-        if (roundIndex == 0) blockers.Rebuild();
+        // Every round is fought on fresh ground further along the road, so it brings fresh cover.
+        blockers.Rebuild();
         // A stage's first round always ends in a soul; later rounds carry what their path showed.
         if (roundIndex == 0)
         {

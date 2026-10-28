@@ -93,7 +93,7 @@ public static class BoonArtSetup
         // on their boon screens.
         SetArray(managerSo.FindProperty("scrollFrames"), Frames("Effects/TechniqueScroll_"));
         SetArray(managerSo.FindProperty("beadFrames"), Frames("Effects/SpiritBead_"));
-        SetArray(managerSo.FindProperty("emberFrames"), Frames("Effects/EmberCache_"));
+        SetArray(managerSo.FindProperty("noteFrames"), Frames("Effects/SpiritNotes_"));
         SetArray(managerSo.FindProperty("springFrames"), Frames("Effects/HealingSpring_"));
         managerSo.FindProperty("scrollPainted").objectReferenceValue = BossArtSetup.Portrait("TechniqueScroll_Painted");
         managerSo.FindProperty("beadPainted").objectReferenceValue = BossArtSetup.Portrait("SpiritBead_Painted");

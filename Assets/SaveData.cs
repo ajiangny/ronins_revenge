@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Everything that carries over from one run to the next: how the runs went, which lines have been heard, and the
-// Soul Embers and Flute Songs. One JSON string per save slot in PlayerPrefs, which the web build keeps too.
+// Spirit Notes and Flute Songs. One JSON string per save slot in PlayerPrefs, which the web build keeps too.
 [Serializable]
 public class SaveData
 {
@@ -25,6 +25,8 @@ public class SaveData
     // Repeatables already played since their bag was last emptied.
     public List<string> shuffleBag = new List<string>();
 
+    // The Spirit Notes held. Still named for the old Soul Embers: JsonUtility matches fields by name, so renaming it
+    // would empty every existing save.
     public int embers;
     // Indexed by UpgradeId: ranks bought, and the maxed songs switched off.
     public int[] ranks = new int[0];

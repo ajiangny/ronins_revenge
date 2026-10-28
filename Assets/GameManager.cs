@@ -38,14 +38,14 @@ public class GameManager : MonoBehaviour
     const string HighScoreKey = "HighScore";
     // A Spirit Offering taken at full health gives these points, times the stage number.
     const int OfferingPoints = 500;
-    // Embers a Spirit Bead gives per stage when every boon held is already Epic.
-    const int BeadEmbers = 20;
+    // Spirit Notes a Spirit Bead gives per stage when every boon held is already Epic.
+    const int BeadNotes = 20;
     static bool skipTitle;
     // The next scene load opens in the safe area instead of the title, after a death (he wakes in the pool) or a load.
     static bool intoSafeArea;
     static bool wakeInPool;
     // What the run just ended earned, shown as he wakes.
-    static int lastRunEmbers;
+    static int lastRunNotes;
     // Dev menu testing aids. Statics, so god mode and a pending jump survive the scene reload that starts the run.
     static bool godMode;
     static int devJumpStage = -1;
@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
     {
         skipTitle = false;
         intoSafeArea = wakeInPool = false;
-        lastRunEmbers = 0;
+        lastRunNotes = 0;
         godMode = false;
         devJumpStage = -1;
         devJumpBoss = false;
@@ -95,8 +95,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] int bossPortalAfterRound = 3;
     [Tooltip("Portals to choose from after each round, besides the boss's.")]
     [SerializeField] int portalChoices = 2;
-    [Tooltip("Embers an ember cache gives, times the stage number.")]
-    [SerializeField] int emberCache = 30;
+    [Tooltip("Spirit Notes a Lost Melody portal gives, times the stage number.")]
+    [FormerlySerializedAs("emberCache")]
+    [SerializeField] int noteCache = 30;
     [Tooltip("Rounds past a stage's last configured one repeat it, this much faster (speed) per extra round.")]
     [SerializeField] float extraRoundSpeedUp = 0.06f;
     [Tooltip("...and with this much less time between arrows per extra round.")]
@@ -117,8 +118,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] beadFrames;
     [Tooltip("The painted bead held out on the Spirit Bead screen. Empty uses beadFrames.")]
     [SerializeField] Sprite beadPainted;
-    [Tooltip("The ember cache portal's icon, looped.")]
-    [SerializeField] Sprite[] emberFrames;
+    [Tooltip("The Lost Melody portal's icon, looped.")]
+    [FormerlySerializedAs("emberFrames")]
+    [SerializeField] Sprite[] noteFrames;
     [Tooltip("The healing spring portal's icon, looped. Empty uses the life icon.")]
     [SerializeField] Sprite[] springFrames;
     [Tooltip("Each boss portal's icon, by the boss waiting behind it.")]
@@ -444,9 +446,9 @@ public class GameManager : MonoBehaviour
     int highScore;
     // The best score before this run, so the end screen can tell a new record apart.
     int highScoreAtStart;
-    // Soul Embers earned this run (already added to the save), for the end screen.
-    int embersThisRun;
-    float emberFraction;
+    // Spirit Notes earned this run (already added to the save), for the end screen.
+    int notesThisRun;
+    float noteFraction;
     // Second Dawn and Fate's Thread work once a run.
     bool dawnUsed;
     // Fate's Thread redraws and Banishing Bell banishes left this run, and the boons banished.
@@ -884,7 +886,7 @@ public class GameManager : MonoBehaviour
     {
         bool paper = OnPaper;
         string muted = MenuUI.MutedHex(paper);
-        string ember = paper ? "1E8C7E" : ColorUtility.ToHtmlStringRGB(OniColour);
+        string noteHex = paper ? "1E8C7E" : ColorUtility.ToHtmlStringRGB(OniColour);
         var items = new List<MenuUI.Item>();
         Upgrades.RefundRetired();
         foreach (Song song in Upgrades.All)
@@ -895,10 +897,10 @@ public class GameManager : MonoBehaviour
             int bought = Upgrades.Bought(id);
             bool maxed = Upgrades.Maxed(id);
             string pips = $"<color=#{muted}>{bought}/{song.MaxRank}</color>";
-            string price = maxed ? (Upgrades.IsOff(id) ? "OFF" : "") : $"<color=#{(Upgrades.CanBuy(id) ? ember : muted)}>{Upgrades.Price(id)}</color>";
+            string price = maxed ? (Upgrades.IsOff(id) ? "OFF" : "") : $"<color=#{(Upgrades.CanBuy(id) ? noteHex : muted)}>{Upgrades.Price(id)}</color>";
             string note = maxed
                 ? $"{song.Effect(song.MaxRank)}   <color=#{muted}>·  Enter switches it {(Upgrades.IsOff(id) ? "on" : "off")}</color>"
-                : $"{song.Effect(bought + 1)}   <color=#{muted}>·  {(Upgrades.CanBuy(id) ? "Enter to learn" : "not enough embers")}</color>";
+                : $"{song.Effect(bought + 1)}   <color=#{muted}>·  {(Upgrades.CanBuy(id) ? "Enter to learn" : "not enough notes")}</color>";
             items.Add(MenuUI.Item.Button($"{song.Name.ToUpperInvariant()}  {pips}  {price}", () =>
             {
                 if (maxed) Upgrades.Toggle(id);
@@ -911,10 +913,10 @@ public class GameManager : MonoBehaviour
         {
             Upgrades.RefundAll();
             ShowSongs(back, refundRow);
-        }, $"Forget every song and take back {Upgrades.Spent} embers"));
+        }, $"Forget every song and take back {Upgrades.Spent} notes"));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("FLUTE SONGS",
-            $"<color=#{ember}>{Save.Data.embers} SOUL EMBERS</color>\n<size=30><color=#{muted}>Songs Shirogane taught him on her flute. They stay with him through every run.</color></size>",
+            $"<color=#{noteHex}>{Save.Data.embers} SPIRIT NOTES</color>\n<size=30><color=#{muted}>Songs Shirogane taught him on her flute. They stay with him through every run.</color></size>",
             items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
     }
 
@@ -932,7 +934,7 @@ public class GameManager : MonoBehaviour
             any |= peek != null;
             string label = peek == null
                 ? $"{Roman(i + 1)}   <color=#{muted}>·</color>   NEW JOURNEY"
-                : $"{Roman(i + 1)}   <color=#{muted}>·</color>   {peek.runsStarted} {(peek.runsStarted == 1 ? "RUN" : "RUNS")}  <color=#{muted}>·</color>  {peek.embers} EMBERS";
+                : $"{Roman(i + 1)}   <color=#{muted}>·</color>   {peek.runsStarted} {(peek.runsStarted == 1 ? "RUN" : "RUNS")}  <color=#{muted}>·</color>  {peek.embers} NOTES";
             string note = peek == null
                 ? "An empty slot. It begins on the hill, with her flute."
                 : $"{peek.deaths} {(peek.deaths == 1 ? "death" : "deaths")}  ·  {peek.runsCleared} {(peek.runsCleared == 1 ? "dawn" : "dawns")}  ·  wakes in the temple";
@@ -1038,8 +1040,8 @@ public class GameManager : MonoBehaviour
             Sfx.Play(Sfx.SoulCollect);
             yield return new WaitForSeconds(0.7f);
             yield return ronin.WalkTo(BodyAt(safeArea.PoolExit), travelWalkSpeed * 0.3f);
-            if (lastRunEmbers > 0) StartCoroutine(EmberTally(lastRunEmbers));
-            lastRunEmbers = 0;
+            if (lastRunNotes > 0) StartCoroutine(NoteTally(lastRunNotes));
+            lastRunNotes = 0;
             StartCoroutine(HubReturn());
         }
         // The floor is where his feet may go; the clamp is on his body.
@@ -1073,7 +1075,7 @@ public class GameManager : MonoBehaviour
     }
 
     // The oath stone (Hades' Pact of Punishment): each oath cycles through its ranks; the Heat they add up to raises
-    // the embers earned, and a dawn at a new highest Heat pays a bounty.
+    // the Spirit Notes earned, and a dawn at a new highest Heat pays a bounty.
     void ShowOaths(System.Action back, int startIndex = 0)
     {
         string muted = MenuUI.MutedHex(false);
@@ -1099,14 +1101,14 @@ public class GameManager : MonoBehaviour
         for (int h = Save.Data.bestHeatCleared + 1; h <= Oaths.Heat; h++) nextBounty += Oaths.BountyPerHeat * h;
         string bounty = nextBounty > 0 ? $"   <color=#{muted}>·</color>   dawn bounty  <color=#{heat}>{nextBounty}</color>" : "";
         menu.Show("OATH STONE",
-            $"<color=#{heat}>HEAT {Oaths.Heat}</color>   <color=#{muted}>·</color>   embers  x{Oaths.EmberMultiplier:0.0}{bounty}\n<size=30><color=#{muted}>Vows cut into the stone by ronin who wanted the road harder. Highest Heat at dawn: {Save.Data.bestHeatCleared}.</color></size>",
+            $"<color=#{heat}>HEAT {Oaths.Heat}</color>   <color=#{muted}>·</color>   notes  x{Oaths.NoteMultiplier:0.0}{bounty}\n<size=30><color=#{muted}>Vows cut into the stone by ronin who wanted the road harder. Highest Heat at dawn: {Save.Data.bestHeatCleared}.</color></size>",
             items.ToArray(), back, startIndex, gridColumns: 2);
     }
 
     // What the run he just died on was worth, for a moment, under the stations.
-    IEnumerator EmberTally(int earned)
+    IEnumerator NoteTally(int earned)
     {
-        ui.ShowBanner("Back in the temple", $"+{earned} Soul Embers", $"{Save.Data.embers} to spend at the flute altar", OniColour);
+        ui.ShowBanner("Back in the temple", $"+{earned} Spirit Notes", $"{Save.Data.embers} to spend at the flute altar", OniColour);
         yield return new WaitForSeconds(2.8f);
         ui.HideBanner();
     }
@@ -1276,7 +1278,7 @@ public class GameManager : MonoBehaviour
             // Gives up the run (it isn't counted as a death) and wakes in the temple with what it earned.
             MenuUI.Item.Button("RETURN TO TEMPLE", () =>
             {
-                lastRunEmbers = embersThisRun;
+                lastRunNotes = notesThisRun;
                 ReloadToSafeArea(true);
             }),
             MenuUI.Item.Button("RESTART", () => Reload(true)),
@@ -1309,13 +1311,13 @@ public class GameManager : MonoBehaviour
             SetGodMode(!godMode);
             ShowDevMenu(back, godModeRow);
         }));
-        // Enough embers to try the songs without playing for them.
-        int embersRow = items.Count;
-        items.Add(MenuUI.Item.Button($"+1000 EMBERS  ({Save.Data.embers})", () =>
+        // Enough notes to try the songs without playing for them.
+        int notesRow = items.Count;
+        items.Add(MenuUI.Item.Button($"+1000 NOTES  ({Save.Data.embers})", () =>
         {
-            Upgrades.AddEmbers(1000);
+            Upgrades.AddNotes(1000);
             Save.Write();
-            ShowDevMenu(back, embersRow);
+            ShowDevMenu(back, notesRow);
         }));
         // Forgets every run, line heard and song bought, so the game plays as on a first boot.
         int resetRow = items.Count;
@@ -1358,7 +1360,7 @@ public class GameManager : MonoBehaviour
     // Reload for a clean slate (arrows, debris, ronin), straight into play or back to the title menu.
     static void Reload(bool intoPlay)
     {
-        // A restart or quit mid-run still keeps the embers earned so far.
+        // A restart or quit mid-run still keeps the notes earned so far.
         Save.Write();
         skipTitle = intoPlay;
         Time.timeScale = 1f;
@@ -1531,8 +1533,8 @@ public class GameManager : MonoBehaviour
         ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
         lives = maxLives = Mathf.Clamp(startingLives + Upgrades.Rank(UpgradeId.IronWill) - Oaths.Rank(OathId.FrailBody), 1, Boons.MaxLives);
         Boss.HealthScale = 1f + Oaths.Rank(OathId.IronGenerals) * Oaths.BossHealthPerRank;
-        emberFraction = 0f;
-        embersThisRun = 0;
+        noteFraction = 0f;
+        notesThisRun = 0;
         dawnUsed = false;
         redrawsLeft = Upgrades.Rank(UpgradeId.FatesThread);
         banishesLeft = Upgrades.Rank(UpgradeId.BanishingBell);
@@ -1617,15 +1619,15 @@ public class GameManager : MonoBehaviour
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
 
-    // Embers go straight into the save, so a run that ends any way at all keeps them.
+    // Spirit Notes go straight into the save, so a run that ends any way at all keeps them.
     // Heat raises them; the fractions carry over so single kills still add up.
-    void Earn(int embers)
+    void Earn(int notes)
     {
-        emberFraction += embers * Oaths.EmberMultiplier;
-        int whole = Mathf.FloorToInt(emberFraction);
-        emberFraction -= whole;
-        embersThisRun += whole;
-        Upgrades.AddEmbers(whole);
+        noteFraction += notes * Oaths.NoteMultiplier;
+        int whole = Mathf.FloorToInt(noteFraction);
+        noteFraction -= whole;
+        notesThisRun += whole;
+        Upgrades.AddNotes(whole);
     }
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
@@ -1787,14 +1789,14 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
     }
 
-    // A Spirit Bead raises one held boon a rarity, like Hades' Pom of Power. With nothing left to raise it's an ember
-    // cache instead, and false (nothing shown).
+    // A Spirit Bead raises one held boon a rarity, like Hades' Pom of Power. With nothing left to raise it pays
+    // Spirit Notes instead, and false (nothing shown).
     bool OfferBead(System.Action afterPick)
     {
         var offers = Boons.DrawBead(loadout, 3);
         if (offers.Count == 0)
         {
-            Earn(BeadEmbers * (stageIndex + 1));
+            Earn(BeadNotes * (stageIndex + 1));
             return false;
         }
 
@@ -2120,10 +2122,10 @@ public class GameManager : MonoBehaviour
     IEnumerator GrantReward()
     {
         PortalReward reward = pendingReward;
-        // A spring at full health, or a bead or scroll with nothing left to give, falls back to an ember cache.
-        if (reward == PortalReward.Spring && lives >= maxLives) reward = PortalReward.Embers;
-        if (reward == PortalReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PortalReward.Embers;
-        if (reward == PortalReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PortalReward.Embers;
+        // A spring at full health, or a bead or scroll with nothing left to give, falls back to a Lost Melody.
+        if (reward == PortalReward.Spring && lives >= maxLives) reward = PortalReward.Notes;
+        if (reward == PortalReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PortalReward.Notes;
+        if (reward == PortalReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PortalReward.Notes;
 
         bool picked = false;
         switch (reward)
@@ -2152,12 +2154,12 @@ public class GameManager : MonoBehaviour
                 Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
                 yield return new WaitForSeconds(0.6f);
                 break;
-            case PortalReward.Embers:
-                int embers = emberCache * (stageIndex + 1);
-                Earn(embers);
+            case PortalReward.Notes:
+                int notes = noteCache * (stageIndex + 1);
+                Earn(notes);
                 Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
                 Sfx.Play(Sfx.SoulCollect, 0.9f, 1.2f);
-                ui.ShowSubtitle(null, $"+{embers} Soul Embers", RewardColour(reward, pendingElement), 1.6f);
+                ui.ShowSubtitle(null, $"+{notes} Spirit Notes", RewardColour(reward, pendingElement), 1.6f);
                 yield return new WaitForSeconds(0.6f);
                 break;
         }
@@ -2259,7 +2261,7 @@ public class GameManager : MonoBehaviour
     // cleared. Souls are the common pick; springs only show while he's hurt, beads and scrolls only with a use.
     List<(PortalReward, Element)> RollPortals()
     {
-        var weights = new List<(PortalReward reward, float weight)> { (PortalReward.Soul, 45f), (PortalReward.Embers, 20f) };
+        var weights = new List<(PortalReward reward, float weight)> { (PortalReward.Soul, 45f), (PortalReward.Notes, 20f) };
         if (Boons.DrawBead(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PortalReward.Bead, 20f));
         if (lives < maxLives) weights.Add((PortalReward.Spring, 10f));
         if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PortalReward.Scroll, 5f));
@@ -2282,7 +2284,7 @@ public class GameManager : MonoBehaviour
         return picks;
     }
 
-    static readonly Color EmberColour = new Color(1f, 0.55f, 0.25f);
+    static Color NoteColour => OniColour;
     static readonly Color SpringColour = new Color(1f, 0.4f, 0.45f);
     static readonly Color BossPortalColour = new Color(0.85f, 0.15f, 0.2f);
 
@@ -2293,7 +2295,7 @@ public class GameManager : MonoBehaviour
         PortalReward.Scroll => Boons.ArtColor,
         PortalReward.Spring => SpringColour,
         PortalReward.Boss => BossPortalColour,
-        _ => EmberColour,
+        _ => NoteColour,
     };
 
     string RewardLabel(PortalReward reward, Element element) => reward switch
@@ -2303,7 +2305,7 @@ public class GameManager : MonoBehaviour
         PortalReward.Scroll => "Technique Scroll",
         PortalReward.Spring => "Healing Spring",
         PortalReward.Boss => Stage.boss == BossKind.None ? "Onward" : Stage.boss.ToString(),
-        _ => "Soul Embers",
+        _ => "Lost Melody",
     };
 
     Sprite[] RewardIcon(PortalReward reward, Element element) => reward switch
@@ -2311,7 +2313,7 @@ public class GameManager : MonoBehaviour
         PortalReward.Soul => ArtFor(element)?.soulFrames,
         PortalReward.Scroll => scrollFrames,
         PortalReward.Bead => beadFrames,
-        PortalReward.Embers => emberFrames,
+        PortalReward.Notes => noteFrames != null && noteFrames.Length > 0 ? noteFrames : new[] { ProceduralSprites.Note(1) },
         PortalReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
         PortalReward.Boss => BossIconOf(stages[stageIndex].boss),
         _ => null,
@@ -3183,11 +3185,11 @@ public class GameManager : MonoBehaviour
     {
         state = State.GameOver;
         // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
-        if (cleared) embersThisRun += Oaths.ClaimBounty();
+        if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);
-        RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  embers {embersThisRun}  held: {HeldSummary()}");
+        RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  notes {notesThisRun}  held: {HeldSummary()}");
         Save.EndRun(cleared, killer);
-        lastRunEmbers = embersThisRun;
+        lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);
         Sfx.Play(sting);
@@ -3220,8 +3222,8 @@ public class GameManager : MonoBehaviour
             $"<color=#{muted}>SCORE</color>  <size=48>{score:000000}</size>        <color=#{muted}>HIGH SCORE</color>  <size=48><color=#{gold}>{highScore:000000}</color></size>\n" +
             $"<color=#{muted}>Reached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}</color>";
         if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
-        if (embersThisRun > 0)
-            body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{embersThisRun} SOUL EMBERS</color>  <color=#{muted}>({Save.Data.embers} to spend in the temple)</color>";
+        if (notesThisRun > 0)
+            body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{notesThisRun} SPIRIT NOTES</color>  <color=#{muted}>({Save.Data.embers} to spend in the temple)</color>";
         menu.Show(title, body, new[]
         {
             MenuUI.Item.Button("RETURN TO TEMPLE", () => ReloadToSafeArea(true)),

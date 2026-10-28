@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-// The Flute Songs: what Oni buys on the hill with Soul Embers between runs (ECONOMY.md). A fresh save plays exactly
+// The Flute Songs: what Oni buys on the hill with Spirit Notes between runs (ECONOMY.md). A fresh save plays exactly
 // as the game is tuned; every song only adds on top of the scene's values. The stat songs stay small next to the
 // boons; the later ones give control over a run's rewards (more portals, redraws, banishes, beads) instead of power.
 // Saves index ranks by this enum, so new songs go on the end and a retired one keeps its place.
@@ -25,7 +25,7 @@ public sealed class Song
 
 public static class Upgrades
 {
-    // Embers for each kill: samurai and scouts, and each boss by BossKind.
+    // Spirit Notes for each kill: samurai and scouts, and each boss by BossKind.
     public const int PerSamurai = 1;
     public const int PerScout = 5;
     static readonly int[] PerBoss = { 0, 25, 40, 60, 100 };
@@ -155,9 +155,9 @@ public static class Upgrades
         Save.Write();
     }
 
-    public static void AddEmbers(int embers) => Save.Data.embers += embers;
+    public static void AddNotes(int notes) => Save.Data.embers += notes;
 
-    // A retired song's ranks come back as embers at their base price, and stop counting toward the surcharge.
+    // A retired song's ranks come back as notes at their base price, and stop counting toward the surcharge.
     public static void RefundRetired()
     {
         bool changed = false;

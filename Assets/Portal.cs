@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 // What waits beyond a portal: the next round's reward, given when that round is cleared, or the stage's boss.
-public enum PortalReward { Soul, Bead, Embers, Spring, Scroll, Boss }
+public enum PortalReward { Soul, Bead, Notes, Spring, Scroll, Boss }
 
 // A spirit gate that opens where the army stood once a round is cleared, like Hades' chamber doors: each shows the
 // reward of the round behind it, and the ronin picks one by standing under it. Built in code; without art it is a

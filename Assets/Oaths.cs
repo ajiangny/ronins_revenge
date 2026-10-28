@@ -2,8 +2,9 @@ using System;
 using UnityEngine;
 
 // The Oaths of the Ronin, sworn at the oath stone in the temple (Hades' Pact of Punishment): once he has seen a dawn,
-// each oath makes the next runs harder, and every rank sworn is a point of Heat that raises the embers he earns. The
-// first dawn at a higher Heat than ever before pays a bounty. Saves index ranks by this enum, so new oaths go on the end.
+// each oath makes the next runs harder, and every rank sworn is a point of Heat that raises the Spirit Notes he
+// earns. The first dawn at a higher Heat than ever before pays a bounty. Saves index ranks by this enum, so new oaths
+// go on the end.
 public enum OathId { HastenedMarch, RainOfArrows, IronGenerals, LongRoad, FadedSpirits, FrailBody }
 
 public sealed class Oath
@@ -21,9 +22,9 @@ public static class Oaths
     public const float ArrowIntervalPerRank = 0.1f;
     public const float ArrowSpeedPerRank = 0.05f;
     public const float BossHealthPerRank = 0.15f;
-    // Each point of Heat adds this much to the embers earned.
-    public const float EmbersPerHeat = 0.1f;
-    // The first dawn at a new highest Heat pays this many embers per point.
+    // Each point of Heat adds this much to the notes earned.
+    public const float NotesPerHeat = 0.1f;
+    // The first dawn at a new highest Heat pays this many notes per point.
     public const int BountyPerHeat = 150;
 
     public static readonly Oath[] All =
@@ -71,7 +72,7 @@ public static class Oaths
         }
     }
 
-    public static float EmberMultiplier => 1f + Heat * EmbersPerHeat;
+    public static float NoteMultiplier => 1f + Heat * NotesPerHeat;
 
     // Each press swears one rank more, and past the last rank releases the oath.
     public static void Cycle(OathId id)

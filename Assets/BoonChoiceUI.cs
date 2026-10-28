@@ -117,6 +117,33 @@ public class BoonChoiceUI : MonoBehaviour
     const float SlotGap = 12f;
 
     public bool IsOpen => panel != null && panel.activeSelf;
+    // While Poguru explains the cards over the open screen, nothing can be picked.
+    public bool InputLocked { get; set; }
+
+    // A HUD ability slot's ring, for pointing at it.
+    public RectTransform SlotRect(BoonSlot slot) => hudSlots[(int)slot].ring.rectTransform;
+
+    // Moves the ability slots onto `layer` (a talk scene's overlay, which covers the screen as the canvas does, so
+    // they stay put) to show them over the scene's dark; DropSlots puts them back.
+    public void LiftSlots(RectTransform layer)
+    {
+        foreach (HudSlot slot in hudSlots)
+        {
+            slot.ring.rectTransform.SetParent(layer, false);
+            slot.ring.gameObject.SetActive(true);
+        }
+    }
+
+    public void DropSlots()
+    {
+        foreach (HudSlot slot in hudSlots)
+        {
+            if (slot.ring.transform.parent == transform) continue;
+            slot.ring.rectTransform.SetParent(transform, false);
+            // Back under the tooltips, where they were built.
+            slot.ring.rectTransform.SetSiblingIndex(tips.transform.GetSiblingIndex());
+        }
+    }
 
     public void Bind(Ronin owner, GameUI gameUI)
     {
@@ -363,7 +390,7 @@ public class BoonChoiceUI : MonoBehaviour
 
         float elapsed = Time.unscaledTime - shownAt;
         AnimatePanel(elapsed);
-        if (elapsed < InputDelay) return;
+        if (elapsed < InputDelay || InputLocked) return;
 
         Keyboard keyboard = Keyboard.current;
         if (keyboard != null)

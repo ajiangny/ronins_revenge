@@ -33,6 +33,8 @@ public class DialogueScene : MonoBehaviour
         public AudioClip clip;
         // The source to speak through, when not the scene's own (Oni's carries none of the bosses' voice filters).
         public AudioSource source;
+        // Called as the line comes up (the tutorial points at a HUD slot on the line about it).
+        public System.Action shown;
     }
 
     // One side of the stage: a glow in the speaker's colour and their painting, masked to that half of the screen.
@@ -62,8 +64,14 @@ public class DialogueScene : MonoBehaviour
     RectTransform rule;
     TextMeshProUGUI lineText;
     TextMeshProUGUI hint;
+    Image dim;
+    bool advance;
 
     public bool IsPlaying { get; private set; }
+    // Over the plate and the figures: what a talk lifts out of the dark (the HUD's ability slots, Poguru's pointer).
+    public RectTransform Overlay { get; private set; }
+
+    public const float DarkDim = 0.55f;
 
     const float PlateWidth = 1180f, PlateHeight = 230f;
     const float RuleWidth = 1080f;
@@ -96,8 +104,8 @@ public class DialogueScene : MonoBehaviour
         group.blocksRaycasts = false;
 
         // The field stays visible, dimmed, with darkness rising from the bottom so the plate reads.
-        Image dim = Stretch(GameUI.CreateRect("Dim", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
-        dim.color = new Color(0.02f, 0.01f, 0.03f, 0.55f);
+        dim = Stretch(GameUI.CreateRect("Dim", root, Vector2.zero, Vector2.zero, Vector2.zero)).gameObject.AddComponent<Image>();
+        dim.color = new Color(0.02f, 0.01f, 0.03f, DarkDim);
         dim.raycastTarget = false;
 
         left = BuildSlot("Left", false);
@@ -145,6 +153,8 @@ public class DialogueScene : MonoBehaviour
         hint.text = MenuUI.KeyCap("SPACE", false);
         hint.color = GameUI.MutedColour;
         ui.Style(hint, TextStyle.Hint);
+
+        Overlay = Stretch(GameUI.CreateRect("Overlay", root, Vector2.zero, Vector2.zero, Vector2.zero));
     }
 
     // Each half of the screen holds one figure, masked a little past the centre with a feathered edge so a wide bust
@@ -246,11 +256,17 @@ public class DialogueScene : MonoBehaviour
         else slot.root.offsetMax = new Vector2(offset, slot.root.offsetMax.y);
     }
 
-    // Plays the lines in order, each waiting on confirm, and returns once the scene has faded out.
-    public IEnumerator Play(IList<Line> lines, AudioSource voice, float voiceVolume)
+    // Moves on to the next line as confirm would, typed or not (for test harnesses driving a scene).
+    public void Advance() => advance = true;
+
+    // Plays the lines in order, each waiting on confirm, and returns once the scene has faded out. `dimAlpha` is how
+    // dark the field goes behind it; a lighter one leaves what's under it (a boon screen) readable.
+    public IEnumerator Play(IList<Line> lines, AudioSource voice, float voiceVolume, float dimAlpha = DarkDim)
     {
         if (lines == null || lines.Count == 0) yield break;
         IsPlaying = true;
+        advance = false;
+        dim.color = new Color(dim.color.r, dim.color.g, dim.color.b, dimAlpha);
         root.SetAsLastSibling();
         root.gameObject.SetActive(true);
         group.alpha = 0f;
@@ -287,6 +303,7 @@ public class DialogueScene : MonoBehaviour
             speaking.shown = speaking.lit = true;
             listening.lit = false;
             ShowName(who);
+            line.shown?.Invoke();
             lineText.text = line.text;
             lineText.maxVisibleCharacters = 0;
             int length = lineText.text.Length;
@@ -310,6 +327,11 @@ public class DialogueScene : MonoBehaviour
                 lineText.maxVisibleCharacters = typed ? length : shown;
                 hint.alpha = typed ? 0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 4f) : 0f;
                 Animate(openedAt);
+                if (advance)
+                {
+                    advance = false;
+                    break;
+                }
                 if (Time.unscaledTime - openedAt > InputGuard && Confirmed())
                 {
                     if (!typed) typed = true;

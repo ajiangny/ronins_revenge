@@ -3011,14 +3011,25 @@ public class GameManager : MonoBehaviour
     // Her silver, as herself rather than the Emperor's teal.
     static readonly Color FreedColour = new Color(0.72f, 0.9f, 1f);
 
+    // How a talk plays: over the HUD or with it left as it is (keepHud: the tutorial's pointing, a temple talk, a talk
+    // over the boon screen), how dark the field goes, Poguru on the right instead of the left, and a call as each line
+    // comes up.
+    public struct TalkOptions
+    {
+        public bool keepHud;
+        public float dim;
+        public bool poguruRight;
+        public System.Action<int> onLine;
+    }
+
     // A conversation as a talk scene (DialogueScene) over the frozen field. A boss's built-in line comes first in its
     // own voice, then the written lines, each voiced when its clip is there. The field, the clock and the ronin's
     // controls are put back as they were afterwards.
-    IEnumerator PlayScene(Conversation said)
+    IEnumerator PlayScene(Conversation said) => PlayTalk(said, default);
+
+    // A conversation's lines for the scene, each with its speaker, filled-in text and clip.
+    List<DialogueScene.Line> LinesOf(Conversation said, TalkOptions options)
     {
-        if (said == null) yield break;
-        // A killing blow's hit-stop would hand time back mid-scene.
-        while (hitStopping) yield return null;
         var lines = new List<DialogueScene.Line>();
         int index = 0;
         if (said.BuiltIn is BossLine built && activeBoss != null)
@@ -3031,10 +3042,22 @@ public class GameManager : MonoBehaviour
         foreach (DialogueLine line in said.Lines)
         {
             AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(index)) : null;
-            lines.Add(new DialogueScene.Line { who = SpeakerFor(line.Speaker), text = Dialogue.Fill(line.Text, ctx), clip = clip,
-                source = VoiceOf(line.Speaker) });
+            DialogueScene.Speaker who = SpeakerFor(line.Speaker);
+            if (line.Speaker == "Poguru" && options.poguruRight) who.right = true;
+            int shown = lines.Count;
+            lines.Add(new DialogueScene.Line { who = who, text = Dialogue.Fill(line.Text, ctx), clip = clip,
+                source = VoiceOf(line.Speaker), shown = options.onLine != null ? () => options.onLine(shown) : null });
             index++;
         }
+        return lines;
+    }
+
+    public IEnumerator PlayTalk(Conversation said, TalkOptions options)
+    {
+        if (said == null) yield break;
+        // A killing blow's hit-stop would hand time back mid-scene.
+        while (hitStopping) yield return null;
+        List<DialogueScene.Line> lines = LinesOf(said, options);
         if (lines.Count == 0) yield break;
 
         State was = state;
@@ -3044,12 +3067,18 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
         ronin.ControlsEnabled = false;
         speakingFullLine = true;
-        // Nothing of the HUD sits over the scene.
-        ui.HideForScene(true);
-        boonChoice.SetHudVisible(false);
-        yield return dialogueScene.Play(lines, voice, voiceVolume * Sfx.Volume);
-        ui.HideForScene(false);
-        boonChoice.SetHudVisible(true);
+        // Nothing of the HUD sits over the scene, unless the talk is about it.
+        if (!options.keepHud)
+        {
+            ui.HideForScene(true);
+            boonChoice.SetHudVisible(false);
+        }
+        yield return dialogueScene.Play(lines, voice, voiceVolume * Sfx.Volume, options.dim > 0f ? options.dim : DialogueScene.DarkDim);
+        if (!options.keepHud)
+        {
+            ui.HideForScene(false);
+            boonChoice.SetHudVisible(true);
+        }
         speakingFullLine = false;
         state = was;
         Time.timeScale = timeScale;

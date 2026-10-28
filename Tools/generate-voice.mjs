@@ -1,6 +1,6 @@
 // Generates the voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
-// Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice, Oni's in his and the three souls' in
-// theirs (the story behind each is in Story/<Name>.md).
+// Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice, Oni's in his, Poguru's in his and the three
+// souls' in theirs (the story behind each is in Story/<Name>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
 // from .env.local.
@@ -32,6 +32,10 @@ const ONI = "XySBombsrAu9uFxNYdaV";
 const AKAGANE = "GpSqIE5EUQVhDQQOFpqm";
 const MIZORE = "6hb6jR2nJV34vAkWq2Gv";
 const HIBIKI = "2R377yXvV0jHG7sPjbOY";
+// Designed in ElevenLabs for Poguru (Story/Poguru.md): a tiny cartoon baby-dragon spirit, young, boyish, high and bright
+// but warm (not shrill), fast and breathless, giggly, with comedic gasps and whines. Unity plays him through a light
+// chorus (GameManager.poguruVoice).
+const POGURU = "vHGbxklwUU4QPMN7Wam1";
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -279,6 +283,85 @@ const LINES = {
   Hibiki_Greet_Stop: [HIBIKI, "[fast] Don't stop! Stopping's the worst."],
   Hibiki_Greet_Catch: [HIBIKI, "[excited, calling out] Here! Catch!"],
   Hibiki_Greet_Drumroll: [HIBIKI, "[playful, teasing] Drumroll, please... It's me again!"],
+
+  // Poguru, the Lost Dragon (Story/Poguru.md): the tutorial, his barks and his temple talk. Ids follow
+  // Conversation.VoiceId; Oni's replies inside his conversations are in Oni's voice. Poguru_Wake_Count fills in a
+  // death count, so it stays a subtitle.
+  Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! THE ARMY IS COMING!"],
+  Poguru_Tut_Wake_2: [ONI, "[low, tired, flat] ...Who are you."],
+  Poguru_Tut_Wake_3: [POGURU, "[proud, puffed up] Poguru! The Lost Dragon! [giggles] I live in your wisp. Rent-free!"],
+  Poguru_Tut_Wake_4: [POGURU, "[gasps, fast, breathless] No time! Do you remember how to fight?"],
+  Poguru_Tut_Again: [POGURU, "[excited, fast] Oni! Army! Again! [eager] Want the lesson again? [giggles] I LOVE the lesson."],
+  Poguru_Tut_Yay: [POGURU, "[cheering] Yay! Stay close to me. [flustered, correcting himself] I mean, I'll stay close to you!"],
+  Poguru_Tut_Skip: [POGURU, "[fast, eager] Okay okay okay! I'll be in your wisp. Cheering. [whispering] Quietly. [giggles] Mostly."],
+  Poguru_Tut_Basics: [POGURU, "[excited, explaining fast] Bad guys up there, you down here. They march down, you stop them!"],
+  Poguru_Tut_Basics_2: [POGURU, "[excited] This is SLASH. Press SPACE and a cut flies up. [playful] Whoosh!"],
+  Poguru_Tut_Basics_3: [POGURU, "[awed] Your Spirit SHURIKEN! Press W. Big and sparkly, [sleepy, cute] but it needs a little nap after."],
+  Poguru_Tut_Basics_4: [POGURU, "[excited] And PARRY! Press SHIFT just before an arrow bonks you, [delighted] and it goes right back at them!"],
+  Poguru_Tut_Basics_5: [POGURU, "[proud] Beat the whole army. I'll float nearby and bonk arrows. [nervous giggle] ...Try not to make me bonk too many."],
+  Poguru_Block_1: [POGURU, "[proud, quick] Bonk! Got it!"],
+  Poguru_Block_3: [POGURU, "[wincing, then brave] Ow. Okay. Still fine!"],
+  Poguru_Block_6: [POGURU, "[whiny, exasperated] Oni, you can ALSO move, you know!"],
+  Poguru_Block_10: [POGURU, "[whiny, indignant shout] My HEAD is not a SHIELD!"],
+  Poguru_Block_Break: [POGURU, "[huffy, fed up] That's it! Dragon break! You're on your own for five seconds!"],
+  Poguru_Block_Back: [POGURU, "[grumpy sigh] ...Fine. FINE. I'm back. [pouty] Hmph."],
+  Poguru_Tut_LookOut: [POGURU, "[panicked, squeaky shout] LOOK OUT!!!"],
+  Poguru_Tut_Hearts: [POGURU, "[wailing, panicked] Waaah! It went right through me! [worried, fast] Are you okay?!"],
+  Poguru_Tut_Hearts_2: [ONI, "[low, tired, flat] ...Fine."],
+  Poguru_Tut_Hearts_3: [POGURU, "[explaining, earnest] Those hearts in the corner are your lives. Lose them all and it's back to the temple. [whiny] It's damp there."],
+  Poguru_Tut_Hearts_4: [POGURU, "[excited, proud] Good news! I've been saving a heart soul. For emergencies. [gasps] This is an emergency!"],
+  Poguru_Tut_Hearts_5: [POGURU, "[cheerful] Hearts fall out of broken cover sometimes. [conspiratorial] Once in a blue moon a soldier drops one too!"],
+  Poguru_Tut_Collect: [POGURU, "[excited, urging] Go get it! It's on your row!"],
+  Poguru_Tut_Collected: [POGURU, "[happy] Yummy! [flustered] I mean... healthy!"],
+  Poguru_Tut_Reward: [POGURU, "[awed, delighted] Ooooo! Pretty cool soul!"],
+  Poguru_Tut_Reward_2: [POGURU, "[puzzled, softer] Wait... it looks like someone familiar..."],
+  Poguru_Tut_Boons: [POGURU, "[excited, explaining] Souls lend you their power. That's a boon!"],
+  Poguru_Tut_Boons_2: [POGURU, "[earnest] Pick ONE. Up and down to look, ENTER to take it."],
+  Poguru_Tut_Boons_3: [POGURU, "[explaining] They change your slash, shuriken or parry. [giggles] Or pick the shiniest. That's what I'd do."],
+  Poguru_Tut_Paths: [POGURU, "[excited] Paths! Each leads to your next fight. What's floating in it is your prize for winning."],
+  Poguru_Tut_Paths_2: [POGURU, "[earnest] Walk under one and press E. [conspiratorial] After a few rounds, one of them leads to the boss!"],
+  Poguru_Tut_Done: [POGURU, "[proud, delighted] Looks like you DO remember how to fight!"],
+  Poguru_Tut_Done_2: [POGURU, "[excited, fast] Let's hurry and free everyone!!"],
+  Poguru_Tut_Done_3: [ONI, "[low, tired, flat] ...Back in the wisp."],
+  Poguru_Tut_Done_4: [POGURU, "[fast, flustered] Going! Shutting up! [giggles] ...Mostly!"],
+  Poguru_Round_Go: [POGURU, "[cheering, fast] Go go go!"],
+  Poguru_Round_Snacks: [POGURU, "[whiny] More of them! [curious] Do they ever bring snacks?"],
+  Poguru_Round_Wave: [POGURU, "[cheerful, waving] Hi, army! He's going to beat you now! [sheepish] ...Sorry!"],
+  Poguru_Round_Breathe: [POGURU, "[earnest, coaching] Deep breaths! Like me! [panting quickly] Hff hff hff."],
+  Poguru_Round_Count: [POGURU, "[nervous] I counted them. [gulps] There's... a lot."],
+  Poguru_Soul_Shiny: [POGURU, "[gasps, delighted] Shiny! Can I hold it? [deflated] No? Okay."],
+  Poguru_Soul_Thanks: [POGURU, "[excited] A friend from the coffin! [scolding, cute] Say thank you, Oni!"],
+  Poguru_Soul_Glow: [POGURU, "[delighted] You're glowing! I'm glowing too. [proud, solemn] Solidarity."],
+  Poguru_Boss_Benibana: [POGURU, "[relieved, cheerful] Smoke lady's gone! [proud whisper] I kept one petal."],
+  Poguru_Boss_Utsusemi: [POGURU, "[relieved] The ticking stopped! [hopeful] Is it lunchtime?"],
+  Poguru_Boss_Shirogane: [POGURU, "[sad, quiet] She looked so sad... [sniffles] Wisps can't cry. I checked."],
+  Poguru_Boss_Won: [POGURU, "[cheering shout] WE WON! [flustered] I mean, you won. I helped. [proud] Emotionally."],
+  Poguru_Boss_Wiggle: [POGURU, "[giggles, excited] Victory wiggle! [deflated] ...No? Okay."],
+  Poguru_Wake_First: [POGURU, "[whiny] Back in the damp temple. [soft, warm] ...But I like that you're here."],
+  Poguru_Wake_Army: [POGURU, "[whiny, rubbing his head] Those soldiers were VERY pointy today."],
+  Poguru_Wake_Benibana: [POGURU, "[sniffling] Her smoke made me sneeze."],
+  Poguru_Wake_Utsusemi: [POGURU, "[sing-song, then wincing] Tick, tock, ow."],
+  Poguru_Wake_Shirogane: [POGURU, "[whiny, awed] She hits SO hard."],
+  Poguru_Wake_Kagetsune: [POGURU, "[small, ashamed] I hid in your wisp the whole time. [sheepish] I'm not proud."],
+  Poguru_Wake_Up: [POGURU, "[cheerful, encouraging] Up you get! The pool's warm. [giggles] Ish."],
+  Poguru_Wake_Hug: [POGURU, "[warm, happy] Wisp hug! Very warm. [giggles] Very small."],
+  Poguru_Talk_Who: [ONI, "[low, tired, flat] Where did you come from."],
+  Poguru_Talk_Who_2: [POGURU, "[happy, fast] Your wisp! The left one. It's cosy. [thoughtful] I think I was always there, I just woke up late."],
+  Poguru_Talk_Who_3: [POGURU, "[proud] I'm a dragon! [unsure] Probably. A small one. Lost. [proud] That's my title!"],
+  Poguru_Talk_Cape: [ONI, "[low, quiet, flat] That red cloth."],
+  Poguru_Talk_Cape_2: [POGURU, "[proud, then curious] My cape! It smells like festival lanterns. Do you know why?"],
+  Poguru_Talk_Cape_3: [ONI, "[low, tired, a pause before it] ...No."],
+  Poguru_Talk_Remember: [POGURU, "[earnest, kind] Every time you wake up, you forget a little. So I remember for you!"],
+  Poguru_Talk_Remember_2: [POGURU, "[sheepish giggle] Mostly the wrong things. [curious] Did you used to like plums?"],
+  Poguru_Talk_Remember_3: [ONI, "[low, quiet, remembering] ...I did."],
+  Poguru_Talk_Silver: [POGURU, "[curious, gentle] When the silver lady's near, your wisps go all warm. Is she a friend?"],
+  Poguru_Talk_Silver_2: [ONI, "[low, quiet, aching] ...She was."],
+  Poguru_Talk_Dawn: [POGURU, "[awed, excited] The sun! I'd never seen it! It's very bright. [sheepish] I hid. [giggles] But I peeked!"],
+  Poguru_Talk_Nap: [POGURU, "[sleepy yawn] I was napping. In your wisp. Which is in you. [smug giggle] So technically you were napping too."],
+  Poguru_Talk_Rawr: [POGURU, "[tiny growl] Rawr. [proud] That's my fierce face. [hopeful] Was it fierce? [flustered, fast] Don't answer."],
+  Poguru_Talk_GhostFire: [POGURU, "[thoughtful, matter-of-fact] I tried eating a ghost-fire. [disgusted] It tasted like Tuesday."],
+  Poguru_Talk_Flute: [POGURU, "[hopeful] Play the flute later? [happy] The wisps dance when you do."],
+  Poguru_Talk_Flute_2: [ONI, "[low, tired, a little softer] ...Maybe."],
 };
 
 const client = new ElevenLabsClient();

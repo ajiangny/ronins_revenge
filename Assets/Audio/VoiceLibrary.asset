@@ -379,6 +379,156 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: c58a86066c4ee4ae99b6ef9b4e6fec7c, type: 3}
   - id: Oni_NotYet
     clip: {fileID: 8300000, guid: 4f1891d9e18404b7face89be3d6df22d, type: 3}
+  - id: Poguru_Block_1
+    clip: {fileID: 8300000, guid: d675e096c25ca44dd9d3c1a9335ad26b, type: 3}
+  - id: Poguru_Block_3
+    clip: {fileID: 8300000, guid: 0397c6a5e63774843b242a57807c6548, type: 3}
+  - id: Poguru_Block_6
+    clip: {fileID: 8300000, guid: 3bb686985b9b34d2ba73eecdc1f27f9e, type: 3}
+  - id: Poguru_Block_10
+    clip: {fileID: 8300000, guid: 8d998a7c1c54d4a5da89fc90b57f165d, type: 3}
+  - id: Poguru_Block_Back
+    clip: {fileID: 8300000, guid: b92820a2dc60b4559a96383dae75eff9, type: 3}
+  - id: Poguru_Block_Break
+    clip: {fileID: 8300000, guid: 37007f25109d14fc6aeb627ce320f48a, type: 3}
+  - id: Poguru_Boss_Benibana
+    clip: {fileID: 8300000, guid: 18bd07604d52f464c8f6d0ace8bad6c4, type: 3}
+  - id: Poguru_Boss_Shirogane
+    clip: {fileID: 8300000, guid: 494ba81f45a744609a058e6219a459ff, type: 3}
+  - id: Poguru_Boss_Utsusemi
+    clip: {fileID: 8300000, guid: bfc51355887f34d68b42303294cf97a6, type: 3}
+  - id: Poguru_Boss_Wiggle
+    clip: {fileID: 8300000, guid: 26008b03cdd2348c98c69cc11b093b9c, type: 3}
+  - id: Poguru_Boss_Won
+    clip: {fileID: 8300000, guid: 909c57353308644409c175082349ad31, type: 3}
+  - id: Poguru_Round_Breathe
+    clip: {fileID: 8300000, guid: bf3eabf68fa524adeb06f242488b18c5, type: 3}
+  - id: Poguru_Round_Count
+    clip: {fileID: 8300000, guid: c4fd13a58fa4d44d9811beb6fc19e503, type: 3}
+  - id: Poguru_Round_Go
+    clip: {fileID: 8300000, guid: 989e88e9df91c4dab959d764bcc3363e, type: 3}
+  - id: Poguru_Round_Snacks
+    clip: {fileID: 8300000, guid: bf19c5bddf15b4e86981a6a2466649c9, type: 3}
+  - id: Poguru_Round_Wave
+    clip: {fileID: 8300000, guid: e631e1210302e42d4aa7146482e930e0, type: 3}
+  - id: Poguru_Soul_Glow
+    clip: {fileID: 8300000, guid: aa58ed9cf008c47afb22c7fccf6e3ec0, type: 3}
+  - id: Poguru_Soul_Shiny
+    clip: {fileID: 8300000, guid: c8fd3d749f8054326ab3efeb14dd198c, type: 3}
+  - id: Poguru_Soul_Thanks
+    clip: {fileID: 8300000, guid: 01771df404e24441facde3df9ed04fb3, type: 3}
+  - id: Poguru_Talk_Cape
+    clip: {fileID: 8300000, guid: 88e771e720d1044908c083d3d8d0fd29, type: 3}
+  - id: Poguru_Talk_Cape_2
+    clip: {fileID: 8300000, guid: 55b60eef5d54f4f44963b9022b1be239, type: 3}
+  - id: Poguru_Talk_Cape_3
+    clip: {fileID: 8300000, guid: bab47193cc59f4f9a868fb6d71d25f7e, type: 3}
+  - id: Poguru_Talk_Dawn
+    clip: {fileID: 8300000, guid: 6d095890f19064789a7c066800041598, type: 3}
+  - id: Poguru_Talk_Flute
+    clip: {fileID: 8300000, guid: a3095165eb05d4c46bf3c2df494b3751, type: 3}
+  - id: Poguru_Talk_Flute_2
+    clip: {fileID: 8300000, guid: 84ab4633035134090a288ffb2a207d2b, type: 3}
+  - id: Poguru_Talk_GhostFire
+    clip: {fileID: 8300000, guid: 1d53fdb53f8c94d63b10ac4931739edf, type: 3}
+  - id: Poguru_Talk_Nap
+    clip: {fileID: 8300000, guid: 1d812fc8dad6c41ec9d38e703ef04cdc, type: 3}
+  - id: Poguru_Talk_Rawr
+    clip: {fileID: 8300000, guid: 7df7e56db3ed6441fb639c818cf6c47f, type: 3}
+  - id: Poguru_Talk_Remember
+    clip: {fileID: 8300000, guid: f32effadc02154df1bff013f4ab60de8, type: 3}
+  - id: Poguru_Talk_Remember_2
+    clip: {fileID: 8300000, guid: 850c410d5b508461bbb2da91c821d939, type: 3}
+  - id: Poguru_Talk_Remember_3
+    clip: {fileID: 8300000, guid: 897242c2015054cd48e81065b0956767, type: 3}
+  - id: Poguru_Talk_Silver
+    clip: {fileID: 8300000, guid: 9bf4a371e74da4cfba70e87e9af9a016, type: 3}
+  - id: Poguru_Talk_Silver_2
+    clip: {fileID: 8300000, guid: ad177c03a0fb045a2bc1453149e2ca46, type: 3}
+  - id: Poguru_Talk_Who
+    clip: {fileID: 8300000, guid: c7d68d4df56b04df3b58f82b965d1f4a, type: 3}
+  - id: Poguru_Talk_Who_2
+    clip: {fileID: 8300000, guid: 5e911a0c393cf4d869648a7daef502c0, type: 3}
+  - id: Poguru_Talk_Who_3
+    clip: {fileID: 8300000, guid: 8d886d7a4f3014b8ba14fa6a5883691f, type: 3}
+  - id: Poguru_Tut_Again
+    clip: {fileID: 8300000, guid: 68072a10f7b56424cb54545b29fc5c3f, type: 3}
+  - id: Poguru_Tut_Basics
+    clip: {fileID: 8300000, guid: 842f583465a124b26b9a12c7d805e29e, type: 3}
+  - id: Poguru_Tut_Basics_2
+    clip: {fileID: 8300000, guid: 4a388f978ebdb408d83858c27d69939a, type: 3}
+  - id: Poguru_Tut_Basics_3
+    clip: {fileID: 8300000, guid: 7d1392a449fe04e8ab0dc7d4ba858cdf, type: 3}
+  - id: Poguru_Tut_Basics_4
+    clip: {fileID: 8300000, guid: c4058fcb762044a029f9687dc28ef846, type: 3}
+  - id: Poguru_Tut_Basics_5
+    clip: {fileID: 8300000, guid: ce50fb717df004beb9ebdc50f379e98b, type: 3}
+  - id: Poguru_Tut_Boons
+    clip: {fileID: 8300000, guid: b7188e0133ed44c3eb3cc3c796dfc421, type: 3}
+  - id: Poguru_Tut_Boons_2
+    clip: {fileID: 8300000, guid: b2aa9c6cb9dfb4a0e97a39d7af004303, type: 3}
+  - id: Poguru_Tut_Boons_3
+    clip: {fileID: 8300000, guid: 8008f9e0b80034844808ede66b5291e0, type: 3}
+  - id: Poguru_Tut_Collect
+    clip: {fileID: 8300000, guid: e5242f9d8a4e84432a44c396f014c3be, type: 3}
+  - id: Poguru_Tut_Collected
+    clip: {fileID: 8300000, guid: c1cbbd3bc6a33457e8b6c79a4ca52af6, type: 3}
+  - id: Poguru_Tut_Done
+    clip: {fileID: 8300000, guid: c857987ed02a5455aad8e36f6dda8b56, type: 3}
+  - id: Poguru_Tut_Done_2
+    clip: {fileID: 8300000, guid: 17f2b790b0a8340aab2bfb8dd9aaf08f, type: 3}
+  - id: Poguru_Tut_Done_3
+    clip: {fileID: 8300000, guid: 27096b20ad2de4b7cab28d5f942d39ae, type: 3}
+  - id: Poguru_Tut_Done_4
+    clip: {fileID: 8300000, guid: 01a4fb754a7374072bd8fcf22388f535, type: 3}
+  - id: Poguru_Tut_Hearts
+    clip: {fileID: 8300000, guid: 841fd0ab0998542fca208839e6a3012d, type: 3}
+  - id: Poguru_Tut_Hearts_2
+    clip: {fileID: 8300000, guid: 2ac1acef36cb8467bbdb668c3d06e236, type: 3}
+  - id: Poguru_Tut_Hearts_3
+    clip: {fileID: 8300000, guid: b03b379fc3cc84b4081fa87d16303d4e, type: 3}
+  - id: Poguru_Tut_Hearts_4
+    clip: {fileID: 8300000, guid: 33e43695a8e2a4a9096099c96d4d2b0f, type: 3}
+  - id: Poguru_Tut_Hearts_5
+    clip: {fileID: 8300000, guid: 4468fc1d346a54a95a577ec847544f03, type: 3}
+  - id: Poguru_Tut_LookOut
+    clip: {fileID: 8300000, guid: 8655ca69f0f6242c0ad348bfb7e94c05, type: 3}
+  - id: Poguru_Tut_Paths
+    clip: {fileID: 8300000, guid: 054e5b55978884464a689f4e6e0f8ed2, type: 3}
+  - id: Poguru_Tut_Paths_2
+    clip: {fileID: 8300000, guid: 5befc05be2d304f93a6e05b996318194, type: 3}
+  - id: Poguru_Tut_Reward
+    clip: {fileID: 8300000, guid: 212fefc55cf7e47678b47a54f6338c74, type: 3}
+  - id: Poguru_Tut_Reward_2
+    clip: {fileID: 8300000, guid: 5d146adfe7fc04e26b4e0c2925def6f5, type: 3}
+  - id: Poguru_Tut_Skip
+    clip: {fileID: 8300000, guid: 622f84f76fee448fa80ada8723b421c9, type: 3}
+  - id: Poguru_Tut_Wake
+    clip: {fileID: 8300000, guid: f8fa7391eb743485bb6ddb5ef219d521, type: 3}
+  - id: Poguru_Tut_Wake_2
+    clip: {fileID: 8300000, guid: 199f9cfe3727244e6be2770087182f6b, type: 3}
+  - id: Poguru_Tut_Wake_3
+    clip: {fileID: 8300000, guid: 97226c2a7bbdc441788f13902f4f581f, type: 3}
+  - id: Poguru_Tut_Wake_4
+    clip: {fileID: 8300000, guid: c13dac42c89964b8e9afbc06d5ab25c8, type: 3}
+  - id: Poguru_Tut_Yay
+    clip: {fileID: 8300000, guid: ed3dc6d8b64d74344a508782077175bb, type: 3}
+  - id: Poguru_Wake_Army
+    clip: {fileID: 8300000, guid: 54e6b906cfaa9464e81c5d5bfd210a2f, type: 3}
+  - id: Poguru_Wake_Benibana
+    clip: {fileID: 8300000, guid: f3a47a788019146979e8d6f653039082, type: 3}
+  - id: Poguru_Wake_First
+    clip: {fileID: 8300000, guid: e020496478a1a44cc81ea94fc4292bef, type: 3}
+  - id: Poguru_Wake_Hug
+    clip: {fileID: 8300000, guid: cce05113ef0774a01876cce59ef61d53, type: 3}
+  - id: Poguru_Wake_Kagetsune
+    clip: {fileID: 8300000, guid: fde8a1dab5507433b9b8c074b0125f39, type: 3}
+  - id: Poguru_Wake_Shirogane
+    clip: {fileID: 8300000, guid: 1b09e2a276e5346dbb691f696914a2a1, type: 3}
+  - id: Poguru_Wake_Up
+    clip: {fileID: 8300000, guid: eeaa42257a3604d0e953ba92915dafbe, type: 3}
+  - id: Poguru_Wake_Utsusemi
+    clip: {fileID: 8300000, guid: 822e39adce86440d0a4d17e5c0ae8c08, type: 3}
   - id: Shirogane_BladeRain
     clip: {fileID: 8300000, guid: ffe58a554e32747ed8a8c5fad0fd891e, type: 3}
   - id: Shirogane_Crescent

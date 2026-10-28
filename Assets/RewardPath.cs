@@ -21,8 +21,9 @@ public class RewardPath : MonoBehaviour
 
     public PathReward Reward { get; private set; }
     public Element Element { get; private set; }
-    public Sprite[] IconFrames => iconFrames;
     public Color Colour => colour;
+    // Just under its name, where the HUD hangs the tooltip describing it.
+    public Vector3 TooltipAnchor => transform.position + Vector3.down * (IconSize * 0.5f + 0.85f);
 
     SpriteRenderer glow;
     SpriteRenderer halo;

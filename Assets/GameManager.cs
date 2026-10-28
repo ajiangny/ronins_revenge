@@ -2215,7 +2215,7 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = false;
     }
 
-    const string PathHint = "Walk under a path  ·  Space / E to choose it";
+    const string PathHint = "SPACE / E  to choose";
 
     // The paths open where the army stood. He walks his row (no attacks), the one above him lights and the HUD says
     // what it gives, and stepping up (Space, W / Up, Enter or E) picks it: its reward floats away up the field and
@@ -2259,8 +2259,7 @@ public class GameManager : MonoBehaviour
             if (under != described)
             {
                 described = under;
-                ui.ShowPathInfo(under.IconFrames, RewardLabel(under.Reward, under.Element), RewardDescription(under.Reward),
-                    under.Colour, PathHint);
+                ui.ShowPathInfo(under.TooltipAnchor, RewardDescription(under.Reward), under.Colour, PathHint);
             }
             if (Time.time >= readyAt && state == State.Transition && StepIn()) chosen = under;
             yield return null;

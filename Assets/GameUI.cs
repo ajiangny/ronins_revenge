@@ -74,10 +74,13 @@ public class GameUI : MonoBehaviour
 
     RectTransform pathPlate;
     CanvasGroup pathGroup;
-    Image pathIcon;
-    SpriteAnimatorUI pathIconAnimator;
+    Image pathShade;
+    RectTransform pathRule;
+    float pathRuleWidth;
     TextMeshProUGUI pathText;
     TextMeshProUGUI pathHint;
+    Vector3 pathAnchor;
+    float pathShownAt;
     bool pathShown;
 
     RectTransform subtitlePlate;
@@ -197,29 +200,29 @@ public class GameUI : MonoBehaviour
         return text;
     }
 
-    // While the ronin chooses his next path, what the one he's lined up with gives: its looping icon beside a line
-    // naming the reward and what it does, on a dark plate across the top of the empty field, with how to take it
-    // in small text beneath.
+    // While the ronin chooses his next path, a tooltip hangs under the one he's lined up with, below its name: a
+    // brush rule in the reward's colour, what it gives, and how to take it in small dim text, over a soft shadow
+    // rather than a box, so it reads as part of the path and not as another panel on the HUD.
     void BuildPathInfo()
     {
-        pathPlate = CreateRect("PathInfo", transform, new Vector2(0.5f, 1f), new Vector2(0, -36), new Vector2(900, PathIconSize + 28f));
-        Image plate = pathPlate.gameObject.AddComponent<Image>();
-        plate.color = new Color(0.02f, 0.01f, 0.04f, 0.72f);
-        plate.raycastTarget = false;
+        pathPlate = CreateRect("PathTooltip", transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(PathTooltipWidth, 120f));
+        pathPlate.pivot = new Vector2(0.5f, 1f);
 
-        RectTransform icon = CreateRect("Icon", pathPlate, new Vector2(0f, 0.5f), new Vector2(20f + PathIconSize / 2f, 0f), new Vector2(PathIconSize, PathIconSize));
-        icon.pivot = new Vector2(0.5f, 0.5f);
-        pathIcon = icon.gameObject.AddComponent<Image>();
-        pathIcon.preserveAspect = true;
-        pathIcon.raycastTarget = false;
-        pathIconAnimator = icon.gameObject.AddComponent<SpriteAnimatorUI>();
+        pathShade = CreateRect("Shade", pathPlate, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+        pathShade.sprite = ProceduralSprites.SoftGlow;
+        pathShade.color = new Color(0.02f, 0.01f, 0.04f, 0.75f);
+        pathShade.raycastTarget = false;
 
-        pathText = CreateText("Line", new Vector2(0f, 0.5f), new Vector2(PathIconSize + 40f, 0f), new Vector2(1000, PathIconSize), 34, TextAlignmentOptions.Left, pathPlate);
-        pathText.rectTransform.pivot = new Vector2(0f, 0.5f);
+        pathRule = CreateRule(pathPlate, new Vector2(0.5f, 1f), new Vector2(0f, -6f), Color.white);
+        pathRule.GetChild(0).localScale = Vector3.zero;
+
+        pathText = CreateText("Description", new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(PathTooltipWidth, 80f), 26, TextAlignmentOptions.Top, pathPlate);
+        pathText.rectTransform.pivot = new Vector2(0.5f, 1f);
         Style(pathText, TextStyle.Body);
         pathText.lineSpacing = 0f;
+        pathText.color = new Color(0.93f, 0.9f, 0.85f);
 
-        pathHint = CreateText("Hint", new Vector2(0.5f, 0f), new Vector2(0, -10), new Vector2(1000, 40), 24, TextAlignmentOptions.Top, pathPlate);
+        pathHint = CreateText("Hint", new Vector2(0.5f, 1f), Vector2.zero, new Vector2(PathTooltipWidth, 30f), 19, TextAlignmentOptions.Top, pathPlate);
         pathHint.rectTransform.pivot = new Vector2(0.5f, 1f);
         pathHint.color = MutedColour;
         pathHint.characterSpacing = 4;
@@ -230,32 +233,69 @@ public class GameUI : MonoBehaviour
         pathPlate.gameObject.SetActive(false);
     }
 
-    const float PathIconSize = 92f;
+    const float PathTooltipWidth = 460f;
 
-    // Describes the path he's lined up with: `title` in the reward's colour, then what it does. Without icon art a
-    // disc in its colour stands in.
-    public void ShowPathInfo(Sprite[] icon, string title, string description, Color colour, string hint)
+    // Hangs the tooltip under `anchor` (a point in the world, just below the path's name) and redraws it for the path
+    // he's now lined up with: the rule draws out and the words rise in.
+    public void ShowPathInfo(Vector3 anchor, string description, Color colour, string hint)
     {
-        bool hasArt = icon != null && icon.Length > 0 && icon[0] != null;
-        pathIconAnimator.Play(hasArt ? icon : null, 8f);
-        pathIcon.sprite = hasArt ? icon[0] : ProceduralSprites.Disc;
-        pathIcon.color = hasArt ? Color.white : Color.Lerp(colour, Color.white, 0.4f);
-        Color named = Color.Lerp(colour, Color.white, 0.35f);
-        pathText.text = $"<color=#{ColorUtility.ToHtmlStringRGB(named)}>{title}:</color> {description}";
+        pathAnchor = anchor;
+        Color accent = Color.Lerp(colour, Color.white, 0.3f);
+        foreach (Image mark in pathRule.GetComponentsInChildren<Image>()) mark.color = accent;
+        pathText.text = description;
         pathHint.text = hint;
-        // Fit the plate to the line, wrapping past 1000 wide.
-        Vector2 size = pathText.GetPreferredValues(pathText.text, 1000f, 0f);
-        float width = Mathf.Min(size.x, 1000f);
-        pathText.rectTransform.sizeDelta = new Vector2(width, PathIconSize);
-        pathPlate.sizeDelta = new Vector2(PathIconSize + 40f + width + 32f, Mathf.Max(PathIconSize, size.y) + 28f);
+        float textHeight = pathText.GetPreferredValues(description, PathTooltipWidth, 0f).y;
+        float textWidth = Mathf.Min(pathText.GetPreferredValues(description, PathTooltipWidth, 0f).x, PathTooltipWidth);
+        pathText.rectTransform.sizeDelta = new Vector2(PathTooltipWidth, textHeight);
+        pathHint.rectTransform.anchoredPosition = new Vector2(0f, -22f - textHeight - 8f);
+        pathRuleWidth = Mathf.Max(textWidth * 0.8f, 140f);
+        float height = 22f + textHeight + 8f + 26f;
+        pathPlate.sizeDelta = new Vector2(PathTooltipWidth, height);
+        // The shadow spreads past the words so its soft edge never cuts across them.
+        RectTransform shade = pathShade.rectTransform;
+        shade.anchoredPosition = new Vector2(0f, 10f);
+        shade.sizeDelta = new Vector2(textWidth + 220f, height + 110f);
+        pathShownAt = Time.unscaledTime;
         if (!pathPlate.gameObject.activeSelf) pathGroup.alpha = 0f;
         pathPlate.gameObject.SetActive(true);
         pathShown = true;
+        PlacePathInfo();
     }
 
     public void HidePathInfo()
     {
         pathShown = false;
+    }
+
+    void PlacePathInfo()
+    {
+        Camera cam = Camera.main;
+        if (cam == null) return;
+        Canvas canvas = GetComponent<Canvas>();
+        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        Vector2 screen = cam.WorldToScreenPoint(pathAnchor);
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform, screen, uiCamera, out Vector2 local))
+        {
+            pathPlate.anchoredPosition = local;
+        }
+    }
+
+    void UpdatePathInfo()
+    {
+        if (!pathPlate.gameObject.activeSelf) return;
+        pathGroup.alpha = Mathf.MoveTowards(pathGroup.alpha, pathShown ? 1f : 0f, Time.unscaledDeltaTime / SubtitleFadeIn);
+        if (!pathShown && pathGroup.alpha <= 0f)
+        {
+            pathPlate.gameObject.SetActive(false);
+            return;
+        }
+        PlacePathInfo();
+        float since = Time.unscaledTime - pathShownAt;
+        AnimateRule(pathRule, pathRuleWidth, EaseOut(Mathf.Clamp01(since / 0.35f)));
+        float k = EaseOut(Mathf.Clamp01((since - 0.08f) / 0.3f));
+        pathText.alpha = k;
+        pathText.rectTransform.anchoredPosition = new Vector2(0f, -22f - 8f * (1f - k));
+        pathHint.alpha = EaseOut(Mathf.Clamp01((since - 0.2f) / 0.3f));
     }
 
     // A spoken line sits on a dark plate sized to fit it, with the speaker's name above.
@@ -328,11 +368,7 @@ public class GameUI : MonoBehaviour
             if (!showing && subtitleGroup.alpha <= 0f) subtitlePlate.gameObject.SetActive(false);
         }
         UpdateBanner();
-        if (pathPlate.gameObject.activeSelf)
-        {
-            pathGroup.alpha = Mathf.MoveTowards(pathGroup.alpha, pathShown ? 1f : 0f, Time.unscaledDeltaTime / SubtitleFadeIn);
-            if (!pathShown && pathGroup.alpha <= 0f) pathPlate.gameObject.SetActive(false);
-        }
+        UpdatePathInfo();
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;

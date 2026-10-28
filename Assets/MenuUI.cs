@@ -106,9 +106,6 @@ public class MenuUI : MonoBehaviour
     int columns = 1;
     // Set while the page has table rows: shorter, wider cells with left-aligned labels.
     bool table;
-    // A looping icon just left of the body's first line (the Flute Songs' Spirit Notes).
-    Image bodyIcon;
-    SpriteAnimatorUI bodyIconAnimator;
     int selected;
     int heardSelection;
     float shownAt;
@@ -123,10 +120,9 @@ public class MenuUI : MonoBehaviour
 
     // Opens a page, replacing whatever page was showing. `back` runs on Esc / gamepad B; null means Esc does nothing.
     // The title is white (ink on paper) unless given a colour. A `paper` page sits on the title screen's white page
-    // instead of over the dimmed game. With more than one column the items fill a grid row by row. `bodyIcon` loops
-    // just left of the body's first line.
+    // instead of over the dimmed game. With more than one column the items fill a grid row by row.
     public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default,
-        bool paper = false, int gridColumns = 1, Sprite[] bodyIconFrames = null)
+        bool paper = false, int gridColumns = 1)
     {
         items = pageItems;
         columns = Mathf.Max(1, gridColumns);
@@ -180,37 +176,8 @@ public class MenuUI : MonoBehaviour
         dim.color = paper ? Color.clear : new Color(0.02f, 0.01f, 0.04f, 0.8f);
         page.SetAsLastSibling();
         page.gameObject.SetActive(true);
-        PlaceBodyIcon(bodyIconFrames);
         BuildRows();
         Animate(0f);
-    }
-
-    // Puts the icon in a gap opened at the start of the body's first line, sized to that line, so the line and its icon
-    // stay centred together.
-    void PlaceBodyIcon(Sprite[] frames)
-    {
-        bool shown = frames != null && frames.Length > 0 && bodyText.gameObject.activeSelf;
-        bodyIcon.gameObject.SetActive(shown);
-        bodyIconAnimator.Play(shown ? frames : null, 8f);
-        if (!shown) return;
-        bodyText.ForceMeshUpdate(true);
-        TMP_LineInfo line = bodyText.textInfo.lineInfo[0];
-        float size = (line.ascender - line.descender) * 1.2f;
-        bodyText.text = $"<space={size + 12f:0}>" + bodyText.text;
-        bodyText.ForceMeshUpdate(true);
-        line = bodyText.textInfo.lineInfo[0];
-        // The first visible character after the gap.
-        float left = line.lineExtents.max.x;
-        for (int i = line.firstCharacterIndex; i <= line.lastCharacterIndex; i++)
-        {
-            TMP_CharacterInfo character = bodyText.textInfo.characterInfo[i];
-            if (!character.isVisible) continue;
-            left = character.bottomLeft.x;
-            break;
-        }
-        bodyIcon.sprite = frames[0];
-        bodyIcon.rectTransform.sizeDelta = new Vector2(size, size);
-        bodyIcon.rectTransform.anchoredPosition = new Vector2(left - 12f - size / 2f, (line.ascender + line.descender) / 2f);
     }
 
     // The title screen, laid out like a Final Fantasy title: the game's logo centred high on a paper-white page and
@@ -716,13 +683,6 @@ public class MenuUI : MonoBehaviour
         bodyText.rectTransform.pivot = new Vector2(0.5f, 1f);
         bodyText.richText = true;
         ui.Style(bodyText, TextStyle.Body);
-        // Anchored at the body's pivot (its top centre), the space its text is laid out in.
-        bodyIcon = GameUI.CreateRect("BodyIcon", bodyText.transform, new Vector2(0.5f, 1f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
-        bodyIcon.rectTransform.pivot = new Vector2(0.5f, 0.5f);
-        bodyIcon.preserveAspect = true;
-        bodyIcon.raycastTarget = false;
-        bodyIconAnimator = bodyIcon.gameObject.AddComponent<SpriteAnimatorUI>();
-        bodyIcon.gameObject.SetActive(false);
 
         rowsRoot = GameUI.CreateRect("Items", page, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(RowWidth, 0f));
         rowsRoot.pivot = new Vector2(0.5f, 1f);

@@ -456,6 +456,7 @@ public class GameManager : MonoBehaviour
     int banishesLeft;
     readonly HashSet<BoonId> banished = new HashSet<BoonId>();
     MenuUI menu;
+    ResourceTray resources;
 
     RoninLoadout loadout;
     BoonEffects effects;
@@ -645,6 +646,9 @@ public class GameManager : MonoBehaviour
         boonChoice.Bind(ronin, ui);
         menu = ui.gameObject.AddComponent<MenuUI>();
         menu.Bind(ui);
+        // The temple's resources, Hades-style in the corner. A new currency is one more line here.
+        resources = ResourceTray.Build(ui);
+        resources.Add("SpiritNotes", () => Save.Data.embers, NoteIcon);
         dialogueScene = ui.gameObject.AddComponent<DialogueScene>();
         dialogueScene.Bind(ui);
         baseRoninArt = ronin.art;
@@ -718,6 +722,7 @@ public class GameManager : MonoBehaviour
             || (gamepad != null && gamepad.startButton.wasPressedThisFrame);
         if (state == State.Playing && pause) Pause();
         if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
+        resources.SetVisible(state == State.Hub);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing)
         {
@@ -882,7 +887,7 @@ public class GameManager : MonoBehaviour
 
     // The shop on the hill, laid out as a table: each song's name, its ranks as pips and the price of the next in Spirit
     // Notes; the line under the rows says what the selected one does. A maxed song toggles on and off instead. The
-    // notes held sit under the title beside their icon.
+    // notes held show in the temple's resource tray in the corner.
     void ShowSongs(System.Action back, int startIndex = 0)
     {
         bool paper = OnPaper;
@@ -920,9 +925,7 @@ public class GameManager : MonoBehaviour
             ShowSongs(back, refundRow);
         }, $"Forget every song and take back {Upgrades.Spent} notes"));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
-        menu.Show("FLUTE SONGS",
-            $"<color=#{noteHex}><size=56>{Save.Data.embers}</size></color>   <color=#{muted}><size=26>SPIRIT NOTES</size></color>",
-            items.ToArray(), back, startIndex, paper: paper, gridColumns: 2, bodyIconFrames: NoteIcon);
+        menu.Show("FLUTE SONGS", null, items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
     }
 
     // Three journeys side by side, like Hades' save profiles. An empty one is a new game, which starts on the hill

@@ -113,6 +113,8 @@ public class Ronin : MonoBehaviour
         get => roaming;
         set
         {
+            // He comes into a safe area facing us (climbing out of the pool, or loaded in).
+            if (value && !roaming) facing = South;
             roaming = value;
             if (!value && sprite != null) sprite.transform.localPosition = spriteRest;
         }
@@ -854,7 +856,7 @@ public class Ronin : MonoBehaviour
         body.MovePosition(position);
         // A direction with no frames of its own walks on the idle, so he bobs on it, as on a walk without frames.
         roamTime += Time.fixedDeltaTime;
-        bool bob = step != Vector2.zero && (loopClip == art.idle || loopClip == art.idleDown);
+        bool bob = step != Vector2.zero && IsIdle(loopClip);
         sprite.transform.localPosition = spriteRest + (bob ? Vector3.up * (Mathf.Abs(Mathf.Sin(roamTime * 9f)) * 0.12f / transform.lossyScale.y) : Vector3.zero);
     }
 
@@ -1169,10 +1171,12 @@ public class Ronin : MonoBehaviour
     {
         if (actionPlaying) return;
         // In a safe area he walks all eight ways; in a fight he only sprints along his row.
-        Sprite[] run = Roaming ? WalkClip(new Vector2(moveInput, moveInputY))
+        var step = new Vector2(moveInput, moveInputY);
+        if (Roaming && step != Vector2.zero) facing = Compass(step);
+        Sprite[] run = Roaming ? WalkClip(step)
             : moveInput < 0 ? art.runLeft : moveInput > 0 ? art.runRight : null;
-        // Standing still in a safe area he faces us; in a fight, up the field at the army.
-        Sprite[] still = Roaming && art.idleDown != null && art.idleDown.Length > 0 ? art.idleDown : art.idle;
+        // Standing still in a safe area he keeps facing the way he last walked; in a fight, up the field at the army.
+        Sprite[] still = Roaming ? StillClip(facing) : art.idle;
         Sprite[] clip = run != null && run.Length > 0 ? run : still;
         if (clip == loopClip) return;
         loopClip = clip;
@@ -1185,9 +1189,7 @@ public class Ronin : MonoBehaviour
     Sprite[] WalkClip(Vector2 direction)
     {
         if (direction == Vector2.zero) return null;
-        // 0 is east, counting a quarter turn per two steps anticlockwise.
-        int point = (Mathf.RoundToInt(Mathf.Atan2(direction.y, direction.x) / (Mathf.PI / 4f)) + 8) % 8;
-        switch (point)
+        switch (Compass(direction))
         {
             case 0: return FirstOf(art.runRight);
             case 1: return FirstOf(art.walkUpRight, art.runRight);
@@ -1200,6 +1202,33 @@ public class Ronin : MonoBehaviour
         }
     }
 
+    // The nearest of the eight compass points: 0 is east, counting an eighth of a turn anticlockwise (2 north, 6 south).
+    static int Compass(Vector2 direction) => (Mathf.RoundToInt(Mathf.Atan2(direction.y, direction.x) / (Mathf.PI / 4f)) + 8) % 8;
+
+    const int South = 6;
+    // The compass point he last walked toward in a safe area, for his still pose.
+    int facing = South;
+
+    // Standing still facing a compass point: that way's idle, else facing us, else his back.
+    Sprite[] StillClip(int point)
+    {
+        Sprite[] own = point switch
+        {
+            0 => art.idleRight,
+            1 => art.idleUpRight,
+            2 => art.idle,
+            3 => art.idleUpLeft,
+            4 => art.idleLeft,
+            5 => art.idleDownLeft,
+            7 => art.idleDownRight,
+            _ => art.idleDown,
+        };
+        return FirstOf(own, art.idleDown, art.idle);
+    }
+
+    bool IsIdle(Sprite[] clip) => clip == art.idle || clip == art.idleDown || clip == art.idleLeft || clip == art.idleRight
+        || clip == art.idleUpLeft || clip == art.idleUpRight || clip == art.idleDownLeft || clip == art.idleDownRight;
+
     static Sprite[] FirstOf(params Sprite[][] clips)
     {
         foreach (Sprite[] clip in clips) if (clip != null && clip.Length > 0) return clip;
@@ -1208,7 +1237,7 @@ public class Ronin : MonoBehaviour
 
     float ClipFps(Sprite[] clip)
     {
-        if (clip == art.idle || clip == art.idleDown) return art.idleFps;
+        if (IsIdle(clip)) return art.idleFps;
         if (clip == art.runLeft || clip == art.runRight) return art.runFps;
         return art.walkFps;
     }

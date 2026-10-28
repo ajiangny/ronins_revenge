@@ -154,6 +154,12 @@ public static class BoonArtSetup
         art.walkDownLeft = Recolor(source.walkDownLeft, suffix, hue, boost);
         art.walkDownRight = Recolor(source.walkDownRight, suffix, hue, boost);
         art.idleDown = Recolor(source.idleDown, suffix, hue, boost);
+        art.idleLeft = Recolor(source.idleLeft, suffix, hue, boost);
+        art.idleRight = Recolor(source.idleRight, suffix, hue, boost);
+        art.idleUpLeft = Recolor(source.idleUpLeft, suffix, hue, boost);
+        art.idleUpRight = Recolor(source.idleUpRight, suffix, hue, boost);
+        art.idleDownLeft = Recolor(source.idleDownLeft, suffix, hue, boost);
+        art.idleDownRight = Recolor(source.idleDownRight, suffix, hue, boost);
         art.wisps = Recolor(source.wisps, suffix, hue, boost);
         art.framesWithWisps = Recolor(source.framesWithWisps, suffix, hue, boost);
         art.idleFps = source.idleFps;
@@ -357,7 +363,8 @@ public static class BoonArtSetup
     {
         var found = new List<Sprite>();
         var clips = new[] { art.idle, art.attack, art.hit, art.death, art.parry, art.slash, art.runLeft, art.runRight, art.walkUp,
-            art.walkDown, art.walkUpLeft, art.walkUpRight, art.walkDownLeft, art.walkDownRight, art.idleDown };
+            art.walkDown, art.walkUpLeft, art.walkUpRight, art.walkDownLeft, art.walkDownRight, art.idleDown,
+            art.idleLeft, art.idleRight, art.idleUpLeft, art.idleUpRight, art.idleDownLeft, art.idleDownRight };
         foreach (Sprite[] clip in clips)
         {
             if (clip == null) continue;

@@ -390,6 +390,12 @@ public static class NinjaArtSetup
         ronin.walkDownLeft = Frames("Ronin", "WalkSouthWest");
         ronin.walkDownRight = Frames("Ronin", "WalkSouthEast");
         ronin.idleDown = Frames("Ronin", "IdleSouth");
+        ronin.idleLeft = Frames("Ronin", "IdleWest");
+        ronin.idleRight = Frames("Ronin", "IdleEast");
+        ronin.idleUpLeft = Frames("Ronin", "IdleNorthWest");
+        ronin.idleUpRight = Frames("Ronin", "IdleNorthEast");
+        ronin.idleDownLeft = Frames("Ronin", "IdleSouthWest");
+        ronin.idleDownRight = Frames("Ronin", "IdleSouthEast");
         ronin.walkFps = 9f;
         EditorUtility.SetDirty(ronin);
     }

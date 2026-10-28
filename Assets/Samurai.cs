@@ -190,15 +190,16 @@ public class Samurai : MonoBehaviour, IHittable
         }
         float top = animator.Renderer.bounds.max.y;
         float pulse = 1f + 0.15f * Mathf.Sin(Time.time * 20f);
-        // Pops in at twice its size and settles over the first fifth of a second.
-        float pop = 1f + 1f * (1f - Mathf.Clamp01((Time.time - alertSince) / 0.2f));
-        float size = 1.5f * pulse * pop;
-        alert.transform.position = new Vector3(transform.position.x, top + 0.75f + 0.08f * Mathf.Sin(Time.time * 14f), -0.2f);
+        // Pops in at half again its size and settles over the first fifth of a second. The mark is a unit tall at
+        // scale 1, so its foot is lifted clear of the head whatever its size.
+        float pop = 1f + 0.5f * (1f - Mathf.Clamp01((Time.time - alertSince) / 0.2f));
+        float size = 1.1f * pulse * pop;
+        alert.transform.position = new Vector3(transform.position.x, top + 0.25f + size * 0.5f + 0.08f * Mathf.Sin(Time.time * 14f), -0.2f);
         alert.transform.localScale = Vector3.one * size;
         alertEdge.transform.position = alert.transform.position + Vector3.forward * 0.005f;
-        alertEdge.transform.localScale = new Vector3(size * 1.45f, size * 1.2f, 1f);
+        alertEdge.transform.localScale = new Vector3(size * 1.35f, size * 1.15f, 1f);
         alertGlow.transform.position = alert.transform.position + Vector3.forward * 0.01f;
-        alertGlow.transform.localScale = Vector3.one * (2f * pulse * pop / ProceduralSprites.Glow.bounds.size.x);
+        alertGlow.transform.localScale = Vector3.one * (1.6f * pulse * pop / ProceduralSprites.Glow.bounds.size.x);
     }
 
     void HideAlert()

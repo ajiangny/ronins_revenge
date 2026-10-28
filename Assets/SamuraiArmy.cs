@@ -128,10 +128,11 @@ public class SamuraiArmy : MonoBehaviour
         dive.streak.transform.rotation = Quaternion.FromToRotation(Vector3.up, along.sqrMagnitude > 0.0001f ? along : Vector3.down);
         dive.streak.transform.localScale = new Vector3(0.06f + 0.08f * k, along.magnitude, 1f) / ProceduralSprites.White.bounds.size.x;
         dive.streak.color = new Color(TellColour.r, TellColour.g, TellColour.b, (0.2f + 0.5f * k) * flicker);
-        float size = (1.4f + 0.5f * k) / ProceduralSprites.Glow.bounds.size.x;
+        float size = (2f + 0.8f * k) / ProceduralSprites.Glow.bounds.size.x;
         dive.mark.transform.position = new Vector3(to.x, to.y, 0.1f);
-        dive.mark.transform.localScale = new Vector3(size, size * 0.4f, 1f);
-        dive.mark.color = new Color(TellColour.r, TellColour.g, TellColour.b, (0.35f + 0.5f * k) * flicker);
+        dive.mark.transform.localScale = new Vector3(size, size * 0.45f, 1f);
+        dive.mark.color = new Color(TellColour.r, TellColour.g, TellColour.b, Mathf.Min(1f, (0.6f + 0.4f * k) * flicker));
+        dive.mark.sortingOrder = 4;
     }
 
     // The ronin's feet, where the mark lies.

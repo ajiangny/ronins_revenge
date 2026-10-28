@@ -239,7 +239,7 @@ public class GameUI : MonoBehaviour
         ultimateGlow.sprite = ProceduralSprites.SoftGlow;
         ultimateGlow.raycastTarget = false;
         ultimateGlow.color = Color.clear;
-        Image empty = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth, LifeIconSize - 6f), new Color(0.03f, 0.02f, 0.05f, 0.8f));
+        Image empty = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth, LifeIconSize - 6f), new Color(UltimateColour.r * 0.35f, UltimateColour.g * 0.3f, UltimateColour.b * 0.45f, 0.75f));
         empty.fillAmount = 1f;
         ultimateFill = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth - 8f, LifeIconSize - 14f), UltimateColour);
         ultimateFill.fillAmount = 0f;

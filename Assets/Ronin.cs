@@ -85,6 +85,8 @@ public class Ronin : MonoBehaviour
     [SerializeField] float cloneGlide = 16f;
 
     public event Action Hit;
+    // What landed the latest hit, so a run's last blow can be named (GameManager.EndGame).
+    public DeathCause LastHitCause { get; private set; }
     // Raised on every swing (a slash or Kindling's fireball).
     public event Action Slashed;
     public event Action<Vector3, Projectile> ShurikenThrown;
@@ -1148,13 +1150,14 @@ public class Ronin : MonoBehaviour
             Deflect(arrow);
             return;
         }
-        TakeHit(coll.GetContact(0).point);
+        TakeHit(coll.GetContact(0).point, arrow.Cause);
     }
 
     // Damage that can't be parried, like a boss's chain lash. Invulnerability still applies.
-    public void TakeHit(Vector3 contact)
+    public void TakeHit(Vector3 contact, DeathCause cause = DeathCause.None)
     {
         if (!ControlsEnabled || Invincible || Shielded || Time.time < invulnerableUntil) return;
+        LastHitCause = cause;
         if (ShellUp)
         {
             BreakShell(contact);

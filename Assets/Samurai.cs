@@ -108,6 +108,7 @@ public class Samurai : MonoBehaviour, IHittable
             foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 2, YureiSpread, arrowSpeed * 0.85f))
             {
                 arrow.PassesCover = true;
+                arrow.Cause = DeathCause.GhostArrow;
                 arrow.Tint(GhostArrow, GhostGlow);
             }
             Sfx.Play(Sfx.ArrowFire, 0.5f, 1.3f);

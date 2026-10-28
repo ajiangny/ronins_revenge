@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+// What struck the last blow of a run, so the dead army's deaths can be told apart (Poguru's roasts). Boss deaths are
+// all Boss; which boss is in SaveData.lastKiller. Appended to only: the save stores them as ints.
+public enum DeathCause { None, Boss, Arrow, Spear, GhostArrow, Diver, Invasion }
+
 // Everything that carries over from one run to the next: how the runs went, which lines have been heard, and the
 // Spirit Notes and Flute Songs. One JSON string per save slot in PlayerPrefs, which the web build keeps too.
 [Serializable]
@@ -16,6 +20,11 @@ public class SaveData
     // How the last finished run ended, and what killed him (BossKind; None is the army).
     public bool lastRunCleared;
     public int lastKiller = -1;
+    // The blow that ended it (DeathCause), deaths counted per cause, and how many runs in a row ended the same way.
+    public int lastDeathCause;
+    public int[] deathsByCause = new int[DeathCauses];
+    public int deathStreak;
+    public const int DeathCauses = 7;
     // A death or a win not yet answered on the hill.
     public bool hubPending;
 
@@ -136,6 +145,7 @@ public static class Save
         // A save from before a field grew keeps its old length.
         if (read.deathsTo.Length < 5) Array.Resize(ref read.deathsTo, 5);
         if (read.winsVs.Length < 5) Array.Resize(ref read.winsVs, 5);
+        if (read.deathsByCause == null || read.deathsByCause.Length < SaveData.DeathCauses) Array.Resize(ref read.deathsByCause, SaveData.DeathCauses);
         return read;
     }
 
@@ -164,16 +174,22 @@ public static class Save
     }
 
     // A finished run: a clear, or a death and what caused it. Restarting or quitting mid-run records nothing.
-    public static void EndRun(bool cleared, BossKind killer)
+    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None)
     {
         SaveData d = Data;
+        // A boss's blow is the boss's, whatever it threw.
+        if (!cleared && killer != BossKind.None) cause = DeathCause.Boss;
+        bool same = !cleared && !d.lastRunCleared && d.lastDeathCause == (int)cause && d.lastKiller == (int)killer;
         d.lastRunCleared = cleared;
         d.lastKiller = cleared ? -1 : (int)killer;
+        d.lastDeathCause = cleared ? 0 : (int)cause;
+        d.deathStreak = cleared ? 0 : same ? d.deathStreak + 1 : 1;
         if (cleared) d.runsCleared++;
         else
         {
             d.deaths++;
             d.deathsTo[(int)killer]++;
+            d.deathsByCause[(int)cause]++;
         }
         d.hubPending = true;
         Write();

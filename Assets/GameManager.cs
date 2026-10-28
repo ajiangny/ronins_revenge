@@ -3774,7 +3774,8 @@ public class GameManager : MonoBehaviour
         }
         CameraShake.Add(0.6f);
         ronin.Explode();
-        EndGame("DEFEATED", "The dead reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false);
+        EndGame("DEFEATED", "The dead reached you - there's no stopping them now.", new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false,
+            BossKind.None, DeathCause.Invasion);
     }
 
     void OnRoninHit()
@@ -3818,13 +3819,15 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(PlayConversation(last, activeBoss.Colour));
                 message = $"\"{Dialogue.Fill(last.Lines[0].Text, Dialogue.Context())}\"";
             }
-            EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false, activeBoss != null ? Stage.boss : BossKind.None);
+            EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false, activeBoss != null ? Stage.boss : BossKind.None,
+                ronin.LastHitCause);
         }
     }
 
     // A run that ends in a clear or a death is remembered for the next one; the killer is the boss he fell to, or
     // None for the army.
-    void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None)
+    void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None,
+        DeathCause cause = DeathCause.None)
     {
         state = State.GameOver;
         tutorial.Abort();
@@ -3832,7 +3835,7 @@ public class GameManager : MonoBehaviour
         if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  notes {notesThisRun}  held: {HeldSummary()}");
-        Save.EndRun(cleared, killer);
+        Save.EndRun(cleared, killer, cause);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         Music.Stop(0.6f);

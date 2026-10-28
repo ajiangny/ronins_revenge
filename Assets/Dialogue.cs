@@ -81,6 +81,10 @@ public static class Dialogue
     public static Req Clears(int n) => new Req($"{n}+ clears", c => c.Save.runsCleared >= n);
     public static Req LastCleared => new Req("cleared last run", c => c.Save.lastRunCleared);
     public static Req LastDiedToArmy => new Req("killed by the army last run", c => !c.Save.lastRunCleared && c.Save.lastKiller == (int)BossKind.None);
+    // The blow that ended the last run (army deaths split by what struck it), how many of them, and runs in a row.
+    public static Req DiedTo(DeathCause cause) => new Req($"killed by {cause} last run", c => !c.Save.lastRunCleared && c.Save.lastDeathCause == (int)cause);
+    public static Req DeathsBy(DeathCause cause, int n) => new Req($"{n}+ deaths by {cause}", c => c.Save.deathsByCause[(int)cause] >= n);
+    public static Req Streak(int n) => new Req($"{n}+ deaths in a row the same way", c => !c.Save.lastRunCleared && c.Save.deathStreak >= n);
     public static Req LivesLeft(int n) => new Req($"{n} lives left", c => c.Lives == n);
     public static Req Offering => new Req("a Spirit Offering", c => c.Offering);
     public static Req HoldsDuo => new Req("holds a Duo", c => c.Loadout != null && HasDuo(c.Loadout));

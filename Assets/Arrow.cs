@@ -27,6 +27,8 @@ public class Arrow : MonoBehaviour
     public Color Color => art.color;
     // A Taisho's spear: slashes and arrows break on it and it cuts through cover, so it can only be dodged or parried.
     public bool Unbreakable { get; private set; }
+    // What it counts as if it lands the last blow (Save.EndRun).
+    public DeathCause Cause { get; set; } = DeathCause.Arrow;
     // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
     public bool PassesCover { get; set; }
     // Flies on through other shots that pass shots too, so a boss's overlapping patterns don't break each other
@@ -130,6 +132,7 @@ public class Arrow : MonoBehaviour
     public void MakeUnbreakable(Sprite spear)
     {
         Unbreakable = true;
+        Cause = DeathCause.Spear;
         if (spear != null)
         {
             art.sprite = spear;

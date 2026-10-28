@@ -609,7 +609,7 @@ public class SamuraiArmy : MonoBehaviour
         if ((target.position - position).sqrMagnitude < 0.8f * 0.8f)
         {
             dive.hitRonin = true;
-            ronin.TakeHit(position);
+            ronin.TakeHit(position, DeathCause.Diver);
         }
     }
 

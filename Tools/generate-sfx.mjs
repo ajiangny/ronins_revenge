@@ -237,6 +237,25 @@ const SOUNDS = {
       "A pair of heavy old wooden temple gate doors swinging shut: a short creak of iron hinges ending in a soft " +
       "dull wooden thud, quiet, video game sound effect, no music.",
   },
+  // Each soul's sting as their talk opens, the way Hades' gods announce themselves (GameManager.StingFor).
+  SoulStingFire: {
+    seconds: 2.2,
+    prompt:
+      "A short dramatic Japanese war sting: one deep booming taiko hit with a roaring whoosh of flame bursting up, " +
+      "crackling embers and a low bronze war bell ringing out underneath, fierce and hot, video game sound effect, no music.",
+  },
+  SoulStingFrost: {
+    seconds: 2.2,
+    prompt:
+      "A short calm magical frost sting: a cascade of crystalline ice chimes over a soft resonant singing bowl tone, " +
+      "a breath of cold wind and the crackle of frost spreading, serene and clear, video game sound effect, no music.",
+  },
+  SoulStingStorm: {
+    seconds: 2.5,
+    prompt:
+      "A short energetic storm sting: a fast rolling Japanese taiko drumroll building up into a sharp thunderclap, " +
+      "crackling electric sparks and a rumbling thunder tail, exciting and bright, video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

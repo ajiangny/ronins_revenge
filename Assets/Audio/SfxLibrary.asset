@@ -647,6 +647,39 @@ MonoBehaviour:
     - 0.91725624
     - 0.7411791
     ownSource: 0
+  - id: SoulStingFire
+    clips:
+    - {fileID: 8300000, guid: 32e66dc65c3454af3ae35d72f8b0c9f2, type: 3}
+    - {fileID: 8300000, guid: c8235e7bd89794e4caf298755fbce9a6, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 1.5846032
+    - 1.8130386
+    ownSource: 0
+  - id: SoulStingFrost
+    clips:
+    - {fileID: 8300000, guid: ff8abcce39154411798b6595dd9d7e05, type: 3}
+    - {fileID: 8300000, guid: cea4a73bda53e44879c33fb36e1c05e2, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 1.551882
+    - 1.0013605
+    ownSource: 0
+  - id: SoulStingStorm
+    clips:
+    - {fileID: 8300000, guid: 9a36639ca828f472dbcca922f0aa50f9, type: 3}
+    - {fileID: 8300000, guid: 1d476b99bc32e4595a41798c3e94c736, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 2.023832
+    - 1.8429252
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   templeMusic: {fileID: 8300000, guid: 946fb3b38b2c84813abb8ba5ddced6fa, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}

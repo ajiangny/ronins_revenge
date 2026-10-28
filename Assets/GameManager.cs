@@ -2313,6 +2313,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GreetThenChoose(Conversation greeting, Element element, List<BoonOffer> offers, System.Action afterPick,
         bool ensureCapstone, Rarity minRarity)
     {
+        yield return Sting(element);
         yield return PlayScene(greeting);
         ShowBoons(element, offers, afterPick, ensureCapstone, minRarity);
     }
@@ -2363,6 +2364,23 @@ public class GameManager : MonoBehaviour
         Element.Water => "Mizore",
         _ => "Hibiki",
     };
+
+    // The soul's sting as their talk opens: Akagane's war drum and flame, Mizore's ice chimes, Hibiki's drumroll
+    // into thunder.
+    static string StingFor(Element element) => element switch
+    {
+        Element.Fire => Sfx.SoulStingFire,
+        Element.Water => Sfx.SoulStingFrost,
+        _ => Sfx.SoulStingStorm,
+    };
+
+    // The sting, then a beat so the first line lands on its tail. Unscaled: the boon screen pauses time.
+    IEnumerator Sting(Element element)
+    {
+        if (!Sfx.Has(StingFor(element))) yield break;
+        Sfx.Play(StingFor(element));
+        yield return new WaitForSecondsRealtime(0.6f);
+    }
 
     // The boon screen's pick, or nothing when every offer was rejected (X twice); the run goes on either way.
     void TakeOrReject(List<BoonOffer> offers, int index)

@@ -91,7 +91,9 @@ The same conversation plays whichever soul offers the Duo. Each line's speaker s
 **Built so far:** each soul's `SoulPickup` tables (first meetings, reactions, greetings) are in `Dialogue.cs` and play as
 a talk scene (`DialogueScene`) before the first boon screen of that soul in a run, with the soul's painting
 (`Portraits/<Soul>_Closeup.png`, `_Full.png`) at the left and Oni at the right. `runsSince self ≥ n` became the
-conversation's `Cooldown`, "play once" a Reactive that never comes back. Their lines are voiced. Not yet: `SoulJealous`,
+conversation's `Cooldown`, "play once" a Reactive that never comes back. Their lines are voiced. Each talk opens on
+the soul's sting, as Hades' gods announce themselves (`Sfx.SoulSting<Fire|Frost|Storm>`, `GameManager.StingFor`):
+Akagane's war-drum boom and flame, Mizore's ice chimes over a singing bowl, Hibiki's taiko drumroll into a thunderclap. Not yet: `SoulJealous`,
 `Duo`, `Legendary`, `BossAhead`, `BossFelled`, `HubReturn` and the freed beats. The suggestions below
 still stand for those.
 

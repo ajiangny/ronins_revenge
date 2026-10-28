@@ -68,6 +68,10 @@ public static class Sfx
     // The temple gate's doors swinging open as he comes up to them, and shut behind him.
     public const string GateOpen = "GateOpen";
     public const string GateClose = "GateClose";
+    // Each soul's sting as their talk scene opens (Akagane, Mizore, Hibiki), as Hades' gods announce themselves.
+    public const string SoulStingFire = "SoulStingFire";
+    public const string SoulStingFrost = "SoulStingFrost";
+    public const string SoulStingStorm = "SoulStingStorm";
 
     const int VoiceCount = 16;
 

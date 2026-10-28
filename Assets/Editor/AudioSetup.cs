@@ -88,6 +88,10 @@ public static class AudioSetup
         // The temple gate's doors.
         (Sfx.GateOpen, 0.55f, 0.05f, 0.5f),
         (Sfx.GateClose, 0.5f, 0.05f, 0.5f),
+        // The souls' stings, under their first line.
+        (Sfx.SoulStingFire, 0.6f, 0f, 1f),
+        (Sfx.SoulStingFrost, 0.6f, 0f, 1f),
+        (Sfx.SoulStingStorm, 0.6f, 0f, 1f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

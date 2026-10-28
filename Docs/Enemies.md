@@ -1,0 +1,69 @@
+# Enemies
+
+Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/Scripts/<System>/`; a bare name like
+`Ronin.cs` means the file in its system's folder.
+
+## Samurai army (the "invaders")
+- `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
+  (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
+  holds once its front rank reaches the cover's row (`HoldY` from `holdDepth`, `BeginHolding`: no more drops, it walks that row
+  and `ErodeBlockers` smashes the cover) and starts lunges (`StartLunge`/`UpdateLunge`: a front-rank samurai near the ronin
+  shakes under `Samurai.WarnDive`'s red "!" (`ProceduralSprites.Exclaim`, white-edged, popping in), lunges through where he stood at a
+  steady `lungeSpeed` (its `duration` from the distance) and walks back). Every warning (`Warn`: `WarnDive`, a `BladeRing`, a small
+  shake) also draws `DrawTell`, a red streak from the samurai to the ronin and a mark at his `Feet`, until it launches. One at a time:
+  no lunge while any diver is out, and no dives once `holding`.
+  `ArmyReachedRonin` (a landing at `Ronin.TopY`) is only a safeguard now. In `DiveContact` a parrying ronin (`Ronin.Parrying`,
+  within `parryReach`) flings a lunger or diver away (`Ronin.ParryBody`, `Samurai.Knock` tints it, dive phase 3 arcs it off,
+  then `Kill(KillSource.Deflected)`). Rounds with `LevelConfig.diveInterval` send a samurai from behind the
+  front rank on a telegraphed bezier swoop at the ronin (`StartDive`/`UpdateDives`): it hits blockers (`Blocker.Hit`)
+  and the ronin, ends just past his row (`InView` keeps its turning points inside the view), then glides back up from there
+  into its marching slot, in sight the whole way; divers are left out of the edge, landing and front-column
+  checks. Also hosts the army-wide freeze and spatial queries
+  (`NearestSamurai`, `SamuraiWithin`, `FrontSamuraiInColumn`, `ClosestColumnTo`) used by boons.
+- `Samurai.cs` — one soldier: `Init`, `Fire`, `TakeHit`, `Kill`, frost tint, and `Encase` (ice from Frost Blade / Frozen Riposte: holds its fire, and the ronin's next hit kills it outright).
+- `SamuraiKind.cs` — `Ashigaru` (single arrow), `Archer` (3-arrow fan), `Taisho` (2 HP, unbreakable spear
+  thrown on its own army timer, `SamuraiArmy.ThrowSpear`, over the ranks in front), `Shieldbearer` (2 HP,
+  steel-tinted, never fires; `FrontShooterInColumn` lets the rank behind shoot over it) and `Yurei` (a ghost in the
+  Bushi art, drawn translucent cyan over a spirit glow by `Samurai.SetFrost`; fires a parted pair of arrows with
+  `Arrow.PassesCover`, so cover doesn't stop them) and `Bellringer` (2 HP, never fires; `CanFireKind` lets the
+  rank behind shoot over it like a Shieldbearer. `SamuraiArmy.UpdateBells` picks a living one every `bellInterval`,
+  `Samurai.WarnToll` glows for `tollWarning`, then `Toll` rings a teal pulse and the army's fire interval is scaled
+  by `tollFireScale` for `tollHaste`; one cut down first never rings, and each kill pushes the next toll back by
+  `silenceDelay` with a `Sfx.BellSilenced` chime). Rows pick a kind via
+  `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
+  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Archer the Bushi's).
+  The Bellringer, Shieldbearer and Yurei wear their own art (`bellringerArt`, `shieldbearerArt`, `yureiArt`, via
+  `OwnArt`); a kind without it wears the Bushi as a `Samurai.StandIn`, tinted bronze, steel or a stronger cyan. The
+  look is the undead army of [Story/Army.md](../Story/Army.md); its death debris is `Effects/Bone` and `Ash` (petals and
+  smoke without them).
+- `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
+  Arrows break on each other unless both have `PassesShots` (Shirogane's). `Toughness` (Shirogane's crescents: 2) is how
+  many plain slashes it takes to cut one; the shuriken, a piercing slash and parried shots break it outright.
+  `MakeUnbreakable` makes the Taisho spear: it passes through slashes, arrows and blockers and only stops on the
+  ronin, so it must be dodged or parried (a parried one gives a riposte that pierces two samurai). `Tint` recolours a
+  plain arrow (the yurei's). Its yari art
+  (`Art/Sprites/Projectiles/Spear.png`) reaches it through `Samurai.spearSprite`, wired by `Ninja/Apply Sprite Art`.
+- `SamuraiCounter.cs` — the army's remaining-samurai count; its scene text is hidden by `GameUI`, as the HUD no longer shows it.
+
+## Mini-enemy: Scout
+- `Scout.cs` — kite-borne scout crossing the top of the screen (the mystery-ship role): a corpse lashed to a torn
+  kite. One hit, bonus points, guaranteed soul. Built in code (no prefab). Wears `SamuraiArmy.ScoutArt` under a pale
+  glow; without it the Ashigaru art tinted red under a warm one. Spawned by `GameManager.UpdateScouts` in rounds with
+  `LevelConfig.scouts = true`, every 15–25 s.
+
+## Bullet hell
+- `BulletHell.cs` — the static kit bosses build curtains from, written round the ronin's one axis: a pattern only
+  matters where it crosses his row, so every crossing leaves `MinGap` (2.2) clear and the next gap is never more than
+  `MaxDodgeSpeed` (6 u/s, 60% of his speed) away. Shooters are `BulletHell.Shooter` delegates (a boss's own styled
+  shot). `Enlist` puts a shot on the `BossBullet` physics layer (it copies the `Arrow` layer's collisions at first use,
+  minus arrows and itself; `PassesShots` without the layer), counts it against `Budget` (`Room` waits for space) and
+  marks it `Arrow.CappedRiposte`. Patterns: `Ring`, `Fan` (aimed, capped at `AimedSpeedCap`), `Spiral` (its interval
+  is worked out from the height so one arm's landings sit a gap apart; only downward arms fire), `Curtain` (a row with
+  gaps; `shooterFor` swaps single shots, e.g. a bell), `NextGap`/`GapOk` (staircase steps and a debug check),
+  `HaltAndAim`. Colour language: `Crimson` = `MakeSealDart` (`Arrow.Unparryable`, passes cover), `Bronze` =
+  `MakeBell`/`MakeResonant` (parried, `Resonance` pops every breakable shot within `ResonanceRadius`).
+- `ArrowShadow.cs` — every `Arrow` (`Arrow.Awake`) marks where it will cross the ronin's row, glowing in its
+  `GlowColor` and brightening as it nears; none for shots rising or nearly level.
+- Parry rules in `Ronin`: `DeflectNearbyArrows` fizzles on `Unparryable` shots (`SealedParry`, raising `ParryFizzled`;
+  `GameManager.OnParryFizzled` shows a one-time hint) and `Deflect` sends back at most `RiposteCap` (3) capped
+  shots per parry, popping the rest (`Arrow.Pop`) while still landing the parry (`LandParry`).

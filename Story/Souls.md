@@ -103,7 +103,7 @@ always, a Repeatable 40% of the time, only when Oni has nothing of his own to sa
 same run stay quiet unless a Legendary or Duo is on offer. Not yet: the freed beats.
 
 Everything below is a suggestion for the dialogue system being built in parallel; field names follow
-`Assets/SaveData.cs` where it already has them.
+`Assets/Scripts/Core/SaveData.cs` where it already has them.
 
 ## Record format
 

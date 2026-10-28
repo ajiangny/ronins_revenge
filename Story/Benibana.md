@@ -16,7 +16,7 @@ Her story is Oni's in a mirror: another of the Emperor's tools who led her own p
 
 Long vivid red hair, a black and crimson kimono, silver cross-shaped ornaments and chains, tattoos, red gloves,
 and an ornate katana. Phase 2 (Crimson Unsealed): hair loose, tattoos glowing, chains and charms lifted, the blade
-drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#benibana--crimson-swordswoman).
+drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART_GUIDE.md#benibana--crimson-swordswoman).
 
 ## History
 

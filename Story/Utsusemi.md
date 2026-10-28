@@ -17,7 +17,7 @@
 A tall, slender, black articulated automaton under an enormous circular pilgrim's hat, in blue and ivory robes with
 gold veining and a lace shroud, with hanging gold ornaments, a vertical orange slit-eye and an orange chest core. It
 carries a cane sword. Phase 2: the hat breaks into a halo, the chest opens on a blazing core, and the blade glows
-incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#utsusemi--ceremonial-automaton).
+incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART_GUIDE.md#utsusemi--ceremonial-automaton).
 
 ## History
 

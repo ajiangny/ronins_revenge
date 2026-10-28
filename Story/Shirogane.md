@@ -15,7 +15,7 @@
 Ghostly white skin, flowing white hair, blue eyes, a blue-horned oni mask worn as a hair ornament (a gift from Oni;
 see below), closed black, cobalt and white samurai armor, and a katana in each hand burning with blue spirit
 flame. Phase 2: the spectral wolf behind her shoulder, her blades and hair blazing. Full art direction, including
-the locked requirements: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUIDE.md#shirogane--stage-3-ghost-samurai).
+the locked requirements: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART_GUIDE.md#shirogane--stage-3-ghost-samurai).
 
 ## History
 

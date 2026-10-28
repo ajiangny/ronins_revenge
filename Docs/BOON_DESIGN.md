@@ -2,7 +2,7 @@
 
 This is a design note on Ronin's Revenge's Hades-style boon system. It covers what the system did before this pass,
 what other roguelites do, what changed and why, and what's left for later. The code map is in
-[ARCHITECTURE.md](ARCHITECTURE.md#boons-hades-style-upgrades).
+[Docs/Boons.md](Boons.md).
 
 ## 1. The system before this pass
 
@@ -205,19 +205,19 @@ further. On the card the rarity line reads **Duo** (green) or **Legendary** (ora
   blast every few slash kills, which played too quietly. Now every few swings it throws a great fireball instead
   of a slash, which bursts in a wide blast. It's something you see coming and can aim.
 
-## 5. The portal revamp (fewer, weightier boons)
+## 4. The path revamp (fewer, weightier boons)
 
 **The problem.** With four stages a run fields about 636 samurai. At 7% a kill with pity at 15 that was a soul every
 ~9.5 kills: **about 65 offers a run**, plus scouts and stage boons, against 21 boons, and every held boon came back as
 an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and runs became god runs.
 
 **What changed.**
-- **Portals between rounds** (Hades' chamber doors): each round is fought for a reward chosen at a portal (a soul of a
-  shown element, a Spirit Bead, embers, a healing spring, a scroll); a stage's first round is always a soul. The
-  boss's portal opens from round 3; a stage runs up to 5 rounds, the extra ones harder. Samurai drop souls only rarely
-  (1%, at most one a stage); scouts do 20% of the time. Picking the soul's element at the portal is Hades' "god first, boon second".
+- **Paths between rounds** (Hades' chamber doors): each round is fought for a reward chosen at a path (a soul of a
+  shown element, a Spirit Bead, Spirit Notes (a Lost Melody), a healing spring, a scroll); a stage's first round is always a soul. The
+  boss's path opens from round 3; a stage runs up to 5 rounds, the extra ones harder. Samurai drop souls only rarely
+  (1%, at most one a stage); scouts do 20% of the time. Picking the soul's element at the path is Hades' "god first, boon second".
 - **Spirit Beads** (Pom of Power): souls no longer offer held boons; a bead raises one held boon a rarity. One follows
-  each stage boon, more from bead portals.
+  each stage boon, more from bead paths.
 - About **12–16 boons a run**, each a new boon, a slot swap or a capstone.
 
 **Numbers** (before → after):
@@ -238,7 +238,7 @@ an upgrade card. Slots were Epic by stage 2, every capstone was reachable, and r
 - **Fire blasts burn at most 3 samurai**, nearest first (5 with Wildfire), so chains of blasts can't wipe a packed army.
 - **Armies shoot more:** fire interval ×0.8 in every round, aimed shots +10 points (to at most 60%), divers from
   stage 1 round 2 (9 s) and a bit more often everywhere (×0.85).
-- **Sword Arts are rarer:** no scroll drops from kills (was 0.5%), scouts 25% (was 40%); portals still offer them.
+- **Sword Arts are rarer:** no scroll drops from kills (was 0.5%), scouts 25% (was 40%); paths still offer them.
 - Boss health unchanged: the fights already land in the 60–120 s target.
 
 **Second pass** (two more runs): rounds took 15–40 s with a hit about every other round, but frost builds now made
@@ -250,8 +250,10 @@ every slash kill and added a point to every boss hit; the shadow doubled every s
 proc; Split added two more. Bosses with slow, static moves (Utsusemi's Hour Strikes) took free damage, and Shirogane's
 crescent fans were cut down before they arrived.
 - **Shadow Clone became an ultimate** (`Ronin.Ultimate`), chosen at the temple: a bar filled by 40 of the ronin's own
-  hits, unleashed with Q for 10 s of fighting. Its slashes are `KillSource.Shadow`: half damage to bosses, no boon effects,
+  hits, unleashed with Z or I (E or Middle Click with the mouse) for 10 s of fighting. Its slashes are `KillSource.Shadow`: half damage to bosses, no boon effects,
   no charge. It left the scroll pool (Split, Piercing, Echo remain).
+- **Ultimate boons** (`BoonSlot.Ultimate`, Hades' Calls, done since): Pyre Shadow, Frost Shadow and Storm Shadow lend
+  the Shadow Clone their element, held one at a time and shown on the medallion.
 - **Split Slash's side slashes** are `Shadow` slashes too.
 - **Fire:** Flame Blade bursts on 40 / 55 / 70% of slash kills (on a boss hit, 60% of that); blasts burn 2 samurai (4 with
   Wildfire); Kindling 6 / 5 / 4 swings and its fireball no longer also sets off Flame Blade; Blazing Hands 8 / 14 / 20%.
@@ -260,7 +262,7 @@ crescent fans were cut down before they arrived.
   rarely taken. Now a shell of ice takes one blow, bursts into 5 homing shards and regrows in 18 / 13 / 9 s (a bead shortens it).
 - **Cover** is rebuilt every round.
 
-## 4. Later
+## 5. Later
 
 - **Shared statuses.**
   - Burn: stacking damage over time, capped.
@@ -273,5 +275,4 @@ crescent fans were cut down before they arrived.
   30% faster for good.
 - **Run resources.** Redraws and banishes are now Flute Songs (Fate's Thread, Banishing Bell). Still open: never
   repeat the previous offer, and a rarity pity offset.
-- **Icons.** Icons for the six capstones and the Offering (`UI/Boons/<BoonId>`). Until they exist, the card shows
-  the boon's initial.
+- **Icons.** Done since: every capstone and the Offering has its icon in `UI/Boons/<BoonId>`.

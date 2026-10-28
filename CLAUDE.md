@@ -3,17 +3,24 @@
 Ronin's Revenge — a Space Invaders remake for CSCI 381/780 Assignment 1 (individual work).
 Unity 6000.6.6f1, URP, new Input System. Single scene: `Assets/Scenes/SampleScene.unity`.
 
-**Read [ARCHITECTURE.md](ARCHITECTURE.md) first** to find a system: game flow, player combat, boons,
-samurai army, scouts, bosses, UI, VFX/audio, and the `Ninja/…` editor commands. Keep it up to date when you
-add or move a system, enemy or boss. [README.md](README.md) is the graded write-up; update it when a
+**Read [ARCHITECTURE.md](ARCHITECTURE.md) first**: it maps every system to its `Assets/Scripts/` folder and its page in
+`Docs/`, and lists the `Ninja/…` editor commands. Keep the map and the system's page up to date when you add or move a
+system, enemy or boss. [README.md](README.md) is the graded write-up; update it when a
 player-facing feature changes. [Story/](Story/README.md) holds the plot and a file per character (Oni, the bosses,
 Kagetsune): read the character's file before writing their lines, scenes or art, and update it when they change.
 
 ## Layout
 
-- Gameplay scripts: flat in `Assets/*.cs` (no subfolders, no namespaces, no asmdefs).
-- Editor tooling: `Assets/Editor/*.cs` (menu commands under `Ninja/`).
-- Art: `Assets/Art/` (`Sprites/` raw frames, `Characters/` CharacterArt assets, `Fx/`, `Portraits/`, `Fonts/`).
+- Gameplay scripts: `Assets/Scripts/<System>/*.cs` (Core, Player, Enemies, Bosses, Boons, Rewards, Hub, Dialogue, UI,
+  World, Vfx, Audio; the table in ARCHITECTURE.md says what goes where). No namespaces, no asmdefs. The biggest classes
+  are `partial`: the declaration, serialized fields and lifecycle stay in `Name.cs`, each `Name.Part.cs` beside it holds
+  one family of members; put new members in the part they belong to.
+- Editor tooling: `Assets/Editor/*.cs` (menu commands under `Ninja/`, and the import hooks).
+- Prefabs: `Assets/Prefabs/` (Ronin, Samurai, SamuraiArmy, Arrow, Projectile, SlashWave); everything else is built in code.
+- Docs: `Docs/` holds a page per system (linked from ARCHITECTURE.md) and the design notes (`BOON_DESIGN.md`,
+  `ECONOMY.md`, `CHARACTER_ART_GUIDE.md`); update the system's page when its behaviour changes.
+- Art: `Assets/Art/` (`Sprites/` raw frames, `Characters/` CharacterArt assets, `Materials/` shaders and materials,
+  `FxLibrary.asset`, `Portraits/`, `Fonts/`, `Logo/`).
 - Audio: `Assets/Audio/` (`Sfx/`, `Music/`, `Voice/`, `SfxLibrary.asset`).
 - Cut content kept for later: `Assets/Archive/` (e.g. `Kunai/`: the old kunai weapon's menu and boon icons). Nothing references it.
 - Node tooling outside Unity: `Tools/` (`npm run music`, `npm run sfx`, `npm run voice`; ElevenLabs key in gitignored `.env.local`).

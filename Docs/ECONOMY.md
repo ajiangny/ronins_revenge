@@ -1,7 +1,7 @@
 # Economy: Spirit Notes and the Flute Songs
 
 How strong Oni starts, what he can buy between runs, and the research behind the numbers. The code is in
-`Upgrades.cs` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+`Upgrades.cs` (see [ARCHITECTURE.md](../ARCHITECTURE.md)).
 
 ## The decision
 
@@ -14,7 +14,7 @@ belongs to the boons).
 ## Earning
 
 Spirit Notes, the notes of the songs Shirogane taught Oni that each freed soul leaves behind, are kept on death: 1 per
-samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus Lost Melody portals (30 × the stage), all raised by
+samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus Lost Melody paths (30 × the stage), all raised by
 Heat. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
 five clears. Notes go into the save the moment they're earned, so quitting mid-run keeps them.
@@ -23,7 +23,7 @@ five clears. Notes go into the save the moment they're earned, so quitting mid-r
 
 Price of the next rank = base × (rank + 1) + ⌊10 × 1.1^ranks bought in total⌋ (the Vampire Survivors formula at half
 its fee). Refund returns everything spent, and a maxed song can be switched
-off for a harder run. The shop appears on the title menu once there are notes to spend.
+off for a harder run. The shop is the flute altar in the temple (`GameManager.ShowSongs`).
 
 | Song | Fresh → max | Ranks | Base |
 |---|---|---|---|
@@ -36,7 +36,7 @@ off for a harder run. The shop appears on the title menu once there are notes to
 | Iron Will (max lives) | 3 → 4 | 1 | 600 |
 | Fate's Thread (boon redraws a run, R on the boon screen) | 0 → 3 | 3 | 300 |
 | Second Dawn (once a run, rise again with 2 lives) | 0 → 1 | 1 | 1,200 |
-| Third Path (portals after each round) | 2 → 3 | 1 | 400 |
+| Third Path (paths after each round) | 2 → 3 | 1 | 400 |
 | Banishing Bell (take a boon out of the run, B on the boon screen) | 0 → 2 a run | 2 | 350 |
 | Pond's Blessing (Spirit Beads after the first boss) | 1 → 2 | 1 | 500 |
 | Ancestral Lore (each stage's first soul) | any rarity → Rare or better | 1 | 600 |
@@ -44,9 +44,9 @@ off for a harder run. The shop appears on the title menu once there are notes to
 ### Control, not power (the boon revamp)
 
 With souls dropping from kills a run saw about 65 boon offers, so every slot was Epic by stage 2 and the songs
-(deliberately tiny) didn't matter. Souls now come from portals between rounds (about 12–16 boons a run), and held
+(deliberately tiny) didn't matter. Souls now come from paths between rounds (about 12–16 boons a run), and held
 boons are raised only by Spirit Beads. The newer songs follow Hades' later Mirror rows and Hades II's Arcana: they
-give **more say over the rewards** (another portal, redraws, banishes, an extra bead, a Rare floor) rather than more
+give **more say over the rewards** (another path, redraws, banishes, an extra bead, a Rare floor) rather than more
 damage, so notes stay worth earning without a fresh save being any weaker. **Soul Pull** is retired (its ranks are
 refunded, `Upgrades.RefundRetired`).
 
@@ -61,8 +61,8 @@ new highest Heat pays 150 notes per point gained (`Oaths.cs`).
 | Hastened March | 2 | armies +10% speed |
 | Rain of Arrows | 2 | arrows 10% more often, +5% speed |
 | Iron Generals | 2 | warlords +15% health |
-| The Long Road | 2 | the boss portal opens a round later |
-| Faded Spirits | 2 | no Spirit Beads behind portals; then no Rare floor on the warlord's boon |
+| The Long Road | 2 | the boss path opens a round later |
+| Faded Spirits | 2 | no Spirit Beads behind paths; then no Rare floor on the warlord's boon |
 | Frail Body | 1 | one life fewer |
 
 ## Research

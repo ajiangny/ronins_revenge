@@ -34,7 +34,7 @@ Phase 1: poised and controlled, gathered high ponytail, intact ceremonial presen
 
 Phase 2 working direction, **Crimson Unsealed**: loosened sweeping hair, glowing crimson tattoos, lifted chains and charms, battle-worn sleeves, drawn dark katana with a narrow crimson edge, and a more active stance. Keep her face and core costume recognizable. Match these changes in the close-up.
 
-References: `Assets/Art/Portraits/Benibana_Full.png`, `Assets/Art/Portraits/Benibana_Closeup.png`, and `output/phase2-artwork/crimson-*.png`.
+References: `Assets/Art/Portraits/Benibana_Full.png`, `Assets/Art/Portraits/Benibana_Closeup.png`, and the phase 2 pair `Benibana_Phase_Full.png` / `Benibana_Phase_Closeup.png`.
 
 ## Utsusemi — ceremonial automaton
 
@@ -44,14 +44,14 @@ Phase 1: composed ceremonial stance, intact hat and robes, contained face/core i
 
 Phase 2 working direction, **Fractured Overdrive**: hat sections separate into a recognizable broken circular halo; chest armor opens around a brighter core; robe tears reveal mechanical anatomy; the sword gains an incandescent orange edge. Preserve the same body, materials, and ornament vocabulary. Match the fracture pattern and core state between full body and close-up.
 
-References: `Assets/Art/Portraits/Utsusemi_Full.png`, `Assets/Art/Portraits/Utsusemi_Closeup.png`, and `output/phase2-artwork/automaton-*.png`.
+References: `Assets/Art/Portraits/Utsusemi_Full.png`, `Assets/Art/Portraits/Utsusemi_Closeup.png`, and the phase 2 pair `Utsusemi_Phase_Full.png` / `Utsusemi_Phase_Closeup.png`.
 
 ## Shirogane — stage 3 ghost samurai
 
 ### Locked user requirements
 
 - Palette correction: dominant black, cobalt blue, white, and cyan. Gold is VERY MINIMAL, limited to small muted fittings/fasteners; never broad armor borders, guards, gold tracery, or gold embroidery. Large metal surfaces are dark steel with restrained silver-gray edge highlights. Earlier gold-heavy exports are superseded in palette by `output/shirogane-palette-corrected-v1/`.
-- Approved fresh direction: `output/shirogane-fresh-armored/shirogane-phase1-full-body-review-v2.png`. Preserve its mature proportions and closed samurai armor across the set. Current exports and prompts are in `output/shirogane-approved-set-v1/`; Phase 2 full-body `-v2` is the wider-framed selection.
+- Approved fresh direction: the shipped `Assets/Art/Portraits/Shirogane_Full.png`. Preserve its mature proportions and closed samurai armor across the set. Current exports and prompts are in `output/shirogane-approved-set-v1/`; Phase 2 full-body `-v2` is the wider-framed selection.
 - Phase 1 close-up must also have genuine transparency, per user correction. Phase 2 close-up may retain its cinematic background.
 - **Colour authority: `Shirogane_Phase_Closeup.png`.** All four paintings are graded to it: porcelain skin about RGB (237, 232, 242), dusty-rose lips (180, 145, 160), steel/grey-blue irises (117, 138, 179), not cyan, silvery near-neutral hair (223, 220, 232), not lavender, royal cobalt armour (≈ 56–88, 110–126, 204–213), not electric ultramarine, and neutral black (22, 22, 32). The cyan of the spirit wolf, flame and ice stays an effect colour, never her eyes or skin.
 - Fresh artwork must use the pixel sprite as Shirogane's design authority; do not use rejected Shirogane illustrations as references. Approved other bosses define rendering quality only.
@@ -71,7 +71,7 @@ Identity/composition references: `Assets/Art/Portraits/Shirogane_Full.png`, `Ass
 
 ## Kagetsune — the Thousand-Soul Throne
 
-The Emperor and the planned Stage 4 final boss. Story and personality are in `Story/Kagetsune.md`; read it before designing a new pose or effect, because every motif on him means something (bells = sealed souls, teal fire = the souls themselves, oni skulls = mockery of the ronin Oni).
+The Emperor and the Stage 4 final boss. Story and personality are in `Story/Kagetsune.md`; read it before designing a new pose or effect, because every motif on him means something (bells = sealed souls, teal fire = the souls themselves, oni skulls = mockery of the ronin Oni).
 
 Identity: a colossal, broad-shouldered horned warlord, never shown unarmored or with a visible face. Closed, spiked black helm with a narrow visor slit and two large curved, ridged bronze horns. Blackened scale armor everywhere, edged and overlaid with pierced, thorny bronze filigree; a dark fur mantle over the right shoulder. Snarling bronze oni-skull faces with teal eyes on both pauldrons, the belt buckle and both knees. Braided crimson rope at the waist hung with **pierced bronze bells** on chains, small bronze crosses/charms and red tassels. Tattered crimson and off-white robes and long ofuda talisman strips (red sigils on cream paper) hanging from shoulders, belt and weapon; a central tasset banner bearing the imperial crest. Teal soul-fire with drifting skulls is part of his silhouette.
 

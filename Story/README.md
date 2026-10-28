@@ -16,6 +16,9 @@ writing a line, a scene or art for them**, and update it when something about th
 | **Kagetsune** | The Thousand-Soul Throne / The Unchained Wraith | The Emperor. Stage 4 final boss. | [Kagetsune.md](Kagetsune.md) |
 | **The army** | — | The dead of the Night of a Thousand Bells, marching in the bodies they died in. Every round's enemies. | [Army.md](Army.md) |
 | **Poguru** | The Lost Dragon | A baby dragon of soul-fire living in Oni's left wisp. His guide, the tutorial, comic relief; never fights. | [Poguru.md](Poguru.md) |
+| **Akagane** | Captain of the Vanguard | The Fire soul behind the Fire boons; Oni's old captain. Talks on the boon screen. | [Akagane.md](Akagane.md) |
+| **Mizore** | the Court Physician | The Frost (Water) soul behind the Frost boons. | [Mizore.md](Mizore.md) |
+| **Hibiki** | the Village Drummer | The Storm (Lightning) soul behind the Storm boons. | [Hibiki.md](Hibiki.md) |
 
 ## The betrayal
 
@@ -97,7 +100,7 @@ reactions are written ([Souls.md](Souls.md)) but not yet.
 
 ---
 
-# Dialogue design: reactive lines, the Hades way
+## Dialogue design: reactive lines, the Hades way
 
 ## What Hades does
 

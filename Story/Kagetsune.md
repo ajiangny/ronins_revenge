@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| Role | The Emperor. Stage 4 final boss (`Assets/Kagetsune.cs`). Phase 2: **The Unchained Wraith**. |
+| Role | The Emperor. Stage 4 final boss (`Assets/Scripts/Bosses/Kagetsune.cs`). Phase 2: **The Unchained Wraith**. |
 | Was | A mortal emperor, terrified of dying. |
 | Is | Colossal and deathless, inside an armor of a thousand sealed souls. |
 | Wants | To stay. Forever, and on his throne. |

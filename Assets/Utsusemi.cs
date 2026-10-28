@@ -2474,8 +2474,8 @@ public class Utsusemi : Boss
         var ember = new GameObject("Ember").AddComponent<SpriteRenderer>();
         ember.sprite = ProceduralSprites.White;
         ember.sortingOrder = sprite.sortingOrder + 2;
-        // One to three of its own pixels square, so the sparks read as pixel art beside it.
-        ember.transform.localScale = Vector3.one * BodyPixel * Random.Range(1, 4);
+        // Tiny specks: one of its own pixels, now and then two, so the sparks read as pixel art beside it.
+        ember.transform.localScale = Vector3.one * BodyPixel * (Random.value < 0.85f ? 1f : 2f);
         embers.Add(new Ember { r = ember, at = from + Vector3.back * 0.25f, velocity = velocity, life = life, drag = Random.Range(0.5f, 2.5f) });
     }
 

@@ -59,6 +59,8 @@ public class BoonChoiceUI : MonoBehaviour
     [SerializeField] Vector2 portraitCorner = new Vector2(-250, -601);
     [Tooltip("Where the caught soul floats over the ronin's open palm, as a fraction of the painting from its top-left corner.")]
     [SerializeField] Vector2 portraitSoulPoint = new Vector2(0.8f, -0.06f);
+    [Tooltip("Shifts the held soul (and its swirl, pocket and shadow) from his palm, so the selected card's marker doesn't overlap it.")]
+    [SerializeField] Vector2 heldSoulShift = new Vector2(-110f, 0f);
     [Tooltip("On-screen size of the soul in his hand.")]
     [SerializeField] float heldSoulSize = 420f;
     [Tooltip("One icon per boon, in BoonId order.")]
@@ -499,7 +501,7 @@ public class BoonChoiceUI : MonoBehaviour
         Vector2 portraitAnchor = hasArt ? Vector2.zero : center;
         portraitHome = hasArt ? portraitCorner : SoulOnlyPosition;
         Vector2 palm = hasArt
-            ? new Vector2((portraitSoulPoint.x - 0.5f) * portraitSize.x, (0.5f - portraitSoulPoint.y) * portraitSize.y)
+            ? new Vector2((portraitSoulPoint.x - 0.5f) * portraitSize.x, (0.5f - portraitSoulPoint.y) * portraitSize.y) + heldSoulShift
             : Vector2.zero;
 
         // A vortex of the element's light turns behind the soul in his hand, filling the corner above him.

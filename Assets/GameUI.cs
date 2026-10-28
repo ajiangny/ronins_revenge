@@ -44,7 +44,6 @@ public class GameUI : MonoBehaviour
     TextMeshProUGUI levelText;
     RectTransform livesRow;
     readonly List<GameObject> lifeIcons = new List<GameObject>();
-    Sprite emptyLifeIcon;
     readonly List<GameObject> hudParts = new List<GameObject>();
 
     CanvasGroup banner;
@@ -718,7 +717,8 @@ public class GameUI : MonoBehaviour
     // Built once, as the score changes many times a second.
     static readonly string ScoreFormat = HudLabel("SCORE") + "{0:000000}";
 
-    // A full heart per remaining life and an empty outlined one per life lost, up to his maximum.
+    // A full heart per remaining life and a burnt-out one per life lost, up to his maximum: the same heart, its fire
+    // gone dark, so the row keeps one silhouette (an outline of the flame-wreathed heart came out scraggly).
     public void SetLives(int lives, int maxLives)
     {
         while (lifeIcons.Count < maxLives)
@@ -730,13 +730,12 @@ public class GameUI : MonoBehaviour
             lifeIcons[i].SetActive(i < maxLives);
             bool full = i < lives;
             Image image = lifeIcons[i].GetComponent<Image>();
-            image.sprite = full ? lifeIcon : EmptyLifeIcon;
-            image.color = full ? Color.white : new Color(1f, 1f, 1f, 0.8f);
+            image.sprite = lifeIcon;
+            image.color = full ? Color.white : SpentLife;
         }
     }
 
-    // The life heart's outline alone, built once from its art.
-    Sprite EmptyLifeIcon => emptyLifeIcon != null || lifeIcon == null ? emptyLifeIcon : emptyLifeIcon = ProceduralSprites.Hollow(lifeIcon, new Color(0f, 0f, 0f, 0.35f));
+    static readonly Color SpentLife = new Color(0.22f, 0.24f, 0.3f, 0.75f);
 
     // A stage or round card across the middle of the screen: a stroke of ink paints on from the left, then a small
     // overline, a large title, a brush rule in the accent colour and a line of body text rise in one after another,

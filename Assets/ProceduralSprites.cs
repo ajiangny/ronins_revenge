@@ -76,31 +76,6 @@ public static class ProceduralSprites
 
     public static Sprite White => white != null ? white : white = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
 
-    // Just the outline of a sprite's shape, drawn white to be tinted, with its inside filled in the given colour:
-    // an empty heart beside the full ones.
-    public static Sprite Hollow(Sprite source, Color inside)
-    {
-        Texture2D copy = ReadBack(source);
-        int width = copy.width, height = copy.height;
-        // Only the shape matters, so the colours are thrown away.
-        Color32[] source32 = copy.GetPixels32();
-        bool Solid(int x, int y) => x >= 0 && y >= 0 && x < width && y < height && source32[y * width + x].a > 127;
-        var pixels = new Color32[width * height];
-        Color32 inside32 = inside;
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                if (!Solid(x, y)) continue;
-                bool edge = !Solid(x - 1, y) || !Solid(x + 1, y) || !Solid(x, y - 1) || !Solid(x, y + 1);
-                pixels[y * width + x] = edge ? new Color32(255, 255, 255, 255) : inside32;
-            }
-        }
-        copy.SetPixels32(pixels);
-        copy.Apply();
-        return Sprite.Create(copy, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
-    }
-
     // A soft blurred silhouette of a sprite, white to be tinted, to lay under it as a cast shadow. Worked out small
     // (ShadowWork pixels across; paintings are 1024): the blur hides a painting's ragged edges, so it only needs the
     // rough shape. The canvas is padded so the blur can spread past the art's own edges, and scale is how much bigger

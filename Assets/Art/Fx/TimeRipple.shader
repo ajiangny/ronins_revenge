@@ -23,8 +23,8 @@ Shader "Ninja/TimeRipple"
 
             // Per ring: xy centre in viewport UV, z radius and w push, both in view heights.
             float4 _RippleRings[4];
-            // Half the band's width, in view heights.
-            float _RippleWidth;
+            // Each ring's half band width, in view heights (x).
+            float4 _RippleBands[4];
             float _TimeStop;
 
             half4 Frag(Varyings input) : SV_Target
@@ -41,7 +41,7 @@ Shader "Ninja/TimeRipple"
                     if (ring.w <= 0) continue;
                     float2 d = (uv - ring.xy) * float2(aspect, 1);
                     float dist = length(d);
-                    float x = (dist - ring.z) / _RippleWidth;
+                    float x = (dist - ring.z) / max(_RippleBands[i].x, 1e-4);
                     if (abs(x) >= 1) continue;
                     // One crest and one trough across the band, easing to nothing at its edges.
                     float wave = sin(x * PI) * (1 - x * x);

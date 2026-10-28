@@ -2629,7 +2629,15 @@ public class Utsusemi : Boss
             StartCoroutine(TurnEscapeWheel(bell ? 0.95f : 0.75f, 0.12f));
             Fx.Play(Fx.Impact, from, bell ? BulletHell.Bronze : Gold, bell ? 1.1f : 0.6f);
             ElementFx.Glow(from, bell ? BulletHell.Bronze : BeamColour, 0.6f, bell ? 3f : 1.6f, 0.2f, transform);
-            if (bell) TimeRipple.Emit(from, 3.5f, 0.35f, 0.5f);
+            // Every tick warps the air: a hard ripple of space out from the wheel, the beat made visible. The bell's is
+            // the strongest, and for an instant the world greys toward stopped time.
+            if (bell)
+            {
+                TimeRipple.Emit(WheelCentre, 14f, 2.8f, 0.9f, band: 1.1f);
+                TimeRipple.Emit(WheelCentre, 6f, 1.6f, 0.45f, band: 0.6f);
+                StartCoroutine(StopFlicker(0.45f, 0.3f));
+            }
+            else TimeRipple.Emit(WheelCentre, 9f, 1.8f + k, 0.65f, band: 0.8f);
             Vector3 at = ronin.Bounds.center;
             yield return BulletHell.Room(4);
             if (bell)
@@ -2882,6 +2890,17 @@ public class Utsusemi : Boss
             yield return null;
         }
         RemoveTransient(face);
+    }
+
+    // A brief grey flicker toward stopped time and back (Escapement's bell); never while time is really held.
+    IEnumerator StopFlicker(float peak, float seconds)
+    {
+        for (float t = 0; t < seconds && !timeHeld; t += Time.deltaTime)
+        {
+            TimeRipple.SetStop(peak * Mathf.Sin(t / seconds * Mathf.PI));
+            yield return null;
+        }
+        if (!timeHeld) TimeRipple.SetStop(0f);
     }
 
     IEnumerator StopFade(float from, float to, float seconds)

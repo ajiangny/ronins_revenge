@@ -15,13 +15,13 @@ public class TimeRipple : MonoBehaviour
     const float FallbackAlpha = 0.22f;
 
     static readonly int RingsId = Shader.PropertyToID("_RippleRings");
-    static readonly int WidthId = Shader.PropertyToID("_RippleWidth");
+    static readonly int BandsId = Shader.PropertyToID("_RippleBands");
     static readonly int StopId = Shader.PropertyToID("_TimeStop");
 
     class Ring
     {
         public Vector3 centre;
-        public float radius, strength, seconds, age;
+        public float radius, strength, seconds, age, band;
         public bool inward;
         public SpriteRenderer fallback;
     }
@@ -29,19 +29,23 @@ public class TimeRipple : MonoBehaviour
     static TimeRipple instance;
     readonly List<Ring> rings = new List<Ring>();
     readonly Vector4[] packed = new Vector4[MaxRings];
+    readonly Vector4[] bands = new Vector4[MaxRings];
     float stop;
 
     // Whether the full-screen pass has anything to draw this frame.
     public static bool Live => instance != null && (instance.rings.Count > 0 || instance.stop > 0.001f);
 
-    // A ring from centre out to radius (or, inward, from radius in to centre) over seconds. Strength 0..1.
-    public static void Emit(Vector3 centre, float radius, float strength, float seconds, bool inward = false)
+    // A ring from centre out to radius (or, inward, from radius in to centre) over seconds. Strength 1 is the quiet
+    // default (about 3 px at 1080p); up to MaxStrength for a hard warp, kept brief. Band is the ring's half width.
+    public static void Emit(Vector3 centre, float radius, float strength, float seconds, bool inward = false, float band = BandHalfWidth)
     {
         TimeRipple self = Instance();
         if (self == null) return;
         if (self.rings.Count >= MaxRings) self.Remove(0);
-        self.rings.Add(new Ring { centre = centre, radius = radius, strength = Mathf.Clamp01(strength), seconds = Mathf.Max(0.05f, seconds), inward = inward });
+        self.rings.Add(new Ring { centre = centre, radius = radius, strength = Mathf.Clamp(strength, 0f, MaxStrength), seconds = Mathf.Max(0.05f, seconds), inward = inward, band = Mathf.Max(0.1f, band) });
     }
+
+    const float MaxStrength = 3f;
 
     // How stopped the world looks, 0 (normal) to 1 (drained and cool).
     public static void SetStop(float amount)
@@ -108,6 +112,7 @@ public class TimeRipple : MonoBehaviour
         for (int i = 0; i < MaxRings; i++)
         {
             packed[i] = Vector4.zero;
+            bands[i] = new Vector4(BandHalfWidth / viewHeight, 0, 0, 0);
             if (i >= rings.Count) continue;
             Ring ring = rings[i];
             float t = ring.age / ring.seconds;
@@ -123,6 +128,7 @@ public class TimeRipple : MonoBehaviour
                 // The live camera, not CameraShake.Center: this bends the picture as drawn, shake and all.
                 Vector3 view = cam != null ? cam.WorldToViewportPoint(ring.centre) : new Vector3(0.5f, 0.5f, 0f);
                 packed[i] = new Vector4(view.x, view.y, radius / viewHeight, strength * MaxPush);
+                bands[i] = new Vector4(ring.band / viewHeight, 0, 0, 0);
             }
             else
             {
@@ -131,7 +137,7 @@ public class TimeRipple : MonoBehaviour
         }
 
         Shader.SetGlobalVectorArray(RingsId, packed);
-        Shader.SetGlobalFloat(WidthId, BandHalfWidth / viewHeight);
+        Shader.SetGlobalVectorArray(BandsId, bands);
         Shader.SetGlobalFloat(StopId, passReady ? stop : 0f);
     }
 
@@ -150,6 +156,6 @@ public class TimeRipple : MonoBehaviour
         float scale = radius / 64f;
         ring.fallback.transform.position = ring.centre;
         ring.fallback.transform.localScale = new Vector3(scale, scale / 0.55f, 1f);
-        ring.fallback.color = new Color(0.85f, 0.92f, 1f, FallbackAlpha * strength);
+        ring.fallback.color = new Color(0.85f, 0.92f, 1f, FallbackAlpha * Mathf.Min(1f, strength));
     }
 }

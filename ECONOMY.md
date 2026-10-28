@@ -1,4 +1,4 @@
-# Economy: Soul Embers and the Flute Songs
+# Economy: Spirit Notes and the Flute Songs
 
 How strong Oni starts, what he can buy between runs, and the research behind the numbers. The code is in
 `Upgrades.cs` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
@@ -13,15 +13,17 @@ belongs to the boons).
 
 ## Earning
 
-Soul Embers are kept on death: 1 per samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus ember-cache portals (30 × the stage), all raised by Heat. A death in stage 1
+Spirit Notes, the notes of the songs Shirogane taught Oni that each freed soul leaves behind, are kept on death: 1 per
+samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus Lost Melody portals (30 × the stage), all raised by
+Heat. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
-five clears. Embers go into the save the moment they're earned, so quitting mid-run keeps them.
+five clears. Notes go into the save the moment they're earned, so quitting mid-run keeps them.
 
 ## Spending
 
 Price of the next rank = base × (rank + 1) + ⌊10 × 1.1^ranks bought in total⌋ (the Vampire Survivors formula at half
 its fee). Refund returns everything spent, and a maxed song can be switched
-off for a harder run. The shop appears on the title menu once there are embers to spend.
+off for a harder run. The shop appears on the title menu once there are notes to spend.
 
 | Song | Fresh → max | Ranks | Base |
 |---|---|---|---|
@@ -45,14 +47,14 @@ With souls dropping from kills a run saw about 65 boon offers, so every slot was
 (deliberately tiny) didn't matter. Souls now come from portals between rounds (about 12–16 boons a run), and held
 boons are raised only by Spirit Beads. The newer songs follow Hades' later Mirror rows and Hades II's Arcana: they
 give **more say over the rewards** (another portal, redraws, banishes, an extra bead, a Rare floor) rather than more
-damage, so embers stay worth earning without a fresh save being any weaker. **Soul Pull** is retired (its ranks are
+damage, so notes stay worth earning without a fresh save being any weaker. **Soul Pull** is retired (its ranks are
 refunded, `Upgrades.RefundRetired`).
 
 ## Oaths and Heat (after the first dawn)
 
 The counterweight for strong players, Hades' Pact of Punishment: an oath stone in the temple, sealed until
-Kagetsune falls. Each oath rank is a point of Heat; embers earned are raised 10% a point, and the first dawn at a
-new highest Heat pays 150 embers per point gained (`Oaths.cs`).
+Kagetsune falls. Each oath rank is a point of Heat; notes earned are raised 10% a point, and the first dawn at a
+new highest Heat pays 150 notes per point gained (`Oaths.cs`).
 
 | Oath | Ranks | Per rank |
 |---|---|---|

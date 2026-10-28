@@ -83,19 +83,28 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   `StartGame` before `Save.BeginRun` and armed after the dev-jump return (`Arm`), so a jump never offers it. Hooks:
   `BeginRound` → `Offer` (after `ClearProjectiles`, before the army: Poguru pops out, `Poguru_Tut_Wake`/`_Again`, then a
   `MenuUI` page DO YOU REMEMBER? with TUTORIAL / SKIP, Esc skipping; TUTORIAL sets `tutorialReplay` so a death offers it
-  again, SKIP settles it) → `ArmyArrived` (after `HideBanner`, round 0: a `keepHud` talk with Poguru on the right, the
-  HUD slots lifted onto `DialogueScene.Overlay` by `BoonChoiceUI.LiftSlots` and raised `SlotRise` clear of the plate, and a
-  pointer of his `point` frames, or a teal arrow, bobbing beside each slot as `TalkOptions.onLine` names it, with that
-  ability's keys as key caps beside it (`Tutorial.Keys`; his lines never name keys)) → `RoundStarted` (after `army.Advance`:
-  `Poguru.Guard`, with `Poguru_Block_1/3/6/10` barks and a 5 s `DragonBreak` at 15, back counting from 10) →
+  again and sets `Ronin.Shielded` (no hit counts until the spear), SKIP settles it) → `Drills` (taken; before
+  `blockers.Rebuild`, with the cover cleared so nothing blocks his blows: five `TrainingSoldier`s (`TrainingSoldier.cs`,
+  code-built `IHittable`s, `FootSoldierArt`/`SpearmanArt`) march in, their lines hung over them (`GameManager.SayLine`
+  with `beside`); an archer shoots down Oni's column, two chargers run at him in a file, a spearman throws a
+  `SpearSprite` spear, and a coward trembles at the back. Each lesson is `Lesson(move, slot, yell, moment)`: at its
+  moment `GameManager.HoldForLesson` stops time (`State.Dialogue`; it hands back whichever state it found), the HUD slots
+  are lifted onto the `TutorialLayer`, Poguru's pointer bobs beside the move's slot with its keys as a
+  `GameUI.CreateKeyRow` (key caps, mouse buttons drawn by `ProceduralSprites.Mouse`), his yell is voiced only and shown
+  with the keys beside Oni (on the side away from the shot, or the other when the HUD side lacks room), and
+  `Ronin.Allowed` lets only that move fire: Ronin still reads input with time stopped, so the real press fires the real
+  move (`Slashed`, `ShurikenThrown`, `ParryStarted`; `Tutorial.Press` for a test harness). The slash breaks the arrow,
+  then he cuts the archer down; the shuriken goes through both chargers (Poguru headbutts any that get through back up
+  to try again); the parried spear skims past the spearman (`RiposteTarget` a point beside his head, the spearman and
+  coward `Untouchable`), who flees with the coward for the army) → `Backup` (after `HideBanner`, round 0:
+  `Poguru_Tut_Backup`) → `RoundStarted` (after `army.Advance`: `Poguru.Guard` for the whole round, never a break;
+  `Poguru.Anger` builds with the blocks (redder, shaking, steam) and barks hang over him at 1/3/6/10/15/20/30/45 blocks,
+  then every 15) → either the army falls, or `SamuraiArmy.Holding` (the front rank reaches the cover) sets off `Rage`:
+  he rises over Oni and a ring of his soul-fire sweeps the field, `Kill(KillSource.Effect)` on every samurai it passes →
   `OnArmyDefeated` runs `TutorialRoundEnd` instead of `EndRound` for round 0: `SpearAndHeart` (still `Playing`, so the
-  hits count) pops every arrow and opens on `ParryLesson`: Poguru stops guarding and cheers (`Poguru_Tut_Win`), a
-  `Straggler` (`Straggler.cs`, a code-built foot soldier and `IHittable`, `FootSoldierArt`) runs in from the top and shoots
-  one plain arrow (`ArrowPrefab`) at Oni; once it's within `Ronin.ParryRadius` + 0.7 `GameManager.HoldForLesson` stops
-  time (`State.Dialogue`, so no pause menu), his controls go off, Poguru's yell is voiced only (`Bark(id, false)`) and
-  shown with the parry keys beside Oni on the side away from the arrow, and only a parry press (or `Tutorial.PressParry`
-  from a test harness) lets go into `Ronin.ParryNow`; `Ronin.RiposteTarget` homes the riposte on the straggler, a missed or
-  dodged shot is shot again, and `Poguru_Tut_Parried` follows. Then the spear (skipped if `MaxLives < 2`):
+  hit counts) pops every arrow, plays `Poguru_Tut_Win` or, after his rage, `Poguru_Tut_Raged` at Oni, lifts the shield.
+  Nothing drops while the tutorial is active (`MaybeDropSoul`, `MaybeDropScroll`, `OnBlockerBroken`, the kill heart).
+  Then the spear (skipped if `MaxLives < 2`):
   `EnsureLives(2)`, `SpawnSpear` (unbreakable, unparryable,
   homing) from the far top corner while he dashes into its path at 0.35× time, ghosts, and `ForceHit` lands it through
   god mode and blink if it hasn't in 2.5 s; then `Poguru_Tut_Hearts` (lives row lifted onto the overlay and pointed
@@ -103,7 +112,8 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   hangs) → `ShowBoons` → `BoonsShown` (once; `BoonChoiceUI.InputLocked` while a lightly dimmed `keepHud` talk explains
   the cards) → `ChoosePath` → `PathsShown` (once) → round 1's `BeginRound` → `Finish` (`Poguru_Tut_Done`, settle,
   back in the wisp). `StartAt` and `EndGame` call `Abort` (back in the wisp, nothing settled). GameManager's public
-  block for it: `PlayTalk`, `Bark`, `ForceHit`, `SpawnHeart`, `SpawnSpear`, `EnsureLives`, and `Poguru`, `Menu`,
+  block for it: `PlayTalk`, `Bark`, `SayLine`, `HoldForLesson`, `ForceHit`, `SpawnHeart`, `SpawnSpear`, `EnsureLives`,
+  `FootSoldierArt`, `SpearmanArt`, `SpearSprite`, `ArrowPrefab`, `Army`, and `Poguru`, `Menu`,
   `BoonChoice`, `Scene`, `Ui`, `Lives`, `MaxLives`.
 - **Poguru (`Poguru.cs`):** Oni's companion in his left wisp, code-built like `ShiroganeFreed`: drawn at
   `Ronin.ArtPixelSize`, sorted at `SpriteOrder + 2` with a `SoftGlow`, animated on unscaled time from

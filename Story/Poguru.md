@@ -71,20 +71,28 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 
 | Id | Lines |
 |---|---|
-| `Poguru_Tut_Wake` | P: "ONI! ONI! THE ARMY IS COMING!" · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" · P: "No time! Do you remember how to fight?" |
-| `Poguru_Tut_Again` | P: "Oni! Army! Again! Want the lesson again? I LOVE the lesson." |
-| `Poguru_Tut_Yay` | P: "Yay! Stay close to me. I mean, I'll stay close to you!" |
+| `Poguru_Tut_Wake` | P: "ONI! ONI! WAKE UP! Scary soldiers are coming!" · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" · P: "No time! Do you remember how to fight?" |
+| `Poguru_Tut_Again` | P: "Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson." |
+| `Poguru_Tut_Yay` | P: "Yay! Stay close. They're coming!" |
 | `Poguru_Tut_Skip` | P: "Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly." |
-| `Poguru_Tut_Basics` | P: "Bad guys up there, you down here. They march down, you stop them!" · P: "This is your SLASH! Your sword sends a cut flying up the field. Whoosh!" · P: "Your Spirit SHURIKEN! Big and sparkly, but it needs a little nap after." · P: "And PARRY! Time it just before an arrow bonks you, and it goes right back at them!" (no keys in his words: they show beside the slot he points at) · P: "Beat the whole army. I'll float nearby and bonk arrows. ...Try not to make me bonk too many." |
-| `Poguru_Block_1` | P: "Bonk! Got it!" |
-| `Poguru_Block_3` | P: "Ow. Okay. Still fine!" |
-| `Poguru_Block_6` | P: "Oni, you can ALSO move, you know!" |
-| `Poguru_Block_10` | P: "My HEAD is not a SHIELD!" |
-| `Poguru_Block_Break` | P: "That's it! Dragon break! You're on your own for five seconds!" |
-| `Poguru_Block_Back` | P: "...Fine. FINE. I'm back. Hmph." |
-| `Poguru_Tut_Win` | P: "We did it! Victory wiggle! Wiggle wiggle wiggle..." (he's celebrating, so the straggler's arrow gets past him) |
-| `Poguru_Tut_Parry` | P: "ONI! ONE MORE! PARRY IT!!" (the field holds still until Oni parries) |
-| `Poguru_Tut_Parried` | P: "WHOA! Right back at him! See? You DO remember!" |
+| `Tut_Soldiers` | Ashigaru: "There he is! The Emperor's runaway dog." · Ashigaru: "Lord Kagetsune wants his demon back. Come quietly!" · Oni: "...No." · P: "Eep! Five of them! Okay, okay, one at a time!" |
+| `Tut_Slash_Taunt` | Ashigaru (the archer): "Eat this, traitor!" |
+| `Poguru_Tut_SlashIt` | P (the field holds until Oni slashes): "An arrow! SLASH it! Your cut breaks it clean in half!" |
+| `Poguru_Tut_TakeHim` | P: "Now take him down!" |
+| `Tut_Slash_Fall` | Ashigaru: "Gah...!" |
+| `Tut_Charge_Taunt` | Ashigaru (the chargers): "Rush him! Together!" |
+| `Poguru_Tut_ShurikenIt` | P (held until the shuriken): "Two in a row! Throw your SHURIKEN, it flies right through them both!" |
+| `Poguru_Tut_Stopped` | P: "Stopped in their tracks! Ha!" |
+| `Tut_Spear_Taunt` | Ashigaru (the spearman): "Let's see you cut THIS. Blessed steel from the Emperor's own forge!" |
+| `Poguru_Tut_ParryIt` | P (held until the parry): "That spear's cursed! Kagetsune's blacksmiths forge them with nasty magic. You can't cut it or break it. PARRY IT!" |
+| `Tut_Flee` | Ashigaru (the spearman): "Th-that's not natural! CAPTAAAIN!" · Ashigaru (the coward): "Wait for meee!" · P: "Hehe! Run away! ...Wait. Where are they running TO?" |
+| `Poguru_Tut_Backup` | P: "Uh oh. He brought a LOT of backup." · Oni: "...Good." · P: "Okay! I'll bonk every arrow I can. I'm a very good bonker. You do the rest!" |
+| `Poguru_Block_1` / `_3` / `_6` / `_10` | P: "Bonk! Got it!" / "Ow. Okay. Still fine!" / "Oni, you can ALSO move, you know!" / "My HEAD is not a SHIELD!" |
+| `Poguru_Block_15` / `_20` / `_30` / `_45` | P: "I'M BONKING SO HARD RIGHT NOW!" / "Oni! Swing the sword! The SWORD!" / "My head is RINGING!" / "I am going to EXPLODE!" |
+| `Poguru_Block_More` | P (every 15 more): "BONK! BONK! BOOOONK!" |
+| `Poguru_Rage_Charge` | P (the army reached the cover): "THAT'S IT! THAT IS IT!! RAAAAAGH!!!" |
+| `Poguru_Tut_Raged` | P: "ONI!! WERE YOU NAPPING?!" · P: "I did EVERYTHING! I'm a SUPPORT dragon! SUPPORT!" · Oni: "...You were doing fine." · P: "HMPH!" |
+| `Poguru_Tut_Win` | P (Oni beat the army himself): "We did it! Victory wiggle! Wiggle wiggle wiggle..." |
 | `Poguru_Tut_LookOut` | P: "LOOK OUT!!!" |
 | `Poguru_Tut_Hearts` | P: "Waaah! It went right through me! Are you okay?!" · Oni: "...Fine." · P: "Those hearts in the corner are your lives. Lose them all and it's back to the temple. It's damp there." · P: "Good news! I've been saving a heart soul. For emergencies. This is an emergency!" · P: "Hearts fall out of broken cover sometimes. Once in a blue moon a soldier drops one too!" |
 | `Poguru_Tut_Collect` | P: "Go get it! It's on your row!" |
@@ -152,6 +160,9 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 ## Keep consistent
 
 - He never fights and never takes damage. In the tutorial he only bonks arrows aside, and the spear passes through him.
+  He never gives up guarding Oni, however cross he gets; the only thing he ever "attacks" with is the rage that bursts
+  out of him if Oni leaves the whole army to him.
+- The tutorial's soldiers (speaker "Ashigaru", the `SOLDIER` voice) are generic grunts: sneering, and a little cowardly.
 - He lives in Oni's **left** wisp (wisp 0). When he's out, that wisp is hidden.
 - Teal is soul-fire: his body is teal, and only his cape is red.
 - Short lines. One joke at most per line. He is kind even when he's annoyed.

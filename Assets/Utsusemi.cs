@@ -734,8 +734,12 @@ public class Utsusemi : Boss
         RemoveTransient(sight);
 
         Beam beam = MakeBeam(Eye, 0.8f);
+        // The strike lands hard: a broad blaze where it hits, and a full-size burn left on the spot.
+        if (beam.hit != null) beam.hit.transform.localScale *= 1.8f;
         Sfx.Play(Sfx.LanternCharge, 0.4f, 2f);
         CameraShake.Add(0.1f);
+        GroundFire.Scorch(spot, 2f);
+        Fx.Play(Fx.Impact, spot, BeamColour, 1.4f);
         yield return HoldArmor(shell, 0.3f, () =>
         {
             if (beam.body == null) return;
@@ -1231,6 +1235,8 @@ public class Utsusemi : Boss
         for (int i = 0; i < count; i++)
         {
             weights[i] = Own(Shoot(pivots[i], Vector3.down * 0.1f));
+            // A landing shadow reads a straight fall; a pendulum's swing makes it lie, so the weights go without.
+            Destroy(weights[i].GetComponent<ArrowShadow>());
             if (frames != null) weights[i].Restyle(frames, 8f, Color.white, new Vector2(0.9f, 1.07f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.35f), 1.1f);
             else weights[i].Restyle(ProceduralSprites.Disc, Gold, new Vector2(0.6f, 0.8f), 0.3f, new Color(Gold.r, Gold.g, Gold.b, 0.4f), 1.1f);
             threads[i].color = new Color(0.95f, 0.95f, 1f, 0.6f);

@@ -28,16 +28,17 @@ public class GroundFire : MonoBehaviour
     float size;
     float age;
 
-    public static void Scorch(Vector3 at)
+    // Scale widens one strike's mark (a single laser hour) beyond a dragged beam's patches.
+    public static void Scorch(Vector3 at, float scale = 1f)
     {
         var mark = new GameObject("Scorch").AddComponent<GroundFire>();
         mark.transform.position = new Vector3(at.x, at.y, 0f);
-        mark.size = Random.Range(0.85f, 1.15f);
+        mark.size = Random.Range(0.85f, 1.15f) * scale;
         mark.scorch = true;
         mark.embers = new GameObject("Mark").AddComponent<SpriteRenderer>();
         mark.embers.transform.SetParent(mark.transform, false);
         mark.embers.transform.localPosition = new Vector3(0, 0.02f, 0.1f);
-        mark.embers.transform.localScale = new Vector3(Width * 1.1f * mark.size, 0.26f, 1f);
+        mark.embers.transform.localScale = new Vector3(Width * 1.1f * mark.size, 0.26f * Mathf.Sqrt(scale), 1f);
         mark.embers.sprite = ProceduralSprites.Glow;
         mark.embers.color = ScorchHot;
         mark.embers.sortingOrder = 2;

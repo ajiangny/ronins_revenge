@@ -2309,6 +2309,8 @@ public class GameManager : MonoBehaviour
     IEnumerator TutorialRoundEnd()
     {
         yield return tutorial.SpearAndHeart();
+        // A pause opened on the last beat must not skip the round's end; a death (GameOver) does.
+        while (state == State.Paused) yield return null;
         if (state == State.Playing) yield return EndRound();
     }
 

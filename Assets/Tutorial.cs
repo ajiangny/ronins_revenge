@@ -245,7 +245,8 @@ public class Tutorial : MonoBehaviour
         Heart heart = game.SpawnHeart(spot);
         poguru.Play(game.PoguruClips.point, true);
         game.Bark("Poguru_Tut_Collect");
-        yield return new WaitUntil(() => heart == null);
+        // A heart he can't use (lives somehow full) waits on his row for the round's end instead of holding the lesson.
+        yield return new WaitUntil(() => heart == null || game.Lives >= game.MaxLives);
         poguru.Hover();
         poguru.Play(game.PoguruClips.cheer);
         yield return Wait(game.Bark("Poguru_Tut_Collected"));

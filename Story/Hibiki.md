@@ -81,8 +81,10 @@ a warm country lilt, no accent. Talks fast, laughs easily, teases. When she turn
 catches a little. Energetic and youthful but not babyish or cutesy."
 
 Run-on sentences, exclamations, repeated words ("Out, out, out"), sound effects ("ba-dum"). Delivery tags:
-`[excited, fast]`, `[teasing]`, `[laughing]`, `[suddenly quiet]`, `[voice catching]`. Her serious lines are short and
-should sound like she's stopped running for the first time.
+`[excited, fast]`, `[teasing]`, `[laughing]`, `[serious, blunt]`, `[voice catching]`. Her serious lines are short and
+should sound like she's stopped running for the first time, but at full speaking volume: tags like `[quiet]`,
+`[soft]` or `[suddenly quiet]` make eleven_v3 whisper her, and those takes were too faint to hear. The generator also
+levels every Hibiki take to the other souls' loudness (about -16 LUFS).
 
 ## Lines
 

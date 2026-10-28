@@ -54,8 +54,13 @@ const GHOST =
   "[v]chorus=0.6:0.9:55|75:0.45|0.35:0.3|0.4:0.6|0.9,aecho=0.8:0.55:120|280:0.32|0.18[body];" +
   "[w]asetrate=44100*1.12,aresample=44100,atempo=0.89286,highpass=f=2200,adelay=45|45,volume=0.5[hiss];" +
   "[body][hiss]amix=inputs=2:weights=1 0.35:normalize=0,highpass=f=90,lowpass=f=7000,volume=2.5,alimiter=limit=0.9";
+// Hibiki's takes swing from shouts to near-whispers, so hers are levelled: a gentle compressor evens out each
+// line, then loudnorm brings it to the other souls' loudness.
+const LEVEL =
+  "[0:a]highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=150:makeup=2," +
+  "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100";
 // Which voices are baked, and through what. Every other voice is saved as it arrives.
-const FX = { [SOLDIER]: GHOST };
+const FX = { [SOLDIER]: GHOST, [HIBIKI]: LEVEL };
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -272,26 +277,26 @@ const LINES = {
   Hibiki_Meet_Name_3: [HIBIKI, "[fast, hopeful] Hibiki. The festival drum? I followed you to the river every day for a whole summer?"],
   Hibiki_Meet_Name_4: [HIBIKI, "[cheerful, brushing it off] It's fine! I'll tell you every time. I'm good at repeating things. I'm a drummer."],
   Hibiki_Meet_Procession: [HIBIKI, "[excited, fast] I drummed the whole way up the mountain. Everyone kept saying, our Oni sent for us! The whole village, in our best!"],
-  Hibiki_Meet_Procession_2: [HIBIKI, "[softer] Ma cried, she was so proud of you."],
+  Hibiki_Meet_Procession_2: [HIBIKI, "[warm, proud, a little wistful] Ma cried, she was so proud of you."],
   Hibiki_Meet_Procession_3: [HIBIKI, "[voice catching, then teasing] Don't. Don't make that face. I'll hit you with a stick."],
-  Hibiki_Meet_OneBell: [HIBIKI, "[suddenly quiet] He gave the court bells. He gave the soldiers bells. He didn't give us any."],
-  Hibiki_Meet_OneBell_2: [HIBIKI, "[quiet, serious] The whole village rings inside the coffin. All of us, one sound. Listen for it when he swings that hammer."],
-  Hibiki_Meet_Blame: [HIBIKI, "[suddenly quiet] I told you I don't blame you. That was a lie."],
-  Hibiki_Meet_Blame_2: [HIBIKI, "[voice catching] I do. A little. Every night. And I'd follow you up there again anyway. That's the stupid part."],
-  Hibiki_Meet_Blame_4: [HIBIKI, "[stunned, soft] ...You said my name."],
-  Hibiki_Meet_River_2: [HIBIKI, "[voice catching] ...You remembered on your own."],
+  Hibiki_Meet_OneBell: [HIBIKI, "[serious, stopping short, clear] He gave the court bells. He gave the soldiers bells. He didn't give us any."],
+  Hibiki_Meet_OneBell_2: [HIBIKI, "[serious, steady] The whole village rings inside the coffin. All of us, one sound. Listen for it when he swings that hammer."],
+  Hibiki_Meet_Blame: [HIBIKI, "[serious, blunt] I told you I don't blame you. That was a lie."],
+  Hibiki_Meet_Blame_2: [HIBIKI, "[earnest, voice catching] I do. A little. Every night. And I'd follow you up there again anyway. That's the stupid part."],
+  Hibiki_Meet_Blame_4: [HIBIKI, "[stunned, wondering] ...You said my name."],
+  Hibiki_Meet_River_2: [HIBIKI, "[amazed, voice catching] ...You remembered on your own."],
   Hibiki_Meet_River_3: [HIBIKI, "[laughing through tears, teasing] Don't you dare forget it again, my lord guardsman."],
   Hibiki_Pickup_DiedBenibana: [HIBIKI, "[teasing, fast] She got you with the sleepy smoke again? Stay awake! Do what I do. Never stop moving!"],
   Hibiki_Pickup_DiedUtsusemi: [HIBIKI, "[serious, then fierce] The tea monk wouldn't hurt anybody. That thing would. Be faster than its ticking!"],
   Hibiki_Pickup_DiedShirogane: [HIBIKI, "[matter-of-fact, admiring] Lady Shirogane beat you? Of course she did. She's Lady Shirogane."],
-  Hibiki_Pickup_DiedKagetsune: [HIBIKI, "[suddenly quiet, voice catching] I heard the village ring when he hit you. All of us at once. ...Get up, Oni. Please."],
+  Hibiki_Pickup_DiedKagetsune: [HIBIKI, "[serious, voice catching] I heard the village ring when he hit you. All of us at once. ...Get up, Oni. Please."],
   Hibiki_Pickup_DiedArmy: [HIBIKI, "[teasing, laughing] Just soldiers? Just soldiers got you? Captain Kettle's going to be unbearable."],
   Hibiki_Pickup_FirstClear: [HIBIKI, "[excited, fast, laughing] You did it! You did it, you did it! The whole coffin shook!"],
-  Hibiki_Pickup_FirstClear_2: [HIBIKI, "[suddenly quiet] ...And we're all still in here. Oh."],
+  Hibiki_Pickup_FirstClear_2: [HIBIKI, "[deflating, serious] ...And we're all still in here. Oh."],
   Hibiki_Pickup_FirstClear_3: [HIBIKI, "[bright again, determined] That's fine! We'll do it again, louder!"],
   Hibiki_Pickup_Cleared: [HIBIKI, "[excited] Again! Like last night! Ba-dum, down he goes!"],
   Hibiki_Pickup_HoldsFire: [HIBIKI, "[teasing] You smell like smoke. Was that Captain Kettle? He's so grumpy. Here, have something fun."],
-  Hibiki_Pickup_HoldsFrost: [HIBIKI, "[bright, then softer] Grandmother's been looking after you! She held my wrist, at the end. She's good at that."],
+  Hibiki_Pickup_HoldsFrost: [HIBIKI, "[bright, then fond] Grandmother's been looking after you! She held my wrist, at the end. She's good at that."],
   Hibiki_Pickup_ManyRuns: [HIBIKI, "[playful] I've been counting your nights in drumbeats. I've run out of rhythms. I'm making new ones."],
   Hibiki_Pickup_VeryManyRuns: [HIBIKI, "[proud, warm] Everyone in the coffin knows your name now. Even the ones who never met you. I told them all."],
   Hibiki_Pickup_Offering: [HIBIKI, "[sheepish, laughing] I'm all out of thunder! Um. Here's a hug instead. It's a soul hug. It counts."],
@@ -370,6 +375,9 @@ const LINES = {
   Poguru_Tut_Done_2: [POGURU, "[excited, fast] Let's hurry and free everyone!!"],
   Poguru_Tut_Done_3: [ONI, "[low, tired, flat] ...Back in the wisp."],
   Poguru_Tut_Done_4: [POGURU, "[fast, flustered] Going! Shutting up! [giggles] ...Mostly!"],
+  Poguru_Utsu_Sword: [POGURU, "[panicked, squeaky shout] Laser! [fast, urgent] Oni, hurry! Hide behind the sword!"],
+  Poguru_Utsu_Reclaim: [POGURU, "[alarmed, fast] It wants its sword back! [squeaky shout] Get away from it!"],
+  Poguru_Utsu_Rock: [POGURU, "[terrified gasp] That's a BIG one! [panicked, fast] Behind a rock, quick!"],
   Poguru_Round_Go: [POGURU, "[cheering, fast] Go go go!"],
   Poguru_Round_Snacks: [POGURU, "[whiny] More of them! [curious] Do they ever bring snacks?"],
   Poguru_Round_Wave: [POGURU, "[cheerful, waving] Hi, army! He's going to beat you now! [sheepish] ...Sorry!"],

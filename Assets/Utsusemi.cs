@@ -2746,8 +2746,9 @@ public class Utsusemi : Boss
         CameraShake.Add(0.2f);
         HoldTime(true);
         StartCoroutine(ShowClockFace());
-        TimeRipple.Emit(hand, 16f, 1f, 1.8f);
-        TimeRipple.Emit(hand, 9f, 0.6f, 1.2f);
+        // The world warps hard as time stops: a great ring out from its fist and a tighter one inside it.
+        TimeRipple.Emit(hand, 18f, 3f, 1.6f, band: 1.3f);
+        TimeRipple.Emit(hand, 9f, 2f, 1.1f, band: 0.8f);
         yield return StopFade(0f, 1f, 0.35f);
 
         float lowest = ronin.Bounds.center.y + 5.5f;
@@ -2776,17 +2777,22 @@ public class Utsusemi : Boss
             float y = lowest + r * NeedleRowGap;
             yield return BulletHell.Room(30);
             needles.AddRange(BulletHell.Curtain(Needle, y, LeftEdge + 0.3f, RightEdge - 0.3f, 0.8f, new[] { gap }, gapWidth, 0f));
-            TimeRipple.Emit(new Vector3(gap, y, 0), 2.5f, 0.6f, 0.5f);
+            TimeRipple.Emit(new Vector3(gap, y, 0), 4f, 1.8f, 0.6f, band: 0.7f);
             Sfx.Play(Sfx.ParryClang, 0.3f, 2f);
             lastGap = gap;
             yield return Wait(0.55f);
         }
-        // Held: a moment to read the rows and walk.
+        // Held: a moment to read the rows and walk, the stopped clock throbbing slow rings through the frozen air.
         Beat();
-        yield return Wait(0.9f);
+        for (float t = 0; t < 0.9f; t += HeldPulse)
+        {
+            if (clockFace != null) TimeRipple.Emit(clockFace.transform.position, 12f, 1.4f, 0.8f, band: 1f);
+            yield return Wait(HeldPulse);
+        }
 
         // The ripples rush back into its hand, a bell tolls, and time runs again.
-        TimeRipple.Emit(hand, 16f, 0.9f, 0.6f, inward: true);
+        // The warps rush back into its fist, hard, before time runs again.
+        TimeRipple.Emit(hand, 18f, 3f, 0.6f, inward: true, band: 1.3f);
         yield return Wait(0.6f);
         if (Sfx.Has(Sfx.BellToll)) Sfx.Play(Sfx.BellToll, 0.9f, 1f);
         else Sfx.Play(Sfx.MidnightChime, 1f, 0.9f);
@@ -2801,6 +2807,9 @@ public class Utsusemi : Boss
         Beat();
         yield return Wait(0.8f);
     }
+
+    // How often the stopped clock sends a ring through the frozen air while it holds.
+    const float HeldPulse = 0.45f;
 
     // A fragment of its burning lace, hung in stopped time: unparryable and through cover, but a cut breaks it.
     // Without the phase-two lace art, a molten seal-dart.
@@ -2881,6 +2890,8 @@ public class Utsusemi : Boss
         Vector3 at = face.transform.position;
         if (Fx.Play(Fx.UtsuParts, at, Color.white, 4f) == null) Fx.Play(Fx.Impact, at, Gold, 4f);
         Debris.BurstSprites(at, art.deathParticles, Gold, 18, 1.2f, 9f);
+        // Time snaps back with a shockwave through the air from where the clock hung.
+        TimeRipple.Emit(at, 18f, 2.6f, 0.7f, band: 1.2f);
         Vector3 from = face.transform.localScale;
         for (float t = 0; t < 0.3f && face != null; t += Time.deltaTime)
         {

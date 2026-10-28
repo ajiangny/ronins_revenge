@@ -1064,7 +1064,7 @@ public class GameManager : MonoBehaviour
         menu.Show("HOW WILL YOU FIGHT?", $"<size=30><color=#{muted}>You can change this any time under CONTROLS.</color></size>", new[]
         {
             Card(Controls.Scheme.Keyboard, "Both hands on the keys."),
-            Card(Controls.Scheme.KeyboardMouse, "Move with the keys, strike with the mouse."),
+            Card(Controls.Scheme.KeyboardMouse, "Keys to move, the mouse to strike."),
         }, () => ShowSlots(slot), (int)Controls.Current, paper: true);
     }
 

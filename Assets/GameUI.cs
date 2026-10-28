@@ -221,43 +221,93 @@ public class GameUI : MonoBehaviour
         BuildUltimateBar();
     }
 
-    // The ultimate's bar, an ink stroke beside the lives (past the most hearts he can hold): a dark empty stroke with
-    // the charge painted over it in the shadow's violet, and its name, or the key once it's full.
+    // The ultimate's gauge, in the boss bar's language: a slim dark track in a hairline pale frame beside the lives,
+    // filled in the shadow's violet, its name in small spaced capitals above it and a diamond at its end that lights
+    // when it's full. Gains show first as a pale lead the violet catches up to; a full gauge has a sheen running along
+    // it and its key beside the diamond; while it runs, it drains.
     RectTransform ultimateBar;
-    Image ultimateFill;
-    Image ultimateGlow;
+    RectTransform ultimateFill;
+    RectTransform ultimateLead;
+    Image ultimateFillImage;
+    RectTransform ultimateSheen;
+    Image ultimateDiamond;
+    Image ultimateDiamondGlow;
     TextMeshProUGUI ultimateLabel;
+    TextMeshProUGUI ultimateKey;
+    float shownUltimate;
     bool ultimateWasReady;
-    const float UltimateBarWidth = 260f;
+    const float UltimateBarWidth = 300f;
     static readonly Color UltimateColour = new Color(0.62f, 0.45f, 1f);
+    static readonly Color FrameColour = new Color(0.9f, 0.88f, 0.85f, 0.9f);
 
     void BuildUltimateBar()
     {
-        ultimateBar = CreateRect("Ultimate", transform, new Vector2(0f, 0f), new Vector2(20 + Boons.MaxLives * (LifeIconSize + 6f) + 24f, 6), new Vector2(UltimateBarWidth, LifeIconSize));
+        float left = 20 + Boons.MaxLives * (LifeIconSize + 6f) + 28f;
+        ultimateBar = CreateRect("Ultimate", transform, new Vector2(0f, 0f), new Vector2(left, 16), new Vector2(UltimateBarWidth, 12));
+        ultimateBar.pivot = new Vector2(0f, 0f);
         hudParts.Add(ultimateBar.gameObject);
-        ultimateGlow = CreateRect("Glow", ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth + 90f, LifeIconSize + 60f)).gameObject.AddComponent<Image>();
-        ultimateGlow.sprite = ProceduralSprites.SoftGlow;
-        ultimateGlow.raycastTarget = false;
-        ultimateGlow.color = Color.clear;
-        Image empty = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth, LifeIconSize - 6f), new Color(UltimateColour.r * 0.35f, UltimateColour.g * 0.3f, UltimateColour.b * 0.45f, 0.75f));
-        empty.fillAmount = 1f;
-        ultimateFill = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth - 8f, LifeIconSize - 14f), UltimateColour);
-        ultimateFill.fillAmount = 0f;
-        ultimateLabel = CreateText("Label", new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(UltimateBarWidth, LifeIconSize), 26, TextAlignmentOptions.Center, ultimateBar);
+
+        ultimateBar.gameObject.AddComponent<Image>().color = FrameColour;
+        RectTransform back = CreateRect("Back", ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth - 4f, 8f));
+        back.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.1f, 0.95f);
+        ultimateLead = Stretch(CreateRect("Lead", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        ultimateLead.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 1f, 0.85f);
+        ultimateFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        ultimateFillImage = ultimateFill.gameObject.AddComponent<Image>();
+        ultimateFillImage.color = UltimateColour;
+        // A soft band of light that runs along a full gauge.
+        ultimateSheen = CreateRect("Sheen", back, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(70f, 8f));
+        Image sheen = ultimateSheen.gameObject.AddComponent<Image>();
+        sheen.sprite = ProceduralSprites.SoftGlow;
+        sheen.color = new Color(1f, 1f, 1f, 0.55f);
+        back.gameObject.AddComponent<RectMask2D>();
+
+        // The diamond at the gauge's end: dim and hollow-looking while it fills, lit once it's full.
+        ultimateDiamondGlow = CreateRect("DiamondGlow", ultimateBar, new Vector2(1f, 0.5f), new Vector2(14f, 0f), new Vector2(54f, 54f)).gameObject.AddComponent<Image>();
+        ultimateDiamondGlow.sprite = ProceduralSprites.SoftGlow;
+        ultimateDiamondGlow.raycastTarget = false;
+        RectTransform diamondFrame = CreateRect("DiamondFrame", ultimateBar, new Vector2(1f, 0.5f), new Vector2(14f, 0f), new Vector2(18f, 18f));
+        diamondFrame.localRotation = Quaternion.Euler(0, 0, 45f);
+        diamondFrame.gameObject.AddComponent<Image>().color = FrameColour;
+        RectTransform diamond = CreateRect("Diamond", diamondFrame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12f, 12f));
+        ultimateDiamond = diamond.gameObject.AddComponent<Image>();
+
+        ultimateLabel = CreateText("Label", new Vector2(0f, 1f), new Vector2(0, 2), new Vector2(UltimateBarWidth, 34), 26, TextAlignmentOptions.BottomLeft, ultimateBar);
+        ultimateLabel.rectTransform.pivot = new Vector2(0f, 0f);
         ultimateLabel.textWrappingMode = TextWrappingModes.NoWrap;
         ultimateLabel.characterSpacing = 6;
         Style(ultimateLabel, TextStyle.Hint);
+        ultimateKey = CreateText("Key", new Vector2(1f, 0.5f), new Vector2(34f, 1f), new Vector2(80, 40), 26, TextAlignmentOptions.Left, ultimateBar);
+        ultimateKey.rectTransform.pivot = new Vector2(0f, 0.5f);
+        ultimateKey.textWrappingMode = TextWrappingModes.NoWrap;
+        ultimateKey.text = MenuUI.KeyCap("Q", false);
+        Style(ultimateKey, TextStyle.Hud);
     }
 
-    // Called every frame with the ronin's bar. It glows and names its key while full, and chimes once as it fills.
+    // Called every frame with the ronin's gauge.
     public void SetUltimate(string name, float fill, bool ready, bool active)
     {
         if (ultimateBar == null) return;
-        ultimateFill.fillAmount = fill;
-        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 6f);
-        ultimateFill.color = ready ? Color.Lerp(UltimateColour, Color.white, 0.35f * pulse) : active ? Color.Lerp(UltimateColour, Color.white, 0.2f) : new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.75f);
-        ultimateGlow.color = ready ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.25f + 0.25f * pulse) : active ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.18f) : Color.clear;
-        ultimateLabel.text = ready ? $"{MenuUI.KeyCap("Q", false)}  {name}" : name;
+        float dt = Time.unscaledDeltaTime;
+        // Gains: the pale lead jumps ahead and the violet catches up. Drains move both together.
+        if (fill < shownUltimate) shownUltimate = fill;
+        else shownUltimate = Mathf.MoveTowards(shownUltimate, fill, dt * 1.2f);
+        ultimateLead.anchorMax = new Vector2(fill, 1f);
+        ultimateFill.anchorMax = new Vector2(shownUltimate, 1f);
+
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 5f);
+        ultimateFillImage.color = ready ? Color.Lerp(UltimateColour, Color.white, 0.25f * pulse)
+            : active ? Color.Lerp(UltimateColour, Color.white, 0.15f) : UltimateColour;
+        ultimateSheen.gameObject.SetActive(ready);
+        if (ready) ultimateSheen.anchoredPosition = new Vector2(Mathf.Repeat(Time.unscaledTime * 0.6f, 1.4f) * (UltimateBarWidth + 70f) - 70f, 0f);
+
+        ultimateDiamond.color = ready ? Color.Lerp(UltimateColour, Color.white, 0.5f + 0.5f * pulse)
+            : active ? UltimateColour : new Color(0.08f, 0.04f, 0.1f, 0.95f);
+        ultimateDiamondGlow.color = ready ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.35f + 0.3f * pulse)
+            : active ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.25f) : Color.clear;
+        ultimateKey.gameObject.SetActive(ready);
+
+        ultimateLabel.text = name;
         ultimateLabel.color = ready || active ? Color.white : MutedColour;
         if (ready && !ultimateWasReady) Sfx.Play(Sfx.BladeRing, 0.6f, 1.4f);
         ultimateWasReady = ready;

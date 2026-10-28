@@ -178,7 +178,7 @@ Hades' loop: what happened in earlier runs changes what is said and how strong O
 | Spirit Shuriken (W / Up), 6 s cooldown, pierces a column | `Ronin` → `Kunai.Launch(..., KillSource.Shuriken)` |
 | Parry (Shift / Down / Right Click), 0.25 s window; a landed parry resets its cooldown, a miss costs 2 s (`parryMissCooldown`) | `Ronin.Deflect` → `Arrow.TryDeflect()` → riposte `Kunai` (`KillSource.Deflected`), or a boss slash sent back (`KillSource.Reflected`). The riposte copies the arrow's art (`Kunai.Mimic`), wears `Kunai.ParryAura` and homes (`Kunai.Home`) on `Ronin.RiposteTarget` = `GameManager.RandomEnemy`, passing through everything but its target and blockers. With Burning Riposte it's a fireball, with Frozen Riposte a fan of ice shards (`Ronin.SpawnRiposte`, `Kunai.Animate` with `Fx.Fireball` / `Fx.IceShard` frames); their hits raise `Kunai.Impacted` → `Ronin.RiposteImpact` → `BoonEffects.OnRiposteImpact` |
 | Unparryable damage (boss chain) | `Ronin.TakeHit(Vector3)`; Glacier Shell (`ShellUp`, `BreakShell`) takes the blow first: no life lost, `ShellShards` homing `LaunchIceShard`s, `ShellGrace` s of invulnerability, then it regrows after the boon's value in seconds (`UpdateShell` draws the bubble; `ShellCharge` dims its HUD icon in `BoonChoiceUI.UpdateHud`) |
-| Ultimate (Q): `Ronin.Ultimate` (append-only, `SaveData.ultimate`, picked on the temple's weapon rack page, `ShowRack`; only `ShadowClone` so far). `Kunai.Landed` (static, raised on every projectile hit) fills `UltimateFill` by 1/`ultimateHits` for each `Damage.Procs` hit on a samurai, scout, boss or Kuon; `UltimateLocked` while the tutorial runs. `StartUltimate` sets `UltimateActive`, and `UpdateUltimate` drains the bar over `ultimateDuration` only while he's fighting. Shadow Clone: `UpdateShadowClone` (a flipped, darkened copy of his frame mirrored across `CameraShake.Center` by `MirrorX`, no collider) shows while it runs. HUD: `GameUI.SetUltimate` (an ink bar beside the lives, glowing with a Q key cap when full), fed each frame by `GameManager.Update`; F9 fills it (`FillUltimate`) | `Ronin`, `GameUI`, `GameManager` |
+| Ultimate (Q): `Ronin.Ultimate` (append-only, `SaveData.ultimate`, picked on the temple's weapon rack page, `ShowRack`; only `ShadowClone` so far). `Kunai.Landed` (static, raised on every projectile hit) fills `UltimateFill` by 1/`ultimateHits` for each `Damage.Procs` hit on a samurai, scout, boss or Kuon; `UltimateLocked` while the tutorial runs. `StartUltimate` sets `UltimateActive`, and `UpdateUltimate` drains the bar over `ultimateDuration` only while he's fighting. Shadow Clone: `UpdateShadowClone` (a flipped, darkened copy of his frame mirrored across `CameraShake.Center` by `MirrorX`, no collider) shows while it runs. HUD: `GameUI.SetUltimate` (a slim gauge beside the lives in the boss bar's style: a hairline pale frame round a dark track, a violet fill behind a pale lead that it catches up to, its name in spaced capitals above, and a diamond at its end that lights, with a sheen along the bar and a Q key cap, when full), fed each frame by `GameManager.Update`; F9 fills it (`FillUltimate`) | `Ronin`, `GameUI`, `GameManager` |
 | Elemental look (aura, flame colour, projectile art) | `Ronin.SetLook`, driven by `GameManager.UpdateRoninLook` |
 | Spirit wisps (bobbing beside him on idle, parry and walk frames, which were drawn without them) | `Ronin.UpdateWisps` from `CharacterArt.wisps`, cut from `Ronin_Base` and recoloured per element by Apply Boon Art; hidden on `CharacterArt.framesWithWisps` (run, hit, throw), which draw their own |
 | Ronin events | `Hit`, `ShurikenThrown`, `Parried`, `RiposteImpact` (GameManager subscribes) |
@@ -240,10 +240,13 @@ match `BoonChoiceUI.boonIcons`.
   rank behind shoot over it like a Shieldbearer. `SamuraiArmy.UpdateBells` picks a living one every `bellInterval`,
   `Samurai.WarnToll` glows for `tollWarning`, then `Toll` rings a teal pulse and the army's fire interval is scaled
   by `tollFireScale` for `tollHaste`; one cut down first never rings, and each kill pushes the next toll back by
-  `silenceDelay` with a `Sfx.BellSilenced` chime. Its art is `SamuraiArmy.bellringerArt`; without it `Bronzed`
-  tints the Bushi art bronze). Rows pick a kind via
+  `silenceDelay` with a `Sfx.BellSilenced` chime). Rows pick a kind via
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
-  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Yurei the Bushi's).
+  (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Archer the Bushi's).
+  The Bellringer, Shieldbearer and Yurei wear their own art (`bellringerArt`, `shieldbearerArt`, `yureiArt`, via
+  `OwnArt`); a kind without it wears the Bushi as a `Samurai.StandIn`, tinted bronze, steel or a stronger cyan. The
+  look is the undead army of [Story/Army.md](Story/Army.md); its death debris is `Effects/Bone` and `Ash` (petals and
+  smoke without them).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).
   Arrows break on each other unless both have `PassesShots` (Shirogane's). `Toughness` (Shirogane's crescents: 2) is how
   many plain slashes it takes to cut one; the shuriken, a piercing slash and parried shots break it outright.
@@ -254,8 +257,9 @@ match `BoonChoiceUI.boonIcons`.
 - `SamuraiCounter.cs` — the army's remaining-samurai count; its scene text is hidden by `GameUI`, as the HUD no longer shows it.
 
 ### Mini-enemy: Scout
-- `Scout.cs` — kite-borne scout crossing the top of the screen (the mystery-ship role). One hit, bonus points,
-  guaranteed soul. Built in code (no prefab). Spawned by `GameManager.UpdateScouts` in rounds with
+- `Scout.cs` — kite-borne scout crossing the top of the screen (the mystery-ship role): a corpse lashed to a torn
+  kite. One hit, bonus points, guaranteed soul. Built in code (no prefab). Wears `SamuraiArmy.ScoutArt` under a pale
+  glow; without it the Ashigaru art tinted red under a warm one. Spawned by `GameManager.UpdateScouts` in rounds with
   `LevelConfig.scouts = true`, every 15–25 s.
 
 ### Bullet hell
@@ -589,5 +593,5 @@ Each object handles its own collision (projectiles only destroy themselves).
 ## Outside Unity
 
 - `Tools/generate-music.mjs` — regenerates music via ElevenLabs (`npm run music`, key in gitignored `.env.local`).
-- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, all of Benibana's lines in her designed voice, all of Utsusemi's lines in its designed voice, all of Shirogane's in Lily's and all of Kagetsune's in his designed voice (plus the three souls' answers in theirs), all of Oni's in his designed voice, the three souls' `SoulPickup` lines in theirs, and every Poguru line in his designed voice (`POGURU`; Oni's replies in his) (`npm run sfx`, `npm run voice`).
+- `Tools/generate-sfx.mjs` / `Tools/generate-voice.mjs` — the newer sound effects, all of Benibana's lines in her designed voice, all of Utsusemi's lines in its designed voice, all of Shirogane's in Lily's and all of Kagetsune's in his designed voice (plus the three souls' answers in theirs), all of Oni's in his designed voice, the three souls' `SoulPickup` lines in theirs, and every Poguru line in his designed voice (`POGURU`; Oni's replies in his), and the tutorial's dead soldiers (`SOLDIER`), whose takes are baked through `ffmpeg` with the `GHOST` filter (`FX` maps a voice to its filter; raw takes are kept in the gitignored `Tools/.voice-raw/`, and `npm run voice -- --fx-only` re-bakes them without API calls) (`npm run sfx`, `npm run voice`).
 - `README.md` — the assignment write-up (requirements, template fixes, features, balancing).

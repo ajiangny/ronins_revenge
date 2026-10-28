@@ -14,6 +14,9 @@ public class BoonChoiceUI : MonoBehaviour
     const float InputDelay = 0.3f;
     const float CardSlide = 34f;
     static readonly Color CardColor = new Color(0.03f, 0.02f, 0.05f, 0.97f);
+    // The dark well the held soul sits in, and how far its shadow falls below it.
+    static readonly Color PocketColour = new Color(0.02f, 0.01f, 0.04f, 0.85f);
+    static readonly Vector2 ShadowDrop = new Vector2(0f, -14f);
     static readonly Color MutedText = new Color(0.78f, 0.74f, 0.68f);
     static readonly string StatGreen = "#A8E07C";
     const float CardRuleWidth = 980f;
@@ -75,7 +78,8 @@ public class BoonChoiceUI : MonoBehaviour
     SwirlUI swirl;
     SpriteAnimatorUI portraitAnimator;
     Image heldSoul;
-    Image heldSoulOutline;
+    Image heldSoulShadow;
+    Image pocket;
     Image heldSoulGlow;
     SpriteAnimatorUI heldSoulAnimator;
     TextMeshProUGUI overline;
@@ -166,15 +170,16 @@ public class BoonChoiceUI : MonoBehaviour
             portraitAnimator.Play(null, 0f);
             // The soul he caught floats over his palm, so it takes the element's colours.
             heldSoul.gameObject.SetActive(hasSoul);
-            heldSoulOutline.gameObject.SetActive(hasSoul);
+            heldSoulShadow.gameObject.SetActive(hasSoul);
             if (hasSoul)
             {
                 heldSoul.sprite = soulFrames[0];
                 heldSoulAnimator.Play(soulFrames, 8f);
-                heldSoulOutline.sprite = ProceduralSprites.GlowOutline(soulFrames[0], out float outlineScale);
-                heldSoulOutline.rectTransform.sizeDelta = heldSoul.rectTransform.sizeDelta * outlineScale;
+                heldSoulShadow.sprite = ProceduralSprites.ShadowOf(soulFrames[0], out float shadowScale);
+                heldSoulShadow.rectTransform.sizeDelta = heldSoul.rectTransform.sizeDelta * shadowScale;
             }
-            heldSoulGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.8f);
+            // Only a faint aura: a bright halo here would fill in the dark pocket the soul sits in.
+            heldSoulGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.25f);
         }
         else
         {
@@ -182,7 +187,7 @@ public class BoonChoiceUI : MonoBehaviour
             portrait.color = hasSoul ? Color.white : Color.Lerp(elementColor, Color.white, 0.5f);
             portraitAnimator.Play(hasSoul ? soulFrames : null, 8f);
             heldSoul.gameObject.SetActive(false);
-            heldSoulOutline.gameObject.SetActive(false);
+            heldSoulShadow.gameObject.SetActive(false);
             heldSoulGlow.color = Color.clear;
         }
         // A soft wash under the swirl; any brighter and a pale element (the steel of Sword Arts) turns the corner white.
@@ -390,12 +395,11 @@ public class BoonChoiceUI : MonoBehaviour
         swirl.Strength = Mathf.Clamp01(elapsed / 0.6f);
         heldSoul.color = new Color(1f, 1f, 1f, enter);
         heldSoul.rectTransform.anchoredPosition = heldSoulGlow.rectTransform.anchoredPosition + new Vector2(0f, 6f * Mathf.Sin(Time.unscaledTime * 3f));
-        // The outline follows the soul's bob and breathes with its glow, in the screen's colour lifted well towards
-        // white so it stands out from the swirl of the same colour behind it.
-        heldSoulOutline.rectTransform.anchoredPosition = heldSoul.rectTransform.anchoredPosition;
-        heldSoulOutline.rectTransform.localScale = heldSoul.rectTransform.localScale;
-        Color rim = Color.Lerp(elementColor, Color.white, 0.7f);
-        heldSoulOutline.color = new Color(rim.r, rim.g, rim.b, enter * (0.85f + 0.15f * pulse));
+        // Its shadow falls a little below it and follows its bob, so it reads as floating off the swirl.
+        heldSoulShadow.rectTransform.anchoredPosition = heldSoul.rectTransform.anchoredPosition + ShadowDrop;
+        heldSoulShadow.rectTransform.localScale = heldSoul.rectTransform.localScale;
+        heldSoulShadow.color = new Color(0f, 0f, 0f, 0.75f * enter);
+        pocket.color = new Color(PocketColour.r, PocketColour.g, PocketColour.b, PocketColour.a * swirl.Strength);
         heldSoulGlow.rectTransform.localScale = Vector3.one * (0.9f + 0.15f * pulse);
         // The painted soul is a single frame, so it flickers by swelling a little out of step with the glow.
         heldSoul.rectTransform.localScale = Vector3.one * (1f + 0.035f * Mathf.Sin(Time.unscaledTime * 7.3f) + 0.02f * Mathf.Sin(Time.unscaledTime * 3.1f));
@@ -505,15 +509,19 @@ public class BoonChoiceUI : MonoBehaviour
         portraitGlow = CreateImage("PortraitGlow", root, portraitAnchor, portraitHome + (hasArt ? portraitSize / 2f + palm : Vector2.zero),
             hasArt ? new Vector2(1100, 1100) : new Vector2(640, 640), ProceduralSprites.SoftGlow);
         portraitGlow.rectTransform.pivot = center;
+        // A well of shadow in the swirl's heart, behind Oni, so what he holds is the brightest thing in a dark frame.
+        pocket = CreateImage("Pocket", root, portraitAnchor, portraitHome + (hasArt ? portraitSize / 2f + palm : Vector2.zero),
+            Vector2.one * heldSoulSize * 1.9f, ProceduralSprites.SoftGlow);
+        pocket.rectTransform.pivot = center;
         portrait = CreateImage("Portrait", root, portraitAnchor, portraitHome, portraitSize, null);
         portrait.preserveAspect = true;
         portraitAnimator = portrait.gameObject.AddComponent<SpriteAnimatorUI>();
 
         Vector2 soulSize = new Vector2(heldSoulSize, heldSoulSize);
-        heldSoulGlow = CreateImage("HeldSoulGlow", portrait.rectTransform, center, palm, soulSize * 2.2f, ProceduralSprites.Glow);
-        // A glow hugging the soul's own shape, just behind it.
-        heldSoulOutline = CreateImage("HeldSoulOutline", portrait.rectTransform, center, palm, soulSize, null);
-        heldSoulOutline.preserveAspect = true;
+        heldSoulGlow = CreateImage("HeldSoulGlow", portrait.rectTransform, center, palm, soulSize * 1.5f, ProceduralSprites.SoftGlow);
+        // A soft shadow in the soul's own shape, just under it.
+        heldSoulShadow = CreateImage("HeldSoulShadow", portrait.rectTransform, center, palm, soulSize, null);
+        heldSoulShadow.preserveAspect = true;
         heldSoul = CreateImage("HeldSoul", portrait.rectTransform, center, palm, soulSize, null);
         heldSoul.preserveAspect = true;
         heldSoulAnimator = heldSoul.gameObject.AddComponent<SpriteAnimatorUI>();

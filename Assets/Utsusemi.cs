@@ -1076,15 +1076,25 @@ public class Utsusemi : Boss
     const int ChopImpactFrame = 5;
 
     // fps is how fast the chop clip plays, and so how soon the blow lands; recover is the pause after it.
-    IEnumerator Chop(float x, HourMark mark, float fps = 20f, float recover = 0.18f)
+    // A `parryable` chop (the sword reclaim's) clangs off a parry: no damage, but a sliver on its stance meter.
+    IEnumerator Chop(float x, HourMark mark, float fps = 20f, float recover = 0.18f, bool parryable = false)
     {
         PlayFrames(chopFrames, 1, -1, true, fps);
-        yield return Wait(chopFrames != null ? (ChopImpactFrame - 1) / fps : 0.2f);
+        yield return Wait(ChopWindUp(fps));
 
         Vector3 point = new Vector3(x, GroundY + 0.15f, 0);
         if (Mathf.Abs(ronin.Bounds.center.x - x) < ChopReach)
         {
-            ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            if (parryable && ronin.Parrying)
+            {
+                Vector3 clash = new Vector3(x, ronin.Bounds.center.y + 0.4f, 0);
+                ronin.ParryBody(clash);
+                Fx.Play(Fx.Impact, clash, Gold, 1.6f);
+                ElementFx.Glow(clash, Gold, 0.8f, 2.5f, 0.25f);
+                HitStop?.Invoke(0.08f);
+                AddStance(ParriedChopStance);
+            }
+            else ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
         }
         if (Fx.Play(Fx.UtsuChop, point, Color.white, 2.4f) == null) Fx.Play(Fx.Impact, point, CoreRed, 1.2f);
         ElementFx.Glow(point, Color.white, 0.6f, 1.8f, 0.15f);
@@ -1092,6 +1102,83 @@ public class Utsusemi : Boss
         CameraShake.Add(0.2f);
         mark?.Struck();
         yield return Wait(recover);
+    }
+
+    // From the start of the chop clip to the blade striking the ground.
+    float ChopWindUp(float fps = 20f) => chopFrames != null ? (ChopImpactFrame - 1) / fps : 0.2f;
+
+    // How much of its stance meter a parried reclaim chop fills: a sliver, like a parried shot.
+    const float ParriedChopStance = 0.03f;
+
+    // The parry tell for the reclaim chop: a gold ring on the ground round where the blade will strike, closing in
+    // over `seconds` with a quickening tick, and a gold "!" over the ronin's head (the army's lunge tell); both snap
+    // white `flashBefore` seconds before it lands.
+    IEnumerator ChopTell(float x, float seconds, float flashBefore)
+    {
+        Vector3 spot = new Vector3(x, GroundY + 0.15f, -0.3f);
+        float pixel = ronin.ArtPixelSize;
+        var ring = new GameObject("ChopTell").AddComponent<SpriteRenderer>();
+        ring.sortingOrder = 58;
+        transient.Add(ring.gameObject);
+        var glow = Bar(spot, spot + Vector3.right * 0.01f, 1f, Color.clear, 57);
+        glow.sprite = ProceduralSprites.SoftGlow;
+        // The "!" stands out even against its own pale robe as it lands on him: a dark edge and a gold glow behind it.
+        var alert = new GameObject("ChopAlert").AddComponent<SpriteRenderer>();
+        alert.sprite = ProceduralSprites.Exclaim;
+        alert.sortingOrder = 63;
+        transient.Add(alert.gameObject);
+        var edge = new GameObject("Edge").AddComponent<SpriteRenderer>();
+        edge.sprite = ProceduralSprites.Exclaim;
+        edge.color = new Color(0.08f, 0.06f, 0.05f);
+        edge.sortingOrder = 62;
+        edge.transform.SetParent(alert.transform, false);
+        edge.transform.localScale = new Vector3(1.45f, 1.25f, 1f);
+        var halo = new GameObject("Glow").AddComponent<SpriteRenderer>();
+        halo.sprite = ProceduralSprites.Glow;
+        halo.color = new Color(Gold.r, Gold.g, Gold.b, 0.7f);
+        halo.sortingOrder = 61;
+        halo.transform.SetParent(alert.transform, false);
+        halo.transform.localScale = Vector3.one * (1.6f * ProceduralSprites.Exclaim.bounds.size.y / ProceduralSprites.Glow.bounds.size.x);
+        float alertSize = 0.95f / ProceduralSprites.Exclaim.bounds.size.y;
+        Vector3 OverHead() => new Vector3(ronin.Bounds.center.x, ronin.TopY + 0.75f, -0.4f);
+        float closeIn = Mathf.Max(0.05f, seconds - flashBefore), ticked = 0;
+        for (float t = 0; t < closeIn && ring != null; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        {
+            float k = t / closeIn;
+            float radius = Mathf.Lerp(ChopReach * 3f, ChopReach, Mathf.SmoothStep(0, 1, k));
+            ring.sprite = ProceduralSprites.Ring(Mathf.RoundToInt(radius / pixel));
+            ring.transform.SetPositionAndRotation(spot, Quaternion.identity);
+            ring.transform.localScale = Vector3.one * pixel;
+            ring.color = new Color(Gold.r, Gold.g, Gold.b, 0.4f + 0.6f * k);
+            glow.transform.SetPositionAndRotation(spot, Quaternion.identity);
+            glow.transform.localScale = new Vector3(radius * 2f, radius * 0.9f, 1f) / ProceduralSprites.SoftGlow.bounds.size.x;
+            glow.color = new Color(Gold.r, Gold.g, Gold.b, 0.25f * k);
+            alert.transform.position = OverHead() + Vector3.up * 0.06f * Mathf.Sin(t * 30f);
+            alert.transform.localScale = Vector3.one * alertSize * Mathf.Min(1f, k * 4f);
+            alert.color = Gold;
+            if (t - ticked > Mathf.Lerp(0.12f, 0.05f, k))
+            {
+                ticked = t;
+                Sfx.Play(Sfx.BladeRing, 0.25f, 1.3f + k);
+            }
+            yield return null;
+        }
+        if (ring == null) yield break;
+        // The lock: tight and white. This is the beat to parry on.
+        ring.sprite = ProceduralSprites.Ring(Mathf.RoundToInt(ChopReach * 1.3f / pixel));
+        ring.color = Color.white;
+        alert.transform.position = OverHead();
+        alert.transform.localScale = Vector3.one * alertSize * 1.35f;
+        alert.color = Color.white;
+        halo.color = new Color(1f, 1f, 1f, 0.85f);
+        ElementFx.Glow(OverHead(), Color.white, 0.5f, 1.5f, 0.2f);
+        glow.color = new Color(1f, 1f, 1f, 0.45f);
+        Fx.Play(Fx.Impact, spot + Vector3.up * 0.3f, Color.white, 0.8f);
+        Sfx.Play(Sfx.BladeRing, 0.6f, 2f);
+        yield return Wait(flashBefore + 0.1f);
+        RemoveTransient(ring);
+        RemoveTransient(glow);
+        RemoveTransient(alert);
     }
 
     // The hour slash draws the blade back by this frame, holds it through the ticks, and lets the cleave go on the
@@ -1789,7 +1876,7 @@ public class Utsusemi : Boss
         }
         Vector3 row = anchor;
         float x = plantedSword.transform.position.x;
-        // Poguru, who was pointing at the sword, flies back to Oni yelling to get clear: it's coming down on it.
+        // Poguru, who was pointing at the sword, flies back to Oni with a quick yelp: it's coming down on it.
         CallPoguru("Poguru_Utsu_Reclaim", null);
         ElementFx.Glow(plantedSword.transform.position, Color.white, 0.9f, 2.5f, 0.4f);
         Sfx.Play(Sfx.ParryClang, 0.5f, 1.6f);
@@ -1801,12 +1888,16 @@ public class Utsusemi : Boss
         yield return Wait(ReclaimWarning);
 
         Beat();
-        yield return Dash(new Vector3(x, Landing(), row.z));
+        // The chop can be parried: a gold ring closes on the sword's spot through the dash and wind-up and flashes
+        // white just before the blade lands.
+        const float dashTime = 0.2f;
+        StartCoroutine(ChopTell(x, dashTime + ChopWindUp(), 0.16f));
+        yield return Dash(new Vector3(x, Landing(), row.z), dashTime);
         Destroy(plantedSword.gameObject);
         transient.Remove(plantedSword.gameObject);
         plantedSword = null;
         swordOut = false;
-        yield return Chop(x, mark);
+        yield return Chop(x, mark, parryable: true);
         RestPoguru();
         yield return Dash(row);
         PlayIdle();

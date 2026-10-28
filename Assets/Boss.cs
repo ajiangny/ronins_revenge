@@ -605,6 +605,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         StartCoroutine(RecoverFromStagger(seconds));
     }
 
+    // A blow that lands on her stance but not her health (Utsusemi's parried sword chop): a full meter still staggers.
+    protected void AddStance(float amount)
+    {
+        if (AddPoise(amount)) Stagger(StaggerSeconds);
+    }
+
     // Fills the stance meter by `amount` (scaled by StanceResistance); true once it's full and her stance should break.
     // Super armour, a stagger already underway, a phase break or going down hold it where it is.
     bool AddPoise(float amount)

@@ -376,7 +376,7 @@ const LINES = {
   Poguru_Tut_Done_3: [ONI, "[low, tired, flat] ...Back in the wisp."],
   Poguru_Tut_Done_4: [POGURU, "[fast, flustered] Going! Shutting up! [giggles] ...Mostly!"],
   Poguru_Utsu_Sword: [POGURU, "[panicked, squeaky shout] Laser! [fast, urgent] Oni, hurry! Hide behind the sword!"],
-  Poguru_Utsu_Reclaim: [POGURU, "[alarmed, fast] It wants its sword back! [squeaky shout] Get away from it!"],
+  Poguru_Utsu_Reclaim: [POGURU, "[panicked squeaky shout, very fast] Sword! MOVE!"],
   Poguru_Utsu_Rock: [POGURU, "[terrified gasp] That's a BIG one! [panicked, fast] Behind a rock, quick!"],
   Poguru_Round_Go: [POGURU, "[cheering, fast] Go go go!"],
   Poguru_Round_Snacks: [POGURU, "[whiny] More of them! [curious] Do they ever bring snacks?"],

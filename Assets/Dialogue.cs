@@ -439,7 +439,7 @@ public static class Dialogue
 
         // His warnings in Utsusemi's fight, called as he flies out to point the way (Boss.PoguruWarn).
         Tut("Poguru_Utsu_Sword", P("Laser! Oni, hurry! Hide behind the sword!")),
-        Tut("Poguru_Utsu_Reclaim", P("It wants its sword back! Get away from it!")),
+        Tut("Poguru_Utsu_Reclaim", P("Sword! MOVE!")),
         Tut("Poguru_Utsu_Rock", P("That's a BIG one! Behind a rock, quick!")),
 
         // His barks: a line out of the wisp, then back in.

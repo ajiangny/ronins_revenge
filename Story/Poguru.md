@@ -112,7 +112,7 @@ He flies out to point the way and stays out until the move is over.
 | Id | Lines |
 |---|---|
 | `Poguru_Utsu_Sword` | P (the sword plants before the Heart Lantern or Midnight; he hovers over the blade): "Laser! Oni, hurry! Hide behind the sword!" |
-| `Poguru_Utsu_Reclaim` | P (the blade glints; he flies back to Oni before its dash): "It wants its sword back! Get away from it!" |
+| `Poguru_Utsu_Reclaim` | P (the blade glints; he flies back to Oni before its dash, a quick yelp): "Sword! MOVE!" |
 | `Poguru_Utsu_Rock` | P (the Hyper Beam winds up; he hovers in the nearest rock's shade): "That's a BIG one! Behind a rock, quick!" |
 
 ### Barks (subtitles; he pops out of the wisp, then back in)

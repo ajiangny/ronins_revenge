@@ -3453,7 +3453,45 @@ public class GameManager : MonoBehaviour
         poguruWarning = true;
         if (over is Vector3 spot) poguru.DashTo(spot, null, 18f);
         else poguru.Hover();
-        if (id != null) Bark(id);
+        if (id != null && WarningSpoken()) Bark(WarningTake(id));
+    }
+
+    // His warnings are a reminder, not a running commentary. He speaks them in the first run they come up, then only
+    // every two or three runs, and only two or three times in such a run; the rest of the time he just points.
+    int warnRun = -1, warnsLeft;
+
+    bool WarningSpoken()
+    {
+        if (warnRun != Save.Run)
+        {
+            warnRun = Save.Run;
+            SaveData d = Save.Data;
+            bool talks = d.poguruWarnRun == 0 || Save.Run - d.poguruWarnRun >= d.poguruWarnGap;
+            warnsLeft = talks ? Random.Range(2, 4) : 0;
+            if (talks)
+            {
+                d.poguruWarnRun = Save.Run;
+                d.poguruWarnGap = Random.Range(2, 4);
+                Save.Write();
+            }
+        }
+        if (warnsLeft <= 0) return false;
+        warnsLeft--;
+        return true;
+    }
+
+    // A warning is written a few ways (`<id>`, `<id>_B`, `<id>_C`); one at random, never the one he said last.
+    string lastWarning;
+
+    string WarningTake(string id)
+    {
+        var takes = new List<string>();
+        foreach (string take in new[] { id, id + "_B", id + "_C" })
+        {
+            if (take != lastWarning && Dialogue.Find(take, false) != null) takes.Add(take);
+        }
+        lastWarning = takes.Count > 0 ? takes[Random.Range(0, takes.Count)] : id;
+        return lastWarning;
     }
 
     // Unsubtitled when the words are shown elsewhere (the tutorial's parry prompt), so the plate covers nothing.

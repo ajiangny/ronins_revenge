@@ -545,10 +545,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: ed3dc6d8b64d74344a508782077175bb, type: 3}
   - id: Poguru_Utsu_Reclaim
     clip: {fileID: 8300000, guid: 7ba01c1e2fc774a7f86b9459bd92fd90, type: 3}
+  - id: Poguru_Utsu_Reclaim_B
+    clip: {fileID: 8300000, guid: 275823c43aff54eba8c3a4346bcb3112, type: 3}
+  - id: Poguru_Utsu_Reclaim_C
+    clip: {fileID: 8300000, guid: fed718b6421874160bf27f6076318724, type: 3}
   - id: Poguru_Utsu_Rock
     clip: {fileID: 8300000, guid: 9c8431f87e96c4f8a9fd3c1885b5a452, type: 3}
+  - id: Poguru_Utsu_Rock_B
+    clip: {fileID: 8300000, guid: 931ea8a1a94c549469bd06048b178d6c, type: 3}
+  - id: Poguru_Utsu_Rock_C
+    clip: {fileID: 8300000, guid: 6af2c0e14991c4b0ea7e9628e89b98af, type: 3}
   - id: Poguru_Utsu_Sword
     clip: {fileID: 8300000, guid: 02625e6dd40e04044ade1b2ef0b130be, type: 3}
+  - id: Poguru_Utsu_Sword_B
+    clip: {fileID: 8300000, guid: 120660704b3244604afb0bea39504618, type: 3}
+  - id: Poguru_Utsu_Sword_C
+    clip: {fileID: 8300000, guid: d5c751055d17f4563a2eb5089cf6b0ec, type: 3}
   - id: Poguru_Wake_Army
     clip: {fileID: 8300000, guid: 54e6b906cfaa9464e81c5d5bfd210a2f, type: 3}
   - id: Poguru_Wake_Benibana

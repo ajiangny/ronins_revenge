@@ -438,9 +438,16 @@ public static class Dialogue
             O("...Back in the wisp."), P("Going! Shutting up! ...Mostly!")),
 
         // His warnings in Utsusemi's fight, called as he flies out to point the way (Boss.PoguruWarn).
+        // Each is written a few ways (_B, _C), and he only says them now and then (GameManager.WarningSpoken).
         Tut("Poguru_Utsu_Sword", P("Laser! Oni, hurry! Hide behind the sword!")),
-        Tut("Poguru_Utsu_Reclaim", P("Sword! MOVE!")),
+        Tut("Poguru_Utsu_Sword_B", P("Behind the sword! Quick quick quick!")),
+        Tut("Poguru_Utsu_Sword_C", P("Big shiny laser! Get behind the sword!")),
+        Tut("Poguru_Utsu_Reclaim", P("Move out the way!")),
+        Tut("Poguru_Utsu_Reclaim_B", P("Out the way! It's coming!")),
+        Tut("Poguru_Utsu_Reclaim_C", P("Move move MOVE!")),
         Tut("Poguru_Utsu_Rock", P("That's a BIG one! Behind a rock, quick!")),
+        Tut("Poguru_Utsu_Rock_B", P("Hide behind a rock! Hurry!")),
+        Tut("Poguru_Utsu_Rock_C", P("Rock! Rock! Get behind a rock!")),
 
         // His barks: a line out of the wisp, then back in.
         Line("Poguru_Round_Go", Pog, DialogueEvent.PoguruRound, Repeat, "Go go go!"),

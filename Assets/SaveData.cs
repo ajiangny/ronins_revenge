@@ -44,6 +44,9 @@ public class SaveData
     // on the next run (set at his nest, and while a tutorial is under way, so a death in it offers it again).
     public bool tutorialSettled;
     public bool tutorialReplay;
+    // Poguru's mid-fight warnings: the last run he said any (0 for never) and how many runs until he says them again.
+    public int poguruWarnRun;
+    public int poguruWarnGap;
 
     public int SeenIn(string id)
     {

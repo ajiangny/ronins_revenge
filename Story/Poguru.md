@@ -107,13 +107,14 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 
 ### Warnings in Utsusemi's fight (`DialogueEvent.Tutorial` ids, played through `Boss.PoguruWarn`)
 
-He flies out to point the way and stays out until the move is over.
+He flies out to point the way and stays out until the move is over. He only says them now and then: in the first run they
+come up, then every two or three runs, two or three lines in such a run. Each has three takes (`_B`, `_C`).
 
 | Id | Lines |
 |---|---|
-| `Poguru_Utsu_Sword` | P (the sword plants before the Heart Lantern or Midnight; he hovers over the blade): "Laser! Oni, hurry! Hide behind the sword!" |
-| `Poguru_Utsu_Reclaim` | P (the blade glints; he flies back to Oni before its dash, a quick yelp): "Sword! MOVE!" |
-| `Poguru_Utsu_Rock` | P (the Hyper Beam winds up; he hovers in the nearest rock's shade): "That's a BIG one! Behind a rock, quick!" |
+| `Poguru_Utsu_Sword` / `_B` / `_C` | P (the sword plants before the Heart Lantern or Midnight; he hovers over the blade): "Laser! Oni, hurry! Hide behind the sword!" / "Behind the sword! Quick quick quick!" / "Big shiny laser! Get behind the sword!" |
+| `Poguru_Utsu_Reclaim` / `_B` / `_C` | P (the blade glints; he flies back to Oni before its dash, a quick yelp): "Move out the way!" / "Out the way! It's coming!" / "Move move MOVE!" |
+| `Poguru_Utsu_Rock` / `_B` / `_C` | P (the Hyper Beam winds up; he hovers in the nearest rock's shade): "That's a BIG one! Behind a rock, quick!" / "Hide behind a rock! Hurry!" / "Rock! Rock! Get behind a rock!" |
 
 ### Barks (subtitles; he pops out of the wisp, then back in)
 

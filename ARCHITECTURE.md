@@ -137,7 +137,10 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   Transition / Hub): `PoguruRound` 20% after `army.Advance`, `PoguruSoul` after the run's first boon (`TakeBoon`),
   `PoguruBoss` in `BossFell` after `Save.BossFelled` (not Kagetsune), `PoguruWake` after `HubReturn` (`WakeTalk`);
   `SayAsPoguru` voices one line through `poguruVoice` with a subtitle. Bosses call him out mid-fight through
-  `Boss.PoguruWarn(lineId, over)` / `Boss.PoguruRest` (`PoguruWarns`, `poguruWarning`): Utsusemi's sword and rock warnings.
+  `Boss.PoguruWarn(lineId, over)` / `Boss.PoguruRest` (`PoguruWarns`, `poguruWarning`): Utsusemi's sword and rock warnings. He
+  always flies out to point, but only speaks when `WarningSpoken` allows (the first run they come up, then every
+  `SaveData.poguruWarnGap` (2–3) runs after `poguruWarnRun`, 2–3 lines in such a run), picking `<id>`, `<id>_B` or `<id>_C`
+  by `WarningTake`, never the one said last.
 
 ## Safe areas: the temple between runs
 

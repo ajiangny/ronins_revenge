@@ -316,7 +316,7 @@ public class Tutorial : MonoBehaviour
     // side away from the shot, `threatX`), he points at the move's slot, and only that move lets play go on, fired by
     // the real press (Ronin reads input with time stopped) or a harness's Press.
     IEnumerator Lesson(Moves move, BoonSlot slot, string yellId, Func<bool> moment, float threatX) =>
-        Lesson(move, game.BoonChoice.SlotRect(slot), Keys(slot), yellId, moment, threatX);
+        Lesson(move, game.BoonChoice.SlotRect(slot), Controls.Glyphs(move), yellId, moment, threatX);
 
     // The same, pointing at any HUD medallion (the ultimate's) with its own keys.
     IEnumerator Lesson(Moves move, RectTransform target, KeyGlyph[] keys, string yellId, Func<bool> moment, float threatX)
@@ -425,16 +425,6 @@ public class Tutorial : MonoBehaviour
         prompt = null;
     }
 
-    // What each move is pressed with: its keys, and the mouse button drawn as a mouse.
-    static KeyGlyph[] Keys(BoonSlot slot) => slot switch
-    {
-        BoonSlot.Attack => new[] { KeyGlyph.Key("SPACE"), KeyGlyph.MouseLeft },
-        BoonSlot.Special => new[] { KeyGlyph.Key("W"), KeyGlyph.Key("↑") },
-        _ => new[] { KeyGlyph.Key("SHIFT"), KeyGlyph.Key("↓"), KeyGlyph.MouseRight },
-    };
-
-    static KeyGlyph[] Keys(Moves move) => move == Moves.Ultimate ? new[] { KeyGlyph.Key("Q") } : Keys(BoonSlot.Attack);
-
     // Beat 3: the army the coward fetched has marched in. Poguru's had a look.
     public IEnumerator Backup()
     {
@@ -482,7 +472,7 @@ public class Tutorial : MonoBehaviour
         float until = Time.time + said;
         while (Time.time < until && !Over()) yield return null;
         if (Over()) yield break;
-        yield return Lesson(Moves.Ultimate, game.BoonChoice.UltimateRect, Keys(Moves.Ultimate), "Poguru_Tut_UltimateIt",
+        yield return Lesson(Moves.Ultimate, game.BoonChoice.UltimateRect, Controls.Glyphs(Moves.Ultimate), "Poguru_Tut_UltimateIt",
             () => true, ronin.Bounds.center.x + 1f);
         yield return new WaitForSeconds(0.6f);
         if (!Over()) PoguruSays("Poguru_Tut_Clone");

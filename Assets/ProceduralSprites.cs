@@ -10,7 +10,6 @@ public static class ProceduralSprites
     static Sprite shadow;
     static Sprite disc;
     static Sprite arrowDown;
-    static Sprite mouseLeft, mouseRight;
     static Sprite fadeDown;
     static Sprite swirl;
     static Sprite flame;
@@ -340,13 +339,18 @@ public static class ProceduralSprites
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);
 
     // A mouse drawn in white line, its left or right button filled, for key caps (GameUI.CreateKeyRow).
-    public static Sprite Mouse(bool left) => left
-        ? mouseLeft != null ? mouseLeft : mouseLeft = BuildMouse(true)
-        : mouseRight != null ? mouseRight : mouseRight = BuildMouse(false);
+    public static Sprite Mouse(int button)
+    {
+        int i = UnityEngine.Mathf.Clamp(button, 1, 3) - 1;
+        return mice[i] != null ? mice[i] : mice[i] = BuildMouse(i + 1);
+    }
 
-    // A rounded body outline, the line between the buttons and the one under them, and the pressed button solid.
-    // Smoothly filtered and antialiased from distances, so it stays clean at text size.
-    static Sprite BuildMouse(bool left)
+    static readonly Sprite[] mice = new Sprite[3];
+
+    // A rounded body outline, the line between the buttons and the one under them, and the pressed button solid
+    // (1 left, 2 right; 3 the middle, drawn as a solid wheel on the split). Smoothly filtered and antialiased from
+    // distances, so it stays clean at text size.
+    static Sprite BuildMouse(int button)
     {
         const int width = 64, height = 92;
         const float stroke = 5f;
@@ -374,8 +378,15 @@ public static class ProceduralSprites
                 float under = Mathf.Abs(y + 0.5f - buttonsFrom) - stroke / 2f;
                 float line = Mathf.Min(outline, Mathf.Min(split, inside > 0f ? under : float.MaxValue));
                 // The pressed button: inside the body, above the line, on its side of the split.
-                bool pressedSide = left ? p.x < 0f : p.x > 0f;
+                bool pressedSide = button == 1 ? p.x < 0f : button == 2 && p.x > 0f;
                 float fill = upper && pressedSide ? -Mathf.Min(inside, y + 0.5f - buttonsFrom) : float.MaxValue;
+                if (button == 3)
+                {
+                    // The wheel: a capsule standing on the split, a little above the line under the buttons.
+                    float wheelY = Mathf.Clamp(y + 0.5f, buttonsFrom + 12f, height - 22f);
+                    float wheel = new Vector2(p.x, y + 0.5f - wheelY).magnitude - 7f;
+                    fill = Mathf.Min(fill, wheel);
+                }
                 float d = Mathf.Min(line, fill);
                 byte a = (byte)(Mathf.Clamp01(0.5f - d) * 255f);
                 pixels[y * width + x] = new Color32(255, 255, 255, a);

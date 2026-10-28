@@ -146,17 +146,17 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 | Repeatable | | `Poguru_Talk_GhostFire` | P: "I tried eating a ghost-fire. It tasted like Tuesday." |
 | Repeatable | | `Poguru_Talk_Flute` | P: "Play the flute later? The wisps dance when you do." · Oni: "...Maybe." |
 
-### Tips page (at his nest; not voiced)
+### Tips page (at his nest; not voiced) (each move's key is the current control scheme's, `Controls.Label`)
 
 | Topic | Text |
 |---|---|
-| SLASH (SPACE) | "A cut flies up the field. Cover stops it, so step out first!" |
-| SHURIKEN (W) | "Big and sparkly, slow to come back. Save it for crowds." |
-| PARRY (SHIFT) | "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!" |
+| SLASH (key) | "A cut flies up the field. Cover stops it, so step out first!" |
+| SHURIKEN (key) | "Big and sparkly, slow to come back. Save it for crowds." |
+| PARRY (key) | "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!" |
 | SPEARS | "The glowing red ones go right through cover. Move!" |
 | HEARTS | "From broken cover, and rarely a soldier. At full lives they wait on your row." |
 | THE ARMY | "If it reaches your row, it's over. Thin out the bottom rank!" |
-| ULTIMATE (Q) | "Hits fill the bottom medallion. Your shadow fights beside you!" |
+| ULTIMATE (key) | "Hits fill the bottom medallion. Your shadow fights beside you!" |
 | BOONS | "One per soul. Hold TAB in a fight to see what your icons do." |
 | PATHS | "Walk under, press E. The boss's path opens after round three." |
 | SPIRIT NOTES | "They stay even when you fall. Spend them at the flute altar." |

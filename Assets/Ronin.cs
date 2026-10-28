@@ -57,7 +57,7 @@ public class Ronin : MonoBehaviour
     [Tooltip("Seconds per bob of the spirit wisps.")]
     [SerializeField] float wispPeriod = 1.8f;
 
-    [Header("Spirit Shuriken (W / Up)")]
+    [Header("Spirit Shuriken")]
     [Tooltip("Leave empty to throw a big spinning kunai until the shuriken art is in.")]
     [SerializeField] Sprite shurikenSprite;
     [SerializeField] float shurikenCooldown = 6f;
@@ -65,14 +65,14 @@ public class Ronin : MonoBehaviour
     [SerializeField] float shurikenScale = 2.6f;
     [SerializeField] float shurikenSpeed = 0.75f;
 
-    [Header("Parry (Shift / Down / Right Click)")]
+    [Header("Parry")]
     [SerializeField] float parryWindow = 0.25f;
     [Tooltip("Cooldown after a parry that deflects nothing. A parry that lands is ready again at once, so parries chain.")]
     [SerializeField] float parryMissCooldown = 2f;
     [Tooltip("Arrows inside this radius around the ronin's upper body are deflected during the parry.")]
     [SerializeField] float parryRadius = 1.1f;
 
-    [Header("Ultimate (Q)")]
+    [Header("Ultimate")]
     [Tooltip("Hits on samurai, scouts or a boss (his own blows, not boon effects or shadow slashes) to fill the bar.")]
     [SerializeField] int ultimateHits = 40;
     [Tooltip("Seconds a full bar lasts once the ultimate is unleashed.")]
@@ -372,29 +372,26 @@ public class Ronin : MonoBehaviour
         }
         else if (ControlsEnabled && keyboard != null)
         {
-            if (keyboard.rightArrowKey.isPressed || keyboard.dKey.isPressed) moveInput += 1;
-            if (keyboard.leftArrowKey.isPressed || keyboard.aKey.isPressed) moveInput -= 1;
+            moveInput = Controls.MoveX(keyboard);
         }
+        // The moves' buttons are the control scheme's (Controls); using the other scheme's switches to it.
         if (ControlsEnabled && !Roaming && !MoveOnly && keyboard != null)
         {
-            bool slash = keyboard.spaceKey.isPressed || (mouse != null && mouse.leftButton.isPressed);
-            bool parry = keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame
-                || (mouse != null && mouse.rightButton.wasPressedThisFrame);
-            if (slash && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
+            Controls.Detect(keyboard, mouse);
+            if (Controls.Slash(keyboard, mouse) && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
             {
                 Attack();
             }
-            if ((keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && (Allowed & Moves.Shuriken) != 0
-                && ShurikenCharge >= 1f)
+            if (Controls.Shuriken(keyboard, mouse) && (Allowed & Moves.Shuriken) != 0 && ShurikenCharge >= 1f)
             {
                 ThrowShuriken();
             }
-            if (parry && (Allowed & Moves.Parry) != 0 && ParryCharge >= 1f)
+            if (Controls.Parry(keyboard, mouse) && (Allowed & Moves.Parry) != 0 && ParryCharge >= 1f)
             {
                 if (ParrySealed != null && ParrySealed()) SealedParry();
                 else StartParry();
             }
-            if (keyboard.qKey.wasPressedThisFrame && (Allowed & Moves.Ultimate) != 0 && UltimateReady) StartUltimate();
+            if (Controls.Ultimate(keyboard, mouse) && (Allowed & Moves.Ultimate) != 0 && UltimateReady) StartUltimate();
         }
         UpdateUltimate();
         UpdateShell();

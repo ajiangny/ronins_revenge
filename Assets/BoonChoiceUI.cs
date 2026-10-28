@@ -112,7 +112,12 @@ public class BoonChoiceUI : MonoBehaviour
     IReadOnlyList<EquippedBoon> hudPassives = new List<EquippedBoon>();
     readonly List<TextMeshProUGUI> passiveTips = new List<TextMeshProUGUI>();
     CanvasGroup tips;
-    static readonly string[] SlotKeys = { "Space", "W", "Shift" };
+    // Each slot's move, whose key in the current control scheme (Controls.Label) its Tab tip shows.
+    static readonly Moves[] SlotMoves = { Moves.Slash, Moves.Shuriken, Moves.Parry };
+    static string SlotKey(int i) => MenuUI.KeyCap(Controls.Label(SlotMoves[i]), false);
+    static string UltimateKey => MenuUI.KeyCap(Controls.Label(Moves.Ultimate), false);
+    // The loadout last shown, so the tips can be redrawn when the control scheme changes.
+    RoninLoadout shownLoadout;
     static readonly string[] SlotNames = { "Slash", "Spirit Shuriken", "Parry" };
     const float SlotSize = 68f;
     const float SlotGap = 12f;
@@ -409,6 +414,15 @@ public class BoonChoiceUI : MonoBehaviour
         letter.text = sprite != null ? "" : boon.Name.Substring(0, 1);
     }
 
+    void OnEnable() => Controls.Changed += RedrawTips;
+    void OnDisable() => Controls.Changed -= RedrawTips;
+
+    // A new control scheme: the Tab tips show its keys.
+    void RedrawTips()
+    {
+        if (shownLoadout != null) RefreshHud(shownLoadout);
+    }
+
     void Update()
     {
         if (ronin != null) UpdateHud();
@@ -564,7 +578,7 @@ public class BoonChoiceUI : MonoBehaviour
                 Color color = Boons.Info(held.Boon.Element).Color;
                 SetIcon(slot.icon, slot.letter, held.Boon, color);
                 slot.ring.color = color;
-                slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {held.Boon.Name}";
+                slot.tip.text = $"{SlotKey(i)}  {held.Boon.Name}";
             }
             else
             {
@@ -573,10 +587,11 @@ public class BoonChoiceUI : MonoBehaviour
                 slot.icon.color = ability != null ? Color.white : new Color(0.25f, 0.25f, 0.3f);
                 slot.letter.text = ability != null ? "" : new[] { "B", "S", "P" }[i];
                 slot.ring.color = new Color(0.55f, 0.55f, 0.6f);
-                slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {SlotNames[i]}";
+                slot.tip.text = $"{SlotKey(i)}  {SlotNames[i]}";
             }
         }
 
+        shownLoadout = loadout;
         hudPassives = loadout.Passives;
         while (passiveIcons.Count < loadout.Passives.Count)
         {
@@ -608,7 +623,7 @@ public class BoonChoiceUI : MonoBehaviour
         UltimateColour = held != null ? Boons.Info(held.Boon.Element).Color : ShadowVioletColour;
         SetIcon(ultimateIcon, ultimateLetter, boon, UltimateColour);
         ultimateCharge.color = UltimateColour;
-        ultimateTip.text = held != null ? $"{MenuUI.KeyCap("Q", false)}  Ultimate  ·  {held.Boon.Name}" : $"{MenuUI.KeyCap("Q", false)}  Ultimate";
+        ultimateTip.text = held != null ? $"{UltimateKey}  Ultimate  ·  {held.Boon.Name}" : $"{UltimateKey}  Ultimate";
     }
 
     const float CardX = 170f;
@@ -780,7 +795,7 @@ public class BoonChoiceUI : MonoBehaviour
             slot.cooldown.fillClockwise = false;
             slot.cooldown.fillAmount = 0f;
             slot.tip = CreateTip(position + new Vector2(SlotSize + 14f, SlotSize / 2f));
-            slot.tip.text = $"{MenuUI.KeyCap(SlotKeys[i], false)}  {SlotNames[i]}";
+            slot.tip.text = $"{SlotKey(i)}  {SlotNames[i]}";
             hudSlots[i] = slot;
         }
 
@@ -826,7 +841,7 @@ public class BoonChoiceUI : MonoBehaviour
         BoonDefinition clone = Boons.Get(BoonId.ShadowClone);
         SetIcon(ultimateIcon, ultimateLetter, clone, UltimateColour);
         ultimateTip = CreateTip(position + new Vector2(SlotSize + 14f, SlotSize / 2f));
-        ultimateTip.text = $"{MenuUI.KeyCap("Q", false)}  Ultimate";
+        ultimateTip.text = $"{UltimateKey}  Ultimate";
     }
 
     void UpdateUltimate()

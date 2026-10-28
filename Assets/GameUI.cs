@@ -66,7 +66,7 @@ public class GameUI : MonoBehaviour
             if (key.mouse != 0)
             {
                 Image icon = CreateRect("Mouse", cap, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
-                icon.sprite = ProceduralSprites.Mouse(key.mouse == 1);
+                icon.sprite = ProceduralSprites.Mouse(key.mouse);
                 icon.preserveAspect = true;
                 icon.raycastTarget = false;
                 var size = icon.gameObject.AddComponent<LayoutElement>();
@@ -1047,10 +1047,11 @@ public class GameUI : MonoBehaviour
 public struct KeyGlyph
 {
     public string text;
-    // 1 the left mouse button, 2 the right; 0 a key.
+    // 1 the left mouse button, 2 the right, 3 the middle (the wheel); 0 a key.
     public int mouse;
 
     public static KeyGlyph Key(string name) => new KeyGlyph { text = name };
     public static KeyGlyph MouseLeft => new KeyGlyph { mouse = 1 };
     public static KeyGlyph MouseRight => new KeyGlyph { mouse = 2 };
+    public static KeyGlyph MouseMiddle => new KeyGlyph { mouse = 3 };
 }

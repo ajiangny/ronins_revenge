@@ -970,25 +970,37 @@ public class GameManager : MonoBehaviour
     // Pages opened from the title screen stay on its white page; from the pause menu they sit over the dimmed fight.
     bool OnPaper => state == State.Title;
 
-    void ShowControls(System.Action back)
+    // The current control scheme's keys, and a switch between the two schemes (Controls), which the page redraws on.
+    void ShowControls(System.Action back, int startIndex = 0)
     {
         bool paper = OnPaper;
         string muted = MenuUI.MutedHex(paper);
         string Key(string key) => MenuUI.KeyCap(key, paper);
+        string Keys(Moves move) => string.Join("    or    ", System.Array.ConvertAll(Controls.Bindings(move), Key));
         string Row(string action, string keys) => $"<pos=20%><color=#{muted}>{action}</color><pos=50%>{keys}\n";
+        bool mouse = Controls.UsesMouse;
+        string move = mouse ? Key("A") + "  " + Key("D")
+            : Key("←") + "  " + Key("→") + "    or    " + Key("A") + "  " + Key("D");
         menu.Show("CONTROLS",
             "<align=left>" +
-            Row("Move", Key("A") + "  " + Key("D") + "    or    " + Key("←") + "  " + Key("→")) +
-            Row("Slash", Key("SPACE") + "    or    " + Key("LEFT CLICK")) +
-            Row("Spirit Shuriken", Key("W") + "    or    " + Key("↑")) +
-            Row("Parry arrows", Key("SHIFT") + "  " + Key("↓") + "    or    " + Key("RIGHT CLICK")) +
-            Row("Ultimate (when full)", Key("Q")) +
+            Row("Move", move) +
+            Row("Slash (hold)", Keys(Moves.Slash)) +
+            Row("Parry arrows", Keys(Moves.Parry)) +
+            Row("Spirit Shuriken", Keys(Moves.Shuriken)) +
+            Row("Ultimate (when full)", Keys(Moves.Ultimate)) +
             Row("Show ability names", "hold " + Key("TAB")) +
             Row("Pause", Key("ESC") + "    or    " + Key("P")) +
-            "</align>\n" +
-            $"Clear three samurai armies in each of the {stages.Length} stages.\nA warlord waits at the end of every stage.\n" +
-            "Fallen samurai may drop spirit souls. Catch one to choose a boon.",
-            new[] { MenuUI.Item.Button("BACK", back) }, back, paper: paper);
+            "</align>",
+            new[]
+            {
+                MenuUI.Item.Button($"PLAY WITH: {Controls.Name(Controls.Current)}", () =>
+                {
+                    Controls.Current = mouse ? Controls.Scheme.Keyboard : Controls.Scheme.KeyboardMouse;
+                    Sfx.Play(Sfx.UiConfirm);
+                    ShowControls(back, 0);
+                }, ""),
+                MenuUI.Item.Button("BACK", back),
+            }, back, startIndex, paper: paper);
     }
 
     // The shop on the hill, laid out as a table: each song's name, its ranks as pips and the price of the next in Spirit
@@ -1367,14 +1379,16 @@ public class GameManager : MonoBehaviour
         string muted = MenuUI.MutedHex(false);
         string teal = ColorUtility.ToHtmlStringRGB(PoguruColour);
         string Row(string topic, string text) => $"<color=#{teal}>{topic}</color>  <color=#{muted}>·</color>  {text}\n";
+        // The keys are the current control scheme's.
+        string Keyed(string topic, Moves move) => $"{topic} ({Controls.Label(move).ToUpperInvariant()})";
         string body = "<size=28><align=left>" +
-            Row("SLASH (SPACE)", "A cut flies up the field. Cover stops it, so step out first!") +
-            Row("SHURIKEN (W)", "Big and sparkly, slow to come back. Save it for crowds.") +
-            Row("PARRY (SHIFT)", "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!") +
+            Row(Keyed("SLASH", Moves.Slash), "A cut flies up the field. Cover stops it, so step out first!") +
+            Row(Keyed("SHURIKEN", Moves.Shuriken), "Big and sparkly, slow to come back. Save it for crowds.") +
+            Row(Keyed("PARRY", Moves.Parry), "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!") +
             Row("SPEARS", "The glowing red ones go right through cover. Move!") +
             Row("HEARTS", "From broken cover, and rarely a soldier. At full lives they wait on your row.") +
             Row("THE ARMY", "If it reaches your row, it's over. Thin out the bottom rank!") +
-            Row("ULTIMATE (Q)", "Hits fill the bottom medallion. Your shadow fights beside you!") +
+            Row(Keyed("ULTIMATE", Moves.Ultimate), "Hits fill the bottom medallion. Your shadow fights beside you!") +
             Row("BOONS", "One per soul. Hold TAB in a fight to see what your icons do.") +
             Row("PATHS", "Walk under, press E. The boss's path opens after round three.") +
             Row("SPIRIT NOTES", "They stay even when you fall. Spend them at the flute altar.") +
@@ -1440,6 +1454,12 @@ public class GameManager : MonoBehaviour
     {
         menu.Show("SETTINGS", null, new[]
         {
+            MenuUI.Item.Button($"CONTROLS: {Controls.Name(Controls.Current)}", () =>
+            {
+                Controls.Current = Controls.UsesMouse ? Controls.Scheme.Keyboard : Controls.Scheme.KeyboardMouse;
+                Sfx.Play(Sfx.UiConfirm);
+                ShowSettings(back);
+            }, "Keyboard only, or keyboard and mouse. Using the other in a fight switches to it."),
             MenuUI.Item.Slider("MUSIC", () => Music.Volume, value => Music.Volume = value),
             MenuUI.Item.Slider("SOUND", () => Sfx.Volume, value =>
             {

@@ -2071,7 +2071,8 @@ public class Utsusemi : Boss
             colour = colour,
             art = Fx.Frames(molten ? Fx.UtsuBeamMolten : Fx.UtsuBeamRed),
             glow = Bar(from, from, 1f, new Color(colour.r, colour.g, colour.b, 0.35f), 53),
-            flare = Fx.Play(Fx.UtsuBeamFlare, from, molten ? MoltenTint : Color.white, flareSize, transform, 57),
+            // The flare at its source sits under the beam itself, so the laser reads on top of the glow.
+            flare = Fx.Play(Fx.UtsuBeamFlare, from, molten ? MoltenTint : Color.white, flareSize, transform, 54),
             hit = Fx.Play(Fx.UtsuBeamHit, from, molten ? MoltenTint : Color.white, 1.3f, null, 57),
         };
         if (beam.art != null)

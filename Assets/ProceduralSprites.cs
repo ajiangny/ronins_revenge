@@ -101,6 +101,91 @@ public static class ProceduralSprites
         return Sprite.Create(copy, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), source.pixelsPerUnit);
     }
 
+    // A thin crisp line of light around a sprite's silhouette, white to be tinted, to draw just behind it as a glowing
+    // outline.
+    // Worked out at most GlowWork pixels across (paintings are 1024), spread a little past the shape's edge and blurred;
+    // the canvas is padded so the glow can reach past the art's own edges, and scale is how much bigger it is than the
+    // art. Cached per sprite.
+    const int GlowWork = 512;
+    static readonly System.Collections.Generic.Dictionary<Sprite, (Sprite glow, float scale)> glowOutlines =
+        new System.Collections.Generic.Dictionary<Sprite, (Sprite, float)>();
+
+    public static Sprite GlowOutline(Sprite source, out float scale)
+    {
+        if (glowOutlines.TryGetValue(source, out var cached))
+        {
+            scale = cached.scale;
+            return cached.glow;
+        }
+        Texture2D copy = ReadBack(source);
+        int width = copy.width, height = copy.height;
+        Color32[] art = copy.GetPixels32();
+        Object.Destroy(copy);
+        // The packed pixels may be trimmed of the canvas's empty margins: put them back where they sit in the full
+        // sprite, so the glow lines up with the art as it's drawn.
+        int rectWidth = Mathf.RoundToInt(source.rect.width), rectHeight = Mathf.RoundToInt(source.rect.height);
+        int offsetX = Mathf.RoundToInt(source.textureRectOffset.x), offsetY = Mathf.RoundToInt(source.textureRectOffset.y);
+
+        // Each working pixel takes the most solid art pixel in its block, so thin wisps aren't lost. Only clearly solid
+        // pixels count: a painting's faint haze and sparkles would swell the outline past what you see.
+        int step = Mathf.Max(1, Mathf.CeilToInt(Mathf.Max(rectWidth, rectHeight) / (float)GlowWork));
+        int sw = Mathf.CeilToInt(rectWidth / (float)step), sh = Mathf.CeilToInt(rectHeight / (float)step);
+        int pad = Mathf.RoundToInt(Mathf.Max(sw, sh) * 0.04f);
+        int w = sw + pad * 2, h = sh + pad * 2;
+        var alpha = new float[w * h];
+        for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                int i = ((y + offsetY) / step + pad) * w + (x + offsetX) / step + pad;
+                alpha[i] = Mathf.Max(alpha[i], Mathf.InverseLerp(0.35f, 0.6f, art[y * width + x].a / 255f));
+            }
+
+        // Spread just past the edge (a max filter, across then down) and keep only the ring outside the shape, so the
+        // line never shows through the gaps between a painting's wisps. One light blur only smooths its steps: the
+        // line stays crisp, so the art reads as lifted off what's behind it.
+        float[] spread = Pass(alpha, w, h, 3, true);
+        for (int i = 0; i < alpha.Length; i++) alpha[i] = Mathf.Max(0f, spread[i] - alpha[i]);
+        alpha = Pass(alpha, w, h, 1, false);
+
+        var texture = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[w * h];
+        for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color32(255, 255, 255, (byte)(Mathf.Clamp01(alpha[i] * 1.6f) * 255));
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        var glow = Sprite.Create(texture, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), source.pixelsPerUnit / step);
+        scale = (Mathf.Max(sw, sh) + pad * 2f) / Mathf.Max(sw, sh);
+        glowOutlines[source] = (glow, scale);
+        return glow;
+    }
+
+    // One separable pass over a w×h alpha map: a max filter (spread) or a box blur, radius in pixels.
+    static float[] Pass(float[] alpha, int w, int h, int radius, bool spread)
+    {
+        var across = new float[alpha.Length];
+        var result = new float[alpha.Length];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                across[y * w + x] = Gather(alpha, y * w, 1, x, w, radius, spread);
+        for (int x = 0; x < w; x++)
+            for (int y = 0; y < h; y++)
+                result[y * w + x] = Gather(across, x, w, y, h, radius, spread);
+        return result;
+    }
+
+    static float Gather(float[] alpha, int start, int stride, int at, int length, int radius, bool spread)
+    {
+        float value = 0f;
+        int count = 0;
+        for (int k = Mathf.Max(0, at - radius); k <= Mathf.Min(length - 1, at + radius); k++)
+        {
+            float a = alpha[start + k * stride];
+            if (spread) value = Mathf.Max(value, a);
+            else value += a;
+            count++;
+        }
+        return spread ? value : value / (radius * 2 + 1);
+    }
+
     // baseSprite with one patch taken from b: the box (padded by pad pixels) where frames a and b differ. Utsusemi's
     // empty-handed stance with its hat off comes from its unarmed frame and the hat region of its bare-headed idle.
     // Null when the three frames aren't the same size.

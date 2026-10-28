@@ -75,6 +75,7 @@ public class BoonChoiceUI : MonoBehaviour
     SwirlUI swirl;
     SpriteAnimatorUI portraitAnimator;
     Image heldSoul;
+    Image heldSoulOutline;
     Image heldSoulGlow;
     SpriteAnimatorUI heldSoulAnimator;
     TextMeshProUGUI overline;
@@ -165,10 +166,13 @@ public class BoonChoiceUI : MonoBehaviour
             portraitAnimator.Play(null, 0f);
             // The soul he caught floats over his palm, so it takes the element's colours.
             heldSoul.gameObject.SetActive(hasSoul);
+            heldSoulOutline.gameObject.SetActive(hasSoul);
             if (hasSoul)
             {
                 heldSoul.sprite = soulFrames[0];
                 heldSoulAnimator.Play(soulFrames, 8f);
+                heldSoulOutline.sprite = ProceduralSprites.GlowOutline(soulFrames[0], out float outlineScale);
+                heldSoulOutline.rectTransform.sizeDelta = heldSoul.rectTransform.sizeDelta * outlineScale;
             }
             heldSoulGlow.color = new Color(elementColor.r, elementColor.g, elementColor.b, 0.8f);
         }
@@ -178,6 +182,7 @@ public class BoonChoiceUI : MonoBehaviour
             portrait.color = hasSoul ? Color.white : Color.Lerp(elementColor, Color.white, 0.5f);
             portraitAnimator.Play(hasSoul ? soulFrames : null, 8f);
             heldSoul.gameObject.SetActive(false);
+            heldSoulOutline.gameObject.SetActive(false);
             heldSoulGlow.color = Color.clear;
         }
         // A soft wash under the swirl; any brighter and a pale element (the steel of Sword Arts) turns the corner white.
@@ -385,6 +390,12 @@ public class BoonChoiceUI : MonoBehaviour
         swirl.Strength = Mathf.Clamp01(elapsed / 0.6f);
         heldSoul.color = new Color(1f, 1f, 1f, enter);
         heldSoul.rectTransform.anchoredPosition = heldSoulGlow.rectTransform.anchoredPosition + new Vector2(0f, 6f * Mathf.Sin(Time.unscaledTime * 3f));
+        // The outline follows the soul's bob and breathes with its glow, in the screen's colour lifted well towards
+        // white so it stands out from the swirl of the same colour behind it.
+        heldSoulOutline.rectTransform.anchoredPosition = heldSoul.rectTransform.anchoredPosition;
+        heldSoulOutline.rectTransform.localScale = heldSoul.rectTransform.localScale;
+        Color rim = Color.Lerp(elementColor, Color.white, 0.7f);
+        heldSoulOutline.color = new Color(rim.r, rim.g, rim.b, enter * (0.85f + 0.15f * pulse));
         heldSoulGlow.rectTransform.localScale = Vector3.one * (0.9f + 0.15f * pulse);
         // The painted soul is a single frame, so it flickers by swelling a little out of step with the glow.
         heldSoul.rectTransform.localScale = Vector3.one * (1f + 0.035f * Mathf.Sin(Time.unscaledTime * 7.3f) + 0.02f * Mathf.Sin(Time.unscaledTime * 3.1f));
@@ -500,6 +511,9 @@ public class BoonChoiceUI : MonoBehaviour
 
         Vector2 soulSize = new Vector2(heldSoulSize, heldSoulSize);
         heldSoulGlow = CreateImage("HeldSoulGlow", portrait.rectTransform, center, palm, soulSize * 2.2f, ProceduralSprites.Glow);
+        // A glow hugging the soul's own shape, just behind it.
+        heldSoulOutline = CreateImage("HeldSoulOutline", portrait.rectTransform, center, palm, soulSize, null);
+        heldSoulOutline.preserveAspect = true;
         heldSoul = CreateImage("HeldSoul", portrait.rectTransform, center, palm, soulSize, null);
         heldSoul.preserveAspect = true;
         heldSoulAnimator = heldSoul.gameObject.AddComponent<SpriteAnimatorUI>();

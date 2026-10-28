@@ -136,6 +136,14 @@ public abstract class Boss : MonoBehaviour, IHittable
     bool fighting;
     float lastBeat;
 
+    // The stance meter: every hit fills it a little, and a full meter breaks her stance. Left alone it drains.
+    public float Poise { get; private set; }
+    // Raised whenever the stance meter moves, for the HUD.
+    public event Action<float> PoiseChanged;
+    float lastPoiseAt;
+    const float PoiseDecayDelay = 3f;
+    const float PoiseDecayRate = 0.2f;
+
     protected bool Staggered => Time.time < staggeredUntil;
     public bool Frozen => Time.time < frozenUntil;
     // How fast the boss's clock runs: a freeze or a stagger stops her.
@@ -267,8 +275,11 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Extra damage taken while a weak spot is open (Utsusemi with its hat off).
     protected virtual int DamageMultiplier => 1;
 
-    // How long a reflected strike breaks the boss's stance.
+    // How long a broken stance lasts.
     protected virtual float StaggerSeconds => 2f;
+
+    // How much of each hit's stance damage the boss feels; below 1 she takes longer to stagger. Second forms hold firmer.
+    protected virtual float StanceResistance => SecondPhase ? 0.85f : 1f;
 
     // How long the fall takes before the stage's boon is offered over it.
     public virtual float DefeatSeconds => 2.2f;
@@ -277,6 +288,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // fight, the boss notices it has stopped moving and starts over.
     void Update()
     {
+        if (Poise > 0f && Time.time - lastPoiseAt > PoiseDecayDelay)
+            SetPoise(Poise - PoiseDecayRate * Time.deltaTime);
+
         if (!fighting || IsDead || Down || PhaseBreaking || Busy || Staggered || Frozen)
         {
             lastBeat = Time.time;
@@ -577,6 +591,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         if (IsDead || Down || SuperArmor || PhaseBreaking) return;
         Interrupt();
+        SetPoise(0f);
         staggeredUntil = Time.time + seconds;
         PlayAction(art.hit);
         Sfx.Play(Sfx.BossStagger);
@@ -584,6 +599,24 @@ public abstract class Boss : MonoBehaviour, IHittable
         OnStaggered();
         nextHurtLine = Time.time + seconds;
         StartCoroutine(RecoverFromStagger(seconds));
+    }
+
+    // Fills the stance meter by `amount` (scaled by StanceResistance); true once it's full and her stance should break.
+    // Super armour, a stagger already underway, a phase break or going down hold it where it is.
+    bool AddPoise(float amount)
+    {
+        if (amount <= 0f || SuperArmor || Staggered || PhaseBreaking || Down || IsDead) return false;
+        lastPoiseAt = Time.time;
+        SetPoise(Poise + amount * StanceResistance);
+        return Poise >= 1f;
+    }
+
+    void SetPoise(float value)
+    {
+        value = Mathf.Clamp01(value);
+        if (Mathf.Approximately(value, Poise)) return;
+        Poise = value;
+        PoiseChanged?.Invoke(Poise);
     }
 
     IEnumerator RecoverFromStagger(float seconds)
@@ -612,6 +645,10 @@ public abstract class Boss : MonoBehaviour, IHittable
     public void TakeHit(int damage, KillSource source)
     {
         if (IsDead || Down || PhaseBreaking) return;
+        // Read before the hit lands: a boon's nested hit would clear Kunai.Striking.
+        bool setPiece = source == KillSource.Reflected && Kunai.Striking != null && Kunai.Striking.SetPiece;
+        float stance = setPiece ? Damage.SetPieceStance : Damage.Stance(source);
+        if (ronin != null) stance *= ronin.StanceBoost(source);
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
         damage = Damage.Lessen(damage, source, ref shadowChip);
@@ -645,7 +682,7 @@ public abstract class Boss : MonoBehaviour, IHittable
             else Die();
             return;
         }
-        if (source == KillSource.Reflected) Stagger(StaggerSeconds);
+        if (AddPoise(stance)) Stagger(StaggerSeconds);
         else if (Time.time >= nextHurtLine)
         {
             nextHurtLine = Time.time + HurtLineGap;
@@ -662,6 +699,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         PhaseBreaking = true;
         armorChip = 0;
         staggeredUntil = frozenUntil = 0;
+        SetPoise(0f);
         Interrupt();
         IEnumerator scene = PhaseBreak();
         bool sceneDone = false;
@@ -694,6 +732,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         Down = true;
         staggeredUntil = frozenUntil = 0;
+        SetPoise(0f);
         Interrupt();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         OnDowned();

@@ -131,6 +131,14 @@ public class GameUI : MonoBehaviour
     bool bossSplit;
     float shownBossHealth2 = 1f;
     float bossHealth2 = 1f;
+    // The thin stance meter under the boss bar; it flashes white when it fills and her stance breaks.
+    RectTransform poiseFill;
+    Image poiseFillImage;
+    float bossPoise;
+    float shownPoise;
+    float poiseFlashUntil;
+    static readonly Color PoiseColour = new Color(1f, 0.78f, 0.3f);
+    const float PoiseFlashSeconds = 0.5f;
 
     RectTransform pathPlate;
     CanvasGroup pathGroup;
@@ -435,6 +443,7 @@ public class GameUI : MonoBehaviour
 
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;
+        UpdatePoise();
         shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
         float half = bossSplit ? 0.5f : 1f;
         bossFill.anchorMax = new Vector2(bossHealth * half, 1f);
@@ -452,12 +461,37 @@ public class GameUI : MonoBehaviour
 
     RectTransform bossTrail;
 
+    // The stance meter eases toward the boss's, holds full and flashes white as her stance breaks, then drains.
+    void UpdatePoise()
+    {
+        float flash = (poiseFlashUntil - Time.unscaledTime) / PoiseFlashSeconds;
+        if (flash > 0f)
+        {
+            shownPoise = 1f;
+            poiseFillImage.color = Color.Lerp(PoiseColour, Color.white, flash);
+        }
+        else
+        {
+            shownPoise = Mathf.MoveTowards(shownPoise, bossPoise, Time.unscaledDeltaTime * 2f);
+            poiseFillImage.color = PoiseColour;
+        }
+        poiseFill.anchorMax = new Vector2(shownPoise, 1f);
+    }
+
+    public void SetBossPoise(float fraction)
+    {
+        if (fraction >= 1f) poiseFlashUntil = Time.unscaledTime + PoiseFlashSeconds;
+        bossPoise = Mathf.Clamp01(fraction);
+    }
+
     public void ShowBossBar(string name, Color colour)
     {
         bossName.text = name;
         bossName.color = colour;
         bossFillImage.color = colour;
         bossHealth = shownBossHealth = 1f;
+        bossPoise = shownPoise = 0f;
+        poiseFlashUntil = 0f;
         bossSplit = false;
         bossBar.SetActive(true);
     }
@@ -860,9 +894,18 @@ public class GameUI : MonoBehaviour
         // The notch between the halves, in the frame's colour.
         bossDivider = CreateRect("Divider", back, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4, 18));
         bossDivider.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 1f);
+        // The stance meter: a thin gold strip hung under the health bar.
+        RectTransform poiseFrame = CreateRect("Poise", frame, new Vector2(0.5f, 0f), new Vector2(0, -5), new Vector2(904, 8));
+        poiseFrame.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 0.9f);
+        RectTransform poiseBack = CreateRect("Back", poiseFrame, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(898, 4));
+        poiseBack.gameObject.AddComponent<Image>().color = new Color(0.08f, 0.04f, 0.06f, 0.95f);
+        poiseFill = Stretch(CreateRect("Fill", poiseBack, Vector2.zero, Vector2.zero, Vector2.zero));
+        poiseFill.anchorMax = new Vector2(0f, 1f);
+        poiseFillImage = poiseFill.gameObject.AddComponent<Image>();
+        poiseFillImage.color = PoiseColour;
         // Each half's name under it, small, so the split reads without a legend.
-        bossLabelLeft = CreateText("LabelLeft", new Vector2(0.25f, 0f), new Vector2(0, -14), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
-        bossLabelRight = CreateText("LabelRight", new Vector2(0.75f, 0f), new Vector2(0, -14), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        bossLabelLeft = CreateText("LabelLeft", new Vector2(0.25f, 0f), new Vector2(0, -22), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        bossLabelRight = CreateText("LabelRight", new Vector2(0.75f, 0f), new Vector2(0, -22), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
         foreach (TextMeshProUGUI label in new[] { bossLabelLeft, bossLabelRight })
         {
             label.characterSpacing = 3;

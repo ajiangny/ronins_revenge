@@ -1380,7 +1380,7 @@ public class Shirogane : Boss
         Arrow fang = Fire(from, (ronin.Bounds.center - from).normalized * DrawSpeed);
         WolfShot(fang, 2.2f, Color.white, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
         fang.MakeUnbreakable();
-        fang.MakeReflectable(home);
+        fang.MakeReflectable(home, setPiece: true);
         StartCoroutine(Pursue(fang, DrawSpeed * ShotSpeed));
         return fang;
     }

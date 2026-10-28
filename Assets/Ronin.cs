@@ -150,6 +150,28 @@ public class Ronin : MonoBehaviour
     // Kindling's fireball has hit something.
     public event Action<Vector3, IHittable> FireballImpact;
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
+
+    // Each upgrade he holds for an attack makes its hits break a boss's stance a quarter faster.
+    static readonly BoonId[] SlashUpgrades = { BoonId.FlameBlade, BoonId.FrostBlade, BoonId.StormBlade, BoonId.SplitSlash, BoonId.PiercingSlash, BoonId.EchoSlash };
+    static readonly BoonId[] ShurikenUpgrades = { BoonId.InfernoShuriken, BoonId.GlacialShuriken, BoonId.ThunderShuriken };
+    static readonly BoonId[] RiposteUpgrades = { BoonId.BurningRiposte, BoonId.FrozenRiposte, BoonId.ThunderRiposte };
+    const float StancePerUpgrade = 0.25f;
+
+    public float StanceBoost(KillSource source)
+    {
+        BoonId[] upgrades = source switch
+        {
+            KillSource.Shuriken => ShurikenUpgrades,
+            KillSource.Deflected or KillSource.Reflected => RiposteUpgrades,
+            KillSource.Effect => null,
+            _ => SlashUpgrades,
+        };
+        if (upgrades == null) return 1f;
+        int held = 0;
+        foreach (BoonId id in upgrades)
+            if (Loadout.Find(id) != null) held++;
+        return 1f + StancePerUpgrade * held;
+    }
     // World-space height of the top of the ronin; samurai reaching it have landed.
     public float TopY => transform.position.y + topOffset;
     public Bounds Bounds => sprite.bounds;
@@ -1053,6 +1075,7 @@ public class Ronin : MonoBehaviour
         {
             Kunai riposte = SpawnProjectile(kunaiPrefab, position);
             riposte.Launch(Vector3.up, 1.3f, 0, KillSource.Reflected, flipSprite: true, scale: 2.4f, lifetimeMultiplier: 2f);
+            riposte.SetPiece = arrow.SetPiece;
             riposte.Tint(arrowColor, arrowColor);
             riposte.Home(() => target);
             riposte.Mimic(arrowArt);

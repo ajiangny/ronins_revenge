@@ -2750,6 +2750,7 @@ public class GameManager : MonoBehaviour
         activeBoss.Damaged += OnBossDamaged;
         Boss boss = activeBoss;
         boss.Healed += () => ShowBossHealth(boss);
+        boss.PoiseChanged += ui.SetBossPoise;
         activeBoss.Defeated += OnBossDefeated;
         // A boss with no phase card still changes music when its second phase starts; with one, this is a no-op.
         activeBoss.SecondPhaseBegan += PlayPhaseMusic;

@@ -112,6 +112,8 @@ public class Kagetsune : Boss
     protected override bool HasSecondPhase => true;
     protected override bool Busy => breaking || ultimate;
     protected override float StaggerSeconds => secondPhase ? 1.4f : 1.8f;
+    // The final exam: his stance holds longer than the others'.
+    protected override float StanceResistance => secondPhase ? 0.7f : 0.8f;
     // Open is double damage, but not on top of a stagger's own double: the best burst is ×2, not ×4.
     protected override int DamageMultiplier => Time.time < exposedUntil && !Staggered ? 2 : 1;
     public override float DefeatSeconds => 11f;
@@ -140,6 +142,7 @@ public class Kagetsune : Boss
         // The soul-fire in his open chest, always burning; it flares with each blow.
         chestGlow = Glowing(Chest, Teal, 2.2f, 4, false);
         chestGlow.transform.SetParent(transform, true);
+        Damaged += OnHitBy;
     }
 
     void LateUpdate()
@@ -975,7 +978,7 @@ public class Kagetsune : Boss
         if (frames != null) bell.Restyle(frames, 8f, Color.white, new Vector2(2f, 2.2f), 0.7f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.5f), 3f);
         else bell.Restyle(ProceduralSprites.Disc, Bronze, new Vector2(1.7f, 2f), 0.7f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.55f), 3f);
         bell.MakeUnbreakable();
-        bell.MakeReflectable(transform);
+        bell.MakeReflectable(transform, setPiece: true);
         StartCoroutine(Pursue(bell, 8.5f, face: false));
         Toll(1f, 0.5f);
         if (Hardened) ClosingRing((bell.transform.position.y - Row) / 8.5f);
@@ -1232,7 +1235,7 @@ public class Kagetsune : Boss
         if (frames != null) coffin.Restyle(frames, 8f, Color.white, new Vector2(1.6f, 2.4f), 0.7f, new Color(Teal.r, Teal.g, Teal.b, 0.5f), 3f);
         else coffin.Restyle(ProceduralSprites.White, new Color(0.22f, 0.2f, 0.22f), new Vector2(1.2f, 2f), 0.7f, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 3f);
         coffin.MakeUnbreakable();
-        coffin.MakeReflectable(transform);
+        coffin.MakeReflectable(transform, setPiece: true);
         coffinThrownAt = Time.time;
         StartCoroutine(Pursue(coffin, 9f, face: false));
         // Seal-darts fall either side of him, so running wide only trades the coffin for the darts.
@@ -1253,7 +1256,7 @@ public class Kagetsune : Boss
         yield return Wait(0.4f);
     }
 
-    // The coffin or the last toll sent home breaks his stance; a coffin bursting on him leaves him open.
+    // His stance breaks (the coffin or the Last Toll sent home, or a meter filled by blows).
     protected override void OnStaggered()
     {
         ultimate = false;
@@ -1266,13 +1269,19 @@ public class Kagetsune : Boss
         Sfx.Stop(Sfx.LanternBeam);
         Toll(1f, 0.7f);
         Fx.Play(Fx.Impact, Centre, Bronze, 3f);
-        if (Time.time - coffinThrownAt < 4f)
-        {
-            coffinThrownAt = float.NegativeInfinity;
-            exposedUntil = Time.time + StaggerSeconds + ExposedSeconds;
-            Fx.Play(Fx.Explosion, Chest, Teal, 2.5f);
-            Debris.BurstSprites(Chest, art.deathParticles, Teal, 24, 1f, 8f);
-        }
+        // Opened by the coffin a moment ago: the opening waits out the stagger, which already doubles damage.
+        if (Time.time < exposedUntil) exposedUntil += StaggerSeconds;
+    }
+
+    // The coffin bursting on him leaves him open whether or not it fills his stance meter. Damaged fires before
+    // the stance breaks, so OnStaggered can push the opening back past the stagger.
+    void OnHitBy(Vector3 point, KillSource source)
+    {
+        if (source != KillSource.Reflected || Time.time - coffinThrownAt >= 4f) return;
+        coffinThrownAt = float.NegativeInfinity;
+        exposedUntil = Time.time + ExposedSeconds;
+        Fx.Play(Fx.Explosion, Chest, Teal, 2.5f);
+        Debris.BurstSprites(Chest, art.deathParticles, Teal, 24, 1f, 8f);
     }
 
     // The Night of a Thousand Bells, his ultimate: the field goes dark, bells hang across the top, and soul-fire

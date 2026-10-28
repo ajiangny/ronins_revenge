@@ -39,6 +39,8 @@ public class Kunai : MonoBehaviour
     public static event Action<KillSource, IHittable> Landed;
     // The projectile whose hit is being dealt right now, so the kill it causes can be traced back to it.
     public static Kunai Striking { get; private set; }
+    // A parried set piece on its way home, which hits a boss's stance far harder than a plain parried slash.
+    public bool SetPiece { get; set; }
     // Kindling's fireball, which sets off no Flame Blade blast of its own.
     public bool Kindled { get; set; }
     // Ice shards encase a samurai before they hit it, so one they cut down freezes into an ice statue.

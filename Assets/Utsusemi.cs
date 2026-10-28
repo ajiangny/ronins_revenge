@@ -1110,7 +1110,7 @@ public class Utsusemi : Boss
         if (frames != null) cleave.Restyle(frames, 14f, Color.white, new Vector2(5.6f, 3.7f), 1.1f, new Color(1f, 0.2f, 0.18f, 0.6f), 4.5f);
         else cleave.Restyle(ProceduralSprites.White, new Color(0.9f, 0.93f, 1f), new Vector2(5.4f, 0.5f), 1.1f, new Color(1f, 0.2f, 0.18f, 0.6f), 4.5f);
         cleave.MakeUnbreakable();
-        cleave.MakeReflectable(transform);
+        cleave.MakeReflectable(transform, setPiece: true);
         StartCoroutine(Pursue(cleave, HourSpeed));
         Sfx.Play(Sfx.HourSlash, 1f);
         Sfx.Play(Sfx.MidnightChime, 0.6f, 1.4f);

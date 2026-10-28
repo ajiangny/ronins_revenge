@@ -101,10 +101,14 @@ public class Arrow : MonoBehaviour
         glow.color = glowTint;
     }
 
-    public void MakeReflectable(Transform target)
+    // A set piece is a parry-only move (the hour cleave, the Last Toll): sent home, it fills most of a stance meter.
+    public void MakeReflectable(Transform target, bool setPiece = false)
     {
         ReflectTarget = target;
+        SetPiece = setPiece;
     }
+
+    public bool SetPiece { get; private set; }
 
     // Draws a restyled shot's hitbox out along its length (Shirogane's ice pillars), keeping its radius.
     public void Lengthen(float length)

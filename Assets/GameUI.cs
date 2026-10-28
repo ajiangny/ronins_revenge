@@ -35,6 +35,55 @@ public class GameUI : MonoBehaviour
     // The lives row, which Poguru's hearts lesson lifts out of a talk's dark.
     public RectTransform LivesRow => livesRow;
 
+    // The fill behind a key cap, as MenuUI.KeyCap's <mark> draws it on dark pages.
+    static readonly Color KeyCapFill = new Color(1f, 1f, 1f, 0x2E / 255f);
+
+    // A row of key caps in the menus' style, for keys shown as UI rather than inside a line of text: a key's name in
+    // each cap, or for a mouse button a drawn mouse with that button filled. Laid out left to right from its pivot.
+    public RectTransform CreateKeyRow(Transform parent, float fontSize, params KeyGlyph[] keys)
+    {
+        RectTransform row = CreateRect("Keys", parent, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+        var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 10f;
+        layout.childAlignment = TextAnchor.MiddleLeft;
+        layout.childControlWidth = layout.childControlHeight = true;
+        layout.childForceExpandWidth = layout.childForceExpandHeight = false;
+        var fit = row.gameObject.AddComponent<ContentSizeFitter>();
+        fit.horizontalFit = fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        float capHeight = fontSize * 1.4f;
+        foreach (KeyGlyph key in keys)
+        {
+            RectTransform cap = CreateRect("Cap", row, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            Image fill = cap.gameObject.AddComponent<Image>();
+            fill.color = KeyCapFill;
+            fill.raycastTarget = false;
+            var capLayout = cap.gameObject.AddComponent<HorizontalLayoutGroup>();
+            capLayout.padding = new RectOffset(10, 10, 2, 2);
+            capLayout.childAlignment = TextAnchor.MiddleCenter;
+            capLayout.childControlWidth = capLayout.childControlHeight = true;
+            capLayout.childForceExpandWidth = capLayout.childForceExpandHeight = false;
+            cap.gameObject.AddComponent<LayoutElement>().minHeight = capHeight;
+            if (key.mouse != 0)
+            {
+                Image icon = CreateRect("Mouse", cap, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+                icon.sprite = ProceduralSprites.Mouse(key.mouse == 1);
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                var size = icon.gameObject.AddComponent<LayoutElement>();
+                size.preferredHeight = capHeight - 10f;
+                size.preferredWidth = (capHeight - 10f) * icon.sprite.rect.width / icon.sprite.rect.height;
+            }
+            else
+            {
+                TextMeshProUGUI label = CreateText(cap, BodyFont, "Key", new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, fontSize, TextAlignmentOptions.Center);
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                label.text = key.text;
+                Style(label, TextStyle.Hud);
+            }
+        }
+        return row;
+    }
+
     // A world point on this canvas, for UI hung beside something in the field.
     public Vector2 CanvasPoint(Vector3 world)
     {
@@ -965,4 +1014,16 @@ public class GameUI : MonoBehaviour
         rect.sizeDelta = size;
         return rect;
     }
+}
+
+// One cap in GameUI.CreateKeyRow: a key's name, or a mouse button (drawn, not spelled out).
+public struct KeyGlyph
+{
+    public string text;
+    // 1 the left mouse button, 2 the right; 0 a key.
+    public int mouse;
+
+    public static KeyGlyph Key(string name) => new KeyGlyph { text = name };
+    public static KeyGlyph MouseLeft => new KeyGlyph { mouse = 1 };
+    public static KeyGlyph MouseRight => new KeyGlyph { mouse = 2 };
 }

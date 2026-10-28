@@ -10,6 +10,7 @@ public static class ProceduralSprites
     static Sprite shadow;
     static Sprite disc;
     static Sprite arrowDown;
+    static Sprite mouseLeft, mouseRight;
     static Sprite fadeDown;
     static Sprite swirl;
 
@@ -336,6 +337,53 @@ public static class ProceduralSprites
 
     // A hard-edged arrow pointing down, standing in for the soul hint's art.
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);
+
+    // A mouse drawn in white line, its left or right button filled, for key caps (GameUI.CreateKeyRow).
+    public static Sprite Mouse(bool left) => left
+        ? mouseLeft != null ? mouseLeft : mouseLeft = BuildMouse(true)
+        : mouseRight != null ? mouseRight : mouseRight = BuildMouse(false);
+
+    // A rounded body outline, the line between the buttons and the one under them, and the pressed button solid.
+    // Smoothly filtered and antialiased from distances, so it stays clean at text size.
+    static Sprite BuildMouse(bool left)
+    {
+        const int width = 64, height = 92;
+        const float stroke = 5f;
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        Vector2 centre = new Vector2(width / 2f, height / 2f);
+        // The body's half size and corner radius, inset so the stroke fits the canvas.
+        Vector2 half = new Vector2(width / 2f - stroke, height / 2f - stroke);
+        float corner = half.x * 0.95f;
+        // Where the buttons end, from the bottom.
+        float buttonsFrom = height * 0.56f;
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Vector2 p = new Vector2(x + 0.5f, y + 0.5f) - centre;
+                // Signed distance to the rounded body.
+                Vector2 q = new Vector2(Mathf.Abs(p.x), Mathf.Abs(p.y)) - half + Vector2.one * corner;
+                float body = new Vector2(Mathf.Max(q.x, 0f), Mathf.Max(q.y, 0f)).magnitude + Mathf.Min(Mathf.Max(q.x, q.y), 0f) - corner;
+                float outline = Mathf.Abs(body) - stroke / 2f;
+                float inside = -body;
+                bool upper = y + 0.5f > buttonsFrom;
+                // The split between the buttons, and the line under them.
+                float split = upper ? Mathf.Abs(p.x) - stroke / 2f : float.MaxValue;
+                float under = Mathf.Abs(y + 0.5f - buttonsFrom) - stroke / 2f;
+                float line = Mathf.Min(outline, Mathf.Min(split, inside > 0f ? under : float.MaxValue));
+                // The pressed button: inside the body, above the line, on its side of the split.
+                bool pressedSide = left ? p.x < 0f : p.x > 0f;
+                float fill = upper && pressedSide ? -Mathf.Min(inside, y + 0.5f - buttonsFrom) : float.MaxValue;
+                float d = Mathf.Min(line, fill);
+                byte a = (byte)(Mathf.Clamp01(0.5f - d) * 255f);
+                pixels[y * width + x] = new Color32(255, 255, 255, a);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), height);
+    }
 
     static Sprite BuildArrowDown(int size)
     {

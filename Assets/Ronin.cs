@@ -249,7 +249,9 @@ public class Ronin : MonoBehaviour
     {
         if (UltimateActive || UltimateLocked || UltimateFill >= 1f || !Damage.Procs(source)) return;
         if (!(target is Samurai || target is Scout || target is Boss || target is SpiritWolf)) return;
-        UltimateFill = Mathf.Min(1f, UltimateFill + 1f / Mathf.Max(1, ultimateHits));
+        // Storm Shadow fills it faster.
+        float step = (1f + Loadout.Extra(BoonId.StormShadow)) / Mathf.Max(1, ultimateHits);
+        UltimateFill = Mathf.Min(1f, UltimateFill + step);
         if (UltimateFill >= 1f) UltimateFilled?.Invoke();
     }
 
@@ -451,9 +453,22 @@ public class Ronin : MonoBehaviour
     bool CloneOut => shadow != null && shadow.enabled;
     Vector3 CloneMuzzle => new Vector3(cloneX + centerOffsetX, transform.position.y, 0f);
     Vector3 CloneCentre => Bounds.center + Vector3.right * (cloneX - transform.position.x);
-    // The clone's colours, and the look of everything it sends.
-    Color CloneTint => ShadowTint;
-    Color CloneGlow => ShadowGlow;
+    // Where the clone stands while it's out, for the Ultimate boons' blasts.
+    public bool CloneShown => CloneOut;
+    public Vector3 ClonePoint => CloneCentre;
+    // The clone's colours, and the look of everything it sends: its violet, leaning to the element of the Ultimate
+    // slot's boon.
+    Color CloneTint
+    {
+        get
+        {
+            Element? element = Loadout.SlotElement(BoonSlot.Ultimate);
+            if (element == null) return ShadowTint;
+            Color c = Color.Lerp(ShadowTint, Boons.Info(element.Value).Color, 0.35f);
+            return new Color(c.r, c.g, c.b, ShadowTint.a);
+        }
+    }
+    Color CloneGlow => Loadout.SlotElement(BoonSlot.Ultimate) is Element e ? Color.Lerp(ShadowGlow, Boons.Info(e).Color, 0.6f) : ShadowGlow;
 
     // A clone's projectile: its own colours over his attack's.
     void Shade(Kunai projectile, Color tint) => projectile.Tint(Color.Lerp(tint, CloneGlow, 0.6f), CloneGlow);

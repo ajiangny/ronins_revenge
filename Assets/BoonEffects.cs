@@ -98,8 +98,59 @@ public class BoonEffects
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value);
                 break;
+            case KillSource.Clone:
+                OnCloneKill(samurai, position);
+                break;
         }
         if (Damage.Procs(source)) BeatDrum();
+    }
+
+    // The Ultimate slot's boon, on a kill by the Shadow Clone: its element takes the samurai's neighbours.
+    void OnCloneKill(Samurai samurai, Vector3 position)
+    {
+        float value;
+        if (loadout.Has(BoonId.PyreShadow, out value)) Blast(position, value);
+        if (loadout.Has(BoonId.FrostShadow, out value))
+        {
+            int encased = 0;
+            foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+            {
+                if (encased >= FrostEncaseTargets) break;
+                if (Random.value >= FrostEncaseChance) continue;
+                target.Encase(value * loadout.FreezeMultiplier);
+                encased++;
+            }
+            Fx.Play(Fx.IceBurst, position, Color.white, 1f);
+        }
+        if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value)
+        {
+            List<Samurai> reach = army.SamuraiWithin(position, StormBladeRange);
+            reach.RemoveAll(s => s.IsDead || s == samurai);
+            if (reach.Count > 0) Chain(position, reach[Random.Range(0, reach.Count)]);
+        }
+    }
+
+    // On a boss or Kuon every clone hit lands, so the Ultimate boons fire on a share of them.
+    const float CloneBossShare = 0.25f;
+
+    // Frost Shadow: the clone comes out in a wave of frost that freezes the army (or holds the boss a moment).
+    public void OnUltimateStarted(Vector3 at)
+    {
+        if (!loadout.Has(BoonId.FrostShadow, out float seconds)) return;
+        if (BossFight) Boss.Freeze(seconds * 0.5f * loadout.FreezeMultiplier);
+        else if (army.Remaining > 0) army.Freeze(seconds * loadout.FreezeMultiplier);
+        else return;
+        if (Fx.Play(Fx.FrostWave, at, Color.white, 3.5f) == null) ElementFx.Glow(at, Frost, 1f, 6f, 0.4f);
+        CameraShake.Add(0.2f);
+        Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
+    }
+
+    // Pyre Shadow: the clone goes out in a blast wider than its kills' (on a boss, a boss blast).
+    public void OnUltimateEnded(Vector3 at)
+    {
+        if (!loadout.Has(BoonId.PyreShadow, out float radius)) return;
+        if (BossFight) BossBlast(at, radius + 1f);
+        else Blast(at, radius + 1f);
     }
 
     // The kill effects, triggered by hits on the boss: fire bursts on her (and burns her smoke), frost slows her,
@@ -133,6 +184,17 @@ public class BoonEffects
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
+                break;
+            case KillSource.Clone:
+                if (Random.value >= CloneBossShare) break;
+                if (loadout.Has(BoonId.PyreShadow, out value)) BossBlast(point, value);
+                if (loadout.Has(BoonId.FrostShadow, out value) && !Boss.Frozen && Time.time >= nextBossFrost)
+                {
+                    nextBossFrost = Time.time + BossFrostCooldown;
+                    Boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
+                    Fx.Play(Fx.IceBurst, point, Color.white, 1.2f);
+                }
+                if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
                 break;
         }
         if (Damage.Procs(source)) BeatDrum();
@@ -331,6 +393,11 @@ public class BoonEffects
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) WolfBlast(point, value);
+                break;
+            case KillSource.Clone:
+                if (Random.value >= CloneBossShare) break;
+                if (loadout.Has(BoonId.PyreShadow, out value)) WolfBlast(point, value);
+                if (WolfFight && loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 break;
         }
         if (Damage.Procs(source)) BeatDrum();

@@ -659,6 +659,7 @@ public class GameManager : MonoBehaviour
         ronin.FireballImpact += OnFireballImpact;
         ronin.RiposteTarget = RandomEnemy;
         ronin.UltimateStarted += OnUltimateStarted;
+        ronin.UltimateEnded += OnUltimateEnded;
         Blocker.Broken += OnBlockerBroken;
         IceStatue.Shattered += OnStatueShattered;
     }
@@ -674,6 +675,7 @@ public class GameManager : MonoBehaviour
         ronin.RiposteImpact -= OnRiposteImpact;
         ronin.FireballImpact -= OnFireballImpact;
         ronin.UltimateStarted -= OnUltimateStarted;
+        ronin.UltimateEnded -= OnUltimateEnded;
         Blocker.Broken -= OnBlockerBroken;
         IceStatue.Shattered -= OnStatueShattered;
     }
@@ -1907,6 +1909,13 @@ public class GameManager : MonoBehaviour
     void OnUltimateStarted()
     {
         RunLog.Note($"ultimate: {UltimateName(ronin.CurrentUltimate)}");
+        if (state == State.Playing) effects.OnUltimateStarted(ronin.Bounds.center);
+    }
+
+    // The clone is still out on the frame the bar runs dry, so its spot is where Pyre Shadow bursts.
+    void OnUltimateEnded()
+    {
+        if (state == State.Playing && ronin.CloneShown) effects.OnUltimateEnded(ronin.ClonePoint);
     }
 
     void OnFireballImpact(Vector3 point, IHittable target)

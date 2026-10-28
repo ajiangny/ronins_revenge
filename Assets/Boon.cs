@@ -6,9 +6,10 @@ using UnityEngine;
 // Fire burns (explosions), Water chills (slows and freezes), Lightning jolts (chains).
 public enum Element { Fire, Water, Lightning }
 
-// Attack, Special and Parry each hold one boon; taking another element's boon for that slot replaces it.
+// Attack, Special, Parry and Ultimate each hold one boon; taking another element's boon for that slot replaces it.
+// The Ultimate slot is Hades' Call: its boon gives the Shadow Clone its element, shown on the ultimate's medallion.
 // Passives don't take a slot and are kept alongside each other.
-public enum BoonSlot { Attack, Special, Parry, Passive }
+public enum BoonSlot { Attack, Special, Parry, Ultimate, Passive }
 
 public enum Rarity { Common, Rare, Epic }
 
@@ -30,6 +31,7 @@ public enum BoonId
     Wildfire, StillWater, RaijinsDrum,
     SplitSlash, PiercingSlash, EchoSlash, ShadowClone,
     SpiritOffering,
+    PyreShadow, FrostShadow, StormShadow,
 }
 
 public sealed class BoonDefinition
@@ -139,16 +141,16 @@ public static class Boons
     public static readonly Color ArtColor = new Color(0.82f, 0.86f, 0.92f);
 
     // The core slot boons each capstone builds on: fire blasts, ice, and lightning strikes.
-    static readonly BoonId[] BlastBoons = { BoonId.FlameBlade, BoonId.InfernoShuriken, BoonId.BurningRiposte };
-    static readonly BoonId[] IceBoons = { BoonId.FrostBlade, BoonId.GlacialShuriken, BoonId.FrozenRiposte };
-    static readonly BoonId[] StrikeBoons = { BoonId.StormBlade, BoonId.ThunderShuriken, BoonId.ThunderRiposte };
+    static readonly BoonId[] BlastBoons = { BoonId.FlameBlade, BoonId.InfernoShuriken, BoonId.BurningRiposte, BoonId.PyreShadow };
+    static readonly BoonId[] IceBoons = { BoonId.FrostBlade, BoonId.GlacialShuriken, BoonId.FrozenRiposte, BoonId.FrostShadow };
+    static readonly BoonId[] StrikeBoons = { BoonId.StormBlade, BoonId.ThunderShuriken, BoonId.ThunderRiposte, BoonId.StormShadow };
 
     static bool HoldsAny(RoninLoadout loadout, BoonId[] ids) => Array.Exists(ids, id => loadout.Find(id) != null);
 
     static bool TwoSlotsOf(RoninLoadout loadout, Element element)
     {
         int count = 0;
-        foreach (BoonSlot slot in new[] { BoonSlot.Attack, BoonSlot.Special, BoonSlot.Parry })
+        foreach (BoonSlot slot in new[] { BoonSlot.Attack, BoonSlot.Special, BoonSlot.Parry, BoonSlot.Ultimate })
         {
             if (loadout.SlotElement(slot) == element) count++;
         }
@@ -218,6 +220,19 @@ public static class Boons
         new BoonDefinition { Id = BoonId.StaticCharge, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Static Charge",
             Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster.",
             StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent },
+
+        // Ultimate (Hades' Calls): one per element, held one at a time. Each lends the Shadow Clone its element; the
+        // clone's own hits (KillSource.Clone) set off nothing else.
+        new BoonDefinition { Id = BoonId.PyreShadow, Element = Element.Fire, Slot = BoonSlot.Ultimate, Name = "Pyre Shadow",
+            Description = "Your <b>Shadow Clone</b>'s kills burst into flame, and it goes out in a great blast when your ultimate ends.",
+            StatLabel = "Blast radius:", Values = new[] { 1.6f, 1.9f, 2.2f }, Format = Plus },
+        new BoonDefinition { Id = BoonId.FrostShadow, Element = Element.Water, Slot = BoonSlot.Ultimate, Name = "Frost Shadow",
+            Description = "Unleashing your <b>Shadow Clone</b> freezes the whole army, and its kills may encase nearby samurai in ice.",
+            StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds },
+        new BoonDefinition { Id = BoonId.StormShadow, Element = Element.Lightning, Slot = BoonSlot.Ultimate, Name = "Storm Shadow",
+            Description = "Your <b>Shadow Clone</b>'s kills may arc lightning, and your <b>Ultimate</b> fills faster.",
+            StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent,
+            ExtraLabel = "Fill speed:", ExtraValues = new[] { 0.15f, 0.25f, 0.35f }, ExtraFormat = Percent },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
@@ -344,7 +359,7 @@ public static class Boons
                 if (loadout.Find(boon.Id) == null && boon.Requires(loadout)) capstones.Add(boon);
                 continue;
             }
-            if (loadout.BoonCount == 0 && boon.Slot == BoonSlot.Passive) continue;
+            if (loadout.BoonCount == 0 && (boon.Slot == BoonSlot.Passive || boon.Slot == BoonSlot.Ultimate)) continue;
             // Held boons are raised by Spirit Beads, not offered again.
             if (loadout.Find(boon.Id) != null) continue;
             if (boon.Id == BoonId.TidalRenewal && maxLives >= MaxLives) continue;

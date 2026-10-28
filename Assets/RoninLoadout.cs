@@ -17,7 +17,7 @@ public sealed class EquippedBoon
 // The boons the ronin holds this run: one per core slot plus any passives, and the stats they add up to.
 public sealed class RoninLoadout
 {
-    readonly EquippedBoon[] slots = new EquippedBoon[3];
+    readonly EquippedBoon[] slots = new EquippedBoon[4];
     readonly List<EquippedBoon> passives = new List<EquippedBoon>();
     readonly int[] elementCounts = new int[3];
 
@@ -52,6 +52,13 @@ public sealed class RoninLoadout
 
     // The boon's value at its current rarity, or 0 if the ronin doesn't have it.
     public float Value(BoonId id) => Find(id)?.Value ?? 0f;
+
+    // A held boon's second stat (Storm Shadow's fill speed), or 0.
+    public float Extra(BoonId id)
+    {
+        EquippedBoon held = Find(id);
+        return held?.Boon.ExtraValues != null ? held.Boon.ExtraValues[(int)held.Rarity] : 0f;
+    }
 
     public bool Has(BoonId id, out float value)
     {

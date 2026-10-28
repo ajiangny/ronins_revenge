@@ -131,7 +131,9 @@ public class BoonChoiceUI : MonoBehaviour
     float ultimateFire;
     bool ultimateWasReady;
     bool hudVisible = true;
-    static readonly Color UltimateColour = new Color(0.62f, 0.45f, 1f);
+    static readonly Color ShadowVioletColour = new Color(0.62f, 0.45f, 1f);
+    // Violet, or the element of the Ultimate slot's boon once he holds one.
+    Color UltimateColour = ShadowVioletColour;
     const int UltimateFlames = 16;
     // Kept faint: the fire says "ready" without pulling the eye off the field.
     const float UltimateFlameAlpha = 0.45f;
@@ -586,6 +588,18 @@ public class BoonChoiceUI : MonoBehaviour
             SetIcon(passiveIcons[i], passiveIcons[i].GetComponentInChildren<TextMeshProUGUI>(), boon, ColorOf(boon));
             passiveTips[i].text = boon.Name;
         }
+        RefreshUltimate(loadout.InSlot(BoonSlot.Ultimate));
+    }
+
+    // The medallion is the Ultimate slot: the Shadow Clone in violet, or its boon's icon in its element's colour.
+    void RefreshUltimate(EquippedBoon held)
+    {
+        if (ultimate == null) return;
+        BoonDefinition boon = held != null ? held.Boon : Boons.Get(BoonId.ShadowClone);
+        UltimateColour = held != null ? Boons.Info(held.Boon.Element).Color : ShadowVioletColour;
+        SetIcon(ultimateIcon, ultimateLetter, boon, UltimateColour);
+        ultimateCharge.color = UltimateColour;
+        ultimateTip.text = held != null ? $"{MenuUI.KeyCap("Q", false)}  Ultimate  ·  {held.Boon.Name}" : $"{MenuUI.KeyCap("Q", false)}  Ultimate";
     }
 
     const float CardX = 170f;

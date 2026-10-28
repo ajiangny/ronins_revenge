@@ -6,13 +6,15 @@ using UnityEngine.Serialization;
 
 // The moves his controls can fire, as flags for Ronin.Allowed.
 [Flags]
-public enum Moves { None = 0, Slash = 1, Shuriken = 2, Parry = 4, All = Slash | Shuriken | Parry }
+public enum Moves { None = 0, Slash = 1, Shuriken = 2, Parry = 4, Ultimate = 8, All = Slash | Shuriken | Parry | Ultimate }
 
 [RequireComponent(typeof(Rigidbody))]
 public class Ronin : MonoBehaviour
 {
     // The main attack on Space. The kunai is kept for a later weapon-select screen.
     public enum Weapon { Sword, Kunai }
+    // The ultimate chosen at the temple, kept in the save by its int: new ones go on the end.
+    public enum Ultimate { ShadowClone }
 
     // The teal of his spirit flames, before any element takes over.
     static readonly Color DefaultGlow = new Color(0.55f, 1f, 0.85f);
@@ -70,6 +72,12 @@ public class Ronin : MonoBehaviour
     [Tooltip("Arrows inside this radius around the ronin's upper body are deflected during the parry.")]
     [SerializeField] float parryRadius = 1.1f;
 
+    [Header("Ultimate (Q)")]
+    [Tooltip("Hits on samurai, scouts or a boss (his own blows, not boon effects or shadow slashes) to fill the bar.")]
+    [SerializeField] int ultimateHits = 40;
+    [Tooltip("Seconds a full bar lasts once the ultimate is unleashed.")]
+    [SerializeField] float ultimateDuration = 10f;
+
     public event Action Hit;
     // Raised on every swing (a slash or Kindling's fireball).
     public event Action Slashed;
@@ -82,6 +90,16 @@ public class Ronin : MonoBehaviour
     public event Action ParryFizzled;
 
     public bool ControlsEnabled { get; set; }
+    public Ultimate CurrentUltimate { get; set; }
+    // 0 empty, 1 full; while the ultimate runs it drains back to 0.
+    public float UltimateFill { get; private set; }
+    public bool UltimateActive { get; private set; }
+    public bool UltimateReady => !UltimateActive && UltimateFill >= 1f;
+    // The tutorial keeps the bar still, so its drills can't hand him a full one.
+    public bool UltimateLocked { get; set; }
+    public event Action UltimateFilled;
+    public event Action UltimateStarted;
+    public event Action UltimateEnded;
     // He walks his row but can't attack: choosing a portal between rounds.
     public bool MoveOnly { get; set; }
     // In a safe area (the temple) he walks anywhere inside RoamArea, up and down too, and can't fight. Nowhere else
@@ -215,6 +233,46 @@ public class Ronin : MonoBehaviour
         UpdateLoopClip();
     }
 
+    void OnEnable() => Kunai.Landed += ChargeUltimate;
+    void OnDisable() => Kunai.Landed -= ChargeUltimate;
+
+    // Each of his own blows on an enemy fills the bar a notch; boon effects and the shadow's slashes don't.
+    void ChargeUltimate(KillSource source, IHittable target)
+    {
+        if (UltimateActive || UltimateLocked || UltimateFill >= 1f || !Damage.Procs(source)) return;
+        if (!(target is Samurai || target is Scout || target is Boss || target is SpiritWolf)) return;
+        UltimateFill = Mathf.Min(1f, UltimateFill + 1f / Mathf.Max(1, ultimateHits));
+        if (UltimateFill >= 1f) UltimateFilled?.Invoke();
+    }
+
+    // Dev tools (F9): a full bar at once.
+    public void FillUltimate()
+    {
+        if (UltimateActive || UltimateFill >= 1f) return;
+        UltimateFill = 1f;
+        UltimateFilled?.Invoke();
+    }
+
+    // Unleashed: the shadow steps out across the field and swings with him until the bar runs dry.
+    void StartUltimate()
+    {
+        UltimateActive = true;
+        Sfx.Play(Sfx.MistSwirl, 0.9f, 1.2f);
+        CameraShake.Add(0.15f);
+        UltimateStarted?.Invoke();
+    }
+
+    // The bar drains only while he's fighting, so a talk, a pause or the walk between rounds doesn't waste it.
+    void UpdateUltimate()
+    {
+        if (!UltimateActive || !ControlsEnabled || MoveOnly || Roaming) return;
+        UltimateFill = Mathf.Max(0f, UltimateFill - Time.deltaTime / Mathf.Max(0.1f, ultimateDuration));
+        if (UltimateFill > 0f) return;
+        UltimateActive = false;
+        if (shadow != null && shadow.enabled) Fx.Play(Fx.SmokePuff, shadow.bounds.center, ShadowGlow, 1.4f);
+        UltimateEnded?.Invoke();
+    }
+
     bool songsLearned;
 
     // The Flute Songs bought on the hill, added on top of the scene's tuning. The scene reloads for every run, so
@@ -272,7 +330,9 @@ public class Ronin : MonoBehaviour
                 if (ParrySealed != null && ParrySealed()) SealedParry();
                 else StartParry();
             }
+            if (keyboard.qKey.wasPressedThisFrame && (Allowed & Moves.Ultimate) != 0 && UltimateReady) StartUltimate();
         }
+        UpdateUltimate();
         UpdateLoopClip();
     }
 
@@ -283,19 +343,19 @@ public class Ronin : MonoBehaviour
         UpdateShadowClone();
     }
 
-    // Shadow Clone: the shadow mirrors him across the middle of the view (CameraShake.Center, so a shake doesn't move
-    // it), drawn from his own frame flipped and darkened. It's only a picture: nothing collides with it. It shows while
-    // he's in control, and puffs into being the first time.
+    // The Shadow Clone ultimate: the shadow mirrors him across the middle of the view (CameraShake.Center, so a shake
+    // doesn't move it), drawn from his own frame flipped and darkened. It's only a picture: nothing collides with it.
+    // It shows while the ultimate runs and he's in control, and puffs into being each time it's unleashed.
     void UpdateShadowClone()
     {
-        bool show = ControlsEnabled && Loadout.Has(BoonId.ShadowClone, out _);
+        bool show = ControlsEnabled && UltimateActive && CurrentUltimate == Ultimate.ShadowClone;
         if (shadow == null)
         {
             if (!show) return;
             shadow = new GameObject("ShadowClone").AddComponent<SpriteRenderer>();
             shadowGlow = Kunai.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, new Color(ShadowGlow.r, ShadowGlow.g, ShadowGlow.b, 0.35f));
-            Fx.Play(Fx.SmokePuff, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y, 0f), ShadowGlow, 1.4f);
         }
+        if (show && !shadow.enabled) Fx.Play(Fx.SmokePuff, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y, 0f), ShadowGlow, 1.4f);
         shadow.enabled = shadowGlow.enabled = show;
         if (!show) return;
         shadow.sprite = sprite.sprite;

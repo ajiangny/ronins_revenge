@@ -34,6 +34,8 @@ public class Kunai : MonoBehaviour
     public KillSource Source { get; private set; } = KillSource.Kunai;
     // Raised with the contact point whenever this shot damages something (fireball and ice shard ripostes).
     public event Action<Vector3, IHittable> Impacted;
+    // Any of the ronin's projectiles has damaged something (it fills his ultimate).
+    public static event Action<KillSource, IHittable> Landed;
     // Ice shards encase a samurai before they hit it, so one they cut down freezes into an ice statue.
     public float FreezeOnHit { get; set; }
     // Piercing Slash: cuts through arrows (they break on it) instead of being stopped by them.
@@ -282,6 +284,7 @@ public class Kunai : MonoBehaviour
             if (FreezeOnHit > 0f && target is Samurai samurai) samurai.Encase(FreezeOnHit);
             target.TakeHit(Damage.Of(Source), Source);
             Impacted?.Invoke(transform.position, target);
+            Landed?.Invoke(Source, target);
             if (pierceLeft > 0)
             {
                 pierceLeft--;

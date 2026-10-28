@@ -218,6 +218,49 @@ public class GameUI : MonoBehaviour
 
         livesRow = CreateRect("LivesIcons", transform, new Vector2(0f, 0f), new Vector2(20, 6), new Vector2(400, LifeIconSize));
         hudParts.Add(livesRow.gameObject);
+        BuildUltimateBar();
+    }
+
+    // The ultimate's bar, an ink stroke beside the lives (past the most hearts he can hold): a dark empty stroke with
+    // the charge painted over it in the shadow's violet, and its name, or the key once it's full.
+    RectTransform ultimateBar;
+    Image ultimateFill;
+    Image ultimateGlow;
+    TextMeshProUGUI ultimateLabel;
+    bool ultimateWasReady;
+    const float UltimateBarWidth = 260f;
+    static readonly Color UltimateColour = new Color(0.62f, 0.45f, 1f);
+
+    void BuildUltimateBar()
+    {
+        ultimateBar = CreateRect("Ultimate", transform, new Vector2(0f, 0f), new Vector2(20 + Boons.MaxLives * (LifeIconSize + 6f) + 24f, 6), new Vector2(UltimateBarWidth, LifeIconSize));
+        hudParts.Add(ultimateBar.gameObject);
+        ultimateGlow = CreateRect("Glow", ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth + 90f, LifeIconSize + 60f)).gameObject.AddComponent<Image>();
+        ultimateGlow.sprite = ProceduralSprites.SoftGlow;
+        ultimateGlow.raycastTarget = false;
+        ultimateGlow.color = Color.clear;
+        Image empty = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth, LifeIconSize - 6f), new Color(0.03f, 0.02f, 0.05f, 0.8f));
+        empty.fillAmount = 1f;
+        ultimateFill = CreateInk(ultimateBar, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(UltimateBarWidth - 8f, LifeIconSize - 14f), UltimateColour);
+        ultimateFill.fillAmount = 0f;
+        ultimateLabel = CreateText("Label", new Vector2(0.5f, 0.5f), new Vector2(0, 1), new Vector2(UltimateBarWidth, LifeIconSize), 26, TextAlignmentOptions.Center, ultimateBar);
+        ultimateLabel.textWrappingMode = TextWrappingModes.NoWrap;
+        ultimateLabel.characterSpacing = 6;
+        Style(ultimateLabel, TextStyle.Hint);
+    }
+
+    // Called every frame with the ronin's bar. It glows and names its key while full, and chimes once as it fills.
+    public void SetUltimate(string name, float fill, bool ready, bool active)
+    {
+        if (ultimateBar == null) return;
+        ultimateFill.fillAmount = fill;
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 6f);
+        ultimateFill.color = ready ? Color.Lerp(UltimateColour, Color.white, 0.35f * pulse) : active ? Color.Lerp(UltimateColour, Color.white, 0.2f) : new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.75f);
+        ultimateGlow.color = ready ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.25f + 0.25f * pulse) : active ? new Color(UltimateColour.r, UltimateColour.g, UltimateColour.b, 0.18f) : Color.clear;
+        ultimateLabel.text = ready ? $"{MenuUI.KeyCap("Q", false)}  {name}" : name;
+        ultimateLabel.color = ready || active ? Color.white : MutedColour;
+        if (ready && !ultimateWasReady) Sfx.Play(Sfx.BladeRing, 0.6f, 1.4f);
+        ultimateWasReady = ready;
     }
 
     // Score, stage and lives; hidden behind the title menu.

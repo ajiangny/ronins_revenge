@@ -257,8 +257,9 @@ public static class Boons
         new BoonDefinition { Id = BoonId.EchoSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Echo Slash",
             Description = "A swing may send a ghostly second <b>Slash</b> that hunts down an enemy.",
             StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
+        // No longer drawn from scrolls: it's the Shadow Clone ultimate now (Ronin.Ultimate), kept here for its id and icon.
         new BoonDefinition { Id = BoonId.ShadowClone, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Shadow Clone",
-            Description = "Your shadow mirrors you across the field and <b>Slashes</b> whenever you do. Nothing can touch it.",
+            Description = "Your shadow mirrors you across the field and <b>Slashes</b> whenever you do, at half strength. Nothing can touch it.",
             StatLabel = "Shadows:", Values = new[] { 1f, 1f, 1f }, Format = Plus },
     };
 
@@ -277,7 +278,7 @@ public static class Boons
         var pool = new List<BoonDefinition>();
         foreach (BoonDefinition boon in All)
         {
-            if (boon.Kind == BoonKind.Art && loadout.Find(boon.Id) == null) pool.Add(boon);
+            if (boon.Kind == BoonKind.Art && boon.Id != BoonId.ShadowClone && loadout.Find(boon.Id) == null) pool.Add(boon);
         }
         var offers = new List<BoonOffer>();
         while (offers.Count < count && pool.Count > 0)

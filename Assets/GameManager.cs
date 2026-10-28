@@ -658,6 +658,7 @@ public class GameManager : MonoBehaviour
         ronin.RiposteImpact += OnRiposteImpact;
         ronin.FireballImpact += OnFireballImpact;
         ronin.RiposteTarget = RandomEnemy;
+        ronin.UltimateStarted += OnUltimateStarted;
         Blocker.Broken += OnBlockerBroken;
         IceStatue.Shattered += OnStatueShattered;
     }
@@ -672,6 +673,7 @@ public class GameManager : MonoBehaviour
         ronin.Parried -= OnParried;
         ronin.RiposteImpact -= OnRiposteImpact;
         ronin.FireballImpact -= OnFireballImpact;
+        ronin.UltimateStarted -= OnUltimateStarted;
         Blocker.Broken -= OnBlockerBroken;
         IceStatue.Shattered -= OnStatueShattered;
     }
@@ -808,7 +810,20 @@ public class GameManager : MonoBehaviour
             UpdateScouts();
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
+        ronin.UltimateLocked = tutorial.Active;
+        ui.SetUltimate(UltimateName(ronin.CurrentUltimate), ronin.UltimateFill, ronin.UltimateReady, ronin.UltimateActive);
     }
+
+    // The ultimates the temple offers, by Ronin.Ultimate: their names and what they do.
+    static string UltimateName(Ronin.Ultimate ultimate) => ultimate switch
+    {
+        _ => "SHADOW CLONE",
+    };
+
+    static string UltimateNote(Ronin.Ultimate ultimate) => ultimate switch
+    {
+        _ => "Fill the bar by striking foes, then press Q: your shadow slashes beside you at half strength until it drains.",
+    };
 
     // How far the army's lowest rank stands above the ronin's head, for the run log.
     float ArmyGap()
@@ -1378,6 +1393,22 @@ public class GameManager : MonoBehaviour
                 ShowRack(back, row);
             }, note));
         }
+        // The ultimate he carries out (only one so far): its bar fills as he strikes, Q unleashes it.
+        var ultimate = (Ronin.Ultimate)Save.Data.ultimate;
+        foreach (Ronin.Ultimate each in (Ronin.Ultimate[])System.Enum.GetValues(typeof(Ronin.Ultimate)))
+        {
+            int row = items.Count;
+            Ronin.Ultimate pick = each;
+            string name = $"ULTIMATE: {UltimateName(each)}";
+            items.Add(MenuUI.Item.Button(each == ultimate ? $"{name}  <color=#{muted}>·  CARRIED</color>" : name, () =>
+            {
+                Save.Data.ultimate = (int)pick;
+                Save.Write();
+                ronin.CurrentUltimate = pick;
+                Sfx.Play(Sfx.UiConfirm);
+                ShowRack(back, row);
+            }, UltimateNote(each)));
+        }
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
             startIndex >= 0 ? startIndex : (int)carried);
@@ -1591,6 +1622,7 @@ public class GameManager : MonoBehaviour
             }
         }
         if (keyboard.f8Key.wasPressedThisFrame) RunLog.Dump();
+        if (keyboard.f9Key.wasPressedThisFrame) ronin.FillUltimate();
         if (state != State.Playing) return;
         if (keyboard.f1Key.wasPressedThisFrame)
         {
@@ -1693,6 +1725,7 @@ public class GameManager : MonoBehaviour
         Upgrades.RefundRetired();
         ronin.LearnSongs();
         ronin.CurrentWeapon = (Ronin.Weapon)Save.Data.weapon;
+        ronin.CurrentUltimate = (Ronin.Ultimate)Save.Data.ultimate;
         lives = maxLives = Mathf.Clamp(startingLives + Upgrades.Rank(UpgradeId.IronWill) - Oaths.Rank(OathId.FrailBody), 1, Boons.MaxLives);
         Boss.HealthScale = 1f + Oaths.Rank(OathId.IronGenerals) * Oaths.BossHealthPerRank;
         noteFraction = 0f;
@@ -1871,6 +1904,11 @@ public class GameManager : MonoBehaviour
     void OnRiposteImpact(Vector3 point, IHittable target)
     {
         if (state == State.Playing) effects.OnRiposteImpact(point, target);
+    }
+
+    void OnUltimateStarted()
+    {
+        RunLog.Note($"ultimate: {UltimateName(ronin.CurrentUltimate)}");
     }
 
     void OnFireballImpact(Vector3 point, IHittable target)

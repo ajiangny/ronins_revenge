@@ -828,15 +828,10 @@ public class GameManager : MonoBehaviour
         boonChoice.UltimateShown = !tutorial.Active;
     }
 
-    // The ultimates the temple offers, by Ronin.Ultimate: their names and what they do.
+    // The ultimates, by Ronin.Ultimate, named for the run log.
     static string UltimateName(Ronin.Ultimate ultimate) => ultimate switch
     {
         _ => "SHADOW CLONE",
-    };
-
-    static string UltimateNote(Ronin.Ultimate ultimate) => ultimate switch
-    {
-        _ => "Fill the bar by striking foes, then press Q: your shadow slashes beside you at half strength until it drains.",
     };
 
     // How far the army's lowest rank stands above the ronin's head, for the run log.
@@ -1408,22 +1403,8 @@ public class GameManager : MonoBehaviour
                 ShowRack(back, row);
             }, note));
         }
-        // The ultimate he carries out (only one so far): its bar fills as he strikes, Q unleashes it.
-        var ultimate = (Ronin.Ultimate)Save.Data.ultimate;
-        foreach (Ronin.Ultimate each in (Ronin.Ultimate[])System.Enum.GetValues(typeof(Ronin.Ultimate)))
-        {
-            int row = items.Count;
-            Ronin.Ultimate pick = each;
-            string name = $"ULTIMATE: {UltimateName(each)}";
-            items.Add(MenuUI.Item.Button(each == ultimate ? $"{name}  <color=#{muted}>·  CARRIED</color>" : name, () =>
-            {
-                Save.Data.ultimate = (int)pick;
-                Save.Write();
-                ronin.CurrentUltimate = pick;
-                Sfx.Play(Sfx.UiConfirm);
-                ShowRack(back, row);
-            }, UltimateNote(each)));
-        }
+        // The ultimate (SaveData.ultimate) isn't offered here while Shadow Clone is the only one; it comes back once
+        // there are more to choose between.
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
             startIndex >= 0 ? startIndex : (int)carried);

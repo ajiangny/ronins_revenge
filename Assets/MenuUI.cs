@@ -19,8 +19,13 @@ public class MenuUI : MonoBehaviour
         public Action<float> set;
         // A line shown under the rows while this item is selected (the Flute Songs' effects).
         public string note;
+        // Table rows (the Flute Songs): a right-aligned value, and rank pips.
+        public string detail;
+        public int pips;
+        public int pipsMax;
 
         public bool IsSlider => set != null;
+        public bool IsTableRow => detail != null || pipsMax > 0;
 
         public static Item Button(string label, Action chosen, string note = null) => new Item { label = label, chosen = chosen, note = note };
         public static Item Slider(string label, Func<float> get, Action<float> set) => new Item { label = label, get = get, set = set };
@@ -32,6 +37,14 @@ public class MenuUI : MonoBehaviour
     const float RowWidth = 760f;
     // Grid pages (more rows than fit in a column) use narrower cells side by side.
     const float GridCellWidth = 620f;
+    // A table page (any table row) is denser and wider, so its columns line up and the page fits with its note line.
+    const float TableRowHeight = 66f;
+    const float TableCellWidth = 740f;
+    const float TableFontSize = 36f;
+    // Right-hand columns of a table row, from the cell's right edge: the value, then the pips.
+    const float DetailWidth = 110f;
+    const float PipSize = 13f;
+    const float PipSpacing = 24f;
     const float GridGap = 70f;
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
@@ -53,6 +66,7 @@ public class MenuUI : MonoBehaviour
         public RectTransform fill;
         public Image fillImage;
         public TextMeshProUGUI value;
+        public TextMeshProUGUI detail;
         public float shownSelect;
     }
 
@@ -90,6 +104,11 @@ public class MenuUI : MonoBehaviour
     bool leaving;
     float leftAt;
     int columns = 1;
+    // Set while the page has table rows: shorter, wider cells with left-aligned labels.
+    bool table;
+    // A looping icon just left of the body's first line (the Flute Songs' Spirit Notes).
+    Image bodyIcon;
+    SpriteAnimatorUI bodyIconAnimator;
     int selected;
     int heardSelection;
     float shownAt;
@@ -104,12 +123,14 @@ public class MenuUI : MonoBehaviour
 
     // Opens a page, replacing whatever page was showing. `back` runs on Esc / gamepad B; null means Esc does nothing.
     // The title is white (ink on paper) unless given a colour. A `paper` page sits on the title screen's white page
-    // instead of over the dimmed game. With more than one column the items fill a grid row by row.
+    // instead of over the dimmed game. With more than one column the items fill a grid row by row. `bodyIcon` loops
+    // just left of the body's first line.
     public void Show(string title, string body, Item[] pageItems, Action onBack, int startIndex = 0, Color titleColour = default,
-        bool paper = false, int gridColumns = 1)
+        bool paper = false, int gridColumns = 1, Sprite[] bodyIconFrames = null)
     {
         items = pageItems;
         columns = Mathf.Max(1, gridColumns);
+        table = Array.Exists(items, item => item.IsTableRow);
         back = onBack;
         SetLight(false);
         SetPaper(paper);
@@ -133,9 +154,12 @@ public class MenuUI : MonoBehaviour
         // Stack title, body and rows down from the top, then centre the whole block on screen.
         const float titleHeight = 150f;
         float bodyHeight = bodyText.gameObject.activeSelf ? bodyText.GetPreferredValues(bodyText.text, 1200f, 0f).y : 0f;
-        float rowsHeight = GridRows * RowHeight;
+        float rowsHeight = GridRows * PageRowHeight;
         float gap = 36f;
-        float total = titleHeight + (bodyHeight > 0f ? bodyHeight + gap : 0f) + gap + rowsHeight;
+        // The selected item's note sits just under the rows, so it can never run into the last one.
+        const float noteHeight = 60f;
+        bool hasNote = noteText.gameObject.activeSelf;
+        float total = titleHeight + (bodyHeight > 0f ? bodyHeight + gap : 0f) + gap + rowsHeight + (hasNote ? gap / 2f + noteHeight : 0f);
         float y = total / 2f + 30f;
 
         titleReveal.anchoredPosition = new Vector2(0, y - titleHeight / 2f);
@@ -149,13 +173,44 @@ public class MenuUI : MonoBehaviour
             y -= bodyHeight + gap;
         }
         rowsRoot.anchoredPosition = new Vector2(0, y);
+        noteText.rectTransform.anchoredPosition = new Vector2(0, y - rowsHeight - gap / 2f);
+        noteText.rectTransform.sizeDelta = new Vector2(1600f, noteHeight);
 
         // Active before the rows are built, so their labels can be measured to place the markers.
         dim.color = paper ? Color.clear : new Color(0.02f, 0.01f, 0.04f, 0.8f);
         page.SetAsLastSibling();
         page.gameObject.SetActive(true);
+        PlaceBodyIcon(bodyIconFrames);
         BuildRows();
         Animate(0f);
+    }
+
+    // Puts the icon in a gap opened at the start of the body's first line, sized to that line, so the line and its icon
+    // stay centred together.
+    void PlaceBodyIcon(Sprite[] frames)
+    {
+        bool shown = frames != null && frames.Length > 0 && bodyText.gameObject.activeSelf;
+        bodyIcon.gameObject.SetActive(shown);
+        bodyIconAnimator.Play(shown ? frames : null, 8f);
+        if (!shown) return;
+        bodyText.ForceMeshUpdate(true);
+        TMP_LineInfo line = bodyText.textInfo.lineInfo[0];
+        float size = (line.ascender - line.descender) * 1.2f;
+        bodyText.text = $"<space={size + 12f:0}>" + bodyText.text;
+        bodyText.ForceMeshUpdate(true);
+        line = bodyText.textInfo.lineInfo[0];
+        // The first visible character after the gap.
+        float left = line.lineExtents.max.x;
+        for (int i = line.firstCharacterIndex; i <= line.lastCharacterIndex; i++)
+        {
+            TMP_CharacterInfo character = bodyText.textInfo.characterInfo[i];
+            if (!character.isVisible) continue;
+            left = character.bottomLeft.x;
+            break;
+        }
+        bodyIcon.sprite = frames[0];
+        bodyIcon.rectTransform.sizeDelta = new Vector2(size, size);
+        bodyIcon.rectTransform.anchoredPosition = new Vector2(left - 12f - size / 2f, (line.ascender + line.descender) / 2f);
     }
 
     // The title screen, laid out like a Final Fantasy title: the game's logo centred high on a paper-white page and
@@ -165,6 +220,7 @@ public class MenuUI : MonoBehaviour
     {
         items = pageItems;
         columns = 1;
+        table = false;
         back = null;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
@@ -424,11 +480,12 @@ public class MenuUI : MonoBehaviour
     Vector2 CellPosition(int index, float rowHeight)
     {
         int column = index % columns;
-        float x = (column - (columns - 1) / 2f) * (GridCellWidth + GridGap);
+        float x = (column - (columns - 1) / 2f) * (CellWidth + GridGap);
         return new Vector2(columns > 1 ? x : 0f, -rowHeight * (index / columns + 0.5f));
     }
 
-    float CellWidth => light ? LightRowWidth : columns > 1 ? GridCellWidth : RowWidth;
+    float CellWidth => light ? LightRowWidth : table ? TableCellWidth : columns > 1 ? GridCellWidth : RowWidth;
+    float PageRowHeight => light ? LightRowHeight : table ? TableRowHeight : RowHeight;
 
     void Nudge(float amount)
     {
@@ -464,7 +521,7 @@ public class MenuUI : MonoBehaviour
             hintText.alpha = 0.55f * Chrome;
             figure.color = new Color(1f, 1f, 1f, rise);
         }
-        float rowHeight = light ? LightRowHeight : RowHeight;
+        float rowHeight = PageRowHeight;
 
         for (int i = 0; i < rows.Count; i++)
         {
@@ -484,7 +541,8 @@ public class MenuUI : MonoBehaviour
                 row.label.rectTransform.anchoredPosition = new Vector2(8f * k, 0);
                 continue;
             }
-            row.root.localScale = Vector3.one * (1f + 0.08f * k);
+            // A table row barely grows, so its columns stay in line with the rows around it.
+            row.root.localScale = Vector3.one * (1f + (table ? 0.02f : 0.08f) * k);
             if (row.bar.type == Image.Type.Filled) row.bar.fillAmount = k;
             else row.bar.rectTransform.sizeDelta = new Vector2(CellWidth * k, row.bar.rectTransform.sizeDelta.y);
             row.label.color = onPaper ? Color.Lerp(Ink, InkAccent, k) : Color.Lerp(Idle, Color.white, k);
@@ -507,7 +565,7 @@ public class MenuUI : MonoBehaviour
         rows.Clear();
 
         float rowWidth = CellWidth;
-        float rowHeight = light ? LightRowHeight : RowHeight;
+        float rowHeight = PageRowHeight;
         for (int i = 0; i < items.Length; i++)
         {
             var row = new Row();
@@ -517,7 +575,7 @@ public class MenuUI : MonoBehaviour
 
             if (light || onPaper)
             {
-                row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, RowHeight - 14f)).gameObject.AddComponent<Image>();
+                row.bar = GameUI.CreateRect("Bar", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(0, rowHeight - 14f)).gameObject.AddComponent<Image>();
                 row.bar.sprite = ProceduralSprites.White;
                 row.bar.color = new Color(Accent.r, Accent.g, Accent.b, light ? 0f : 0.14f);
                 row.bar.raycastTarget = false;
@@ -526,7 +584,7 @@ public class MenuUI : MonoBehaviour
             {
                 // Over the dimmed game the selection is a stroke of red ink, like the stage and boon cards; it paints
                 // on from the left as the marker arrives.
-                row.bar = GameUI.CreateInk(row.root, new Vector2(0.5f, 0.5f), new Vector2(30f, 0), new Vector2(rowWidth + 60f, RowHeight + 10f),
+                row.bar = GameUI.CreateInk(row.root, new Vector2(0.5f, 0.5f), new Vector2(30f, 0), new Vector2(rowWidth + 60f, rowHeight + 10f),
                     new Color(Accent.r, Accent.g, Accent.b, 0.38f));
             }
 
@@ -538,11 +596,14 @@ public class MenuUI : MonoBehaviour
             marker.raycastTarget = false;
 
             bool slider = items[i].IsSlider;
-            // Title-page labels line up on their left edge, like a classic JRPG menu; the rest are centred.
-            bool left = slider || light;
+            // Title-page labels line up on their left edge, like a classic JRPG menu, and so do a table's, so its
+            // columns read down the page; the rest are centred.
+            bool left = slider || light || table;
+            float labelWidth = slider ? 300f : table ? rowWidth - 76f - DetailWidth - 3 * PipSpacing - 40f : rowWidth;
             row.label = GameUI.CreateText(row.root, ui.BodyFont, "Label", new Vector2(left ? 0f : 0.5f, 0.5f),
-                slider ? new Vector2(76f, 0) : Vector2.zero, new Vector2(slider ? 300f : rowWidth, rowHeight), light ? 40 : 44,
+                slider || table ? new Vector2(76f, 0) : Vector2.zero, new Vector2(labelWidth, rowHeight), light ? 40 : table ? TableFontSize : 44,
                 left ? TextAlignmentOptions.Left : TextAlignmentOptions.Center);
+            if (table) row.label.textWrappingMode = TextWrappingModes.NoWrap;
             row.label.text = items[i].label;
             row.label.characterSpacing = 6;
             ui.Style(row.label, TextStyle.Heading);
@@ -552,6 +613,11 @@ public class MenuUI : MonoBehaviour
             if (light)
             {
                 row.marker.anchoredPosition = new Vector2(-rowWidth / 2f - 30f, 0);
+            }
+            else if (table)
+            {
+                row.marker.anchoredPosition = new Vector2(-rowWidth / 2f + 44f, 0);
+                BuildTableColumns(row, items[i], rowHeight);
             }
             else if (!slider)
             {
@@ -582,6 +648,36 @@ public class MenuUI : MonoBehaviour
                 }
             }
             rows.Add(row);
+        }
+    }
+
+    // A table row's right-hand columns: the value right-aligned at the edge, and the rank pips (small diamonds like the
+    // marker, lit for each rank held) in a column of their own left of it.
+    void BuildTableColumns(Row row, Item item, float rowHeight)
+    {
+        Color ink = onPaper ? Ink : Idle;
+        if (item.detail != null)
+        {
+            row.detail = GameUI.CreateText(row.root, ui.BodyFont, "Detail", new Vector2(1f, 0.5f), new Vector2(-24f, 0),
+                new Vector2(DetailWidth, rowHeight), TableFontSize, TextAlignmentOptions.Right);
+            row.detail.textWrappingMode = TextWrappingModes.NoWrap;
+            row.detail.richText = true;
+            row.detail.text = item.detail;
+            row.detail.color = ink;
+            ui.Style(row.detail, TextStyle.Heading);
+            if (onPaper) row.detail.fontSharedMaterial = row.detail.font.material;
+        }
+        float pipsRight = -24f - DetailWidth - 28f;
+        for (int p = 0; p < item.pipsMax; p++)
+        {
+            float x = pipsRight - (item.pipsMax - 1 - p) * PipSpacing - PipSize / 2f;
+            RectTransform pip = GameUI.CreateRect("Pip", row.root, new Vector2(1f, 0.5f), new Vector2(x, 0), new Vector2(PipSize, PipSize));
+            pip.pivot = new Vector2(0.5f, 0.5f);
+            pip.localRotation = Quaternion.Euler(0, 0, 45f);
+            Image image = pip.gameObject.AddComponent<Image>();
+            image.raycastTarget = false;
+            bool lit = p < item.pips;
+            image.color = new Color(ink.r, ink.g, ink.b, lit ? 0.9f : 0.3f);
         }
     }
 
@@ -620,6 +716,13 @@ public class MenuUI : MonoBehaviour
         bodyText.rectTransform.pivot = new Vector2(0.5f, 1f);
         bodyText.richText = true;
         ui.Style(bodyText, TextStyle.Body);
+        // Anchored at the body's pivot (its top centre), the space its text is laid out in.
+        bodyIcon = GameUI.CreateRect("BodyIcon", bodyText.transform, new Vector2(0.5f, 1f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+        bodyIcon.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        bodyIcon.preserveAspect = true;
+        bodyIcon.raycastTarget = false;
+        bodyIconAnimator = bodyIcon.gameObject.AddComponent<SpriteAnimatorUI>();
+        bodyIcon.gameObject.SetActive(false);
 
         rowsRoot = GameUI.CreateRect("Items", page, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(RowWidth, 0f));
         rowsRoot.pivot = new Vector2(0.5f, 1f);
@@ -628,8 +731,10 @@ public class MenuUI : MonoBehaviour
             28, TextAlignmentOptions.Bottom);
         hintText.color = GameUI.MutedColour;
         ui.Style(hintText, TextStyle.Hint);
-        noteText = GameUI.CreateText(page, ui.BodyFont, "Note", new Vector2(0.5f, 0f), new Vector2(0, 98f), new Vector2(1600f, 60f),
-            34, TextAlignmentOptions.Bottom);
+        noteText = GameUI.CreateText(page, ui.BodyFont, "Note", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1600f, 60f),
+            34, TextAlignmentOptions.Center);
+        // Placed under the rows by Show, by its top edge.
+        noteText.rectTransform.pivot = new Vector2(0.5f, 1f);
         noteText.richText = true;
 
         paper.gameObject.SetActive(false);

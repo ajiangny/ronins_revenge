@@ -880,8 +880,9 @@ public class GameManager : MonoBehaviour
             new[] { MenuUI.Item.Button("BACK", back) }, back, paper: paper);
     }
 
-    // The shop on the hill: each song's name, ranks learned and the price of the next; the line under the rows says
-    // what the selected one does. A maxed song toggles on and off instead.
+    // The shop on the hill, laid out as a table: each song's name, its ranks as pips and the price of the next in Spirit
+    // Notes; the line under the rows says what the selected one does. A maxed song toggles on and off instead. The
+    // notes held sit under the title beside their icon.
     void ShowSongs(System.Action back, int startIndex = 0)
     {
         bool paper = OnPaper;
@@ -896,17 +897,21 @@ public class GameManager : MonoBehaviour
             int row = items.Count;
             int bought = Upgrades.Bought(id);
             bool maxed = Upgrades.Maxed(id);
-            string pips = $"<color=#{muted}>{bought}/{song.MaxRank}</color>";
-            string price = maxed ? (Upgrades.IsOff(id) ? "OFF" : "") : $"<color=#{(Upgrades.CanBuy(id) ? noteHex : muted)}>{Upgrades.Price(id)}</color>";
+            bool affordable = Upgrades.CanBuy(id);
+            string price = maxed ? (Upgrades.IsOff(id) ? $"<color=#{muted}>OFF</color>" : "") : $"<color=#{(affordable ? noteHex : muted)}>{Upgrades.Price(id)}</color>";
             string note = maxed
                 ? $"{song.Effect(song.MaxRank)}   <color=#{muted}>·  Enter switches it {(Upgrades.IsOff(id) ? "on" : "off")}</color>"
                 : $"{song.Effect(bought + 1)}   <color=#{muted}>·  {(Upgrades.CanBuy(id) ? "Enter to learn" : "not enough notes")}</color>";
-            items.Add(MenuUI.Item.Button($"{song.Name.ToUpperInvariant()}  {pips}  {price}", () =>
+            MenuUI.Item item = MenuUI.Item.Button(song.Name.ToUpperInvariant(), () =>
             {
                 if (maxed) Upgrades.Toggle(id);
                 else if (Upgrades.Buy(id)) Sfx.Play(Sfx.SoulCollect);
                 ShowSongs(back, row);
-            }, note));
+            }, note);
+            item.detail = price;
+            item.pips = bought;
+            item.pipsMax = song.MaxRank;
+            items.Add(item);
         }
         int refundRow = items.Count;
         items.Add(MenuUI.Item.Button("REFUND ALL", () =>
@@ -916,8 +921,8 @@ public class GameManager : MonoBehaviour
         }, $"Forget every song and take back {Upgrades.Spent} notes"));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("FLUTE SONGS",
-            $"<color=#{noteHex}>{Save.Data.embers} SPIRIT NOTES</color>\n<size=30><color=#{muted}>Songs Shirogane taught him on her flute. They stay with him through every run.</color></size>",
-            items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
+            $"<color=#{noteHex}><size=56>{Save.Data.embers}</size></color>   <color=#{muted}><size=26>SPIRIT NOTES</size></color>",
+            items.ToArray(), back, startIndex, paper: paper, gridColumns: 2, bodyIconFrames: NoteIcon);
     }
 
     // Three journeys side by side, like Hades' save profiles. An empty one is a new game, which starts on the hill
@@ -2285,6 +2290,8 @@ public class GameManager : MonoBehaviour
     }
 
     static Color NoteColour => OniColour;
+    // The Spirit Notes' icon, looped: the PixelLab art, or a drawn note without it.
+    Sprite[] NoteIcon => noteFrames != null && noteFrames.Length > 0 ? noteFrames : new[] { ProceduralSprites.Note(1) };
     static readonly Color SpringColour = new Color(1f, 0.4f, 0.45f);
     static readonly Color BossPortalColour = new Color(0.85f, 0.15f, 0.2f);
 
@@ -2313,7 +2320,7 @@ public class GameManager : MonoBehaviour
         PortalReward.Soul => ArtFor(element)?.soulFrames,
         PortalReward.Scroll => scrollFrames,
         PortalReward.Bead => beadFrames,
-        PortalReward.Notes => noteFrames != null && noteFrames.Length > 0 ? noteFrames : new[] { ProceduralSprites.Note(1) },
+        PortalReward.Notes => NoteIcon,
         PortalReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
         PortalReward.Boss => BossIconOf(stages[stageIndex].boss),
         _ => null,

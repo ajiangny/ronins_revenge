@@ -351,6 +351,15 @@ public class Ronin : MonoBehaviour
     // Ends his hit flash's invulnerability at once, so a scripted blow (the tutorial's spear) always lands.
     public void ClearInvulnerable() => invulnerableUntil = 0f;
 
+    public float ParryRadius => parryRadius;
+
+    // The tutorial's held parry: whatever the cooldown says, he parries now.
+    public void ParryNow()
+    {
+        lastParry = float.NegativeInfinity;
+        StartParry();
+    }
+
     public bool Parrying => Time.time < parryUntil;
 
     // A samurai lunging or diving at him met the parry: the clash lands like a parried arrow (the parry is ready

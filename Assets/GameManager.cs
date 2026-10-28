@@ -3262,13 +3262,14 @@ public class GameManager : MonoBehaviour
 
     // One of Poguru's lines as a bark: voiced when its clip is there, subtitled, his mouth moving. Returns how long it
     // takes to say; 0 when it isn't written.
-    public float Bark(string id)
+    public float Bark(string id, bool subtitled = true)
     {
         Conversation said = Dialogue.Find(id);
-        return said != null && said.Lines.Length > 0 ? SayAsPoguru(said) : 0f;
+        return said != null && said.Lines.Length > 0 ? SayAsPoguru(said, subtitled) : 0f;
     }
 
-    float SayAsPoguru(Conversation said)
+    // Unsubtitled when the words are shown elsewhere (the tutorial's parry prompt), so the plate covers nothing.
+    float SayAsPoguru(Conversation said, bool subtitled = true)
     {
         AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(0)) : null;
         string text = Dialogue.Fill(said.Lines[0].Text, Dialogue.Context());
@@ -3280,7 +3281,7 @@ public class GameManager : MonoBehaviour
             poguruVoice.clip = clip;
             poguruVoice.Play();
         }
-        ui.ShowSubtitle("Poguru", text, PoguruColour, seconds + 0.6f);
+        if (subtitled) ui.ShowSubtitle("Poguru", text, PoguruColour, seconds + 0.6f);
         poguru.Talk(seconds);
         return seconds + 0.3f;
     }
@@ -3307,6 +3308,18 @@ public class GameManager : MonoBehaviour
         to.z = 0f;
         spear.Launch(to.normalized * speed, 2f);
         return spear;
+    }
+
+    // The tutorial's last straggler: a foot soldier's art and an ordinary arrow.
+    public CharacterArt FootSoldierArt => army.samuraiByRow[army.samuraiByRow.Length - 1];
+    public Arrow ArrowPrefab => army.samuraiPrefab.arrowPrefab;
+
+    // Holds the field still for a lesson that waits on the player (the tutorial's parry): no pause menu meanwhile,
+    // since its Resume would let time run on.
+    public void HoldForLesson(bool hold)
+    {
+        state = hold ? State.Dialogue : State.Playing;
+        Time.timeScale = hold ? 0f : 1f;
     }
 
     // At least this many lives, so a lesson's blow can't end the run.

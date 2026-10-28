@@ -34,6 +34,15 @@ public class GameUI : MonoBehaviour
     public Sprite LifeIcon => lifeIcon;
     // The lives row, which Poguru's hearts lesson lifts out of a talk's dark.
     public RectTransform LivesRow => livesRow;
+
+    // A world point on this canvas, for UI hung beside something in the field.
+    public Vector2 CanvasPoint(Vector3 world)
+    {
+        Canvas canvas = GetComponent<Canvas>();
+        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)transform, Camera.main.WorldToScreenPoint(world), uiCamera, out Vector2 local);
+        return local;
+    }
     public TMP_FontAsset BodyFont => bodyFontBaked != null ? bodyFontBaked : BuildFont(bodyFont, ref bodyAsset, BodySampling, BodyPadding);
     public TMP_FontAsset TitleFont => headerFontBaked != null ? headerFontBaked : BuildFont(headerFont, ref headerAsset, HeaderSampling, HeaderPadding);
     public const int BodySampling = 72, BodyPadding = 12, HeaderSampling = 90, HeaderPadding = 16;

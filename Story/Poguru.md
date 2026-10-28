@@ -75,20 +75,23 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 | `Poguru_Tut_Again` | P: "Oni! Army! Again! Want the lesson again? I LOVE the lesson." |
 | `Poguru_Tut_Yay` | P: "Yay! Stay close to me. I mean, I'll stay close to you!" |
 | `Poguru_Tut_Skip` | P: "Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly." |
-| `Poguru_Tut_Basics` | P: "Bad guys up there, you down here. They march down, you stop them!" · P: "This is SLASH. Press SPACE and a cut flies up. Whoosh!" · P: "Your Spirit SHURIKEN! Press W. Big and sparkly, but it needs a little nap after." · P: "And PARRY! Press SHIFT just before an arrow bonks you, and it goes right back at them!" · P: "Beat the whole army. I'll float nearby and bonk arrows. ...Try not to make me bonk too many." |
+| `Poguru_Tut_Basics` | P: "Bad guys up there, you down here. They march down, you stop them!" · P: "This is your SLASH! Your sword sends a cut flying up the field. Whoosh!" · P: "Your Spirit SHURIKEN! Big and sparkly, but it needs a little nap after." · P: "And PARRY! Time it just before an arrow bonks you, and it goes right back at them!" (no keys in his words: they show beside the slot he points at) · P: "Beat the whole army. I'll float nearby and bonk arrows. ...Try not to make me bonk too many." |
 | `Poguru_Block_1` | P: "Bonk! Got it!" |
 | `Poguru_Block_3` | P: "Ow. Okay. Still fine!" |
 | `Poguru_Block_6` | P: "Oni, you can ALSO move, you know!" |
 | `Poguru_Block_10` | P: "My HEAD is not a SHIELD!" |
 | `Poguru_Block_Break` | P: "That's it! Dragon break! You're on your own for five seconds!" |
 | `Poguru_Block_Back` | P: "...Fine. FINE. I'm back. Hmph." |
+| `Poguru_Tut_Win` | P: "We did it! Victory wiggle! Wiggle wiggle wiggle..." (he's celebrating, so the straggler's arrow gets past him) |
+| `Poguru_Tut_Parry` | P: "ONI! ONE MORE! PARRY IT!!" (the field holds still until Oni parries) |
+| `Poguru_Tut_Parried` | P: "WHOA! Right back at him! See? You DO remember!" |
 | `Poguru_Tut_LookOut` | P: "LOOK OUT!!!" |
 | `Poguru_Tut_Hearts` | P: "Waaah! It went right through me! Are you okay?!" · Oni: "...Fine." · P: "Those hearts in the corner are your lives. Lose them all and it's back to the temple. It's damp there." · P: "Good news! I've been saving a heart soul. For emergencies. This is an emergency!" · P: "Hearts fall out of broken cover sometimes. Once in a blue moon a soldier drops one too!" |
 | `Poguru_Tut_Collect` | P: "Go get it! It's on your row!" |
 | `Poguru_Tut_Collected` | P: "Yummy! I mean... healthy!" |
 | `Poguru_Tut_Reward` | P: "Ooooo! Pretty cool soul!" · P: "Wait... it looks like someone familiar..." |
-| `Poguru_Tut_Boons` | P: "Souls lend you their power. That's a boon!" · P: "Pick ONE. Up and down to look, ENTER to take it." · P: "They change your slash, shuriken or parry. Or pick the shiniest. That's what I'd do." |
-| `Poguru_Tut_Paths` | P: "Paths! Each leads to your next fight. What's floating in it is your prize for winning." · P: "Walk under one and press E. After a few rounds, one of them leads to the boss!" |
+| `Poguru_Tut_Boons` | P: "Souls lend you their power. That's a boon!" · P: "Pick ONE. Look them all over, then take the one you like best!" · P: "They change your slash, shuriken or parry. Or pick the shiniest. That's what I'd do." |
+| `Poguru_Tut_Paths` | P: "Paths! Each leads to your next fight. What's floating in it is your prize for winning." · P: "Walk under the one you want, and off we go! After a few rounds, one of them leads to the boss!" |
 | `Poguru_Tut_Done` | P: "Looks like you DO remember how to fight!" · P: "Let's hurry and free everyone!!" · Oni: "...Back in the wisp." · P: "Going! Shutting up! ...Mostly!" |
 
 ### Barks (subtitles; he pops out of the wisp, then back in)

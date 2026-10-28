@@ -493,6 +493,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 4468fc1d346a54a95a577ec847544f03, type: 3}
   - id: Poguru_Tut_LookOut
     clip: {fileID: 8300000, guid: 8655ca69f0f6242c0ad348bfb7e94c05, type: 3}
+  - id: Poguru_Tut_Parried
+    clip: {fileID: 8300000, guid: 9a8cc627509d84336ab57eda14272364, type: 3}
+  - id: Poguru_Tut_Parry
+    clip: {fileID: 8300000, guid: da1bc9090c8d54931b9c4d75382cb796, type: 3}
   - id: Poguru_Tut_Paths
     clip: {fileID: 8300000, guid: 054e5b55978884464a689f4e6e0f8ed2, type: 3}
   - id: Poguru_Tut_Paths_2
@@ -511,6 +515,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 97226c2a7bbdc441788f13902f4f581f, type: 3}
   - id: Poguru_Tut_Wake_4
     clip: {fileID: 8300000, guid: c13dac42c89964b8e9afbc06d5ab25c8, type: 3}
+  - id: Poguru_Tut_Win
+    clip: {fileID: 8300000, guid: be9728584e0564a02a530bf8c3deaf39, type: 3}
   - id: Poguru_Tut_Yay
     clip: {fileID: 8300000, guid: ed3dc6d8b64d74344a508782077175bb, type: 3}
   - id: Poguru_Wake_Army

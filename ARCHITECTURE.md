@@ -84,11 +84,19 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   `BeginRound` → `Offer` (after `ClearProjectiles`, before the army: Poguru pops out, `Poguru_Tut_Wake`/`_Again`, then a
   `MenuUI` page DO YOU REMEMBER? with TUTORIAL / SKIP, Esc skipping; TUTORIAL sets `tutorialReplay` so a death offers it
   again, SKIP settles it) → `ArmyArrived` (after `HideBanner`, round 0: a `keepHud` talk with Poguru on the right, the
-  HUD slots lifted onto `DialogueScene.Overlay` by `BoonChoiceUI.LiftSlots` and a pointer of his `point` frames, or a
-  teal arrow, bobbing beside each slot as `TalkOptions.onLine` names it) → `RoundStarted` (after `army.Advance`:
+  HUD slots lifted onto `DialogueScene.Overlay` by `BoonChoiceUI.LiftSlots` and raised `SlotRise` clear of the plate, and a
+  pointer of his `point` frames, or a teal arrow, bobbing beside each slot as `TalkOptions.onLine` names it, with that
+  ability's keys as key caps beside it (`Tutorial.Keys`; his lines never name keys)) → `RoundStarted` (after `army.Advance`:
   `Poguru.Guard`, with `Poguru_Block_1/3/6/10` barks and a 5 s `DragonBreak` at 15, back counting from 10) →
   `OnArmyDefeated` runs `TutorialRoundEnd` instead of `EndRound` for round 0: `SpearAndHeart` (still `Playing`, so the
-  hit counts; skipped if `MaxLives < 2`): `EnsureLives(2)`, pops every arrow, `SpawnSpear` (unbreakable, unparryable,
+  hits count) pops every arrow and opens on `ParryLesson`: Poguru stops guarding and cheers (`Poguru_Tut_Win`), a
+  `Straggler` (`Straggler.cs`, a code-built foot soldier and `IHittable`, `FootSoldierArt`) runs in from the top and shoots
+  one plain arrow (`ArrowPrefab`) at Oni; once it's within `Ronin.ParryRadius` + 0.7 `GameManager.HoldForLesson` stops
+  time (`State.Dialogue`, so no pause menu), his controls go off, Poguru's yell is voiced only (`Bark(id, false)`) and
+  shown with the parry keys beside Oni on the side away from the arrow, and only a parry press (or `Tutorial.PressParry`
+  from a test harness) lets go into `Ronin.ParryNow`; `Ronin.RiposteTarget` homes the riposte on the straggler, a missed or
+  dodged shot is shot again, and `Poguru_Tut_Parried` follows. Then the spear (skipped if `MaxLives < 2`):
+  `EnsureLives(2)`, `SpawnSpear` (unbreakable, unparryable,
   homing) from the far top corner while he dashes into its path at 0.35× time, ghosts, and `ForceHit` lands it through
   god mode and blink if it hasn't in 2.5 s; then `Poguru_Tut_Hearts` (lives row lifted onto the overlay and pointed
   at), `SpawnHeart` on Oni's row, waits for it → `GrantReward` → `RewardShown` (a talk while the `RewardSpirit`

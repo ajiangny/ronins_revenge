@@ -1,5 +1,7 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // Poguru's first-run tutorial, in place of Stage I, Round 1 (Story/Poguru.md). He pops out of Oni's wisp before the
@@ -14,6 +16,9 @@ public class Tutorial : MonoBehaviour
     const float SpearTimeout = 2.5f;
     const float SlowMotion = 0.35f;
     const float PointerSize = 96f;
+    // How far the lifted ability slots rise during the controls talk, so the lowest (parry) and its keys clear the
+    // talk's plate.
+    const float SlotRise = 130f;
     // His annoyance barks, by arrows bonked; at the break he sulks for a few seconds, then comes back counting from 10.
     static readonly int[] BlockBarks = { 1, 3, 6, 10 };
     const int BreakAt = 15;
@@ -33,6 +38,14 @@ public class Tutorial : MonoBehaviour
     RectTransform pointedSlot;
     // How wide what he points at is drawn (a slot, or the row of lives), so he hovers just past it.
     float pointedWidth;
+    // The keys for what he points at, shown beside his pointer so he never has to say them.
+    TextMeshProUGUI keyLabel;
+    // "Parry!" with its keys, hung beside Oni while the straggler's arrow hangs in the air.
+    TextMeshProUGUI parryPrompt;
+
+    // A test harness's parry press (synthetic keys don't reach an unfocused Game view), like DialogueScene.Advance.
+    bool parryPressed;
+    public void PressParry() => parryPressed = true;
 
     public bool Armed => armed;
     public bool Active { get; private set; }
@@ -106,6 +119,7 @@ public class Tutorial : MonoBehaviour
         if (!Active) yield break;
         BoonChoiceUI boons = game.BoonChoice;
         boons.LiftSlots(game.Scene.Overlay);
+        RaiseSlots(true);
         BuildPointer(game.Scene.Overlay);
         var options = new GameManager.TalkOptions
         {
@@ -116,7 +130,18 @@ public class Tutorial : MonoBehaviour
         yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Basics"), options);
         Point(null);
         ClearPointer();
+        RaiseSlots(false);
         boons.DropSlots();
+    }
+
+    bool slotsRaised;
+
+    void RaiseSlots(bool raise)
+    {
+        if (slotsRaised == raise) return;
+        slotsRaised = raise;
+        foreach (BoonSlot slot in new[] { BoonSlot.Attack, BoonSlot.Special, BoonSlot.Parry })
+            game.BoonChoice.SlotRect(slot).anchoredPosition += Vector2.up * (raise ? SlotRise : -SlotRise);
     }
 
     // Beat 3: the round itself, with him on guard.
@@ -163,8 +188,9 @@ public class Tutorial : MonoBehaviour
         game.Poguru.Guard(false);
     }
 
-    // Beat 4, as the army falls (still in play, so a hit counts): a spear he can't stop goes through him and takes a
-    // life, and he hands over a heart to win it back. Without a life to spare it's left out.
+    // Beat 4, as the army falls (still in play, so a hit counts). While he celebrates, a straggler runs in and shoots;
+    // the field holds still with the arrow at Oni until he parries it. Then a spear he can't stop goes through him and
+    // takes a life, and he hands over a heart to win it back. Without a life to spare the spear is left out.
     public IEnumerator SpearAndHeart()
     {
         if (!Active || spearDone) yield break;
@@ -172,10 +198,12 @@ public class Tutorial : MonoBehaviour
         StopGuarding();
         Poguru poguru = game.Poguru;
         poguru.Hover();
+        // Nothing else may hit him: only the lesson's shots count.
+        foreach (Arrow arrow in FindObjectsByType<Arrow>()) arrow.Pop(Color.white);
+        yield return ParryLesson();
+        poguru.Hover();
         if (game.MaxLives < 2) yield break;
         game.EnsureLives(2);
-        // Nothing else may hit him: only the spear's blow counts.
-        foreach (Arrow arrow in FindObjectsByType<Arrow>()) arrow.Pop(Color.white);
         yield return new WaitForSeconds(0.9f);
 
         Ronin ronin = game.Ronin;
@@ -252,6 +280,112 @@ public class Tutorial : MonoBehaviour
         yield return Wait(game.Bark("Poguru_Tut_Collected"));
     }
 
+    // The straggler's shot. Poguru is busy with his victory wiggle, so it's Oni's to parry: once the arrow is in reach
+    // the field holds still, he yells, and only a parry lets it go on. A shot that's dodged or cut down is shot again.
+    IEnumerator ParryLesson()
+    {
+        Poguru poguru = game.Poguru;
+        Ronin ronin = game.Ronin;
+        Camera cam = Camera.main;
+        float half = cam.orthographicSize * cam.aspect;
+        Vector3 centre = CameraShake.Center;
+        poguru.Play(game.PoguruClips.cheer, true);
+        float cheering = game.Bark("Poguru_Tut_Win");
+        yield return new WaitForSeconds(0.8f);
+
+        // A little to one side of him, so the arrow comes in at an angle he can read.
+        float x = ronin.Bounds.center.x + (ronin.Bounds.center.x < centre.x ? 2.5f : -2.5f);
+        x = Mathf.Clamp(x, centre.x - half + 1.5f, centre.x + half - 1.5f);
+        Straggler straggler = Straggler.Spawn(game.FootSoldierArt, x, centre.y + cam.orthographicSize * 0.4f);
+        System.Func<Transform> aimed = ronin.RiposteTarget;
+        ronin.RiposteTarget = () => straggler != null && !straggler.Dead ? straggler.transform : null;
+        bool parried = false;
+        System.Action landed = () => parried = true;
+        ronin.Parried += landed;
+        yield return new WaitUntil(() => straggler == null || straggler.Standing);
+        yield return new WaitForSeconds(Mathf.Max(0.3f, cheering - 1.6f));
+
+        while (!parried && straggler != null && !straggler.Dead)
+        {
+            Arrow arrow = null;
+            yield return straggler.Shoot(game.ArrowPrefab, ronin.Bounds.center, shot => arrow = shot);
+            if (arrow == null) break;
+            float reach = ronin.ParryRadius + 0.7f;
+            while (arrow != null && Vector2.Distance(arrow.transform.position, ronin.Bounds.center) > reach) yield return null;
+            if (arrow == null)
+            {
+                yield return new WaitForSeconds(0.5f);
+                continue;
+            }
+
+            // Hold everything with the arrow in the air; only a parry press lets go.
+            game.HoldForLesson(true);
+            ronin.ControlsEnabled = false;
+            poguru.Play(game.PoguruClips.gasp, true);
+            // His yell is in the prompt, beside Oni on the far side from the arrow, so nothing hides the shot.
+            game.Bark("Poguru_Tut_Parry", false);
+            ShowParryPrompt(Dialogue.Find("Poguru_Tut_Parry", false), arrow.transform.position.x < ronin.Bounds.center.x);
+            parryPressed = false;
+            yield return new WaitUntil(() => parryPressed || ParryPressed());
+            HideParryPrompt();
+            ronin.ControlsEnabled = true;
+            game.HoldForLesson(false);
+            ronin.ParryNow();
+            float pressed = Time.time;
+            while (!parried && Time.time - pressed < 0.6f) yield return null;
+            if (!parried && arrow != null) arrow.Pop(Color.white);
+        }
+        ronin.Parried -= landed;
+
+        // His own arrow comes back for him; if cover took it instead, he falls all the same.
+        float flying = Time.time;
+        while (straggler != null && !straggler.Dead && Time.time - flying < 1.5f) yield return null;
+        if (straggler != null && !straggler.Dead) straggler.Fall();
+        ronin.RiposteTarget = aimed;
+        poguru.Play(game.PoguruClips.cheer, true);
+        yield return Wait(game.Bark("Poguru_Tut_Parried"));
+    }
+
+    // The same keys Ronin parries on.
+    static bool ParryPressed()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
+        return (keyboard != null && (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame))
+            || (mouse != null && mouse.rightButton.wasPressedThisFrame);
+    }
+
+    // Poguru's yell over the parry keys, hung beside Oni on the side the arrow isn't coming from.
+    void ShowParryPrompt(Conversation yell, bool onRight)
+    {
+        HideParryPrompt();
+        GameUI ui = game.Ui;
+        promptOnRight = onRight;
+        parryPrompt = GameUI.CreateText(ui.transform, ui.BodyFont, "ParryPrompt", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(700f, 120f),
+            34, onRight ? TextAlignmentOptions.Left : TextAlignmentOptions.Right);
+        parryPrompt.rectTransform.pivot = new Vector2(onRight ? 0f : 1f, 0.5f);
+        parryPrompt.textWrappingMode = TextWrappingModes.NoWrap;
+        string said = yell != null && yell.Lines.Length > 0 ? yell.Lines[0].Text : "PARRY IT!!";
+        parryPrompt.text = $"<color=#{ColorUtility.ToHtmlStringRGB(GameManager.PoguruColour)}>{said}</color>\n{Keys(BoonSlot.Parry)}";
+        ui.Style(parryPrompt, TextStyle.Hud);
+    }
+
+    bool promptOnRight;
+
+    void HideParryPrompt()
+    {
+        if (parryPrompt != null) Destroy(parryPrompt.gameObject);
+        parryPrompt = null;
+    }
+
+    // What each ability is pressed with, as key caps.
+    static string Keys(BoonSlot slot) => slot switch
+    {
+        BoonSlot.Attack => $"{MenuUI.KeyCap("SPACE", false)}  {MenuUI.KeyCap("LEFT CLICK", false)}",
+        BoonSlot.Special => $"{MenuUI.KeyCap("W", false)}  {MenuUI.KeyCap("↑", false)}",
+        _ => $"{MenuUI.KeyCap("SHIFT", false)}  {MenuUI.KeyCap("↓", false)}  {MenuUI.KeyCap("RIGHT CLICK", false)}",
+    };
+
     // Beat 5: the round's soul hangs mid-field; he half-recognises it.
     public IEnumerator RewardShown()
     {
@@ -302,8 +436,10 @@ public class Tutorial : MonoBehaviour
         Active = false;
         StopGuarding();
         game.BoonChoice.InputLocked = false;
+        RaiseSlots(false);
         game.BoonChoice.DropSlots();
         ClearPointer();
+        HideParryPrompt();
         game.Poguru.ReturnToWisp();
     }
 
@@ -316,6 +452,10 @@ public class Tutorial : MonoBehaviour
         slotGlow.raycastTarget = false;
         slotGlow.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         slotGlow.transform.SetAsFirstSibling();
+        keyLabel = GameUI.CreateText(layer, game.Ui.BodyFont, "PointerKeys", Vector2.zero, Vector2.zero, new Vector2(600f, 56f), 30, TextAlignmentOptions.Left);
+        keyLabel.rectTransform.pivot = new Vector2(0f, 0.5f);
+        keyLabel.textWrappingMode = TextWrappingModes.NoWrap;
+        game.Ui.Style(keyLabel, TextStyle.Hud);
         pointer = GameUI.CreateRect("PoguruPointer", layer, Vector2.zero, Vector2.zero, Vector2.one * PointerSize);
         pointer.pivot = new Vector2(0f, 0.5f);
         pointerImage = pointer.gameObject.AddComponent<Image>();
@@ -344,15 +484,20 @@ public class Tutorial : MonoBehaviour
     void Point(BoonSlot? slot)
     {
         RectTransform rect = slot is BoonSlot s ? game.BoonChoice.SlotRect(s) : null;
-        PointAt(rect, rect != null ? rect.sizeDelta.x : 0f);
+        PointAt(rect, rect != null ? rect.sizeDelta.x : 0f, slot is BoonSlot k ? Keys(k) : null);
     }
 
-    void PointAt(RectTransform target, float width)
+    void PointAt(RectTransform target, float width, string keys = null)
     {
         pointedSlot = target;
         pointedWidth = width;
         if (pointer != null) pointer.gameObject.SetActive(pointedSlot != null);
         if (slotGlow != null) slotGlow.gameObject.SetActive(pointedSlot != null);
+        if (keyLabel != null)
+        {
+            keyLabel.text = keys ?? "";
+            keyLabel.gameObject.SetActive(pointedSlot != null && keys != null);
+        }
         if (pointedSlot != null) Sfx.Play(Sfx.UiMove, 0.5f, 1.4f);
     }
 
@@ -360,6 +505,8 @@ public class Tutorial : MonoBehaviour
     {
         if (pointer != null) Destroy(pointer.gameObject);
         if (slotGlow != null) Destroy(slotGlow.gameObject);
+        if (keyLabel != null) Destroy(keyLabel.gameObject);
+        keyLabel = null;
         pointer = null;
         slotGlow = null;
         pointedSlot = null;
@@ -368,6 +515,12 @@ public class Tutorial : MonoBehaviour
     // The pointer bobs toward the slot, its frames cycling, and the slot's glow pulses. Unscaled: the talk holds time.
     void Update()
     {
+        // The parry prompt rides beside Oni and swells in time, held or not.
+        if (parryPrompt != null)
+        {
+            parryPrompt.rectTransform.anchoredPosition = game.Ui.CanvasPoint(game.Ronin.Bounds.center + Vector3.right * (promptOnRight ? 1.3f : -1.3f));
+            parryPrompt.rectTransform.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(Time.unscaledTime * 8f));
+        }
         if (pointer == null || pointedSlot == null) return;
         float now = Time.unscaledTime;
         // Both are anchored and pivoted at their bottom-left (the lives row at its left middle).
@@ -376,6 +529,8 @@ public class Tutorial : MonoBehaviour
         Vector2 middle = corner + size / 2f;
         float bob = Mathf.Abs(Mathf.Sin(now * 4f)) * 14f;
         pointer.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + bob, 0f);
+        // The keys sit just past where the pointer reaches, still, so they read easily.
+        if (keyLabel != null) keyLabel.rectTransform.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + 14f + PointerSize + 16f, 0f);
         if (pointFrames != null) pointerImage.sprite = pointFrames[(int)(now * 8f) % pointFrames.Length];
         slotGlow.rectTransform.anchoredPosition = middle;
         Color glow = GameManager.PoguruColour;

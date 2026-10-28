@@ -17,8 +17,10 @@ public class BoonEffects
     const float FrostEncaseChance = 0.5f;
     const int FrostEncaseTargets = 2;
     // Most samurai one fire blast can burn, nearest first; Wildfire's blasts burn more.
-    const int BlastTargets = 3;
-    const int WildfireBlastTargets = 5;
+    const int BlastTargets = 2;
+    const int WildfireBlastTargets = 4;
+    // Flame Blade on a boss (or Kuon): every hit lands, so it bursts at this share of its kill chance.
+    const float BossFlameShare = 0.6f;
     const float ShardFreezeSeconds = 1.5f;
     const float BossShardFreezeSeconds = 0.5f;
     // Frost Blade freezes the boss for a quarter of its freeze time, and no more often than this.
@@ -55,6 +57,15 @@ public class BoonEffects
     static Color Frost => Boons.Info(Element.Water).Color;
     static Color Storm => Boons.Info(Element.Lightning).Color;
 
+    // Flame Blade's roll. Kindling's fireball counts as a slash for the other blades, but brings its own blast, so it
+    // never sets off Flame Blade's as well.
+    bool FlameBursts(float share)
+    {
+        if (Kunai.Striking != null && Kunai.Striking.Kindled) return false;
+        EquippedBoon flame = loadout.Find(BoonId.FlameBlade);
+        return flame != null && Random.value < Boons.FlameChanceAt(flame.Rarity) * share;
+    }
+
     public void OnKill(Samurai samurai, KillSource source)
     {
         Vector3 position = samurai.transform.position;
@@ -63,7 +74,7 @@ public class BoonEffects
         {
             case KillSource.Slash:
             case KillSource.Kunai:
-                if (loadout.Has(BoonId.FlameBlade, out value)) Blast(position, value);
+                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     int encased = 0;
@@ -101,7 +112,7 @@ public class BoonEffects
         {
             case KillSource.Slash:
             case KillSource.Kunai:
-                if (loadout.Has(BoonId.FlameBlade, out value)) BossBlast(point, value);
+                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) BossBlast(point, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     // A blow on the frozen boss shatters the ice for an extra point of damage; otherwise she freezes.
@@ -315,7 +326,7 @@ public class BoonEffects
         {
             case KillSource.Slash:
             case KillSource.Kunai:
-                if (loadout.Has(BoonId.FlameBlade, out value)) WolfBlast(point, value);
+                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) WolfBlast(point, value);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 break;
             case KillSource.Shuriken:

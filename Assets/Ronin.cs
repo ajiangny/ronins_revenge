@@ -471,7 +471,8 @@ public class Ronin : MonoBehaviour
     }
 
     // Kindling's fireball: the Burning Riposte fireball drawn at twice its size, slower than a slash. It burns through
-    // arrows, and its hit counts as a slash (so Blade boons trigger) before it bursts in a great blast.
+    // arrows, and its hit counts as a slash (so Frost and Storm Blade trigger, though not Flame Blade's blast) before
+    // it bursts in a great blast.
     void ThrowFireball()
     {
         Color fire = Boons.Info(Element.Fire).Color;
@@ -490,6 +491,7 @@ public class Ronin : MonoBehaviour
         }
         fireball.ParryAura(Color.Lerp(fire, Color.yellow, 0.3f));
         fireball.CutsArrows = true;
+        fireball.Kindled = true;
         fireball.Impacted += (point, target) => FireballImpact?.Invoke(point, target);
         Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
         Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, fire, 1f, transform);

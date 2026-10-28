@@ -44,9 +44,11 @@ public sealed class BoonDefinition
     public float[] Values;
     // Formats one value for the stat line, e.g. v => $"+{v:0.#}".
     public Func<float, string> Format;
-    // An optional second stat on the same line (Frost Blade's ice shards), indexed by Rarity and shown as a count.
+    // An optional second stat on the same line (Frost Blade's ice shards), indexed by Rarity and shown as a count
+    // unless ExtraFormat says otherwise (Flame Blade's blast chance).
     public string ExtraLabel;
     public float[] ExtraValues;
+    public Func<float, string> ExtraFormat;
     // Applied once when taken, instead of being kept in the loadout (Tidal Renewal).
     public bool Instant;
     public BoonKind Kind;
@@ -111,6 +113,7 @@ public static class Boons
 
     // How many shards an ice statue bursts into: Frost Blade's shard count, or its Common count without it.
     public static int IceShardsAt(Rarity rarity) => (int)Get(BoonId.FrostBlade).ExtraValues[(int)rarity];
+    public static float FlameChanceAt(Rarity rarity) => Get(BoonId.FlameBlade).ExtraValues[(int)rarity];
 
     public static Color RarityColor(Rarity rarity) => rarity switch
     {
@@ -161,10 +164,12 @@ public static class Boons
     {
         // Fire: burn. Kills explode. Samurai stand 2 apart across and 1.75 apart down, so 1.8 reaches the samurai
         // above and below and 2.1 adds the ones beside it. The diagonals (2.7) are left to Wildfire, so an Epic blast
-        // never wipes a 3x3 block on its own.
+        // never wipes a 3x3 block on its own. Flame Blade only bursts on some kills: on every one, with the slash
+        // as fast as it is, it cleared whole waves by itself.
         new BoonDefinition { Id = BoonId.FlameBlade, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Blade",
-            Description = "Your <b>Slashes</b> burst into flame on a kill, burning nearby samurai.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus },
+            Description = "A <b>Slash</b> kill may burst into flame, burning nearby samurai.",
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
+            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent },
         new BoonDefinition { Id = BoonId.InfernoShuriken, Element = Element.Fire, Slot = BoonSlot.Special, Name = "Inferno Shuriken",
             Description = "Every samurai your <b>Shuriken</b> cuts down explodes.",
             StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus },
@@ -173,10 +178,10 @@ public static class Boons
             StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus },
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
             Description = "You <b>Slash</b> faster.",
-            StatLabel = "Slash cooldown:", Values = new[] { 0.1f, 0.18f, 0.25f }, Format = MinusPercent },
+            StatLabel = "Slash cooldown:", Values = new[] { 0.08f, 0.14f, 0.2f }, Format = MinusPercent },
         new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
             Description = "Every few swings, you hurl a great <b>Fireball</b> instead of a <b>Slash</b>. It burns through arrows and bursts in a wide blast.",
-            StatLabel = "Swings per fireball:", Values = new[] { 5f, 4f, 3f }, Format = v => $"{v:0}" },
+            StatLabel = "Swings per fireball:", Values = new[] { 6f, 5f, 4f }, Format = v => $"{v:0}" },
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
@@ -199,10 +204,10 @@ public static class Boons
         // Lightning: jolt. Chains and speed.
         new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",
             Description = "A <b>Slash</b> kill may arc lightning to a samurai further off in the ranks.",
-            StatLabel = "Chain chance:", Values = new[] { 0.35f, 0.5f, 0.7f }, Format = Percent },
+            StatLabel = "Chain chance:", Values = new[] { 0.45f, 0.6f, 0.8f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderShuriken, Element = Element.Lightning, Slot = BoonSlot.Special, Name = "Thunder Shuriken",
             Description = "Your <b>Shuriken</b> flies much faster, and may arc lightning into each samurai it passes near.",
-            StatLabel = "Chain chance:", Values = new[] { 0.3f, 0.45f, 0.6f }, Format = Percent },
+            StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent },
         new BoonDefinition { Id = BoonId.ThunderRiposte, Element = Element.Lightning, Slot = BoonSlot.Parry, Name = "Thunder Riposte",
             Description = "A successful <b>Parry</b> strikes the samurai nearest above you with lightning.",
             StatLabel = "Strikes:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
@@ -211,7 +216,7 @@ public static class Boons
             StatLabel = "Move speed:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = Percent },
         new BoonDefinition { Id = BoonId.StaticCharge, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Static Charge",
             Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster.",
-            StatLabel = "Cooldowns:", Values = new[] { 0.1f, 0.18f, 0.25f }, Format = MinusPercent },
+            StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
@@ -244,7 +249,7 @@ public static class Boons
         new BoonDefinition { Id = BoonId.RaijinsDrum, Element = Element.Lightning, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Raijin's Drum",
             Description = "Every few hits beat the thunder drum: <b>Lightning</b> strikes the front samurai of the 3 columns nearest you.",
-            StatLabel = "Hits per beat:", Values = new[] { 8f, 8f, 8f }, Format = v => $"{v:0}",
+            StatLabel = "Hits per beat:", Values = new[] { 6f, 6f, 6f }, Format = v => $"{v:0}",
             Requires = l => TwoSlotsOf(l, Element.Lightning) },
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.

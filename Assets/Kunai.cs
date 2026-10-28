@@ -36,6 +36,10 @@ public class Kunai : MonoBehaviour
     public event Action<Vector3, IHittable> Impacted;
     // Any of the ronin's projectiles has damaged something (it fills his ultimate).
     public static event Action<KillSource, IHittable> Landed;
+    // The projectile whose hit is being dealt right now, so the kill it causes can be traced back to it.
+    public static Kunai Striking { get; private set; }
+    // Kindling's fireball, which sets off no Flame Blade blast of its own.
+    public bool Kindled { get; set; }
     // Ice shards encase a samurai before they hit it, so one they cut down freezes into an ice statue.
     public float FreezeOnHit { get; set; }
     // Piercing Slash: cuts through arrows (they break on it) instead of being stopped by them.
@@ -282,7 +286,9 @@ public class Kunai : MonoBehaviour
         if (target != null)
         {
             if (FreezeOnHit > 0f && target is Samurai samurai) samurai.Encase(FreezeOnHit);
+            Striking = this;
             target.TakeHit(Damage.Of(Source), Source);
+            Striking = null;
             Impacted?.Invoke(transform.position, target);
             Landed?.Invoke(Source, target);
             if (pierceLeft > 0)

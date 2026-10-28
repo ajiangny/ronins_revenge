@@ -353,8 +353,9 @@ public class BoonChoiceUI : MonoBehaviour
         card.stat.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>- {boon.StatLabel}</color>   <color={StatGreen}>{value}</color>";
         if (boon.ExtraValues != null)
         {
-            string extra = $"{boon.ExtraValues[(int)offer.Rarity]:0}";
-            if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {boon.ExtraValues[(int)offer.Rarity - 1]:0})</color>";
+            System.Func<float, string> format = boon.ExtraFormat ?? (v => $"{v:0}");
+            string extra = format(boon.ExtraValues[(int)offer.Rarity]);
+            if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {format(boon.ExtraValues[(int)offer.Rarity - 1])})</color>";
             card.stat.text += $"     <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>{boon.ExtraLabel}</color>   <color={StatGreen}>{extra}</color>";
         }
         card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";

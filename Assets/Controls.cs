@@ -77,17 +77,41 @@ public static class Controls
         ? move switch
         {
             Moves.Slash => new[] { KeyGlyph.MouseLeft },
-            Moves.Shuriken => new[] { KeyGlyph.Key("SPACE") },
+            Moves.Shuriken => new[] { KeyGlyph.Space },
             Moves.Parry => new[] { KeyGlyph.MouseRight },
             _ => new[] { KeyGlyph.Key("E"), KeyGlyph.MouseMiddle },
         }
         : move switch
         {
-            Moves.Slash => new[] { KeyGlyph.Key("SPACE") },
+            Moves.Slash => new[] { KeyGlyph.Space },
             Moves.Shuriken => new[] { KeyGlyph.Key("X") },
             Moves.Parry => new[] { KeyGlyph.Key("C") },
             _ => new[] { KeyGlyph.Key("Z") },
         };
+
+    // Every binding of a move in a scheme as drawn caps, "or" between alternatives (the new journey's cards).
+    public static KeyGlyph[] AllGlyphs(Moves move, Scheme scheme)
+    {
+        var glyphs = new System.Collections.Generic.List<KeyGlyph>();
+        foreach (string binding in Bindings(move, scheme))
+        {
+            if (glyphs.Count > 0) glyphs.Add(KeyGlyph.Or);
+            glyphs.Add(binding switch
+            {
+                "LEFT CLICK" => KeyGlyph.MouseLeft,
+                "RIGHT CLICK" => KeyGlyph.MouseRight,
+                "MIDDLE CLICK" => KeyGlyph.MouseMiddle,
+                "SPACE" => KeyGlyph.Space,
+                _ => KeyGlyph.Key(binding),
+            });
+        }
+        return glyphs.ToArray();
+    }
+
+    // Left and right as drawn caps: A D, and the arrows too on the keyboard.
+    public static KeyGlyph[] MoveGlyphs(Scheme scheme) => scheme == Scheme.KeyboardMouse
+        ? new[] { KeyGlyph.Key("A"), KeyGlyph.Key("D") }
+        : new[] { KeyGlyph.Key("←"), KeyGlyph.Key("→"), KeyGlyph.Or, KeyGlyph.Key("A"), KeyGlyph.Key("D") };
 
     // The same as words for a key cap in text (the HUD's Tab tips): only the main button.
     public static string Label(Moves move) => UsesMouse

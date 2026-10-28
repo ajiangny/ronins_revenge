@@ -1030,7 +1030,7 @@ public class GameManager : MonoBehaviour
             }, back, startIndex, paper: paper);
     }
 
-    // A move's keys in a scheme as key caps, `or` between alternatives (the controls page and the new journey's cards).
+    // A move's keys in a scheme as key caps in text, `or` between alternatives (the controls page).
     static string SchemeKeys(Controls.Scheme scheme, Moves move, bool paper, string or) =>
         string.Join(or, System.Array.ConvertAll(Controls.Bindings(move, scheme), key => MenuUI.KeyCap(key, paper)));
 
@@ -1042,30 +1042,27 @@ public class GameManager : MonoBehaviour
     }
 
     // A new journey asks how Oni will fight before the flute intro, so Poguru's lessons show the right keys from the
-    // first one. Two cards, the current scheme preselected; Esc goes back to the journeys.
+    // first one. Two cards, each listing its keys as drawn caps, the current scheme preselected; Esc goes back to the
+    // journeys.
     void ShowSchemeChoice(int slot)
     {
         string muted = MenuUI.MutedHex(true);
-        string or = $" <color=#{muted}>or</color> ";
-        string Row(string action, string keys) => $"<color=#{muted}>{action}</color><pos=38%>{keys}\n";
-        MenuUI.Item Card(Controls.Scheme scheme, string tagline) => MenuUI.Item.Card(Controls.Name(scheme),
-            $"<align=center><color=#{muted}>{tagline}</color></align>\n" +
-            Row("Move", SchemeMoveKeys(scheme, true, or)) +
-            Row("Slash", SchemeKeys(scheme, Moves.Slash, true, or)) +
-            Row("Parry", SchemeKeys(scheme, Moves.Parry, true, or)) +
-            Row("Shuriken", SchemeKeys(scheme, Moves.Shuriken, true, or)) +
-            Row("Ultimate", SchemeKeys(scheme, Moves.Ultimate, true, or)),
-            () =>
-            {
-                Controls.Current = scheme;
-                Save.Use(slot);
-                StartCoroutine(TitleToGame());
-            });
-        menu.Show("HOW WILL YOU FIGHT?", $"<size=30><color=#{muted}>You can change this any time under CONTROLS.</color></size>", new[]
+        MenuUI.Item Card(Controls.Scheme scheme) => MenuUI.Item.Card(Controls.Name(scheme), new[]
         {
-            Card(Controls.Scheme.Keyboard, "Both hands on the keys."),
-            Card(Controls.Scheme.KeyboardMouse, "Keys to move, the mouse to strike."),
-        }, () => ShowSlots(slot), (int)Controls.Current, paper: true);
+            new MenuUI.CardLine("Move", Controls.MoveGlyphs(scheme)),
+            new MenuUI.CardLine("Slash", Controls.AllGlyphs(Moves.Slash, scheme)),
+            new MenuUI.CardLine("Parry", Controls.AllGlyphs(Moves.Parry, scheme)),
+            new MenuUI.CardLine("Shuriken", Controls.AllGlyphs(Moves.Shuriken, scheme)),
+            new MenuUI.CardLine("Ultimate", Controls.AllGlyphs(Moves.Ultimate, scheme)),
+        }, () =>
+        {
+            Controls.Current = scheme;
+            Save.Use(slot);
+            StartCoroutine(TitleToGame());
+        });
+        menu.Show("HOW WILL YOU FIGHT?", $"<size=30><color=#{muted}>You can change this any time under CONTROLS.</color></size>",
+            new[] { Card(Controls.Scheme.Keyboard), Card(Controls.Scheme.KeyboardMouse) },
+            () => ShowSlots(slot), (int)Controls.Current, paper: true);
     }
 
     // The shop on the hill, laid out as a table: each song's name, its ranks as pips and the price of the next in Spirit

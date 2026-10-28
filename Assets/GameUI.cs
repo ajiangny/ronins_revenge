@@ -37,10 +37,15 @@ public class GameUI : MonoBehaviour
 
     // The fill behind a key cap, as MenuUI.KeyCap's <mark> draws it on dark pages.
     static readonly Color KeyCapFill = new Color(1f, 1f, 1f, 0x2E / 255f);
+    static readonly Color PaperKeyCapFill = new Color(0f, 0f, 0f, 0x1A / 255f);
 
     // A row of key caps in the menus' style, for keys shown as UI rather than inside a line of text: a key's name in
-    // each cap, or for a mouse button a drawn mouse with that button filled. Laid out left to right from its pivot.
-    public RectTransform CreateKeyRow(Transform parent, float fontSize, params KeyGlyph[] keys)
+    // each cap, or for a mouse button a drawn mouse with that button filled, or the spacebar's mark; a word ("or")
+    // stands between caps without one. Laid out left to right from its pivot.
+    public RectTransform CreateKeyRow(Transform parent, float fontSize, params KeyGlyph[] keys) => CreateKeyRow(parent, fontSize, false, keys);
+
+    // The same in ink, for the title's paper pages.
+    public RectTransform CreateKeyRow(Transform parent, float fontSize, bool paper, params KeyGlyph[] keys)
     {
         RectTransform row = CreateRect("Keys", parent, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
         var layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
@@ -51,11 +56,22 @@ public class GameUI : MonoBehaviour
         var fit = row.gameObject.AddComponent<ContentSizeFitter>();
         fit.horizontalFit = fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         float capHeight = fontSize * 1.4f;
+        Color ink = paper ? MenuUI.Ink : Color.white;
         foreach (KeyGlyph key in keys)
         {
+            if (key.word)
+            {
+                TextMeshProUGUI word = CreateText(row, BodyFont, "Word", new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, fontSize * 0.85f, TextAlignmentOptions.Center);
+                word.textWrappingMode = TextWrappingModes.NoWrap;
+                word.text = key.text;
+                Style(word, TextStyle.Hud);
+                if (paper) word.fontSharedMaterial = word.font.material;
+                word.color = paper ? new Color(ink.r, ink.g, ink.b, 0.6f) : MutedColour;
+                continue;
+            }
             RectTransform cap = CreateRect("Cap", row, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             Image fill = cap.gameObject.AddComponent<Image>();
-            fill.color = KeyCapFill;
+            fill.color = paper ? PaperKeyCapFill : KeyCapFill;
             fill.raycastTarget = false;
             var capLayout = cap.gameObject.AddComponent<HorizontalLayoutGroup>();
             capLayout.padding = new RectOffset(10, 10, 2, 2);
@@ -63,10 +79,11 @@ public class GameUI : MonoBehaviour
             capLayout.childControlWidth = capLayout.childControlHeight = true;
             capLayout.childForceExpandWidth = capLayout.childForceExpandHeight = false;
             cap.gameObject.AddComponent<LayoutElement>().minHeight = capHeight;
-            if (key.mouse != 0)
+            if (key.mouse != 0 || key.space)
             {
-                Image icon = CreateRect("Mouse", cap, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
-                icon.sprite = ProceduralSprites.Mouse(key.mouse);
+                Image icon = CreateRect(key.space ? "Spacebar" : "Mouse", cap, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero).gameObject.AddComponent<Image>();
+                icon.sprite = key.space ? ProceduralSprites.Spacebar : ProceduralSprites.Mouse(key.mouse);
+                icon.color = ink;
                 icon.preserveAspect = true;
                 icon.raycastTarget = false;
                 var size = icon.gameObject.AddComponent<LayoutElement>();
@@ -79,6 +96,11 @@ public class GameUI : MonoBehaviour
                 label.textWrappingMode = TextWrappingModes.NoWrap;
                 label.text = key.text;
                 Style(label, TextStyle.Hud);
+                if (paper)
+                {
+                    label.fontSharedMaterial = label.font.material;
+                    label.color = ink;
+                }
             }
         }
         return row;
@@ -1086,14 +1108,19 @@ public class GameUI : MonoBehaviour
     }
 }
 
-// One cap in GameUI.CreateKeyRow: a key's name, or a mouse button (drawn, not spelled out).
+// One cap in GameUI.CreateKeyRow: a key's name, or a mouse button or the spacebar (drawn, not spelled out); or a
+// plain word between caps.
 public struct KeyGlyph
 {
     public string text;
     // 1 the left mouse button, 2 the right, 3 the middle (the wheel); 0 a key.
     public int mouse;
+    public bool space;
+    public bool word;
 
     public static KeyGlyph Key(string name) => new KeyGlyph { text = name };
+    public static KeyGlyph Space => new KeyGlyph { space = true };
+    public static KeyGlyph Or => new KeyGlyph { text = "or", word = true };
     public static KeyGlyph MouseLeft => new KeyGlyph { mouse = 1 };
     public static KeyGlyph MouseRight => new KeyGlyph { mouse = 2 };
     public static KeyGlyph MouseMiddle => new KeyGlyph { mouse = 3 };

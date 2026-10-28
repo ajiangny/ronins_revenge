@@ -5,7 +5,7 @@ A Space Invaders remake re-themed as a lone chibi ronin holding a moonlit temple
 Built on the class template ([Oren-Steinberg/Space-Invaders-3D](https://github.com/Oren-Steinberg/Space-Invaders-3D)), Unity 6000.6, URP.
 Open `Assets/Scenes/SampleScene.unity` and press Play.
 
-**Controls:** two schemes, picked on two cards (KEYBOARD / KEYBOARD + MOUSE, each listing its keys) when a new journey starts, changeable under SETTINGS or on the CONTROLS page (PLAY WITH), and switched automatically mid-fight when you use the other one's buttons (a mouse click, or a Keyboard-only attack key); every key prompt (Tab tips, Poguru's lessons, the Controls and Tips pages) shows the scheme in use, and a lesson's key caps redraw if you switch mid-lesson.
+**Controls:** two schemes, picked on two cards (KEYBOARD / KEYBOARD + MOUSE, each listing its keys as drawn caps, with mouse buttons and the spacebar as icons) when a new journey starts, changeable under SETTINGS or on the CONTROLS page (PLAY WITH), and switched automatically mid-fight when you use the other one's buttons (a mouse click, or a Keyboard-only attack key); every key prompt (Tab tips, Poguru's lessons, the Controls and Tips pages) shows the scheme in use, and a lesson's key caps redraw if you switch mid-lesson.
 - **Keyboard:** one hand moves, the other attacks, in either of two layouts that work together. Arcade: the arrows move, Space slashes (hold), C parries, X throws the Spirit Shuriken, Z unleashes the ultimate. Or A/D move with J slash, K parry, L shuriken, I ultimate.
 - **Keyboard + Mouse:** A/D move, hold Left Click to slash, Right Click to parry, Space for the Spirit Shuriken, E (or Middle Click) for the ultimate.
 

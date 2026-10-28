@@ -338,6 +338,44 @@ public static class ProceduralSprites
     // A hard-edged arrow pointing down, standing in for the soul hint's art.
     public static Sprite ArrowDown => arrowDown != null ? arrowDown : arrowDown = BuildArrowDown(16);
 
+    // The spacebar's mark (a long bar with its ends turned up, like ⎵) in white line, for key caps
+    // (GameUI.CreateKeyRow). Wide, so its cap reads as the long key.
+    public static Sprite Spacebar => spacebar != null ? spacebar : spacebar = BuildSpacebar();
+    static Sprite spacebar;
+
+    // Drawn from distances like the mouse, so it stays clean at text size.
+    static Sprite BuildSpacebar()
+    {
+        const int width = 120, height = 48;
+        const float stroke = 5f;
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        var pixels = new Color32[width * height];
+        // The bar along the bottom and the two ends rising from it, as segments the stroke is drawn around.
+        Vector2 left = new Vector2(14f, 12f), right = new Vector2(width - 14f, 12f);
+        Vector2 leftTop = new Vector2(14f, 32f), rightTop = new Vector2(width - 14f, 32f);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Vector2 p = new Vector2(x + 0.5f, y + 0.5f);
+                float d = Mathf.Min(Segment(p, left, right), Mathf.Min(Segment(p, left, leftTop), Segment(p, right, rightTop))) - stroke / 2f;
+                byte a = (byte)(Mathf.Clamp01(0.5f - d) * 255f);
+                pixels[y * width + x] = new Color32(255, 255, 255, a);
+            }
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply();
+        return Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0.5f), height);
+    }
+
+    // Distance from p to the segment a-b.
+    static float Segment(Vector2 p, Vector2 a, Vector2 b)
+    {
+        Vector2 ab = b - a;
+        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
+        return (p - (a + ab * t)).magnitude;
+    }
+
     // A mouse drawn in white line, its left or right button filled, for key caps (GameUI.CreateKeyRow).
     public static Sprite Mouse(int button)
     {

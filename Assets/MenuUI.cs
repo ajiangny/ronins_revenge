@@ -23,16 +23,29 @@ public class MenuUI : MonoBehaviour
         public string detail;
         public int pips;
         public int pipsMax;
-        // A card's text under its heading (a page of cards side by side, like the new journey's control choice).
-        public string card;
+        // A card's lines under its heading, each an action and its keys (a page of cards side by side, like the new
+        // journey's control choice).
+        public CardLine[] card;
 
         public bool IsSlider => set != null;
         public bool IsTableRow => detail != null || pipsMax > 0;
         public bool IsCard => card != null;
 
         public static Item Button(string label, Action chosen, string note = null) => new Item { label = label, chosen = chosen, note = note };
-        public static Item Card(string label, string card, Action chosen) => new Item { label = label, card = card, chosen = chosen };
+        public static Item Card(string label, CardLine[] card, Action chosen) => new Item { label = label, card = card, chosen = chosen };
         public static Item Slider(string label, Func<float> get, Action<float> set) => new Item { label = label, get = get, set = set };
+    }
+
+    public struct CardLine
+    {
+        public string action;
+        public KeyGlyph[] keys;
+
+        public CardLine(string action, KeyGlyph[] keys)
+        {
+            this.action = action;
+            this.keys = keys;
+        }
     }
 
     // Keys can't be read for this long after a page opens, so the press that opened it doesn't also act on it.
@@ -53,6 +66,9 @@ public class MenuUI : MonoBehaviour
     // A card page's cells: tall panels side by side, one per choice.
     const float CardWidth = 580f;
     const float CardHeight = 480f;
+    // Where a card's lines start under its heading, and how tall each is (its key caps and mouse icons).
+    const float CardLinesTop = 136f;
+    const float CardLineHeight = 58f;
     const float SliderStep = 0.1f;
     static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
     static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
@@ -60,7 +76,7 @@ public class MenuUI : MonoBehaviour
     const float LightRowWidth = 300f;
     const float LightRowHeight = 66f;
     static readonly Color Paper = new Color(0.975f, 0.963f, 0.945f);
-    static readonly Color Ink = new Color(0.17f, 0.13f, 0.15f);
+    public static readonly Color Ink = new Color(0.17f, 0.13f, 0.15f);
     static readonly Color InkAccent = new Color(0.72f, 0.1f, 0.08f);
 
     class Row
@@ -688,15 +704,23 @@ public class MenuUI : MonoBehaviour
         rule.color = new Color(ink.r, ink.g, ink.b, 0.3f);
         rule.raycastTarget = false;
 
-        TextMeshProUGUI body = GameUI.CreateText(row.root, ui.BodyFont, "Body", new Vector2(0.5f, 1f), new Vector2(0f, -140f),
-            new Vector2(width - 70f, height - 160f), 30, TextAlignmentOptions.TopLeft);
-        body.rectTransform.pivot = new Vector2(0.5f, 1f);
-        body.richText = true;
-        body.textWrappingMode = TextWrappingModes.Normal;
-        body.text = item.card;
-        body.color = ink;
-        ui.Style(body, TextStyle.Body);
-        if (onPaper) body.fontSharedMaterial = body.font.material;
+        // A line per action: its name muted on the left, its keys as drawn caps in a column after it.
+        float left = -width / 2f + 44f;
+        for (int i = 0; i < item.card.Length; i++)
+        {
+            float y = -CardLinesTop - (i + 0.5f) * CardLineHeight;
+            TextMeshProUGUI action = GameUI.CreateText(row.root, ui.BodyFont, "Action", new Vector2(0.5f, 1f), new Vector2(left + 80f, y),
+                new Vector2(160f, CardLineHeight), 30, TextAlignmentOptions.Left);
+            action.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            action.text = item.card[i].action;
+            ui.Style(action, TextStyle.Body);
+            if (onPaper) action.fontSharedMaterial = action.font.material;
+            action.color = new Color(ink.r, ink.g, ink.b, 0.65f);
+            RectTransform keys = ui.CreateKeyRow(row.root, 30, onPaper, item.card[i].keys);
+            keys.anchorMin = keys.anchorMax = new Vector2(0.5f, 1f);
+            keys.pivot = new Vector2(0f, 0.5f);
+            keys.anchoredPosition = new Vector2(left + 180f, y);
+        }
 
         // Cards have no bar or marker; Animate never reaches for them on a card page.
         row.marker = GameUI.CreateRect("Marker", row.root, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);

@@ -72,7 +72,7 @@ public static class RunLog
         if (total > 0)
         {
             int effect = kills[(int)KillSource.Effect];
-            line.Append($"  kills {total}: slash {kills[(int)KillSource.Slash] + kills[(int)KillSource.Kunai]}, shadow {kills[(int)KillSource.Shadow]}, shuriken {kills[(int)KillSource.Shuriken]}, " +
+            line.Append($"  kills {total}: slash {kills[(int)KillSource.Slash] + kills[(int)KillSource.Kunai]}, shadow {kills[(int)KillSource.Shadow]}, clone {kills[(int)KillSource.Clone]}, shuriken {kills[(int)KillSource.Shuriken]}, " +
                 $"parry {kills[(int)KillSource.Deflected] + kills[(int)KillSource.Reflected]}, effect {effect} ({100f * effect / total:0}%)");
             line.Append($"  frozen {frozenSeconds:0.0}s ({100f * frozenSeconds / Mathf.Max(seconds, 0.01f):0}%)");
         }

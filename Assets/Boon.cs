@@ -265,7 +265,7 @@ public static class Boons
             StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
         // No longer drawn from scrolls: it's the Shadow Clone ultimate now (Ronin.Ultimate), kept here for its id and icon.
         new BoonDefinition { Id = BoonId.ShadowClone, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Shadow Clone",
-            Description = "Your shadow mirrors you across the field and <b>Slashes</b> whenever you do, at half strength. Nothing can touch it.",
+            Description = "Your shadow fights at your side, copying your <b>Slash</b>, <b>Shuriken</b> and <b>Parry</b> at reduced strength. Nothing can touch it.",
             StatLabel = "Shadows:", Values = new[] { 1f, 1f, 1f }, Format = Plus },
     };
 

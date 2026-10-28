@@ -4,9 +4,10 @@ using UnityEngine;
 // What killed a samurai. Boon effects only trigger on the ronin's own attacks, never on other effects' kills,
 // so explosions and lightning can't chain into each other forever. Reflected is a boss's own slash parried back at it.
 // Slash is the katana's crescent wave; new values go on the end so saved ints keep their meaning.
-// Shadow is a lesser slash (the Shadow Clone's, or a Split Slash fork): half damage to bosses, no boon effects, and it
-// doesn't fill the ultimate, so the extra blades add reach without multiplying everything else.
-public enum KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash, Shadow }
+// Shadow is a lesser slash (a Split Slash fork) and Clone anything the Shadow Clone ultimate sends (slashes, fireballs,
+// shuriken, ripostes): one point, half damage to bosses, no boon effects, and neither fills the ultimate, so the extra
+// blades add reach without multiplying everything else. Clone is kept apart so the Ultimate boons can act on it alone.
+public enum KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash, Shadow, Clone }
 
 // Every projectile the ronin sends upward: katana slash waves, thrown kunai, the Spirit Shuriken and parried arrows.
 [RequireComponent(typeof(Rigidbody))]
@@ -44,6 +45,8 @@ public class Kunai : MonoBehaviour
     public float FreezeOnHit { get; set; }
     // Piercing Slash: cuts through arrows (they break on it) instead of being stopped by them.
     public bool CutsArrows { get; set; }
+    // A Spirit Shuriken (his, or the clone's): it passes over his cover and through arrows.
+    public bool Spinning { get; set; }
 
     Rigidbody body;
     SpriteRenderer art;
@@ -95,6 +98,7 @@ public class Kunai : MonoBehaviour
         launched = true;
         launchedAt = Time.time;
         Source = source;
+        Spinning = source == KillSource.Shuriken;
         pierceLeft = pierce;
         transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
         transform.localScale *= scale;
@@ -299,7 +303,7 @@ public class Kunai : MonoBehaviour
             }
         }
         // The shuriken and reflected slashes cut through arrows and don't chip the ronin's own blockers.
-        else if (Source == KillSource.Shuriken || Source == KillSource.Reflected)
+        else if (Spinning || Source == KillSource.Reflected)
         {
             KeepFlying(coll.collider);
             return;

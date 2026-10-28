@@ -260,7 +260,7 @@ public class Arrow : MonoBehaviour
         // A tough shot (Shirogane's crescents) takes more than one plain slash to cut down; the slash is still spent.
         // The shuriken, a piercing slash and a parried shot break it outright.
         else if (Toughness > 1 && coll.collider.GetComponentInParent<Kunai>() is Kunai cut && !cut.CutsArrows
-            && cut.Source != KillSource.Shuriken && cut.Source != KillSource.Reflected && cut.Source != KillSource.Deflected)
+            && !cut.Spinning && cut.Source != KillSource.Reflected && cut.Source != KillSource.Deflected)
         {
             Toughness--;
             Fx.Play(Fx.Impact, transform.position, Color.white, 0.7f);

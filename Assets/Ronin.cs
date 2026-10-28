@@ -77,6 +77,10 @@ public class Ronin : MonoBehaviour
     [SerializeField] int ultimateHits = 40;
     [Tooltip("Seconds a full bar lasts once the ultimate is unleashed.")]
     [SerializeField] float ultimateDuration = 10f;
+    [Tooltip("How far beside him the Shadow Clone stands, in world units.")]
+    [SerializeField] float cloneOffset = 1.6f;
+    [Tooltip("How fast the Shadow Clone glides to keep its place beside him (and to cross to his other side at a wall), in units per second.")]
+    [SerializeField] float cloneGlide = 16f;
 
     public event Action Hit;
     // Raised on every swing (a slash or Kindling's fireball).
@@ -160,6 +164,10 @@ public class Ronin : MonoBehaviour
     bool hurry;
     SpriteRenderer shadow;
     SpriteRenderer shadowGlow;
+    // Where the clone stands (its pivot's x, like his), which side of him it keeps to, and its own parry's end.
+    float cloneX;
+    float cloneSide = 1f;
+    float cloneParryUntil;
     SpriteRenderer aura;
     readonly System.Collections.Generic.List<SpriteRenderer> wisps = new System.Collections.Generic.List<SpriteRenderer>();
     SpriteAnimator animator;
@@ -323,7 +331,7 @@ public class Ronin : MonoBehaviour
         UltimateFill = Mathf.Max(0f, UltimateFill - Time.deltaTime / Mathf.Max(0.1f, ultimateDuration));
         if (UltimateFill > 0f) return;
         UltimateActive = false;
-        if (shadow != null && shadow.enabled) Fx.Play(Fx.SmokePuff, shadow.bounds.center, ShadowGlow, 1.4f);
+        if (CloneOut) Fx.Play(Fx.SmokePuff, shadow.bounds.center, CloneGlow, 1.4f);
         UltimateEnded?.Invoke();
     }
 
@@ -398,9 +406,11 @@ public class Ronin : MonoBehaviour
         UpdateShadowClone();
     }
 
-    // The Shadow Clone ultimate: the shadow mirrors him across the middle of the view (CameraShake.Center, so a shake
-    // doesn't move it), drawn from his own frame flipped and darkened. It's only a picture: nothing collides with it.
-    // It shows while the ultimate runs and he's in control, and puffs into being each time it's unleashed.
+    // The Shadow Clone ultimate: a shadow of him stands at his side, drawn from his own frame darkened, and does
+    // whatever he does. It keeps to the side with more room and glides round to his other side when a wall
+    // (the view's edge, measured from CameraShake.Center so a shake doesn't move it) would crowd it. It's only a
+    // picture: nothing collides with it. It shows while the ultimate runs and he's in control, and puffs into being
+    // each time it's unleashed.
     void UpdateShadowClone()
     {
         bool show = ControlsEnabled && UltimateActive && CurrentUltimate == Ultimate.ShadowClone;
@@ -408,21 +418,45 @@ public class Ronin : MonoBehaviour
         {
             if (!show) return;
             shadow = new GameObject("ShadowClone").AddComponent<SpriteRenderer>();
-            shadowGlow = Kunai.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, new Color(ShadowGlow.r, ShadowGlow.g, ShadowGlow.b, 0.35f));
+            shadowGlow = Kunai.CreateGlow(shadow.transform, 1.6f, sprite.sortingOrder - 2, Color.clear);
         }
-        if (show && !shadow.enabled) Fx.Play(Fx.SmokePuff, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y, 0f), ShadowGlow, 1.4f);
+        float x = transform.position.x;
+        float halfWidth = cam.orthographicSize * cam.aspect;
+        float centerX = CameraShake.Center.x;
+        float min = centerX - halfWidth + screenMargin - minOffsetX;
+        float max = centerX + halfWidth - screenMargin - maxOffsetX;
+        bool appearing = show && !shadow.enabled;
+        if (appearing) cloneSide = x < centerX ? 1f : -1f;
+        float wanted = x + cloneSide * cloneOffset;
+        if (wanted < min || wanted > max)
+        {
+            cloneSide = -cloneSide;
+            wanted = x + cloneSide * cloneOffset;
+        }
+        cloneX = appearing ? wanted : Mathf.MoveTowards(cloneX, wanted, cloneGlide * Time.deltaTime);
+        cloneX = Mathf.Clamp(cloneX, min, max);
+        if (appearing) Fx.Play(Fx.SmokePuff, CloneCentre, CloneGlow, 1.4f);
+
         shadow.enabled = shadowGlow.enabled = show;
         if (!show) return;
         shadow.sprite = sprite.sprite;
-        shadow.flipX = !sprite.flipX;
-        shadow.color = ShadowTint;
+        shadow.flipX = sprite.flipX;
+        shadow.color = CloneTint;
         shadow.sortingOrder = sprite.sortingOrder - 1;
-        Vector3 at = sprite.transform.position;
-        shadow.transform.position = new Vector3(MirrorX(at.x), at.y, at.z);
+        shadowGlow.color = new Color(CloneGlow.r, CloneGlow.g, CloneGlow.b, 0.35f);
+        shadow.transform.position = sprite.transform.position + Vector3.right * (cloneX - x);
         shadow.transform.localScale = sprite.transform.lossyScale;
     }
 
-    float MirrorX(float x) => 2f * CameraShake.Center.x - x;
+    bool CloneOut => shadow != null && shadow.enabled;
+    Vector3 CloneMuzzle => new Vector3(cloneX + centerOffsetX, transform.position.y, 0f);
+    Vector3 CloneCentre => Bounds.center + Vector3.right * (cloneX - transform.position.x);
+    // The clone's colours, and the look of everything it sends.
+    Color CloneTint => ShadowTint;
+    Color CloneGlow => ShadowGlow;
+
+    // A clone's projectile: its own colours over his attack's.
+    void Shade(Kunai projectile, Color tint) => projectile.Tint(Color.Lerp(tint, CloneGlow, 0.6f), CloneGlow);
 
     void OnDestroy()
     {
@@ -491,6 +525,11 @@ public class Ronin : MonoBehaviour
         if (move == Moves.Slash) Attack();
         else if (move == Moves.Shuriken) ThrowShuriken();
         else if (move == Moves.Parry) StartParry();
+        else if (move == Moves.Ultimate && !UltimateActive)
+        {
+            FillUltimate();
+            StartUltimate();
+        }
     }
 
     public bool Parrying => Time.time < parryUntil;
@@ -517,7 +556,8 @@ public class Ronin : MonoBehaviour
         if (Loadout.Has(BoonId.Kindling, out float swingsPerFireball) && ++swingsSinceFireball >= (int)swingsPerFireball)
         {
             swingsSinceFireball = 0;
-            ThrowFireball();
+            ThrowFireball(Muzzle, false);
+            if (CloneOut) ThrowFireball(CloneMuzzle, true);
         }
         // Without the slash prefab (art not applied yet) the sword falls back to throwing kunai.
         else if (weapon == Weapon.Sword && slashPrefab != null) Slash();
@@ -527,14 +567,15 @@ public class Ronin : MonoBehaviour
 
     // Kindling's fireball: the Burning Riposte fireball drawn at twice its size, slower than a slash. It burns through
     // arrows, and its hit counts as a slash (so Frost and Storm Blade trigger, though not Flame Blade's blast) before
-    // it bursts in a great blast.
-    void ThrowFireball()
+    // it bursts in a great blast. The clone's is a lesser one in its colours, with no blast.
+    void ThrowFireball(Vector3 from, bool clone)
     {
         Color fire = Boons.Info(Element.Fire).Color;
-        Kunai fireball = SpawnProjectile(kunaiPrefab, Muzzle);
+        Kunai fireball = SpawnProjectile(kunaiPrefab, from);
         Sprite[] frames = Fx.Frames(Fx.Fireball);
         bool hasArt = frames != null && frames.Length > 0;
-        fireball.Launch(Vector3.up, KindlingSpeed, 0, KillSource.Slash, hasArt ? null : kunaiSprite, scale: KindlingScale, lifetimeMultiplier: 2f);
+        fireball.Launch(Vector3.up, KindlingSpeed, 0, clone ? KillSource.Clone : KillSource.Slash, hasArt ? null : kunaiSprite,
+            scale: KindlingScale, lifetimeMultiplier: 2f);
         if (hasArt)
         {
             fireball.Animate(frames, 14f, FireballSize * KindlingDrawScale);
@@ -544,8 +585,15 @@ public class Ronin : MonoBehaviour
         {
             fireball.Tint(Color.Lerp(Color.white, fire, 0.7f), fire);
         }
-        fireball.ParryAura(Color.Lerp(fire, Color.yellow, 0.3f));
         fireball.CutsArrows = true;
+        if (clone)
+        {
+            Shade(fireball, hasArt ? Color.white : fire);
+            fireball.ParryAura(CloneGlow);
+            Fx.Play(Fx.SlashArc, CloneCentre + Vector3.up * 0.35f, CloneGlow, 1f);
+            return;
+        }
+        fireball.ParryAura(Color.Lerp(fire, Color.yellow, 0.3f));
         fireball.Kindled = true;
         fireball.Impacted += (point, target) => FireballImpact?.Invoke(point, target);
         Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
@@ -578,45 +626,48 @@ public class Ronin : MonoBehaviour
     }
 
     // One slash (or kunai) per swing; the Sword Arts reshape it. Split Slash forks it mid-flight, Echo Slash may add a
-    // homing ghost, Piercing Slash applies to every one of them, and the Shadow Clone ultimate's shadow swings with him.
+    // homing ghost, Piercing Slash applies to every one of them, and the Shadow Clone swings with him: the same fan
+    // from beside him, every blade of it a lesser one (KillSource.Clone) in its colours.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
-        Kunai slash = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, 1f);
-        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent));
-        if (shadow != null && shadow.enabled)
-        {
-            // The shadow's slash is a lesser one (half damage to bosses, no boon effects): it pierces, but never splits
-            // or echoes, and wears the shadow's colours.
-            Kunai shade = LaunchSlash(prefab, new Vector3(MirrorX(Muzzle.x), Muzzle.y, 0f), Vector3.up, KillSource.Shadow, projectileSprite, 1f);
-            shade.Tint(Color.Lerp(attackTint, ShadowGlow, 0.6f), ShadowGlow);
-            Fx.Play(Fx.SlashArc, new Vector3(MirrorX(Bounds.center.x), Bounds.center.y + 0.35f, 0f), ShadowGlow, 0.8f);
-        }
+        FanFrom(prefab, source, projectileSprite, Muzzle, false);
+        if (!CloneOut) return;
+        FanFrom(prefab, KillSource.Clone, projectileSprite, CloneMuzzle, true);
+        Fx.Play(Fx.SlashArc, CloneCentre + Vector3.up * 0.35f, CloneGlow, 0.8f);
+    }
+
+    void FanFrom(GameObject prefab, KillSource source, Sprite projectileSprite, Vector3 from, bool clone)
+    {
+        Kunai slash = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
+        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent, clone));
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
-            Kunai ghost = LaunchSlash(prefab, Muzzle, Vector3.up, source, projectileSprite, EchoScale);
+            Kunai ghost = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, EchoScale, clone);
             ghost.Home(RiposteTarget);
-            ghost.ParryAura(Color.Lerp(Color.white, attackGlow, 0.5f));
+            ghost.ParryAura(clone ? CloneGlow : Color.Lerp(Color.white, attackGlow, 0.5f));
         }
     }
 
-    Kunai LaunchSlash(GameObject prefab, Vector3 position, Vector3 direction, KillSource source, Sprite projectileSprite, float scale)
+    Kunai LaunchSlash(GameObject prefab, Vector3 position, Vector3 direction, KillSource source, Sprite projectileSprite, float scale, bool clone = false)
     {
         Kunai projectile = SpawnProjectile(prefab, position);
         bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
         projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale);
         projectile.CutsArrows = pierces;
-        projectile.Tint(attackTint, attackGlow);
+        if (clone) Shade(projectile, attackTint);
+        else projectile.Tint(attackTint, attackGlow);
         return projectile;
     }
 
     // Split Slash: two smaller, lesser slashes (half damage to bosses, no boon effects) peel off either side of the
-    // one in flight, which flies on.
-    void SplitOff(GameObject prefab, Sprite projectileSprite, Kunai parent)
+    // one in flight, which flies on. A clone's slash forks into the clone's own.
+    void SplitOff(GameObject prefab, Sprite projectileSprite, Kunai parent, bool clone)
     {
         Vector3 at = parent.transform.position;
         Vector3 heading = parent.transform.up;
-        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, KillSource.Shadow, projectileSprite, SplitScale);
-        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, KillSource.Shadow, projectileSprite, SplitScale);
+        KillSource source = clone ? KillSource.Clone : KillSource.Shadow;
+        Kunai left = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, splitAngle) * heading, source, projectileSprite, SplitScale, clone);
+        Kunai right = LaunchSlash(prefab, at, Quaternion.Euler(0, 0, -splitAngle) * heading, source, projectileSprite, SplitScale, clone);
         left.IgnoreCollisionsWith(parent);
         right.IgnoreCollisionsWith(parent);
         left.IgnoreCollisionsWith(right);
@@ -637,6 +688,18 @@ public class Ronin : MonoBehaviour
         Sfx.Play(Sfx.ShurikenThrow);
         PlayAction(art.attack);
         ShurikenThrown?.Invoke(Muzzle, shuriken);
+        if (CloneOut) CloneShuriken(speed, hasArt);
+    }
+
+    // The clone's own shuriken flies up its column beside his: as fast and as far, but each hit a lesser one, and it
+    // sets off none of the shuriken boons (it raises no ShurikenThrown).
+    void CloneShuriken(float speed, bool hasArt)
+    {
+        Kunai shuriken = SpawnProjectile(kunaiPrefab, CloneMuzzle);
+        shuriken.Launch(Vector3.up, speed, int.MaxValue, KillSource.Clone,
+            hasArt ? shurikenSprite : kunaiSprite, scale: hasArt ? shurikenScale : shurikenScale * 0.6f, spin: true, lifetimeMultiplier: 2f);
+        shuriken.Spinning = true;
+        Shade(shuriken, shurikenTint);
     }
 
     // The seal holds his blade: a dull red spark and no parry, and the cooldown isn't spent.
@@ -665,6 +728,11 @@ public class Ronin : MonoBehaviour
             ElementFx.Glow(Bounds.center, parryColor, 0.8f, parryRadius * 2.4f, parryWindow, transform);
         }
         PlayAction(art.parry != null && art.parry.Length > 0 ? art.parry : art.attack);
+        if (CloneOut)
+        {
+            cloneParryUntil = parryUntil;
+            Fx.Play(Fx.SlashArc, CloneCentre + Vector3.up * 0.35f, CloneGlow, 1.15f);
+        }
     }
 
     Kunai SpawnProjectile(GameObject prefab, Vector3 position)
@@ -726,6 +794,7 @@ public class Ronin : MonoBehaviour
     {
         if (walking) return;
         if (Parrying) DeflectNearbyArrows();
+        if (Time.time < cloneParryUntil && CloneOut) CloneDeflect();
 
         Vector3 position = body.position;
         if (Roaming)
@@ -898,6 +967,36 @@ public class Ronin : MonoBehaviour
                 }
             }
             else Deflect(arrow);
+        }
+    }
+
+    // The Shadow Clone parries with him and turns the arrows that reach it: plain ones only (no spear, seal-dart, boss
+    // slash or shot with a part to play when parried, like the Emperor's skulls), each sent back as a lesser homing
+    // riposte in its colours. Its parries set off no riposte boons and don't count as his landing one.
+    void CloneDeflect()
+    {
+        int hits = Physics.OverlapSphereNonAlloc(CloneCentre, parryRadius, parryBuffer);
+        for (int i = 0; i < hits; i++)
+        {
+            Arrow arrow = parryBuffer[i].GetComponentInParent<Arrow>();
+            if (arrow == null || arrow.Unparryable || arrow.Unbreakable || arrow.Reflectable || arrow.Parried != null) continue;
+            if (arrow.CappedRiposte && ++cappedRipostes > RiposteCap)
+            {
+                arrow.Pop(CloneGlow);
+                continue;
+            }
+            SpriteRenderer arrowArt = arrow.Art;
+            Vector3 position = arrow.transform.position;
+            if (!arrow.TryDeflect()) continue;
+            Kunai riposte = SpawnProjectile(kunaiPrefab, position);
+            riposte.Launch(Vector3.up, 1.1f, 0, KillSource.Clone, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
+            riposte.Home(RiposteTarget);
+            riposte.Mimic(arrowArt);
+            Shade(riposte, Color.white);
+            riposte.ParryAura(CloneGlow);
+            arrow.Riposte = riposte;
+            Fx.Play(Fx.Impact, position, CloneGlow, 0.9f);
+            Sfx.Play(Sfx.Deflect, 0.7f, 0.85f);
         }
     }
 

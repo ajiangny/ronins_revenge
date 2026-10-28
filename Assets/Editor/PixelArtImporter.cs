@@ -12,6 +12,16 @@ public class PixelArtImporter : AssetPostprocessor
     const string UtsusemiPhaseRoot = CharacterRoot + "UtsusemiPhase2/";
     const float UtsusemiPhasePixelsPerUnit = 60f;
 
+    // Effects drawn with SpriteDrawMode.Tiled, by file-name prefix.
+    static readonly string[] TiledArt = { "Utsu_BeamRed_", "Utsu_BeamMolten_", "Kage_Chain_", "Kage_SoulPillar_", "SafeZone_" };
+
+    static bool IsTiled(string path)
+    {
+        string file = System.IO.Path.GetFileName(path);
+        foreach (string prefix in TiledArt) if (file.StartsWith(prefix)) return true;
+        return false;
+    }
+
     void OnPreprocessTexture()
     {
         if (!assetPath.StartsWith(SpriteRoot)) return;
@@ -29,8 +39,12 @@ public class PixelArtImporter : AssetPostprocessor
         // A custom pivot set by a setup script (effects anchored on their strike point) is kept.
         var settings = new TextureImporterSettings();
         importer.ReadTextureSettings(settings);
-        if (settings.spriteAlignment == (int)SpriteAlignment.Custom) return;
-        settings.spriteAlignment = (int)(assetPath.StartsWith(CharacterRoot) ? SpriteAlignment.BottomCenter : SpriteAlignment.Center);
+        // Art laid in Tiled draw mode (beams, chains, the safe-zone band) needs a full-rect mesh to tile.
+        if (IsTiled(assetPath)) settings.spriteMeshType = SpriteMeshType.FullRect;
+        if (settings.spriteAlignment != (int)SpriteAlignment.Custom)
+        {
+            settings.spriteAlignment = (int)(assetPath.StartsWith(CharacterRoot) ? SpriteAlignment.BottomCenter : SpriteAlignment.Center);
+        }
         importer.SetTextureSettings(settings);
     }
 }

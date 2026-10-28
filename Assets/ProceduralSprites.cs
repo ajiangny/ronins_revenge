@@ -511,6 +511,51 @@ public static class ProceduralSprites
         return result;
     }
 
+    // A small pixel-art flame in a stepped molten palette (white core, gold, orange, a dark red edge), flickering
+    // through frames that each lick a different way. One texel per unit and pivoted at its base: scale it by the
+    // pixel size of whatever it burns on, so its pixels match that sprite's.
+    public static Sprite[] PixelFlame => pixelFlame != null ? pixelFlame : pixelFlame = BuildPixelFlame(9, 15, 6);
+    static Sprite[] pixelFlame;
+
+    static Sprite[] BuildPixelFlame(int width, int height, int frames)
+    {
+        var palette = new[]
+        {
+            new Color32(140, 28, 10, 255), new Color32(243, 92, 13, 255), new Color32(251, 190, 60, 255),
+            new Color32(255, 236, 150, 255), new Color32(255, 255, 240, 255),
+        };
+        var result = new Sprite[frames];
+        var random = new System.Random(7);
+        for (int f = 0; f < frames; f++)
+        {
+            float sway = (float)random.NextDouble() * 2f - 1f;
+            float reach = 0.7f + 0.3f * (float)random.NextDouble();
+            var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color32[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                float v = (y + 0.5f) / (height * reach);
+                if (v >= 1f) continue;
+                // Widest just above the base, leaning further off-centre the higher it licks.
+                float half = (width / 2f) * Mathf.Min(1f, v * 4f + 0.45f) * Mathf.Pow(1f - v, 0.8f);
+                float centre = width / 2f + sway * v * v * width * 0.35f;
+                for (int x = 0; x < width; x++)
+                {
+                    float d = Mathf.Abs(x + 0.5f - centre) / Mathf.Max(0.5f, half);
+                    if (d > 1f || random.NextDouble() < 0.08 * v) continue;
+                    // Hotter towards its middle and its base.
+                    float heat = (1f - d) * (1f - v * 0.7f);
+                    int step = Mathf.Clamp(Mathf.FloorToInt(heat * palette.Length * 1.3f), 0, palette.Length - 1);
+                    pixels[y * width + x] = palette[step];
+                }
+            }
+            texture.SetPixels32(pixels);
+            texture.Apply();
+            result[f] = Sprite.Create(texture, new Rect(0, 0, width, height), new Vector2(0.5f, 0f), 1f);
+        }
+        return result;
+    }
+
     // A soft tongue of flame, white to be tinted: round at its base, narrowing to a point and fading towards its tip.
     // Pivoted at its base, so it can be stood on a rim and turned outward.
     public static Sprite Flame => flame != null ? flame : flame = BuildFlame(32, 64);

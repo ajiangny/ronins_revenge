@@ -2431,15 +2431,22 @@ public class Utsusemi : Boss
 
     // Where flames lick its second form, in its frames' pixels: the raised claw, then the torn hem's ragged ends.
     static readonly Vector2[] FlamePoints = { new Vector2(109f, 50f), new Vector2(40f, 106f), new Vector2(112f, 102f), new Vector2(64f, 121f), new Vector2(94f, 120f) };
-    // How tall each of those tongues stands, in world units: the claw's burns brightest.
-    static readonly float[] FlameHeights = { 0.75f, 0.5f, 0.5f, 0.4f, 0.4f };
-    const float EmberGap = 0.07f;
+    // How many of its own pixels tall each of those flames stands at most: the claw's burns tallest.
+    static readonly float[] FlameScale = { 1.3f, 1f, 1f, 0.8f, 0.8f };
+    const float EmberGap = 0.022f;
+    const int MaxEmbers = 90;
+    // Embers cool through these in hard steps, never blending: white-hot, gold, orange, ember red, a dying char.
+    static readonly Color[] EmberSteps =
+    {
+        new Color(1f, 1f, 0.92f), new Color(1f, 0.86f, 0.36f), new Color(0.95f, 0.36f, 0.05f),
+        new Color(0.62f, 0.12f, 0.04f), new Color(0.3f, 0.06f, 0.04f),
+    };
 
     class Ember
     {
         public SpriteRenderer r;
-        public Vector3 velocity;
-        public float age, life;
+        public Vector3 at, velocity;
+        public float age, life, nextKick, drag;
     }
     readonly List<Ember> embers = new List<Ember>();
 
@@ -2452,18 +2459,42 @@ public class Utsusemi : Boss
         TimeRipple.Clear();
     }
 
-    // Its second form burns, as in its painting: flame tongues lick its raised claw and the torn hem, and embers lift
-    // off the shroud and drift up and away. Built in code on whatever frame it's in, so it follows every clip.
+    // One world pixel of its sprite, so its fire is drawn on its own pixel grid.
+    float BodyPixel => sprite.sprite != null ? sprite.transform.lossyScale.x / sprite.sprite.pixelsPerUnit : 0.05f;
+
+    Vector3 SnapToPixels(Vector3 at)
+    {
+        float pixel = BodyPixel;
+        return new Vector3(Mathf.Round(at.x / pixel) * pixel, Mathf.Round(at.y / pixel) * pixel, at.z);
+    }
+
+    void SpawnEmber(Vector3 from, Vector3 velocity, float life)
+    {
+        if (embers.Count >= MaxEmbers) return;
+        var ember = new GameObject("Ember").AddComponent<SpriteRenderer>();
+        ember.sprite = ProceduralSprites.White;
+        ember.sortingOrder = sprite.sortingOrder + 2;
+        // One to three of its own pixels square, so the sparks read as pixel art beside it.
+        ember.transform.localScale = Vector3.one * BodyPixel * Random.Range(1, 4);
+        embers.Add(new Ember { r = ember, at = from + Vector3.back * 0.25f, velocity = velocity, life = life, drag = Random.Range(0.5f, 2.5f) });
+    }
+
+    // Its second form burns, as in its painting: pixel flames lick its raised claw and the torn hem, and embers boil off
+    // the shroud in fits, jerked about by gusts and kicks, some spat out sideways in bursts, cooling in hard steps on
+    // its own pixel grid. Built in code on whatever frame it's in, so it follows every clip.
     IEnumerator BurnShroud()
     {
+        Sprite[] flameFrames = ProceduralSprites.PixelFlame;
         var tongues = new List<SpriteRenderer>();
-        foreach (Vector2 _ in FlamePoints)
+        var flameFrame = new float[FlamePoints.Length];
+        for (int i = 0; i < FlamePoints.Length; i++)
         {
             var tongue = new GameObject("ShroudFlame").AddComponent<SpriteRenderer>();
             tongue.transform.SetParent(sprite.transform, false);
-            tongue.sprite = ProceduralSprites.Flame;
+            tongue.sprite = flameFrames[0];
             tongue.sortingOrder = sprite.sortingOrder + 1;
             tongues.Add(tongue);
+            flameFrame[i] = Random.Range(0f, flameFrames.Length);
         }
         // Heat glowing under its feet, beneath the body.
         var heat = new GameObject("Heat").AddComponent<SpriteRenderer>();
@@ -2471,7 +2502,8 @@ public class Utsusemi : Boss
         heat.sprite = ProceduralSprites.SoftGlow;
         heat.sortingOrder = sprite.sortingOrder - 2;
         tongues.Add(heat);
-        float nextEmber = 0f;
+        float nextEmber = 0f, nextBurst = Time.time + 0.5f, gustUntil = 0f, nextGust = Time.time + 1f;
+        Vector3 gust = Vector3.zero;
         while (!IsDead && sprite != null)
         {
             // Its fire stands still while it holds time.
@@ -2481,33 +2513,57 @@ public class Utsusemi : Boss
                 continue;
             }
             float parent = sprite.transform.lossyScale.x;
+            float pixel = BodyPixel;
             float throb = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
             heat.transform.position = new Vector3(sprite.bounds.center.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0.1f);
             heat.transform.localScale = new Vector3(3.2f, 1.2f, 1f) / parent;
             heat.color = new Color(Molten.r, Molten.g * 0.8f, Molten.b, 0.18f + 0.08f * throb);
+
+            // The flames jump between frames at an uneven rate and now and then flip, so no two lick alike.
             for (int i = 0; i < FlamePoints.Length; i++)
             {
-                float flicker = Mathf.PerlinNoise(Time.time * 6f, i * 3.1f);
-                float height = FlameHeights[i] * (0.7f + 0.6f * flicker);
-                tongues[i].transform.position = OnSprite(FlamePoints[i].x, FlamePoints[i].y) + Vector3.back * 0.2f;
-                tongues[i].transform.localScale = new Vector3(height * 0.6f, height, 1f) / parent;
-                tongues[i].color = new Color(Molten.r, Molten.g, Molten.b, 0.35f + 0.35f * flicker);
+                flameFrame[i] += Time.deltaTime * Random.Range(8f, 18f);
+                SpriteRenderer tongue = tongues[i];
+                tongue.sprite = flameFrames[(int)flameFrame[i] % flameFrames.Length];
+                if (Random.value < 0.04f) tongue.flipX = !tongue.flipX;
+                tongue.transform.position = SnapToPixels(OnSprite(FlamePoints[i].x, FlamePoints[i].y)) + Vector3.back * 0.2f;
+                // Whole pixels only: stretched by a step now and then, never smoothly.
+                float tall = FlameScale[i] * (Random.value < 0.15f ? 1.25f : 1f);
+                tongue.transform.localScale = new Vector3(pixel, pixel * tall, 1f) / parent;
             }
 
+            // Gusts: every so often every ember is shoved one way together.
+            if (Time.time >= nextGust)
+            {
+                gust = new Vector3(Random.Range(-2.2f, 2.2f), Random.Range(-0.3f, 0.8f), 0);
+                gustUntil = Time.time + Random.Range(0.15f, 0.35f);
+                nextGust = Time.time + Random.Range(0.6f, 1.6f);
+            }
+            Vector3 gustNow = Time.time < gustUntil ? gust : Vector3.zero;
+
+            Bounds b = sprite.bounds;
             if (Time.time >= nextEmber)
             {
-                nextEmber = Time.time + EmberGap * Random.Range(0.6f, 1.4f);
+                nextEmber = Time.time + EmberGap * Random.Range(0.3f, 1.7f);
                 // Off the lower shroud, where the painting's hem burns.
-                Bounds b = sprite.bounds;
-                Vector3 from = new Vector3(Random.Range(b.min.x + b.size.x * 0.1f, b.max.x - b.size.x * 0.1f),
-                    b.min.y + b.size.y * Random.Range(0.08f, 0.5f), 0);
-                var ember = new GameObject("Ember").AddComponent<SpriteRenderer>();
-                ember.sprite = ProceduralSprites.White;
-                ember.sortingOrder = sprite.sortingOrder + 2;
-                ember.transform.position = from + Vector3.back * 0.25f;
-                ember.transform.localScale = Vector3.one * Random.Range(0.05f, 0.1f);
-                embers.Add(new Ember { r = ember, velocity = new Vector3(Random.Range(-0.4f, 0.4f), Random.Range(0.8f, 1.6f), 0), life = Random.Range(0.6f, 1.1f) });
+                Vector3 from = new Vector3(Random.Range(b.min.x + b.size.x * 0.08f, b.max.x - b.size.x * 0.08f),
+                    b.min.y + b.size.y * Random.Range(0.05f, 0.55f), 0);
+                SpawnEmber(from, new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(0.6f, 2.4f), 0), Random.Range(0.4f, 1.2f));
             }
+            // Bursts: the shroud spits a fistful of sparks out sideways from one ragged end.
+            if (Time.time >= nextBurst)
+            {
+                nextBurst = Time.time + Random.Range(0.25f, 0.8f);
+                float side = Random.value < 0.5f ? -1f : 1f;
+                Vector3 from = new Vector3(side < 0 ? b.min.x + b.size.x * 0.15f : b.max.x - b.size.x * 0.15f,
+                    b.min.y + b.size.y * Random.Range(0.1f, 0.45f), 0);
+                int count = Random.Range(6, 13);
+                for (int n = 0; n < count; n++)
+                {
+                    SpawnEmber(from, new Vector3(side * Random.Range(1.5f, 4.5f), Random.Range(-0.5f, 2.5f), 0), Random.Range(0.25f, 0.6f));
+                }
+            }
+
             for (int i = embers.Count - 1; i >= 0; i--)
             {
                 Ember e = embers[i];
@@ -2518,11 +2574,19 @@ public class Utsusemi : Boss
                     embers.RemoveAt(i);
                     continue;
                 }
+                // Kicked about at random, rising as they go, slowed by the air.
+                if (Time.time >= e.nextKick)
+                {
+                    e.velocity += new Vector3(Random.Range(-1.6f, 1.6f), Random.Range(-0.4f, 1.2f), 0);
+                    e.nextKick = Time.time + Random.Range(0.04f, 0.16f);
+                }
+                e.velocity = Vector3.Lerp(e.velocity, new Vector3(0, 1.2f, 0), e.drag * Time.deltaTime);
+                e.at += (e.velocity + gustNow) * Time.deltaTime;
+                e.r.transform.position = SnapToPixels(e.at);
+                // Cooling in hard steps, and guttering: some frames it blinks out.
                 float k = e.age / e.life;
-                e.r.transform.position += (e.velocity + Vector3.right * Mathf.Sin(e.age * 9f + i) * 0.3f) * Time.deltaTime;
-                // White-hot as it leaves, cooling to a dull red as it fades.
-                Color c = Color.Lerp(new Color(1f, 0.85f, 0.5f), new Color(0.8f, 0.2f, 0.1f), k);
-                e.r.color = new Color(c.r, c.g, c.b, 1f - k * k);
+                Color c = EmberSteps[Mathf.Min(EmberSteps.Length - 1, (int)(k * EmberSteps.Length))];
+                e.r.color = new Color(c.r, c.g, c.b, Random.value < 0.12f * k ? 0f : 1f);
             }
             yield return null;
         }

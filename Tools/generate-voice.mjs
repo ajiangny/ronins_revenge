@@ -4,14 +4,18 @@
 // Story/<Name>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
-// from .env.local.
+// from .env.local. `npm run voice -- --fx-only [names]` re-bakes the FX voices' clips (the dead soldiers) from their
+// kept raw takes, or from the clip itself the first time, without calling the API. Baking needs ffmpeg on the PATH.
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
-import { createWriteStream } from "fs";
-import { mkdir } from "fs/promises";
+import { execFileSync } from "child_process";
+import { createWriteStream, existsSync } from "fs";
+import { copyFile, mkdir } from "fs/promises";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 
 const OUT_DIR = new URL("../Assets/Audio/Voice/", import.meta.url);
+// The unbaked takes of FX voices, kept (gitignored) so `--fx-only` can re-bake them without new API calls.
+const RAW_DIR = new URL("./.voice-raw/", import.meta.url);
 // Designed in ElevenLabs for Benibana: a low, smoky, unaccented alto with a stage performer's diction, the court
 // dancer used to an audience, theatrical and mocking with cold grief underneath.
 const BENIBANA = "piUPVF9NiOg0l2da9TTF";
@@ -38,8 +42,20 @@ const HIBIKI = "2R377yXvV0jHG7sPjbOY";
 // chorus (GameManager.poguruVoice).
 const POGURU = "vHGbxklwUU4QPMN7Wam1";
 // Designed in ElevenLabs for the tutorial's soldiers: a gruff, sneering middle-aged foot soldier of Kagetsune's army,
-// rough and swaggering with a coward underneath, a period-drama villain grunt. All of them share it.
+// rough and swaggering with a coward underneath, a period-drama villain grunt. All of them share it. They are dead
+// (Story/Army.md), so their takes are read hollow and rasping and baked through GHOST below.
 const SOLDIER = "r3povynJfMX3y8tUT4Jg";
+
+// The dead army's voice, baked into the mp3 with ffmpeg so it sounds the same in WebGL builds, where Unity's audio
+// filters don't run: the take pitched down ~12% at the same speed, doubled by a slow chorus with a tomb echo, and a
+// faint whisper of it pitched up and high-passed underneath. The pad leaves room for the echo's tail.
+const GHOST =
+  "[0:a]apad=pad_dur=0.7,asetrate=44100*0.88,aresample=44100,atempo=1.13636,asplit=2[v][w];" +
+  "[v]chorus=0.6:0.9:55|75:0.45|0.35:0.3|0.4:0.6|0.9,aecho=0.8:0.55:120|280:0.32|0.18[body];" +
+  "[w]asetrate=44100*1.12,aresample=44100,atempo=0.89286,highpass=f=2200,adelay=45|45,volume=0.5[hiss];" +
+  "[body][hiss]amix=inputs=2:weights=1 0.35:normalize=0,highpass=f=90,lowpass=f=7000,volume=2.5,alimiter=limit=0.9";
+// Which voices are baked, and through what. Every other voice is saved as it arrives.
+const FX = { [SOLDIER]: GHOST };
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -291,28 +307,28 @@ const LINES = {
   // Poguru, the Lost Dragon (Story/Poguru.md): the tutorial, his barks and his temple talk. Ids follow
   // Conversation.VoiceId; Oni's replies inside his conversations are in Oni's voice. Poguru_Wake_Count fills in a
   // death count, so it stays a subtitle.
-  Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! WAKE UP! [terrified, fast] Scary soldiers are coming!"],
+  Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! WAKE UP! [terrified, fast] Scary dead soldiers are coming!"],
   Poguru_Tut_Wake_2: [ONI, "[low, tired, flat] ...Who are you."],
   Poguru_Tut_Wake_3: [POGURU, "[proud, puffed up] Poguru! The Lost Dragon! [giggles] I live in your wisp. Rent-free!"],
   Poguru_Tut_Wake_4: [POGURU, "[gasps, fast, breathless] No time! Do you remember how to fight?"],
   Poguru_Tut_Again: [POGURU, "[excited, fast] Oni! Wake up! Soldiers! Again! [eager] Want the lesson again? [giggles] I LOVE the lesson."],
   Poguru_Tut_Yay: [POGURU, "[cheering] Yay! [nervous, fast] Stay close. They're coming!"],
   Poguru_Tut_Skip: [POGURU, "[fast, eager] Okay okay okay! I'll be in your wisp. Cheering. [whispering] Quietly. [giggles] Mostly."],
-  Tut_Soldiers: [SOLDIER, "[gruff, sneering shout] There he is! [mocking] The Emperor's runaway dog."],
-  Tut_Soldiers_2: [SOLDIER, "[swaggering, menacing] Lord Kagetsune wants his demon back. [barking an order] Come quietly!"],
+  Tut_Soldiers: [SOLDIER, "[hollow, rasping, dry rattle of breath] There he is... [sneering, a dead man's laugh] the Emperor's runaway dog."],
+  Tut_Soldiers_2: [SOLDIER, "[hollow, rasping, menacing] The coffin wants its demon back. [slow, a dry croak] Come... quietly."],
   Tut_Soldiers_3: [ONI, "[low, tired, flat] ...No."],
   Tut_Soldiers_4: [POGURU, "[squeaks] Eep! [panicked, fast] Five of them! [flustered, trying to stay calm] Okay, okay, one at a time!"],
-  Tut_Slash_Taunt: [SOLDIER, "[snarling shout] Eat this, traitor!"],
+  Tut_Slash_Taunt: [SOLDIER, "[rasping, snarling shout] Join us, traitor!"],
   Poguru_Tut_SlashIt: [POGURU, "[urgent, fast] An arrow! SLASH it! [excited] Your cut breaks it clean in half!"],
   Poguru_Tut_TakeHim: [POGURU, "[fierce, cheering] Now take him down!"],
-  Tut_Slash_Fall: [SOLDIER, "[dying grunt, choking] Gah...!"],
-  Tut_Charge_Taunt: [SOLDIER, "[rough battle shout] Rush him! Together!"],
+  Tut_Slash_Fall: [SOLDIER, "[death rattle, wheezing, fading] Not... again...!"],
+  Tut_Charge_Taunt: [SOLDIER, "[hoarse, rasping battle shout] Drag him down! Together!"],
   Poguru_Tut_ShurikenIt: [POGURU, "[urgent, fast] Two in a row! [excited] Throw your SHURIKEN, it flies right through them both!"],
   Poguru_Tut_Stopped: [POGURU, "[gleeful] Stopped in their tracks! [cackles] Ha!"],
-  Tut_Spear_Taunt: [SOLDIER, "[smug, sneering] Let's see you cut THIS. [proud, gloating] Blessed steel from the Emperor's own forge!"],
+  Tut_Spear_Taunt: [SOLDIER, "[rasping, smug, sneering] Let's see you cut THIS. [proud, gloating] Blessed steel from the Emperor's own forge!"],
   Poguru_Tut_ParryIt: [POGURU, "[panicked, very fast] That spear's cursed! Kagetsune's blacksmiths forge them with nasty magic. [frantic] You can't cut it or break it. [shouting] PARRY IT!"],
-  Tut_Flee: [SOLDIER, "[terrified, stammering] Th-that's not natural! [screaming, running away] CAPTAAAIN!"],
-  Tut_Flee_2: [SOLDIER, "[whimpering, higher pitched, cowardly wail] Wait for meee!"],
+  Tut_Flee: [SOLDIER, "[rasping, terrified, stammering] Th-that's not natural! [screaming, running away] CAPTAAAIN!"],
+  Tut_Flee_2: [SOLDIER, "[rasping whimper, higher pitched, cowardly wail] Wait for meee!"],
   Tut_Flee_3: [POGURU, "[giggling, taunting] Hehe! Run away! [pause, suddenly worried] ...Wait. Where are they running TO?"],
   Poguru_Tut_Backup: [POGURU, "[dismayed, small voice] Uh oh. [gulps] He brought a LOT of backup."],
   Poguru_Tut_Backup_2: [ONI, "[low, tired, flat] ...Good."],
@@ -391,11 +407,19 @@ const LINES = {
   Poguru_Talk_Flute_2: [ONI, "[low, tired, a little softer] ...Maybe."],
 };
 
-const client = new ElevenLabsClient();
-const wanted = process.argv.slice(2);
-const names = wanted.length > 0 ? wanted : Object.keys(LINES);
+const args = process.argv.slice(2);
+const fxOnly = args.includes("--fx-only");
+const wanted = args.filter((a) => a !== "--fx-only");
+const names = wanted.length > 0 ? wanted : Object.keys(LINES).filter((n) => !fxOnly || FX[LINES[n][0]]);
+const client = fxOnly ? null : new ElevenLabsClient();
+
+// Writes the clip from its raw take through the voice's filter.
+function bake(raw, out, filter) {
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-i", raw, "-filter_complex", filter, "-c:a", "libmp3lame", "-b:a", "128k", out]);
+}
 
 await mkdir(OUT_DIR, { recursive: true });
+await mkdir(RAW_DIR, { recursive: true });
 for (const name of names) {
   const line = LINES[name];
   if (!line) {
@@ -404,20 +428,29 @@ for (const name of names) {
     continue;
   }
 
-  console.log(`Voicing ${name}...`);
+  const [voice, text] = line;
+  const filter = FX[voice];
+  const file = new URL(`${name}.mp3`, OUT_DIR);
+  const raw = new URL(`${name}.mp3`, RAW_DIR);
   try {
-    const [voice, text] = line;
-    const audio = await client.textToSpeech.convert(voice, {
-      text,
-      modelId: "eleven_v3",
-      outputFormat: "mp3_44100_128",
-    });
-    const source = typeof audio.pipe === "function" ? audio : Readable.fromWeb(audio);
-    const file = new URL(`${name}.mp3`, OUT_DIR);
-    await pipeline(source, createWriteStream(file));
-    console.log(`Saved ${file.pathname}`);
+    if (fxOnly) {
+      if (!filter) continue;
+      // A clip voiced before baking existed is its own raw take.
+      if (!existsSync(raw)) await copyFile(file, raw);
+    } else {
+      console.log(`Voicing ${name}...`);
+      const audio = await client.textToSpeech.convert(voice, {
+        text,
+        modelId: "eleven_v3",
+        outputFormat: "mp3_44100_128",
+      });
+      const source = typeof audio.pipe === "function" ? audio : Readable.fromWeb(audio);
+      await pipeline(source, createWriteStream(filter ? raw : file));
+    }
+    if (filter) bake(raw.pathname, file.pathname, filter);
+    console.log(`Saved ${file.pathname}${filter ? " (baked)" : ""}`);
   } catch (err) {
-    console.error(`API error for ${name}:`, err.message ?? err);
+    console.error(`Error for ${name}:`, err.message ?? err);
     process.exitCode = 1;
   }
 }

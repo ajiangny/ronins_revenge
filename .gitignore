@@ -124,3 +124,6 @@ InitTestScene*.unity*
 # macOS and Unity crash leftovers
 .DS_Store
 mono_crash*.json
+
+# Unbaked voice takes kept by Tools/generate-voice.mjs for --fx-only
+Tools/.voice-raw/

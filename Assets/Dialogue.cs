@@ -383,20 +383,20 @@ public static class Dialogue
             Say("Hibiki", "Drumroll, please... It's me again!")),
 
         // Poguru, the Lost Dragon in Oni's left wisp (Story/Poguru.md). The tutorial's lines are played by id.
-        Tut("Poguru_Tut_Wake", P("ONI! ONI! WAKE UP! Scary soldiers are coming!"), O("...Who are you."),
+        Tut("Poguru_Tut_Wake", P("ONI! ONI! WAKE UP! Scary dead soldiers are coming!"), O("...Who are you."),
             P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!"), P("No time! Do you remember how to fight?")),
         Tut("Poguru_Tut_Again", P("Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson.")),
         Tut("Poguru_Tut_Yay", P("Yay! Stay close. They're coming!")),
         Tut("Poguru_Tut_Skip", P("Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly.")),
         // The drills: five soldiers find Oni before the army. Their lines hang over them in the field; his frozen
         // yells sit beside Oni with the keys, which he never says.
-        Tut("Tut_Soldiers", S("There he is! The Emperor's runaway dog."), S("Lord Kagetsune wants his demon back. Come quietly!"),
+        Tut("Tut_Soldiers", S("There he is... the Emperor's runaway dog."), S("The coffin wants its demon back. Come... quietly."),
             O("...No."), P("Eep! Five of them! Okay, okay, one at a time!")),
-        Tut("Tut_Slash_Taunt", S("Eat this, traitor!")),
+        Tut("Tut_Slash_Taunt", S("Join us, traitor!")),
         Tut("Poguru_Tut_SlashIt", P("An arrow! SLASH it! Your cut breaks it clean in half!")),
         Tut("Poguru_Tut_TakeHim", P("Now take him down!")),
-        Tut("Tut_Slash_Fall", S("Gah...!")),
-        Tut("Tut_Charge_Taunt", S("Rush him! Together!")),
+        Tut("Tut_Slash_Fall", S("Not... again...!")),
+        Tut("Tut_Charge_Taunt", S("Drag him down! Together!")),
         Tut("Poguru_Tut_ShurikenIt", P("Two in a row! Throw your SHURIKEN, it flies right through them both!")),
         Tut("Poguru_Tut_Stopped", P("Stopped in their tracks! Ha!")),
         Tut("Tut_Spear_Taunt", S("Let's see you cut THIS. Blessed steel from the Emperor's own forge!")),

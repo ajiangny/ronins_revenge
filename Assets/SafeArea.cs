@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // What a station does when Oni uses it.
-public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths }
+public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths, Poguru }
 
 // A little life a station gives off: incense smoke rising, light glinting on blades, a soft glow.
 public enum StationFx { None, Incense, Glint, Glow }
@@ -160,6 +160,14 @@ public class SafeArea : MonoBehaviour
     // Map pixels count from the top-left, as in the art.
     public Vector3 MapToWorld(Vector2 px) => new Vector3(ground.min.x + px.x * mapPixel, ground.max.y - px.y * mapPixel, 0f);
     public Vector2 WorldToMap(Vector3 world) => new Vector2((world.x - ground.min.x) / mapPixel, (ground.max.y - world.y) / mapPixel);
+
+    // The top of a station's prop (where Poguru perches on his nest), or a little over its spot without one.
+    public Vector3 TopOf(StationKind kind)
+    {
+        foreach (Standing s in standing)
+            if (s.station.kind == kind) return new Vector3(s.art.center.x, s.art.max.y, 0f);
+        return PointOf(kind) + Vector3.up * 1.5f;
+    }
 
     public Vector3 PointOf(StationKind kind)
     {

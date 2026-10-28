@@ -352,6 +352,9 @@ public class GameManager : MonoBehaviour
                 // On the flagstones to the lower left, between the dais and the pool, used from its right side.
                 new SafeArea.Station { kind = StationKind.Oaths, label = "OATH STONE", spot = new Vector2(0.3125f, 0.1f), propAt = new Vector2(190f, 334f),
                     placeholder = new Color(0.32f, 0.36f, 0.3f), footprint = new Vector2(2f, 0.5f), fx = StationFx.Glow, glowColour = Oaths.HeatColour, reach = 2f },
+                // Poguru's nest, an old offering bowl on the flagstones right of the pool, used from in front of it.
+                new SafeArea.Station { kind = StationKind.Poguru, label = "POGURU", spot = new Vector2(0.6105f, 0.215f), propAt = new Vector2(452f, 292f),
+                    placeholder = new Color(0.3f, 0.45f, 0.55f), footprint = new Vector2(1.2f, 0.4f), fx = StationFx.Glow, glowColour = PoguruColour, reach = 1.8f },
             },
             // The ghost-fires at either side, and the two stone lanterns at the dais, lit.
             lamps = new[]
@@ -521,6 +524,8 @@ public class GameManager : MonoBehaviour
     // A station's page is open over the safe area; he stands still under it.
     bool stationOpen;
     float stationClosedAt;
+    // Poguru talks once a visit to the temple.
+    bool poguruTalked;
 
     void Awake()
     {
@@ -754,9 +759,10 @@ public class GameManager : MonoBehaviour
     {
         bool pending = Save.Data.hubPending;
         yield return HubReturn();
-        if (!pending) yield break;
-        yield return new WaitForSeconds(0.6f);
-        yield return PoguruBark(DialogueEvent.PoguruWake);
+        yield return new WaitForSeconds(pending ? 0.6f : 1f);
+        if (pending) yield return PoguruBark(DialogueEvent.PoguruWake);
+        // Out of the wisp (if his word didn't already bring him) and off to his nest.
+        if (state == State.Hub && safeArea != null && poguru.Current != Poguru.Mode.Perch) poguru.PerchAt(NestPoint);
     }
 
     // Poguru pops out of the wisp for a line and goes back in. Nothing is picked (or marked heard) unless it can play:
@@ -772,7 +778,9 @@ public class GameManager : MonoBehaviour
         poguru.PopOut();
         yield return new WaitForSecondsRealtime(0.5f);
         yield return new WaitForSecondsRealtime(SayAsPoguru(said));
-        poguru.ReturnToWisp();
+        // In the temple he goes to his nest instead.
+        if (state == State.Hub && safeArea != null) poguru.PerchAt(NestPoint);
+        else poguru.ReturnToWisp();
     }
 
     bool FullLinePlaying => dialogueScene.IsPlaying || (speakingFullLine && (voice.isPlaying || oniVoice.isPlaying || soulVoice.isPlaying));
@@ -1103,6 +1111,7 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         SetHudVisible(false);
         ronin.ControlsEnabled = false;
+        poguruTalked = false;
         if (!shown)
         {
             ShowSafeArea();
@@ -1135,6 +1144,8 @@ public class GameManager : MonoBehaviour
         ronin.Roaming = true;
         ronin.ControlsEnabled = true;
         state = State.Hub;
+        // Standing by the pool, he's already on his nest; waking, he flies to it after his word (WakeTalk).
+        if (!wake) poguru.PerchAt(NestPoint, true);
         if (Oaths.Unlocked && !Save.Data.oathsUnsealed) StartCoroutine(UnsealOaths());
     }
 
@@ -1221,6 +1232,7 @@ public class GameManager : MonoBehaviour
             case StationKind.FluteSongs: OpenStation(() => ShowSongs(CloseStation)); break;
             case StationKind.Memorial: OpenStation(() => ShowRecords(CloseStation)); break;
             case StationKind.WeaponRack: OpenStation(() => ShowRack(CloseStation)); break;
+            case StationKind.Poguru: OpenStation(() => ShowPoguru(CloseStation)); break;
             case StationKind.Oaths:
                 if (Oaths.Unlocked) OpenStation(() => ShowOaths(CloseStation));
                 else ui.ShowSubtitle("Oni", "Bound in chains. Not until the Emperor falls.", OniColour, 2.5f);
@@ -1281,6 +1293,67 @@ public class GameManager : MonoBehaviour
         menu.Show("MEMORIAL STONES", body, new[] { MenuUI.Item.Button("BACK", back) }, back);
     }
 
+    // Where Poguru sits on his nest.
+    Vector3 NestPoint => safeArea.TopOf(StationKind.Poguru) + Vector3.up * 0.35f;
+
+    // Poguru's nest: a talk once a visit, what he remembers about fighting, and the switch that has the next run open
+    // with his lesson again.
+    void ShowPoguru(System.Action back, int startIndex = 0)
+    {
+        string muted = MenuUI.MutedHex(false);
+        bool replay = Save.Data.tutorialReplay;
+        var items = new List<MenuUI.Item>
+        {
+            MenuUI.Item.Button(poguruTalked ? $"TALK  <color=#{muted}>·  NAPPING</color>" : "TALK", () =>
+            {
+                if (poguruTalked)
+                {
+                    Sfx.Play(Sfx.UiMove);
+                    return;
+                }
+                menu.Hide();
+                StartCoroutine(TalkToPoguru());
+            }, poguruTalked ? "He's said his piece. Come back after the next run." : "Hear what's on his mind."),
+            MenuUI.Item.Button("TIPS", () => ShowTips(() => ShowPoguru(back, 1)), "What he remembers about fighting."),
+            MenuUI.Item.Button($"REPLAY TUTORIAL  <color=#{muted}>·  {(replay ? "ON" : "OFF")}</color>", () =>
+            {
+                Save.Data.tutorialReplay = !replay;
+                Save.Write();
+                Sfx.Play(Sfx.UiConfirm);
+                ShowPoguru(back, 2);
+            }, replay ? "The next run opens with his lesson. Enter to switch it off." : "Enter to have the next run open with his lesson again."),
+            MenuUI.Item.Button("BACK", back, ""),
+        };
+        menu.Show("POGURU", $"<size=30><color=#{muted}>The Lost Dragon, on his nest. He lives in your left wisp.</color></size>", items.ToArray(), back, startIndex);
+    }
+
+    // Once a visit, with the temple left as it is behind the talk.
+    IEnumerator TalkToPoguru()
+    {
+        poguruTalked = true;
+        yield return PlayTalk(Dialogue.Pick("Poguru", DialogueEvent.PoguruTalk, Dialogue.Context(loadout)), new TalkOptions { keepHud = true });
+        CloseStation();
+    }
+
+    void ShowTips(System.Action back)
+    {
+        string muted = MenuUI.MutedHex(false);
+        string teal = ColorUtility.ToHtmlStringRGB(PoguruColour);
+        string Row(string topic, string text) => $"<color=#{teal}>{topic}</color>  <color=#{muted}>·</color>  {text}\n";
+        string body = "<size=28><align=left>" +
+            Row("SLASH (SPACE)", "A cut flies up the field. Cover stops it, so step out first!") +
+            Row("SHURIKEN (W)", "Big and sparkly, slow to come back. Save it for crowds.") +
+            Row("PARRY (SHIFT)", "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!") +
+            Row("SPEARS", "The glowing red ones go right through cover. Move!") +
+            Row("HEARTS", "From broken cover, and rarely a soldier. At full lives they wait on your row.") +
+            Row("THE ARMY", "If it reaches your row, it's over. Thin out the bottom rank!") +
+            Row("BOONS", "One per soul. Hold TAB in a fight to see what your icons do.") +
+            Row("PATHS", "Walk under, press E. The boss's path opens after round three.") +
+            Row("SPIRIT NOTES", "They stay even when you fall. Spend them at the flute altar.") +
+            "</align></size>";
+        menu.Show("TIPS", body, new[] { MenuUI.Item.Button("BACK", back) }, back);
+    }
+
     // The weapon rack (Hades' Infernal Arms): the blade he carries out, kept in the save.
     void ShowRack(System.Action back, int startIndex = -1)
     {
@@ -1320,6 +1393,7 @@ public class GameManager : MonoBehaviour
         ronin.RoamBlocks = null;
         safeArea.ShowPrompt(null);
         safeArea.HoldGateOpen = true;
+        poguru.ReturnToWisp();
         yield return ronin.WalkTo(BodyAt(safeArea.PointOf(StationKind.Exit)), travelWalkSpeed * 0.6f);
         yield return new WaitUntil(() => safeArea.GateOpened);
         stageIndex = 0;

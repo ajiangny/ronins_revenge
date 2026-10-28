@@ -424,6 +424,7 @@ public static class NinjaArtSetup
         (StationKind.Memorial, "Props/Temple_Memorial"),
         (StationKind.WeaponRack, "Props/Temple_Rack"),
         (StationKind.Oaths, "Props/Temple_OathStone"),
+        (StationKind.Poguru, "Props/Temple_PoguruNest"),
     };
 
     // The layout (floor, spots, footprints, pool, lamps) is copied from GameManager.DefaultSafeAreas, which is laid out

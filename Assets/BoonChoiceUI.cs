@@ -91,7 +91,11 @@ public class BoonChoiceUI : MonoBehaviour
     readonly Card[] cards = new Card[3];
 
     List<BoonOffer> offers;
+    // Called with the card taken, or Rejected when every offer is turned down.
     Action<int> chosen;
+    public const int Rejected = -1;
+    // Rejecting takes two presses: the first arms it (the hint asks "Reject all?"), so a stray key never throws a soul away.
+    bool rejectArmed;
     // Fate's Thread: draws a fresh set of offers, once.
     Func<List<BoonOffer>> redraw;
     // Banishing Bell: takes the selected card's boon out of the run and returns the fresh cards.
@@ -153,7 +157,8 @@ public class BoonChoiceUI : MonoBehaviour
         chosen = onChosen;
         redraw = null;
         banish = null;
-        hint.text = Hints;
+        rejectArmed = false;
+        UpdateHints();
         elementColor = colour;
         selected = heardSelection = 0;
         shownAt = Time.unscaledTime;
@@ -207,6 +212,11 @@ public class BoonChoiceUI : MonoBehaviour
     }
 
     static string Hints => $"{MenuUI.KeyCap("1 2 3", false)}  Quick pick       {MenuUI.KeyCap("↑ ↓", false)}  Select       {MenuUI.KeyCap("Enter", false)}  Choose";
+    // Its own link, so a click on it rejects as the key does.
+    string RejectHint => rejectArmed
+        ? $"<link=\"reject\">{MenuUI.KeyCap("X", false)}  <color=#{ColorUtility.ToHtmlStringRGB(RejectRed)}>Reject all?</color></link>"
+        : $"<link=\"reject\">{MenuUI.KeyCap("X", false)}  Reject</link>";
+    static readonly Color RejectRed = new Color(1f, 0.42f, 0.36f);
 
     // Offers a redraw of this screen's cards (R), for the Fate's Thread song. The callback may offer another.
     public void OfferRedraw(Func<List<BoonOffer>> draw)
@@ -227,12 +237,34 @@ public class BoonChoiceUI : MonoBehaviour
         hint.text = Hints;
         if (redraw != null) hint.text += $"       {MenuUI.KeyCap("R", false)}  Redraw";
         if (banish != null) hint.text += $"       {MenuUI.KeyCap("B", false)}  Banish";
+        hint.text += $"       {RejectHint}";
+    }
+
+    // The first press arms it; the second turns every offer down and closes the screen with nothing taken.
+    void Reject()
+    {
+        if (!rejectArmed)
+        {
+            rejectArmed = true;
+            UpdateHints();
+            Sfx.Play(Sfx.UiMove);
+            return;
+        }
+        Choose(Rejected);
+    }
+
+    void Disarm()
+    {
+        if (!rejectArmed) return;
+        rejectArmed = false;
+        UpdateHints();
     }
 
     void Redraw()
     {
         Func<List<BoonOffer>> draw = redraw;
         redraw = null;
+        rejectArmed = false;
         UpdateHints();
         Replace(draw());
     }
@@ -241,6 +273,7 @@ public class BoonChoiceUI : MonoBehaviour
     {
         Func<int, List<BoonOffer>> banishSelected = banish;
         banish = null;
+        rejectArmed = false;
         UpdateHints();
         Replace(banishSelected(selected));
     }
@@ -320,7 +353,12 @@ public class BoonChoiceUI : MonoBehaviour
         if (ronin != null) UpdateHud();
         if (!IsOpen) return;
 
-        if (selected != heardSelection) Sfx.Play(Sfx.UiMove);
+        if (selected != heardSelection)
+        {
+            Sfx.Play(Sfx.UiMove);
+            // Looking at another card means he's still choosing.
+            Disarm();
+        }
         heardSelection = selected;
 
         float elapsed = Time.unscaledTime - shownAt;
@@ -345,6 +383,11 @@ public class BoonChoiceUI : MonoBehaviour
                 Banish();
                 return;
             }
+            if (keyboard.xKey.wasPressedThisFrame)
+            {
+                Reject();
+                return;
+            }
             if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
             {
                 Choose(selected);
@@ -355,6 +398,11 @@ public class BoonChoiceUI : MonoBehaviour
         Mouse mouse = Mouse.current;
         if (mouse == null) return;
         Vector2 pointer = mouse.position.ReadValue();
+        if (mouse.leftButton.wasPressedThisFrame && TMP_TextUtilities.FindIntersectingLink(hint, pointer, null) >= 0)
+        {
+            Reject();
+            return;
+        }
         for (int i = 0; i < offers.Count; i++)
         {
             if (!RectTransformUtility.RectangleContainsScreenPoint(cards[i].root, pointer, null)) continue;
@@ -369,7 +417,8 @@ public class BoonChoiceUI : MonoBehaviour
 
     void Choose(int index)
     {
-        Sfx.Play(Sfx.UiConfirm);
+        Sfx.Play(index == Rejected ? Sfx.UiMove : Sfx.UiConfirm);
+        rejectArmed = false;
         panel.SetActive(false);
         SetHudVisible(true);
         Action<int> callback = chosen;

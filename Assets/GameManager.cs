@@ -1822,7 +1822,7 @@ public class GameManager : MonoBehaviour
         Sfx.Play(Sfx.SoulCollect, 1f, 1.15f);
         boonChoice.ShowBead(offers, Held(beadPainted, beadFrames), index =>
         {
-            TakeBoon(offers[index]);
+            TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
         });
@@ -1840,7 +1840,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
         boonChoice.ShowArts(offers, Held(scrollPainted, scrollFrames), index =>
         {
-            TakeBoon(offers[index]);
+            TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
         });
@@ -1954,7 +1954,7 @@ public class GameManager : MonoBehaviour
         Sprite[] heldSoul = art?.heldSoul != null ? new[] { art.heldSoul } : art?.soulFrames;
         boonChoice.Show(element, offers, heldSoul, art?.portrait, index =>
         {
-            TakeBoon(offers[index]);
+            TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
         });
@@ -1992,6 +1992,13 @@ public class GameManager : MonoBehaviour
         Element.Water => "Mizore",
         _ => "Hibiki",
     };
+
+    // The boon screen's pick, or nothing when every offer was rejected (X twice); the run goes on either way.
+    void TakeOrReject(List<BoonOffer> offers, int index)
+    {
+        if (index == BoonChoiceUI.Rejected) RunLog.Note($"rejected {string.Join(", ", offers.ConvertAll(o => o.Boon.Name))}");
+        else TakeBoon(offers[index]);
+    }
 
     void TakeBoon(BoonOffer offer)
     {

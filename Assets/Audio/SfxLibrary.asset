@@ -24,6 +24,17 @@ MonoBehaviour:
     - 0.4170975
     - 0.5187982
     ownSource: 0
+  - id: KunaiThrow
+    clips:
+    - {fileID: 8300000, guid: 593e7bd861b264cf88e093c158e8348a, type: 3}
+    - {fileID: 8300000, guid: 79da46443a86e4e75a592ce0177c0878, type: 3}
+    volume: 0.55
+    pitchJitter: 0.08
+    minInterval: 0.05
+    audible:
+    - 0.31566894
+    - 0.52562356
+    ownSource: 0
   - id: ShurikenThrow
     clips:
     - {fileID: 8300000, guid: d8e6b6839af83411f8b83cc69cca7b03, type: 3}
@@ -72,8 +83,8 @@ MonoBehaviour:
     pitchJitter: 0.1
     minInterval: 0.04
     audible:
-    - 1.176576
-    - 0.67126983
+    - 0.5585034
+    - 0.63532877
     ownSource: 0
   - id: PlayerHit
     clips:
@@ -248,8 +259,8 @@ MonoBehaviour:
     pitchJitter: 0
     minInterval: 0.1
     audible:
-    - 0.5252381
-    - 1.1382313
+    - 0.4807483
+    - 0.680839
     ownSource: 1
   - id: ParryClang
     clips:
@@ -270,8 +281,8 @@ MonoBehaviour:
     pitchJitter: 0.12
     minInterval: 0.12
     audible:
-    - 0.5807256
-    - 0.5355329
+    - 0.6530612
+    - 0.6530612
     ownSource: 0
   - id: PlayerHurt
     clips:

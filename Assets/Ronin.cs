@@ -11,6 +11,9 @@ public enum Moves { None = 0, Slash = 1, Shuriken = 2, Parry = 4, Ultimate = 8, 
 [RequireComponent(typeof(Rigidbody))]
 public class Ronin : MonoBehaviour
 {
+    // The look of his main attack, picked at the temple's weapon rack and kept in the save by its int. Only a skin:
+    // a kunai flies and hits exactly like the katana's slash wave.
+    public enum Blade { Katana, Kunai }
     // The ultimate chosen at the temple, kept in the save by its int: new ones go on the end.
     public enum Ultimate { ShadowClone }
 
@@ -41,6 +44,8 @@ public class Ronin : MonoBehaviour
     [FormerlySerializedAs("projectilePrefab"), FormerlySerializedAs("dartPrefab")] public GameObject projectilePrefab;
     [Tooltip("The crescent wave each katana swing sends up the screen.")]
     public GameObject slashPrefab;
+    [Tooltip("The kunai skin's art, drawn on the slash wave in place of the crescent.")]
+    [SerializeField] Sprite kunaiSprite;
     public CharacterArt art;
     public float speed = 10f;
     [Tooltip("Seconds between swings. Kept slow enough that every slash is a choice, as in Space Invaders.")]
@@ -131,6 +136,7 @@ public class Ronin : MonoBehaviour
     public Rect RoamArea { get; set; }
     // Ground in a safe area he walks around (the props' footprints), in the same body space as RoamArea.
     public Rect[] RoamBlocks { get; set; }
+    public Blade Skin { get; set; }
     // God mode from the dev menu: nothing can hurt him.
     public bool Invincible { get; set; }
     // Poguru's tutorial keeps him unhurt until its spear, apart from god mode.
@@ -230,6 +236,7 @@ public class Ronin : MonoBehaviour
 
     // The current elemental look: art set, projectile sprites and colours.
     Sprite slashSprite;
+    Sprite elementKunai;
     Color attackTint = Color.white;
     Color attackGlow = DefaultGlow;
     Color shurikenTint = Color.white;
@@ -642,11 +649,20 @@ public class Ronin : MonoBehaviour
         PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
     }
 
-    // Each swing of the katana sends a crescent of spirit energy up the screen.
+    // Each swing of the katana sends a crescent of spirit energy up the screen. The kunai skin throws a kunai instead,
+    // on the same slash wave, so only the art, sound and pose change.
     void Slash()
     {
         // Without the slash prefab (art not applied yet) the plain projectile stands in for the crescent.
-        Fan(slashPrefab != null ? slashPrefab : projectilePrefab, KillSource.Slash, slashSprite);
+        GameObject prefab = slashPrefab != null ? slashPrefab : projectilePrefab;
+        if (Skin == Blade.Kunai)
+        {
+            Fan(prefab, KillSource.Slash, elementKunai != null ? elementKunai : kunaiSprite);
+            Sfx.Play(Sfx.KunaiThrow);
+            PlayAction(art.attack);
+            return;
+        }
+        Fan(prefab, KillSource.Slash, slashSprite);
         Sfx.Play(Sfx.SwordSlash);
         Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, attackGlow, 0.5f), 0.8f, transform);
         PlayAction(art.slash != null && art.slash.Length > 0 ? art.slash : art.parry);
@@ -1168,7 +1184,7 @@ public class Ronin : MonoBehaviour
 
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
     // A null glow colour keeps the default spirit-flame teal.
-    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Color attackColor, Color? attackHalo,
+    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Sprite kunai, Color attackColor, Color? attackHalo,
         Sprite shuriken, Color shurikenColor, Color? shurikenHalo, Color parry)
     {
         attackGlow = attackHalo ?? DefaultGlow;
@@ -1181,6 +1197,7 @@ public class Ronin : MonoBehaviour
             if (!actionPlaying) UpdateLoopClip();
         }
         slashSprite = slash;
+        elementKunai = kunai;
         attackTint = attackColor;
         if (shuriken != null) shurikenSprite = shuriken;
         shurikenTint = shurikenColor;

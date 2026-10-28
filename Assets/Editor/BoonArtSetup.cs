@@ -12,7 +12,7 @@ public static class BoonArtSetup
     const string ArtRoot = "Assets/Art/Characters/";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
-    // The ronin's spirit flames and the slash wave are teal-green (hue ~160°); his red scarf and skin sit near 0-20°,
+    // The ronin's spirit flames, the slash wave and the spirit kunai are teal-green (hue ~160°); his red scarf and skin sit near 0-20°,
     // so only this hue band is recoloured.
     const float FlameHueMin = 120f / 360f;
     const float FlameHueMax = 200f / 360f;
@@ -50,6 +50,7 @@ public static class BoonArtSetup
             {
                 var so = new SerializedObject(root.GetComponent<Ronin>());
                 so.FindProperty("shurikenSprite").objectReferenceValue = shuriken;
+                so.FindProperty("kunaiSprite").objectReferenceValue = Load("Projectiles/Kunai");
                 so.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(root, "Assets/Ronin.prefab");
             }
@@ -74,6 +75,7 @@ public static class BoonArtSetup
             SetArray(entry.FindPropertyRelative("soulFrames"), Frames($"Effects/Soul_{suffix}_"));
             entry.FindPropertyRelative("ronin").objectReferenceValue = BuildRoninVariant(baseRonin, suffix, hue, boost);
             entry.FindPropertyRelative("slash").objectReferenceValue = Recolor(Load("Projectiles/SlashWave"), suffix, hue, boost);
+            entry.FindPropertyRelative("kunai").objectReferenceValue = Recolor(Load("Projectiles/Kunai"), suffix, hue, boost);
             // Each element has its own drawn shuriken (PixelLab); without it the base one is recoloured.
             Sprite elementShuriken = Load($"Projectiles/ShurikenArt_{suffix}");
             entry.FindPropertyRelative("shuriken").objectReferenceValue = elementShuriken != null ? elementShuriken : Recolor(shuriken, suffix, hue, boost);

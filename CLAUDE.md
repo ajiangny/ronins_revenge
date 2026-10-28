@@ -15,7 +15,7 @@ Kagetsune): read the character's file before writing their lines, scenes or art,
 - Editor tooling: `Assets/Editor/*.cs` (menu commands under `Ninja/`).
 - Art: `Assets/Art/` (`Sprites/` raw frames, `Characters/` CharacterArt assets, `Fx/`, `Portraits/`, `Fonts/`).
 - Audio: `Assets/Audio/` (`Sfx/`, `Music/`, `Voice/`, `SfxLibrary.asset`).
-- Cut content kept for later: `Assets/Archive/` (e.g. `Kunai/`: the old thrown-kunai sprites, boon icons and sounds). Nothing references it.
+- Cut content kept for later: `Assets/Archive/` (e.g. `Kunai/`: the old kunai weapon's menu and boon icons). Nothing references it.
 - Node tooling outside Unity: `Tools/` (`npm run music`, `npm run sfx`, `npm run voice`; ElevenLabs key in gitignored `.env.local`).
 
 ## Working in the Unity Editor

@@ -666,6 +666,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 5ce5dc578e08e4607a868d5c3ca7e7be, type: 3}
     ronin: {fileID: 11400000, guid: 87854a5e3b08f448e84815e10623cf65, type: 2}
     slash: {fileID: 21300000, guid: c5ae3ed84403048069ae1d58d701fb9f, type: 3}
+    kunai: {fileID: 21300000, guid: a4e51af349d844efcbaea19692953b58, type: 3}
     shuriken: {fileID: 21300000, guid: 86faec04d091c4c0cae7f1640a71a562, type: 3}
     portrait: {fileID: 21300000, guid: d71bc9f61d51940f8ab6578e1bb362ea, type: 3}
     heldSoul: {fileID: 21300000, guid: 8e0ee89ea145446af85da51b8ddc8715, type: 3}
@@ -681,6 +682,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: d4038dac2139548ac8c9756b1828fb4e, type: 3}
     ronin: {fileID: 11400000, guid: 0b85754cadf1441e1a665c4e9e2471ee, type: 2}
     slash: {fileID: 21300000, guid: 905c10a6beb5e489ca825c9226abdcd8, type: 3}
+    kunai: {fileID: 21300000, guid: 76b73bd8597e74851972cd6c7ec4945d, type: 3}
     shuriken: {fileID: 21300000, guid: cb92f75287e5c46e49efcaebecd4913a, type: 3}
     portrait: {fileID: 21300000, guid: 1b911b30e49794c2e8595aedc564ced1, type: 3}
     heldSoul: {fileID: 21300000, guid: 453b77d78f34140d1805659d1ecf3992, type: 3}
@@ -696,6 +698,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 9085cb52d554045ebba14814460b0ba3, type: 3}
     ronin: {fileID: 11400000, guid: 6c0aef5ba9c6e49dc98b8f2414fca399, type: 2}
     slash: {fileID: 21300000, guid: 75e028813accc442bb170ea4ab56ad6b, type: 3}
+    kunai: {fileID: 21300000, guid: 8aafdb898a50942fb95a2f3718151ae8, type: 3}
     shuriken: {fileID: 21300000, guid: 8634ec5d2e3ff4ab59215f6fbb2ea6e6, type: 3}
     portrait: {fileID: 21300000, guid: 6690511b54dfc4ff98ae91cc017b7c40, type: 3}
     heldSoul: {fileID: 21300000, guid: af7e7e2adc1a0457ca0fbbf09c75ce4d, type: 3}

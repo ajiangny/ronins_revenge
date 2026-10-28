@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: dcc58a84084348d2a32f2bcefaee7e8e
+guid: f4ede7c1433c14df4a6c3a3036b4738e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2963246206477779900
-    second: Utsusemi_Idle_0_0
+      213: -5660137294662727911
+    second: UtsusemiPhase2_Stop_4_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 7
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 48
+  spritePixelsToUnits: 60
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Utsusemi_Idle_0_0
+      name: UtsusemiPhase2_Stop_4_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 116
-        height: 116
+        width: 152
+        height: 152
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cb3c12f89b09f1920800000000000000
-      internalID: 2963246206477779900
+      spriteID: 91700b38e172371b0800000000000000
+      internalID: -5660137294662727911
       vertices: []
       indices: 
       edges: []

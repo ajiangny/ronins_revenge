@@ -212,6 +212,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] utsusemiPhaseChop;
     [SerializeField] Sprite[] utsusemiPhaseHourSlash;
     [SerializeField] Sprite[] utsusemiPhaseSwordThrow;
+    [SerializeField] Sprite[] utsusemiPhaseStop;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [Tooltip("Its overdriven second-phase illustrations: the card that plays in its phase break. Without them its phase line is a subtitle.")]
@@ -2836,7 +2837,7 @@ public class GameManager : MonoBehaviour
                     automaton.SetThrowFrames(utsusemiSwordThrow, utsusemiUnarmedIdle);
                     automaton.SetPhaseArt(utsusemiPhaseArt);
                     automaton.SetPhaseFrames(utsusemiPhaseBareIdle, utsusemiPhaseUnarmedIdle, utsusemiPhaseDash, utsusemiPhaseChop,
-                        utsusemiPhaseHourSlash, utsusemiPhaseSwordThrow);
+                        utsusemiPhaseHourSlash, utsusemiPhaseSwordThrow, utsusemiPhaseStop);
                 }
                 return automaton;
             case BossKind.Kagetsune:

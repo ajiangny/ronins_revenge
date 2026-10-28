@@ -7,6 +7,10 @@ public class PixelArtImporter : AssetPostprocessor
     const string SpriteRoot = "Assets/Art/Sprites/";
     const string CharacterRoot = SpriteRoot + "Characters/";
     const float PixelsPerUnit = 48f;
+    // Utsusemi's second form was drawn from its painting at a larger size (97 px tall against the first form's 70),
+    // so it's packed denser to stand only about an eighth taller than its first form once it breaks open.
+    const string UtsusemiPhaseRoot = CharacterRoot + "UtsusemiPhase2/";
+    const float UtsusemiPhasePixelsPerUnit = 60f;
 
     void OnPreprocessTexture()
     {
@@ -15,7 +19,7 @@ public class PixelArtImporter : AssetPostprocessor
         var importer = (TextureImporter)assetImporter;
         importer.textureType = TextureImporterType.Sprite;
         importer.spriteImportMode = SpriteImportMode.Single;
-        importer.spritePixelsPerUnit = PixelsPerUnit;
+        importer.spritePixelsPerUnit = assetPath.StartsWith(UtsusemiPhaseRoot) ? UtsusemiPhasePixelsPerUnit : PixelsPerUnit;
         importer.filterMode = FilterMode.Point;
         importer.textureCompression = TextureImporterCompression.Uncompressed;
         importer.mipmapEnabled = false;

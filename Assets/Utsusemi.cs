@@ -72,8 +72,10 @@ public class Utsusemi : Boss
 
     // Its overdriven versions of the extra clips, worn with the phase art; any that is missing keeps the first.
     Sprite[] phaseBareIdle, phaseUnarmedIdle, phaseDash, phaseChop, phaseSlash, phaseSwordThrow;
+    // Its raised burning fist as it stops time (phase 2 only); without it, the throw clip stands in.
+    Sprite[] stopFrames;
 
-    public void SetPhaseFrames(Sprite[] bare, Sprite[] unarmed, Sprite[] dash, Sprite[] chop, Sprite[] slash, Sprite[] swordThrow)
+    public void SetPhaseFrames(Sprite[] bare, Sprite[] unarmed, Sprite[] dash, Sprite[] chop, Sprite[] slash, Sprite[] swordThrow, Sprite[] stop)
     {
         Sprite[] Some(Sprite[] f, int min) => f != null && f.Length > min ? f : null;
         phaseBareIdle = Some(bare, 0);
@@ -82,6 +84,7 @@ public class Utsusemi : Boss
         phaseChop = Some(chop, ChopImpactFrame);
         phaseSlash = Some(slash, 0);
         phaseSwordThrow = Some(swordThrow, SwordReleaseFrame);
+        stopFrames = Some(stop, 0);
     }
 
     public void SetBareIdle(Sprite[] frames)

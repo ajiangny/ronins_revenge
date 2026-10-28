@@ -18,8 +18,8 @@ using UnityEngine.UI;
 public class Tutorial : MonoBehaviour
 {
     const float SpearSpeed = 9f;
-    // A spear that hasn't landed by now is landed for it, so the beat can't stall.
-    const float SpearTimeout = 2.5f;
+    // A spear that hasn't landed this long after it should have reached him is landed for it, so the beat can't stall.
+    const float SpearGrace = 1f;
     const float SlowMotion = 0.35f;
     const float PointerSize = 96f;
     // His annoyance barks, by arrows bonked; past the last, one every RepeatEvery more. He never stops guarding.
@@ -90,6 +90,14 @@ public class Tutorial : MonoBehaviour
     static IEnumerator Wait(float seconds)
     {
         if (seconds > 0f) yield return new WaitForSeconds(seconds);
+    }
+
+    // From the pause menu: settled as if skipped at the offer. GameManager then restarts the run, so nothing of it
+    // needs tidying here.
+    public void Skip()
+    {
+        Settle();
+        Active = false;
     }
 
     // Beat 1: before anything arrives, he pops out and asks. Back (Esc) skips.
@@ -348,6 +356,8 @@ public class Tutorial : MonoBehaviour
         ronin.ParryStarted -= fired;
         ronin.UltimateStarted -= fired;
         if (!done) ronin.Perform(move);
+        // He stops yelling the moment Oni moves, instead of finishing the line over the move.
+        game.CutLine("Poguru");
 
         HideLesson();
         game.Poguru.Play(game.PoguruClips.idle, true);
@@ -609,8 +619,11 @@ public class Tutorial : MonoBehaviour
         Time.timeScale = SlowMotion;
         float slowUntil = Time.unscaledTime + 1.1f;
         float launched = Time.time;
+        // It comes from off screen's far corner, so its flight is timed by the distance: a fixed timeout landed it
+        // for it before it got there.
+        float timeout = Vector2.Distance(from, ronin.Bounds.center) / SpearSpeed + SpearGrace;
         bool ghosted = false;
-        while (spear != null && game.Lives == livesBefore && Time.time - launched < SpearTimeout)
+        while (spear != null && game.Lives == livesBefore && Time.time - launched < timeout)
         {
             // It homes in on him, so it always lands.
             Vector3 to = ronin.Bounds.center - spear.transform.position;

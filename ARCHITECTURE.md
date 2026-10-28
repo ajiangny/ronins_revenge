@@ -94,7 +94,7 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   are lifted onto the `TutorialLayer`, Poguru's pointer bobs beside the move's slot with its keys as a
   `GameUI.CreateKeyRow` (key caps, mouse buttons drawn by `ProceduralSprites.Mouse`), his yell is voiced only and shown
   with the keys beside Oni (on the side away from the shot, or the other when the HUD side lacks room), and
-  `Ronin.Allowed` lets only that move fire: Ronin still reads input with time stopped, so the real press fires the real
+  `Ronin.Allowed` lets only that move fire (once it does, `GameManager.CutLine("Poguru")` stops his yell and `Poguru.Hush` his talking): Ronin still reads input with time stopped, so the real press fires the real
   move (`Slashed`, `ShurikenThrown`, `ParryStarted`; `Tutorial.Press` for a test harness). The slash breaks the arrow,
   then he cuts the archer down; the shuriken goes through both chargers (Poguru headbutts any that get through back up
   to try again); the parried spear skims past the spearman (`RiposteTarget` a point beside his head, the spearman and
@@ -112,11 +112,16 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   Then the spear (skipped if `MaxLives < 2`):
   `EnsureLives(2)`, `SpawnSpear` (unbreakable, unparryable,
   homing) from the far top corner while he dashes into its path at 0.35× time, ghosts, and `ForceHit` lands it through
-  god mode and blink if it hasn't in 2.5 s; then `Poguru_Tut_Hearts` (lives row lifted onto the overlay and pointed
+  god mode and blink if it hasn't within its flight time (distance / `SpearSpeed`) plus `SpearGrace`; then `Poguru_Tut_Hearts` (lives row lifted onto the overlay and pointed
   at), `SpawnHeart` on Oni's row, waits for it → `GrantReward` → `RewardShown` (a talk while the `RewardSpirit`
   hangs) → `ShowBoons` → `BoonsShown` (once; `BoonChoiceUI.InputLocked` while a lightly dimmed `keepHud` talk explains
   the cards) → `ChoosePath` → `PathsShown` (once) → round 1's `BeginRound` → `Finish` (`Poguru_Tut_Done`, settle,
-  back in the wisp). `StartAt` and `EndGame` call `Abort` (back in the wisp, nothing settled). GameManager's public
+  back in the wisp). `StartAt` and `EndGame` call `Abort` (back in the wisp, nothing settled). **Pause:** while `Active`,
+  `GameManager.Update` lets Esc pause in `Transition` and `Dialogue` too (lessons, talks), not just `Playing`; `Pause` keeps
+  `pausedFrom`/`pausedTimeScale`/`pausedControls`, `HoldVoices` pauses the voice sources and `DialogueScene.Hold` freezes a talk's
+  line (no typing, no advancing, a short input guard after). `ShowTutorialPause`: RESUME (`ResumeTutorial` hands it all back,
+  controls a frame late so the closing key can't fire a lesson's move), SKIP TUTORIAL (`Tutorial.Skip` settles it, then
+  `SkipToRoundOne`: `GameUI.FadeTo` black and `Reload(true)`), CONTROLS, SETTINGS, QUIT TO TITLE, QUIT GAME (not on WebGL). GameManager's public
   block for it: `PlayTalk`, `Bark`, `SayLine`, `HoldForLesson`, `ForceHit`, `SpawnHeart`, `SpawnSpear`, `EnsureLives`,
   `FootSoldierArt`, `SpearmanArt`, `SpearSprite`, `ArrowPrefab`, `Army`, and `Poguru`, `Menu`,
   `BoonChoice`, `Scene`, `Ui`, `Lives`, `MaxLives`.

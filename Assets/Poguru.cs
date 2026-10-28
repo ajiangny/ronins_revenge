@@ -164,6 +164,14 @@ public class Poguru : MonoBehaviour
         Play(art.talk, true);
     }
 
+    // Cut short: his line was stopped, so he stops mouthing it.
+    public void Hush()
+    {
+        if (talkUntil <= 0f) return;
+        talkUntil = 0f;
+        Play(art.idle, true);
+    }
+
     // Something passes right through him (the tutorial's spear): he goes see-through and flickers for a moment.
     public void Ghost(float seconds) => ghostUntil = Time.unscaledTime + seconds;
 

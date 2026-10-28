@@ -818,7 +818,10 @@ public class GameManager : MonoBehaviour
         // In a browser Esc may only leave fullscreen without the game seeing it, so leaving fullscreen pauses too.
         bool leftFullScreen = Application.platform == RuntimePlatform.WebGLPlayer && wasFullScreen && !Screen.fullScreen;
         wasFullScreen = Screen.fullScreen;
-        if (state == State.Playing && (pause || leftFullScreen)) Pause();
+        // Poguru's tutorial can be paused through its drills and talks too, so it can be skipped from anywhere in it.
+        bool canPause = state == State.Playing
+            || (tutorial.Active && (state == State.Transition || state == State.Dialogue) && !menu.IsOpen);
+        if (canPause && (pause || leftFullScreen)) Pause();
         if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
         resources.SetVisible(state == State.Hub);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
@@ -1482,14 +1485,96 @@ public class GameManager : MonoBehaviour
         }, back, paper: OnPaper);
     }
 
-    // Freezes the fight under the pause menu. Only offered mid-play, never during a boon pick or a boss intro.
+    // Freezes the fight under the pause menu. Only offered mid-play, never during a boon pick or a boss intro, except
+    // in the tutorial, which can be paused through its drills, lessons and talks.
     void Pause()
     {
+        pausedFrom = state;
+        pausedTimeScale = Time.timeScale;
+        pausedControls = ronin.ControlsEnabled;
         state = State.Paused;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
         Music.Duck(0.35f, float.MaxValue);
-        ShowPauseMenu();
+        if (!tutorial.Active)
+        {
+            ShowPauseMenu();
+            return;
+        }
+        // Talks and lessons run on real time: their lines and voices are held too.
+        HoldVoices(true);
+        dialogueScene.Hold(true);
+        ShowTutorialPause();
+    }
+
+    // What the tutorial's pause hands back: it can open in a lesson's hold or a talk as well as mid-play.
+    State pausedFrom;
+    float pausedTimeScale = 1f;
+    bool pausedControls;
+    readonly List<AudioSource> heldVoices = new List<AudioSource>();
+
+    void ShowTutorialPause()
+    {
+        string muted = MenuUI.MutedHex(false);
+        var items = new List<MenuUI.Item>
+        {
+            MenuUI.Item.Button("RESUME", ResumeTutorial),
+            MenuUI.Item.Button("SKIP TUTORIAL", SkipTutorial, "Straight into a regular Round 1. Poguru will be in your wisp."),
+            MenuUI.Item.Button("CONTROLS", () => ShowControls(ShowTutorialPause)),
+            MenuUI.Item.Button("SETTINGS", () => ShowSettings(ShowTutorialPause)),
+            MenuUI.Item.Button("QUIT TO TITLE", () => Reload(false)),
+        };
+        if (Application.platform != RuntimePlatform.WebGLPlayer) items.Add(MenuUI.Item.Button("QUIT GAME", Quit));
+        menu.Show("PAUSED", $"<size=30><color=#{muted}>Poguru's tutorial</color></size>", items.ToArray(), ResumeTutorial);
+    }
+
+    void ResumeTutorial()
+    {
+        menu.Hide();
+        Music.Duck(1f, 0f);
+        HoldVoices(false);
+        dialogueScene.Hold(false);
+        state = pausedFrom;
+        Time.timeScale = pausedTimeScale;
+        StartCoroutine(GiveBackControls(pausedControls));
+    }
+
+    // A frame late, so the key that closed the menu (Space is also the slash) doesn't fire a held lesson's move.
+    IEnumerator GiveBackControls(bool enabled)
+    {
+        yield return null;
+        if (state != State.Paused) ronin.ControlsEnabled = enabled;
+    }
+
+    // Settles the tutorial, then fades to black and starts the run again at a regular Stage I, Round 1.
+    void SkipTutorial()
+    {
+        menu.Hide();
+        tutorial.Skip();
+        StartCoroutine(SkipToRoundOne());
+    }
+
+    IEnumerator SkipToRoundOne()
+    {
+        yield return ui.FadeTo(1f, 0.8f);
+        Reload(true);
+    }
+
+    void HoldVoices(bool hold)
+    {
+        if (hold)
+        {
+            heldVoices.Clear();
+            foreach (AudioSource source in new[] { voice, oniVoice, soulVoice, poguruVoice })
+            {
+                if (source == null || !source.isPlaying) continue;
+                source.Pause();
+                heldVoices.Add(source);
+            }
+            return;
+        }
+        foreach (AudioSource source in heldVoices) if (source != null) source.UnPause();
+        heldVoices.Clear();
     }
 
     void ShowPauseMenu()
@@ -3382,6 +3467,14 @@ public class GameManager : MonoBehaviour
         return seconds + 0.3f;
     }
 
+    // Stops a field line (SayLine) this speaker is still saying.
+    public void CutLine(string speaker)
+    {
+        AudioSource source = speaker == "Poguru" ? poguruVoice : oniVoice;
+        if (source.isPlaying) source.Stop();
+        if (speaker == "Poguru") poguru.Hush();
+    }
+
     // The tutorial's spear has to land: through god mode and the blink after an earlier hit.
     public void ForceHit()
     {
@@ -3414,8 +3507,8 @@ public class GameManager : MonoBehaviour
     public Arrow ArrowPrefab => army.samuraiPrefab.arrowPrefab;
     public SamuraiArmy Army => army;
 
-    // Holds the field still for a lesson that waits on the player (the tutorial's parry): no pause menu meanwhile,
-    // since its Resume would let time run on.
+    // Holds the field still for a lesson that waits on the player (the tutorial's parry). The tutorial's pause can
+    // open over it and hands the hold back on resume.
     public void HoldForLesson(bool hold)
     {
         if (hold && state != State.Dialogue) heldFrom = state;

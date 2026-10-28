@@ -66,8 +66,25 @@ public class DialogueScene : MonoBehaviour
     TextMeshProUGUI hint;
     Image dim;
     bool advance;
+    // Held under the pause menu: the line stops typing, its voice pauses and no press advances it.
+    bool held;
+    float heldReleasedAt = float.MinValue;
+    AudioSource voicing;
 
     public bool IsPlaying { get; private set; }
+
+    public void Hold(bool hold)
+    {
+        if (held == hold) return;
+        held = hold;
+        if (voicing != null)
+        {
+            if (hold) voicing.Pause();
+            else voicing.UnPause();
+        }
+        // The press that closed the pause menu mustn't also advance the line.
+        if (!hold) heldReleasedAt = Time.unscaledTime;
+    }
     // Over the plate and the figures: what a talk lifts out of the dark (the HUD's ability slots, Poguru's pointer).
     public RectTransform Overlay { get; private set; }
 
@@ -309,6 +326,7 @@ public class DialogueScene : MonoBehaviour
             int length = lineText.text.Length;
             if (speaker != null) speaker.Stop();
             speaker = line.source != null ? line.source : voice;
+            voicing = speaker;
             if (speaker != null && line.clip != null)
             {
                 speaker.volume = voiceVolume;
@@ -321,6 +339,12 @@ public class DialogueScene : MonoBehaviour
             bool typed = false;
             while (true)
             {
+                if (held)
+                {
+                    lineAt += Time.unscaledDeltaTime;
+                    yield return null;
+                    continue;
+                }
                 float since = Time.unscaledTime - lineAt;
                 int shown = Mathf.Min(length, Mathf.FloorToInt(since * CharactersPerSecond));
                 if (!typed && shown >= length) typed = true;
@@ -332,7 +356,7 @@ public class DialogueScene : MonoBehaviour
                     advance = false;
                     break;
                 }
-                if (Time.unscaledTime - openedAt > InputGuard && Confirmed())
+                if (Time.unscaledTime - openedAt > InputGuard && Time.unscaledTime - heldReleasedAt > InputGuard && Confirmed())
                 {
                     if (!typed) typed = true;
                     else break;
@@ -349,6 +373,7 @@ public class DialogueScene : MonoBehaviour
             yield return null;
         }
         root.gameObject.SetActive(false);
+        voicing = null;
         IsPlaying = false;
     }
 

@@ -122,9 +122,11 @@ public class Utsusemi : Boss
         }
     }
     Vector3 Head => new Vector3(Centre.x, sprite.bounds.max.y - sprite.bounds.size.y * 0.12f, 0);
-    // The red slit-eye under the hat brim and the lantern heart in its chest, where its frames draw them.
-    Vector3 Eye => OnSprite(57.5f, 38.5f);
-    Vector3 Core => OnSprite(58f, 50.5f);
+    // The red slit-eye under the hat brim and the lantern heart in its chest, where its frames draw them. The second
+    // form, drawn from its painting on a larger canvas, has them elsewhere (PhaseBreak moves them).
+    Vector2 eyePixel = new Vector2(57.5f, 38.5f), corePixel = new Vector2(58f, 50.5f);
+    Vector3 Eye => OnSprite(eyePixel.x, eyePixel.y);
+    Vector3 Core => OnSprite(corePixel.x, corePixel.y);
     Vector3 Shoulder => Centre + new Vector3(sprite.bounds.extents.x * 0.5f, sprite.bounds.size.y * 0.1f, 0);
 
     // The height of its row, taken when the fight first starts. Its dashes down to the ronin's ground return here,
@@ -595,7 +597,8 @@ public class Utsusemi : Boss
         {
             eye = new GameObject("Eye").AddComponent<SpriteRenderer>();
             eye.transform.SetParent(sprite.transform, false);
-            eye.transform.position = Head + Vector3.back * 0.3f;
+            // Under the hat brim in its first form; its broken halo floats clear of the head in the second.
+            eye.transform.position = (SecondPhase ? Eye : Head) + Vector3.back * 0.3f;
             eye.transform.localScale = new Vector3(0.25f, 0.7f, 1f) / transform.lossyScale.x;
             eye.sprite = ProceduralSprites.Glow;
             eye.color = CoreRed;
@@ -897,8 +900,9 @@ public class Utsusemi : Boss
         }
         float pixel = sprite.transform.lossyScale.x / sprite.sprite.pixelsPerUnit;
         float jitter = Random.Range(-2, 3) * pixel;
-        SpawnGhost(flat, GhostBlue, alpha, jitter - 3f * pixel, pixel);
-        SpawnGhost(flat, GhostGold, alpha * 0.7f, jitter + 3f * pixel, pixel);
+        // Its second form leaves burning ghosts: molten and ivory instead of steel blue and gold.
+        SpawnGhost(flat, SecondPhase ? Molten : GhostBlue, alpha, jitter - 3f * pixel, pixel);
+        SpawnGhost(flat, SecondPhase ? Lace : GhostGold, alpha * 0.7f, jitter + 3f * pixel, pixel);
     }
 
     void SpawnGhost(Material flat, Color color, float alpha, float offsetX, float pixel)
@@ -2157,8 +2161,15 @@ public class Utsusemi : Boss
         if (Fx.Play(Fx.UtsuGears, Centre, Color.white, 3f) == null) Fx.Play(Fx.Explosion, Centre, Gold, 2.5f);
         if (Fx.Play(Fx.UtsuParts, Head, Color.white, 2.5f) == null) Fx.Play(Fx.Impact, Head, Gold, 2.5f);
         Debris.BurstSprites(Centre, art.deathParticles, Lace, 30, 1.2f, 8f);
-        bodyTint = Color.Lerp(bodyTint, new Color(0.75f, 0.7f, 0.8f), 0.5f);
         WearPhaseArt();
+        // The painting-drawn second form (152 px frames) carries its own burnt look; only the old recolour needs dimming.
+        bool painted = art.idle != null && art.idle.Length > 0 && art.idle[0].rect.width > 140f;
+        if (painted)
+        {
+            eyePixel = new Vector2(76.5f, 44.5f);
+            corePixel = new Vector2(79.5f, 59.5f);
+        }
+        else bodyTint = Color.Lerp(bodyTint, new Color(0.75f, 0.7f, 0.8f), 0.5f);
         if (phaseBareIdle != null) bareIdle = phaseBareIdle;
         if (phaseUnarmedIdle != null) unarmedIdle = phaseUnarmedIdle;
         if (phaseDash != null) dashFrames = phaseDash;
@@ -2169,6 +2180,7 @@ public class Utsusemi : Boss
         bareUnarmedIdle = null;
         PlayIdle();
         AddCore();
+        StartCoroutine(BurnShroud());
         // The core opens with a radial burst of light: phase 2 fights with lasers.
         for (int i = 0; i < 8; i++)
         {
@@ -2262,9 +2274,105 @@ public class Utsusemi : Boss
 
     void AddCore()
     {
-        coreGlow = Kunai.CreateGlow(sprite.transform, 1.4f, sprite.sortingOrder + 1, CoreRed);
+        coreGlow = Kunai.CreateGlow(sprite.transform, 1.4f, sprite.sortingOrder + 1, CoreMolten);
         coreGlow.transform.position = Core + Vector3.back * 0.3f;
         StartCoroutine(PulseCore());
+    }
+
+    // The opened core burns molten orange, like the beams it fires, not the first form's red.
+    static readonly Color CoreMolten = new Color(1f, 0.5f, 0.14f);
+
+    // Where flames lick its second form, in its frames' pixels: the raised claw, then the torn hem's ragged ends.
+    static readonly Vector2[] FlamePoints = { new Vector2(109f, 50f), new Vector2(40f, 106f), new Vector2(112f, 102f), new Vector2(64f, 121f), new Vector2(94f, 120f) };
+    // How tall each of those tongues stands, in world units: the claw's burns brightest.
+    static readonly float[] FlameHeights = { 0.75f, 0.5f, 0.5f, 0.4f, 0.4f };
+    const float EmberGap = 0.07f;
+
+    class Ember
+    {
+        public SpriteRenderer r;
+        public Vector3 velocity;
+        public float age, life;
+    }
+    readonly List<Ember> embers = new List<Ember>();
+
+    // Embers in the air when the fight is torn down go with it.
+    protected override void OnCleared()
+    {
+        foreach (Ember e in embers) if (e.r != null) Destroy(e.r.gameObject);
+        embers.Clear();
+    }
+
+    // Its second form burns, as in its painting: flame tongues lick its raised claw and the torn hem, and embers lift
+    // off the shroud and drift up and away. Built in code on whatever frame it's in, so it follows every clip.
+    IEnumerator BurnShroud()
+    {
+        var tongues = new List<SpriteRenderer>();
+        foreach (Vector2 _ in FlamePoints)
+        {
+            var tongue = new GameObject("ShroudFlame").AddComponent<SpriteRenderer>();
+            tongue.transform.SetParent(sprite.transform, false);
+            tongue.sprite = ProceduralSprites.Flame;
+            tongue.sortingOrder = sprite.sortingOrder + 1;
+            tongues.Add(tongue);
+        }
+        // Heat glowing under its feet, beneath the body.
+        var heat = new GameObject("Heat").AddComponent<SpriteRenderer>();
+        heat.transform.SetParent(sprite.transform, false);
+        heat.sprite = ProceduralSprites.SoftGlow;
+        heat.sortingOrder = sprite.sortingOrder - 2;
+        tongues.Add(heat);
+        float nextEmber = 0f;
+        while (!IsDead && sprite != null)
+        {
+            float parent = sprite.transform.lossyScale.x;
+            float throb = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
+            heat.transform.position = new Vector3(sprite.bounds.center.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0.1f);
+            heat.transform.localScale = new Vector3(3.2f, 1.2f, 1f) / parent;
+            heat.color = new Color(Molten.r, Molten.g * 0.8f, Molten.b, 0.18f + 0.08f * throb);
+            for (int i = 0; i < FlamePoints.Length; i++)
+            {
+                float flicker = Mathf.PerlinNoise(Time.time * 6f, i * 3.1f);
+                float height = FlameHeights[i] * (0.7f + 0.6f * flicker);
+                tongues[i].transform.position = OnSprite(FlamePoints[i].x, FlamePoints[i].y) + Vector3.back * 0.2f;
+                tongues[i].transform.localScale = new Vector3(height * 0.6f, height, 1f) / parent;
+                tongues[i].color = new Color(Molten.r, Molten.g, Molten.b, 0.35f + 0.35f * flicker);
+            }
+
+            if (Time.time >= nextEmber)
+            {
+                nextEmber = Time.time + EmberGap * Random.Range(0.6f, 1.4f);
+                // Off the lower shroud, where the painting's hem burns.
+                Bounds b = sprite.bounds;
+                Vector3 from = new Vector3(Random.Range(b.min.x + b.size.x * 0.1f, b.max.x - b.size.x * 0.1f),
+                    b.min.y + b.size.y * Random.Range(0.08f, 0.5f), 0);
+                var ember = new GameObject("Ember").AddComponent<SpriteRenderer>();
+                ember.sprite = ProceduralSprites.White;
+                ember.sortingOrder = sprite.sortingOrder + 2;
+                ember.transform.position = from + Vector3.back * 0.25f;
+                ember.transform.localScale = Vector3.one * Random.Range(0.05f, 0.1f);
+                embers.Add(new Ember { r = ember, velocity = new Vector3(Random.Range(-0.4f, 0.4f), Random.Range(0.8f, 1.6f), 0), life = Random.Range(0.6f, 1.1f) });
+            }
+            for (int i = embers.Count - 1; i >= 0; i--)
+            {
+                Ember e = embers[i];
+                e.age += Time.deltaTime;
+                if (e.age >= e.life || e.r == null)
+                {
+                    if (e.r != null) Destroy(e.r.gameObject);
+                    embers.RemoveAt(i);
+                    continue;
+                }
+                float k = e.age / e.life;
+                e.r.transform.position += (e.velocity + Vector3.right * Mathf.Sin(e.age * 9f + i) * 0.3f) * Time.deltaTime;
+                // White-hot as it leaves, cooling to a dull red as it fades.
+                Color c = Color.Lerp(new Color(1f, 0.85f, 0.5f), new Color(0.8f, 0.2f, 0.1f), k);
+                e.r.color = new Color(c.r, c.g, c.b, 1f - k * k);
+            }
+            yield return null;
+        }
+        foreach (SpriteRenderer t in tongues) if (t != null) Destroy(t.gameObject);
+        OnCleared();
     }
 
     // The heart beats in time with the clock.
@@ -2273,7 +2381,7 @@ public class Utsusemi : Boss
         while (coreGlow != null && !IsDead)
         {
             float pulse = Mathf.Pow(Mathf.Abs(Mathf.Sin(Time.time * 4f)), 4f);
-            coreGlow.color = new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.45f + 0.45f * pulse);
+            coreGlow.color = new Color(CoreMolten.r, CoreMolten.g, CoreMolten.b, 0.45f + 0.45f * pulse);
             coreGlow.transform.localScale = Vector3.one * (1.2f + 0.5f * pulse) / transform.lossyScale.x;
             yield return null;
         }

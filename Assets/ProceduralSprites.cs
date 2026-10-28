@@ -165,9 +165,9 @@ public static class ProceduralSprites
     // Opaque at the top fading to clear at the bottom, for shading behind the HUD.
     public static Sprite FadeDown => fadeDown != null ? fadeDown : fadeDown = BuildFadeDown(32);
 
-    // Soft spiral arms curling in to a bright middle, smoothly filtered and drawn white to be tinted: a vortex of spirit
-    // light (SwirlUI turns layers of it). Arms are wispy, thinning and fading towards the rim.
-    public static Sprite Swirl => swirl != null ? swirl : swirl = BuildSwirl(256, 3, 2.6f);
+    // Thin wisps of light curling in to a soft bright heart, smoothly filtered and drawn white to be tinted: a vortex of
+    // spirit smoke (SwirlUI turns layers of it).
+    public static Sprite Swirl => swirl != null ? swirl : swirl = BuildSwirl(320, 2.8f);
 
     // Little pixel music notes (a single eighth note and a beamed pair), drawn white to be tinted.
     public static Sprite Note(int kind) => notes[kind % NotePatterns.Length] != null
@@ -319,7 +319,7 @@ public static class ProceduralSprites
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
     }
 
-    static Sprite BuildSwirl(int size, int arms, float twist)
+    static Sprite BuildSwirl(int size, float twist)
     {
         var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
         var pixels = new Color32[size * size];
@@ -331,17 +331,21 @@ public static class ProceduralSprites
                 float dx = (x + 0.5f - half) / half, dy = (y + 0.5f - half) / half;
                 float r = Mathf.Sqrt(dx * dx + dy * dy);
                 if (r >= 1f) continue;
-                // A log spiral: the angle each arm sits at grows with the log of the radius, so they curl in tighter
-                // towards the middle. A second, finer set of arms breaks them into wisps.
-                float angle = Mathf.Atan2(dy, dx);
-                float bend = twist * Mathf.Log(r + 0.04f);
-                float main = Mathf.Pow(0.5f + 0.5f * Mathf.Cos(arms * (angle - bend)), 3f);
-                float wisps = 0.5f + 0.5f * Mathf.Cos(arms * 2f * (angle - bend * 1.3f) + 1.7f);
-                float arm = main * (0.65f + 0.35f * wisps);
-                // Bright at the heart, the arms thinning out to nothing at the rim.
-                float fade = Mathf.Pow(1f - r, 1.6f);
-                float core = Mathf.Pow(Mathf.Clamp01(1f - r * 3f), 2f);
-                float a = Mathf.Clamp01(arm * fade + core * 0.6f);
+                // A log spiral (each strand's angle grows with the log of the radius, so they curl in tighter towards
+                // the middle), bent by noise so no strand runs quite true, like smoke rather than a drawn spiral.
+                float warp = Mathf.PerlinNoise(dx * 2.2f + 7f, dy * 2.2f + 7f) - 0.5f;
+                float t = Mathf.Atan2(dy, dx) - twist * Mathf.Log(r + 0.04f) + 1.4f * warp;
+                // Three sets of thin strands, finer and fainter each time, so they read as wisps, not broad arms.
+                float strands = Mathf.Pow(0.5f + 0.5f * Mathf.Cos(3f * t), 10f)
+                    + 0.7f * Mathf.Pow(0.5f + 0.5f * Mathf.Cos(5f * t + 1.3f + 0.8f * warp), 16f)
+                    + 0.45f * Mathf.Pow(0.5f + 0.5f * Mathf.Cos(8f * t + 2.6f), 22f);
+                // Each strand fades in and out along its length.
+                float breakup = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.25f, 0.75f, Mathf.PerlinNoise(dx * 5f + 21f, dy * 5f + 3f)));
+                float wisps = strands * (0.25f + 0.75f * breakup);
+                // Thinning out to nothing at the rim and at the very centre, which the soft heart below fills instead.
+                float fade = Mathf.Pow(1f - r, 1.2f) * Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.03f, 0.22f, r));
+                float heart = Mathf.Pow(Mathf.Clamp01(1f - r * 4f), 2f) * 0.35f;
+                float a = Mathf.Clamp01(wisps * fade * 1.6f + heart);
                 pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
             }
         }

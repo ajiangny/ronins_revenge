@@ -5,8 +5,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.TextCore.LowLevel;
 
-// Wires the UI fonts, the title logo, the title screen's flute-playing ronin (and his stand-up), and Oni's and the
-// three souls' dialogue portraits into the scene. Safe to re-run; anything missing leaves the game's fallback in its place.
+// Wires the UI fonts, the title logo, the title screen's flute-playing ronin (and his stand-up), and Oni's, the
+// three souls' and Poguru's dialogue portraits into the scene. Safe to re-run; anything missing leaves the game's fallback in its place.
 public static class UiSetup
 {
     const string FontRoot = "Assets/Art/Fonts/";
@@ -53,6 +53,11 @@ public static class UiSetup
             manager.FindProperty(char.ToLowerInvariant(soul[0]) + soul.Substring(1) + "Closeup").objectReferenceValue = closeup;
             if (closeup != null) painted.Add(soul);
         }
+        // Poguru's paintings, imported like the souls'.
+        Sprite poguru = Painting("Assets/Art/Portraits/Poguru_Closeup.png", BossCloseupPath);
+        Painting("Assets/Art/Portraits/Poguru_Full.png", BossCloseupPath);
+        manager.FindProperty("poguruCloseup").objectReferenceValue = poguru;
+        if (poguru != null) painted.Add("Poguru");
         manager.ApplyModifiedPropertiesWithoutUndo();
 
         EditorSceneManager.MarkSceneDirty(scene);

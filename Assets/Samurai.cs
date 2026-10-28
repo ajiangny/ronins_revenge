@@ -28,6 +28,7 @@ public class Samurai : MonoBehaviour, IHittable
     [FormerlySerializedAs("bulletPrefab")] public Arrow arrowPrefab;
     [Tooltip("The Taisho's yari. Wired by Ninja/Apply Sprite Art; without it the spear is a darkened arrow.")]
     [SerializeField] Sprite spearSprite;
+    public Sprite SpearSprite => spearSprite;
     [Tooltip("How strongly the stage's clan colour tints the samurai sprite.")]
     [SerializeField, Range(0, 1)] float tintStrength = 0.2f;
 

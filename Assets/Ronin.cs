@@ -318,13 +318,38 @@ public class Ronin : MonoBehaviour
         {
             SpriteRenderer wisp = wisps[i];
             wisp.sprite = i < frames.Length ? frames[i] : null;
-            wisp.enabled = sprite.enabled && wisp.sprite != null && !drawnInFrame;
+            wisp.enabled = sprite.enabled && wisp.sprite != null && !drawnInFrame && !(i < wispHidden.Length && wispHidden[i]);
             wisp.color = sprite.color;
             if (wisp.sprite == null) continue;
             float bob = Mathf.Round(Mathf.Sin((Time.time / wispPeriod + i * 0.5f) * Mathf.PI * 2f) * wispBobPixels);
             wisp.transform.localPosition = Vector3.up * (bob / wisp.sprite.pixelsPerUnit);
         }
     }
+
+    // Poguru lives in the left wisp (0): while he's out of it, it's hidden.
+    readonly bool[] wispHidden = new bool[2];
+
+    public void SetWispHidden(int index, bool hidden)
+    {
+        if (index >= 0 && index < wispHidden.Length) wispHidden[index] = hidden;
+    }
+
+    // Where each wisp's flame sits on his 64-pixel canvas, in art pixels from the top-left (Ronin_Wisp_<n>.png).
+    static readonly Vector2[] WispPixels = { new Vector2(16.5f, 17f), new Vector2(49f, 28f) };
+
+    // A wisp's flame in the world, on whatever frame he's showing.
+    public Vector3 WispPoint(int index)
+    {
+        Sprite frame = sprite.sprite;
+        if (frame == null) return Bounds.center;
+        Vector2 px = WispPixels[Mathf.Clamp(index, 0, WispPixels.Length - 1)];
+        float ppu = frame.pixelsPerUnit;
+        var local = new Vector3((px.x - frame.pivot.x) / ppu, (frame.rect.height - px.y - frame.pivot.y) / ppu, 0f);
+        return sprite.transform.TransformPoint(local);
+    }
+
+    // Ends his hit flash's invulnerability at once, so a scripted blow (the tutorial's spear) always lands.
+    public void ClearInvulnerable() => invulnerableUntil = 0f;
 
     public bool Parrying => Time.time < parryUntil;
 

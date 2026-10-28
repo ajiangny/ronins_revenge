@@ -146,6 +146,10 @@ public static class BossArtSetup
         SetFrames(so.FindProperty("freedKneel"), TryFrames("ShiroganeFreed", "Kneel"));
         SetFrames(so.FindProperty("freedBow"), TryFrames("ShiroganeFreed", "Bow"));
         SetFrames(so.FindProperty("freedIdle"), TryFrames("ShiroganeFreed", "Idle"));
+        // Poguru, Oni's companion in his left wisp, drawn at Oni's size; any clip not drawn yet plays his idle.
+        SerializedProperty poguru = so.FindProperty("poguruArt");
+        foreach (string clip in new[] { "Idle", "Talk", "Pop", "Bonk", "Annoyed", "Point", "Gasp", "Cheer" })
+            SetFrames(poguru.FindPropertyRelative(char.ToLowerInvariant(clip[0]) + clip.Substring(1)), TryFrames("Poguru", clip));
         so.FindProperty("shiroganePortrait").objectReferenceValue = Portrait("Shirogane_Full");
         so.FindProperty("shiroganeCloseup").objectReferenceValue = Portrait("Shirogane_Closeup");
         so.FindProperty("shiroganePhasePortrait").objectReferenceValue = Portrait("Shirogane_Phase_Full");
@@ -198,6 +202,8 @@ public static class BossArtSetup
         Debug.Log(utsusemi == null ? "Utsusemi has no frames yet; portraits wired, stand-in art kept."
             : $"Utsusemi art applied: {utsusemi.idle.Length} idle, {utsusemi.attack.Length} thrust, {utsusemi.parry.Length} throw, " +
               $"{utsusemi.hit.Length} hit, {utsusemi.death.Length} defeat frames.");
+        Debug.Log(TryFrames("Poguru", "Idle") == null ? "Poguru has no frames yet; he stays a glow with eyes."
+            : $"Poguru art applied: {TryFrames("Poguru", "Idle").Length} idle frames.");
         Debug.Log(shirogane == null ? "Shirogane has no frames yet; portraits and voice wired, stand-in art kept."
             : $"Shirogane art applied: {shirogane.idle.Length} idle, {shirogane.attack.Length} slash, {shirogane.parry.Length} blade-call, " +
               $"{shirogane.hit.Length} hit, {shirogane.death.Length} defeat frames.");

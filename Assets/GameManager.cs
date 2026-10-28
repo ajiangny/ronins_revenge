@@ -143,6 +143,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite akaganeCloseup;
     [SerializeField] Sprite mizoreCloseup;
     [SerializeField] Sprite hibikiCloseup;
+    [Tooltip("Poguru's pixel clips (set by Ninja/Apply Boss Art). Empty draws him as a teal glow with eyes.")]
+    [SerializeField] PoguruArt poguruArt = new PoguruArt();
+    [Tooltip("Poguru's painted close-up for his talk scenes (set by Ninja/Apply UI Fonts). Empty shows his pixel frames instead.")]
+    [SerializeField] Sprite poguruCloseup;
     [Tooltip("How fast the ronin walks from his seat to the middle of his row after START, in world units a second.")]
     [SerializeField] float titleWalkSpeed = 6f;
     [Tooltip("Seconds the title page takes to fade into the first stage's field as he walks.")]
@@ -495,6 +499,8 @@ public class GameManager : MonoBehaviour
     AudioSource voice;
     AudioSource oniVoice;
     AudioSource soulVoice;
+    AudioSource poguruVoice;
+    Poguru poguru;
     // The voice filters: Utsusemi's machine voice (a doubled, ringing, slightly gritty layer over the recorded
     // lines) and Shirogane's spirit voice (a soft, hollow echo, as if from across water) retune the same three.
     Behaviour[] machineVoice;
@@ -536,6 +542,25 @@ public class GameManager : MonoBehaviour
         oniVoice.playOnAwake = false;
         oniVoice.spatialBlend = 0f;
         soulVoice = CreateSoulVoice();
+        poguruVoice = CreatePoguruVoice();
+    }
+
+    // Poguru's own source: he's soul-fire too, so a light, quick chorus, but no coffin echo.
+    AudioSource CreatePoguruVoice()
+    {
+        var poguruObject = new GameObject("PoguruVoice");
+        poguruObject.transform.SetParent(transform, false);
+        var source = poguruObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        var chorus = poguruObject.AddComponent<AudioChorusFilter>();
+        chorus.dryMix = 0.9f;
+        chorus.wetMix1 = chorus.wetMix2 = 0.12f;
+        chorus.wetMix3 = 0f;
+        chorus.delay = 20f;
+        chorus.rate = 0.6f;
+        chorus.depth = 0.08f;
+        return source;
     }
 
     // The three souls share a source of their own: they're half in the coffin, so a faint, slow version of the
@@ -655,6 +680,7 @@ public class GameManager : MonoBehaviour
         dialogueScene.Bind(ui);
         baseRoninArt = ronin.art;
         ResetLoadout();
+        poguru = Poguru.Create(poguruArt, ronin);
 
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0);
@@ -693,6 +719,8 @@ public class GameManager : MonoBehaviour
 
     // Oni's teal, for the few words he says.
     static readonly Color OniColour = new Color(0.45f, 1f, 0.9f);
+    // Poguru's soul-fire, a bluer teal than Oni's so the two read apart.
+    public static readonly Color PoguruColour = new Color(0.45f, 0.85f, 1f);
 
     // The close-up framed beside Oni's words on the title hill. Lines in play show no portrait; conversations get a
     // full talk scene instead (SpeakerFor).
@@ -3034,6 +3062,7 @@ public class GameManager : MonoBehaviour
     {
         "Oni" => oniVoice,
         "Akagane" or "Mizore" or "Hibiki" => soulVoice,
+        "Poguru" => poguruVoice,
         _ => null,
     };
 
@@ -3056,6 +3085,10 @@ public class GameManager : MonoBehaviour
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
             case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
+            // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.
+            case "Poguru":
+                return new DialogueScene.Speaker { name = "Poguru", epithet = "The Lost Dragon", colour = PoguruColour, art = poguruCloseup,
+                    focus = new Vector2(0.5f, 0.32f), height = ScenePortraitHeight * 0.85f, soulFrames = poguruArt?.idle };
         }
         if (activeBoss != null && name == Stage.boss.ToString())
         {

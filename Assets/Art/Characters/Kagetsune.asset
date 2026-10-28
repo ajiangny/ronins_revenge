@@ -63,6 +63,12 @@ MonoBehaviour:
   walkDownLeft: []
   walkDownRight: []
   idleDown: []
+  idleLeft: []
+  idleRight: []
+  idleUpLeft: []
+  idleUpRight: []
+  idleDownLeft: []
+  idleDownRight: []
   wisps: []
   framesWithWisps: []
   idleFps: 6

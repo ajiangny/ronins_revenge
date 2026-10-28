@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
+// The moves his controls can fire, as flags for Ronin.Allowed.
+[Flags]
+public enum Moves { None = 0, Slash = 1, Shuriken = 2, Parry = 4, All = Slash | Shuriken | Parry }
+
 [RequireComponent(typeof(Rigidbody))]
 public class Ronin : MonoBehaviour
 {
@@ -67,7 +71,11 @@ public class Ronin : MonoBehaviour
     [SerializeField] float parryRadius = 1.1f;
 
     public event Action Hit;
+    // Raised on every swing (a slash or Kindling's fireball).
+    public event Action Slashed;
     public event Action<Vector3, Kunai> ShurikenThrown;
+    // Raised as a parry starts, landed or not.
+    public event Action ParryStarted;
     // Raised once per parry, on the first arrow it deflects.
     public event Action Parried;
     // Raised when a parry meets a shot it can't turn (a crimson seal-dart), once per parry.
@@ -93,6 +101,10 @@ public class Ronin : MonoBehaviour
     public Weapon CurrentWeapon { get => weapon; set => weapon = value; }
     // God mode from the dev menu: nothing can hurt him.
     public bool Invincible { get; set; }
+    // Poguru's tutorial keeps him unhurt until its spear, apart from god mode.
+    public bool Shielded { get; set; }
+    // Which of his moves the controls may fire; the tutorial's drills allow only the one they teach.
+    public Moves Allowed { get; set; } = Moves.All;
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
     public Func<Transform> RiposteTarget { get; set; }
     // True while he stands where a parry is forbidden (inside a lane sealed by the Emperor's ofuda); set by that boss.
@@ -246,15 +258,16 @@ public class Ronin : MonoBehaviour
             bool slash = keyboard.spaceKey.isPressed || (mouse != null && mouse.leftButton.isPressed);
             bool parry = keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame
                 || (mouse != null && mouse.rightButton.wasPressedThisFrame);
-            if (slash && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
+            if (slash && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
             {
                 Attack();
             }
-            if ((keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && ShurikenCharge >= 1f)
+            if ((keyboard.wKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame) && (Allowed & Moves.Shuriken) != 0
+                && ShurikenCharge >= 1f)
             {
                 ThrowShuriken();
             }
-            if (parry && ParryCharge >= 1f)
+            if (parry && (Allowed & Moves.Parry) != 0 && ParryCharge >= 1f)
             {
                 if (ParrySealed != null && ParrySealed()) SealedParry();
                 else StartParry();
@@ -353,11 +366,16 @@ public class Ronin : MonoBehaviour
 
     public float ParryRadius => parryRadius;
 
-    // The tutorial's held parry: whatever the cooldown says, he parries now.
-    public void ParryNow()
+    // Every move ready at once, for the tutorial's drills.
+    public void ResetCooldowns() => lastShot = lastShuriken = lastParry = float.NegativeInfinity;
+
+    // A drill's move fired for a test harness (synthetic keys don't reach an unfocused Game view).
+    public void Perform(Moves move)
     {
-        lastParry = float.NegativeInfinity;
-        StartParry();
+        ResetCooldowns();
+        if (move == Moves.Slash) Attack();
+        else if (move == Moves.Shuriken) ThrowShuriken();
+        else if (move == Moves.Parry) StartParry();
     }
 
     public bool Parrying => Time.time < parryUntil;
@@ -379,6 +397,7 @@ public class Ronin : MonoBehaviour
 
     void Attack()
     {
+        Slashed?.Invoke();
         // Kindling: every few swings a great fireball goes up instead of the slash.
         if (Loadout.Has(BoonId.Kindling, out float swingsPerFireball) && ++swingsSinceFireball >= (int)swingsPerFireball)
         {
@@ -521,6 +540,7 @@ public class Ronin : MonoBehaviour
         cappedRipostes = 0;
         parryFizzled = false;
         Sfx.Play(Sfx.ParrySwing);
+        ParryStarted?.Invoke();
         // The slash sweeps over his head, where the arrows come from.
         if (Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, Color.Lerp(Color.white, parryColor, 0.7f), 1.15f, transform) == null)
         {
@@ -865,7 +885,7 @@ public class Ronin : MonoBehaviour
     // Damage that can't be parried, like a boss's chain lash. Invulnerability still applies.
     public void TakeHit(Vector3 contact)
     {
-        if (!ControlsEnabled || Invincible || Time.time < invulnerableUntil) return;
+        if (!ControlsEnabled || Invincible || Shielded || Time.time < invulnerableUntil) return;
 
         invulnerableUntil = Time.time + invulnerableTime;
         HitFlash.Flash(sprite);

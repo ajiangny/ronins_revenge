@@ -383,27 +383,41 @@ public static class Dialogue
             Say("Hibiki", "Drumroll, please... It's me again!")),
 
         // Poguru, the Lost Dragon in Oni's left wisp (Story/Poguru.md). The tutorial's lines are played by id.
-        Tut("Poguru_Tut_Wake", P("ONI! ONI! THE ARMY IS COMING!"), O("...Who are you."),
+        Tut("Poguru_Tut_Wake", P("ONI! ONI! WAKE UP! Scary soldiers are coming!"), O("...Who are you."),
             P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!"), P("No time! Do you remember how to fight?")),
-        Tut("Poguru_Tut_Again", P("Oni! Army! Again! Want the lesson again? I LOVE the lesson.")),
-        Tut("Poguru_Tut_Yay", P("Yay! Stay close to me. I mean, I'll stay close to you!")),
+        Tut("Poguru_Tut_Again", P("Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson.")),
+        Tut("Poguru_Tut_Yay", P("Yay! Stay close. They're coming!")),
         Tut("Poguru_Tut_Skip", P("Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly.")),
-        // No keys in his words: each one shows beside the slot he points at.
-        Tut("Poguru_Tut_Basics", P("Bad guys up there, you down here. They march down, you stop them!"),
-            P("This is your SLASH! Your sword sends a cut flying up the field. Whoosh!"),
-            P("Your Spirit SHURIKEN! Big and sparkly, but it needs a little nap after."),
-            P("And PARRY! Time it just before an arrow bonks you, and it goes right back at them!"),
-            P("Beat the whole army. I'll float nearby and bonk arrows. ...Try not to make me bonk too many.")),
+        // The drills: five soldiers find Oni before the army. Their lines hang over them in the field; his frozen
+        // yells sit beside Oni with the keys, which he never says.
+        Tut("Tut_Soldiers", S("There he is! The Emperor's runaway dog."), S("Lord Kagetsune wants his demon back. Come quietly!"),
+            O("...No."), P("Eep! Five of them! Okay, okay, one at a time!")),
+        Tut("Tut_Slash_Taunt", S("Eat this, traitor!")),
+        Tut("Poguru_Tut_SlashIt", P("An arrow! SLASH it! Your cut breaks it clean in half!")),
+        Tut("Poguru_Tut_TakeHim", P("Now take him down!")),
+        Tut("Tut_Slash_Fall", S("Gah...!")),
+        Tut("Tut_Charge_Taunt", S("Rush him! Together!")),
+        Tut("Poguru_Tut_ShurikenIt", P("Two in a row! Throw your SHURIKEN, it flies right through them both!")),
+        Tut("Poguru_Tut_Stopped", P("Stopped in their tracks! Ha!")),
+        Tut("Tut_Spear_Taunt", S("Let's see you cut THIS. Blessed steel from the Emperor's own forge!")),
+        Tut("Poguru_Tut_ParryIt", P("That spear's cursed! Kagetsune's blacksmiths forge them with nasty magic. You can't cut it or break it. PARRY IT!")),
+        Tut("Tut_Flee", S("Th-that's not natural! CAPTAAAIN!"), S("Wait for meee!"), P("Hehe! Run away! ...Wait. Where are they running TO?")),
+        // The army they fetched: he guards it to the end, crosser by the bonk, and bursts if it reaches the cover.
+        Tut("Poguru_Tut_Backup", P("Uh oh. He brought a LOT of backup."), O("...Good."),
+            P("Okay! I'll bonk every arrow I can. I'm a very good bonker. You do the rest!")),
         Tut("Poguru_Block_1", P("Bonk! Got it!")),
         Tut("Poguru_Block_3", P("Ow. Okay. Still fine!")),
         Tut("Poguru_Block_6", P("Oni, you can ALSO move, you know!")),
         Tut("Poguru_Block_10", P("My HEAD is not a SHIELD!")),
-        Tut("Poguru_Block_Break", P("That's it! Dragon break! You're on your own for five seconds!")),
-        Tut("Poguru_Block_Back", P("...Fine. FINE. I'm back. Hmph.")),
-        // The army's down and he's celebrating, so the straggler's arrow gets past him: Oni has to parry it.
+        Tut("Poguru_Block_15", P("I'M BONKING SO HARD RIGHT NOW!")),
+        Tut("Poguru_Block_20", P("Oni! Swing the sword! The SWORD!")),
+        Tut("Poguru_Block_30", P("My head is RINGING!")),
+        Tut("Poguru_Block_45", P("I am going to EXPLODE!")),
+        Tut("Poguru_Block_More", P("BONK! BONK! BOOOONK!")),
+        Tut("Poguru_Rage_Charge", P("THAT'S IT! THAT IS IT!! RAAAAAGH!!!")),
+        Tut("Poguru_Tut_Raged", P("ONI!! WERE YOU NAPPING?!"), P("I did EVERYTHING! I'm a SUPPORT dragon! SUPPORT!"),
+            O("...You were doing fine."), P("HMPH!")),
         Tut("Poguru_Tut_Win", P("We did it! Victory wiggle! Wiggle wiggle wiggle...")),
-        Tut("Poguru_Tut_Parry", P("ONI! ONE MORE! PARRY IT!!")),
-        Tut("Poguru_Tut_Parried", P("WHOA! Right back at him! See? You DO remember!")),
         Tut("Poguru_Tut_LookOut", P("LOOK OUT!!!")),
         Tut("Poguru_Tut_Hearts", P("Waaah! It went right through me! Are you okay?!"), O("...Fine."),
             P("Those hearts in the corner are your lives. Lose them all and it's back to the temple. It's damp there."),
@@ -471,6 +485,9 @@ public static class Dialogue
     const DialogueEvent PogTalk = DialogueEvent.PoguruTalk;
     static DialogueLine P(string text) => Say(Pog, text);
     static DialogueLine O(string text) => Say("Oni", text);
+    // The tutorial's soldiers, in the soldier voice (SOLDIER in Tools/generate-voice.mjs).
+    public const string Soldier = "Ashigaru";
+    static DialogueLine S(string text) => Say(Soldier, text);
 
     // A tutorial conversation: never picked, only played by id.
     static Conversation Tut(string id, params DialogueLine[] lines) => Talk(id, Pog, DialogueEvent.Tutorial, Repeat, When(), lines);

@@ -72,6 +72,8 @@ public class SamuraiArmy : MonoBehaviour
     public event Action<Samurai, KillSource> SamuraiKilled;
     public event Action ArmyDefeated;
     public event Action ArmyReachedRonin;
+    // The front rank has reached the cover's row and holds there (BeginHolding).
+    public event Action Holding;
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
@@ -386,6 +388,7 @@ public class SamuraiArmy : MonoBehaviour
     {
         holding = true;
         nextLungeTime = Time.time + lungeInterval * 0.5f;
+        Holding?.Invoke();
         Sfx.Play(Sfx.SamuraiCry, 1f, 0.9f);
         CameraShake.Add(0.25f);
     }

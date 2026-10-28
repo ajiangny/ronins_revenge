@@ -37,6 +37,8 @@ public class Poguru : MonoBehaviour
     const float BonkReach = 0.55f;
     // Without art: the glow's width, in world units.
     const float FallbackSize = 0.75f;
+    // How red he goes, fully angry.
+    static readonly Color AngryTint = new Color(1f, 0.42f, 0.36f);
 
     PoguruArt art;
     Ronin ronin;
@@ -62,6 +64,10 @@ public class Poguru : MonoBehaviour
     Arrow chasing;
     int blocks;
     Vector3 lastPosition;
+
+    // How cross he is, 0 to 1 (the tutorial's guarded round): he reddens, shakes and steams.
+    public float Anger { get; set; }
+    float nextSteam;
 
     public Mode Current => mode;
     public bool IsOut => mode != Mode.Hidden;
@@ -323,7 +329,9 @@ public class Poguru : MonoBehaviour
                 at = Vector3.Lerp(at, perch + Vector3.up * (bob * 0.6f), 1f - Mathf.Exp(-5f * dt));
                 break;
         }
-        transform.position = new Vector3(at.x, at.y, -0.3f);
+        // Fuming, he shakes on the spot.
+        Vector3 shake = Anger > 0.3f ? new Vector3(Mathf.Sin(now * 70f), Mathf.Cos(now * 53f), 0f) * (0.05f * (Anger - 0.3f)) : Vector3.zero;
+        transform.position = new Vector3(at.x, at.y, -0.3f) + shake;
         transform.localScale = Vector3.one * grow;
         if (mode != Mode.Popping && mode != Mode.Returning) grow = Mathf.MoveTowards(grow, 1f, dt * 3f);
 
@@ -350,13 +358,21 @@ public class Poguru : MonoBehaviour
             Play(art.idle, true);
         }
         float alpha = now < ghostUntil ? 0.3f + 0.25f * Mathf.Abs(Mathf.Sin(now * 30f)) : 1f;
-        glow.color = new Color(glow.color.r, glow.color.g, glow.color.b, 0.3f * alpha + 0.06f * Mathf.Sin(now * 4f));
+        Color soul = Color.Lerp(GameManager.PoguruColour, AngryTint, Anger);
+        glow.color = new Color(soul.r, soul.g, soul.b, 0.3f * alpha + 0.06f * Mathf.Sin(now * 4f));
+        Color tint = Color.Lerp(Color.white, AngryTint, Anger * 0.75f);
+        // Past half angry, puffs of steam off his head, quicker the crosser he gets.
+        if (Anger > 0.5f && now >= nextSteam)
+        {
+            nextSteam = now + Mathf.Lerp(0.7f, 0.2f, Anger);
+            ElementFx.Glow(transform.position + new Vector3(UnityEngine.Random.Range(-0.15f, 0.15f), 0.45f, 0f), new Color(1f, 1f, 1f, 0.5f), 0.15f, 0.5f, 0.5f);
+        }
         if (hasArt)
         {
             int frame = (int)((now - clipAt) * Mathf.Max(1f, art.fps));
             if (!clipLoop && frame >= clip.Length) Play(talkUntil > 0f ? art.talk : art.idle, true);
             else body.sprite = clip[clipLoop ? frame % clip.Length : frame];
-            body.color = new Color(1f, 1f, 1f, alpha);
+            body.color = new Color(tint.r, tint.g, tint.b, alpha);
             return;
         }
         // The stand-in breathes, and squashes as he talks.

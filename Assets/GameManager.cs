@@ -1749,6 +1749,13 @@ public class GameManager : MonoBehaviour
         ClearProjectiles();
         // A new journey's first round opens on Poguru's offer, before the army arrives.
         if (stageIndex == 0 && roundIndex == 0 && tutorial.Armed) yield return tutorial.Offer();
+        // Taken, five soldiers find Oni first: his practice before the army they run to fetch. The cover isn't up yet
+        // (it's built just below), so nothing stands between his blows and them.
+        if (stageIndex == 0 && roundIndex == 0 && tutorial.Active)
+        {
+            blockers.Clear();
+            yield return tutorial.Drills();
+        }
         // Blockers carry their damage from round to round; a new stage brings fresh ones.
         if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
         // A stage's first round always ends in a soul; later rounds carry what their path showed.
@@ -1782,7 +1789,7 @@ public class GameManager : MonoBehaviour
 
         ui.HideBanner();
         // The tutorial's lesson as the first army stands ready, and its goodbye as the second does.
-        if (tutorial.Active && stageIndex == 0 && roundIndex == 0) yield return tutorial.ArmyArrived();
+        if (tutorial.Active && stageIndex == 0 && roundIndex == 0) yield return tutorial.Backup();
         else if (tutorial.Active && stageIndex == 0 && roundIndex == 1) yield return tutorial.Finish();
         state = State.Playing;
         ronin.ControlsEnabled = true;
@@ -1827,7 +1834,7 @@ public class GameManager : MonoBehaviour
         }
         MaybeDropScroll(samurai.transform.position, scrollChancePerKill);
         // Rarely a soldier drops a heart, but only one he can use (Poguru promises as much in the tutorial).
-        if (source != KillSource.Effect && !killHeartThisStage && lives < maxLives && Random.value < killHeartChance)
+        if (source != KillSource.Effect && !killHeartThisStage && !tutorial.Active && lives < maxLives && Random.value < killHeartChance)
         {
             killHeartThisStage = true;
             Heart.Spawn(samurai.transform.position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
@@ -1916,7 +1923,8 @@ public class GameManager : MonoBehaviour
     // once the round's army is gone.
     void MaybeDropSoul(Vector3 position)
     {
-        if (activeSoul != null || army.Remaining == 0) return;
+        // Nothing drops in Poguru's tutorial: its one heart and soul are scripted.
+        if (activeSoul != null || army.Remaining == 0 || tutorial.Active) return;
         SpawnSoul(position, PickSoulElement());
     }
 
@@ -1943,7 +1951,7 @@ public class GameManager : MonoBehaviour
     // the round's last samurai, like souls.
     void MaybeDropScroll(Vector3 position, float chance)
     {
-        if (activeScroll != null || scrollsDropped >= maxScrollsPerRun || army.Remaining == 0) return;
+        if (activeScroll != null || scrollsDropped >= maxScrollsPerRun || army.Remaining == 0 || tutorial.Active) return;
         if (Random.value >= chance || Boons.DrawArts(loadout, 1).Count == 0) return;
         scrollsDropped++;
         SpawnScroll(position);
@@ -2032,7 +2040,7 @@ public class GameManager : MonoBehaviour
 
     void OnBlockerBroken(Vector3 position)
     {
-        if (state != State.Playing || Random.value >= heartDropChance) return;
+        if (state != State.Playing || tutorial.Active || Random.value >= heartDropChance) return;
         Heart.Spawn(position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
     }
 
@@ -3269,20 +3277,32 @@ public class GameManager : MonoBehaviour
     }
 
     // Unsubtitled when the words are shown elsewhere (the tutorial's parry prompt), so the plate covers nothing.
-    float SayAsPoguru(Conversation said, bool subtitled = true)
+    float SayAsPoguru(Conversation said, bool subtitled = true) => SayLine(said, 0, null, subtitled);
+
+    // The tutorial's soldiers, in the dull red of the army's arrows.
+    static readonly Color SoldierColour = new Color(0.9f, 0.45f, 0.4f);
+
+    // One line of a conversation said in the field, not in a scene: voiced when its clip is there and subtitled,
+    // hung `beside` a point (bottom-left canvas pixels) when given. Returns how long it takes to say.
+    public float SayLine(Conversation said, int line, Vector2? beside = null, bool subtitled = true)
     {
-        AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(0)) : null;
-        string text = Dialogue.Fill(said.Lines[0].Text, Dialogue.Context());
+        if (said == null || line >= said.Lines.Length) return 0f;
+        string speaker = said.Lines[line].Speaker;
+        AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(line)) : null;
+        string text = Dialogue.Fill(said.Lines[line].Text, Dialogue.Context());
         float seconds = clip != null ? clip.length : Mathf.Clamp(text.Length * 0.06f, 1.4f, 3.5f);
+        // Soldiers speak through Oni's plain source; they never talk over him.
+        AudioSource source = speaker == "Poguru" ? poguruVoice : oniVoice;
         if (clip != null)
         {
-            poguruVoice.Stop();
-            poguruVoice.volume = voiceVolume * Sfx.Volume;
-            poguruVoice.clip = clip;
-            poguruVoice.Play();
+            source.Stop();
+            source.volume = voiceVolume * Sfx.Volume;
+            source.clip = clip;
+            source.Play();
         }
-        if (subtitled) ui.ShowSubtitle("Poguru", text, PoguruColour, seconds + 0.6f);
-        poguru.Talk(seconds);
+        Color colour = speaker == "Poguru" ? PoguruColour : speaker == "Oni" ? OniColour : SoldierColour;
+        if (subtitled) ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, beside);
+        if (speaker == "Poguru") poguru.Talk(seconds);
         return seconds + 0.3f;
     }
 
@@ -3312,15 +3332,23 @@ public class GameManager : MonoBehaviour
 
     // The tutorial's last straggler: a foot soldier's art and an ordinary arrow.
     public CharacterArt FootSoldierArt => army.samuraiByRow[army.samuraiByRow.Length - 1];
+    // The tutorial's spearman wears the Taisho's art and throws his yari.
+    public CharacterArt SpearmanArt => army.samuraiByRow[0];
+    public Sprite SpearSprite => army.samuraiPrefab.SpearSprite;
     public Arrow ArrowPrefab => army.samuraiPrefab.arrowPrefab;
+    public SamuraiArmy Army => army;
 
     // Holds the field still for a lesson that waits on the player (the tutorial's parry): no pause menu meanwhile,
     // since its Resume would let time run on.
     public void HoldForLesson(bool hold)
     {
-        state = hold ? State.Dialogue : State.Playing;
+        if (hold && state != State.Dialogue) heldFrom = state;
+        state = hold ? State.Dialogue : heldFrom;
         Time.timeScale = hold ? 0f : 1f;
     }
+
+    // The state a lesson's hold hands back (the drills run in Transition, the army round in Playing).
+    State heldFrom = State.Playing;
 
     // At least this many lives, so a lesson's blow can't end the run.
     public void EnsureLives(int count)

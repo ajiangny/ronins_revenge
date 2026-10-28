@@ -1,14 +1,19 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-// Poguru's first-run tutorial, in place of Stage I, Round 1 (Story/Poguru.md). He pops out of Oni's wisp before the
-// army arrives and offers it; taken, he points out the ability slots, guards the round by bonking arrows, lets a
-// spear through to teach hearts, and explains the reward, the boon cards and the paths as each first comes up. It's
-// done once round 2 starts. GameManager calls the hooks below at those moments; a death or a dev jump aborts it,
-// and since nothing is settled until it's finished or skipped, the next run offers it again.
+// Poguru's first-run tutorial, in place of Stage I, Round 1 (Story/Poguru.md). He pops out of Oni's wisp and offers
+// it; taken, five soldiers find Oni before the army (the drills: an archer for the slash, two chargers for the
+// shuriken, a spearman for the parry, and a coward who runs with him for the army). Each lesson holds the field still
+// at its moment, points at its slot with its keys and lets only that move go on. The army then comes; Poguru bonks
+// every arrow at Oni (who can't be hurt until the spear), crosser by the bonk, and if it reaches the cover his rage
+// bursts and wipes it out. A spear he can't stop then goes through him, he hands over a heart, and he explains the
+// reward, the boon cards and the paths as each first comes up. It's done once round 2 starts. GameManager calls the
+// hooks below; a death or a dev jump aborts it, and since nothing is settled until it's finished or skipped, the next
+// run offers it again.
 public class Tutorial : MonoBehaviour
 {
     const float SpearSpeed = 9f;
@@ -16,20 +21,23 @@ public class Tutorial : MonoBehaviour
     const float SpearTimeout = 2.5f;
     const float SlowMotion = 0.35f;
     const float PointerSize = 96f;
-    // How far the lifted ability slots rise during the controls talk, so the lowest (parry) and its keys clear the
-    // talk's plate.
-    const float SlotRise = 130f;
-    // His annoyance barks, by arrows bonked; at the break he sulks for a few seconds, then comes back counting from 10.
-    static readonly int[] BlockBarks = { 1, 3, 6, 10 };
-    const int BreakAt = 15;
-    const float BreakTime = 5f;
+    // His annoyance barks, by arrows bonked; past the last, one every RepeatEvery more. He never stops guarding.
+    static readonly int[] BlockBarks = { 1, 3, 6, 10, 15, 20, 30, 45 };
+    const int RepeatEvery = 15;
+    // Blocks at which he's as cross as he gets.
+    const float FullAnger = 45f;
+    const float RageSpeed = 12f;
 
     GameManager game;
     bool armed;
     bool guarding;
+    bool raged;
     bool spearDone, rewardDone, boonsDone, pathsDone;
-    Coroutine dragonBreak;
+    float barkingUntil;
+    readonly List<TrainingSoldier> soldiers = new List<TrainingSoldier>();
 
+    // The layer the lessons' UI sits on, over the HUD (DialogueScene.Overlay only shows during a talk).
+    RectTransform lessonLayer;
     // The pointer beside a HUD slot while he talks about it, and the glow behind that slot.
     RectTransform pointer;
     Image pointerImage;
@@ -39,13 +47,15 @@ public class Tutorial : MonoBehaviour
     // How wide what he points at is drawn (a slot, or the row of lives), so he hovers just past it.
     float pointedWidth;
     // The keys for what he points at, shown beside his pointer so he never has to say them.
-    TextMeshProUGUI keyLabel;
-    // "Parry!" with its keys, hung beside Oni while the straggler's arrow hangs in the air.
-    TextMeshProUGUI parryPrompt;
+    RectTransform keyRow;
+    // His yell and the move's keys, hung beside Oni while the lesson holds the field.
+    RectTransform prompt;
+    bool promptOnRight;
 
-    // A test harness's parry press (synthetic keys don't reach an unfocused Game view), like DialogueScene.Advance.
-    bool parryPressed;
-    public void PressParry() => parryPressed = true;
+    // A test harness's press for a held lesson (synthetic keys don't reach an unfocused Game view), like
+    // DialogueScene.Advance.
+    Moves pressed;
+    public void Press(Moves move) => pressed = move;
 
     public bool Armed => armed;
     public bool Active { get; private set; }
@@ -59,7 +69,7 @@ public class Tutorial : MonoBehaviour
     public void Arm(bool offer)
     {
         armed = offer;
-        Active = guarding = false;
+        Active = guarding = raged = false;
         spearDone = rewardDone = boonsDone = pathsDone = false;
     }
 
@@ -75,7 +85,7 @@ public class Tutorial : MonoBehaviour
         if (seconds > 0f) yield return new WaitForSeconds(seconds);
     }
 
-    // Beat 1: before the army, he pops out and asks. Back (Esc) skips.
+    // Beat 1: before anything arrives, he pops out and asks. Back (Esc) skips.
     public IEnumerator Offer()
     {
         armed = false;
@@ -89,7 +99,7 @@ public class Tutorial : MonoBehaviour
         string muted = MenuUI.MutedHex(false);
         game.Menu.Show("DO YOU REMEMBER?", $"<size=30><color=#{muted}>Poguru can walk you through the first round.</color></size>", new[]
         {
-            MenuUI.Item.Button("TUTORIAL", () => take = true, "Slash, shuriken and parry, with Poguru beside you."),
+            MenuUI.Item.Button("TUTORIAL", () => take = true, "Practise on a few soldiers first, with Poguru beside you."),
             MenuUI.Item.Button("SKIP", () => take = false, "Straight into the fight. He'll be in your wisp."),
         }, () => take = false);
         yield return new WaitUntil(() => take.HasValue);
@@ -98,6 +108,8 @@ public class Tutorial : MonoBehaviour
         if (take.Value)
         {
             Active = true;
+            // He keeps Oni from harm until the lesson's spear.
+            game.Ronin.Shielded = true;
             // A death before the end offers it again.
             Save.Data.tutorialReplay = true;
             Save.Write();
@@ -112,101 +124,432 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    // Beat 2: the army stands ready; he stands on the right of a talk with the ability slots lifted out of the dark,
-    // pointing at each as he names it.
-    public IEnumerator ArmyArrived()
+    // Beat 2, before the army: the five soldiers, one lesson each.
+    public IEnumerator Drills()
     {
         if (!Active) yield break;
-        BoonChoiceUI boons = game.BoonChoice;
-        boons.LiftSlots(game.Scene.Overlay);
-        RaiseSlots(true);
-        BuildPointer(game.Scene.Overlay);
-        var options = new GameManager.TalkOptions
+        Ronin ronin = game.Ronin;
+        Poguru poguru = game.Poguru;
+        Camera cam = Camera.main;
+        Vector3 centre = CameraShake.Center;
+        float top = centre.y + cam.orthographicSize + 1.5f;
+        // Their line, well above the cover, and the coward a step behind it.
+        float line = centre.y + cam.orthographicSize * 0.3f;
+        float x = ronin.Bounds.center.x;
+        Moves learned = Moves.None;
+        ronin.Allowed = Moves.None;
+        ronin.ControlsEnabled = false;
+
+        TrainingSoldier archer = Recruit(TrainingSoldier.Kind.Archer, game.FootSoldierArt, new Vector3(x - 3f, top), new Vector3(x - 3f, line));
+        TrainingSoldier front = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(x - 1f, top), new Vector3(x - 1f, line));
+        TrainingSoldier back = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(x + 1f, top), new Vector3(x + 1f, line));
+        TrainingSoldier spearman = Recruit(TrainingSoldier.Kind.Spearman, game.SpearmanArt, new Vector3(x + 3f, top), new Vector3(x + 3f, line));
+        TrainingSoldier coward = Recruit(TrainingSoldier.Kind.Coward, game.FootSoldierArt, new Vector3(x + 5f, top), new Vector3(x + 5f, line + 1.6f));
+        Sfx.Play(Sfx.MarchStep);
+        yield return new WaitUntil(() => soldiers.TrueForAll(s => s == null || !s.Moving));
+        coward.Tremble(true);
+        yield return Line("Tut_Soldiers", 0, archer);
+        yield return Line("Tut_Soldiers", 1, archer);
+        yield return Line("Tut_Soldiers", 2, null, ronin.Bounds.center);
+        yield return Line("Tut_Soldiers", 3, null, poguru.Centre);
+
+        // The slash: the archer steps into Oni's column and shoots straight down. Held mid-flight, Oni's cut breaks
+        // the arrow; then he's to cut the archer down, who keeps shooting (and Poguru bonking) till he falls.
+        archer.MoveTo(new Vector3(ronin.Bounds.center.x, line));
+        yield return new WaitUntil(() => !archer.Moving);
+        yield return Line("Tut_Slash_Taunt", 0, archer);
+        Arrow arrow = null;
+        Vector3 archerAt = archer.transform.position;
+        yield return archer.Shoot(game.ArrowPrefab, new Vector3(archerAt.x, ronin.Bounds.center.y), shot => arrow = shot);
+        float midway = (archerAt.y + ronin.TopY) / 2f;
+        yield return Lesson(Moves.Slash, BoonSlot.Attack, "Poguru_Tut_SlashIt", () => arrow == null || arrow.transform.position.y < midway, archerAt.x);
+        learned |= Moves.Slash;
+        ronin.Allowed = learned;
+        yield return Wait(game.Bark("Poguru_Tut_TakeHim") - 0.6f);
+        ronin.ControlsEnabled = true;
+        poguru.Guard(true);
+        Vector3 fell = archerAt;
+        float nextShot = Time.time + 2.5f;
+        while (archer != null && !archer.Dead)
         {
-            keepHud = true,
-            poguruRight = true,
-            onLine = line => Point(line == 1 ? BoonSlot.Attack : line == 2 ? BoonSlot.Special : line == 3 ? BoonSlot.Parry : (BoonSlot?)null),
-        };
-        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Basics"), options);
-        Point(null);
-        ClearPointer();
-        RaiseSlots(false);
-        boons.DropSlots();
+            fell = archer.transform.position;
+            if (Time.time >= nextShot)
+            {
+                nextShot = Time.time + 4f;
+                StartCoroutine(archer.Shoot(game.ArrowPrefab, ronin.Bounds.center, null));
+            }
+            yield return null;
+        }
+        poguru.Guard(false);
+        ronin.ControlsEnabled = false;
+        game.SayLine(Dialogue.Find("Tut_Slash_Fall", false), 0, Beside(fell));
+        yield return new WaitForSeconds(1.4f);
+
+        // The shuriken: the chargers line up in Oni's column, one behind the other, and run at him. Held while
+        // they're still well up the field, one shuriken goes through both. One that gets through is bonked back up
+        // by Poguru and they come again.
+        yield return Line("Tut_Charge_Taunt", 0, front);
+        bool charged = false;
+        while (!charged)
+        {
+            float cx = ronin.Bounds.center.x;
+            front.MoveTo(new Vector3(cx, line), 6f);
+            back.MoveTo(new Vector3(cx, line + 1.3f), 6f);
+            yield return new WaitUntil(() => !front.Moving && !back.Moving);
+            float stop = ronin.TopY + 1.6f;
+            front.MoveTo(new Vector3(cx, stop), 2.2f);
+            back.MoveTo(new Vector3(cx, stop + 1.3f), 2.2f);
+            float holdAt = line - 1.3f;
+            yield return Lesson(Moves.Shuriken, BoonSlot.Special, "Poguru_Tut_ShurikenIt", () => front.Dead || front.transform.position.y < holdAt, cx);
+            learned |= Moves.Shuriken;
+            ronin.Allowed = learned;
+            yield return new WaitUntil(() => (front.Dead || !front.Moving) && (back.Dead || !back.Moving));
+            charged = front.Dead && back.Dead;
+            if (charged) break;
+            // Through his shuriken: Poguru headbutts the survivors back up the field to try again.
+            poguru.Play(game.PoguruClips.bonk);
+            Sfx.Play(Sfx.Deflect, 0.6f, 1.4f);
+            if (!front.Dead) front.Knockback(new Vector3(cx, line));
+            if (!back.Dead) back.Knockback(new Vector3(cx, line + 1.3f));
+            yield return new WaitForSeconds(0.8f);
+            // Whoever's left of the pair comes again alone.
+            if (front.Dead) front = back;
+            if (back.Dead) back = front;
+        }
+        yield return Wait(game.Bark("Poguru_Tut_Stopped"));
+
+        // The parry: the spearman throws a cursed yari, unbreakable, that only a parry turns. His riposte skims past
+        // the spearman's head on purpose, so he lives to run.
+        spearman.MoveTo(new Vector3(ronin.Bounds.center.x + 2.5f, line));
+        yield return new WaitUntil(() => !spearman.Moving);
+        yield return Line("Tut_Spear_Taunt", 0, spearman);
+        spearman.Untouchable = true;
+        coward.Untouchable = true;
+        var near = new GameObject("NearMiss").transform;
+        Func<Transform> aimed = ronin.RiposteTarget;
+        ronin.RiposteTarget = () => near;
+        bool turned = false;
+        Action landed = () => turned = true;
+        ronin.Parried += landed;
+        while (!turned)
+        {
+            near.position = spearman.transform.position + new Vector3(1.1f, 1.4f, 0f);
+            Arrow spear = null;
+            yield return spearman.Shoot(game.ArrowPrefab, ronin.Bounds.center, shot => spear = shot, game.SpearSprite);
+            float reach = ronin.ParryRadius + 0.7f;
+            yield return Lesson(Moves.Parry, BoonSlot.Parry, "Poguru_Tut_ParryIt",
+                () => spear == null || Vector2.Distance(spear.transform.position, ronin.Bounds.center) < reach, spearman.transform.position.x);
+            float swung = Time.time;
+            while (!turned && Time.time - swung < 0.6f) yield return null;
+            if (!turned && spear != null) spear.Pop(Color.white);
+        }
+        ronin.Parried -= landed;
+        learned |= Moves.Parry;
+        ronin.Allowed = learned;
+        yield return new WaitForSeconds(0.9f);
+        ronin.RiposteTarget = aimed;
+        Destroy(near.gameObject);
+
+        // They've seen enough: the two left run for the army.
+        float said = 0f;
+        if (spearman != null && !spearman.Dead)
+        {
+            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 0, Beside(spearman.transform.position));
+            spearman.Flee();
+            yield return new WaitForSeconds(Mathf.Min(said, 1.2f));
+        }
+        if (coward != null && !coward.Dead)
+        {
+            coward.Tremble(false);
+            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 1, Beside(coward.transform.position));
+            coward.Flee(9f);
+        }
+        yield return Wait(said);
+        poguru.Play(game.PoguruClips.cheer);
+        yield return Line("Tut_Flee", 2, null, poguru.Centre);
+        soldiers.Clear();
+        ronin.Allowed = Moves.All;
     }
 
-    bool slotsRaised;
-
-    void RaiseSlots(bool raise)
+    TrainingSoldier Recruit(TrainingSoldier.Kind kind, CharacterArt art, Vector3 from, Vector3 to)
     {
-        if (slotsRaised == raise) return;
-        slotsRaised = raise;
-        foreach (BoonSlot slot in new[] { BoonSlot.Attack, BoonSlot.Special, BoonSlot.Parry })
-            game.BoonChoice.SlotRect(slot).anchoredPosition += Vector2.up * (raise ? SlotRise : -SlotRise);
+        TrainingSoldier soldier = TrainingSoldier.Spawn(art, kind, from);
+        soldier.MoveTo(to);
+        soldiers.Add(soldier);
+        return soldier;
     }
 
-    // Beat 3: the round itself, with him on guard.
+    // One line in the field, hung over whoever says it (a soldier, or a point: Oni, Poguru), and its length waited.
+    IEnumerator Line(string id, int line, TrainingSoldier over, Vector3? at = null)
+    {
+        Vector3 point = over != null ? over.transform.position : at ?? CameraShake.Center;
+        yield return Wait(game.SayLine(Dialogue.Find(id, false), line, Beside(point)));
+    }
+
+    // Where a subtitle plate starts (its bottom-left, in canvas pixels from the bottom-left) to sit over a point.
+    Vector2 Beside(Vector3 world)
+    {
+        RectTransform canvas = (RectTransform)game.Ui.transform;
+        Vector2 at = game.Ui.CanvasPoint(world + Vector3.up * 0.9f) + canvas.rect.size / 2f + new Vector2(-200f, 0f);
+        // Kept on screen, with room for a long line.
+        at.x = Mathf.Clamp(at.x, 30f, canvas.rect.width - 760f);
+        return at;
+    }
+
+    // A held lesson: once `moment` comes the field stops, Poguru's yell and the move's keys hang beside Oni (on the
+    // side away from the shot, `threatX`), he points at the move's slot, and only that move lets play go on, fired by
+    // the real press (Ronin reads input with time stopped) or a harness's Press.
+    IEnumerator Lesson(Moves move, BoonSlot slot, string yellId, Func<bool> moment, float threatX)
+    {
+        yield return new WaitUntil(moment);
+        Ronin ronin = game.Ronin;
+        bool wasEnabled = ronin.ControlsEnabled;
+        Moves wasAllowed = ronin.Allowed;
+        game.HoldForLesson(true);
+        ronin.ResetCooldowns();
+        ronin.Allowed = move;
+        ronin.ControlsEnabled = true;
+        game.Poguru.Play(game.PoguruClips.gasp, true);
+        Conversation yell = Dialogue.Find(yellId, false);
+        game.SayLine(yell, 0, null, false);
+        ShowLesson(slot, yell, PromptOnRight(threatX < ronin.Bounds.center.x));
+
+        bool done = false;
+        Action fired = () => done = true;
+        Action<Vector3, Kunai> thrown = (_, __) => done = true;
+        ronin.Slashed += fired;
+        ronin.ShurikenThrown += thrown;
+        ronin.ParryStarted += fired;
+        pressed = Moves.None;
+        yield return new WaitUntil(() => done || pressed == move);
+        ronin.Slashed -= fired;
+        ronin.ShurikenThrown -= thrown;
+        ronin.ParryStarted -= fired;
+        if (!done) ronin.Perform(move);
+
+        HideLesson();
+        game.Poguru.Play(game.PoguruClips.idle, true);
+        ronin.Allowed = wasAllowed;
+        ronin.ControlsEnabled = wasEnabled;
+        game.HoldForLesson(false);
+    }
+
+    // The prompt goes on Oni's side away from the shot, unless that side lacks room (the HUD slots and their keys are
+    // on the left), when it takes the other.
+    bool PromptOnRight(bool awayIsRight)
+    {
+        RectTransform canvas = (RectTransform)game.Ui.transform;
+        float oni = game.Ui.CanvasPoint(game.Ronin.Bounds.center).x + canvas.rect.width / 2f;
+        bool roomLeft = oni - PromptWidth - 60f > HudReach;
+        bool roomRight = oni + PromptWidth + 60f < canvas.rect.width - 30f;
+        return awayIsRight ? roomRight || !roomLeft : !roomLeft;
+    }
+
+    const float PromptWidth = 560f;
+    // How far right of the screen's left edge the slots, Poguru's pointer and its keys reach.
+    const float HudReach = 520f;
+
+    RectTransform LessonLayer()
+    {
+        if (lessonLayer == null)
+        {
+            lessonLayer = GameUI.CreateRect("TutorialLayer", game.Ui.transform, Vector2.zero, Vector2.zero, Vector2.zero);
+            lessonLayer.anchorMin = Vector2.zero;
+            lessonLayer.anchorMax = Vector2.one;
+            lessonLayer.pivot = new Vector2(0.5f, 0.5f);
+            lessonLayer.offsetMin = lessonLayer.offsetMax = Vector2.zero;
+        }
+        lessonLayer.SetAsLastSibling();
+        return lessonLayer;
+    }
+
+    void ShowLesson(BoonSlot slot, Conversation yell, bool onRight)
+    {
+        RectTransform layer = LessonLayer();
+        game.BoonChoice.LiftSlots(layer);
+        BuildPointer(layer);
+        Point(slot);
+
+        HidePrompt();
+        GameUI ui = game.Ui;
+        promptOnRight = onRight;
+        prompt = GameUI.CreateRect("LessonPrompt", layer, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(10f, 10f));
+        prompt.pivot = new Vector2(onRight ? 0f : 1f, 0.5f);
+        TextMeshProUGUI words = GameUI.CreateText(prompt, ui.BodyFont, "Yell", Vector2.zero, Vector2.zero, new Vector2(PromptWidth, 50f), 32,
+            onRight ? TextAlignmentOptions.BottomLeft : TextAlignmentOptions.BottomRight);
+        words.rectTransform.anchorMin = words.rectTransform.anchorMax = new Vector2(onRight ? 0f : 1f, 0.5f);
+        words.rectTransform.pivot = new Vector2(onRight ? 0f : 1f, 0f);
+        words.rectTransform.anchoredPosition = new Vector2(0f, 6f);
+        words.textWrappingMode = TextWrappingModes.Normal;
+        words.text = yell != null && yell.Lines.Length > 0 ? yell.Lines[0].Text : "";
+        words.color = GameManager.PoguruColour;
+        ui.Style(words, TextStyle.Hud);
+        RectTransform keys = ui.CreateKeyRow(prompt, 30, Keys(slot));
+        keys.anchorMin = keys.anchorMax = new Vector2(onRight ? 0f : 1f, 0.5f);
+        keys.pivot = new Vector2(onRight ? 0f : 1f, 1f);
+        keys.anchoredPosition = new Vector2(0f, -6f);
+    }
+
+    void HideLesson()
+    {
+        ClearPointer();
+        game.BoonChoice.DropSlots();
+        HidePrompt();
+    }
+
+    void HidePrompt()
+    {
+        if (prompt != null) Destroy(prompt.gameObject);
+        prompt = null;
+    }
+
+    // What each move is pressed with: its keys, and the mouse button drawn as a mouse.
+    static KeyGlyph[] Keys(BoonSlot slot) => slot switch
+    {
+        BoonSlot.Attack => new[] { KeyGlyph.Key("SPACE"), KeyGlyph.MouseLeft },
+        BoonSlot.Special => new[] { KeyGlyph.Key("W"), KeyGlyph.Key("↑") },
+        _ => new[] { KeyGlyph.Key("SHIFT"), KeyGlyph.Key("↓"), KeyGlyph.MouseRight },
+    };
+
+    // Beat 3: the army the coward fetched has marched in. Poguru's had a look.
+    public IEnumerator Backup()
+    {
+        if (!Active) yield break;
+        game.Poguru.Hover();
+        yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Backup"), default);
+    }
+
+    // Beat 4: the round itself, with him on guard to the end, and his rage waiting for the army to reach the cover.
     public void RoundStarted()
     {
         if (!Active || spearDone) return;
         guarding = true;
+        raged = false;
+        barkingUntil = 0f;
         Poguru poguru = game.Poguru;
         poguru.ResetBlocks();
+        poguru.Anger = 0f;
         poguru.Blocked -= OnBlocked;
         poguru.Blocked += OnBlocked;
         poguru.Guard(true);
+        game.Army.Holding -= OnHolding;
+        game.Army.Holding += OnHolding;
     }
 
     void OnBlocked(int count)
     {
         if (!guarding) return;
-        if (System.Array.IndexOf(BlockBarks, count) >= 0) game.Bark($"Poguru_Block_{count}");
-        if (count >= BreakAt && dragonBreak == null) dragonBreak = StartCoroutine(DragonBreak());
+        game.Poguru.Anger = Mathf.Clamp01(count / FullAnger);
+        string id = Array.IndexOf(BlockBarks, count) >= 0 ? $"Poguru_Block_{count}"
+            : count > BlockBarks[BlockBarks.Length - 1] && (count - BlockBarks[BlockBarks.Length - 1]) % RepeatEvery == 0 ? "Poguru_Block_More"
+            : null;
+        // A bark waits for the last to finish, so a hail of arrows doesn't talk over itself.
+        // Hung over him, not across the bottom where he hovers.
+        if (id != null && Time.unscaledTime >= barkingUntil)
+            barkingUntil = Time.unscaledTime + game.SayLine(Dialogue.Find(id, false), 0, Beside(game.Poguru.Centre));
     }
 
-    IEnumerator DragonBreak()
+    void OnHolding()
     {
+        if (guarding && !raged) StartCoroutine(Rage());
+    }
+
+    // Left to Poguru all round, the army reaches the cover and his rage bursts: he rises over Oni shaking and red, and
+    // a ring of his soul-fire sweeps the field, cutting down every samurai it passes (a boon-effect kill, no chains).
+    IEnumerator Rage()
+    {
+        raged = true;
+        StopGuarding();
+        Ronin ronin = game.Ronin;
         Poguru poguru = game.Poguru;
-        poguru.Guard(false);
-        float said = game.Bark("Poguru_Block_Break");
-        yield return new WaitForSeconds(Mathf.Min(said, BreakTime));
+        ronin.ControlsEnabled = false;
+        poguru.Anger = 1f;
+        Vector3 over = ronin.Bounds.center + Vector3.up * 2.4f;
+        poguru.DashTo(new Vector3(over.x, over.y, 0f), null, RageSpeed);
         poguru.Play(game.PoguruClips.annoyed, true);
-        yield return new WaitForSeconds(Mathf.Max(0f, BreakTime - said));
-        dragonBreak = null;
-        if (!guarding) yield break;
-        poguru.ResetBlocks(10);
-        poguru.Play(game.PoguruClips.idle, true);
-        poguru.Guard(true);
-        game.Bark("Poguru_Block_Back");
+        float charge = game.SayLine(Dialogue.Find("Poguru_Rage_Charge", false), 0, Beside(over));
+        float until = Time.time + Mathf.Max(1.5f, charge - 0.6f);
+        while (Time.time < until)
+        {
+            CameraShake.Add(Time.deltaTime * 0.6f);
+            yield return null;
+        }
+
+        Vector3 from = poguru.Centre;
+        Color fire = GameManager.PoguruColour;
+        Sfx.Play(Sfx.LightningStrike, 1f, 0.7f);
+        Sfx.Play(Sfx.FireBlast, 1f, 0.8f);
+        CameraShake.Add(0.7f);
+        ElementFx.Glow(from, new Color(fire.r, fire.g, fire.b, 0.9f), 1f, 14f, 0.6f);
+        // The ring grows past the farthest samurai; whoever it passes falls.
+        var ring = new GameObject("PoguruRage").AddComponent<SpriteRenderer>();
+        ring.sprite = ProceduralSprites.Ring(48);
+        ring.sortingOrder = 45;
+        ring.transform.position = new Vector3(from.x, from.y, 0f);
+        float reach = 4f;
+        foreach (Samurai samurai in game.Army.Soldiers) reach = Mathf.Max(reach, Vector2.Distance(samurai.transform.position, from) + 1.5f);
+        const float Sweep = 0.9f;
+        float started = Time.time;
+        while (Time.time - started < Sweep)
+        {
+            float k = (Time.time - started) / Sweep;
+            float radius = Mathf.Lerp(0.3f, reach, 1f - (1f - k) * (1f - k));
+            ring.transform.localScale = Vector3.one * (radius * 2f / ring.sprite.bounds.size.x);
+            ring.color = Color.Lerp(new Color(1f, 1f, 1f, 1f), new Color(1f, 0.45f, 0.35f, 0f), k);
+            foreach (Samurai samurai in new List<Samurai>(game.Army.Soldiers))
+                if (Vector2.Distance(samurai.transform.position, from) <= radius) samurai.Kill(KillSource.Effect);
+            foreach (Arrow arrow in FindObjectsByType<Arrow>())
+                if (Vector2.Distance(arrow.transform.position, from) <= radius) arrow.Pop(fire);
+            yield return null;
+        }
+        Destroy(ring.gameObject);
+        foreach (Samurai samurai in new List<Samurai>(game.Army.Soldiers)) samurai.Kill(KillSource.Effect);
+        poguru.Anger = 0.7f;
+        ronin.ControlsEnabled = true;
     }
 
     void StopGuarding()
     {
         guarding = false;
-        if (dragonBreak != null) StopCoroutine(dragonBreak);
-        dragonBreak = null;
+        if (game.Army != null) game.Army.Holding -= OnHolding;
         game.Poguru.Blocked -= OnBlocked;
         game.Poguru.Guard(false);
     }
 
-    // Beat 4, as the army falls (still in play, so a hit counts). While he celebrates, a straggler runs in and shoots;
-    // the field holds still with the arrow at Oni until he parries it. Then a spear he can't stop goes through him and
-    // takes a life, and he hands over a heart to win it back. Without a life to spare the spear is left out.
+    // Beat 5, as the army falls (still in play, so the hit counts): he celebrates (or, if his rage did the work, yells
+    // at Oni), then a spear he can't stop goes through him and takes a life, and he hands over a heart to win it back.
+    // Without a life to spare the spear is left out.
     public IEnumerator SpearAndHeart()
     {
         if (!Active || spearDone) yield break;
         spearDone = true;
         StopGuarding();
+        Ronin ronin = game.Ronin;
         Poguru poguru = game.Poguru;
         poguru.Hover();
-        // Nothing else may hit him: only the lesson's shots count.
+        // Nothing else may hit him: only the spear's blow counts.
         foreach (Arrow arrow in FindObjectsByType<Arrow>()) arrow.Pop(Color.white);
-        yield return ParryLesson();
-        poguru.Hover();
+        if (raged)
+        {
+            Conversation scold = Dialogue.Find("Poguru_Tut_Raged");
+            for (int i = 0; i < scold.Lines.Length; i++)
+            {
+                bool oni = scold.Lines[i].Speaker == "Oni";
+                yield return Wait(game.SayLine(scold, i, Beside(oni ? ronin.Bounds.center : poguru.Centre)));
+            }
+        }
+        else
+        {
+            poguru.Play(game.PoguruClips.cheer, true);
+            yield return Wait(game.Bark("Poguru_Tut_Win") - 0.8f);
+        }
+        poguru.Anger = 0f;
+        ronin.ControlsEnabled = true;
+        ronin.Shielded = false;
         if (game.MaxLives < 2) yield break;
         game.EnsureLives(2);
-        yield return new WaitForSeconds(0.9f);
+        yield return new WaitForSeconds(0.6f);
 
-        Ronin ronin = game.Ronin;
         Camera cam = Camera.main;
         float half = cam.orthographicSize * cam.aspect;
         Vector3 centre = CameraShake.Center;
@@ -280,113 +623,7 @@ public class Tutorial : MonoBehaviour
         yield return Wait(game.Bark("Poguru_Tut_Collected"));
     }
 
-    // The straggler's shot. Poguru is busy with his victory wiggle, so it's Oni's to parry: once the arrow is in reach
-    // the field holds still, he yells, and only a parry lets it go on. A shot that's dodged or cut down is shot again.
-    IEnumerator ParryLesson()
-    {
-        Poguru poguru = game.Poguru;
-        Ronin ronin = game.Ronin;
-        Camera cam = Camera.main;
-        float half = cam.orthographicSize * cam.aspect;
-        Vector3 centre = CameraShake.Center;
-        poguru.Play(game.PoguruClips.cheer, true);
-        float cheering = game.Bark("Poguru_Tut_Win");
-        yield return new WaitForSeconds(0.8f);
-
-        // A little to one side of him, so the arrow comes in at an angle he can read.
-        float x = ronin.Bounds.center.x + (ronin.Bounds.center.x < centre.x ? 2.5f : -2.5f);
-        x = Mathf.Clamp(x, centre.x - half + 1.5f, centre.x + half - 1.5f);
-        Straggler straggler = Straggler.Spawn(game.FootSoldierArt, x, centre.y + cam.orthographicSize * 0.4f);
-        System.Func<Transform> aimed = ronin.RiposteTarget;
-        ronin.RiposteTarget = () => straggler != null && !straggler.Dead ? straggler.transform : null;
-        bool parried = false;
-        System.Action landed = () => parried = true;
-        ronin.Parried += landed;
-        yield return new WaitUntil(() => straggler == null || straggler.Standing);
-        yield return new WaitForSeconds(Mathf.Max(0.3f, cheering - 1.6f));
-
-        while (!parried && straggler != null && !straggler.Dead)
-        {
-            Arrow arrow = null;
-            yield return straggler.Shoot(game.ArrowPrefab, ronin.Bounds.center, shot => arrow = shot);
-            if (arrow == null) break;
-            float reach = ronin.ParryRadius + 0.7f;
-            while (arrow != null && Vector2.Distance(arrow.transform.position, ronin.Bounds.center) > reach) yield return null;
-            if (arrow == null)
-            {
-                yield return new WaitForSeconds(0.5f);
-                continue;
-            }
-
-            // Hold everything with the arrow in the air; only a parry press lets go.
-            game.HoldForLesson(true);
-            ronin.ControlsEnabled = false;
-            poguru.Play(game.PoguruClips.gasp, true);
-            // His yell is in the prompt, beside Oni on the far side from the arrow, so nothing hides the shot.
-            game.Bark("Poguru_Tut_Parry", false);
-            ShowParryPrompt(Dialogue.Find("Poguru_Tut_Parry", false), arrow.transform.position.x < ronin.Bounds.center.x);
-            parryPressed = false;
-            yield return new WaitUntil(() => parryPressed || ParryPressed());
-            HideParryPrompt();
-            ronin.ControlsEnabled = true;
-            game.HoldForLesson(false);
-            ronin.ParryNow();
-            float pressed = Time.time;
-            while (!parried && Time.time - pressed < 0.6f) yield return null;
-            if (!parried && arrow != null) arrow.Pop(Color.white);
-        }
-        ronin.Parried -= landed;
-
-        // His own arrow comes back for him; if cover took it instead, he falls all the same.
-        float flying = Time.time;
-        while (straggler != null && !straggler.Dead && Time.time - flying < 1.5f) yield return null;
-        if (straggler != null && !straggler.Dead) straggler.Fall();
-        ronin.RiposteTarget = aimed;
-        poguru.Play(game.PoguruClips.cheer, true);
-        yield return Wait(game.Bark("Poguru_Tut_Parried"));
-    }
-
-    // The same keys Ronin parries on.
-    static bool ParryPressed()
-    {
-        Keyboard keyboard = Keyboard.current;
-        Mouse mouse = Mouse.current;
-        return (keyboard != null && (keyboard.leftShiftKey.wasPressedThisFrame || keyboard.downArrowKey.wasPressedThisFrame))
-            || (mouse != null && mouse.rightButton.wasPressedThisFrame);
-    }
-
-    // Poguru's yell over the parry keys, hung beside Oni on the side the arrow isn't coming from.
-    void ShowParryPrompt(Conversation yell, bool onRight)
-    {
-        HideParryPrompt();
-        GameUI ui = game.Ui;
-        promptOnRight = onRight;
-        parryPrompt = GameUI.CreateText(ui.transform, ui.BodyFont, "ParryPrompt", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(700f, 120f),
-            34, onRight ? TextAlignmentOptions.Left : TextAlignmentOptions.Right);
-        parryPrompt.rectTransform.pivot = new Vector2(onRight ? 0f : 1f, 0.5f);
-        parryPrompt.textWrappingMode = TextWrappingModes.NoWrap;
-        string said = yell != null && yell.Lines.Length > 0 ? yell.Lines[0].Text : "PARRY IT!!";
-        parryPrompt.text = $"<color=#{ColorUtility.ToHtmlStringRGB(GameManager.PoguruColour)}>{said}</color>\n{Keys(BoonSlot.Parry)}";
-        ui.Style(parryPrompt, TextStyle.Hud);
-    }
-
-    bool promptOnRight;
-
-    void HideParryPrompt()
-    {
-        if (parryPrompt != null) Destroy(parryPrompt.gameObject);
-        parryPrompt = null;
-    }
-
-    // What each ability is pressed with, as key caps.
-    static string Keys(BoonSlot slot) => slot switch
-    {
-        BoonSlot.Attack => $"{MenuUI.KeyCap("SPACE", false)}  {MenuUI.KeyCap("LEFT CLICK", false)}",
-        BoonSlot.Special => $"{MenuUI.KeyCap("W", false)}  {MenuUI.KeyCap("↑", false)}",
-        _ => $"{MenuUI.KeyCap("SHIFT", false)}  {MenuUI.KeyCap("↓", false)}  {MenuUI.KeyCap("RIGHT CLICK", false)}",
-    };
-
-    // Beat 5: the round's soul hangs mid-field; he half-recognises it.
+    // Beat 6: the round's soul hangs mid-field; he half-recognises it.
     public IEnumerator RewardShown()
     {
         if (!Active || rewardDone) yield break;
@@ -396,7 +633,7 @@ public class Tutorial : MonoBehaviour
         yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Reward"), default);
     }
 
-    // Beat 6: over the first boon screen, lightly dimmed so the cards stay readable; nothing can be picked meanwhile.
+    // Beat 7: over the first boon screen, lightly dimmed so the cards stay readable; nothing can be picked meanwhile.
     public IEnumerator BoonsShown()
     {
         if (!Active || boonsDone) yield break;
@@ -407,7 +644,7 @@ public class Tutorial : MonoBehaviour
         game.BoonChoice.InputLocked = false;
     }
 
-    // Beat 7: the first paths.
+    // Beat 8: the first paths.
     public IEnumerator PathsShown()
     {
         if (!Active || pathsDone) yield break;
@@ -417,7 +654,7 @@ public class Tutorial : MonoBehaviour
         yield return game.PlayTalk(Dialogue.Find("Poguru_Tut_Paths"), new GameManager.TalkOptions { keepHud = true, dim = 0.3f });
     }
 
-    // Beat 8: round 2's army has marched in; he's satisfied and goes back in the wisp.
+    // Beat 9: round 2's army has marched in; he's satisfied and goes back in the wisp.
     public IEnumerator Finish()
     {
         if (!Active) yield break;
@@ -435,11 +672,13 @@ public class Tutorial : MonoBehaviour
         if (!Active && !guarding) return;
         Active = false;
         StopGuarding();
+        game.Ronin.Shielded = false;
+        game.Ronin.Allowed = Moves.All;
+        game.Poguru.Anger = 0f;
         game.BoonChoice.InputLocked = false;
-        RaiseSlots(false);
-        game.BoonChoice.DropSlots();
-        ClearPointer();
-        HideParryPrompt();
+        HideLesson();
+        foreach (TrainingSoldier soldier in soldiers) if (soldier != null) Destroy(soldier.gameObject);
+        soldiers.Clear();
         game.Poguru.ReturnToWisp();
     }
 
@@ -452,10 +691,6 @@ public class Tutorial : MonoBehaviour
         slotGlow.raycastTarget = false;
         slotGlow.rectTransform.pivot = new Vector2(0.5f, 0.5f);
         slotGlow.transform.SetAsFirstSibling();
-        keyLabel = GameUI.CreateText(layer, game.Ui.BodyFont, "PointerKeys", Vector2.zero, Vector2.zero, new Vector2(600f, 56f), 30, TextAlignmentOptions.Left);
-        keyLabel.rectTransform.pivot = new Vector2(0f, 0.5f);
-        keyLabel.textWrappingMode = TextWrappingModes.NoWrap;
-        game.Ui.Style(keyLabel, TextStyle.Hud);
         pointer = GameUI.CreateRect("PoguruPointer", layer, Vector2.zero, Vector2.zero, Vector2.one * PointerSize);
         pointer.pivot = new Vector2(0f, 0.5f);
         pointerImage = pointer.gameObject.AddComponent<Image>();
@@ -478,25 +713,28 @@ public class Tutorial : MonoBehaviour
             // Pivoted on its tip, which turns to face the slot.
             pointer.pivot = new Vector2(0.5f, 0f);
         }
-        Point(null);
+        PointAt(null, 0f);
     }
 
-    void Point(BoonSlot? slot)
+    void Point(BoonSlot slot)
     {
-        RectTransform rect = slot is BoonSlot s ? game.BoonChoice.SlotRect(s) : null;
-        PointAt(rect, rect != null ? rect.sizeDelta.x : 0f, slot is BoonSlot k ? Keys(k) : null);
+        RectTransform rect = game.BoonChoice.SlotRect(slot);
+        PointAt(rect, rect.sizeDelta.x, Keys(slot));
     }
 
-    void PointAt(RectTransform target, float width, string keys = null)
+    void PointAt(RectTransform target, float width, KeyGlyph[] keys = null)
     {
         pointedSlot = target;
         pointedWidth = width;
         if (pointer != null) pointer.gameObject.SetActive(pointedSlot != null);
         if (slotGlow != null) slotGlow.gameObject.SetActive(pointedSlot != null);
-        if (keyLabel != null)
+        if (keyRow != null) Destroy(keyRow.gameObject);
+        keyRow = null;
+        if (pointer != null && pointedSlot != null && keys != null)
         {
-            keyLabel.text = keys ?? "";
-            keyLabel.gameObject.SetActive(pointedSlot != null && keys != null);
+            keyRow = game.Ui.CreateKeyRow(pointer.parent, 30, keys);
+            keyRow.anchorMin = keyRow.anchorMax = Vector2.zero;
+            keyRow.pivot = new Vector2(0f, 0.5f);
         }
         if (pointedSlot != null) Sfx.Play(Sfx.UiMove, 0.5f, 1.4f);
     }
@@ -505,24 +743,24 @@ public class Tutorial : MonoBehaviour
     {
         if (pointer != null) Destroy(pointer.gameObject);
         if (slotGlow != null) Destroy(slotGlow.gameObject);
-        if (keyLabel != null) Destroy(keyLabel.gameObject);
-        keyLabel = null;
+        if (keyRow != null) Destroy(keyRow.gameObject);
+        keyRow = null;
         pointer = null;
         slotGlow = null;
         pointedSlot = null;
     }
 
-    // The pointer bobs toward the slot, its frames cycling, and the slot's glow pulses. Unscaled: the talk holds time.
+    // The pointer bobs toward the slot, its frames cycling, and the slot's glow pulses; the lesson's prompt rides
+    // beside Oni. Unscaled: lessons and talks hold time.
     void Update()
     {
-        // The parry prompt rides beside Oni and swells in time, held or not.
-        if (parryPrompt != null)
+        float now = Time.unscaledTime;
+        if (prompt != null)
         {
-            parryPrompt.rectTransform.anchoredPosition = game.Ui.CanvasPoint(game.Ronin.Bounds.center + Vector3.right * (promptOnRight ? 1.3f : -1.3f));
-            parryPrompt.rectTransform.localScale = Vector3.one * (1f + 0.06f * Mathf.Sin(Time.unscaledTime * 8f));
+            prompt.anchoredPosition = game.Ui.CanvasPoint(game.Ronin.Bounds.center + Vector3.right * (promptOnRight ? 1.3f : -1.3f));
+            prompt.localScale = Vector3.one * (1f + 0.04f * Mathf.Sin(now * 8f));
         }
         if (pointer == null || pointedSlot == null) return;
-        float now = Time.unscaledTime;
         // Both are anchored and pivoted at their bottom-left (the lives row at its left middle).
         Vector2 size = new Vector2(pointedWidth, pointedSlot.sizeDelta.y);
         Vector2 corner = pointedSlot.anchoredPosition - Vector2.Scale(pointedSlot.pivot, pointedSlot.sizeDelta);
@@ -530,7 +768,7 @@ public class Tutorial : MonoBehaviour
         float bob = Mathf.Abs(Mathf.Sin(now * 4f)) * 14f;
         pointer.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + bob, 0f);
         // The keys sit just past where the pointer reaches, still, so they read easily.
-        if (keyLabel != null) keyLabel.rectTransform.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + 14f + PointerSize + 16f, 0f);
+        if (keyRow != null) keyRow.anchoredPosition = middle + new Vector2(size.x / 2f + 18f + 14f + PointerSize + 16f, 0f);
         if (pointFrames != null) pointerImage.sprite = pointFrames[(int)(now * 8f) % pointFrames.Length];
         slotGlow.rectTransform.anchoredPosition = middle;
         Color glow = GameManager.PoguruColour;

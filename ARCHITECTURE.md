@@ -85,7 +85,8 @@ Title ─Start─▶ Choose a journey ─new slot (flute intro)─────�
   `MenuUI` page DO YOU REMEMBER? with TUTORIAL / SKIP, Esc skipping; TUTORIAL sets `tutorialReplay` so a death offers it
   again and sets `Ronin.Shielded` (no hit counts until the spear), SKIP settles it) → `Drills` (taken; before
   `blockers.Rebuild`, with the cover cleared so nothing blocks his blows: five `TrainingSoldier`s (`TrainingSoldier.cs`,
-  code-built `IHittable`s, `FootSoldierArt`/`SpearmanArt`) march in, their lines hung over them (`GameManager.SayLine`
+  code-built `IHittable`s, `FootSoldierArt`/`SpearmanArt`, each `Untouchable` until its own lesson so a wide slash can't
+  take the next ones early) march in, their lines hung over them (`GameManager.SayLine`
   with `beside`); an archer shoots down Oni's column, two chargers run at him in a file, a spearman throws a
   `SpearSprite` spear, and a coward trembles at the back. Each lesson is `Lesson(move, slot, yell, moment)`: at its
   moment `GameManager.HoldForLesson` stops time (`State.Dialogue`; it hands back whichever state it found), the HUD slots
@@ -481,7 +482,10 @@ give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's
   speaker's name (fading in and out, with an optional speaker portrait, used only on the title hill: `ShowSubtitle(…, portrait)` takes a
   `GameUI.SpeakerPortrait`, a close-up plus the point to centre on and the height to draw it, cropped into a framed
   night-dark window at the plate's left, or standing on the plate when it sits `beside` someone), boss intro (a null
-  `lineText` makes it a name reveal only, for a talk scene to follow). Talk scenes are `DialogueScene.cs`, built the
+  `lineText` makes it a name reveal only, for a talk scene to follow). `ShowSubtitleOver` hangs a line over whoever says
+  it in the field (narrow wrap, kept on screen, a point in their colour aimed at them; below their head near the top),
+  used through `GameManager.SayLine(…, over)` by Poguru's barks and the tutorial's soldiers, who bob as they speak
+  (`TrainingSoldier.Speak`). Talk scenes are `DialogueScene.cs`, built the
   same way from the shared parts below. Builds its pieces in code on the Canvas; `SetHudVisible` hides the HUD behind the
   title menu.
 - **Text styles:** `GameUI.Style(text, TextStyle)` gives text its font and a shared outline-and-shadow material

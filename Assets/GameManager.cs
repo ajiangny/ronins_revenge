@@ -3277,14 +3277,16 @@ public class GameManager : MonoBehaviour
     }
 
     // Unsubtitled when the words are shown elsewhere (the tutorial's parry prompt), so the plate covers nothing.
-    float SayAsPoguru(Conversation said, bool subtitled = true) => SayLine(said, 0, null, subtitled);
+    // Hung over him when he's out (his barks come as he pops from the wisp), so it's clear the line is his.
+    float SayAsPoguru(Conversation said, bool subtitled = true) =>
+        SayLine(said, 0, poguru.IsOut ? poguru.Centre + Vector3.up * 0.8f : (Vector3?)null, subtitled);
 
     // The tutorial's soldiers, in the dull red of the army's arrows.
     static readonly Color SoldierColour = new Color(0.9f, 0.45f, 0.4f);
 
-    // One line of a conversation said in the field, not in a scene: voiced when its clip is there and subtitled,
-    // hung `beside` a point (bottom-left canvas pixels) when given. Returns how long it takes to say.
-    public float SayLine(Conversation said, int line, Vector2? beside = null, bool subtitled = true)
+    // One line of a conversation said in the field, not in a scene: voiced when its clip is there and subtitled, hung
+    // over the speaker when `over` (the top of their head, in the world) is given. Returns how long it takes to say.
+    public float SayLine(Conversation said, int line, Vector3? over = null, bool subtitled = true)
     {
         if (said == null || line >= said.Lines.Length) return 0f;
         string speaker = said.Lines[line].Speaker;
@@ -3301,7 +3303,9 @@ public class GameManager : MonoBehaviour
             source.Play();
         }
         Color colour = speaker == "Poguru" ? PoguruColour : speaker == "Oni" ? OniColour : SoldierColour;
-        if (subtitled) ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, beside);
+        if (subtitled && over is Vector3 head)
+            ui.ShowSubtitleOver(speaker, text, colour, seconds + 0.6f, ui.CanvasPoint(head) + ((RectTransform)ui.transform).rect.size / 2f);
+        else if (subtitled) ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f);
         if (speaker == "Poguru") poguru.Talk(seconds);
         return seconds + 0.3f;
     }

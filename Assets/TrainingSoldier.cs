@@ -112,12 +112,19 @@ public class TrainingSoldier : MonoBehaviour, IHittable
         set { foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = !value && !Dead; }
     }
 
+    // He's the one talking: he bobs on the spot for as long as his line lasts, so it's clear which soldier speaks.
+    public void Speak(float seconds) => speakingUntil = Time.unscaledTime + seconds;
+    float speakingUntil;
+
     // The coward's quiver while he hangs back.
     public void Tremble(bool on) => trembling = on;
 
     void LateUpdate()
     {
-        if (sprite != null) sprite.transform.localPosition = trembling && !Dead ? new Vector3(Mathf.Sin(Time.time * 60f) * 0.03f, 0f, 0f) : Vector3.zero;
+        if (sprite == null) return;
+        Vector3 at = trembling && !Dead ? new Vector3(Mathf.Sin(Time.time * 60f) * 0.03f, 0f, 0f) : Vector3.zero;
+        if (Time.unscaledTime < speakingUntil && !Dead) at.y += Mathf.Abs(Mathf.Sin(Time.unscaledTime * 12f)) * 0.08f;
+        sprite.transform.localPosition = at;
     }
 
     // Runs off the top of the screen and is gone.

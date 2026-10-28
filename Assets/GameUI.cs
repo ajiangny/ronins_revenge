@@ -149,6 +149,8 @@ public class GameUI : MonoBehaviour
     CanvasGroup subtitleGroup;
     RectTransform portraitFrame;
     Image portraitEdge;
+    // The point under a subtitle hung over its speaker (ShowSubtitleOver), aimed at whoever's talking.
+    Image subtitleTail;
     Image portraitGlow;
     RectTransform portraitArt;
     Image portraitImage;
@@ -544,6 +546,49 @@ public class GameUI : MonoBehaviour
         // A new line fades in unless one is already up.
         if (!subtitlePlate.gameObject.activeSelf) subtitleGroup.alpha = 0f;
         subtitlePlate.gameObject.SetActive(true);
+        if (subtitleTail != null) subtitleTail.gameObject.SetActive(false);
+    }
+
+    // How wide a line hung over its speaker wraps, so it stays a compact bubble.
+    const float OverWrap = 620f;
+    const float TailSize = 24f;
+
+    // A subtitle hung over whoever says it in the field (`head`: the top of their head, in canvas pixels from the
+    // bottom-left), with a point in their colour aimed down at them, so it's clear who's talking. It wraps narrow and is
+    // kept wholly on screen; near the top it hangs below the head instead.
+    public void ShowSubtitleOver(string speaker, string text, Color colour, float seconds, Vector2 head)
+    {
+        ShowSubtitle(speaker, text, colour, seconds);
+        Vector2 size = subtitle.GetPreferredValues(text, OverWrap, 0f);
+        size = new Vector2(Mathf.Min(size.x, OverWrap) + 64f, size.y + 28f);
+        subtitlePlate.sizeDelta = size;
+        subtitle.rectTransform.sizeDelta = size;
+        Vector2 canvas = ((RectTransform)transform).rect.size;
+        // The speaker's name stands this far over the plate.
+        const float NameRoom = 64f, Margin = 24f;
+        bool below = head.y + TailSize + size.y + NameRoom > canvas.y - Margin;
+        float x = Mathf.Clamp(head.x, size.x / 2f + Margin, canvas.x - size.x / 2f - Margin);
+        float y = below ? head.y - 90f - TailSize : head.y + TailSize;
+        y = below ? Mathf.Max(y, size.y + Margin) : Mathf.Clamp(y, Margin, canvas.y - size.y - NameRoom);
+        subtitlePlate.anchorMin = subtitlePlate.anchorMax = Vector2.zero;
+        subtitlePlate.pivot = new Vector2(0.5f, below ? 1f : 0f);
+        subtitlePlate.anchoredPosition = new Vector2(x, y);
+
+        if (subtitleTail == null)
+        {
+            subtitleTail = CreateRect("Tail", subtitlePlate, Vector2.zero, Vector2.zero, Vector2.one * TailSize).gameObject.AddComponent<Image>();
+            subtitleTail.sprite = ProceduralSprites.ArrowDown;
+            subtitleTail.raycastTarget = false;
+        }
+        subtitleTail.gameObject.SetActive(true);
+        RectTransform tail = subtitleTail.rectTransform;
+        // Under the plate pointing down at him, or over it pointing up when it hangs below.
+        tail.anchorMin = tail.anchorMax = new Vector2(0f, below ? 1f : 0f);
+        // Pivoted on its top edge: hanging below the plate it points down; turned over, it stands on the plate pointing up.
+        tail.pivot = new Vector2(0.5f, 1f);
+        tail.localRotation = Quaternion.Euler(0f, 0f, below ? 180f : 0f);
+        tail.anchoredPosition = new Vector2(Mathf.Clamp(head.x - (x - size.x / 2f), TailSize, size.x - TailSize), 0f);
+        subtitleTail.color = colour;
     }
 
     void FramePortrait(SpeakerPortrait portrait, Color colour)

@@ -113,13 +113,13 @@ public class Tutorial : MonoBehaviour
             // A death before the end offers it again.
             Save.Data.tutorialReplay = true;
             Save.Write();
-            yield return Wait(game.Bark("Poguru_Tut_Yay"));
+            yield return Wait(PoguruSays("Poguru_Tut_Yay"));
             poguru.Hover();
         }
         else
         {
             Settle();
-            yield return Wait(game.Bark("Poguru_Tut_Skip"));
+            yield return Wait(PoguruSays("Poguru_Tut_Skip"));
             poguru.ReturnToWisp();
         }
     }
@@ -135,16 +135,17 @@ public class Tutorial : MonoBehaviour
         float top = centre.y + cam.orthographicSize + 1.5f;
         // Their line, well above the cover, and the coward a step behind it.
         float line = centre.y + cam.orthographicSize * 0.3f;
-        float x = ronin.Bounds.center.x;
         Moves learned = Moves.None;
         ronin.Allowed = Moves.None;
         ronin.ControlsEnabled = false;
 
-        TrainingSoldier archer = Recruit(TrainingSoldier.Kind.Archer, game.FootSoldierArt, new Vector3(x - 3f, top), new Vector3(x - 3f, line));
-        TrainingSoldier front = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(x - 1f, top), new Vector3(x - 1f, line));
-        TrainingSoldier back = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(x + 1f, top), new Vector3(x + 1f, line));
-        TrainingSoldier spearman = Recruit(TrainingSoldier.Kind.Spearman, game.SpearmanArt, new Vector3(x + 3f, top), new Vector3(x + 3f, line));
-        TrainingSoldier coward = Recruit(TrainingSoldier.Kind.Coward, game.FootSoldierArt, new Vector3(x + 5f, top), new Vector3(x + 5f, line + 1.6f));
+        // Spread across the road, so each one's lines and lesson read on their own.
+        float c = centre.x;
+        TrainingSoldier archer = Recruit(TrainingSoldier.Kind.Archer, game.FootSoldierArt, new Vector3(c - 5f, top), new Vector3(c - 5f, line));
+        TrainingSoldier front = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(c - 2f, top), new Vector3(c - 2f, line));
+        TrainingSoldier back = Recruit(TrainingSoldier.Kind.Charger, game.FootSoldierArt, new Vector3(c + 0.5f, top), new Vector3(c + 0.5f, line));
+        TrainingSoldier spearman = Recruit(TrainingSoldier.Kind.Spearman, game.SpearmanArt, new Vector3(c + 3.5f, top), new Vector3(c + 3.5f, line));
+        TrainingSoldier coward = Recruit(TrainingSoldier.Kind.Coward, game.FootSoldierArt, new Vector3(c + 6f, top), new Vector3(c + 6f, line + 1.6f));
         Sfx.Play(Sfx.MarchStep);
         yield return new WaitUntil(() => soldiers.TrueForAll(s => s == null || !s.Moving));
         coward.Tremble(true);
@@ -157,6 +158,8 @@ public class Tutorial : MonoBehaviour
         // the arrow; then he's to cut the archer down, who keeps shooting (and Poguru bonking) till he falls.
         archer.MoveTo(new Vector3(ronin.Bounds.center.x, line));
         yield return new WaitUntil(() => !archer.Moving);
+        // Only the soldier of the lesson at hand can be hit: a wide slash mustn't take the chargers early.
+        archer.Untouchable = false;
         yield return Line("Tut_Slash_Taunt", 0, archer);
         Arrow arrow = null;
         Vector3 archerAt = archer.transform.position;
@@ -165,7 +168,7 @@ public class Tutorial : MonoBehaviour
         yield return Lesson(Moves.Slash, BoonSlot.Attack, "Poguru_Tut_SlashIt", () => arrow == null || arrow.transform.position.y < midway, archerAt.x);
         learned |= Moves.Slash;
         ronin.Allowed = learned;
-        yield return Wait(game.Bark("Poguru_Tut_TakeHim") - 0.6f);
+        yield return Wait(PoguruSays("Poguru_Tut_TakeHim") - 0.6f);
         ronin.ControlsEnabled = true;
         poguru.Guard(true);
         Vector3 fell = archerAt;
@@ -182,13 +185,14 @@ public class Tutorial : MonoBehaviour
         }
         poguru.Guard(false);
         ronin.ControlsEnabled = false;
-        game.SayLine(Dialogue.Find("Tut_Slash_Fall", false), 0, Beside(fell));
+        game.SayLine(Dialogue.Find("Tut_Slash_Fall", false), 0, Beside(fell + Vector3.up * SoldierHead));
         yield return new WaitForSeconds(1.4f);
 
         // The shuriken: the chargers line up in Oni's column, one behind the other, and run at him. Held while
         // they're still well up the field, one shuriken goes through both. One that gets through is bonked back up
         // by Poguru and they come again.
         yield return Line("Tut_Charge_Taunt", 0, front);
+        front.Untouchable = back.Untouchable = false;
         bool charged = false;
         while (!charged)
         {
@@ -216,7 +220,7 @@ public class Tutorial : MonoBehaviour
             if (front.Dead) front = back;
             if (back.Dead) back = front;
         }
-        yield return Wait(game.Bark("Poguru_Tut_Stopped"));
+        yield return Wait(PoguruSays("Poguru_Tut_Stopped"));
 
         // The parry: the spearman throws a cursed yari, unbreakable, that only a parry turns. His riposte skims past
         // the spearman's head on purpose, so he lives to run.
@@ -254,14 +258,14 @@ public class Tutorial : MonoBehaviour
         float said = 0f;
         if (spearman != null && !spearman.Dead)
         {
-            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 0, Beside(spearman.transform.position));
+            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 0, Beside(spearman.transform.position + Vector3.up * SoldierHead));
             spearman.Flee();
             yield return new WaitForSeconds(Mathf.Min(said, 1.2f));
         }
         if (coward != null && !coward.Dead)
         {
             coward.Tremble(false);
-            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 1, Beside(coward.transform.position));
+            said = game.SayLine(Dialogue.Find("Tut_Flee", false), 1, Beside(coward.transform.position + Vector3.up * SoldierHead));
             coward.Flee(9f);
         }
         yield return Wait(said);
@@ -274,6 +278,7 @@ public class Tutorial : MonoBehaviour
     TrainingSoldier Recruit(TrainingSoldier.Kind kind, CharacterArt art, Vector3 from, Vector3 to)
     {
         TrainingSoldier soldier = TrainingSoldier.Spawn(art, kind, from);
+        soldier.Untouchable = true;
         soldier.MoveTo(to);
         soldiers.Add(soldier);
         return soldier;
@@ -282,19 +287,20 @@ public class Tutorial : MonoBehaviour
     // One line in the field, hung over whoever says it (a soldier, or a point: Oni, Poguru), and its length waited.
     IEnumerator Line(string id, int line, TrainingSoldier over, Vector3? at = null)
     {
-        Vector3 point = over != null ? over.transform.position : at ?? CameraShake.Center;
-        yield return Wait(game.SayLine(Dialogue.Find(id, false), line, Beside(point)));
+        // A soldier's head stands higher than his middle, and he bobs while he talks.
+        Vector3 point = over != null ? over.transform.position + Vector3.up * SoldierHead : at ?? CameraShake.Center;
+        float said = game.SayLine(Dialogue.Find(id, false), line, Beside(point));
+        if (over != null) over.Speak(said);
+        yield return Wait(said);
     }
 
-    // Where a subtitle plate starts (its bottom-left, in canvas pixels from the bottom-left) to sit over a point.
-    Vector2 Beside(Vector3 world)
-    {
-        RectTransform canvas = (RectTransform)game.Ui.transform;
-        Vector2 at = game.Ui.CanvasPoint(world + Vector3.up * 0.9f) + canvas.rect.size / 2f + new Vector2(-200f, 0f);
-        // Kept on screen, with room for a long line.
-        at.x = Mathf.Clamp(at.x, 30f, canvas.rect.width - 760f);
-        return at;
-    }
+    // One of Poguru's lines, hung over him (not across the bottom of the screen, where he hovers by Oni).
+    float PoguruSays(string id) => game.SayLine(Dialogue.Find(id, false), 0, Beside(game.Poguru.Centre));
+
+    const float SoldierHead = 0.35f;
+
+    // The top of the head of whoever stands at this point (a soldier, Oni, Poguru), where his line hangs.
+    static Vector3 Beside(Vector3 world) => world + Vector3.up * 0.8f;
 
     // A held lesson: once `moment` comes the field stops, Poguru's yell and the move's keys hang beside Oni (on the
     // side away from the shot, `threatX`), he points at the move's slot, and only that move lets play go on, fired by
@@ -541,7 +547,7 @@ public class Tutorial : MonoBehaviour
         else
         {
             poguru.Play(game.PoguruClips.cheer, true);
-            yield return Wait(game.Bark("Poguru_Tut_Win") - 0.8f);
+            yield return Wait(PoguruSays("Poguru_Tut_Win") - 0.8f);
         }
         poguru.Anger = 0f;
         ronin.ControlsEnabled = true;
@@ -562,7 +568,7 @@ public class Tutorial : MonoBehaviour
         Vector3 block = Vector3.Lerp(ronin.Bounds.center, from, 0.3f);
         poguru.DashTo(new Vector3(block.x, block.y, 0f), null, 20f);
         poguru.Play(game.PoguruClips.gasp, true);
-        game.Bark("Poguru_Tut_LookOut");
+        PoguruSays("Poguru_Tut_LookOut");
         Time.timeScale = SlowMotion;
         float slowUntil = Time.unscaledTime + 1.1f;
         float launched = Time.time;
@@ -615,12 +621,12 @@ public class Tutorial : MonoBehaviour
         while (!there && Time.time - flying < 3f) yield return null;
         Heart heart = game.SpawnHeart(spot);
         poguru.Play(game.PoguruClips.point, true);
-        game.Bark("Poguru_Tut_Collect");
+        PoguruSays("Poguru_Tut_Collect");
         // A heart he can't use (lives somehow full) waits on his row for the round's end instead of holding the lesson.
         yield return new WaitUntil(() => heart == null || game.Lives >= game.MaxLives);
         poguru.Hover();
         poguru.Play(game.PoguruClips.cheer);
-        yield return Wait(game.Bark("Poguru_Tut_Collected"));
+        yield return Wait(PoguruSays("Poguru_Tut_Collected"));
     }
 
     // Beat 6: the round's soul hangs mid-field; he half-recognises it.

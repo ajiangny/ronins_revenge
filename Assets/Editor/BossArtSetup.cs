@@ -113,7 +113,7 @@ public static class BossArtSetup
             SetFrames(so.FindProperty("utsusemiUnarmedIdle"), TryFrames("Utsusemi", "UnarmedIdle"));
         }
         so.FindProperty("utsusemiPhaseArt").objectReferenceValue = utsusemiPhase;
-        foreach (string clip in new[] { "BareIdle", "UnarmedIdle", "Dash", "Chop", "HourSlash", "SwordThrow", "Stop" })
+        foreach (string clip in new[] { "BareIdle", "UnarmedIdle", "Dash", "Chop", "HourSlash", "SwordThrow", "Stop", "HyperCharge" })
         {
             SetFrames(so.FindProperty("utsusemiPhase" + clip), utsusemiPhase == null ? null : TryFrames("UtsusemiPhase2", clip));
         }

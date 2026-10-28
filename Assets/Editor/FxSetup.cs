@@ -82,6 +82,8 @@ public static class FxSetup
         (Fx.UtsuPlumbPortal, 10, true, Centre),
         (Fx.UtsuLaceP2, 8, true, Centre),
         (Fx.UtsuEscapeWheel, 1, true, Centre),
+        // The rocks stand on their base line, like the blockers they're cut from.
+        (Fx.UtsuRock, 1, true, new Vector2(0.5f, 0f)),
         (Fx.ShiroCrescent, 14, true, Centre),
         (Fx.ShiroSword, 10, true, Centre),
         (Fx.ShiroOrb, 12, true, Centre),

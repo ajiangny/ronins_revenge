@@ -19,7 +19,7 @@ public class Utsusemi : Boss
     static readonly Color GhostBlue = new Color(0.4f, 0.62f, 1f);
     static readonly Color GhostGold = new Color(1f, 0.8f, 0.35f);
 
-    enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight, Escapement, StoppedHour }
+    enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight, Escapement, StoppedHour, HyperBeam }
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
     float Recovery => secondPhase ? 0.35f : 0.7f;
@@ -74,6 +74,13 @@ public class Utsusemi : Boss
     Sprite[] phaseBareIdle, phaseUnarmedIdle, phaseDash, phaseChop, phaseSlash, phaseSwordThrow;
     // Its raised burning fist as it stops time (phase 2 only); without it, the throw clip stands in.
     Sprite[] stopFrames;
+    // Its Hyper Beam wind-up (phase 2 only): arms flung back as its core swells; without it, its attack pose.
+    Sprite[] hyperChargeFrames;
+
+    public void SetHyperCharge(Sprite[] frames)
+    {
+        hyperChargeFrames = frames != null && frames.Length > 1 ? frames : null;
+    }
 
     public void SetPhaseFrames(Sprite[] bare, Sprite[] unarmed, Sprite[] dash, Sprite[] chop, Sprite[] slash, Sprite[] swordThrow, Sprite[] stop)
     {
@@ -155,6 +162,8 @@ public class Utsusemi : Boss
         armored = false;
         // A fight restarted mid-Stopped Hour lets time run again (the ronin too) and bursts the cleaves it had hung.
         ClearStoppedTime();
+        // Poguru goes back in the wisp if a stagger cut the move he was warning about short.
+        RestPoguru();
         // A fight restarted mid-laser (a stagger) clears the planted sword with the attack: it's back in hand.
         if (swordOut)
         {
@@ -166,6 +175,16 @@ public class Utsusemi : Boss
         while (true)
         {
             while (breaking) yield return null;
+            // Fresh out of its phase break, with the rocks it shook loose still lying in the row: the Hyper Beam
+            // comes first, without the overload (the break was it).
+            if (hyperNext)
+            {
+                hyperNext = false;
+                lastLaser = Move.HyperBeam;
+                movesSinceLaser = 0;
+                yield return HyperBeam(false);
+                continue;
+            }
             // Winding: it stands still for a beat between combos. This is the opening.
             yield return Wait(Recovery);
 
@@ -191,7 +210,7 @@ public class Utsusemi : Boss
                 Move move = NextMove(hourStruck);
                 // A short shuffle to a new spot before a move, not a long walk: the lasers walk to the centre
                 // themselves, and a combo's follow-ups often go straight in.
-                bool laser = move == Move.HeartLantern || move == Move.Midnight || move == Move.StoppedHour;
+                bool laser = move == Move.HeartLantern || move == Move.Midnight || move == Move.StoppedHour || move == Move.HyperBeam;
                 if (!laser && (i == 0 || Random.value < 0.5f))
                 {
                     yield return Stride(NearX(1.8f, 3.6f));
@@ -213,6 +232,7 @@ public class Utsusemi : Boss
                     case Move.Midnight: yield return Midnight(); break;
                     case Move.Escapement: yield return Escapement(); break;
                     case Move.StoppedHour: yield return StoppedHour(); break;
+                    case Move.HyperBeam: yield return HyperBeam(true); break;
                 }
             }
         }
@@ -220,7 +240,7 @@ public class Utsusemi : Boss
 
     // Never the same move twice in a row; the Hour Strikes come at most once a combo but at least every third move,
     // so the parry rhythm stays part of the fight. No new hat while one is still out. Once its core opens, the laser
-    // moves (the Heart Lantern, Midnight and the Stopped Hour) take over: one at least every third move and often
+    // moves (the Heart Lantern, Midnight, the Stopped Hour and the Hyper Beam) take over: one at least every third move and often
     // sooner, never the same one twice running, so the order can't be counted off.
     Move NextMove(bool hourStruck)
     {
@@ -234,7 +254,7 @@ public class Utsusemi : Boss
         }
         if (secondPhase && (movesSinceLaser >= 2 || (movesSinceLaser == 1 && Random.value < 0.5f)))
         {
-            var lasers = new List<Move> { Move.HeartLantern, Move.Midnight, Move.StoppedHour };
+            var lasers = new List<Move> { Move.HeartLantern, Move.Midnight, Move.StoppedHour, Move.HyperBeam };
             if (lastLaser is Move previous) lasers.Remove(previous);
             return lasers[Random.Range(0, lasers.Count)];
         }
@@ -299,6 +319,7 @@ public class Utsusemi : Boss
         // The beam runs along the foot of the row, where the blockers stand: their wall's own height.
         Transform wall = cover[0].transform.parent;
         float rowY = wall != null ? wall.position.y : cover[0].transform.position.y;
+        coverRowY = rowY;
         ElementFx.Glow(Eye, CoreRed, 1.2f, 3.5f, 0.8f, transform);
         Sfx.Play(Sfx.LanternCharge, 0.8f, 1.25f);
         for (int i = 0; i < 3; i++)
@@ -1562,7 +1583,7 @@ public class Utsusemi : Boss
         float dir = Random.value < 0.5f ? 1f : -1f;
         float from = dir > 0 ? LeftEdge + 0.5f : RightEdge - 0.5f;
         float to = dir > 0 ? RightEdge - 0.5f : LeftEdge + 0.5f;
-        ShowShelter(() => new[] { new ShelterSweep(Core, Mathf.Min(from, to), Mathf.Max(from, to)) });
+        WarnSword("Poguru_Utsu_Sword");
         yield return Charge();
 
         // A faint guide line runs the sweep first, so the ronin knows which way to run for cover.
@@ -1592,7 +1613,6 @@ public class Utsusemi : Boss
         yield return SweepBeam(beam, to, from, 0.5f);
         EndBeam(beam);
         Sfx.Stop(Sfx.LanternBeam);
-        HideShelter();
         yield return ReclaimSword();
     }
 
@@ -1763,11 +1783,14 @@ public class Utsusemi : Boss
         if (plantedSword == null)
         {
             swordOut = false;
+            RestPoguru();
             PlayIdle();
             yield break;
         }
         Vector3 row = anchor;
         float x = plantedSword.transform.position.x;
+        // Poguru, who was pointing at the sword, flies back to Oni yelling to get clear: it's coming down on it.
+        CallPoguru("Poguru_Utsu_Reclaim", null);
         ElementFx.Glow(plantedSword.transform.position, Color.white, 0.9f, 2.5f, 0.4f);
         Sfx.Play(Sfx.ParryClang, 0.5f, 1.6f);
         Tick(0.9f);
@@ -1784,6 +1807,7 @@ public class Utsusemi : Boss
         plantedSword = null;
         swordOut = false;
         yield return Chop(x, mark);
+        RestPoguru();
         yield return Dash(row);
         PlayIdle();
     }
@@ -1836,11 +1860,7 @@ public class Utsusemi : Boss
         float leftEdge = LeftEdge + 0.3f, rightEdge = RightEdge - 0.3f;
         // The hands stop this far either side of the sword: the gap they leave is the safe spot.
         const float gap = 1.1f;
-        ShowShelter(() => new[]
-        {
-            new ShelterSweep(Eye, leftEdge, markX - gap),
-            new ShelterSweep(Core, markX + gap, rightEdge),
-        });
+        WarnSword("Poguru_Utsu_Sword");
         for (int strike = 0; strike < strikes; strike++)
         {
             // Close: slow at first, quickening as they near twelve.
@@ -1876,85 +1896,43 @@ public class Utsusemi : Boss
             // Another hour to strike: the sword comes back and goes out again while the hands wait at the edges.
             if (strike + 1 < strikes)
             {
-                HideShelter();
+                // Poguru comes back to Oni while the sword flies, and over to it again once it lands.
+                CallPoguru(null, null);
                 yield return HoldingHands(RecallSword(), left, right, leftEdge, rightEdge);
                 yield return HoldingHands(ThrowSword(AtRonin(3f), strike + 2), left, right, leftEdge, rightEdge);
                 if (plantedSword != null) markX = plantedSword.transform.position.x;
-                ShowShelter(() => new[]
-                {
-                    new ShelterSweep(Eye, leftEdge, markX - gap),
-                    new ShelterSweep(Core, markX + gap, rightEdge),
-                });
+                WarnSword(null);
             }
         }
-        HideShelter();
         EndBeam(left);
         EndBeam(right);
         Sfx.Stop(Sfx.LanternBeam);
         yield return ReclaimSword();
     }
 
-    // The sword's shelter, marked on the ground from the moment the sword plants until the laser is over: the stretch of
-    // the ronin's row that every ray of the coming laser hits the sword before reaching his height, worked out from
-    // the beams themselves so it's exactly where he's safe, and marked with a SafeZone, brightening while the laser fires.
-    readonly struct ShelterSweep
+    // Once the sword plants, Poguru flies out of the wisp yelling to hide behind it and hovers over it until the laser is
+    // over; that is the shelter's only marker. A line of null just moves him over the sword (Midnight's second throw).
+    void WarnSword(string line)
     {
-        public readonly Vector3 from;
-        public readonly float lo, hi;
-        public ShelterSweep(Vector3 from, float lo, float hi)
-        {
-            this.from = from;
-            this.lo = lo;
-            this.hi = hi;
-        }
+        if (plantedSword == null) return;
+        Vector3 top = plantedSword.transform.position + Vector3.up * (SwordCoverHeight / 2f + 0.7f);
+        CallPoguru(line, top);
     }
 
-    // The shelter is sampled at this step along the row, and a beam this close to the ronin's middle still hits him.
-    const float ShelterStep = 0.05f, BeamReach = 0.45f;
-    Coroutine shelter;
-    SafeZone shelterZone;
+    // Whether this fight has Poguru out of the wisp, so he's only sent back when it called him.
+    bool poguruOut;
 
-    void ShowShelter(System.Func<ShelterSweep[]> sweeps)
+    void CallPoguru(string line, Vector3? over)
     {
-        HideShelter();
-        shelter = StartCoroutine(Shelter(sweeps));
+        poguruOut = true;
+        PoguruWarn?.Invoke(line, over);
     }
 
-    void HideShelter()
+    void RestPoguru()
     {
-        if (shelter != null) StopCoroutine(shelter);
-        shelter = null;
-        if (shelterZone != null)
-        {
-            transient.Remove(shelterZone.gameObject);
-            shelterZone.Dismiss(0.25f);
-        }
-        shelterZone = null;
-    }
-
-    IEnumerator Shelter(System.Func<ShelterSweep[]> sweeps)
-    {
-        float rowY = ronin.Bounds.center.y, floorY = GroundY + 0.15f;
-        shelterZone = SafeZone.Create();
-        transient.Add(shelterZone.gameObject);
-        ElementFx.Glow(new Vector3(plantedSword != null ? plantedSword.transform.position.x : ronin.Bounds.center.x, floorY + 0.5f, 0),
-            SafeZone.Colour, 0.6f, 2.5f, 0.4f);
-        Sfx.Play(Sfx.SoulCollect, 0.5f, 1.3f);
-
-        float nextSample = 0;
-        for (float age = 0; plantedSword != null && shelterZone != null; age += Time.deltaTime)
-        {
-            if (age >= nextSample)
-            {
-                nextSample = age + 0.2f;
-                bool found = ShelterSpan(sweeps(), rowY, plantedSword.transform.position.x, out float lo, out float hi);
-                if (found) shelterZone.Place(lo, hi, floorY);
-                // Brighter while a laser is burning; gone if there's nowhere to hide.
-                shelterZone.Strength = found ? (beams.Count > 0 ? 1f : 0.65f) : 0f;
-            }
-            yield return null;
-        }
-        HideShelter();
+        if (!poguruOut) return;
+        poguruOut = false;
+        PoguruRest?.Invoke();
     }
 
     // A beam that crosses the ronin's height burns him, unless he stands within the planted sword's ward: the whole
@@ -1966,53 +1944,6 @@ public class Utsusemi : Boss
     }
 
     bool InSwordWard(float x) => plantedSword != null && Mathf.Abs(x - plantedSword.transform.position.x) <= SwordCoverWidth / 2f;
-
-    // The stretch of the row nearest the sword that none of the sweeps' unblocked rays come within reach of.
-    bool ShelterSpan(ShelterSweep[] sweeps, float rowY, float swordX, out float lo, out float hi)
-    {
-        float left = LeftEdge, right = RightEdge;
-        int cells = Mathf.CeilToInt((right - left) / ShelterStep) + 1;
-        var danger = new bool[cells];
-        foreach (ShelterSweep sweep in sweeps)
-        {
-            for (float x = sweep.lo; x <= sweep.hi; x += ShelterStep)
-            {
-                Vector3 end = BeamEnd(sweep.from, x, out _);
-                // Stopped above his head: this ray can't reach him.
-                if (end.y > rowY + 0.2f || sweep.from.y - end.y < 0.01f) continue;
-                float crossX = sweep.from.x + (end.x - sweep.from.x) * (sweep.from.y - rowY) / (sweep.from.y - end.y);
-                int a = Mathf.Max(0, Mathf.FloorToInt((crossX - BeamReach - left) / ShelterStep));
-                int b = Mathf.Min(cells - 1, Mathf.CeilToInt((crossX + BeamReach - left) / ShelterStep));
-                for (int i = a; i <= b; i++) danger[i] = true;
-            }
-        }
-        // The sword's ward is safe ground whatever the rays do.
-        for (int i = 0; i < cells; i++)
-        {
-            if (InSwordWard(left + i * ShelterStep)) danger[i] = false;
-        }
-        // The safe run closest to the sword.
-        lo = hi = swordX;
-        float best = float.MaxValue;
-        bool found = false;
-        for (int i = 0; i < cells; i++)
-        {
-            if (danger[i]) continue;
-            int j = i;
-            while (j + 1 < cells && !danger[j + 1]) j++;
-            float runLo = left + i * ShelterStep, runHi = left + j * ShelterStep;
-            float distance = swordX < runLo ? runLo - swordX : swordX > runHi ? swordX - runHi : 0f;
-            if (runHi - runLo >= 0.3f && distance < best)
-            {
-                best = distance;
-                lo = runLo;
-                hi = runHi;
-                found = true;
-            }
-            i = j;
-        }
-        return found;
-    }
 
     // Runs a step of the attack (and everything it waits on) while both hands keep burning at the given spots.
     IEnumerator HoldingHands(IEnumerator step, Beam left, Beam right, float leftX, float rightX)
@@ -2081,6 +2012,8 @@ public class Utsusemi : Boss
         public float nextFire, nextBurn, nextSpark, lastFireX;
         // Fired from the slit-eye rather than the core.
         public bool fromEye;
+        // How many times its usual breadth it's drawn (the Hyper Beam's is several).
+        public float width = 1f;
     }
 
     Beam MakeBeam() => MakeBeam(Core, 1.6f);
@@ -2137,14 +2070,14 @@ public class Utsusemi : Boss
         float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
         // The molten beam thrashes: its width jumps about every frame on top of the flicker.
         if (beam.molten) flicker *= Random.Range(0.85f, 1.2f);
-        Stretch(beam.glow, from, to, (beam.molten ? 2f : 1.6f) * flicker);
+        Stretch(beam.glow, from, to, (beam.molten ? 2f : 1.6f) * flicker * beam.width);
         beam.glow.color = flash ? new Color(1f, 1f, 1f, 0.5f) : new Color(beam.colour.r, beam.colour.g, beam.colour.b, 0.35f);
         if (beam.art != null)
         {
             beam.body.sprite = beam.art[(int)(Time.time * BeamFps) % beam.art.Length];
             // Flipped now and then, so the molten plasma never settles into a pattern.
             if (beam.molten && Random.value < 0.15f) beam.body.flipY = !beam.body.flipY;
-            LayTiled(beam.body, from, to, (beam.molten ? 0.95f : 0.7f) * flicker * (flash ? 1.3f : 1f));
+            LayTiled(beam.body, from, to, (beam.molten ? 0.95f : 0.7f) * flicker * (flash ? 1.3f : 1f) * beam.width);
             if (beam.molten && Time.time >= beam.nextSpark)
             {
                 // Embers spit off its length.
@@ -2155,8 +2088,8 @@ public class Utsusemi : Boss
         }
         else
         {
-            Stretch(beam.body, from, to, 0.42f * flicker);
-            Stretch(beam.core, from, to, 0.14f);
+            Stretch(beam.body, from, to, 0.42f * flicker * beam.width);
+            Stretch(beam.core, from, to, 0.14f * beam.width);
             beam.body.color = flash ? Color.white : new Color(CoreRed.r, CoreRed.g, CoreRed.b, 0.9f);
         }
         if (beam.hit != null) beam.hit.transform.position = to + Vector3.back * 0.3f;
@@ -2224,6 +2157,394 @@ public class Utsusemi : Boss
 
     Vector3 BeamEnd(Vector3 from, float x, out Blocker cover) => BeamEnd(from, new Vector3(x, GroundY, 0), out cover);
 
+    // The height of the cover row its entrance razed, where the rocks it shakes loose come to rest; just above the
+    // ronin's head if the entrance never measured it.
+    float coverRowY = float.NaN;
+    float CoverRowY => float.IsNaN(coverRowY) ? ronin.TopY + 0.8f : coverRowY;
+
+    // A rock lying in the cover row. Blows only flash off it; only the Hyper Beam breaks it, and only once the whole
+    // beam has passed it.
+    class Rock
+    {
+        public Blocker cover;
+        public SpriteRenderer look;
+        public Sprite[] states;
+        public float halfWidth, height, heat;
+        public bool scorched;
+    }
+    readonly List<Rock> rocks = new List<Rock>();
+    // Set by the phase break: the Hyper Beam opens the second phase.
+    bool hyperNext;
+
+    // How tall a rock that stays stands, how many can lie in the row at once, and how far apart they come to rest.
+    const float RockHeight = 1.5f;
+    const int MaxRocks = 3;
+    const float RockSpacing = 3.5f;
+    // How long the move's overload shakes the hall and rains rocks.
+    const float RockfallSeconds = 2.6f;
+    // The Hyper Beam: its wind-up, its sweep from edge to edge, how many times a laser's breadth it's drawn, and how
+    // far either side of where its middle crosses the ronin's height it burns.
+    const float HyperChargeSeconds = 2.2f, HyperSweepSeconds = 3f, HyperWidth = 3.2f, HyperReach = 1.1f;
+
+    // The Hyper Beam (second phase only). In super armour it overloads as at its phase break, lasers firing wild from
+    // its eye and core (these ones burn) while the hall shakes and rocks rain down, one or two coming to rest in the
+    // cover row. The armour drops, Poguru yells to get behind a rock and hovers in its shade, and it winds up a vast
+    // beam that sweeps the field from one edge to the other. Only a rock saves the ronin: the beam can't get through
+    // one, and a rock it burns crumbles only once the whole beam has passed it. Straight after the phase break it skips
+    // the overload: the break shook the rocks down already.
+    IEnumerator HyperBeam(bool overload)
+    {
+        yield return Stride(CameraShake.Center.x);
+        if (overload)
+        {
+            armored = true;
+            SpriteRenderer[] shell = ArmorShell();
+            Sfx.Play(Sfx.GearGrind, 0.8f, 0.7f);
+            StartCoroutine(Tremble(RockfallSeconds, 0.06f, 1.2f));
+            bool fallen = false;
+            StartCoroutine(Rockfall(RockfallSeconds, Random.Range(1, 3), true, () => fallen = true));
+            float t = 0, nextShot = 0.15f;
+            yield return HoldArmor(shell, RockfallSeconds, () =>
+            {
+                t += Time.deltaTime;
+                if (t < nextShot) return;
+                float k = t / RockfallSeconds;
+                StartCoroutine(WildLaser(true, Mathf.Lerp(0.45f, 0.3f, k), true));
+                nextShot = t + Mathf.Lerp(0.4f, 0.18f, k) * Random.Range(0.7f, 1.3f);
+            });
+            while (!fallen) yield return HoldArmor(shell, Time.deltaTime);
+            Armour(shell, false);
+            foreach (SpriteRenderer part in shell) RemoveTransient(part);
+        }
+
+        rocks.RemoveAll(r => r.cover == null);
+        Rock nearest = NearestRock();
+        if (nearest != null) CallPoguru("Poguru_Utsu_Rock", new Vector3(ShadeX(nearest), ronin.TopY + 0.3f, 0));
+        // The sweep is laid out on the ronin's row, so its breadth reaches both edges there and every rock's shade;
+        // aimed at the ground, its ends lie a little beyond the view.
+        float dir = Random.value < 0.5f ? 1f : -1f;
+        Vector3 aim = Core;
+        float row = ronin.Bounds.center.y;
+        float GroundFor(float rowX) => aim.x + (rowX - aim.x) * (aim.y - GroundY) / Mathf.Max(0.01f, aim.y - row);
+        float from = GroundFor(dir > 0 ? LeftEdge - HyperReach : RightEdge + HyperReach);
+        float to = GroundFor(dir > 0 ? RightEdge + HyperReach : LeftEdge - HyperReach);
+        yield return HyperCharge(from);
+
+        Beam beam = MakeBeam(Core, 2.6f);
+        beam.width = HyperWidth;
+        Sfx.PlayLoop(Sfx.LanternBeam, 1f, 0.6f);
+        Sfx.Play(Sfx.LanternCharge, 1f, 0.45f);
+        CameraShake.Add(0.6f);
+        float lastX = from;
+        for (float t = 0; t < HyperSweepSeconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.2f))
+        {
+            Beat();
+            float x = Mathf.Lerp(from, to, t / HyperSweepSeconds);
+            Vector3 end = BeamEnd(x, out Blocker cover);
+            DrawBeam(beam, Core, end, false, cover == null);
+            CameraShake.Add(2.4f * Time.deltaTime);
+            Rock struck = rocks.Find(r => r.cover != null && r.cover == cover);
+            if (struck != null) Scorch(struck, end);
+            else if (cover != null) BurnCover(beam, cover, end);
+            HyperHit(lastX, x);
+            CrumblePassed(x, dir);
+            lastX = x;
+            yield return null;
+        }
+        EndBeam(beam);
+        Sfx.Stop(Sfx.LanternBeam);
+        foreach (Rock rock in rocks.ToArray())
+        {
+            if (rock.scorched) Crumble(rock);
+        }
+        RestPoguru();
+        PlayIdle();
+        yield return Wait(0.4f);
+    }
+
+    // Its wind-up: arms flung back as its core swells (its attack pose without that clip), streaks of light pulled
+    // into its heart from all round, a molten orb growing there, the whine climbing and the ticks racing, the hall
+    // shaking harder, and a guide line to the edge the beam will start from. Full, it flashes white with a ripple.
+    IEnumerator HyperCharge(float from)
+    {
+        // The clip winds up once, then its last two frames (the blaze at full power) flicker until it fires.
+        if (hyperChargeFrames != null)
+        {
+            Sprite[] blaze = { hyperChargeFrames[hyperChargeFrames.Length - 2], hyperChargeFrames[hyperChargeFrames.Length - 1] };
+            animator.Play(hyperChargeFrames, false, () => animator.Play(blaze, true, null, 10f), hyperChargeFrames.Length / (HyperChargeSeconds * 0.6f));
+        }
+        else PlayAction(art.attack);
+        Sfx.Play(Sfx.LanternCharge, 1f, 0.55f);
+        SpriteRenderer orb = Bar(Core, Core, 1f, Color.clear, sprite.sortingOrder + 2);
+        orb.sprite = ProceduralSprites.Glow;
+        SpriteRenderer heart = Bar(Core, Core, 1f, Color.clear, sprite.sortingOrder + 3);
+        heart.sprite = ProceduralSprites.Disc;
+        SpriteRenderer guide = Bar(Core, Core, 0.05f, Color.clear);
+        float nextStreak = 0, nextTick = 0, tick = 0.3f;
+        bool whined = false;
+        for (float t = 0; t < HyperChargeSeconds; t += Time.deltaTime * Mathf.Max(Tempo, 0.3f))
+        {
+            Beat();
+            float k = t / HyperChargeSeconds;
+            Vector3 core = Core;
+            float pulse = 1f + 0.15f * Mathf.Sin(Time.time * (10f + 30f * k));
+            orb.transform.SetPositionAndRotation(core + Vector3.back * 0.3f, Quaternion.identity);
+            orb.transform.localScale = Vector3.one * (Mathf.Lerp(0.5f, 3.2f, k) * pulse / ProceduralSprites.Glow.bounds.size.x);
+            orb.color = new Color(Molten.r, Molten.g, Molten.b, Mathf.Lerp(0.3f, 0.9f, k));
+            heart.transform.SetPositionAndRotation(core + Vector3.back * 0.35f, Quaternion.identity);
+            heart.transform.localScale = Vector3.one * (Mathf.Lerp(0.1f, 0.75f, k) * pulse / ProceduralSprites.Disc.bounds.size.x);
+            heart.color = Color.Lerp(new Color(1f, 0.8f, 0.5f), Color.white, k);
+            if (t >= nextStreak)
+            {
+                nextStreak = t + Mathf.Lerp(0.07f, 0.02f, k);
+                StartCoroutine(Inflow(core, k));
+            }
+            if (t >= nextTick)
+            {
+                Sfx.Play(Sfx.ClockTick, 0.6f, 1f + k);
+                nextTick = t + tick;
+                tick = Mathf.Max(0.06f, tick * 0.85f);
+            }
+            if (!whined && k > 0.55f)
+            {
+                whined = true;
+                Sfx.Play(Sfx.LanternCharge, 1f, 0.8f);
+            }
+            CameraShake.Add(Time.deltaTime * (1.5f + 1.5f * k));
+            Stretch(guide, core, BeamEnd(from, out _), 0.04f + 0.08f * k);
+            guide.color = new Color(Molten.r, Molten.g, Molten.b, (0.2f + 0.5f * k) * (0.7f + 0.3f * Mathf.Sin(Time.time * 40f)));
+            yield return null;
+        }
+        RemoveTransient(orb);
+        RemoveTransient(heart);
+        RemoveTransient(guide);
+        ElementFx.Glow(Core, Color.white, 1.2f, 4f, 0.35f, transform);
+        TimeRipple.Emit(Core, 10f, 1.2f, 0.6f);
+        HitFlash.Flash(sprite, 0.12f);
+    }
+
+    // A streak of light pulled in from the air to its core.
+    IEnumerator Inflow(Vector3 core, float k)
+    {
+        Vector3 heading = Random.insideUnitCircle.normalized;
+        float far = Random.Range(2.5f, 4.5f);
+        SpriteRenderer streak = Bar(core, core + heading * 0.01f, 0.06f, Color.clear, 54);
+        const float seconds = 0.28f;
+        for (float t = 0; t < seconds && streak != null; t += Time.deltaTime)
+        {
+            float u = t / seconds;
+            float near = 1f - u * u;
+            Stretch(streak, core + heading * far * near, core + heading * far * Mathf.Min(1f, near + 0.35f), 0.05f + 0.05f * k);
+            streak.color = new Color(1f, Mathf.Lerp(0.85f, 0.6f, u), 0.4f, Mathf.Sin(u * Mathf.PI) * 0.9f);
+            yield return null;
+        }
+        RemoveTransient(streak);
+    }
+
+    // Within the beam's breadth on the ronin's row (counting the ground it swept since last frame), it burns him
+    // unless a rock (or the sword) stands between his middle and its core.
+    void HyperHit(float lastX, float x)
+    {
+        Vector3 core = Core;
+        Vector3 middle = ronin.Bounds.center;
+        float a = RowCross(core, lastX, middle.y), b = RowCross(core, x, middle.y);
+        if (middle.x < Mathf.Min(a, b) - HyperReach || middle.x > Mathf.Max(a, b) + HyperReach) return;
+        BeamEnd(core, middle, out Blocker cover);
+        if (cover == null && !InSwordWard(middle.x)) ronin.TakeHit(middle);
+    }
+
+    // Where a ray from `from` to x on the ground crosses height y.
+    float RowCross(Vector3 from, float x, float y) => from.x + (x - from.x) * (from.y - y) / (from.y - GroundY);
+
+    // Where a ray from `from` through a point crosses height y.
+    static float Project(Vector3 from, Vector3 through, float y) => from.x + (through.x - from.x) * (from.y - y) / Mathf.Max(0.01f, from.y - through.y);
+
+    // A burnt rock crumbles only once the beam's trailing edge on the ronin's row has left its whole shade behind,
+    // so whoever sheltered there is never caught by the beam's breadth as the rock goes.
+    void CrumblePassed(float x, float dir)
+    {
+        Vector3 core = Core;
+        float rowY = ronin.Bounds.center.y;
+        float trailing = RowCross(core, x, rowY) - dir * HyperReach;
+        foreach (Rock rock in rocks.ToArray())
+        {
+            if (!rock.scorched || rock.cover == null) continue;
+            Vector3 foot = rock.cover.transform.position;
+            Vector3 farFoot = foot + Vector3.right * dir * rock.halfWidth;
+            float shadeFar = dir > 0
+                ? Mathf.Max(Project(core, farFoot, rowY), Project(core, farFoot + Vector3.up * rock.height, rowY))
+                : Mathf.Min(Project(core, farFoot, rowY), Project(core, farFoot + Vector3.up * rock.height, rowY));
+            if (dir * (trailing - shadeFar) > 0f) Crumble(rock);
+        }
+    }
+
+    // The beam bearing down on a rock: it glows hotter, cracks through its damage states and spits sparks.
+    void Scorch(Rock rock, Vector3 at)
+    {
+        rock.scorched = true;
+        rock.heat += Time.deltaTime;
+        if (rock.states != null) rock.look.sprite = rock.states[rock.heat > 0.4f ? 2 : rock.heat > 0.15f ? 1 : 0];
+        rock.look.color = Color.Lerp(Color.white, new Color(1f, 0.6f, 0.35f), Mathf.Clamp01(rock.heat * 1.5f));
+        if (Random.value < 0.3f) Fx.Play(Fx.Impact, at, Molten, Random.Range(0.5f, 0.9f));
+        if (Random.value < 0.05f) Sfx.Play(Sfx.BlockerHit, 0.5f, Random.Range(0.6f, 0.8f));
+    }
+
+    void Crumble(Rock rock)
+    {
+        rocks.Remove(rock);
+        if (rock.cover == null) return;
+        Vector3 middle = rock.cover.transform.position + Vector3.up * rock.height * 0.5f;
+        Debris.BurstSprites(middle, rock.states, new Color(0.8f, 0.72f, 0.65f), 8, 0.3f, 6f);
+        Fx.Play(Fx.SmokePuff, middle, new Color(0.8f, 0.75f, 0.7f, 0.9f), 2f);
+        rock.cover.Demolish();
+        CameraShake.Add(0.2f);
+    }
+
+    Rock NearestRock()
+    {
+        Rock best = null;
+        foreach (Rock rock in rocks)
+        {
+            if (rock.cover == null) continue;
+            if (best == null || Mathf.Abs(ShadeX(rock) - ronin.Bounds.center.x) < Mathf.Abs(ShadeX(best) - ronin.Bounds.center.x)) best = rock;
+        }
+        return best;
+    }
+
+    // The middle of a rock's shade on the ronin's row, cast from its core.
+    float ShadeX(Rock rock) => Project(Core, rock.cover.transform.position + Vector3.up * rock.height * 0.5f, ronin.Bounds.center.y);
+
+    // The hall shakes and rocks rain down across it for `seconds`: most smash on the ground (on the ronin, if
+    // `harmful` and he's still under it), and `keep` of them land in the cover row and stay there as cover, making
+    // room first if the row already holds as many as it can.
+    IEnumerator Rockfall(float seconds, int keep, bool harmful, System.Action done = null)
+    {
+        rocks.RemoveAll(r => r.cover == null);
+        while (rocks.Count > 0 && rocks.Count + keep > MaxRocks) Crumble(rocks[0]);
+        List<float> spots = RockSpots(keep);
+        Sfx.Play(Sfx.GearGrind, 0.7f, 0.5f);
+        CameraShake.Add(0.4f);
+        float nextRock = 0.1f;
+        int dropped = 0, landed = 0;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
+        {
+            // A steady rumble: the shake topped up as fast as it fades.
+            CameraShake.Add(2.3f * Time.deltaTime);
+            if (t >= nextRock)
+            {
+                nextRock = t + Random.Range(0.12f, 0.24f);
+                StartCoroutine(FallingRock(Random.Range(LeftEdge + 0.5f, RightEdge - 0.5f), harmful, null));
+            }
+            // The ones that stay come down through the middle of it.
+            if (dropped < spots.Count && t >= seconds * (0.3f + 0.4f * dropped / spots.Count))
+            {
+                StartCoroutine(FallingRock(spots[dropped], false, () => landed++));
+                dropped++;
+            }
+            yield return null;
+        }
+        for (; dropped < spots.Count; dropped++) StartCoroutine(FallingRock(spots[dropped], false, () => landed++));
+        while (landed < spots.Count) yield return null;
+        done?.Invoke();
+    }
+
+    // Spots in the cover row for new rocks, well apart from each other and from those already there.
+    List<float> RockSpots(int count)
+    {
+        var spots = new List<float>();
+        // Clear of the HUD's boon column at the left and of the edges.
+        float lo = LeftEdge + 3.5f, hi = RightEdge - 3f;
+        for (int i = 0; i < count; i++)
+        {
+            for (int tries = 0; tries < 20; tries++)
+            {
+                float x = Random.Range(lo, hi);
+                bool clear = spots.TrueForAll(s => Mathf.Abs(s - x) >= RockSpacing)
+                    && rocks.TrueForAll(r => r.cover == null || Mathf.Abs(r.cover.transform.position.x - x) >= RockSpacing);
+                if (!clear) continue;
+                spots.Add(x);
+                break;
+            }
+        }
+        if (spots.Count == 0 && rocks.Count == 0) spots.Add(Random.Range(lo, hi));
+        return spots;
+    }
+
+    // One rock falling from above the screen onto its shadow, which darkens as it nears. A rock that `stayed` lands
+    // in the cover row and stays (calling it once it has); the rest smash on the ground.
+    IEnumerator FallingRock(float x, bool harmful, System.Action stayed)
+    {
+        bool stays = stayed != null;
+        Sprite[] frames = Fx.Frames(Fx.UtsuRock);
+        Sprite[] states = null;
+        if (frames != null && frames.Length >= 3)
+        {
+            int first = Random.Range(0, frames.Length / 3) * 3;
+            states = new[] { frames[first], frames[first + 1], frames[first + 2] };
+        }
+        float height = stays ? RockHeight : Random.Range(0.45f, 0.85f);
+        float landY = stays ? CoverRowY : GroundY + 0.15f;
+
+        // The rock stands on its own foot: the object's origin is the bottom of its art. Launched, so a stagger leaves
+        // it falling (and lying there); only a halt or its fall clears it.
+        var root = new GameObject(stays ? "Rock" : "FallingRock");
+        Detach(root);
+        var look = new GameObject("Look").AddComponent<SpriteRenderer>();
+        look.transform.SetParent(root.transform, false);
+        look.sprite = states != null ? states[0] : ProceduralSprites.Disc;
+        if (states == null) look.color = new Color(0.45f, 0.42f, 0.4f);
+        float scale = height / look.sprite.bounds.size.y;
+        look.transform.localScale = Vector3.one * scale;
+        look.transform.localPosition = Vector3.up * (-look.sprite.bounds.min.y * scale);
+        look.sortingOrder = stays ? 6 : 52;
+        float halfWidth = look.sprite.bounds.size.x * scale / 2f;
+
+        var shadow = new GameObject("RockShadow").AddComponent<SpriteRenderer>();
+        shadow.sprite = ProceduralSprites.SoftGlow;
+        shadow.sortingOrder = 3;
+        Detach(shadow.gameObject);
+
+        float top = TopOfScreen + height, fall = stays ? 0.9f : Random.Range(0.6f, 0.85f);
+        float spin = stays ? 0f : Random.Range(-360f, 360f);
+        for (float t = 0; t < fall && root != null; t += Time.deltaTime)
+        {
+            float k = t / fall;
+            root.transform.SetPositionAndRotation(new Vector3(x, Mathf.Lerp(top, landY, k * k), 0), Quaternion.Euler(0, 0, spin * t));
+            shadow.transform.position = new Vector3(x, landY, 0.3f);
+            shadow.transform.localScale = new Vector3(halfWidth * 2.4f, halfWidth * 0.7f, 1f) * (0.5f + 0.5f * k) / ProceduralSprites.SoftGlow.bounds.size.x;
+            shadow.color = new Color(0f, 0f, 0f, 0.15f + 0.4f * k);
+            yield return null;
+        }
+        Destroy(shadow.gameObject);
+        if (root == null) yield break;
+        Vector3 foot = new Vector3(x, landY, 0);
+        root.transform.SetPositionAndRotation(foot, Quaternion.identity);
+
+        if (!stays)
+        {
+            Debris.BurstSprites(foot + Vector3.up * height * 0.4f, states, new Color(0.8f, 0.72f, 0.65f), 5, 0.2f, 4f);
+            Fx.Play(Fx.SmokePuff, foot + Vector3.up * 0.2f, new Color(0.8f, 0.75f, 0.7f, 0.8f), 0.9f);
+            Sfx.Play(Sfx.BlockerBreak, 0.35f, Random.Range(0.8f, 1.1f));
+            CameraShake.Add(0.06f);
+            if (harmful && Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth + 0.3f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            Destroy(root);
+            yield break;
+        }
+
+        // It thuds into the row and stays: cover that only the Hyper Beam will break.
+        Fx.Play(Fx.SmokePuff, foot + Vector3.up * 0.3f, new Color(0.8f, 0.75f, 0.7f, 0.9f), 2f);
+        Debris.BurstSprites(foot + Vector3.up * 0.3f, states, new Color(0.8f, 0.72f, 0.65f), 6, 0.2f, 4f);
+        Sfx.Play(Sfx.HammerSlam, 0.8f, 0.7f);
+        CameraShake.Add(0.35f);
+        var box = root.AddComponent<BoxCollider>();
+        box.size = new Vector3(halfWidth * 2f * 0.85f, height * 0.85f, 0.5f);
+        box.center = Vector3.up * height / 2f;
+        Blocker cover = root.AddComponent<Blocker>();
+        cover.Init(int.MaxValue, look, states ?? new[] { look.sprite }, null);
+        rocks.Add(new Rock { cover = cover, look = look, states = states, halfWidth = halfWidth, height = height });
+        stayed();
+    }
+
     // Fire burns holes in the lace.
     public override void Burn(Vector3 point, float radius)
     {
@@ -2251,6 +2572,7 @@ public class Utsusemi : Boss
     protected override IEnumerator PhaseBreak()
     {
         breaking = true;
+        RestPoguru();
         // A break mid-Hour Strikes drops the armour with the rest of the move.
         armored = false;
         ShowEye(false);
@@ -2264,6 +2586,9 @@ public class Utsusemi : Boss
         Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
         Music.Duck(0.15f, 8f);
         yield return new WaitForSeconds(0.4f);
+        // The whole hall shakes with it and rocks rain down; one or two come to rest in the cover row and stay, which
+        // its first move once it has broken open (the Hyper Beam) will need.
+        StartCoroutine(Rockfall(OverloadSeconds + 0.6f, Random.Range(1, 3), false));
         yield return Overload();
 
         // It stops dead. A bell tolls once, and the air ripples with it.
@@ -2322,6 +2647,7 @@ public class Utsusemi : Boss
             Speak(BossLine.Phase);
             yield return new WaitForSeconds(1.8f);
         }
+        hyperNext = true;
         breaking = false;
     }
 
@@ -2370,8 +2696,9 @@ public class Utsusemi : Boss
     }
 
     // One wild laser from its eye or core: mostly raking the ground, some flung up and out to the sides, swinging as
-    // it fires. It burns the ground where it lands but never hits the ronin.
-    IEnumerator WildLaser(bool molten, float preview)
+    // it fires. It burns the ground where it lands; only a `harmful` one (the Hyper Beam's overload, not the phase
+    // break's) hits the ronin, and cover stops that one.
+    IEnumerator WildLaser(bool molten, float preview, bool harmful = false)
     {
         bool fromEye = Random.value < 0.4f;
         float angle = Random.value < 0.75f ? Random.Range(-160f, -20f) : Random.Range(-15f, 195f);
@@ -2416,8 +2743,15 @@ public class Utsusemi : Boss
         {
             Vector3 from = fromEye ? Eye : Core;
             Vector3 heading = Quaternion.Euler(0, 0, angle + swing * t / seconds) * Vector3.right;
-            Vector3 to = heading.y < -0.05f ? from + heading * ((GroundY - from.y) / heading.y) : from + heading * 30f;
-            DrawBeam(beam, from, to, t < 0.04f, heading.y < -0.05f);
+            bool ground = heading.y < -0.05f;
+            Vector3 to = ground ? from + heading * ((GroundY - from.y) / heading.y) : from + heading * 30f;
+            if (harmful && ground)
+            {
+                to = BeamEnd(from, to, out Blocker cover);
+                if (cover == null) BeamHit(from, to);
+                ground = cover == null;
+            }
+            DrawBeam(beam, from, to, t < 0.04f, ground);
             yield return null;
         }
         EndBeam(beam);
@@ -2482,6 +2816,10 @@ public class Utsusemi : Boss
         ClearStoppedTime();
         TimeRipple.Clear();
         plumbsOut = false;
+        RestPoguru();
+        foreach (Rock rock in rocks) if (rock.cover != null) Destroy(rock.cover.gameObject);
+        rocks.Clear();
+        hyperNext = false;
     }
 
     // One world pixel of its sprite, so its fire is drawn on its own pixel grid.

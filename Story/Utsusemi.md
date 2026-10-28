@@ -41,8 +41,9 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../CHARACTER_ART_GUID
 | Pendulum Kick | The monk would never let the boy stand under a falling weight. The machine swings him off anyway. |
 | Hour Strikes | "Remember the hours": it counts the hours of the stopped night, one by one, then hunts him down the hours again with its blade. |
 | Plumb Lines | The weights of the clock it winds. |
-| Phase break | The mainspring slips: it overloads, its lasers firing wild as it cracks open from the heart, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. It bursts open rather than stop. |
+| Phase break | The mainspring slips: it overloads, its lasers firing wild as it cracks open from the heart, the ticks race, and **one of Kagetsune's bells** tolls to wind it back up. The hall it walked shakes apart around it, rocks raining down. It bursts open rather than stop. |
 | Heart Lantern / Midnight | Its core: the monk's soul, burning as fuel. |
+| Hyper Beam | Everything the monk was, burnt at once: the core opened wide enough to sweep the whole road. The only shelter left is the rubble of its own overload, and the rubble doesn't last. |
 | Stopped Hour | The stopped night itself. It keeps the hour Kagetsune froze; for a moment it holds the world there too, Oni with it, and only the machine moves, hanging its burning shroud over him and setting the hours on him one by one, as on that night. |
 | The Thirteenth Hour | The hour that should never come. Near the end it turns its own heart into a clock face and burns down to it. |
 

@@ -213,6 +213,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] Sprite[] utsusemiPhaseHourSlash;
     [SerializeField] Sprite[] utsusemiPhaseSwordThrow;
     [SerializeField] Sprite[] utsusemiPhaseStop;
+    [Tooltip("Its Hyper Beam wind-up in phase 2 (set by Ninja/Apply Boss Art). Empty holds its attack pose instead.")]
+    [SerializeField] Sprite[] utsusemiPhaseHyperCharge;
     [SerializeField] Sprite utsusemiPortrait;
     [SerializeField] Sprite utsusemiCloseup;
     [Tooltip("Its overdriven second-phase illustrations: the card that plays in its phase break. Without them its phase line is a subtitle.")]
@@ -537,6 +539,13 @@ public class GameManager : MonoBehaviour
             if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(seconds));
         };
         Boss.RenameBar = name => ui.RenameBossBar(name);
+        Boss.PoguruWarn = PoguruWarns;
+        Boss.PoguruRest = () =>
+        {
+            if (!poguruWarning) return;
+            poguruWarning = false;
+            poguru.ReturnToWisp();
+        };
         // Bosses' voicelines: a 2D source of their own, so they're never throttled like sound effects. It sits on its
         // own child so the machine-voice filters only ever touch it.
         backdrop = FindAnyObjectByType<Backdrop>();
@@ -2935,6 +2944,7 @@ public class GameManager : MonoBehaviour
                     automaton.SetPhaseArt(utsusemiPhaseArt);
                     automaton.SetPhaseFrames(utsusemiPhaseBareIdle, utsusemiPhaseUnarmedIdle, utsusemiPhaseDash, utsusemiPhaseChop,
                         utsusemiPhaseHourSlash, utsusemiPhaseSwordThrow, utsusemiPhaseStop);
+                    automaton.SetHyperCharge(utsusemiPhaseHyperCharge);
                 }
                 return automaton;
             case BossKind.Kagetsune:
@@ -3431,6 +3441,19 @@ public class GameManager : MonoBehaviour
     {
         Conversation said = Dialogue.Find(id);
         return said != null && said.Lines.Length > 0 ? SayAsPoguru(said, subtitled) : 0f;
+    }
+
+    // Out of the wisp mid-fight because a boss's move is coming (Utsusemi's lasers and sword): he calls it and hovers
+    // over where Oni should go, or at his shoulder, until the boss sends him back with Boss.PoguruRest.
+    bool poguruWarning;
+
+    void PoguruWarns(string id, Vector3? over)
+    {
+        if (tutorial.Active || poguru == null) return;
+        poguruWarning = true;
+        if (over is Vector3 spot) poguru.DashTo(spot, null, 18f);
+        else poguru.Hover();
+        if (id != null) Bark(id);
     }
 
     // Unsubtitled when the words are shown elsewhere (the tutorial's parry prompt), so the plate covers nothing.

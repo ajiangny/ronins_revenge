@@ -50,6 +50,10 @@ public abstract class Boss : MonoBehaviour, IHittable
     public static System.Action<float> HitStop;
     // Set by the GameManager: renames the boss bar mid-fight (a partner joins, or one of a pair falls).
     public static System.Action<string> RenameBar;
+    // Set by the GameManager: Poguru pops out of the ronin's wisp to call a warning (one of his lines by id, or none)
+    // and hovers over a spot to point it out, or at the ronin's shoulder without one; PoguruRest sends him back in.
+    public static System.Action<string, Vector3?> PoguruWarn;
+    public static System.Action PoguruRest;
 
     public abstract string Title { get; }
     // The name on the bar from the phase card on (Shirogane shares hers with Kuon).

@@ -845,6 +845,13 @@ MonoBehaviour:
   - {fileID: 21300000, guid: ee0c8829aa7df42b7bad7a9ffa338e50, type: 3}
   - {fileID: 21300000, guid: 71053797907044f3c96423ddc4a40b2b, type: 3}
   - {fileID: 21300000, guid: 3b97151cb267845f6abcafd84888a5de, type: 3}
+  utsusemiPhaseHyperCharge:
+  - {fileID: 21300000, guid: 7317a3056da1843f5b86d6f41d4939a9, type: 3}
+  - {fileID: 21300000, guid: 2ac17bb841bb243d59f7cdf7669a5a3e, type: 3}
+  - {fileID: 21300000, guid: b380b9ac1070641308627e323b627f38, type: 3}
+  - {fileID: 21300000, guid: 3817187cd61ed492f8889828da59a0c0, type: 3}
+  - {fileID: 21300000, guid: 76d390a9829b3478eb9ce86aeb60dbc6, type: 3}
+  - {fileID: 21300000, guid: 70da789033f9c4ad5b3d7cc91db4b79d, type: 3}
   utsusemiPortrait: {fileID: 21300000, guid: 2c4bacae8440840f28c284c08694adeb, type: 3}
   utsusemiCloseup: {fileID: 21300000, guid: f6cf0c2b8b2144e81b202b677c47c4aa, type: 3}
   utsusemiPhasePortrait: {fileID: 21300000, guid: 6f79b413cf9144dedbf9a160b5348d4f, type: 3}

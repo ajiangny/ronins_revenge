@@ -589,6 +589,19 @@ MonoBehaviour:
     - {fileID: 21300000, guid: a95b65e35e9264c04b9b2e09b44d9b62, type: 3}
     fps: 1
     loop: 1
+  - id: Utsu_Rock
+    frames:
+    - {fileID: 21300000, guid: 1af6bd6ff286443d68a807a94a6fcd75, type: 3}
+    - {fileID: 21300000, guid: d847b98431efc4f4fb5c9acd01e74ef4, type: 3}
+    - {fileID: 21300000, guid: d1b3d00d66651400b8fb7fb68c639b90, type: 3}
+    - {fileID: 21300000, guid: 2dcbcdbdc56314704a3183cb6bb82d68, type: 3}
+    - {fileID: 21300000, guid: 2c1bd3af63ffe46fdbc083f519edc55a, type: 3}
+    - {fileID: 21300000, guid: bf8bca599b10d404db471c8da37bd8d0, type: 3}
+    - {fileID: 21300000, guid: 7fd17e272f2b349a598ee69c3250e112, type: 3}
+    - {fileID: 21300000, guid: bc2c39fa758764d06b3a4c9ca6e8406c, type: 3}
+    - {fileID: 21300000, guid: cfe74843de335485ebc73e8a3606bc50, type: 3}
+    fps: 1
+    loop: 1
   - id: Shiro_Crescent
     frames:
     - {fileID: 21300000, guid: 3312beff92a1645a09e6afbfa13adeb5, type: 3}

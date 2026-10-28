@@ -105,6 +105,16 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 | `Poguru_Tut_Paths` | P: "Paths! Each leads to your next fight. What's floating in it is your prize for winning." · P: "Walk under the one you want, and off we go! After a few rounds, one of them leads to the boss!" |
 | `Poguru_Tut_Done` | P: "Looks like you DO remember how to fight!" · P: "Let's hurry and free everyone!!" · Oni: "...Back in the wisp." · P: "Going! Shutting up! ...Mostly!" |
 
+### Warnings in Utsusemi's fight (`DialogueEvent.Tutorial` ids, played through `Boss.PoguruWarn`)
+
+He flies out to point the way and stays out until the move is over.
+
+| Id | Lines |
+|---|---|
+| `Poguru_Utsu_Sword` | P (the sword plants before the Heart Lantern or Midnight; he hovers over the blade): "Laser! Oni, hurry! Hide behind the sword!" |
+| `Poguru_Utsu_Reclaim` | P (the blade glints; he flies back to Oni before its dash): "It wants its sword back! Get away from it!" |
+| `Poguru_Utsu_Rock` | P (the Hyper Beam winds up; he hovers in the nearest rock's shade): "That's a BIG one! Behind a rock, quick!" |
+
 ### Barks (subtitles; he pops out of the wisp, then back in)
 
 | Event | Priority | Requires | Id | Text |

@@ -60,6 +60,9 @@ public static class Fx
     public const string SafeZone = "SafeZone";
     public const string SafeZoneIcon = "SafeZoneIcon";
     public const string UtsuPlumbPortal = "Utsu_PlumbPortal";
+    // The rocks its overload shakes loose: three looks (the stage's Rock, RockB and RockC blockers), each intact,
+    // cracked and nearly broken, so frame look * 3 + state.
+    public const string UtsuRock = "Utsu_Rock";
 
     // Shirogane's effects.
     public const string ShiroCrescent = "Shiro_Crescent";

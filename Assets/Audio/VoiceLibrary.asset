@@ -473,6 +473,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: b2aa9c6cb9dfb4a0e97a39d7af004303, type: 3}
   - id: Poguru_Tut_Boons_3
     clip: {fileID: 8300000, guid: 8008f9e0b80034844808ede66b5291e0, type: 3}
+  - id: Poguru_Tut_Clone
+    clip: {fileID: 8300000, guid: 061b2c010542f41bcb9cd305124ac797, type: 3}
   - id: Poguru_Tut_Collect
     clip: {fileID: 8300000, guid: e5242f9d8a4e84432a44c396f014c3be, type: 3}
   - id: Poguru_Tut_Collected
@@ -525,6 +527,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a378f7d1da13847e086edc6572da80e7, type: 3}
   - id: Poguru_Tut_TakeHim
     clip: {fileID: 8300000, guid: 63c57350e6f624eee9bb35166340cba4, type: 3}
+  - id: Poguru_Tut_Ultimate
+    clip: {fileID: 8300000, guid: 10f0b53effec045d9bdffc2c7a3f7033, type: 3}
+  - id: Poguru_Tut_UltimateIt
+    clip: {fileID: 8300000, guid: 816ca9333fcc0477eb1181e60da92ad7, type: 3}
   - id: Poguru_Tut_Wake
     clip: {fileID: 8300000, guid: f8fa7391eb743485bb6ddb5ef219d521, type: 3}
   - id: Poguru_Tut_Wake_2

@@ -129,6 +129,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] BossIcon[] bossIcons;
     [Tooltip("Chance that a blocker worn down by hits drops a heart, which heals a lost life.")]
     [SerializeField, Range(0, 1)] float heartDropChance = 0.2f;
+    [Tooltip("Chance a fallen samurai drops a heart while the ronin is hurt (never from boon effects); at most one a stage.")]
+    [SerializeField, Range(0, 1)] float killHeartChance = 0.005f;
     [Tooltip("The ronin sitting on his row playing his flute, looped on the title screen. Empty shows his idle.")]
     [SerializeField] Sprite[] titleFluteFrames;
     [Tooltip("Frames per second for the title screen's flute loop.")]
@@ -475,8 +477,10 @@ public class GameManager : MonoBehaviour
     // A scroll that reached the ronin while the round was wrapping up; its arts are offered before the next round.
     bool gatheredScroll;
     int scrollsDropped;
-    // Souls dropped by samurai this stage, for killSoulsPerStage.
+    // Souls dropped by samurai this stage, for killSoulsPerStage; and whether one has dropped a heart.
     int killSoulsThisStage;
+    bool killHeartThisStage;
+    Tutorial tutorial;
     // What clearing the current round gives, picked at the path that led to it.
     PathReward pendingReward;
     Element pendingElement;
@@ -681,6 +685,8 @@ public class GameManager : MonoBehaviour
         baseRoninArt = ronin.art;
         ResetLoadout();
         poguru = Poguru.Create(poguruArt, ronin);
+        tutorial = gameObject.AddComponent<Tutorial>();
+        tutorial.Bind(this);
 
         highScore = PlayerPrefs.GetInt(HighScoreKey, 0);
         ui.SetScore(0);
@@ -1504,6 +1510,7 @@ public class GameManager : MonoBehaviour
     // Drops into a stage's boss fight, or its rounds, on that fight's own map. A boss jump counts as the last round.
     void StartAt(int stage, bool boss)
     {
+        tutorial.Abort();
         stageIndex = stage;
         boss &= Stage.boss != BossKind.None;
         roundIndex = boss ? BossPortalAfter - 1 : 0;
@@ -1590,6 +1597,9 @@ public class GameManager : MonoBehaviour
         stageIndex = 0;
         roundIndex = 0;
         ResetLoadout();
+        // Asked before the run is counted: a new journey's first run has none behind it.
+        bool offerTutorial = Tutorial.ShouldOffer(Save.Data);
+        tutorial.Arm(false);
         Save.BeginRun();
         RunLog.Enabled = DevToolsOn;
         var songs = new List<string>();
@@ -1607,6 +1617,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(DevJumpTo(stage, devJumpBoss));
             return;
         }
+        tutorial.Arm(offerTutorial);
         StartCoroutine(BeginRound());
     }
 
@@ -1626,12 +1637,15 @@ public class GameManager : MonoBehaviour
         state = State.Transition;
         ronin.ControlsEnabled = false;
         ClearProjectiles();
+        // A new journey's first round opens on Poguru's offer, before the army arrives.
+        if (stageIndex == 0 && roundIndex == 0 && tutorial.Armed) yield return tutorial.Offer();
         // Blockers carry their damage from round to round; a new stage brings fresh ones.
         if (roundIndex == 0) blockers.Rebuild(loadout.BlockerHealthMultiplier);
         // A stage's first round always ends in a soul; later rounds carry what their path showed.
         if (roundIndex == 0)
         {
             killSoulsThisStage = 0;
+            killHeartThisStage = false;
             pendingReward = PathReward.Soul;
             pendingElement = PickSoulElement();
         }
@@ -1657,9 +1671,13 @@ public class GameManager : MonoBehaviour
         if (Time.time < introEnds) yield return new WaitForSeconds(introEnds - Time.time);
 
         ui.HideBanner();
+        // The tutorial's lesson as the first army stands ready, and its goodbye as the second does.
+        if (tutorial.Active && stageIndex == 0 && roundIndex == 0) yield return tutorial.ArmyArrived();
+        else if (tutorial.Active && stageIndex == 0 && roundIndex == 1) yield return tutorial.Finish();
         state = State.Playing;
         ronin.ControlsEnabled = true;
         army.Advance();
+        tutorial.RoundStarted();
         RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }
@@ -1697,6 +1715,12 @@ public class GameManager : MonoBehaviour
             MaybeDropSoul(samurai.transform.position);
         }
         MaybeDropScroll(samurai.transform.position, scrollChancePerKill);
+        // Rarely a soldier drops a heart, but only one he can use (Poguru promises as much in the tutorial).
+        if (source != KillSource.Effect && !killHeartThisStage && lives < maxLives && Random.value < killHeartChance)
+        {
+            killHeartThisStage = true;
+            Heart.Spawn(samurai.transform.position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
+        }
     }
 
     void OnShurikenThrown(Vector3 muzzle, Kunai shuriken)
@@ -2005,6 +2029,8 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             afterPick();
         });
+        // The tutorial explains the cards over the first boon screen.
+        if (tutorial.Active) StartCoroutine(tutorial.BoonsShown());
         // Fate's Thread and Banishing Bell. The new cards replace these in the same list, so the pick reads them.
         List<BoonOffer> Refill()
         {
@@ -2153,7 +2179,19 @@ public class GameManager : MonoBehaviour
     void OnArmyDefeated()
     {
         if (state != State.Playing) return;
+        if (tutorial.Active && stageIndex == 0 && roundIndex == 0)
+        {
+            StartCoroutine(TutorialRoundEnd());
+            return;
+        }
         StartCoroutine(EndRound());
+    }
+
+    // The tutorial's first round ends on its spear and heart, still in play so the blow lands, then as any round does.
+    IEnumerator TutorialRoundEnd()
+    {
+        yield return tutorial.SpearAndHeart();
+        if (state == State.Playing) yield return EndRound();
     }
 
     IEnumerator EndRound()
@@ -2199,6 +2237,7 @@ public class GameManager : MonoBehaviour
 
         RewardSpirit spirit = RewardSpirit.Spawn(CameraShake.Center, RewardIcon(reward, pendingElement),
             RewardColour(reward, pendingElement), ronin);
+        if (tutorial.Active) yield return tutorial.RewardShown();
         yield return new WaitUntil(() => spirit == null);
 
         bool picked = false;
@@ -2264,6 +2303,7 @@ public class GameManager : MonoBehaviour
                 RewardLabel(reward, element), RewardIcon(reward, element), ui.BodyFont));
         }
         Sfx.Play(Sfx.SoulSpawn, 1f, 0.7f);
+        if (tutorial.Active) yield return tutorial.PathsShown();
 
         ronin.MoveOnly = true;
         ronin.ControlsEnabled = true;
@@ -3085,6 +3125,73 @@ public class GameManager : MonoBehaviour
         ronin.ControlsEnabled = controls;
     }
 
+    // Poguru's tutorial (Tutorial.cs) drives the first round through these.
+    public Poguru Poguru => poguru;
+    public PoguruArt PoguruClips => poguruArt;
+    public Ronin Ronin => ronin;
+    public MenuUI Menu => menu;
+    public BoonChoiceUI BoonChoice => boonChoice;
+    public DialogueScene Scene => dialogueScene;
+    public int Lives => lives;
+    public int MaxLives => maxLives;
+
+    // One of Poguru's lines as a bark: voiced when its clip is there, subtitled, his mouth moving. Returns how long it
+    // takes to say; 0 when it isn't written.
+    public float Bark(string id)
+    {
+        Conversation said = Dialogue.Find(id);
+        return said != null && said.Lines.Length > 0 ? SayAsPoguru(said) : 0f;
+    }
+
+    float SayAsPoguru(Conversation said)
+    {
+        AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(0)) : null;
+        string text = Dialogue.Fill(said.Lines[0].Text, Dialogue.Context());
+        float seconds = clip != null ? clip.length : Mathf.Clamp(text.Length * 0.06f, 1.4f, 3.5f);
+        if (clip != null)
+        {
+            poguruVoice.Stop();
+            poguruVoice.volume = voiceVolume * Sfx.Volume;
+            poguruVoice.clip = clip;
+            poguruVoice.Play();
+        }
+        ui.ShowSubtitle("Poguru", text, PoguruColour, seconds + 0.6f);
+        poguru.Talk(seconds);
+        return seconds + 0.3f;
+    }
+
+    // The tutorial's spear has to land: through god mode and the blink after an earlier hit.
+    public void ForceHit()
+    {
+        bool invincible = ronin.Invincible;
+        ronin.Invincible = false;
+        ronin.ClearInvulnerable();
+        ronin.TakeHit(ronin.Bounds.center);
+        ronin.Invincible = invincible;
+    }
+
+    public Heart SpawnHeart(Vector3 at) => Heart.Spawn(at, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
+
+    // A Taisho's spear thrown at him from `from`: it cuts through cover and can't be parried.
+    public Arrow SpawnSpear(Vector3 from, float speed)
+    {
+        Arrow spear = Instantiate(army.samuraiPrefab.arrowPrefab, from, Quaternion.identity);
+        spear.MakeUnbreakable(army.samuraiPrefab.SpearSprite);
+        spear.Unparryable = true;
+        Vector3 to = ronin.Bounds.center - from;
+        to.z = 0f;
+        spear.Launch(to.normalized * speed, 2f);
+        return spear;
+    }
+
+    // At least this many lives, so a lesson's blow can't end the run.
+    public void EnsureLives(int count)
+    {
+        if (lives >= count) return;
+        lives = Mathf.Min(count, maxLives);
+        ui.SetLives(lives, maxLives);
+    }
+
     // Who speaks through which source: Oni clean, the souls with their coffin echo, a boss (null) through the scene's
     // own, retuned per boss.
     AudioSource VoiceOf(string speaker) => speaker switch
@@ -3324,6 +3431,7 @@ public class GameManager : MonoBehaviour
     void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None)
     {
         state = State.GameOver;
+        tutorial.Abort();
         // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
         if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);

@@ -191,7 +191,7 @@ All player projectiles use the `Kunai` component (slash waves, kunai, shuriken, 
 `KillSource { Kunai, Shuriken, Deflected, Effect, Reflected, Slash, Shadow, Clone }`. The Attack-slot boons (Flame/Frost/Storm Blade)
 trigger on both `Slash` and `Kunai`. `Shadow` (Split Slash's forks) and `Clone` (anything the Shadow Clone sends) are lesser
 blades (`Damage.IsLesser`): one point each, `Damage.Procs` is false for them and for `Effect` (no boon effects, no drum beat, no statue burst, no ultimate charge; only the Ultimate slot's boons act on `Clone`), and `Damage.Lessen` halves what it deals
-to a boss or Kuon (`Boss.shadowChip`/`SpiritWolf.shadowChip` carry the half points). Damage per source is `Damage.Of` in `IHittable.cs` (slash and kunai 1, shuriken 3, deflected 2, reflected 0: a parried boss slash only staggers).
+to a boss or Kuon (`Boss.shadowChip`/`SpiritWolf.shadowChip` carry the half points). Damage per source is `Damage.Of` in `IHittable.cs` (slash and kunai 1, shuriken 3, deflected 2, reflected 0: a parried boss slash only hits the stance meter). How much of a boss's stance meter a hit fills is `Damage.Stance` beside it (slash/kunai 0.015, lesser blades half, shuriken 0.06, deflected 0.07, reflected 0.4, effects 0), or `Damage.SetPieceStance` (0.7) for a parried set piece: `Arrow.MakeReflectable(target, setPiece: true)` (Utsusemi's hour cleave, Kagetsune's bell and coffin, Shirogane's Fang) → `Ronin.Deflect` copies it to `Kunai.SetPiece`, which `Boss.TakeHit` reads through `Kunai.Striking`; `Ronin.StanceBoost` adds a quarter per upgrade held for that attack.
 Anything the player can damage implements `IHittable.TakeHit(int, KillSource)`: `Samurai`, `Scout`, `Boss`.
 
 ## Boons (Hades-style upgrades)
@@ -290,7 +290,10 @@ match `BoonChoiceUI.boonIcons`.
   so the boss fights phase 2 in its Phase 2 painting's sprites), the two-bar phase break
   (`HasSecondPhase`: emptying the first bar runs `BreakPhase`, which plays the subclass `PhaseBreak` cutscene while
   `PhaseBreaking` makes it invincible and refills the bar, raising `Healed`, then starts phase 2 via `SecondPhase`),
-  staggers, freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
+  the stance meter (`Poise`, 0-1: `TakeHit` → `AddPoise` scaled by the virtual `StanceResistance` (0.85 in phase 2, Kagetsune 0.8/0.7);
+  full means `Stagger(StaggerSeconds)`, which empties it; held by super armour, a stagger, a phase break or going down;
+  drains at `PoiseDecayRate` after `PoiseDecayDelay` without a hit; `PoiseChanged` → `GameUI.SetBossPoise`, the gold strip
+  under the boss bar that flashes white on a break), staggers, freeze (boss-time `Wait`), dashes with afterimages, telegraph bars, shots, a stall watchdog
   that restarts a dead fight loop, and the default defeat. For a pair sharing a bar: `BarFraction` (what the HUD
   shows), `PhaseTitle` (the bar's name after the phase card), `RenameBar` (set by the GameManager), and
   `HoldOnAtZero` → `GoDown` (`Down`: out of the fight, unhittable, `OnDowned`) until `Defeat` finishes her;
@@ -423,7 +426,7 @@ match `BoonChoiceUI.boonIcons`.
   `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), Broken Chains
   (`ChainCage` first: two chain walls that `HitIfCrossed` for 3 s round a two-arm `cageSpiral`, then lashes from his
   shoulders), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
-  chain; parried, `OnStaggered` sees `coffinThrownAt` and sets `exposedUntil`, doubling `DamageMultiplier`), the Night
+  chain; parried, its hit (`OnHitBy`, on `Damaged`) sees `coffinThrownAt` and sets `exposedUntil`, which a stagger pushes back past itself, doubling `DamageMultiplier`), the Night
   of a Thousand Bells (`ultimate`, every `Ultimate` moves: `Darkness`, eight lanes, five waves with a stepping
   safe lane that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Summon` builds an `Echo`: the boss's own CharacterArt idle, set
   by `SetEcho` from `GameManager.CreateBoss`, drawn teal and translucent on a chain from the hammer; `EchoBenibana`

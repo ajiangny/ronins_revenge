@@ -1,6 +1,6 @@
 # The Story of Ronin's Revenge
 
-The story behind Shadow Blade: what happened, why everyone keeps coming back, how it ends, and how lines should
+The story behind Ronin's Revenge: what happened, why everyone keeps coming back, how it ends, and how lines should
 react as runs pile up, the way Hades' do. Each character has their own file. **Check a character's file before
 writing a line, a scene or art for them**, and update it when something about them changes.
 

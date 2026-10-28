@@ -28,7 +28,7 @@ const TRACKS = {
   BattleMusic: {
     lengthMs: 120_000,
     prompt:
-      "Driving, energetic feudal Japan battle music for a retro arcade ninja game. Pounding taiko drum ensemble, " +
+      "Driving, energetic feudal Japan battle music for a retro arcade samurai game. Pounding taiko drum ensemble, " +
       "fast shamisen riffs, sharp shakuhachi accents and a punchy chiptune bass line. Intense and heroic, about " +
       "150 BPM, steady energy throughout, instrumental only. Seamless loop: the ending flows straight back into " +
       "the opening with no intro build or fade out.",
@@ -37,7 +37,7 @@ const TRACKS = {
   Stage_Benibana: {
     lengthMs: 120_000,
     prompt:
-      "Night march through a moonlit bamboo forest on the road to the capital, for a retro arcade ninja game's first " +
+      "Night march through a moonlit bamboo forest on the road to the capital, for a retro arcade samurai game's first " +
       "stage. Driving taiko and shime-daiko groove, fast plucked shamisen riffs, a breathy shakuhachi melody that " +
       "cuts through like wind in the bamboo stalks, hollow bamboo clacks and a punchy chiptune bass. Determined, lean " +
       "and adventurous, a lone ronin setting out to hunt his betrayer, about 145 BPM, steady energy throughout. " +

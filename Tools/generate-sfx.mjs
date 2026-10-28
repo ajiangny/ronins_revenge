@@ -39,7 +39,7 @@ const SOUNDS = {
   PlayerHurt: {
     seconds: 0.5,
     prompt:
-      "A young male ninja taking a hit: a short sharp pained grunt through gritted teeth, close mic, dry, " +
+      "A young male ronin taking a hit: a short sharp pained grunt through gritted teeth, close mic, dry, " +
       "video game hurt sound, no music.",
   },
   BossHit: {

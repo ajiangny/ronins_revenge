@@ -1,6 +1,6 @@
 # Architecture
 
-Shadow Blade is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System). One scene,
+Ronin's Revenge is a Space Invaders remake (Unity 6000.6.6f1, URP, new Input System). One scene,
 `Assets/Scenes/SampleScene.unity`. Every gameplay script sits flat in `Assets/`; editor tooling sits in
 `Assets/Editor/`. This file is a map: where each system lives and how the pieces talk to each other.
 

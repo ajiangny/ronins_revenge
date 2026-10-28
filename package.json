@@ -1,5 +1,5 @@
 {
-  "name": "shadow-blade-audio-tools",
+  "name": "ronins-revenge-audio-tools",
   "private": true,
   "type": "module",
   "description": "Generates the game's music, sound effects and boss voicelines with ElevenLabs. Not part of the Unity build.",

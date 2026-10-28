@@ -1,6 +1,6 @@
 # Boon design: analysis, research and refinements
 
-This is a design note on Shadow Blade's Hades-style boon system. It covers what the system did before this pass,
+This is a design note on Ronin's Revenge's Hades-style boon system. It covers what the system did before this pass,
 what other roguelites do, what changed and why, and what's left for later. The code map is in
 [ARCHITECTURE.md](ARCHITECTURE.md#boons-hades-style-upgrades).
 
@@ -43,7 +43,7 @@ numbers in-game.
 
 - **One boon per verb.** Attack, Special, Cast, Dash and Call each hold one boon. Taking another god's boon for a
   filled slot replaces it, and passives sit beside the slots. A boon changes how an existing button feels instead
-  of adding a button. Shadow Blade's three slots already mirror this. <https://hades.wiki.fextralife.com/Boons>
+  of adding a button. Ronin's Revenge's three slots already mirror this. <https://hades.wiki.fextralife.com/Boons>
 - **God identity through a status.**
   - Each god has one status, so whichever slot it lands in carries the god's identity: Aphrodite's Weak, Ares'
     Doom, Demeter's Chill, Dionysus' Hangover (caps at 5 stacks), Zeus' Jolted and chain lightning, Poseidon's

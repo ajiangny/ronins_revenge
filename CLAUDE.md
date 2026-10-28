@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Shadow Blade: Ronin vs. Samurai — a Space Invaders remake for CSCI 381/780 Assignment 1 (individual work).
+Ronin's Revenge — a Space Invaders remake for CSCI 381/780 Assignment 1 (individual work).
 Unity 6000.6.6f1, URP, new Input System. Single scene: `Assets/Scenes/SampleScene.unity`.
 
 **Read [ARCHITECTURE.md](ARCHITECTURE.md) first** to find a system: game flow, player combat, boons,

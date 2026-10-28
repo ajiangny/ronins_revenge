@@ -2413,7 +2413,7 @@ public class GameManager : MonoBehaviour
         TuneVoice(Stage.boss);
         activeBoss.Damaged += OnBossDamaged;
         Boss boss = activeBoss;
-        boss.Healed += () => ui.SetBossHealth(boss.BarFraction);
+        boss.Healed += () => ShowBossHealth(boss);
         activeBoss.Defeated += OnBossDefeated;
         // A boss with no phase card still changes music when its second phase starts; with one, this is a no-op.
         activeBoss.SecondPhaseBegan += PlayPhaseMusic;
@@ -2710,7 +2710,7 @@ public class GameManager : MonoBehaviour
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        ui.SetBossHealth(activeBoss.BarFraction);
+        ShowBossHealth(activeBoss);
         if (state != State.Playing || source == KillSource.Effect) return;
 
         if (source == KillSource.Reflected)
@@ -2744,7 +2744,7 @@ public class GameManager : MonoBehaviour
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        if (activeBoss != null) ui.SetBossHealth(activeBoss.BarFraction);
+        if (activeBoss != null) ShowBossHealth(activeBoss);
         if (state != State.Playing || source == KillSource.Effect) return;
 
         if (source == KillSource.Reflected)
@@ -2769,11 +2769,21 @@ public class GameManager : MonoBehaviour
         score += 750 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
-        if (activeBoss != null) ui.SetBossHealth(activeBoss.BarFraction);
+        if (activeBoss != null) ShowBossHealth(activeBoss);
         if (!hitStopping) StartCoroutine(HitStop(0.2f));
         CameraShake.Add(0.5f);
         effects.Wolf = null;
         activeWolf = null;
+    }
+
+    // The boss bar, in two halves while a boss fights beside a second foe (Shirogane and Kuon).
+    // Kuon's half is a spirit violet, apart from Shirogane's ice blue and the white of the damage trail.
+    static readonly Color KuonBarColour = new Color(0.72f, 0.6f, 1f);
+
+    void ShowBossHealth(Boss boss)
+    {
+        if (boss.SplitBar(out float left, out float right)) ui.SetBossHealthSplit(left, right, "SHIROGANE", "KUON", KuonBarColour);
+        else ui.SetBossHealth(boss.BarFraction);
     }
 
     void OnBossDefeated()

@@ -62,6 +62,16 @@ public class GameUI : MonoBehaviour
     Image bossFillImage;
     float shownBossHealth = 1f;
     float bossHealth = 1f;
+    // The bar's second half (Kuon's), shown only while the bar is split.
+    RectTransform bossFill2;
+    Image bossFill2Image;
+    RectTransform bossTrail2;
+    RectTransform bossDivider;
+    TextMeshProUGUI bossLabelLeft;
+    TextMeshProUGUI bossLabelRight;
+    bool bossSplit;
+    float shownBossHealth2 = 1f;
+    float bossHealth2 = 1f;
 
     RectTransform subtitlePlate;
     TextMeshProUGUI subtitleSpeaker;
@@ -253,8 +263,18 @@ public class GameUI : MonoBehaviour
         // The trailing white chunk of the boss bar catches up to the red, so big hits read as big.
         if (bossBar == null || !bossBar.activeSelf) return;
         shownBossHealth = Mathf.MoveTowards(shownBossHealth, bossHealth, Time.unscaledDeltaTime * 0.6f);
-        bossFill.anchorMax = new Vector2(bossHealth, 1f);
-        bossTrail.anchorMax = new Vector2(shownBossHealth, 1f);
+        float half = bossSplit ? 0.5f : 1f;
+        bossFill.anchorMax = new Vector2(bossHealth * half, 1f);
+        bossTrail.anchorMax = new Vector2(shownBossHealth * half, 1f);
+        bossFill2.gameObject.SetActive(bossSplit);
+        bossTrail2.gameObject.SetActive(bossSplit);
+        bossDivider.gameObject.SetActive(bossSplit);
+        bossLabelLeft.gameObject.SetActive(bossSplit);
+        bossLabelRight.gameObject.SetActive(bossSplit);
+        if (!bossSplit) return;
+        shownBossHealth2 = Mathf.MoveTowards(shownBossHealth2, bossHealth2, Time.unscaledDeltaTime * 0.6f);
+        bossFill2.anchorMax = new Vector2(0.5f + bossHealth2 * 0.5f, 1f);
+        bossTrail2.anchorMax = new Vector2(0.5f + shownBossHealth2 * 0.5f, 1f);
     }
 
     RectTransform bossTrail;
@@ -265,6 +285,7 @@ public class GameUI : MonoBehaviour
         bossName.color = colour;
         bossFillImage.color = colour;
         bossHealth = shownBossHealth = 1f;
+        bossSplit = false;
         bossBar.SetActive(true);
     }
 
@@ -276,7 +297,24 @@ public class GameUI : MonoBehaviour
 
     public void SetBossHealth(float fraction)
     {
+        bossSplit = false;
         bossHealth = Mathf.Clamp01(fraction);
+    }
+
+    // Two foes on one bar: the left half is the first, the right half the second, in its own colour, with a notch
+    // between them. The second half starts full when the split first appears.
+    public void SetBossHealthSplit(float left, float right, string leftName, string rightName, Color rightColour)
+    {
+        bossLabelLeft.text = leftName;
+        bossLabelLeft.color = bossFillImage.color;
+        bossLabelRight.text = rightName;
+        bossLabelRight.color = rightColour;
+        if (!bossSplit) shownBossHealth = Mathf.Min(shownBossHealth * 2f, 1f);
+        if (!bossSplit) shownBossHealth2 = 1f;
+        bossSplit = true;
+        bossHealth = Mathf.Clamp01(left);
+        bossHealth2 = Mathf.Clamp01(right);
+        bossFill2Image.color = rightColour;
     }
 
     // A speaker's dialogue portrait: their close-up, the point of it to centre on (0-1 across and down, their eyes),
@@ -613,6 +651,27 @@ public class GameUI : MonoBehaviour
         bossTrail.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
         bossFill = Stretch(CreateRect("Fill", back, Vector2.zero, Vector2.zero, Vector2.zero));
         bossFillImage = bossFill.gameObject.AddComponent<Image>();
+        bossTrail2 = Stretch(CreateRect("Trail2", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        bossTrail2.anchorMin = new Vector2(0.5f, 0f);
+        bossTrail2.gameObject.AddComponent<Image>().color = new Color(1f, 0.95f, 0.85f);
+        bossFill2 = Stretch(CreateRect("Fill2", back, Vector2.zero, Vector2.zero, Vector2.zero));
+        bossFill2.anchorMin = new Vector2(0.5f, 0f);
+        bossFill2Image = bossFill2.gameObject.AddComponent<Image>();
+        // The notch between the halves, in the frame's colour.
+        bossDivider = CreateRect("Divider", back, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(4, 18));
+        bossDivider.gameObject.AddComponent<Image>().color = new Color(0.9f, 0.88f, 0.85f, 1f);
+        // Each half's name under it, small, so the split reads without a legend.
+        bossLabelLeft = CreateText("LabelLeft", new Vector2(0.25f, 0f), new Vector2(0, -14), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        bossLabelRight = CreateText("LabelRight", new Vector2(0.75f, 0f), new Vector2(0, -14), new Vector2(440, 26), 18, TextAlignmentOptions.Top, frame);
+        foreach (TextMeshProUGUI label in new[] { bossLabelLeft, bossLabelRight })
+        {
+            label.characterSpacing = 3;
+            Style(label, TextStyle.Heading);
+            label.gameObject.SetActive(false);
+        }
+        bossTrail2.gameObject.SetActive(false);
+        bossFill2.gameObject.SetActive(false);
+        bossDivider.gameObject.SetActive(false);
         bossName = CreateText("BossName", new Vector2(0.5f, 0f), new Vector2(0, 20), new Vector2(904, 40), 30, TextAlignmentOptions.Bottom, frame);
         bossName.characterSpacing = 3;
         Style(bossName, TextStyle.Heading);

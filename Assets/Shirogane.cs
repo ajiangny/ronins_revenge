@@ -132,15 +132,29 @@ public class Shirogane : Boss
     // While Kuon stands, emptying her share of the bar only puts her down: Kuon fights on, enraged.
     protected override bool HoldOnAtZero => WolfFights;
     public override string PhaseTitle => "SHIROGANE & KUON";
+    // In phase 2 she and Kuon each have half of the old 220 (scaled by the oaths like every warlord), so either can
+    // fall first: her falling first is what enrages Kuon, which at 80 to her 140 almost never happened.
+    public const int SecondPhaseShare = 110;
+    protected override int SecondPhaseHealth => Mathf.RoundToInt(SecondPhaseShare * HealthScale);
     // From her phase break the bar is hers and Kuon's together. While her bar refills, Kuon's share fills with it.
     public override float BarFraction
     {
         get
         {
             if (!secondPhase || wolf == null) return HealthFraction;
-            float wolfShare = wolf.Armed ? wolf.Health : SpiritWolf.StartingHealth * HealthFraction;
-            return (Health + wolfShare) / (MaxHealth + SpiritWolf.StartingHealth);
+            float wolfShare = wolf.Armed ? wolf.Health : wolf.MaxHealth * HealthFraction;
+            return (Health + wolfShare) / (MaxHealth + wolf.MaxHealth);
         }
+    }
+
+    // The phase 2 bar in two halves, hers on the left and Kuon's on the right, so each one's health reads apart.
+    public override bool SplitBar(out float left, out float right)
+    {
+        left = right = 0f;
+        if (!secondPhase || wolf == null) return false;
+        left = Down ? 0f : HealthFraction;
+        right = !wolf.Armed ? HealthFraction : wolf.IsBroken ? 0f : wolf.HealthFraction;
+        return true;
     }
     Vector3 Hands => Centre + Vector3.down * (sprite.bounds.size.y * 0.1f);
 
@@ -2642,7 +2656,8 @@ public class SpiritWolf : MonoBehaviour, IHittable
 {
     public enum Presence { Silhouette, Present }
 
-    public const int StartingHealth = 80;
+    // Scaled by Boss.HealthScale (the oaths) when it is armed, like the warlords.
+    public const int StartingHealth = Shirogane.SecondPhaseShare;
     // A parried Fang of the Oath does no damage by Damage.Of; on Kuon it lands as a heavy blow and dazes it.
     const int ReflectedDamage = 20;
     const float DazeSeconds = 2f;
@@ -2654,8 +2669,9 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public event System.Action<Vector3, KillSource> Damaged;
     public event System.Action Broken;
 
+    public int MaxHealth { get; private set; } = StartingHealth;
     public int Health { get; private set; } = StartingHealth;
-    public float HealthFraction => (float)Health / StartingHealth;
+    public float HealthFraction => (float)Health / MaxHealth;
     // In the fight as a foe of its own, from her phase break until her fall.
     public bool Armed { get; private set; }
     public bool IsBroken { get; private set; }
@@ -2762,7 +2778,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
     // Takes the field with a full bar.
     public void Arm()
     {
-        Health = StartingHealth;
+        Health = MaxHealth = Mathf.RoundToInt(StartingHealth * Boss.HealthScale);
         IsBroken = false;
         Armed = true;
         den = transform.position;

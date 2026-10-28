@@ -92,6 +92,14 @@ public abstract class Boss : MonoBehaviour, IHittable
     public float HealthFraction => (float)Health / MaxHealth;
     // What the HUD bar shows: her own health, unless she shares the bar with a partner (Shirogane and Kuon).
     public virtual float BarFraction => HealthFraction;
+    // A bar shown in two halves (Shirogane and Kuon): each half's fraction, or false for one plain bar.
+    public virtual bool SplitBar(out float left, out float right)
+    {
+        left = right = 0f;
+        return false;
+    }
+    // What the bar refills to at the phase break; most bosses come back at full strength.
+    protected virtual int SecondPhaseHealth => MaxHealth;
     public bool IsDead { get; private set; }
     // Beaten while a partner fights on: out of the fight, can't be hit or targeted, but not yet fallen.
     public bool Down { get; private set; }
@@ -615,6 +623,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     // The first bar is empty: the fight stops, the cutscene plays while the bar fills back up, then phase 2 begins.
     IEnumerator BreakPhase()
     {
+        MaxHealth = SecondPhaseHealth;
         SecondPhase = true;
         PhaseBreaking = true;
         armorChip = 0;

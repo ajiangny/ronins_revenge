@@ -188,6 +188,8 @@ public partial class Shirogane : Boss
         bladeGlow = Projectile.CreateGlow(sprite.transform, 1.6f / transform.lossyScale.x, sprite.sortingOrder - 1, new Color(Cyan.r, Cyan.g, Cyan.b, 0.35f));
         bladeGlow.transform.localPosition = new Vector3(0f, -0.1f, 0.05f);
         StartCoroutine(PulseBlades());
+        // Summoned out of the coffin she comes alone: Kuon was never his.
+        if (Summoned) return;
         wolf = SpiritWolf.Create(this, wolfIdle, wolfHowl, wolfCharge, wolfVanish, wolfMaw, transform.lossyScale.x, sprite.sortingOrder - 1);
         wolf.SetPresence(SpiritWolf.Presence.Silhouette);
         wolf.Broken += OnWolfBroken;

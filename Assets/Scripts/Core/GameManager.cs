@@ -415,6 +415,7 @@ public partial class GameManager : MonoBehaviour
             if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(seconds));
         };
         Boss.RenameBar = name => ui.RenameBossBar(name);
+        Boss.Summon = SummonSoul;
         Boss.PoguruWarn = PoguruWarns;
         Boss.PoguruRest = () =>
         {

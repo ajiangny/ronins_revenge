@@ -41,6 +41,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Raised once the phase break is over and the second phase starts fighting.
     public event Action SecondPhaseBegan;
     public event Action<Boss, BossLine> Spoke;
+    // Raised when a summoned soul is taken off the field without being cut down.
+    public event Action Banished;
 
     // Set by the GameManager for a boss with phase-two portraits: plays a title card for the new phase (its own
     // art, epithet and the Phase line) and finishes when the card has. Null leaves the phase line as a subtitle.
@@ -54,6 +56,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // and hovers over a spot to point it out, or at the ronin's shoulder without one; PoguruRest sends him back in.
     public static System.Action<string, Vector3?> PoguruWarn;
     public static System.Action PoguruRest;
+    // Set by the GameManager: raises a boss's soul out of Kagetsune's coffin at the given x, at a share of its health,
+    // to fight beside him. It enters and begins on its own; null when it can't be raised.
+    public static System.Func<BossKind, float, Boss> Summon;
 
     public abstract string Title { get; }
     // The name on the bar from the phase card on (Shirogane shares hers with Kuon).
@@ -112,6 +117,9 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Bosses with a second phase have two bars: emptying the first starts a phase break that refills it.
     protected virtual bool HasSecondPhase => false;
     public bool SecondPhase { get; private set; }
+    // A soul Kagetsune has dragged out of the coffin: it fights with its first phase only (an empty bar is its end,
+    // not a phase break) and falls as a soul, without last words or its own defeat scene.
+    public bool Summoned { get; set; }
     // True from the moment the first bar empties until phase 2 begins; nothing hurts the boss meanwhile.
     protected bool PhaseBreaking { get; private set; }
     // How long the bar takes to refill, after the break's first beat.
@@ -569,6 +577,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         Arrow arrow = Instantiate(arrowPrefab, position, Quaternion.identity);
         arrow.Launch(velocity, 2.5f);
+        // A summoned soul's shots and the Emperor's skulls share the field: they fly through each other.
+        if (Summoned) arrow.PassesShots = true;
         return arrow;
     }
 
@@ -687,7 +697,7 @@ public abstract class Boss : MonoBehaviour, IHittable
 
         if (Health <= 0)
         {
-            if (HasSecondPhase && !SecondPhase) StartCoroutine(BreakPhase());
+            if (HasSecondPhase && !SecondPhase && !Summoned) StartCoroutine(BreakPhase());
             else if (HoldOnAtZero) GoDown();
             else Die();
             return;
@@ -764,8 +774,52 @@ public abstract class Boss : MonoBehaviour, IHittable
         OnCleared();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         Defeated?.Invoke();
+        if (Summoned)
+        {
+            StartCoroutine(SoulFall(false));
+            return;
+        }
         Speak(BossLine.Defeat);
         StartCoroutine(Fall());
+    }
+
+    // Takes a summoned soul off the field without a defeat: the Emperor drags it back into the coffin, or his own fall
+    // takes it with him. Defeated is not raised.
+    public void Banish()
+    {
+        if (IsDead) return;
+        IsDead = true;
+        fighting = false;
+        StopAllCoroutines();
+        ClearTransient();
+        ClearLaunched();
+        OnCleared();
+        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
+        Banished?.Invoke();
+        StartCoroutine(SoulFall(true));
+    }
+
+    // A summoned soul's end: cut down, it flares white and dissolves upward; pulled back, it thins into teal and is
+    // drawn down toward the coffin.
+    IEnumerator SoulFall(bool pulledBack)
+    {
+        Color soul = new Color(0.3f, 1f, 0.82f);
+        sprite.transform.localRotation = Quaternion.identity;
+        Fx.Play(pulledBack ? Fx.SmokePuff : Fx.Impact, Centre, soul, 2.2f);
+        if (!pulledBack) Debris.BurstSprites(Centre, art.deathParticles, soul, 24, 1.1f, 7f);
+        Vector3 from = anchor;
+        const float Seconds = 1.1f;
+        for (float t = 0; t < Seconds; t += Time.deltaTime)
+        {
+            float k = t / Seconds;
+            anchor = from + (pulledBack ? Vector3.down : Vector3.up) * (0.8f * k * k);
+            body.MovePosition(anchor);
+            Color c = Color.Lerp(bodyTint, pulledBack ? soul : Color.white, Mathf.Min(1f, k * 2f));
+            c.a = 1f - k;
+            sprite.color = c;
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 
     // Overridable defeat: by default she staggers, kneels and fades out in a burst of petals.

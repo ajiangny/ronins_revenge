@@ -40,10 +40,11 @@ public partial class GameManager
         }
         Sfx.Play(Sfx.FrostChill, 0.8f, 0.5f);
 
+        ClearSummons();
         activeBoss = CreateBoss(Stage.boss, post + Vector3.up * 5f);
         TuneVoice(Stage.boss);
-        activeBoss.Damaged += OnBossDamaged;
         Boss boss = activeBoss;
+        boss.Damaged += (point, source) => OnBossDamaged(boss, point, source);
         boss.Healed += () => ShowBossHealth(boss);
         boss.PoiseChanged += ui.SetBossPoise;
         activeBoss.Defeated += OnBossDefeated;
@@ -118,13 +119,76 @@ public partial class GameManager
     Conversation Unwritten(BossLine line) =>
         new Conversation { Id = $"{Stage.boss}_{line}", Speaker = Stage.boss.ToString(), BuiltIn = line };
 
-    Boss CreateBoss(BossKind kind, Vector3 position)
+    // A soul Kagetsune drags out of the coffin comes back with this share of its health.
+    const float SummonHealth = 0.3f;
+    // The souls fighting beside the Emperor; they take the usual boss row, above where he stands.
+    readonly List<Boss> summons = new List<Boss>();
+
+    // Raises a boss's soul to fight beside the Emperor (Boss.Summon): its first phase only, at a share of its health,
+    // gliding down to the boss row at x. It shares his bar while it stands and hits back like any boss; its fall
+    // isn't the stage's.
+    Boss SummonSoul(BossKind kind, float x)
     {
+        if (state != State.Playing || activeBoss == null) return null;
+        Camera cam = Camera.main;
+        Vector3 post = new Vector3(x, CameraShake.Center.y + cam.orthographicSize - bossDepth, 0);
+        Boss soul = CreateBoss(kind, post + Vector3.up * 4f, SummonHealth);
+        soul.Summoned = true;
+        soul.Damaged += (point, source) => OnBossDamaged(soul, point, source);
+        soul.Spoke += OnBossSpoke;
+        soul.Defeated += () =>
+        {
+            score += 500 * (stageIndex + 1);
+            highScore = Mathf.Max(highScore, score);
+            ui.SetScore(score);
+            if (!hitStopping) StartCoroutine(HitStop(0.12f));
+            ShowBossHealth(activeBoss);
+        };
+        soul.Banished += () => ShowBossHealth(activeBoss);
+        summons.Add(soul);
+        effects.Summons.Add(soul);
+        StartCoroutine(RaiseSoul(soul, post));
+        return soul;
+    }
+
+    IEnumerator RaiseSoul(Boss soul, Vector3 post)
+    {
+        yield return soul.Enter(post, 1f);
+        if (soul != null && !soul.IsDead && state == State.Playing) soul.Begin(ronin, army.samuraiPrefab.arrowPrefab);
+    }
+
+    // The soul standing beside the boss, if any.
+    Boss LiveSummon()
+    {
+        summons.RemoveAll(s => s == null || s.IsDead);
+        effects.Summons.RemoveAll(s => s == null || s.IsDead);
+        return summons.Count > 0 ? summons[0] : null;
+    }
+
+    void ClearSummons()
+    {
+        foreach (Boss soul in summons) if (soul != null) soul.Banish();
+        summons.Clear();
+        effects.Summons.Clear();
+    }
+
+    // Which boss a speaker is, for its own voice clips.
+    static BossKind KindOf(Boss boss) => boss switch
+    {
+        Utsusemi => BossKind.Utsusemi,
+        Shirogane => BossKind.Shirogane,
+        Kagetsune => BossKind.Kagetsune,
+        _ => BossKind.Benibana,
+    };
+
+    Boss CreateBoss(BossKind kind, Vector3 position, float healthScale = 1f)
+    {
+        int Health(int full) => Mathf.Max(1, Mathf.RoundToInt(full * healthScale));
         switch (kind)
         {
             case BossKind.Utsusemi:
                 bool noArt = utsusemiArt == null;
-                Utsusemi automaton = Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Utsusemi.StartingHealth,
+                Utsusemi automaton = Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Health(Utsusemi.StartingHealth),
                     position, noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
                 if (!noArt)
                 {
@@ -139,7 +203,7 @@ public partial class GameManager
                 return automaton;
             case BossKind.Kagetsune:
                 bool hollow = kagetsuneArt == null;
-                Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Kagetsune.StartingHealth,
+                Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Health(Kagetsune.StartingHealth),
                     position, hollow ? new Color(0.55f, 0.42f, 0.32f) : Color.white);
                 if (!hollow) emperor.SetPhaseArt(kagetsunePhaseArt);
                 // The souls he can drag out of the coffin, drawn in their own art at their own size.
@@ -150,7 +214,7 @@ public partial class GameManager
             case BossKind.Shirogane:
                 bool ghostly = shiroganeArt == null;
                 Shirogane blade = Boss.Create<Shirogane>(ghostly ? army.samuraiByRow[Mathf.Min(1, army.samuraiByRow.Length - 1)] : shiroganeArt,
-                    shiroganeScale, Shirogane.StartingHealth, position, ghostly ? new Color(0.6f, 0.9f, 1f) : Color.white);
+                    shiroganeScale, Health(Shirogane.StartingHealth), position, ghostly ? new Color(0.6f, 0.9f, 1f) : Color.white);
                 if (!ghostly)
                 {
                     blade.SetDashFrames(shiroganeDash);
@@ -164,7 +228,7 @@ public partial class GameManager
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
                 Color tint = standIn ? new Color(1f, 0.55f, 0.6f) : Color.white;
-                Benibana warlord = Boss.Create<Benibana>(art, benibanaScale, Benibana.StartingHealth, position, tint);
+                Benibana warlord = Boss.Create<Benibana>(art, benibanaScale, Health(Benibana.StartingHealth), position, tint);
                 if (!standIn) warlord.SetPhaseArt(benibanaPhaseArt);
                 return warlord;
         }
@@ -322,7 +386,7 @@ public partial class GameManager
                 or BossLine.EchoBenibana or BossLine.EchoUtsusemi or BossLine.EchoShirogane;
         if (!full && voice.isPlaying && (speakingFullLine || line != BossLine.Stagger)) return;
 
-        AudioClip clip = VoiceFor(Stage.boss).Take(line, lastTakes.TryGetValue(line, out int last) ? last : -1, out int take);
+        AudioClip clip = VoiceFor(KindOf(boss)).Take(line, lastTakes.TryGetValue(line, out int last) ? last : -1, out int take);
         lastTakes[line] = take;
         string text = boss.Line(line, take);
         float seconds = clip != null ? clip.length : full ? 2.5f : 1.2f;
@@ -338,7 +402,7 @@ public partial class GameManager
         if (!string.IsNullOrEmpty(text)) ui.ShowSubtitle(boss.Speaker(line), text, boss.SpeakerColour(line), seconds + 0.6f);
     }
 
-    void OnBossDamaged(Vector3 point, KillSource source)
+    void OnBossDamaged(Boss hit, Vector3 point, KillSource source)
     {
         score += 10 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
@@ -349,9 +413,9 @@ public partial class GameManager
         if (source == KillSource.Reflected)
         {
             // Her own slash breaks her stance: a heavy hit-stop and a burst of red petals.
-            Debris.BurstSprites(point, ronin.art.deathParticles, activeBoss.Colour, 24, 1.2f, 8f);
+            Debris.BurstSprites(point, ronin.art.deathParticles, hit.Colour, 24, 1.2f, 8f);
             Fx.Play(Fx.BeniPetals, point, Color.white, 2.2f);
-            Fx.Play(Fx.Impact, point, activeBoss.Colour, 2.5f);
+            Fx.Play(Fx.Impact, point, hit.Colour, 2.5f);
             CameraShake.Add(0.45f);
             if (!hitStopping) StartCoroutine(HitStop(0.15f));
         }
@@ -360,7 +424,7 @@ public partial class GameManager
             Color spark = source == KillSource.Shuriken ? ronin.ShurikenGlow : source == KillSource.Deflected ? ronin.ParryColor : ronin.AttackGlow;
             Fx.Play(Fx.Impact, point + (Vector3)Random.insideUnitCircle * 0.6f, Color.Lerp(Color.white, spark, 0.6f), 1.2f);
         }
-        effects.OnBossHit(point, source);
+        effects.OnBossHit(hit, point, source);
     }
 
     // Kuon takes the field at her phase break: it shares her bar, and it can be hit until it breaks.
@@ -415,6 +479,13 @@ public partial class GameManager
 
     void ShowBossHealth(Boss boss)
     {
+        if (boss == null) return;
+        // A soul summoned beside the Emperor takes the right half of his bar while it stands.
+        if (boss == activeBoss && LiveSummon() is Boss soul)
+        {
+            ui.SetBossHealthSplit(boss.BarFraction, soul.HealthFraction, boss.Title, soul.Title, soul.Colour);
+            return;
+        }
         if (boss.SplitBar(out float left, out float right)) ui.SetBossHealthSplit(left, right, "SHIROGANE", "KUON", KuonBarColour);
         else ui.SetBossHealth(boss.BarFraction);
     }

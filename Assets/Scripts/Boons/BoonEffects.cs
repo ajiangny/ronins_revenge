@@ -40,6 +40,19 @@ public class BoonEffects
     // The boss being fought, if any. Effects that would hit samurai hit the boss instead while she stands alone.
     public Boss Boss { get; set; }
     bool BossFight => Boss != null && !Boss.IsDead;
+    // The souls Kagetsune has summoned to fight beside him: bosses in their own right, hit by the same effects.
+    public readonly List<Boss> Summons = new List<Boss>();
+    // Every boss standing: the one being fought and any souls fighting beside him.
+    IEnumerable<Boss> Bosses
+    {
+        get
+        {
+            if (BossFight) yield return Boss;
+            foreach (Boss summon in Summons) if (summon != null && !summon.IsDead) yield return summon;
+        }
+    }
+    // A boss that's still standing, when the thing struck is one.
+    static Boss StandingBoss(IHittable target) => target is Boss boss && boss != null && !boss.IsDead ? boss : null;
     // Shirogane's wolf, Kuon, while it can be fought: the damage boons land on it too, but frost doesn't hold a spirit.
     public SpiritWolf Wolf { get; set; }
     bool WolfFight => Wolf != null && Wolf.Armed && !Wolf.IsBroken;
@@ -136,7 +149,7 @@ public class BoonEffects
     public void OnUltimateStarted(Vector3 at)
     {
         if (!loadout.Has(BoonId.FrostShadow, out float seconds)) return;
-        if (BossFight) Boss.Freeze(seconds * 0.5f * loadout.FreezeMultiplier);
+        if (BossFight) foreach (Boss boss in Bosses) boss.Freeze(seconds * 0.5f * loadout.FreezeMultiplier);
         else if (army.Remaining > 0) army.Freeze(seconds * loadout.FreezeMultiplier);
         else return;
         if (Fx.Play(Fx.FrostWave, at, Color.white, 3.5f) == null) ElementFx.Glow(at, Frost, 1f, 6f, 0.4f);
@@ -152,47 +165,48 @@ public class BoonEffects
         else Blast(at, radius + 1f);
     }
 
-    // The kill effects, triggered by hits on the boss: fire bursts on her (and burns her smoke), frost slows her,
-    // lightning arcs into her.
-    public void OnBossHit(Vector3 point, KillSource source)
+    // The kill effects, triggered by hits on a boss (the one fought, or a soul summoned beside him): fire bursts on
+    // her (and burns her smoke), frost slows her, lightning arcs into her.
+    public void OnBossHit(Boss hit, Vector3 point, KillSource source)
     {
         if (!BossFight) return;
+        Boss boss = hit != null && !hit.IsDead ? hit : Boss;
         float value;
         switch (source)
         {
             case KillSource.Slash:
-                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) BossBlast(point, value);
+                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) BossBlast(point, value, boss);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     // A blow on the frozen boss shatters the ice for an extra point of damage; otherwise she freezes.
-                    if (Boss.Frozen)
+                    if (boss.Frozen)
                     {
                         ShatterFx(point, 1.4f);
-                        Boss.TakeHit(1, KillSource.Effect);
+                        boss.TakeHit(1, KillSource.Effect);
                     }
                     else if (Time.time >= nextBossFrost)
                     {
                         nextBossFrost = Time.time + BossFrostCooldown;
-                        Boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
+                        boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
                         Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
                         Sfx.Play(Sfx.FrostChill);
                     }
                 }
-                if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
+                if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, boss.Centre, boss);
                 break;
             case KillSource.Shuriken:
-                if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value);
+                if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value, boss);
                 break;
             case KillSource.Clone:
                 if (Random.value >= CloneBossShare) break;
-                if (loadout.Has(BoonId.PyreShadow, out value)) BossBlast(point, value);
-                if (loadout.Has(BoonId.FrostShadow, out value) && !Boss.Frozen && Time.time >= nextBossFrost)
+                if (loadout.Has(BoonId.PyreShadow, out value)) BossBlast(point, value, boss);
+                if (loadout.Has(BoonId.FrostShadow, out value) && !boss.Frozen && Time.time >= nextBossFrost)
                 {
                     nextBossFrost = Time.time + BossFrostCooldown;
-                    Boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
+                    boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
                     Fx.Play(Fx.IceBurst, point, Color.white, 1.2f);
                 }
-                if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Boss.Centre, Boss);
+                if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, boss.Centre, boss);
                 break;
         }
         if (Damage.Procs(source)) BeatDrum();
@@ -204,16 +218,16 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.BurningRiposte, out value))
         {
-            if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, value);
+            if (BossFight && StandingBoss(target) is Boss struck) BossBlast(point, value, struck);
             else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, value);
             else if (!BossFight) Blast(point, value);
         }
         // Frozen Riposte shards encase the samurai they hit themselves (Projectile.FreezeOnHit); only the boss is left.
         if (loadout.Has(BoonId.FrozenRiposte, out _))
         {
-            if (BossFight && ReferenceEquals(target, Boss))
+            if (BossFight && StandingBoss(target) is Boss struck)
             {
-                Boss.Freeze(BossShardFreezeSeconds * loadout.FreezeMultiplier);
+                struck.Freeze(BossShardFreezeSeconds * loadout.FreezeMultiplier);
                 Fx.Play(Fx.IceBurst, point, Color.white, 1f);
             }
         }
@@ -224,7 +238,7 @@ public class BoonEffects
         // Thunder Shuriken: lightning arcs off the blade into what it flies past, boss included.
         if (loadout.Has(BoonId.ThunderShuriken, out float arcChance) && shuriken != null)
         {
-            shuriken.gameObject.AddComponent<ShurikenStorm>().Begin(army, () => BossFight ? Boss : null, ShurikenArcRadius, arcChance,
+            shuriken.gameObject.AddComponent<ShurikenStorm>().Begin(army, () => Bosses, ShurikenArcRadius, arcChance,
                 (from, target, point) => Strike(from, point, target, chain: true));
         }
         if (BossFight)
@@ -253,7 +267,7 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
-            Boss.Freeze(value * loadout.FreezeMultiplier);
+            foreach (Boss boss in Bosses) boss.Freeze(value * loadout.FreezeMultiplier);
             if (Fx.Play(Fx.FrostWave, Boss.Centre, Color.white, 3f) == null) ElementFx.Glow(Boss.Centre, Frost, 1f, 5f, 0.4f);
             CameraShake.Add(0.2f);
             Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
@@ -355,15 +369,16 @@ public class BoonEffects
     }
 
     // Fire on the boss: the burst, plus one point of damage and a hole burnt in any smoke around her.
-    void BossBlast(Vector3 position, float radius)
+    void BossBlast(Vector3 position, float radius, Boss target = null)
     {
+        Boss boss = target != null && !target.IsDead ? target : Boss;
         radius += loadout.Value(BoonId.Wildfire);
         if (Fx.Play(Fx.Explosion, position, Color.white, radius / 0.9f) == null) ElementFx.Blast(position, radius, Fire, ronin.art.deathParticles);
         CameraShake.Add(0.12f);
         Sfx.Play(Sfx.FireBlast);
-        Boss.Burn(position, radius);
+        boss.Burn(position, radius);
         BurnArrows(position, radius);
-        Boss.TakeHit(Boss.Frozen && loadout.Find(BoonId.ThermalShock) != null ? 2 : 1, KillSource.Effect);
+        boss.TakeHit(boss.Frozen && loadout.Find(BoonId.ThermalShock) != null ? 2 : 1, KillSource.Effect);
     }
 
     // Fire on Kuon: the burst and one point of damage.
@@ -432,12 +447,12 @@ public class BoonEffects
             Sfx.Play(Sfx.LightningStrike);
         }
 
-        bool onBoss = BossFight && ReferenceEquals(target, Boss);
-        if (onBoss)
+        Boss struck = BossFight ? StandingBoss(target) : null;
+        if (struck != null)
         {
             // Plasma Arc burns as it strikes; Superconductor doubles through a frozen boss.
             int damage = loadout.Find(BoonId.PlasmaArc) != null ? 2 : 1;
-            if (Boss.Frozen && loadout.Find(BoonId.Superconductor) != null) damage *= 2;
+            if (struck.Frozen && loadout.Find(BoonId.Superconductor) != null) damage *= 2;
             target.TakeHit(damage, KillSource.Effect);
             return;
         }
@@ -461,7 +476,7 @@ public class BoonEffects
     // Kindling's fireball has struck something: it bursts in a great blast (on the boss, a boss blast).
     public void OnFireballImpact(Vector3 point, IHittable target)
     {
-        if (BossFight && ReferenceEquals(target, Boss)) BossBlast(point, KindlingRadius);
+        if (BossFight && StandingBoss(target) is Boss struck) BossBlast(point, KindlingRadius, struck);
         else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, KindlingRadius);
         else if (!BossFight) Blast(point, KindlingRadius);
     }

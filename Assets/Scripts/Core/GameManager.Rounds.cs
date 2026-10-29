@@ -327,6 +327,7 @@ public partial class GameManager
         if (activeScout != null && activeScout.GetComponentInChildren<Collider>() is { enabled: true }) enemies.Add(activeScout.transform);
         if (activeBoss != null && !activeBoss.IsDead && !activeBoss.Down) enemies.Add(activeBoss.transform);
         if (activeWolf != null && activeWolf.Targetable) enemies.Add(activeWolf.transform);
+        foreach (Boss soul in summons) if (soul != null && !soul.IsDead) enemies.Add(soul.transform);
         return enemies.Count > 0 ? enemies[Random.Range(0, enemies.Count)] : null;
     }
 }

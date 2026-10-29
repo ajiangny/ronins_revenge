@@ -131,6 +131,7 @@ public partial class GameManager
         Save.EndRun(cleared, killer, cause, loadout.DominantElement);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
+        ClearSummons();
         Music.Stop(0.6f);
         Sfx.Play(sting);
         Time.timeScale = 1f;

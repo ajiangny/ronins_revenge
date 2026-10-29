@@ -22,8 +22,10 @@ suit with a glass bowl helmet, an Asagi koi, a cobalt-rimmed ruffled glass vase,
 coat holding a rack of vials.
 
 - **The head is a glass bowl.** Round, clear, full of water, with a ruffled cobalt lip like a vase. Her koi swims
-  inside and looks out at you: blue net scales on a white body, a white face, orange cheek patches, long white
-  barbels that hang like an old woman's whiskers, and one eye gone a little cloudy with age. When she's thinking
+  inside and looks out at you, and she is plainly a soul, not a pet: half-translucent and lit from within, blue net
+  scales glowing faintly on a pale body you can almost see through, a white face, orange cheek patches like embers,
+  fins and tail trailing off into wisps of soft sea-blue spirit light, and one eye gone a little cloudy with age. Her
+  barbels curl like an old woman's whiskers and **stay inside the glass**: nothing of the koi ever crosses the bowl. When she's thinking
   she turns a slow circle. When she laughs, bubbles.
 - **Old-lady touches.** A pair of gold pince-nez clipped to the bowl's rim, over nothing in particular. A plain
   wooden comb tucked into the ruffle, where a bun would be. A brass collar fitting where the bowl sits on the neck,

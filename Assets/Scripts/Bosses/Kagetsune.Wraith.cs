@@ -509,7 +509,7 @@ public partial class Kagetsune
             Toll(1f, 0.7f + 0.05f * wave);
             CameraShake.Add(0.3f);
             TimeRipple.Emit(new Vector3(CameraShake.Center.x, TopOfScreen - 1f, 0), 10f, 0.4f, 0.5f);
-            for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) TollRing(bells[i].transform.position, 2.5f, 0.7f);
+            for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) TollRing(bells[i].transform.position + Vector3.down * HangingBellHeight * 0.55f, 3.6f, 0.7f);
             for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) StartCoroutine(Swing(bells[i]));
             var columns = new List<SpriteRenderer>();
             foreach (float x in xs)
@@ -554,16 +554,19 @@ public partial class Kagetsune
 
     const float ColumnSeconds = 0.25f;
 
+    // How tall the ultimate's hanging bells are drawn: big enough to read as bells from the bottom of the field.
+    const float HangingBellHeight = 2.3f;
+
     // A bell hung across the top for the ultimate: the art on its cord, or a bronze glow without it.
     SpriteRenderer HangBell(Vector3 at)
     {
         Sprite[] frames = Fx.Frames(Fx.KageBell);
-        if (frames == null) return Glowing(at + Vector3.down * 0.6f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.35f), 1.2f, 57);
+        if (frames == null) return Glowing(at + Vector3.down * HangingBellHeight * 0.5f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.35f), HangingBellHeight, 57);
         var bell = new GameObject("Bell").AddComponent<SpriteRenderer>();
         bell.sprite = frames[0];
         bell.sortingOrder = 57;
         bell.transform.position = at;
-        bell.transform.localScale = Vector3.one * (1.3f / frames[0].bounds.size.y);
+        bell.transform.localScale = Vector3.one * (HangingBellHeight / frames[0].bounds.size.y);
         bell.color = BellColour(bell, 0.5f);
         transient.Add(bell.gameObject);
         return bell;

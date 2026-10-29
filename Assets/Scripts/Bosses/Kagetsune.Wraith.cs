@@ -373,6 +373,8 @@ public partial class Kagetsune
         coffin.MakeReflectable(transform, setPiece: true);
         coffinThrownAt = Time.time;
         StartCoroutine(Pursue(coffin, 9f, face: false));
+        StartCoroutine(Streak(coffin, new Color(Teal.r, Teal.g, Teal.b, 0.4f)));
+        HitFlash.Flash(sprite, 0.08f);
         // Seal-darts fall either side of him, so running wide only trades the coffin for the darts.
         foreach (float offset in new[] { -2.6f, 2.6f, -5.2f, 5.2f })
         {
@@ -478,6 +480,8 @@ public partial class Kagetsune
 
             Toll(1f, 0.7f + 0.05f * wave);
             CameraShake.Add(0.3f);
+            TimeRipple.Emit(new Vector3(CameraShake.Center.x, TopOfScreen - 1f, 0), 10f, 0.4f, 0.5f);
+            for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) TollRing(bells[i].transform.position, 2.5f, 0.7f);
             for (int i = 0; i < LaneCount; i++) if (i != safe && bells[i] != null) StartCoroutine(Swing(bells[i]));
             var columns = new List<SpriteRenderer>();
             foreach (float x in xs)

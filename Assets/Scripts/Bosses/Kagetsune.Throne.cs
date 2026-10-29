@@ -206,6 +206,8 @@ public partial class Kagetsune
             yield return Wait(0.22f);
             Toll(0.75f, 1f - 0.05f * i);
             Fx.Play(Fx.Impact, Waist, Teal, 1.6f);
+            TollRing(Waist, 5f);
+            TimeRipple.Emit(Waist, 3f, 0.25f, 0.4f);
             Drop(bell);
             yield return BulletHell.Room(12);
             if (secondPhase) BulletHell.Fan(Skull, Waist, ronin.Bounds.center, 3, 10f, 6.5f);
@@ -376,7 +378,13 @@ public partial class Kagetsune
             foreach (SpriteRenderer c in curtains) if (c != null) c.color = new Color(c.color.r, c.color.g, c.color.b, 0.08f * (1f - t / 0.5f));
             yield return null;
         }
-        foreach (SpriteRenderer s in strips) if (s != null) { Fx.Play(Fx.Impact, s.transform.position, SealRed, 0.6f); Destroy(s.gameObject); }
+        // Each strip burns away in seal-fire.
+        foreach (SpriteRenderer s in strips)
+        {
+            if (s == null) continue;
+            if (Fx.Play(Fx.KageOfudaBurn, s.transform.position, Color.white, 1.4f) == null) Fx.Play(Fx.Impact, s.transform.position, SealRed, 0.6f);
+            Destroy(s.gameObject);
+        }
         foreach (SpriteRenderer c in curtains) if (c != null) Destroy(c.gameObject);
     }
 
@@ -408,14 +416,30 @@ public partial class Kagetsune
         SpriteRenderer guide = Bar(Chest, BeamEnd(Chest, new Vector3(from, GroundY, 0), out _), 0.06f, new Color(Teal.r, Teal.g, Teal.b, 0.5f));
         if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 0.4f, 0.8f);
         else Sfx.Play(Sfx.LanternCharge, 0.8f, 0.7f);
+        // The flare at his chest: the souls' fire gathering, then pouring out of it while the beam burns.
+        FxPlayer flare = Fx.Play(Fx.KageWailFlare, Chest, new Color(1f, 1f, 1f, 0f), 1f, null, 58);
+        if (flare != null) transient.Add(flare.gameObject);
+        SpriteRenderer dim = Darkness();
+        HitFlash.Flash(sprite, 0.1f);
         for (float t = 0; t < 1f; t += Time.deltaTime * Tempo)
         {
             gather.transform.localScale = Vector3.one * Mathf.Lerp(1f, 4f, t);
             gather.color = new Color(Teal.r, Teal.g, Teal.b, 0.7f * t);
+            if (flare != null)
+            {
+                flare.transform.position = Chest + Vector3.back * 0.3f;
+                flare.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, 2.2f, t * t);
+                flare.Color = new Color(1f, 1f, 1f, t);
+            }
+            dim.color = new Color(0f, 0.02f, 0.02f, 0.25f * t);
             yield return null;
         }
         Drop(gather);
         Drop(guide);
+        TimeRipple.Emit(Chest, 5f, 0.5f, 0.5f);
+        // A splash where the beam meets the ground.
+        FxPlayer splash = Fx.Play(Fx.KageWailFlare, Chest, Color.white, 1.2f, null, 58);
+        if (splash != null) transient.Add(splash.gameObject);
 
         var glow = Bar(Chest, Chest, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 53);
         glow.sprite = ProceduralSprites.Glow;
@@ -426,7 +450,10 @@ public partial class Kagetsune
         CameraShake.Add(0.3f);
         int passes = secondPhase ? 2 : 1;
         float sweep = secondPhase ? 1.9f : 2.6f;
-        float nextBurn = 0, lastFire = from, nextEmber = 0;
+        float nextBurn = 0, lastFire = from, nextEmber = 0, nextRumble = 0;
+        // The beam bursts open past its full width and settles, and on its last stretch pinches shut.
+        const float OpenSeconds = 0.18f, CloseSeconds = 0.2f;
+        float burned = 0f, total = passes * sweep;
         for (int pass = 0; pass < passes; pass++)
         {
             float a = pass % 2 == 0 ? from : to, b = pass % 2 == 0 ? to : from;
@@ -443,9 +470,28 @@ public partial class Kagetsune
                 float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
                 if (faltering) flicker *= Random.value < 0.5f ? 0.25f : 0.7f;
                 if (guttered) flicker = 0.06f;
-                Stretch(glow, start, end, 1.8f * flicker);
-                Stretch(body, start, end, 0.5f * flicker);
-                Stretch(core, start, end, guttered ? 0.02f : 0.16f);
+                burned += Time.deltaTime * Tempo;
+                float open = burned < OpenSeconds ? Mathf.Lerp(1.8f, 1f, burned / OpenSeconds)
+                    : total - burned < CloseSeconds ? Mathf.Max(0f, (total - burned) / CloseSeconds) : 1f;
+                Stretch(glow, start, end, 1.8f * flicker * open);
+                Stretch(body, start, end, 0.5f * flicker * open);
+                Stretch(core, start, end, (guttered ? 0.02f : 0.16f) * open);
+                if (flare != null)
+                {
+                    flare.transform.position = start + Vector3.back * 0.3f;
+                    flare.transform.localScale = Vector3.one * 2.2f * (guttered ? 0.4f : open);
+                }
+                if (splash != null)
+                {
+                    splash.transform.position = end + Vector3.back * 0.3f;
+                    splash.Color = new Color(1f, 1f, 1f, guttered ? 0f : 1f);
+                }
+                // A low rumble the whole time it burns.
+                if (Time.time >= nextRumble && !guttered)
+                {
+                    nextRumble = Time.time + 0.1f;
+                    CameraShake.Add(0.05f);
+                }
                 if (!guttered) HitIfCrossed(start, end);
                 // Hardened, the beam sheds embers as it drags: soul-skulls that drift down behind it.
                 float emberY = Row + 3.5f;
@@ -475,6 +521,9 @@ public partial class Kagetsune
         Drop(glow);
         Drop(body);
         Drop(core);
+        if (flare != null) Drop(flare);
+        if (splash != null) Drop(splash);
+        StartCoroutine(FadeOut(dim, 0.4f));
     }
 
     // The Last Toll, parry-only: a lock-on rings the ronin, then a great bronze bell drops on him, steered onto
@@ -496,7 +545,9 @@ public partial class Kagetsune
         bell.MakeUnbreakable();
         bell.MakeReflectable(transform, setPiece: true);
         StartCoroutine(Pursue(bell, 8.5f, face: false));
+        StartCoroutine(Streak(bell, new Color(Bronze.r, Bronze.g, Bronze.b, 0.4f)));
         Toll(1f, 0.5f);
+        TollRing(bell.transform.position, 6f);
         if (Hardened) ClosingRing((bell.transform.position.y - Row) / 8.5f);
         yield return Wait(1.6f);
     }

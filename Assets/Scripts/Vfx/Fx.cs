@@ -101,12 +101,10 @@ public static class Fx
     public const string KageChain = "Kage_Chain";
     public const string KageSoulPillar = "Kage_SoulPillar";
     public const string KageShockwave = "Kage_Shockwave";
-    // His polish: a bronze sound ring off each toll, the Wail's flare, scrolling body and splash, a chain bursting, an
-    // ofuda burning away, the soul-fire he burns in once the chains snap, his lock-on reticle and a freed soul.
+    // His polish: a bronze sound ring off each toll, the Wail's flare, a chain bursting, an ofuda burning away, the
+    // soul-fire he burns in once the chains snap, his lock-on reticle and a freed soul.
     public const string KageTollRing = "Kage_TollRing";
     public const string KageWailFlare = "Kage_WailFlare";
-    public const string KageWailBeam = "Kage_WailBeam";
-    public const string KageWailHit = "Kage_WailHit";
     public const string KageChainSnap = "Kage_ChainSnap";
     public const string KageOfudaBurn = "Kage_OfudaBurn";
     public const string KageSoulFire = "Kage_SoulFire";

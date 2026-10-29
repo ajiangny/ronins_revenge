@@ -116,7 +116,18 @@ public static class FxSetup
         (Fx.KageBell, 8, true, new Vector2(0.5f, 1f)),
         (Fx.KageChain, 8, true, Centre),
         (Fx.KageSoulPillar, 8, true, Centre),
-        (Fx.KageShockwave, 8, false, new Vector2(0.5f, 0.2f)),
+        // The burst under a slam, its strike point at the middle of the ground ring.
+        (Fx.KageShockwave, 14, false, Centre),
+        // His polish: the toll's sound ring, a chain bursting (its snap point left of the sparks), the soul-fire he
+        // stands in (on its ring at his feet), his lock-on, the Wail's flare, a freed soul (on its head) and an ofuda
+        // burning away.
+        (Fx.KageTollRing, 16, false, Centre),
+        (Fx.KageChainSnap, 16, false, new Vector2(0.3f, 0.53f)),
+        (Fx.KageSoulFire, 12, true, new Vector2(0.5f, 0.14f)),
+        (Fx.KageLockOn, 12, true, Centre),
+        (Fx.KageWailFlare, 16, true, Centre),
+        (Fx.KageSoulRise, 12, true, new Vector2(0.5f, 0.67f)),
+        (Fx.KageOfudaBurn, 14, false, new Vector2(0.53f, 0.56f)),
     };
 
     static Vector2 Centre => new Vector2(0.5f, 0.5f);

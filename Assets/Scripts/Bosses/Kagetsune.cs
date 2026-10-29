@@ -133,7 +133,9 @@ public partial class Kagetsune : Boss
     Vector3 Shoulder(float side) => Centre + new Vector3(side * Extents.x * 0.3f, Extents.y * 0.25f, 0);
 
     SpriteRenderer chestGlow;
-    SpriteRenderer eyes;
+    SpriteRenderer[] eyes;
+    // The soul-fire he stands in once the chains snap.
+    FxPlayer soulFire;
 
     void Start()
     {
@@ -154,9 +156,20 @@ public partial class Kagetsune : Boss
         chestGlow.transform.localScale = Vector3.one * (2.2f + 2.2f * drained) / transform.lossyScale.x;
         UpdateWisps();
         UpdateSoul();
-        if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.44f) + Vector3.back * 0.1f;
+        if (eyes != null)
+        {
+            for (int i = 0; i < eyes.Length; i++)
+            {
+                if (eyes[i] == null) continue;
+                eyes[i].transform.position = Eye(i) + Vector3.back * 0.1f;
+                eyes[i].color = new Color(Teal.r, Teal.g, Teal.b, IsDead ? eyes[i].color.a : 0.75f + 0.25f * Mathf.Sin(Time.time * 6f + i));
+            }
+        }
         UpdateLastBell();
     }
+
+    // His eyes behind the visor, turned teal at the phase break: the souls looking out.
+    Vector3 Eye(int i) => Centre + new Vector3((i == 0 ? -1f : 1f) * Extents.x * 0.045f, Extents.y * 0.44f, 0);
 
     // The Wraith's skull spirits, a few small ghosts circling him once the chains have snapped.
     readonly List<SpriteRenderer> wisps = new List<SpriteRenderer>();
@@ -168,15 +181,16 @@ public partial class Kagetsune : Boss
             foreach (SpriteRenderer wisp in wisps) if (wisp != null) wisp.color = Color.Lerp(wisp.color, Color.clear, Time.deltaTime * 3f);
             return;
         }
+        // Freed-soul ghosts when their art is there, else the skulls he fires.
+        Sprite[] frames = Fx.Frames(Fx.KageSoulRise) ?? Fx.Frames(Fx.KageSkull);
         if (wisps.Count == 0)
         {
-            Sprite[] frames = Fx.Frames(Fx.KageSkull);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 5; i++)
             {
-                var wisp = new GameObject("SkullWisp").AddComponent<SpriteRenderer>();
+                var wisp = new GameObject("SoulWisp").AddComponent<SpriteRenderer>();
                 wisp.sprite = frames != null ? frames[0] : ProceduralSprites.Glow;
                 wisp.sortingOrder = 6;
-                float size = frames != null ? 0.6f / frames[0].bounds.size.y : 0.6f;
+                float size = frames != null ? 0.75f / frames[0].bounds.size.y : 0.6f;
                 wisp.transform.localScale = Vector3.one * size;
                 wisps.Add(wisp);
             }
@@ -184,10 +198,17 @@ public partial class Kagetsune : Boss
         for (int i = 0; i < wisps.Count; i++)
         {
             if (wisps[i] == null) continue;
-            float angle = Time.time * 0.9f + i * Mathf.PI / 2f;
+            float angle = Time.time * 0.9f + i * Mathf.PI * 2f / wisps.Count;
             Vector3 offset = new Vector3(Mathf.Cos(angle) * Extents.x * 0.7f, Mathf.Sin(angle * 1.3f) * Extents.y * 0.45f, -0.1f);
+            Vector3 before = wisps[i].transform.position;
             wisps[i].transform.position = Centre + offset;
-            wisps[i].color = new Color(0.75f, 1f, 0.92f, 0.35f + 0.1f * Mathf.Sin(Time.time * 4f + i));
+            if (frames != null) wisps[i].sprite = frames[(int)(Time.time * 12f + i * 3) % frames.Length];
+            // Each ghost faces the way it drifts.
+            wisps[i].flipX = wisps[i].transform.position.x < before.x;
+            // Those passing behind him dim.
+            bool behind = Mathf.Sin(angle * 1.3f) > 0.3f;
+            wisps[i].sortingOrder = behind ? 4 : 6;
+            wisps[i].color = new Color(0.85f, 1f, 0.95f, (behind ? 0.3f : 0.6f) + 0.1f * Mathf.Sin(Time.time * 4f + i));
         }
     }
 
@@ -196,7 +217,8 @@ public partial class Kagetsune : Boss
 
     void UpdateLastBell()
     {
-        if (IsDead || !lastBell)
+        // The ultimate draws its own dark: this one gives way so the two don't stack.
+        if (IsDead || !lastBell || ultimate)
         {
             if (lastBellDark != null) lastBellDark.color = Color.Lerp(lastBellDark.color, Color.clear, Time.deltaTime * 2f);
             return;
@@ -215,8 +237,15 @@ public partial class Kagetsune : Boss
             lastBellDark.transform.localScale = new Vector3(cam.orthographicSize * cam.aspect * 2.4f, cam.orthographicSize * 2.4f, 1f);
             lastBellDark.color = Color.clear;
         }
-        float pulse = 0.2f + 0.06f * Mathf.Sin(Time.time * 3.1f);
-        lastBellDark.color = new Color(0.02f, 0.06f, 0.06f, pulse);
+        // His heart: a beat each pulse, the dark and the chest-fire swelling with it.
+        float beat = Mathf.Sin(Time.time * 3.1f);
+        lastBellDark.transform.position = new Vector3(CameraShake.Center.x, CameraShake.Center.y, 0.5f);
+        lastBellDark.color = new Color(0.02f, 0.06f, 0.06f, 0.22f + 0.07f * beat);
+        if (beat > 0.95f && Time.time >= nextHeartbeat)
+        {
+            nextHeartbeat = Time.time + 1.5f;
+            StartCoroutine(Heartbeat());
+        }
     }
 
     // A halt (the ronin fell) or his fall: the soul beside him goes back into the coffin with him.
@@ -226,12 +255,24 @@ public partial class Kagetsune : Boss
         StopCage();
     }
 
+    float nextHeartbeat;
+
+    // Lub-dub, low and felt more than heard.
+    IEnumerator Heartbeat()
+    {
+        Slam(0.25f);
+        CameraShake.Add(0.06f);
+        yield return new WaitForSeconds(0.22f);
+        Slam(0.18f);
+    }
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
         BanishSoul();
         if (lastBellDark != null) Destroy(lastBellDark.gameObject);
         foreach (SpriteRenderer wisp in wisps) if (wisp != null) Destroy(wisp.gameObject);
+        if (soulFire != null) Destroy(soulFire.gameObject);
     }
 
     protected override IEnumerator Fight()

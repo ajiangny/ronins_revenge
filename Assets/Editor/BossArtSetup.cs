@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -71,7 +72,9 @@ public static class BossArtSetup
             parry: TryFrames("Kagetsune", "Toll") ?? kagetsuneIdle,
             hit: TryFrames("Kagetsune", "Hit") ?? kagetsuneIdle,
             death: TryFrames("Kagetsune", "Defeat") ?? kagetsuneIdle,
-            new[] { AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Effects/Smoke.png") });
+            // What flies off him: bone and stone from the armor, ash and smoke from the soul-fire.
+            new[] { "Bone", "StoneChip", "Ash", "Smoke" }
+                .Select(n => AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Art/Sprites/Effects/{n}.png")).Where(sprite => sprite != null).ToArray());
 
         // Each boss's second-phase form, worn from its phase break on; any clip it lacks falls back to the first form's.
         CharacterArt benibanaPhase = PhaseArt("BenibanaPhase2", benibana, "Slash", "Puff");

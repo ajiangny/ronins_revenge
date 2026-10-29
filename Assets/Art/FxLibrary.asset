@@ -840,6 +840,115 @@ MonoBehaviour:
   - id: Kage_Shockwave
     frames:
     - {fileID: 21300000, guid: ed1e2605197084563bda13adb52a6378, type: 3}
-    fps: 8
+    - {fileID: 21300000, guid: 828c25f0f689f4f618d996d0cdfde478, type: 3}
+    - {fileID: 21300000, guid: e6dc54e11541843a283984af920fe496, type: 3}
+    - {fileID: 21300000, guid: 73fd3f842a4bf4a468b78e86ef267862, type: 3}
+    - {fileID: 21300000, guid: b0d2bcc70dbea4e0a89b972ebe10f659, type: 3}
+    - {fileID: 21300000, guid: 40b470628727443f1a44b756bef6ea3c, type: 3}
+    - {fileID: 21300000, guid: c227f26ed1ad940fcb873a1977042fe3, type: 3}
+    - {fileID: 21300000, guid: 691a784e3519947688ad9ac27b25ea42, type: 3}
+    - {fileID: 21300000, guid: 6d94d4776eef446caa787f35ea6bd5f8, type: 3}
+    - {fileID: 21300000, guid: e4fce4305ce534bfca1f4b4636207b20, type: 3}
+    fps: 14
+    loop: 0
+  - id: Kage_TollRing
+    frames:
+    - {fileID: 21300000, guid: 5843db3af7af3495db8d0029448cf1ff, type: 3}
+    - {fileID: 21300000, guid: 827b1b61e644b493d87a49efb74a1366, type: 3}
+    - {fileID: 21300000, guid: 760b8ba5d46964ca3aaeb5d805b42296, type: 3}
+    - {fileID: 21300000, guid: 707408238b8804098a6f365b597c45ec, type: 3}
+    - {fileID: 21300000, guid: 3de23cd5e4f7349039786eec65e3e2a5, type: 3}
+    - {fileID: 21300000, guid: 1e925e0068b5a4c0c81d27b48ee899e9, type: 3}
+    - {fileID: 21300000, guid: 2d24cb160cb014506be953ba2cb29019, type: 3}
+    - {fileID: 21300000, guid: 7a421df781a204ffb95fc005b23b2d32, type: 3}
+    fps: 16
+    loop: 0
+  - id: Kage_ChainSnap
+    frames:
+    - {fileID: 21300000, guid: f55f15572ec92467383ca27242ebcb12, type: 3}
+    - {fileID: 21300000, guid: 7f9e7dc48325d4f72bf11a37d72b75e1, type: 3}
+    - {fileID: 21300000, guid: 42f66385275434a95b5c8c8b0112e7b5, type: 3}
+    - {fileID: 21300000, guid: d28953b00225d4cb2b72741385fc7252, type: 3}
+    - {fileID: 21300000, guid: da1f6fd9102834896a7f310a7a1f835e, type: 3}
+    - {fileID: 21300000, guid: 4563f4561621740c78c6d01a79bfd487, type: 3}
+    - {fileID: 21300000, guid: 2270d5a41eaa549e48cbd540aaa7eda4, type: 3}
+    - {fileID: 21300000, guid: b46a2726bc56a4f448a1a33be1ab1e01, type: 3}
+    - {fileID: 21300000, guid: e35b00af4b2a249849ee4b6dae8341b4, type: 3}
+    - {fileID: 21300000, guid: 91e2afea2cafa43f6947910f92100b3d, type: 3}
+    - {fileID: 21300000, guid: 0dd75e15022054f7c88ad87082fd61a1, type: 3}
+    - {fileID: 21300000, guid: 82c19b5cd72d344249aebc54da5c27d2, type: 3}
+    fps: 16
+    loop: 0
+  - id: Kage_SoulFire
+    frames:
+    - {fileID: 21300000, guid: 86bd4cbd031484a79a6a57cc01086ac7, type: 3}
+    - {fileID: 21300000, guid: e801a8e3e967d4d208858601f5d78e41, type: 3}
+    - {fileID: 21300000, guid: 6caa8625e430f4e81bbfca5f962e03dc, type: 3}
+    - {fileID: 21300000, guid: 6323ed21e412d47e2be1f220cf169142, type: 3}
+    - {fileID: 21300000, guid: c3031140623db4beaa22ee1185c7c555, type: 3}
+    - {fileID: 21300000, guid: 16318210f8a3744d6a196792bc666ac7, type: 3}
+    - {fileID: 21300000, guid: 83bd3d3c9c7e4434795deea6b91eff4b, type: 3}
+    - {fileID: 21300000, guid: 1b7e3c4228beb48cda342f37c9bd4d3b, type: 3}
+    - {fileID: 21300000, guid: 3512266b07eba42e4ab8e2d1b10a6d91, type: 3}
+    - {fileID: 21300000, guid: 7cdd69234e9a542d8a41a5846753601f, type: 3}
+    - {fileID: 21300000, guid: 559d22aff35214850adc3fb600a265f7, type: 3}
+    - {fileID: 21300000, guid: 46488d0f0a9764fbdb373900bbb99493, type: 3}
+    fps: 12
+    loop: 1
+  - id: Kage_LockOn
+    frames:
+    - {fileID: 21300000, guid: 6dd1b06137b6248b080b655fc4eeb12f, type: 3}
+    - {fileID: 21300000, guid: 606ef27eb55b04fea9ccdf1833894202, type: 3}
+    - {fileID: 21300000, guid: e7fa83fa0c5f441a5853d32b44dbdaae, type: 3}
+    - {fileID: 21300000, guid: d1a9b954b47eb4fd191ec2c639077943, type: 3}
+    - {fileID: 21300000, guid: 1bb9ae88beccb4e0f9ae026caf0b495c, type: 3}
+    - {fileID: 21300000, guid: e95ec251687bc41be8803d7609811207, type: 3}
+    - {fileID: 21300000, guid: c60d84c52153e44b8ac21364480b7a7f, type: 3}
+    - {fileID: 21300000, guid: a62f4b11025cd408a9893b3f726eacc3, type: 3}
+    - {fileID: 21300000, guid: a457de6610acc4a8c8ddc5e5634bc6d2, type: 3}
+    - {fileID: 21300000, guid: 4958e8a62d04046d3badef14ba52c058, type: 3}
+    - {fileID: 21300000, guid: 8450e52a7707a431eb18e6e3cce8e9a9, type: 3}
+    - {fileID: 21300000, guid: 82cc6fd26cf7b4c068f2071902681b5e, type: 3}
+    fps: 12
+    loop: 1
+  - id: Kage_WailFlare
+    frames:
+    - {fileID: 21300000, guid: c9acc13b975d9432294cde2caf7ab960, type: 3}
+    - {fileID: 21300000, guid: 5bce5644a37ae4e7c85e02c7d673b890, type: 3}
+    - {fileID: 21300000, guid: d5198c51dd32c49ffa010f6643d9222d, type: 3}
+    - {fileID: 21300000, guid: aa9fca260f7d144d4be894c94caf5eea, type: 3}
+    - {fileID: 21300000, guid: ae1838d5b39904420b352e4de826fca0, type: 3}
+    - {fileID: 21300000, guid: e6fcfdde455d84147a76e52e3781aa9b, type: 3}
+    - {fileID: 21300000, guid: 91cb47b19b63f481baab61b5ed5b4726, type: 3}
+    - {fileID: 21300000, guid: 161f45eecc5434c91ade85c05b5dd0bc, type: 3}
+    fps: 16
+    loop: 1
+  - id: Kage_SoulRise
+    frames:
+    - {fileID: 21300000, guid: 9e52923761f5442dcb7b4d71588a920a, type: 3}
+    - {fileID: 21300000, guid: 35e114af72d764a1a856ab994c0119f1, type: 3}
+    - {fileID: 21300000, guid: 5f667384ab5d9436c8b164228ff6b5c9, type: 3}
+    - {fileID: 21300000, guid: 9fde8f3f649ef4b2fa0031866d5f6ade, type: 3}
+    - {fileID: 21300000, guid: ca20e415abb844005b7432bb7934ce62, type: 3}
+    - {fileID: 21300000, guid: 243bfd8929ac544a1bfa6981a0a66995, type: 3}
+    - {fileID: 21300000, guid: e7a0656977f34494880976ea9ebebdc1, type: 3}
+    - {fileID: 21300000, guid: 7a783310999b1439cbce380301d4e167, type: 3}
+    fps: 12
+    loop: 1
+  - id: Kage_OfudaBurn
+    frames:
+    - {fileID: 21300000, guid: 814ce9bd93c5d419aa84e82445ccf737, type: 3}
+    - {fileID: 21300000, guid: 91358a9d1304947d1b02b8c9a6ce130c, type: 3}
+    - {fileID: 21300000, guid: f2d22ad90d74649e9baf11927b5cd0c1, type: 3}
+    - {fileID: 21300000, guid: 94a1ec3b560054005bde02cda5e07ff3, type: 3}
+    - {fileID: 21300000, guid: 0accb3fac340041cc994b902fd1888dc, type: 3}
+    - {fileID: 21300000, guid: 384b4b39ad2d14c40b758c51996b1931, type: 3}
+    - {fileID: 21300000, guid: 0862cd3c5b23d4797ae9438e26a92ce6, type: 3}
+    - {fileID: 21300000, guid: 7e78725a18a9c4a7fad4ca1fa5e9e2d9, type: 3}
+    - {fileID: 21300000, guid: b0d86d00d53604e339ca0199071e6269, type: 3}
+    - {fileID: 21300000, guid: cc3d2a21f864c4e089464d477f4aab5f, type: 3}
+    - {fileID: 21300000, guid: 4ba76caf8ebd748729cdd367690424cc, type: 3}
+    - {fileID: 21300000, guid: a896d135530e742f5ae2e99e63377b40, type: 3}
+    fps: 14
     loop: 0
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}

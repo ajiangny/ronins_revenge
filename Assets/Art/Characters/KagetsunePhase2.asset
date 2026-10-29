@@ -76,4 +76,7 @@ MonoBehaviour:
   runFps: 14
   walkFps: 8
   deathParticles:
+  - {fileID: 21300000, guid: abbbbb4d9318467987aa796201c60a43, type: 3}
+  - {fileID: 21300000, guid: a388812ce0aaa4e31a055efc39fb2d2b, type: 3}
+  - {fileID: 21300000, guid: e40ba3856f1b401d94c0fb09495e3a08, type: 3}
   - {fileID: 21300000, guid: 73760173cbac245fb94957b903d5d1a0, type: 3}

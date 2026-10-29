@@ -130,17 +130,35 @@ public partial class Kagetsune
     static Color ChainColour(SpriteRenderer chain, float alpha) =>
         chain.drawMode == SpriteDrawMode.Tiled ? new Color(1f, 1f, 1f, alpha) : new Color(Bronze.r, Bronze.g, Bronze.b, alpha);
 
-    // The burst of stone and soul-fire under a slam: the art held a moment and faded, or nothing extra without it.
+    // The burst of stone and soul-fire under a slam: a ring racing out along the ground as it cracks, `size` wide.
     static void Shockwave(Vector3 at, float size)
     {
         Sprite[] frames = Fx.Frames(Fx.KageShockwave);
         if (frames == null) return;
-        var burst = new GameObject("Shockwave").AddComponent<SpriteRenderer>();
-        burst.sprite = frames[0];
-        burst.sortingOrder = 57;
-        burst.transform.position = at + Vector3.back * 0.2f;
-        burst.transform.localScale = Vector3.one * (size / frames[0].bounds.size.x);
-        Fader.Fade(burst, 0.5f);
+        Fx.Play(Fx.KageShockwave, at + Vector3.back * 0.2f, Color.white, size / frames[0].bounds.size.x, null, 57);
+    }
+
+    // A bell's toll seen as well as heard: a bronze ring of sound spreading from where it rang, `size` across.
+    static void TollRing(Vector3 at, float size, float alpha = 1f)
+    {
+        Sprite[] frames = Fx.Frames(Fx.KageTollRing);
+        if (frames == null)
+        {
+            ElementFx.Glow(at, new Color(Bronze.r, Bronze.g, Bronze.b, 0.5f * alpha), 0.5f, size, 0.35f);
+            return;
+        }
+        Fx.Play(Fx.KageTollRing, at + Vector3.back * 0.3f, new Color(1f, 1f, 1f, alpha), size / frames[0].bounds.size.x, null, 58);
+    }
+
+    // A heavy thrown thing leaves a streak of fading copies of itself as it flies.
+    IEnumerator Streak(Arrow shot, Color colour)
+    {
+        SpriteRenderer look = shot != null ? shot.GetComponentInChildren<SpriteRenderer>() : null;
+        while (shot != null && look != null)
+        {
+            Afterimage(look, colour);
+            yield return new WaitForSeconds(0.04f);
+        }
     }
 
     // A wide faint band down a lane that narrows and brightens over the tell, so the blow lands as it closes.
@@ -186,19 +204,44 @@ public partial class Kagetsune
     {
         SpriteRenderer ring = Glowing(ronin.Bounds.center, new Color(colour.r, colour.g, colour.b, 0f), 5f, 58);
         SpriteRenderer core = Glowing(ronin.Bounds.center, new Color(1f, 1f, 1f, 0f), 1f, 59);
+        // His reticle: a bronze seal turning as it closes in.
+        FxPlayer reticle = Fx.Play(Fx.KageLockOn, ronin.Bounds.center, new Color(1f, 1f, 1f, 0f), 1f, null, 59);
+        Sprite[] frames = Fx.Frames(Fx.KageLockOn);
+        float reticleArt = frames != null ? frames[0].bounds.size.x : 1f;
+        if (reticle != null) transient.Add(reticle.gameObject);
+        int pings = 0;
         for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
         {
             float k = t / seconds;
-            ring.transform.position = core.transform.position = ronin.Bounds.center + Vector3.back * 0.1f;
+            Vector3 at = ronin.Bounds.center + Vector3.back * 0.1f;
+            ring.transform.position = core.transform.position = at;
             ring.transform.localScale = Vector3.one * Mathf.Lerp(5f, 1.8f, Mathf.SmoothStep(0, 1, k));
             ring.color = new Color(colour.r, colour.g, colour.b, 0.25f + 0.4f * k);
             core.color = new Color(1f, 1f, 1f, 0.5f * k);
+            if (reticle != null)
+            {
+                reticle.transform.position = at + Vector3.back * 0.05f;
+                reticle.transform.localScale = Vector3.one * (Mathf.Lerp(4.5f, 1.8f, Mathf.SmoothStep(0, 1, k)) / reticleArt);
+                reticle.Color = new Color(1f, 1f, 1f, Mathf.Min(1f, k * 3f));
+            }
+            // It ticks faster as it closes.
+            if (k >= 1f - Mathf.Pow(0.6f, pings + 1))
+            {
+                pings++;
+                Sfx.Play(Sfx.ClockTick, 0.35f, 0.7f + 0.08f * pings);
+            }
             yield return null;
         }
         ring.color = Color.white;
         Sfx.Play(Sfx.BladeRing, 0.6f, 0.7f);
+        Fx.Play(Fx.Impact, ronin.Bounds.center, colour, 1.6f);
         yield return Wait(0.15f);
         Drop(ring);
         Drop(core);
+        if (reticle != null)
+        {
+            transient.Remove(reticle.gameObject);
+            Destroy(reticle.gameObject);
+        }
     }
 }

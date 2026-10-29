@@ -69,6 +69,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 56ed3867d5d744fcb8ede8a0a91a9122, type: 3}
   - id: Akagane_Hub_Salute_3
     clip: {fileID: 8300000, guid: d14352a2fe3f949fc98a9365b672fc3c, type: 3}
+  - id: Akagane_Jealous_Asagi
+    clip: {fileID: 8300000, guid: e1187ed93fa18420e87df1a0b8bb52c4, type: 3}
+  - id: Akagane_Jealous_Asagi_2
+    clip: {fileID: 8300000, guid: 8a62642dcd2844b80847c0cd07fc6747, type: 3}
+  - id: Akagane_Jealous_Asagi_3
+    clip: {fileID: 8300000, guid: 43d760c1e335f44c19309c71b68c4f3c, type: 3}
   - id: Akagane_Jealous_Back
     clip: {fileID: 8300000, guid: a90a1ecff35d941dfa53ef402c399371, type: 3}
   - id: Akagane_Jealous_Frost
@@ -85,6 +91,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: d73a24f5ab91f4b64a4861c78ec27530, type: 3}
   - id: Akagane_Jealous_Storm
     clip: {fileID: 8300000, guid: 3aa5c6f4bc4094d89b585235520bef4d, type: 3}
+  - id: Akagane_Jealous_Water
+    clip: {fileID: 8300000, guid: d5cb0ad31d4af4531adb8107f2443474, type: 3}
   - id: Akagane_Legendary_Again
     clip: {fileID: 8300000, guid: 0f86d6fb206bd4dbc897e08c6b6cfb57, type: 3}
   - id: Akagane_Legendary_Wildfire
@@ -145,6 +153,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: d46667b812b314c9cb8f88e8bee15d7b, type: 3}
   - id: Akagane_Pickup_HoldsStorm
     clip: {fileID: 8300000, guid: 3e19ff3a03f644358aa39e8d7bd7e82e, type: 3}
+  - id: Akagane_Pickup_HoldsWater
+    clip: {fileID: 8300000, guid: 5863c63771f1445df8c86e46d2e98f3b, type: 3}
   - id: Akagane_Pickup_ManyDeaths
     clip: {fileID: 8300000, guid: 6b0e2b503faae457dbbad71642163faa, type: 3}
   - id: Akagane_Pickup_ManyRuns
@@ -161,6 +171,214 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: fe90c6388b853484cba3d1bbfa4e21b9, type: 3}
   - id: Akagane_Poguru_4
     clip: {fileID: 8300000, guid: cfb34f886396f4d67aed442c364118c4, type: 3}
+  - id: Asagi_Ahead_Any
+    clip: {fileID: 8300000, guid: c90bc1f9f49214c21b2ebbae00add537, type: 3}
+  - id: Asagi_Ahead_Benibana
+    clip: {fileID: 8300000, guid: 5513febb52b4040a99b405c0fff22a1d, type: 3}
+  - id: Asagi_Ahead_Kagetsune
+    clip: {fileID: 8300000, guid: e40ed6979c9254e39a77eb9423cf2805, type: 3}
+  - id: Asagi_Ahead_KagetsuneWon
+    clip: {fileID: 8300000, guid: c8017f20e95bb493b80f06e72781ea6a, type: 3}
+  - id: Asagi_Ahead_Shirogane
+    clip: {fileID: 8300000, guid: 69935e603720d4d1985e84ae59226ad1, type: 3}
+  - id: Asagi_Ahead_Utsusemi
+    clip: {fileID: 8300000, guid: d9fff2d0149d147e8bf80634f7cf949e, type: 3}
+  - id: Asagi_Cut_Hibiki
+    clip: {fileID: 8300000, guid: 928786ddbd1cd41888ddbfd8006b228c, type: 3}
+  - id: Asagi_Cut_Hibiki_2
+    clip: {fileID: 8300000, guid: 9b1f9909352bf424f9f161a19dbe47be, type: 3}
+  - id: Asagi_Cut_Mizore
+    clip: {fileID: 8300000, guid: 57a5cae484ce044d29fd50569207046b, type: 3}
+  - id: Asagi_Cut_Mizore_2
+    clip: {fileID: 8300000, guid: 7d75ccceee47943dca233ad286e056fc, type: 3}
+  - id: Asagi_Cut_Mizore_3
+    clip: {fileID: 8300000, guid: 9cd252cf8a1e14fc9ae65e978ae9b63d, type: 3}
+  - id: Asagi_Felled_Any
+    clip: {fileID: 8300000, guid: 0c37080aeaf5b4a5e990616a83a7074b, type: 3}
+  - id: Asagi_Felled_Benibana
+    clip: {fileID: 8300000, guid: 1cf840d38d039462181ea7ed7cb0a4e5, type: 3}
+  - id: Asagi_Felled_Shirogane
+    clip: {fileID: 8300000, guid: 2e143ecd485e74cf2a9c7e47b428cee4, type: 3}
+  - id: Asagi_Felled_Utsusemi
+    clip: {fileID: 8300000, guid: a9cb318f28fc74db7a7d03c3b5691b65, type: 3}
+  - id: Asagi_Greet_Breathe
+    clip: {fileID: 8300000, guid: 90d5c08aa7d3546828144ab5f995c5b6, type: 3}
+  - id: Asagi_Greet_Fry
+    clip: {fileID: 8300000, guid: f0928d0ff7bf6458d849cb04d5aad371, type: 3}
+  - id: Asagi_Greet_Stone
+    clip: {fileID: 8300000, guid: 01bb53970b8584de28a7dfd40fd6a1ca, type: 3}
+  - id: Asagi_Greet_Thanks
+    clip: {fileID: 8300000, guid: 228297048bc3944518bf3b86f8864a11, type: 3}
+  - id: Asagi_Greet_Tide
+    clip: {fileID: 8300000, guid: e407f095691af417e966c22d281221bd, type: 3}
+  - id: Asagi_Greet_Warm
+    clip: {fileID: 8300000, guid: 596d353bb4f424e27b47b5af418fd285, type: 3}
+  - id: Asagi_Greet_Wash
+    clip: {fileID: 8300000, guid: 9ca1e0a449665405089d8ecea0d7bc42, type: 3}
+  - id: Asagi_Greet_Wet
+    clip: {fileID: 8300000, guid: 8f41982364cdd4aaca223393322e92bf, type: 3}
+  - id: Asagi_Hub_First
+    clip: {fileID: 8300000, guid: a15398eea0cd34c2ab68528eaf9a3f87, type: 3}
+  - id: Asagi_Hub_Kagetsune
+    clip: {fileID: 8300000, guid: a5d5683fc70ec4d0aa7bbb6cd15bcee7, type: 3}
+  - id: Asagi_Hub_Rest
+    clip: {fileID: 8300000, guid: 4fa93b3f16087444ea571907354611ec, type: 3}
+  - id: Asagi_Hub_Sleep
+    clip: {fileID: 8300000, guid: 17f6bf0631f5f46dc9fa2550e7664cdd, type: 3}
+  - id: Asagi_Hub_Sleep_2
+    clip: {fileID: 8300000, guid: b1e3a113b65ef44a08c11f0b21792730, type: 3}
+  - id: Asagi_Hub_Sleep_3
+    clip: {fileID: 8300000, guid: 0fae77fc7e35144f0a8dede03b412eb6, type: 3}
+  - id: Asagi_Jealous_Akagane
+    clip: {fileID: 8300000, guid: 79af26eb4096a479c8fb836ccc372e3b, type: 3}
+  - id: Asagi_Jealous_Akagane_2
+    clip: {fileID: 8300000, guid: b2fcee7e56565432f8e04562a19a83d4, type: 3}
+  - id: Asagi_Jealous_Akagane_3
+    clip: {fileID: 8300000, guid: 7b4a6ab30cf694a7788b1a60dd9d3a0c, type: 3}
+  - id: Asagi_Jealous_Back
+    clip: {fileID: 8300000, guid: bdcb9c3401199464e93b79f40c1d5e42, type: 3}
+  - id: Asagi_Jealous_Fire
+    clip: {fileID: 8300000, guid: fecb1b1c422454dc4aea699cd38d67bd, type: 3}
+  - id: Asagi_Jealous_Frost
+    clip: {fileID: 8300000, guid: 198126562fc304353b840f6fc3930177, type: 3}
+  - id: Asagi_Jealous_Hibiki
+    clip: {fileID: 8300000, guid: 8234e5074743248c991c537b7701827d, type: 3}
+  - id: Asagi_Jealous_Hibiki_2
+    clip: {fileID: 8300000, guid: 266b0b111066c46a4b97efb5e4d6494c, type: 3}
+  - id: Asagi_Jealous_Hibiki_3
+    clip: {fileID: 8300000, guid: 4864798ddb25841109178b87447c795e, type: 3}
+  - id: Asagi_Jealous_Hibiki_4
+    clip: {fileID: 8300000, guid: 9e5c2b32cf91f4b10bb617ef28da5c56, type: 3}
+  - id: Asagi_Jealous_Mizore
+    clip: {fileID: 8300000, guid: d0458a57fdb1043b8947b1a40a22f15c, type: 3}
+  - id: Asagi_Jealous_Mizore_2
+    clip: {fileID: 8300000, guid: 24933cc7ab1014852a8d608b1544959c, type: 3}
+  - id: Asagi_Jealous_Mizore_3
+    clip: {fileID: 8300000, guid: ea06ff21f78ed4175b4da48d46f610e5, type: 3}
+  - id: Asagi_Jealous_Mizore_4
+    clip: {fileID: 8300000, guid: 182d6af6dc3ab4304b85c1c28a1fd4ab, type: 3}
+  - id: Asagi_Jealous_Storm
+    clip: {fileID: 8300000, guid: c4b40ee1b4670499db5b9fc2f14666cf, type: 3}
+  - id: Asagi_Legendary_Again
+    clip: {fileID: 8300000, guid: ad1cadc7b63b6438f86138fecf4d2add, type: 3}
+  - id: Asagi_Legendary_DragonGate
+    clip: {fileID: 8300000, guid: ea9c4d99842254b9e895bf150f7648a1, type: 3}
+  - id: Asagi_Legendary_DragonGate_2
+    clip: {fileID: 8300000, guid: 97c2b37246dcf4fdcb42a10bc456857a, type: 3}
+  - id: Asagi_Meet_Flute
+    clip: {fileID: 8300000, guid: 3088c54f30af6467f98104f4499758c2, type: 3}
+  - id: Asagi_Meet_Flute_2
+    clip: {fileID: 8300000, guid: cd2bb495a61d14f47bd7cb468a4db1fc, type: 3}
+  - id: Asagi_Meet_Flute_4
+    clip: {fileID: 8300000, guid: b199bd80242314f85b384160e2feb72c, type: 3}
+  - id: Asagi_Meet_Fry
+    clip: {fileID: 8300000, guid: 7b93bb0568fc548d5aa4ee7f43d78c35, type: 3}
+  - id: Asagi_Meet_Fry_2
+    clip: {fileID: 8300000, guid: 8cfa307ff0358451d9c105c68dab6bfc, type: 3}
+  - id: Asagi_Meet_Home
+    clip: {fileID: 8300000, guid: 987a935da1af44144a1402e9c64a2ea3, type: 3}
+  - id: Asagi_Meet_Home_2
+    clip: {fileID: 8300000, guid: f98eaa2ecdc7244bdabcf6069e681fc8, type: 3}
+  - id: Asagi_Meet_Home_3
+    clip: {fileID: 8300000, guid: 9c1c229765a81494cbca562b83a87dc2, type: 3}
+  - id: Asagi_Meet_Home_4
+    clip: {fileID: 8300000, guid: 3babcdfe687e646d084c0ce58cf825df, type: 3}
+  - id: Asagi_Meet_Home_5
+    clip: {fileID: 8300000, guid: 5a2482e73c0b74b5d8cbe756a6f97b88, type: 3}
+  - id: Asagi_Meet_Monk
+    clip: {fileID: 8300000, guid: e7ed49a21c4e947b4b5960eef704b5b6, type: 3}
+  - id: Asagi_Meet_Monk_2
+    clip: {fileID: 8300000, guid: 26e46eec4881a4b179a89cb55a3721cd, type: 3}
+  - id: Asagi_Meet_Pool
+    clip: {fileID: 8300000, guid: 6c1e6d03267f848ed930bb1703ed05ab, type: 3}
+  - id: Asagi_Meet_Pool_2
+    clip: {fileID: 8300000, guid: 35d69ca466eff4bb9bc2d6bab22560d1, type: 3}
+  - id: Asagi_Meet_Pool_3
+    clip: {fileID: 8300000, guid: 3ab80e3bcb797437a9d871db18337963, type: 3}
+  - id: Asagi_Meet_Pool_4
+    clip: {fileID: 8300000, guid: 7230b83779e854031958e0a817a9fe93, type: 3}
+  - id: Asagi_Meet_Pool_5
+    clip: {fileID: 8300000, guid: 82bbb41632c7b47fda18a4b030ec4e3e, type: 3}
+  - id: Asagi_Meet_Pool_6
+    clip: {fileID: 8300000, guid: 22675a2fdf1c343c88f4711a15deb9a5, type: 3}
+  - id: Asagi_Meet_Prince
+    clip: {fileID: 8300000, guid: 13bd6dc19ed2c437a9d3af91ec67b0d7, type: 3}
+  - id: Asagi_Meet_Prince_2
+    clip: {fileID: 8300000, guid: 0f11d87d739e745479cf8d041baec475, type: 3}
+  - id: Asagi_Meet_Prince_3
+    clip: {fileID: 8300000, guid: 6271a85117cc8469e90c0759a3fe4746, type: 3}
+  - id: Asagi_Meet_Sleet
+    clip: {fileID: 8300000, guid: be987c1d842fc449897f29e542a405fc, type: 3}
+  - id: Asagi_Meet_Sleet_2
+    clip: {fileID: 8300000, guid: 9f051ba886a4c4d829d552c2294c0538, type: 3}
+  - id: Asagi_Meet_Sleet_3
+    clip: {fileID: 8300000, guid: 49cdcaa100a5e4622abf155c26a93444, type: 3}
+  - id: Asagi_Pickup_Cleared
+    clip: {fileID: 8300000, guid: 3535b29413ca5425b9fbcac1bee8ee65, type: 3}
+  - id: Asagi_Pickup_DiedArmy
+    clip: {fileID: 8300000, guid: 51cd84c7f99b84570a03147938299055, type: 3}
+  - id: Asagi_Pickup_DiedBenibana
+    clip: {fileID: 8300000, guid: 24d8233dc231c418a91a8a1454c2c444, type: 3}
+  - id: Asagi_Pickup_DiedKagetsune
+    clip: {fileID: 8300000, guid: efb6fa8b189fb42eea095b12c208cb14, type: 3}
+  - id: Asagi_Pickup_DiedShirogane
+    clip: {fileID: 8300000, guid: 1973a6c86b7f44e84a00b36c395d09d9, type: 3}
+  - id: Asagi_Pickup_DiedUtsusemi
+    clip: {fileID: 8300000, guid: 4e2d518710c844b73ba3021506291cc9, type: 3}
+  - id: Asagi_Pickup_FirstClear
+    clip: {fileID: 8300000, guid: fc981cd2485594a88a4644bb82c4cf02, type: 3}
+  - id: Asagi_Pickup_FirstClear_2
+    clip: {fileID: 8300000, guid: 19e09d327c8b44fae9d984e472090693, type: 3}
+  - id: Asagi_Pickup_HoldsFire
+    clip: {fileID: 8300000, guid: 30460ad077c6441c0a9b00dcbd4f2d15, type: 3}
+  - id: Asagi_Pickup_HoldsFrost
+    clip: {fileID: 8300000, guid: f807816ed6da846fc805bbdedc5fc648, type: 3}
+  - id: Asagi_Pickup_HoldsStorm
+    clip: {fileID: 8300000, guid: 64becdd366daf432090e47409dc44b8a, type: 3}
+  - id: Asagi_Pickup_LowLives
+    clip: {fileID: 8300000, guid: 1632197e7101d44079279c9694d1b8b5, type: 3}
+  - id: Asagi_Pickup_ManyRuns
+    clip: {fileID: 8300000, guid: 1f1e3d4f4377446ed984323c44a5cb6a, type: 3}
+  - id: Asagi_Pickup_Offering
+    clip: {fileID: 8300000, guid: a67ac04ff295c461fafb78e771837c62, type: 3}
+  - id: Asagi_Pickup_VeryManyRuns
+    clip: {fileID: 8300000, guid: b8b6e811849064d4489deacc155dea1b, type: 3}
+  - id: Asagi_Poguru
+    clip: {fileID: 8300000, guid: 759e76de4f87744d4ab00c1a6f172199, type: 3}
+  - id: Asagi_Poguru_2
+    clip: {fileID: 8300000, guid: 6d438736c02464eb5973478536ea9fff, type: 3}
+  - id: Asagi_Poguru_3
+    clip: {fileID: 8300000, guid: be6ef80d7ac844e298fd67ba26243305, type: 3}
+  - id: Asagi_Poguru_4
+    clip: {fileID: 8300000, guid: c5da9ca89a065484cb9f1875ffe329d6, type: 3}
+  - id: Asagi_Poguru_5
+    clip: {fileID: 8300000, guid: 62cf3aede5a1f46f08055492755f17d2, type: 3}
+  - id: Asagi_Poguru_6
+    clip: {fileID: 8300000, guid: bce559b64bc664d0c83e1e56e062fe49, type: 3}
+  - id: Asagi_Pond_Bodies
+    clip: {fileID: 8300000, guid: fa213e75c22154470837632e7a805cb4, type: 3}
+  - id: Asagi_Pond_Bodies_2
+    clip: {fileID: 8300000, guid: 698ae483629924b83b3eb518a23138d1, type: 3}
+  - id: Asagi_Pond_Bodies_3
+    clip: {fileID: 8300000, guid: 01fa992db8eac41abb5f8f55517475ba, type: 3}
+  - id: Asagi_Pond_Dawn
+    clip: {fileID: 8300000, guid: 3c5a7deb05cab47e68d7705055a33767, type: 3}
+  - id: Asagi_Pond_Dawn_2
+    clip: {fileID: 8300000, guid: 085dd853f36594461b1a6b27897faa4c, type: 3}
+  - id: Asagi_Pond_Fish
+    clip: {fileID: 8300000, guid: d25b18f8bea66464da3d55ddb11174a6, type: 3}
+  - id: Asagi_Pond_Flute
+    clip: {fileID: 8300000, guid: 54391a9b523544f1eaa602eddd6089cf, type: 3}
+  - id: Asagi_Pond_Hello
+    clip: {fileID: 8300000, guid: 4089bc9e978a0491e9c35c2df1c51224, type: 3}
+  - id: Asagi_Pond_Hello_3
+    clip: {fileID: 8300000, guid: 77bffe8d60a4145d8bae765091c46ff6, type: 3}
+  - id: Asagi_Pond_Rest
+    clip: {fileID: 8300000, guid: 1d0dff8930f514a779e465d36e4a630c, type: 3}
+  - id: Asagi_Pond_Ripples
+    clip: {fileID: 8300000, guid: 6423cc5250fce471cafbe6e7189f569e, type: 3}
+  - id: Asagi_Pond_Stone
+    clip: {fileID: 8300000, guid: 5a20ed8fa8cbb4dd6a70728cc73f32ee, type: 3}
   - id: Benibana_Defeat
     clip: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
   - id: Benibana_Defeat_2
@@ -197,6 +415,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 242e437790bf04460b3898ab530ce841, type: 3}
   - id: Benibana_Intro_Three
     clip: {fileID: 8300000, guid: f89e7bdcd5377473482e055990fd0ea9, type: 3}
+  - id: Benibana_Intro_Water
+    clip: {fileID: 8300000, guid: 1a56a775bc26b4ff49c50f7e712ed7a4, type: 3}
   - id: Benibana_Killed
     clip: {fileID: 8300000, guid: 4e7fa8948cbec46b29754a9cefadc72f, type: 3}
   - id: Benibana_Killed_Curtain
@@ -227,6 +447,28 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 060e96b68b620458c9213738d39749ba, type: 3}
   - id: Benibana_Stagger_2
     clip: {fileID: 8300000, guid: 5d7c70c1af1e04caa814b370ef56b944, type: 3}
+  - id: Duo_BlackIce_Again
+    clip: {fileID: 8300000, guid: 36f1a27bfee784883a3edecf89399850, type: 3}
+  - id: Duo_BlackIce_Again_2
+    clip: {fileID: 8300000, guid: 78fae6c75c8c24aaea7c72548d362ab1, type: 3}
+  - id: Duo_BlackIce_First
+    clip: {fileID: 8300000, guid: e850484a5b44f4fc08bd050975db4d71, type: 3}
+  - id: Duo_BlackIce_First_2
+    clip: {fileID: 8300000, guid: 142e0d93da8024a2da81b9aadc0669a2, type: 3}
+  - id: Duo_BlackIce_First_3
+    clip: {fileID: 8300000, guid: ca3307026eb584a41aa1ac6a726d72a8, type: 3}
+  - id: Duo_BlackIce_First_4
+    clip: {fileID: 8300000, guid: 87398f069f647482bb5c8f2b270b0283, type: 3}
+  - id: Duo_BlackIce_First_5
+    clip: {fileID: 8300000, guid: 92cd9b4f5e9f7435eb65b429de167403, type: 3}
+  - id: Duo_BlackIce_Hill
+    clip: {fileID: 8300000, guid: 61a70cf615568476b8e796fa9df62fd4, type: 3}
+  - id: Duo_BlackIce_Hill_2
+    clip: {fileID: 8300000, guid: 06eee7199b14943dcb44f3682b07a4eb, type: 3}
+  - id: Duo_BlackIce_Hill_3
+    clip: {fileID: 8300000, guid: 7d887f6ff520c423bb3ad21704479b56, type: 3}
+  - id: Duo_BlackIce_Hill_4
+    clip: {fileID: 8300000, guid: c8167b21c7d0b4cd294ae46b834e38e6, type: 3}
   - id: Duo_PlasmaArc_Again
     clip: {fileID: 8300000, guid: df1e5c9567e9d4d6fbb10f20060b36aa, type: 3}
   - id: Duo_PlasmaArc_Again_2
@@ -245,6 +487,24 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a78b44e2014da4cc89ac4a5be55d890f, type: 3}
   - id: Duo_PlasmaArc_Pace_3
     clip: {fileID: 8300000, guid: 778d8e2728b564807a178ca7fa821e5c, type: 3}
+  - id: Duo_ScaldingSteam_Again
+    clip: {fileID: 8300000, guid: c47ca00aed5bf484ab627367c50411a2, type: 3}
+  - id: Duo_ScaldingSteam_Again_2
+    clip: {fileID: 8300000, guid: e34ec967cd3b645a0839c536ef7ffd00, type: 3}
+  - id: Duo_ScaldingSteam_First
+    clip: {fileID: 8300000, guid: d85dd1d8898904f05a47686f6bff4616, type: 3}
+  - id: Duo_ScaldingSteam_First_2
+    clip: {fileID: 8300000, guid: dd943dc95b7074bc084584c1340b4d88, type: 3}
+  - id: Duo_ScaldingSteam_First_3
+    clip: {fileID: 8300000, guid: c0b11285f9d7643d58c2aec1a9d22457, type: 3}
+  - id: Duo_ScaldingSteam_First_4
+    clip: {fileID: 8300000, guid: 8d55c7ba6bd5b45d8979c72fb70cfc51, type: 3}
+  - id: Duo_ScaldingSteam_Kettle
+    clip: {fileID: 8300000, guid: 6af4685c73fcd4e2fa1b0400d232de60, type: 3}
+  - id: Duo_ScaldingSteam_Kettle_2
+    clip: {fileID: 8300000, guid: 44ccb8ec6551944f4a322be69458e3ae, type: 3}
+  - id: Duo_ScaldingSteam_Kettle_3
+    clip: {fileID: 8300000, guid: e1dc62e32e6b84c65a46ee5be909a5a9, type: 3}
   - id: Duo_Superconductor_Again
     clip: {fileID: 8300000, guid: fa9bf2a7ae93245a0825903b2f0a02dc, type: 3}
   - id: Duo_Superconductor_Again_2
@@ -277,6 +537,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 695e8a14b816d46968668493a97a6de9, type: 3}
   - id: Duo_ThermalShock_First_3
     clip: {fileID: 8300000, guid: 966b3a8969bea46d585c623b7321f657, type: 3}
+  - id: Duo_ThunderRain_Again
+    clip: {fileID: 8300000, guid: 2d7c24090593747df875465ff0be5de3, type: 3}
+  - id: Duo_ThunderRain_Again_2
+    clip: {fileID: 8300000, guid: 638794191b26547dbbd4327d138b5dc0, type: 3}
+  - id: Duo_ThunderRain_Festival
+    clip: {fileID: 8300000, guid: 0620d9d37de0947d687242167128fd97, type: 3}
+  - id: Duo_ThunderRain_Festival_2
+    clip: {fileID: 8300000, guid: 47a8f1a0f18fe49d69fa0459cafb0bfb, type: 3}
+  - id: Duo_ThunderRain_Festival_3
+    clip: {fileID: 8300000, guid: 3fd5010f8d8a04162bb085baad401b0d, type: 3}
+  - id: Duo_ThunderRain_First
+    clip: {fileID: 8300000, guid: 7e1d1c1c858de48f3955b94963f9c323, type: 3}
+  - id: Duo_ThunderRain_First_2
+    clip: {fileID: 8300000, guid: 75726cec2a507448eae5e392230d490a, type: 3}
+  - id: Duo_ThunderRain_First_3
+    clip: {fileID: 8300000, guid: 61c3db97078cb4d91aa66f9af9b32b8b, type: 3}
   - id: Hibiki_Ahead_Any
     clip: {fileID: 8300000, guid: 9881c9bc2ee244b9490194935d6d91b7, type: 3}
   - id: Hibiki_Ahead_Benibana
@@ -341,6 +617,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: bd1687c881dc84f04b8c6fa8c50d9b93, type: 3}
   - id: Hibiki_Jealous_Akagane_4
     clip: {fileID: 8300000, guid: 45ed75ef3759c4e5389c09da88765545, type: 3}
+  - id: Hibiki_Jealous_Asagi
+    clip: {fileID: 8300000, guid: 7b28e2ae98efa40469c0b46884f1b8b2, type: 3}
+  - id: Hibiki_Jealous_Asagi_2
+    clip: {fileID: 8300000, guid: 97b3414c819ce49f68408c5f3be2ff25, type: 3}
+  - id: Hibiki_Jealous_Asagi_3
+    clip: {fileID: 8300000, guid: 6e788ea847d4a4e80acebd2b1372ba0b, type: 3}
   - id: Hibiki_Jealous_Back
     clip: {fileID: 8300000, guid: d0be1fc6dda8c4c98a8f2bf879302898, type: 3}
   - id: Hibiki_Jealous_Fire
@@ -353,6 +635,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6583a92dc7d5646ecbdaef50d845ba35, type: 3}
   - id: Hibiki_Jealous_Mizore_3
     clip: {fileID: 8300000, guid: 90410880280c642b1a0c41c79b1c1102, type: 3}
+  - id: Hibiki_Jealous_Water
+    clip: {fileID: 8300000, guid: e04cd914c34144ed6bf7387a4c71ae9b, type: 3}
   - id: Hibiki_Legendary_Again
     clip: {fileID: 8300000, guid: 52f5cb231936b43119ef21eef1fc54bd, type: 3}
   - id: Hibiki_Legendary_Drum
@@ -417,6 +701,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 59a44c92ef3f04588b9095d684952cdc, type: 3}
   - id: Hibiki_Pickup_HoldsFrost
     clip: {fileID: 8300000, guid: b90617e384c164d49816da006792b8c4, type: 3}
+  - id: Hibiki_Pickup_HoldsWater
+    clip: {fileID: 8300000, guid: 03d5f54c4d74045cb886fa719992d3ba, type: 3}
   - id: Hibiki_Pickup_ManyRuns
     clip: {fileID: 8300000, guid: 806dd927498ac403b9856138f78bd799, type: 3}
   - id: Hibiki_Pickup_Offering
@@ -469,6 +755,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 669e3c19961ab437f9ba0bebda204122, type: 3}
   - id: Kagetsune_Intro_Storm
     clip: {fileID: 8300000, guid: f24547d124808489f8d9aff6a84899cd, type: 3}
+  - id: Kagetsune_Intro_Water
+    clip: {fileID: 8300000, guid: 0f142532884814b31a0eff1ba3e45b1a, type: 3}
+  - id: Kagetsune_Intro_Water_2
+    clip: {fileID: 8300000, guid: 16b4c0ea9fcef4a669a49768b83947c8, type: 3}
   - id: Kagetsune_Killed_Duo
     clip: {fileID: 8300000, guid: 0b1533de85c07454ea2522b2781ec899, type: 3}
   - id: Kagetsune_Killed_Ring
@@ -567,6 +857,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6085f7ba117234b24b5d49112e23e45a, type: 3}
   - id: Mizore_Jealous_Akagane_3
     clip: {fileID: 8300000, guid: 5ffa8f27b8792404f826ba9f66d4cd6d, type: 3}
+  - id: Mizore_Jealous_Asagi
+    clip: {fileID: 8300000, guid: 3b3a3e8c75f8b421c8f58a7eacbc8902, type: 3}
+  - id: Mizore_Jealous_Asagi_2
+    clip: {fileID: 8300000, guid: 70ca228b63e9646a7bfbe569f521f1f7, type: 3}
+  - id: Mizore_Jealous_Asagi_3
+    clip: {fileID: 8300000, guid: 263b607dde114488dbc932c8ac822318, type: 3}
   - id: Mizore_Jealous_Back
     clip: {fileID: 8300000, guid: a8cce95dea97d4737b51d687fcbab06b, type: 3}
   - id: Mizore_Jealous_Fire
@@ -579,6 +875,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: c106576a7ab8c49a68bc372bdf4dbb4b, type: 3}
   - id: Mizore_Jealous_Storm
     clip: {fileID: 8300000, guid: 31b1d308d661d4040bda8f76700c7339, type: 3}
+  - id: Mizore_Jealous_Water
+    clip: {fileID: 8300000, guid: 9db3ff3131c4f47fc97e6ddfa05fbb93, type: 3}
   - id: Mizore_Legendary_Again
     clip: {fileID: 8300000, guid: 4f0d2c419cf9d47aba1c3b0beb2e0a10, type: 3}
   - id: Mizore_Legendary_StillWater
@@ -639,6 +937,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: bad2f0421ae7b4b1ca0a87de2e576712, type: 3}
   - id: Mizore_Pickup_HoldsStorm
     clip: {fileID: 8300000, guid: 184a2b26d4f204c838215633fdeba635, type: 3}
+  - id: Mizore_Pickup_HoldsWater
+    clip: {fileID: 8300000, guid: 036cf8c09477a452baf1bfb1c689a611, type: 3}
   - id: Mizore_Pickup_LowLives
     clip: {fileID: 8300000, guid: 9e5dfae286de94aeba4fdf0a3046366b, type: 3}
   - id: Mizore_Pickup_ManyRuns
@@ -863,6 +1163,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 4969edbd92606413bb5dc4307553d628, type: 3}
   - id: Poguru_Soul_Thanks
     clip: {fileID: 8300000, guid: 01771df404e24441facde3df9ed04fb3, type: 3}
+  - id: Poguru_Soul_Water
+    clip: {fileID: 8300000, guid: 8779ec5db8f094ef7a53226ff1c5a21d, type: 3}
   - id: Poguru_Soul_Zappy
     clip: {fileID: 8300000, guid: e88797a44210f47728ee8c61ed1bcdaa, type: 3}
   - id: Poguru_Stage_Divers
@@ -1097,6 +1399,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 366b1ac43ac67446a912f3328530969d, type: 3}
   - id: Shirogane_Intro_Storm_2
     clip: {fileID: 8300000, guid: 648c0284b5a0b4ebf8393f21571696e3, type: 3}
+  - id: Shirogane_Intro_Water
+    clip: {fileID: 8300000, guid: 90ecc54bdbcc546b9be0ac8565655c67, type: 3}
+  - id: Shirogane_Intro_Water_2
+    clip: {fileID: 8300000, guid: d9ad5bd3012344e6e8eebdd01f215f13, type: 3}
   - id: Shirogane_Killed
     clip: {fileID: 8300000, guid: 26308ec5cf4aa4a9d8a35a94f325431a, type: 3}
   - id: Shirogane_Killed_Rise
@@ -1161,6 +1467,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6445c319c0cb94d8ba30d0bbaf5c45b8, type: 3}
   - id: Utsusemi_Intro_Tick
     clip: {fileID: 8300000, guid: 1a02184f326d64ddf8fd5982ae32320d, type: 3}
+  - id: Utsusemi_Intro_Water
+    clip: {fileID: 8300000, guid: 1c02bcb6e30984c0cb2592b845d34414, type: 3}
+  - id: Utsusemi_Intro_Water_2
+    clip: {fileID: 8300000, guid: e40cd9e772fbf4d3ebe788cbb648d4bd, type: 3}
   - id: Utsusemi_Intro_WindDown
     clip: {fileID: 8300000, guid: 2a28b47d7b00a415e8294756d7fb077d, type: 3}
   - id: Utsusemi_Kasa

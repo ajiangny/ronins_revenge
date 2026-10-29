@@ -633,6 +633,7 @@ MonoBehaviour:
   akaganeCloseup: {fileID: 21300000, guid: fbb18dca375914fd88f76bd84a2b38b9, type: 3}
   mizoreCloseup: {fileID: 21300000, guid: b5c3a3e041e3946158e6a725a709c327, type: 3}
   hibikiCloseup: {fileID: 21300000, guid: 1c1a8e443b485410fb586a6a7a21cc7c, type: 3}
+  asagiCloseup: {fileID: 21300000, guid: b67bd87389af644bba3b30a817815c80, type: 3}
   poguruArt:
     idle:
     - {fileID: 21300000, guid: 3bf6ddac069384009b50def4167cbab8, type: 3}
@@ -1179,6 +1180,11 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 9993de2bb0a8b4c0693e3b37b0703878, type: 3}
     - {fileID: 21300000, guid: 316770743f0c740388bb36e8ccbcca8a, type: 3}
     - {fileID: 21300000, guid: 5fd15b67d2ac34b4abad7ee99bef3c65, type: 3}
+    asagiArt:
+      idle: []
+      talk: []
+      lift: []
+      fps: 6
     lamps:
     - px: {x: 100, y: 147}
       colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}

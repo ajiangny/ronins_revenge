@@ -680,6 +680,39 @@ MonoBehaviour:
     - 2.023832
     - 1.8429252
     ownSource: 0
+  - id: SoulStingWater
+    clips:
+    - {fileID: 8300000, guid: 8079a6470999e47c1a495b6e2c271f1f, type: 3}
+    - {fileID: 8300000, guid: 8f21b6c9078b240eeb1b21084670f756, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 2.5338776
+    - 2.3257823
+    ownSource: 0
+  - id: TideWave
+    clips:
+    - {fileID: 8300000, guid: abc310f72ece041cdbf641e93d25c37d, type: 3}
+    - {fileID: 8300000, guid: c4d45e91dd0dd4b46a3acfe0bda1bec8, type: 3}
+    volume: 0.7
+    pitchJitter: 0.05
+    minInterval: 0.3
+    audible:
+    - 1.1330612
+    - 1.0860318
+    ownSource: 0
+  - id: Splash
+    clips:
+    - {fileID: 8300000, guid: f7b70e1b96af744d9b5fb5ad4b4e7713, type: 3}
+    - {fileID: 8300000, guid: 0f19240f5a0f946078a9a0dee7d6ba50, type: 3}
+    volume: 0.5
+    pitchJitter: 0.1
+    minInterval: 0.15
+    audible:
+    - 0.5110658
+    - 0.6530612
+    ownSource: 0
   titleMusic: {fileID: 8300000, guid: fb1ea9e50877a43d790778d7809e10a0, type: 3}
   templeMusic: {fileID: 8300000, guid: 946fb3b38b2c84813abb8ba5ddced6fa, type: 3}
   battleMusic: {fileID: 8300000, guid: 3fa548e502c1448c8b660151338633f0, type: 3}

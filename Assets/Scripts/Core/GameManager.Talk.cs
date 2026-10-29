@@ -315,7 +315,7 @@ public partial class GameManager
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
             case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
-            case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.62f, 0.23f));
+            case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f));
             // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.
             case "Poguru":
                 return new DialogueScene.Speaker { name = "Poguru", epithet = "The Lost Dragon", colour = PoguruColour, art = poguruCloseup,

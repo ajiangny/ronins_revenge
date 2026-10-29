@@ -269,6 +269,10 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] CharacterArt kagetsuneArt;
     [Tooltip("The Unchained Wraith's frames, worn from his phase break on. Leave empty to keep his first art.")]
     [SerializeField] CharacterArt kagetsunePhaseArt;
+    [Tooltip("His Spirit Hyper Beam pose: the hammer slammed down at his side, then a braced stance held while the beam burns. Wired by Ninja/Apply Boss Art; empty keeps his idle.")]
+    [SerializeField] Sprite[] kagetsuneBeam;
+    [Tooltip("The Unchained Wraith's Spirit Hyper Beam pose. Empty falls back to his first form's.")]
+    [SerializeField] Sprite[] kagetsunePhaseBeam;
     [Tooltip("He is drawn bigger than the other bosses: a colossus over the field.")]
     [SerializeField] float kagetsuneScale = 4.6f;
     [Tooltip("How much lower than the other bosses he stands, so his horns and the Wraith's ghost-fire clear the boss bar.")]

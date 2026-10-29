@@ -217,7 +217,11 @@ public partial class GameManager
                 bool hollow = kagetsuneArt == null;
                 Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Health(Kagetsune.StartingHealth),
                     position, hollow ? new Color(0.55f, 0.42f, 0.32f) : Color.white);
-                if (!hollow) emperor.SetPhaseArt(kagetsunePhaseArt);
+                if (!hollow)
+                {
+                    emperor.SetPhaseArt(kagetsunePhaseArt);
+                    emperor.SetBeamFrames(kagetsuneBeam, kagetsunePhaseBeam);
+                }
                 return emperor;
             case BossKind.Shirogane:
                 bool ghostly = shiroganeArt == null;

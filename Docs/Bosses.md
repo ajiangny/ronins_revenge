@@ -146,7 +146,10 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`HyperSafe` short of the far edge) over `HyperSweep`, so it thins as it goes and its leading edge stays well under
   the ronin's speed; the hit is the wedge's span at his row; cover isn't a shield: an `OverlapBox` over the footprint
   `Hit`s every `Blocker` in it; a pulsing danger band, two guides and the pale safe strip (`HyperSafeColour`) over
-  `HyperTell`; it dissipates as a thread at `stop`, the coil drawing in and the souls flung off, blinking out on twos.
+  `HyperTell`, over which `BeamPose` plays his beam pose (`Kagetsune_Beam_*` / `KagetsunePhase2_Beam_*`, PixelLab, wired to
+  `GameManager.kagetsuneBeam`/`kagetsunePhaseBeam` by Apply Boss Art and handed over by `SetBeamFrames`): the hammer
+  slams down at his side on `BeamImpactFrame` (the Wraith's `PhaseBeamImpactFrame`) with a `Slam`, a shake and a
+  `Shockwave`, and he holds the braced last frame until the beam is spent, then `PlayIdle`; it dissipates as a thread at `stop`, the coil drawing in and the souls flung off, blinking out on twos.
   `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` as the muzzle flare behind the beam (order 52, `SizeFlare`: `FlareOverBeam` × the beam's width at the chest, following it as it thins), the beam's top rounded into a dome (`DomeShare`, `DomeMax`) so it swells out of the middle of his chest and at the
   chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` puts him in super
   armour (`levyArmour`: `SuperArmor`, `ArmorDamageTaken` 0.2, a teal `SpriteOutline`) until the last soldier has

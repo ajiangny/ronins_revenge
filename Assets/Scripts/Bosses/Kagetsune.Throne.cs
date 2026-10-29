@@ -604,6 +604,38 @@ public partial class Kagetsune
     static readonly Color HyperSafeColour = new Color(1f, 0.95f, 0.8f);
     static readonly Collider[] HyperCover = new Collider[32];
 
+    // His beam pose (PixelLab): the hammer comes off his shoulder and slams down at his side on its impact frame, then he
+    // braces, chest out, and holds the clip's last frame while the beam burns. Each form has its own (the Wraith swings
+    // wider, in an arc of soul-fire, and lands later); without them he keeps his idle.
+    Sprite[] beamFrames, phaseBeamFrames;
+    const int BeamImpactFrame = 2;
+    const int PhaseBeamImpactFrame = 4;
+    // The clip plays over this share of the tell, so he's braced before the beam fires.
+    const float BeamPoseShare = 0.75f;
+
+    public void SetBeamFrames(Sprite[] first, Sprite[] wraith)
+    {
+        beamFrames = first != null && first.Length > BeamImpactFrame ? first : null;
+        phaseBeamFrames = wraith != null && wraith.Length > PhaseBeamImpactFrame ? wraith : null;
+    }
+
+    bool WraithBeam => secondPhase && phaseBeamFrames != null;
+    Sprite[] BeamFrames => WraithBeam ? phaseBeamFrames : beamFrames;
+
+    // Plays the pose over the tell and, on the frame the hammer lands, the slam: a boom, a shake and the shockwave.
+    IEnumerator BeamPose(float tell)
+    {
+        Sprite[] clip = BeamFrames;
+        if (clip == null || IsDead) yield break;
+        float fps = clip.Length / (tell * BeamPoseShare);
+        animator.Play(clip, false, null, fps);
+        yield return Wait((WraithBeam ? PhaseBeamImpactFrame : BeamImpactFrame) / fps);
+        Slam(0.9f);
+        CameraShake.Add(0.35f);
+        Shockwave(new Vector3(Centre.x, sprite.bounds.min.y + Extents.y * 0.2f, 0), 5f);
+        Fx.Play(Fx.SmokePuff, new Vector3(Centre.x + Extents.x * 0.35f, sprite.bounds.min.y + Extents.y * 0.25f, 0), new Color(0.3f, 0.3f, 0.32f, 0.6f), 2f);
+    }
+
     // The muzzle flare's starburst fills about this much of its canvas.
     const float FlareArtShare = 0.85f;
     // How much wider than the beam it shows: enough for its rays to burst out round the beam's dome.
@@ -651,6 +683,7 @@ public partial class Kagetsune
         SpriteRenderer dim = Darkness();
         HitFlash.Flash(sprite, 0.1f);
         float tell = HyperTell;
+        StartCoroutine(BeamPose(tell));
         for (float t = 0; t < tell; t += Time.deltaTime * Tempo)
         {
             float k = t / tell;
@@ -767,6 +800,8 @@ public partial class Kagetsune
         if (flare != null) Drop(flare);
         Drop(safe);
         Drop(dim);
+        // Out of his stance.
+        if (BeamFrames != null && !IsDead) PlayIdle();
     }
 
     // The Last Toll, parry-only: a lock-on rings the ronin, then a great bronze bell drops on him, steered onto

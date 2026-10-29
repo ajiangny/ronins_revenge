@@ -172,6 +172,8 @@ public static class BossArtSetup
         {
             so.FindProperty("kagetsuneArt").objectReferenceValue = kagetsune;
             so.FindProperty("kagetsuneScale").floatValue = KagetsuneScale;
+            SetFrames(so.FindProperty("kagetsuneBeam"), TryFrames("Kagetsune", "Beam"));
+            SetFrames(so.FindProperty("kagetsunePhaseBeam"), TryFrames("KagetsunePhase2", "Beam"));
         }
         so.FindProperty("kagetsunePhaseArt").objectReferenceValue = kagetsunePhase;
         so.FindProperty("kagetsunePortrait").objectReferenceValue = Portrait("Kagetsune_Full");

@@ -71,6 +71,8 @@ public class Projectile : MonoBehaviour
     void Awake()
     {
         body = GetComponent<Rigidbody>();
+        // Shots only turn when steered; a knock from whatever they pass through must not set them spinning.
+        body.freezeRotation = true;
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
         glow = CreateGlow(transform, glowSize, art.sortingOrder - 1, new Color(0.55f, 1f, 0.85f, 0.45f));

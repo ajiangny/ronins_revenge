@@ -138,8 +138,12 @@ public partial class Kagetsune
         Fx.Play(Fx.KageShockwave, at + Vector3.back * 0.2f, Color.white, size / frames[0].bounds.size.x, null, 57);
     }
 
-    // A column of soul-fire slamming down from `top` onto `ground`, `width` across: its ring sits on the ground and the
-    // beam stretches up to the top. Null without the art (the caller draws a plain bar instead).
+    // How much of the column art's canvas its beam fills at its widest.
+    const float ColumnBeamShare = 0.4f;
+
+    // A column of soul-fire slamming down from `top` onto `ground`, its beam `width` across (as wide as what it burns):
+    // its ring sits on the ground and the beam stretches up to the top. Null without the art (the caller draws a plain
+    // bar instead).
     FxPlayer SoulColumn(Vector3 top, Vector3 ground, float width)
     {
         Sprite[] frames = Fx.Frames(Fx.KageSoulColumn);
@@ -147,7 +151,7 @@ public partial class Kagetsune
         FxPlayer column = Fx.Play(Fx.KageSoulColumn, ground + Vector3.back * 0.2f, Color.white, 1f, null, 56);
         if (column == null) return null;
         Vector2 art = frames[0].bounds.size;
-        column.transform.localScale = new Vector3(width / art.x, Mathf.Max(0.1f, top.y - ground.y) / art.y, 1f);
+        column.transform.localScale = new Vector3(width / ColumnBeamShare / art.x, Mathf.Max(0.1f, top.y - ground.y) / art.y, 1f);
         return column;
     }
 

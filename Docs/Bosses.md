@@ -121,8 +121,11 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   and the Wail's source), `Waist` (bells), `HammerHead`, `Shoulder(side)`. Shots: `Skull` (a breakable `Fx.KageSkull`
   orb with `PassesShots`; `Arrow.Parried` → `FreeSoul` dresses a parried one's riposte as a teal freed soul),
   `SkullFan`, `SkullBurst`, `Hunt`; tells: `CloseLanes` (wide faint lane bands that narrow and brighten over ringing
-  beats), `LockOn` (a code-built ring closing on the ronin). Phase 1: Coffer Slam (a shockwave down the ronin's lane
-  that the first `Blocker` in its way absorbs and breaks, `BreakAfter`), Toll of Fealty, Ofuda Decree (`Ofuda`
+  beats), `LockOn` (a code-built ring closing on the ronin). Phase 1: Coffer Slam (`RaiseHammer` spreads his slam clip's
+  wind-up, everything before `ImpactFrame`, over the tell and `StrikeHammer` plays the impact on the blow; then a
+  `Fissure` runs from his feet down to the ronin's row and along it at `FissureSpeed`, and `EruptColumn`s burst out of
+  it in waves `Spacing` apart, each glowing for `ColumnTell` then a `SoulColumn` `EruptWidth` wide, wave B in wave A's
+  gaps, a third on A's spots when hardened; launched columns run in real time and crack cover), Toll of Fealty, Ofuda Decree (`Ofuda`
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
   Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,

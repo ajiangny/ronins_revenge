@@ -8,34 +8,177 @@ public partial class Kagetsune
 {
     // --- Phase 1 ---
 
-    // Coffer Slam: the hammer marks the ronin's lane (two in phase 2), comes down, and a shockwave runs down it.
-    // The first cover in its way takes the blow and breaks; past that it strikes the ronin. Skulls burst from the
-    // crack and curve back down at him. Hardened, he feints: halfway through the tell the mark jumps to where the
-    // ronin has moved, so stepping out early isn't enough.
+    // Coffer Slam: he heaves the coffin-hammer up over his shoulder and brings it down on the courtyard at his feet. The
+    // ground splits: a fissure runs down the field to the ronin's row and races along it both ways, and soul-fire
+    // columns erupt out of it in waves, each spot glowing before it bursts. The second wave fills the gaps the first
+    // left, so he has to step into where a column has just burnt out. Cover over a column is split by it. Hardened, a
+    // third wave erupts where the first did.
     IEnumerator CofferSlam()
     {
         Bark(BossLine.CofferSlam, 7f);
-        var xs = new List<float> { ClampX(ronin.Bounds.center.x) };
-        if (Hardened) xs.Add(ClampX(xs[0] + (Random.value < 0.5f ? -1f : 1f) * Random.Range(3f, 4.5f)));
-        var bands = new List<SpriteRenderer>();
-        foreach (float x in xs) bands.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 2.6f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.12f)));
-        SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.4f), 2.5f);
-        PlayAction(art.attack);
         float tell = secondPhase ? 0.75f : 0.95f;
-        if (Hardened && Random.value < 0.5f)
+        // The wind-up: the hammer rises on his shoulder and is held high while the coffin blazes, three tolls rising.
+        SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.2f), 2f);
+        RaiseHammer(tell);
+        int rung = 0;
+        for (float t = 0; t < tell; t += Time.deltaTime * Tempo)
         {
-            yield return CloseLanes(bands, xs, 2.6f, 2f, Crimson, tell * 0.55f, 2);
-            // The feint: the mark jumps onto him, and the tell closes from there.
-            xs[0] = ClampX(ronin.Bounds.center.x);
-            Toll(0.6f, 1.25f);
-            Fx.Play(Fx.Impact, new Vector3(xs[0], Row, 0), Crimson, 1f);
-            yield return CloseLanes(bands, xs, 2.2f, 1.5f, Crimson, tell * 0.65f, 2);
+            float k = t / tell;
+            raised.transform.position = HammerHead + Vector3.back * 0.1f;
+            raised.transform.localScale = Vector3.one * Mathf.Lerp(2f, 4f, k);
+            raised.color = new Color(Teal.r, Teal.g, Teal.b, 0.2f + 0.5f * k);
+            if (k >= rung / 3f && rung < 3)
+            {
+                rung++;
+                Toll(0.35f, 0.8f + 0.12f * rung);
+            }
+            yield return null;
         }
-        else yield return CloseLanes(bands, xs, 2.6f, 1.5f, Crimson, tell);
         Drop(raised);
-        foreach (SpriteRenderer band in bands) Drop(band);
-        yield return SlamDown(xs, true);
-        yield return Wait(0.5f);
+
+        // The blow, on the frame the hammer meets the ground.
+        StrikeHammer();
+        Vector3 impact = new Vector3(Centre.x + Extents.x * 0.2f, sprite.bounds.min.y + Extents.y * 0.32f, 0);
+        Slam(1f);
+        CameraShake.Add(0.6f);
+        HitStop?.Invoke(0.05f);
+        Fx.Play(Fx.Impact, impact, Teal, 2.6f);
+        Shockwave(impact, 4f);
+        TimeRipple.Emit(impact, 5f, 0.5f, 0.5f);
+        Crack(impact);
+        Debris.BurstSprites(impact, art.deathParticles, Bronze, 14, 0.9f, 8f);
+
+        // The fissure runs down the field to the ronin's row, then splits along it both ways.
+        float ground = GroundY + 0.25f;
+        Vector3 fork = new Vector3(impact.x, ground, 0);
+        yield return Fissure(impact, fork, FissureSpeed);
+        StartCoroutine(Fissure(fork, new Vector3(FieldLeft, ground, 0), FissureSpeed));
+        StartCoroutine(Fissure(fork, new Vector3(FieldRight, ground, 0), FissureSpeed));
+
+        // The columns: wave A on the fork and every Spacing out from it, wave B halfway between, then (hardened) A again.
+        const float Spacing = 4f;
+        int waves = Hardened ? 3 : 2;
+        for (int wave = 0; wave < waves; wave++)
+        {
+            float offset = wave % 2 == 0 ? 0f : Spacing / 2f;
+            var spots = new List<float>();
+            for (float d = offset; fork.x - d >= FieldLeft || fork.x + d <= FieldRight; d += Spacing)
+            {
+                if (fork.x + d <= FieldRight) spots.Add(fork.x + d);
+                if (d > 0f && fork.x - d >= FieldLeft) spots.Add(fork.x - d);
+            }
+            // Each erupts a fixed tell after the fissure reaches it, so the wave rolls out from the fork.
+            foreach (float x in spots) StartCoroutine(EruptColumn(new Vector3(x, ground, 0), Mathf.Abs(x - fork.x) / FissureSpeed));
+            yield return Wait(ColumnTell + (secondPhase ? 0.25f : 0.35f));
+        }
+        yield return Wait(0.4f);
+    }
+
+    // How fast a fissure splits the ground, how long a column's spot glows before it erupts, and how it burns.
+    const float FissureSpeed = 16f;
+    const float ColumnTell = 0.55f;
+    const float EruptSeconds = 0.3f;
+    const float EruptHeight = 6f;
+    const float EruptWidth = 1.4f;
+
+    // One column out of the fissure: its spot glows and swells for the tell, then soul-fire bursts up from it,
+    // burning the ronin and any cover in it for a moment. Once the fissure is open it runs in real time: a stagger
+    // doesn't hold columns already glowing.
+    IEnumerator EruptColumn(Vector3 spot, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (IsDead) yield break;
+        SpriteRenderer mark = Glowing(spot + Vector3.up * 0.2f, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 4);
+        Detach(mark.gameObject);
+        for (float t = 0; t < ColumnTell && mark != null; t += Time.deltaTime)
+        {
+            float k = t / ColumnTell;
+            mark.transform.localScale = new Vector3(Mathf.Lerp(1f, EruptWidth * 1.8f, k), Mathf.Lerp(0.4f, 0.9f, k), 1f);
+            mark.color = new Color(Teal.r, Teal.g, Teal.b, 0.15f + 0.6f * k * k);
+            yield return null;
+        }
+        if (mark != null) Destroy(mark.gameObject);
+        if (IsDead) yield break;
+        Vector3 top = spot + Vector3.up * EruptHeight;
+        if (SoulColumn(top, spot, EruptWidth) == null)
+        {
+            SpriteRenderer bar = Bar(spot, top, EruptWidth * 0.5f, new Color(0.85f, 1f, 0.96f, 0.9f), 56);
+            Detach(bar.gameObject);
+            Fader.Fade(bar, EruptSeconds + 0.2f);
+        }
+        Fx.Play(Fx.SmokePuff, spot, new Color(0.25f, 0.27f, 0.28f, 0.7f), 1.4f);
+        if (Sfx.Has(Sfx.SoulWail)) Sfx.Play(Sfx.SoulWail, 0.25f, 1.6f);
+        else Sfx.Play(Sfx.LanternBeam, 0.25f, 1.4f);
+        BeamEnd(top, spot, out Blocker cover);
+        if (cover != null) cover.Hit(spot);
+        for (float t = 0; t < EruptSeconds; t += Time.deltaTime)
+        {
+            if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < EruptWidth / 2f) ronin.TakeHit(new Vector3(spot.x, ronin.Bounds.center.y, 0));
+            yield return null;
+        }
+        GroundFire.Light(spot);
+    }
+
+    // A fissure splitting the ground from one point to another at `speed`: a dark rift with soul-fire glowing up out of
+    // it, jagged along its length, drawn as it goes and cooling over a few seconds. Only for show; not transient.
+    IEnumerator Fissure(Vector3 from, Vector3 to, float speed)
+    {
+        float length = Vector3.Distance(from, to);
+        if (length < 0.1f) yield break;
+        Vector3 dir = (to - from) / length;
+        Vector3 side = new Vector3(-dir.y, dir.x, 0);
+        int segments = Mathf.Max(2, Mathf.CeilToInt(length / 1.2f));
+        Vector3 last = from;
+        for (int i = 1; i <= segments; i++)
+        {
+            Vector3 next = from + dir * (length * i / segments) + (i < segments ? side * Random.Range(-0.35f, 0.35f) : Vector3.zero);
+            // A seam of soul-fire light with the dark crack down its middle; each piece overlaps the next a little so
+            // the seam reads as one line, not a row of dashes.
+            Vector3 a = last - dir * 0.06f, b = next + dir * 0.06f;
+            for (int layer = 0; layer < 2; layer++)
+            {
+                var rift = new GameObject("Fissure").AddComponent<SpriteRenderer>();
+                rift.sprite = ProceduralSprites.White;
+                rift.color = layer == 0 ? new Color(Teal.r, Teal.g, Teal.b, 0.75f) : new Color(0.04f, 0.03f, 0.05f, 0.95f);
+                rift.sortingOrder = 3 + layer;
+                Stretch(rift, a, b, layer == 0 ? 0.24f : 0.09f);
+                rift.transform.position += Vector3.forward * 0.5f;
+                Fader.Fade(rift, 3.5f);
+            }
+            // Soul-fire glows up out of it here and there.
+            if (Random.value < 0.4f) ElementFx.Glow(next, new Color(Teal.r, Teal.g, Teal.b, 0.45f), 0.3f, 1.4f, 0.6f);
+            last = next;
+            yield return new WaitForSeconds(length / segments / speed);
+        }
+    }
+
+    // His slam on his own art, timed to the blow: the wind-up (everything before the impact frame) spread over the
+    // tell so the hammer is held high at its end, and StrikeHammer plays the impact and follow-through. Without enough
+    // frames the whole clip plays at the blow.
+    int ImpactFrame => art.attack != null && art.attack.Length >= 4 ? Mathf.RoundToInt(art.attack.Length * 0.625f) : -1;
+
+    void RaiseHammer(float seconds)
+    {
+        int impact = ImpactFrame;
+        if (impact <= 0 || IsDead) return;
+        var windup = new Sprite[impact];
+        System.Array.Copy(art.attack, windup, impact);
+        // A little quicker than the tell, so the hammer hangs at its peak before it falls.
+        animator.Play(windup, false, null, impact / (seconds * 0.8f));
+    }
+
+    void StrikeHammer()
+    {
+        int impact = ImpactFrame;
+        if (IsDead) return;
+        if (impact <= 0)
+        {
+            PlayAction(art.attack);
+            return;
+        }
+        var blow = new Sprite[art.attack.Length - impact];
+        System.Array.Copy(art.attack, impact, blow, 0, blow.Length);
+        animator.Play(blow, false, PlayIdle, art.actionFps * 0.8f);
     }
 
     // The hammer comes down on the given lanes: a soul-fire shockwave runs down each to the ground (cover takes it
@@ -57,7 +200,7 @@ public partial class Kagetsune
             SpriteRenderer halo = Bar(top, top, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.3f), 55);
             halo.sprite = ProceduralSprites.Glow;
             waves.Add(halo);
-            bool column = SoulColumn(top, end, 2.4f) != null;
+            bool column = SoulColumn(top, end, 1.9f) != null;
             waves.Add(column ? null : Bar(top, top, 0.5f, new Color(0.9f, 1f, 0.96f, 0.9f), 56));
             if (cover != null) StartCoroutine(BreakAfter(cover, 0.18f));
         }

@@ -519,7 +519,7 @@ public partial class Kagetsune
                 SpriteRenderer halo = Bar(top, ground, halfWidth * 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.3f), 55);
                 halo.sprite = ProceduralSprites.Glow;
                 columns.Add(halo);
-                if (SoulColumn(top, ground, halfWidth * 2f) == null) columns.Add(Bar(top, ground, halfWidth * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
+                if (SoulColumn(top, ground, halfWidth * 1.8f) == null) columns.Add(Bar(top, ground, halfWidth * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
                 GroundFire.Light(new Vector3(x, GroundY, 0));
             }
             // The columns burn for their whole flash, not a single frame.

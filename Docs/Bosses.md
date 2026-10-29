@@ -134,8 +134,9 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `ColumnTell` (`Flare`ing their stretch of crack) then burst as `SoulColumn`s every `ColumnStep`, only the one at the
   row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (timer bombs: `Ofuda`
   strips land at spots `OfudaBlastHalf` × 2 + `OfudaRoom` apart, the ronin's first; `OfudaFuse` runs `Launch`ed in
-  real time: a teal one-pixel `PixelRing` (`ProceduralSprites.Ring`) marks the blast's edge and a pale one closes onto
-  the paper (`SetRing` swaps radii so the line stays a pixel) with a quickening `Toll` tick; then `OfudaBlast`: a
+  real time: a one-pixel `PixelRing` (`ProceduralSprites.Ring`) marks the blast's edge and a pale one closes onto
+  the paper (`SetRing` swaps radii so the line stays a pixel) with a quickening `Toll` tick, rings, glow and paper heating from
+  `Teal` to `SealRed` and flickering in the last quarter; then `OfudaBlast`: a
   `SoulColumn`, `Fx.KageOfudaBurn`, a flash, `Shockwave`, three `RisingSoul`s, hit-stop and a `TimeRipple`; it hits
   inside the ring, `Hit`s cover and leaves a soul `GroundFire.Scorch`; fizzles if he falls or breaks phase; fuses
   step by 0.45 s, 0.35 s in phase 2),

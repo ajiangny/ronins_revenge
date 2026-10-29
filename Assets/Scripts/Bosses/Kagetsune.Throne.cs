@@ -523,7 +523,7 @@ public partial class Kagetsune
     }
 
     // One talisman's fuse: a fixed ring of soul-fire marks the blast's edge round the paper, and a brighter ring
-    // closes in from it onto the paper, ticking faster; the paper glows soul-white as it goes. When the closing ring
+    // closes in from it onto the paper, ticking faster; the rings, glow and paper turn from teal to red. When the closing ring
     // reaches it, the paper bursts in a column of soul-fire that burns whoever stands inside the edge.
     IEnumerator OfudaFuse(SpriteRenderer paper, Vector3 ground, float seconds)
     {
@@ -540,11 +540,16 @@ public partial class Kagetsune
             if (IsDead || breaking || paper == null) break;
             float k = t / seconds;
             float fadeIn = Mathf.Clamp01(t / 0.2f);
-            edge.color = new Color(Teal.r, Teal.g, Teal.b, 0.75f * fadeIn);
+            // The warning heats from soul teal to seal red as the fuse runs, and in its last stretch it flickers.
+            float heat = Mathf.SmoothStep(0f, 1f, k);
+            float flicker = k > 0.75f ? 0.75f + 0.25f * Mathf.Sin(t * 45f) : 1f;
+            Color hot = Color.Lerp(Teal, SealRed, heat);
+            edge.color = new Color(hot.r, hot.g, hot.b, 0.75f * fadeIn * flicker);
             SetRing(closing, Mathf.Lerp(OfudaBlastHalf, 0.15f, k), pixel);
-            closing.color = new Color(0.85f, 1f, 0.96f, (0.5f + 0.5f * k) * fadeIn);
-            under.color = new Color(Teal.r, Teal.g, Teal.b, 0.08f + 0.22f * k * k);
-            paper.color = Color.Lerp(fresh, new Color(0.75f, 1f, 0.95f), k * k);
+            Color core = Color.Lerp(new Color(0.85f, 1f, 0.96f), new Color(1f, 0.6f, 0.5f), heat);
+            closing.color = new Color(core.r, core.g, core.b, (0.5f + 0.5f * k) * fadeIn);
+            under.color = new Color(hot.r, hot.g, hot.b, (0.08f + 0.22f * k * k) * flicker);
+            paper.color = Color.Lerp(fresh, new Color(1f, 0.55f, 0.5f), heat * 0.8f);
             // A tick quickening as the ring closes.
             if (t >= nextTick)
             {

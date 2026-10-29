@@ -606,8 +606,8 @@ public partial class Kagetsune
 
     // The muzzle flare's starburst fills about this much of its canvas.
     const float FlareArtShare = 0.85f;
-    // How much wider than the beam it shows.
-    const float FlareOverBeam = 1.2f;
+    // How much wider than the beam it shows: enough for its rays to burst out round the beam's dome.
+    const float FlareOverBeam = 1.6f;
 
     // Sizes the muzzle flare to the beam's half-width where it leaves his chest.
     void SizeFlare(FxPlayer flare, float beamHalf)

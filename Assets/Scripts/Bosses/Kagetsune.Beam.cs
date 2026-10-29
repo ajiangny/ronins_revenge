@@ -17,6 +17,10 @@ public partial class Kagetsune
     const float CoilPitch = 2.4f;
     // How fast the coil screws down the beam (radians a second).
     const float CoilSpin = 7f;
+    // The dome over the beam's top is this share of its half-width tall, at most DomeMax units, so a wide beam's dome
+    // doesn't climb over his helm.
+    const float DomeShare = 0.7f;
+    const float DomeMax = 0.9f;
 
     static readonly Color32 BeamRim = new Color32(14, 92, 86, 235);
     static readonly Color32 BeamMid = new Color32(34, 173, 152, 255);
@@ -212,30 +216,44 @@ public partial class Kagetsune
             body.Begin();
             int rowTop = Px(top.y), rowFoot = Px(foot.y);
             float t = Time.time;
+            // The dome it swells out of his chest through: rows above the chest narrowing on a half-ellipse to a point
+            // over its middle, so the beam pours out of a ball of soul-fire rather than starting on a flat edge.
+            float domeHeight = Mathf.Min(topHalf * DomeShare, DomeMax) * BeamPixel;
+            for (int y = rowTop + Mathf.CeilToInt(domeHeight / BeamRow) * BeamRow; y > rowTop; y -= BeamRow)
+            {
+                float rise = (y - BeamRow * 0.5f - rowTop) / domeHeight;
+                if (rise >= 1f) continue;
+                Row(y, top.x * BeamPixel, topHalf * BeamPixel * Mathf.Sqrt(1f - rise * rise), t);
+            }
             for (int y = rowTop; y > rowFoot; y -= BeamRow)
             {
                 float f = Mathf.InverseLerp(rowTop, rowFoot, y);
-                float c = Mathf.Lerp(top.x, foot.x, f) * BeamPixel;
                 // A pixel of flicker on the edges, stepped.
                 float half = Mathf.Lerp(topHalf, halfFoot, f) * BeamPixel + Mathf.Round(Mathf.Sin(y * 0.37f + t * 31f));
-                if (half < 0.5f) continue;
-                float flow = Mathf.Round(Mathf.Sin(y * 0.11f - t * 22f) * 2f) / 2f;
-                // Where each band ends, as a share of the half-width out from the middle.
-                float core = 0.22f + 0.06f * flow, light = 0.5f + 0.04f * flow, mid = 0.86f;
-                int y0 = y - BeamRow;
-                int left = Mathf.RoundToInt(c - half), right = Mathf.RoundToInt(c + half) - 1;
-                int midL = Mathf.RoundToInt(c - half * mid), midR = Mathf.RoundToInt(c + half * mid) - 1;
-                int lightL = Mathf.RoundToInt(c - half * light), lightR = Mathf.RoundToInt(c + half * light) - 1;
-                int coreL = Mathf.RoundToInt(c - half * core), coreR = Mathf.RoundToInt(c + half * core) - 1;
-                body.Run(left, midL - 1, y0, BeamRow, BeamRim);
-                body.Run(midL, lightL - 1, y0, BeamRow, BeamMid);
-                body.Run(lightL, coreL - 1, y0, BeamRow, BeamLight);
-                body.Run(coreL, coreR, y0, BeamRow, BeamCore);
-                body.Run(coreR + 1, lightR, y0, BeamRow, BeamLight);
-                body.Run(lightR + 1, midR, y0, BeamRow, BeamMid);
-                body.Run(midR + 1, right, y0, BeamRow, BeamRim);
+                Row(y, Mathf.Lerp(top.x, foot.x, f) * BeamPixel, half, t);
             }
             body.End();
+        }
+
+        // One row of the body, `half` pixels either side of `c`, in the stepped bands of a lit cylinder.
+        void Row(int y, float c, float half, float t)
+        {
+            if (half < 0.5f) return;
+            float flow = Mathf.Round(Mathf.Sin(y * 0.11f - t * 22f) * 2f) / 2f;
+            // Where each band ends, as a share of the half-width out from the middle.
+            float core = 0.22f + 0.06f * flow, light = 0.5f + 0.04f * flow, mid = 0.86f;
+            int y0 = y - BeamRow;
+            int left = Mathf.RoundToInt(c - half), right = Mathf.RoundToInt(c + half) - 1;
+            int midL = Mathf.RoundToInt(c - half * mid), midR = Mathf.RoundToInt(c + half * mid) - 1;
+            int lightL = Mathf.RoundToInt(c - half * light), lightR = Mathf.RoundToInt(c + half * light) - 1;
+            int coreL = Mathf.RoundToInt(c - half * core), coreR = Mathf.RoundToInt(c + half * core) - 1;
+            body.Run(left, midL - 1, y0, BeamRow, BeamRim);
+            body.Run(midL, lightL - 1, y0, BeamRow, BeamMid);
+            body.Run(lightL, coreL - 1, y0, BeamRow, BeamLight);
+            body.Run(coreL, coreR, y0, BeamRow, BeamCore);
+            body.Run(coreR + 1, lightR, y0, BeamRow, BeamLight);
+            body.Run(lightR + 1, midR, y0, BeamRow, BeamMid);
+            body.Run(midR + 1, right, y0, BeamRow, BeamRim);
         }
 
         // Each strand walks the beam a pixel row at a time on its helix: the angle winds on with the distance

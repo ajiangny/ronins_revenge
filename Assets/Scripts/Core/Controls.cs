@@ -72,22 +72,9 @@ public static class Controls
         ? keyboard.eKey.wasPressedThisFrame || (mouse != null && mouse.middleButton.wasPressedThisFrame)
         : keyboard.zKey.wasPressedThisFrame || keyboard.iKey.wasPressedThisFrame;
 
-    // A move's buttons in the current scheme, as drawn key caps (Poguru's lessons): the main one first.
-    public static KeyGlyph[] Glyphs(Moves move) => UsesMouse
-        ? move switch
-        {
-            Moves.Slash => new[] { KeyGlyph.MouseLeft },
-            Moves.Shuriken => new[] { KeyGlyph.Space },
-            Moves.Parry => new[] { KeyGlyph.MouseRight },
-            _ => new[] { KeyGlyph.Key("E"), KeyGlyph.MouseMiddle },
-        }
-        : move switch
-        {
-            Moves.Slash => new[] { KeyGlyph.Space },
-            Moves.Shuriken => new[] { KeyGlyph.Key("X") },
-            Moves.Parry => new[] { KeyGlyph.Key("C") },
-            _ => new[] { KeyGlyph.Key("Z") },
-        };
+    // A move's buttons in the current scheme, as drawn key caps (Poguru's lessons): every binding, so both keyboard
+    // layouts see theirs.
+    public static KeyGlyph[] Glyphs(Moves move) => AllGlyphs(move, Current);
 
     // Every binding of a move in a scheme as drawn caps, "or" between alternatives (the new journey's cards).
     public static KeyGlyph[] AllGlyphs(Moves move, Scheme scheme)

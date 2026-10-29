@@ -349,7 +349,7 @@ public partial class GameManager
         {
             portrait = utsusemiPortrait, closeup = utsusemiCloseup,
             // Framed on its slit-eye, the whole hat brim and its pendants on screen.
-            closeupHeight = 1500f, closeupFocus = new Vector2(0.45f, 0.19f), closeupAt = new Vector2(0f, 255f),
+            closeupHeight = 1500f, closeupFocus = new Vector2(0.55f, 0.19f), closeupAt = new Vector2(0f, 255f),
             // Overdriven: framed between its slit-eye and the open core, the broken hat ringing the top.
             phasePortrait = utsusemiPhasePortrait, phaseCloseup = utsusemiPhaseCloseup, phaseEpithet = Utsusemi.PhaseEpithet,
             // Pulled back as far as the painting allows: its left edge limits it, so the slit-eye sits a little left.

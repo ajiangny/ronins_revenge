@@ -124,7 +124,7 @@ public partial class GameManager
         Time.timeScale = 0f;
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ThreadColor, 1.2f);
         Sfx.Play(Sfx.SoulCollect, 1f, 1.25f);
-        boonChoice.ShowThread(offers, threadFrames, index =>
+        boonChoice.ShowThread(offers, Held(threadPainted, threadFrames), index =>
         {
             TakeOrReject(offers, index);
             Time.timeScale = 1f;
@@ -781,6 +781,9 @@ public partial class GameManager
 
     // What a boon screen holds out: the painting, or the pixel loop without one.
     static Sprite[] Held(Sprite painted, Sprite[] frames) => painted != null ? new[] { painted } : frames;
+
+    // A loop's frames, or the drawn stand-in while it has no art.
+    static Sprite[] Looped(Sprite[] frames, Sprite fallback) => frames != null && frames.Length > 0 ? frames : new[] { fallback };
 
     // Every cleared stage earns a boon of a random element, then the next stage begins.
     IEnumerator StageCleared()

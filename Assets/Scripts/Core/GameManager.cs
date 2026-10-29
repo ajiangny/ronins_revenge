@@ -122,8 +122,14 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] Sprite[] beadFrames;
     [Tooltip("The painted bead held out on the Spirit Bead screen. Empty uses beadFrames.")]
     [SerializeField] Sprite beadPainted;
-    [Tooltip("The Spirit Thread portal's icon and the thing held out on its screen, looped. Empty: a glow in the thread's colour.")]
+    [Tooltip("The Spirit Thread portal's icon, looped. Wired by Ninja/Apply Boon Art; empty: a glow in the thread's colour.")]
     [SerializeField] Sprite[] threadFrames;
+    [Tooltip("The painted thread held out on the Spirit Thread screen. Empty uses threadFrames.")]
+    [SerializeField] Sprite threadPainted;
+    [Tooltip("The Warlord's Seal in the temple's resource tray, looped. Empty draws a pixel seal.")]
+    [SerializeField] Sprite[] sealFrames;
+    [Tooltip("The Kite Silk in the temple's resource tray, looped. Empty draws a pixel spool.")]
+    [SerializeField] Sprite[] silkFrames;
     [Tooltip("The Lost Melody portal's icon, looped.")]
     [FormerlySerializedAs("emberFrames")]
     [SerializeField] Sprite[] noteFrames;
@@ -610,8 +616,8 @@ public partial class GameManager : MonoBehaviour
         // The temple's resources, Hades-style in the corner. A new currency is one more line here.
         resources = ResourceTray.Build(ui);
         resources.Add("SpiritNotes", () => Save.Data.embers, NoteIcon);
-        resources.Add("WarlordSeals", () => Upgrades.Held(Relic.Seal), new[] { ProceduralSprites.Seal });
-        resources.Add("KiteSilk", () => Upgrades.Held(Relic.Silk), new[] { ProceduralSprites.Silk });
+        resources.Add("WarlordSeals", () => Upgrades.Held(Relic.Seal), Looped(sealFrames, ProceduralSprites.Seal));
+        resources.Add("KiteSilk", () => Upgrades.Held(Relic.Silk), Looped(silkFrames, ProceduralSprites.Silk));
         dialogueScene = ui.gameObject.AddComponent<DialogueScene>();
         dialogueScene.Bind(ui);
         baseRoninArt = ronin.art;

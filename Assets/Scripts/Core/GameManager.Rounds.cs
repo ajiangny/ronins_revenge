@@ -38,8 +38,9 @@ public partial class GameManager
         Upgrades.AddRelic(relic, count);
         relicsThisRun[(int)relic] += count;
         RunLog.Note($"+{count} {Upgrades.RelicName(relic, count)}");
-        Fx.Play(Fx.Impact, where, Upgrades.RelicColour(relic), 1.4f);
-        Sfx.Play(Sfx.SoulCollect, 0.7f, 1.3f);
+        // It forms where it was won and flies into him, like a round's reward, only smaller.
+        RewardSpirit.Spawn(where, relic == Relic.Seal ? Looped(sealFrames, ProceduralSprites.Seal) : Looped(silkFrames, ProceduralSprites.Silk),
+            Upgrades.RelicColour(relic), ronin, 1f);
     }
 
     // Drops into a stage's boss fight, or its rounds, on that fight's own map. A boss jump counts as the last round.

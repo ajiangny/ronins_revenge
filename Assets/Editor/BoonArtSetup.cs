@@ -95,9 +95,14 @@ public static class BoonArtSetup
         SetArray(managerSo.FindProperty("scrollFrames"), Frames("Effects/TechniqueScroll_"));
         SetArray(managerSo.FindProperty("beadFrames"), Frames("Effects/SpiritBead_"));
         SetArray(managerSo.FindProperty("noteFrames"), Frames("Effects/SpiritNotes_"));
+        SetArray(managerSo.FindProperty("threadFrames"), Frames("Effects/SpiritThread_"));
+        // The temple tray's Warlord's Seals and Kite Silk.
+        SetArray(managerSo.FindProperty("sealFrames"), Frames("Effects/WarlordSeal_"));
+        SetArray(managerSo.FindProperty("silkFrames"), Frames("Effects/KiteSilk_"));
         SetArray(managerSo.FindProperty("springFrames"), Frames("Effects/HealingSpring_"));
         managerSo.FindProperty("scrollPainted").objectReferenceValue = BossArtSetup.Portrait("TechniqueScroll_Painted");
         managerSo.FindProperty("beadPainted").objectReferenceValue = BossArtSetup.Portrait("SpiritBead_Painted");
+        managerSo.FindProperty("threadPainted").objectReferenceValue = BossArtSetup.Portrait("SpiritThread_Painted");
         SerializedProperty bossIcons = managerSo.FindProperty("bossIcons");
         var kinds = System.Array.FindAll((BossKind[])System.Enum.GetValues(typeof(BossKind)), kind => kind != BossKind.None);
         bossIcons.arraySize = kinds.Length;

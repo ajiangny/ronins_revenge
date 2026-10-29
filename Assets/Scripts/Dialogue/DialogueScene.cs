@@ -230,11 +230,13 @@ public class DialogueScene : MonoBehaviour
             slot.art.color = Color.white;
             Rect r = who.art.rect;
             Vector2 size = new Vector2(who.height * r.width / r.height, who.height);
+            // A painting shorter than the screen would leave the field showing above or below it, so it's drawn at
+            // least screen height.
+            size *= Mathf.Max(1f, (root.rect.height + 2f * EdgeHide) / size.y);
             art.sizeDelta = size;
             Vector2 at = eyes - new Vector2((who.focus.x - 0.5f) * size.x, (0.5f - who.focus.y) * size.y);
             // The paintings are cut at the hips and some fill their canvas to the sides, so the cut edges are kept off
-            // screen: the foot below the bottom, the outer side past the screen's edge. When a painting's too short
-            // for both, the top wins, so the frozen field never shows through above the speaker's head.
+            // screen: the foot below the bottom, the top above it, the outer side past the screen's edge.
             at.y = Mathf.Min(at.y, size.y / 2f - EdgeHide);
             at.y = Mathf.Max(at.y, root.rect.height - size.y / 2f + EdgeHide);
             at.x = who.right ? Mathf.Max(at.x, EdgeHide - size.x / 2f) : Mathf.Min(at.x, size.x / 2f - EdgeHide);

@@ -13,7 +13,7 @@ public class PixelArtImporter : AssetPostprocessor
     const float UtsusemiPhasePixelsPerUnit = 60f;
 
     // Effects drawn with SpriteDrawMode.Tiled, by file-name prefix.
-    static readonly string[] TiledArt = { "Utsu_BeamRed_", "Utsu_BeamMolten_", "Kage_Chain_", "Kage_SoulPillar_", "SafeZone_" };
+    static readonly string[] TiledArt = { "Utsu_BeamRed_", "Utsu_BeamMolten_", "Kage_Chain_", "SafeZone_" };
 
     static bool IsTiled(string path)
     {

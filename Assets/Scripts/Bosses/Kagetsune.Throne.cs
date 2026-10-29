@@ -52,11 +52,13 @@ public partial class Kagetsune
             Vector3 top = new Vector3(x, anchor.y - Extents.y * 0.5f, 0);
             Vector3 end = BeamEnd(top, new Vector3(x, GroundY, 0), out Blocker cover);
             ends.Add(end);
-            // A white-hot core inside a broad soul-fire glow.
-            SpriteRenderer halo = Bar(top, top, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.5f), 55);
+            // A soft soul-fire glow runs down the lane while the column itself slams onto the ground; without the
+            // column's art a white-hot bar runs down inside the glow instead.
+            SpriteRenderer halo = Bar(top, top, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.3f), 55);
             halo.sprite = ProceduralSprites.Glow;
             waves.Add(halo);
-            waves.Add(Tiled(Fx.KageSoulPillar, top, top, 1.2f, new Color(0.9f, 1f, 0.96f, 0.9f), 56));
+            bool column = SoulColumn(top, end, 2.4f) != null;
+            waves.Add(column ? null : Bar(top, top, 0.5f, new Color(0.9f, 1f, 0.96f, 0.9f), 56));
             if (cover != null) StartCoroutine(BreakAfter(cover, 0.18f));
         }
         bool hit = false;
@@ -68,7 +70,7 @@ public partial class Kagetsune
                 Vector3 top = new Vector3(xs[i], anchor.y - Extents.y * 0.5f, 0);
                 Vector3 tip = Vector3.Lerp(top, ends[i], k);
                 Stretch(waves[2 * i], top, tip, 2.6f);
-                Lay(waves[2 * i + 1], top, tip, (waves[2 * i + 1].drawMode == SpriteDrawMode.Tiled ? 1.4f : 0.7f) * (1f - 0.4f * k));
+                Stretch(waves[2 * i + 1], top, tip, 0.7f * (1f - 0.4f * k));
                 if (!hit && Mathf.Abs(ronin.Bounds.center.x - xs[i]) < 0.95f && tip.y <= ronin.Bounds.center.y + 0.3f)
                 {
                     hit = true;

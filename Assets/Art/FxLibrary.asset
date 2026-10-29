@@ -832,11 +832,6 @@ MonoBehaviour:
     - {fileID: 21300000, guid: d4a390e7f06c149daa3a95ded52e14cd, type: 3}
     fps: 8
     loop: 1
-  - id: Kage_SoulPillar
-    frames:
-    - {fileID: 21300000, guid: c7f651853749741679d86db1b43ab874, type: 3}
-    fps: 8
-    loop: 1
   - id: Kage_Shockwave
     frames:
     - {fileID: 21300000, guid: ed1e2605197084563bda13adb52a6378, type: 3}
@@ -849,6 +844,22 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 691a784e3519947688ad9ac27b25ea42, type: 3}
     - {fileID: 21300000, guid: 6d94d4776eef446caa787f35ea6bd5f8, type: 3}
     - {fileID: 21300000, guid: e4fce4305ce534bfca1f4b4636207b20, type: 3}
+    fps: 14
+    loop: 0
+  - id: Kage_SoulColumn
+    frames:
+    - {fileID: 21300000, guid: 5ed6b04babe29495096229cb147ad9ae, type: 3}
+    - {fileID: 21300000, guid: f26a0f857d00c40a58fdf7eb6d425590, type: 3}
+    - {fileID: 21300000, guid: 953cd4e32a2bd4c489dfa630ad2c2f56, type: 3}
+    - {fileID: 21300000, guid: 516bb8e67033a4c529a99c6d3576b77a, type: 3}
+    - {fileID: 21300000, guid: 42b674e44120a428a9cf35598b99c24e, type: 3}
+    - {fileID: 21300000, guid: c7d3b7af47b344994a3718e068db21fb, type: 3}
+    - {fileID: 21300000, guid: 832f282eca362465980f365da3c45329, type: 3}
+    - {fileID: 21300000, guid: 3f843c1732e554e3e8d1d074210a8cf9, type: 3}
+    - {fileID: 21300000, guid: 78a7d0cfb764240f884d0409438df0f5, type: 3}
+    - {fileID: 21300000, guid: 1b327783e28ba43c08bb6219d8db78ba, type: 3}
+    - {fileID: 21300000, guid: 7c7c3c222fab14c0687a4dd556f2478e, type: 3}
+    - {fileID: 21300000, guid: 395bc87f88109401ab1abfa58f60ce1d, type: 3}
     fps: 14
     loop: 0
   - id: Kage_TollRing

@@ -514,11 +514,12 @@ public partial class Kagetsune
             var columns = new List<SpriteRenderer>();
             foreach (float x in xs)
             {
-                // A soul-fire column: a broad soft glow round a narrow white-hot core.
-                SpriteRenderer halo = Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), 55);
+                // A soul-fire column slamming down the lane in a soft glow (a white-hot bar without its art).
+                Vector3 top = new Vector3(x, TopOfScreen, 0), ground = new Vector3(x, GroundY, 0);
+                SpriteRenderer halo = Bar(top, ground, halfWidth * 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.3f), 55);
                 halo.sprite = ProceduralSprites.Glow;
                 columns.Add(halo);
-                columns.Add(Tiled(Fx.KageSoulPillar, new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 1.3f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
+                if (SoulColumn(top, ground, halfWidth * 2f) == null) columns.Add(Bar(top, ground, halfWidth * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
                 GroundFire.Light(new Vector3(x, GroundY, 0));
             }
             // The columns burn for their whole flash, not a single frame.

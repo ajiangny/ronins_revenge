@@ -115,9 +115,10 @@ public static class FxSetup
         (Fx.KageSealDart, 8, true, Centre),
         (Fx.KageBell, 8, true, new Vector2(0.5f, 1f)),
         (Fx.KageChain, 8, true, Centre),
-        (Fx.KageSoulPillar, 8, true, Centre),
         // The burst under a slam, its strike point at the middle of the ground ring.
         (Fx.KageShockwave, 14, false, Centre),
+        // A column of soul-fire, anchored on its ground ring at the foot of a tall canvas.
+        (Fx.KageSoulColumn, 14, false, new Vector2(0.5f, 0.03f)),
         // His polish: the toll's sound ring, a chain bursting (its snap point left of the sparks), the soul-fire he
         // stands in (on its ring at his feet), his lock-on, the Wail's flare, a freed soul (on its head) and an ofuda
         // burning away.

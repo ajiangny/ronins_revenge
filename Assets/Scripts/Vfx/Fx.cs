@@ -95,12 +95,12 @@ public static class Fx
     // The bullet-hell kit's: the bronze bell-shot a parry rings into Resonance, and the crimson seal-dart no parry turns.
     public const string KageBellShot = "Kage_BellShot";
     public const string KageSealDart = "Kage_SealDart";
-    // His set dressing: a hanging bell for the Night of a Thousand Bells, a chain link and a soul-fire column
-    // segment drawn tiled along their length, and the burst under a slam.
+    // His set dressing: a hanging bell for the Night of a Thousand Bells, a chain link drawn tiled along its length,
+    // the burst under a slam, and the column of soul-fire his slams and the Night bring down.
     public const string KageBell = "Kage_Bell";
     public const string KageChain = "Kage_Chain";
-    public const string KageSoulPillar = "Kage_SoulPillar";
     public const string KageShockwave = "Kage_Shockwave";
+    public const string KageSoulColumn = "Kage_SoulColumn";
     // His polish: a bronze sound ring off each toll, the Wail's flare, a chain bursting, an ofuda burning away, the
     // soul-fire he burns in once the chains snap, his lock-on reticle and a freed soul.
     public const string KageTollRing = "Kage_TollRing";

@@ -141,8 +141,12 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`HyperSafe` short of the far edge) over `HyperSweep`, so it thins as it goes and its leading edge stays well under
   the ronin's speed; the hit is the wedge's span at his row; cover isn't a shield: an `OverlapBox` over the footprint
   `Hit`s every `Blocker` in it; a pulsing danger band, two guides and the pale safe strip (`HyperSafeColour`) over
-  `HyperTell`; it dissipates as a thread at `stop`. `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
-  chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` tolls three times and
+  `HyperTell`; it dissipates as a thread at `stop`. The body layer wears `Fx.KageSpiritBeam` (PixelLab, 96×320, 8
+  looping frames) stretched chest to ground, each frame's texture swapped in by `HyperLayer.ShowFrame`; without it a
+  flat body and core are drawn. `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
+  chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` puts him in super
+  armour (`levyArmour`: `SuperArmor`, `ArmorDamageTaken` 0.2, a teal `SpriteOutline`) until the last soldier has
+  fallen in, tolls three times and
   calls the static `Boss.Muster` (→ `GameManager.MusterLevy` → `SamuraiArmy.Muster`) with `LevyConfig()`: 8×2 archers
   and ashigaru on the Throne, 13×3 (14 under the Last Bell) Taisho, archers and yurei with divers on the Wraith, its
   top rank at `LevyTop` under his feet; `NextMove` calls it when `LevyRemaining` is 0 and `movesSinceLevy` reaches
@@ -200,7 +204,10 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls` (the summons and borrowed powers),
   `Levy` (his levy of the dead army) and `Phase` (the break and his fall).
 - The levy uses the round's own `SamuraiArmy`: `Muster` builds the formation in its slots (`SpawnStage(…, aboveView:
-  false)`) and `FallIn` flies each soldier out of his chest into its slot, front rank first, then `Advance`s; `Disband`
+  false)`), lifts every soldier's sprites to `LevyOrder` (in front of the boss and his wisps) and `FallIn` flies each
+  soldier out of his chest into its slot, front rank first (`FlyToSlot`: a flat soul-fire `Silhouette` of its own
+  frame over it, a glow and shed motes; landed, the silhouette burns off white to teal over `Solidify`), then
+  `Advance`s; `Disband`
   clears it in puffs. While a boss is up, `GameManager` ignores `ArmyDefeated`, turns `ArmyReachedRonin` into a hit and
   a disband, and levy kills drop no souls or scrolls (hearts still can).
 - Several bosses at once (Kagetsune's summons): `Boss.Summoned` skips the phase break, makes `Shoot`'s shots

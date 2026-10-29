@@ -605,13 +605,24 @@ public partial class Kagetsune
     static readonly Collider[] HyperCover = new Collider[32];
 
     // One layer of the beam: a trapezoid from his chest to the ground, rebuilt every frame. The glow layer is drawn
-    // with the soft glow texture across its width so its sides fade; the rest are flat.
+    // with the soft glow texture across its width so its sides fade; the body wears the PixelLab beam strip
+    // (Fx.KageSpiritBeam) stretched from chest to ground and playing through its frames, or is flat without it.
     class HyperLayer
     {
         public GameObject shape;
         public Mesh mesh;
         readonly Vector3[] vertices = new Vector3[4];
         readonly Color[] colours = new Color[4];
+        readonly Sprite[] frames;
+        readonly MeshRenderer renderer;
+        readonly MaterialPropertyBlock block = new MaterialPropertyBlock();
+        int shown = -1;
+        const float FramesPerSecond = 12f;
+
+        public HyperLayer(Kagetsune owner, Sprite[] art, int order) : this(owner, art[0].texture, order)
+        {
+            frames = art;
+        }
 
         public HyperLayer(Kagetsune owner, Texture texture, int order)
         {
@@ -619,10 +630,9 @@ public partial class Kagetsune
             mesh = new Mesh();
             mesh.MarkDynamic();
             shape.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var renderer = shape.AddComponent<MeshRenderer>();
+            renderer = shape.AddComponent<MeshRenderer>();
             // The sprites' own material, so the vertex colours give it its look.
             renderer.sharedMaterial = owner.sprite.sharedMaterial;
-            var block = new MaterialPropertyBlock();
             block.SetTexture("_MainTex", texture);
             renderer.SetPropertyBlock(block);
             renderer.sortingOrder = order;
@@ -643,6 +653,21 @@ public partial class Kagetsune
             mesh.vertices = vertices;
             mesh.colors = colours;
             mesh.RecalculateBounds();
+            if (frames != null) ShowFrame((int)(Time.time * FramesPerSecond) % frames.Length);
+        }
+
+        // Each frame is its own texture: swap it in and map the trapezoid onto its rect, top of the art at his chest.
+        void ShowFrame(int index)
+        {
+            if (index == shown) return;
+            shown = index;
+            Sprite frame = frames[index];
+            Rect rect = frame.textureRect;
+            float w = frame.texture.width, h = frame.texture.height;
+            float u0 = rect.xMin / w, u1 = rect.xMax / w, v0 = rect.yMin / h, v1 = rect.yMax / h;
+            mesh.uv = new[] { new Vector2(u0, v1), new Vector2(u1, v1), new Vector2(u1, v0), new Vector2(u0, v0) };
+            block.SetTexture("_MainTex", frame.texture);
+            renderer.SetPropertyBlock(block);
         }
 
         public void Remove(Kagetsune owner)
@@ -708,8 +733,13 @@ public partial class Kagetsune
         Sfx.Stop(Sfx.SoulWail);
 
         var glow = new HyperLayer(this, ProceduralSprites.Glow.texture, 53);
-        var body = new HyperLayer(this, Texture2D.whiteTexture, 55);
-        var core = new HyperLayer(this, Texture2D.whiteTexture, 56);
+        // The PixelLab strip carries its own white-hot core; the flat fallback draws one.
+        Sprite[] art = Fx.Frames(Fx.KageSpiritBeam);
+        var body = art != null ? new HyperLayer(this, art, 55) : new HyperLayer(this, Texture2D.whiteTexture, 55);
+        HyperLayer core = art != null ? null : new HyperLayer(this, Texture2D.whiteTexture, 56);
+        Color bodyTint = art != null ? Color.white : new Color(Teal.r * 0.7f, Teal.g, Teal.b);
+        // The strip's soul-fire edge is ragged: its painted width runs a little past the hit.
+        float artWidth = art != null ? 1.1f : 1f;
         FxPlayer splash = Fx.Play(Fx.KageWailFlare, new Vector3(start + dir * open * 0.5f, ground, 0), Color.white, 2f, null, 58);
         if (splash != null) transient.Add(splash.gameObject);
         TimeRipple.Emit(Chest, 7f, 0.6f, 0.6f);
@@ -734,8 +764,8 @@ public partial class Kagetsune
             float chestHalf = (0.4f + 2.2f * (1f - k)) * burst * flicker;
             Vector3 top = Chest, foot = new Vector3(centre, ground, 0);
             glow.Set(top, chestHalf * 1.8f, foot, half * 1.25f + 0.6f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), new Color(Teal.r, Teal.g, Teal.b, 0.6f));
-            body.Set(top, chestHalf, foot, half * flicker, new Color(Teal.r * 0.7f, Teal.g, Teal.b, 0.9f), new Color(Teal.r * 0.7f, Teal.g, Teal.b, 0.8f));
-            core.Set(top, chestHalf * 0.3f, foot, half * 0.28f * flicker, new Color(0.95f, 1f, 0.98f, 0.95f), new Color(0.85f, 1f, 0.95f, 0.8f));
+            body.Set(top, chestHalf * artWidth, foot, half * flicker * artWidth, new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.95f), new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.9f));
+            core?.Set(top, chestHalf * 0.3f, foot, half * 0.28f * flicker, new Color(0.95f, 1f, 0.98f, 0.95f), new Color(0.85f, 1f, 0.95f, 0.8f));
             if (flare != null)
             {
                 flare.transform.position = Chest + Vector3.back * 0.3f;
@@ -794,8 +824,8 @@ public partial class Kagetsune
             float fade = 1f - t / 0.45f;
             float thread = 0.12f * fade;
             glow.Set(Chest, 0.5f * fade, end, 0.5f * fade, new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade), new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade));
-            body.Set(Chest, thread, end, thread, new Color(Teal.r, Teal.g, Teal.b, 0.8f * fade), new Color(Teal.r, Teal.g, Teal.b, 0.8f * fade));
-            core.Set(Chest, thread * 0.4f, end, thread * 0.4f, new Color(1f, 1f, 1f, fade), new Color(1f, 1f, 1f, fade));
+            body.Set(Chest, thread * 3f, end, thread * 3f, new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.8f * fade), new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.8f * fade));
+            core?.Set(Chest, thread * 0.4f, end, thread * 0.4f, new Color(1f, 1f, 1f, fade), new Color(1f, 1f, 1f, fade));
             if (flare != null) flare.Color = new Color(1f, 1f, 1f, fade);
             safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f * fade);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * fade);
@@ -803,7 +833,7 @@ public partial class Kagetsune
         }
         glow.Remove(this);
         body.Remove(this);
-        core.Remove(this);
+        core?.Remove(this);
         if (flare != null) Drop(flare);
         Drop(safe);
         Drop(dim);

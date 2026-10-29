@@ -260,7 +260,7 @@ public partial class GameManager
         // Kagetsune's callouts and summons, and the summoned souls' lines.
         public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, chains, coffin, thousandBells,
             summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane,
-            curtain, river, rend, pendulum, harvest, absorbed;
+            curtain, river, rend, pendulum, harvest, absorbed, levy;
         // Lines with several takes: one is picked at random, never the one played last time.
         // A boss with stagger takes uses them instead of its single stagger clip.
         public AudioClip[] hurt, staggers, smokeRings, rosaryLash, iaido, rosaryBloom;
@@ -313,6 +313,7 @@ public partial class GameManager
                 BossLine.Rend => rend,
                 BossLine.Pendulum => pendulum,
                 BossLine.Harvest => harvest,
+                BossLine.Levy => levy,
                 BossLine.SoulAbsorbed => absorbed,
                 _ => null,
             };
@@ -383,7 +384,7 @@ public partial class GameManager
             summonUtsusemi = kagetsuneSummonUtsusemiLine, summonShirogane = kagetsuneSummonShiroganeLine,
             echoBenibana = echoBenibanaLine, echoUtsusemi = echoUtsusemiLine, echoShirogane = echoShiroganeLine,
             curtain = kagetsuneCurtainLine, river = kagetsuneRiverLine, rend = kagetsuneRendLine, pendulum = kagetsunePendulumLine,
-            harvest = kagetsuneHarvestLine, absorbed = kagetsuneAbsorbedLine,
+            harvest = kagetsuneHarvestLine, absorbed = kagetsuneAbsorbedLine, levy = kagetsuneLevyLine,
             hurt = kagetsuneHurtLines,
         },
         _ => default,

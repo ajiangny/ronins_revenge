@@ -84,6 +84,9 @@ public class Samurai : MonoBehaviour, IHittable
         animator.Play(art.idle, true, null, art.idleFps);
     }
 
+    // The body's sprite, for effects laid over it (a levy forming out of soul energy).
+    public SpriteRenderer Look => animator.Renderer;
+
     public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased;
 
     // Shieldbearers and bellringers never shoot, so the rank behind them looses over their heads.

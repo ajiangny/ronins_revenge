@@ -119,6 +119,8 @@ public static class FxSetup
         (Fx.KageShockwave, 14, false, Centre),
         // A column of soul-fire, anchored on its ground ring at the foot of a tall canvas.
         (Fx.KageSoulColumn, 14, false, new Vector2(0.5f, 0.03f)),
+        // The Spirit Hyper Beam's body strip, looping; drawn on a mesh, so its anchor is only for Fx.Play.
+        (Fx.KageSpiritBeam, 12, true, new Vector2(0.5f, 0.5f)),
         // His polish: the toll's sound ring, a chain bursting (its snap point left of the sparks), the soul-fire he
         // stands in (on its ring at his feet), his lock-on, the Wail's flare, a freed soul (on its head) and an ofuda
         // burning away.

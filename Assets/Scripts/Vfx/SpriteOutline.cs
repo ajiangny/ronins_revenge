@@ -47,6 +47,13 @@ public class SpriteOutline : MonoBehaviour
         LateUpdate();
     }
 
+    // Taken off (Kagetsune's armour lifting), its edges go with it.
+    void OnDestroy()
+    {
+        if (edges == null) return;
+        foreach (SpriteRenderer edge in edges) if (edge != null) Destroy(edge.gameObject);
+    }
+
     void LateUpdate()
     {
         if (source == null) return;

@@ -282,6 +282,8 @@ public partial class Kagetsune : Boss
     protected override IEnumerator Fight()
     {
         ronin.ParrySealed = InSealedLane;
+        // A fight restarted mid-levy (a halt, the watchdog) mustn't leave him armoured.
+        Armour(false);
         while (breaking) yield return null;
         while (true)
         {

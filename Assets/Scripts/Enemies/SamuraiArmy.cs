@@ -277,11 +277,24 @@ public class SamuraiArmy : MonoBehaviour
 
     // Kagetsune's levy, raised mid-fight: a formation built in its slots, each soldier pulled out of `from` (his chest)
     // as a soul and flying down into its place over `seconds`, the front rank first and from the middle out. Once the
-    // last has fallen in it marches, drops and fires like any army.
+    // last has fallen in it marches, drops and fires like any army. It is drawn in front of him (LevyOrder), so no rank
+    // hides behind his body.
     public void Muster(LevelConfig config, Transform player, float landingLineY, float blockerTop, Vector3 from, float seconds, Color soul)
     {
         SpawnStage(config, player, landingLineY, blockerTop, false);
+        foreach (Samurai soldier in soldiers) DrawAt(soldier, LevyOrder);
         mustering = StartCoroutine(FallIn(from, seconds, soul));
+    }
+
+    // Above a boss's body (5) and Kagetsune's circling wisps (6).
+    const int LevyOrder = 7;
+    static readonly int FlashColour = Shader.PropertyToID("_FlashColor");
+
+    // Lifts every sprite of a soldier together, so its glows and tells keep their places round its body.
+    static void DrawAt(Samurai soldier, int order)
+    {
+        int lift = order - soldier.Look.sortingOrder;
+        foreach (SpriteRenderer part in soldier.GetComponentsInChildren<SpriteRenderer>(true)) part.sortingOrder += lift;
     }
 
     IEnumerator FallIn(Vector3 from, float seconds, Color soul)
@@ -303,18 +316,31 @@ public class SamuraiArmy : MonoBehaviour
             if (order[i] != null) StartCoroutine(FlyToSlot(order[i], from, slots[i], flight, soul));
             yield return new WaitForSeconds(gap);
         }
-        yield return new WaitForSeconds(flight + 0.15f);
+        yield return new WaitForSeconds(flight + Solidify + 0.1f);
         mustering = null;
         if (soldiers.Count > 0) Advance();
     }
 
-    // One soul's flight: up out of him, then an arc down into its slot, where it lands in a puff and stands.
+    // Seconds the soul-fire takes to burn off a landed soldier, showing the body underneath.
+    const float Solidify = 0.4f;
+
+    // One soul's flight: a wisp of soul energy torn out of him, the soldier's shape burning in it, that arcs up, then
+    // down into its slot, growing into a body as it goes and shedding soul-fire behind it. Where it lands the energy
+    // flares and burns away, and the soldier stands there, solid.
     IEnumerator FlyToSlot(Samurai soldier, Vector3 from, Vector3 slot, float seconds, Color soul)
     {
         soldier.gameObject.SetActive(true);
         Vector3 size = soldier.transform.localScale;
         Vector3 rise = Vector3.Lerp(from, slot, 0.35f) + Vector3.up * 2.5f;
-        ElementFx.Glow(from, new Color(soul.r, soul.g, soul.b, 0.6f), 0.3f, 1.4f, 0.3f);
+        SpriteRenderer look = soldier.Look;
+        // The soul's shape: a flat silhouette of the soldier's own frame in soul-fire, laid over its body.
+        SpriteRenderer shape = Silhouette(look, soul);
+        // The energy round it: a soft glow riding with it.
+        var halo = new GameObject("SoulHalo").AddComponent<SpriteRenderer>();
+        halo.sprite = ProceduralSprites.Glow;
+        halo.sortingOrder = look.sortingOrder - 1;
+        ElementFx.Glow(from, new Color(soul.r, soul.g, soul.b, 0.7f), 0.3f, 1.6f, 0.3f);
+        float nextMote = 0f;
         for (float t = 0; t < seconds && soldier != null; t += Time.deltaTime)
         {
             float k = Mathf.SmoothStep(0, 1, t / seconds);
@@ -322,14 +348,71 @@ public class SamuraiArmy : MonoBehaviour
             soldier.transform.position = at;
             soldier.Body.position = at;
             soldier.transform.localScale = size * Mathf.Lerp(0.3f, 1f, k);
+            Follow(shape, look);
+            halo.transform.position = at + Vector3.forward * 0.05f;
+            halo.transform.localScale = Vector3.one * Mathf.Lerp(1.4f, 2.6f, k) / ProceduralSprites.Glow.bounds.size.x;
+            halo.color = new Color(soul.r, soul.g, soul.b, 0.65f);
+            // Soul-fire shed along the way.
+            if (Time.time >= nextMote)
+            {
+                nextMote = Time.time + 0.05f;
+                ElementFx.Glow(at + (Vector3)(UnityEngine.Random.insideUnitCircle * 0.25f), new Color(soul.r, soul.g, soul.b, 0.5f), 0.5f, 0.1f, 0.35f);
+            }
             yield return null;
         }
-        if (soldier == null) yield break;
+        if (soldier == null)
+        {
+            Destroy(halo.gameObject);
+            yield break;
+        }
         soldier.transform.position = slot;
         soldier.Body.position = slot;
         soldier.transform.localScale = size;
         Fx.Play(Fx.SmokePuff, slot + Vector3.down * 0.4f, new Color(soul.r, soul.g, soul.b, 0.55f), 0.9f);
+        ElementFx.Glow(slot, new Color(soul.r, soul.g, soul.b, 0.8f), 0.6f, 2.4f, 0.35f);
         MarchBeat(marchBeatDistance);
+        // The soul-fire burns off the new body, white-hot first.
+        for (float t = 0; t < Solidify && soldier != null; t += Time.deltaTime)
+        {
+            float k = t / Solidify;
+            Follow(shape, look);
+            SetSilhouette(shape, Color.Lerp(Color.white, soul, k * 2f), 1f - k);
+            halo.transform.position = slot + Vector3.forward * 0.05f;
+            halo.color = new Color(soul.r, soul.g, soul.b, 0.65f * (1f - k));
+            yield return null;
+        }
+        if (shape != null) Destroy(shape.gameObject);
+        Destroy(halo.gameObject);
+    }
+
+    // Null without the flat material (the soldier then flies in its own colours, in its halo).
+    static SpriteRenderer Silhouette(SpriteRenderer look, Color soul)
+    {
+        Material flat = Fx.Library != null ? Fx.Library.flashMaterial : null;
+        if (flat == null) return null;
+        var shape = new GameObject("SoulShape").AddComponent<SpriteRenderer>();
+        shape.transform.SetParent(look.transform, false);
+        shape.sharedMaterial = flat;
+        shape.sortingLayerID = look.sortingLayerID;
+        shape.sortingOrder = look.sortingOrder + 1;
+        Follow(shape, look);
+        SetSilhouette(shape, soul, 1f);
+        return shape;
+    }
+
+    static void Follow(SpriteRenderer shape, SpriteRenderer look)
+    {
+        if (shape == null || look == null) return;
+        shape.sprite = look.sprite;
+        shape.flipX = look.flipX;
+    }
+
+    static void SetSilhouette(SpriteRenderer shape, Color colour, float alpha)
+    {
+        if (shape == null) return;
+        var block = new MaterialPropertyBlock();
+        block.SetColor(FlashColour, new Color(colour.r, colour.g, colour.b, alpha));
+        shape.SetPropertyBlock(block);
     }
 
     // The levy goes back to the dark at once (its Emperor broke or fell): each soldier fades in a puff of soul-fire.

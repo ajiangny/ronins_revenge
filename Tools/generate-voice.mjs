@@ -136,6 +136,7 @@ const LINES = {
   Kagetsune_Rend: [KAGETSUNE, "[heavy, relentless] Again. [pause] And again."],
   Kagetsune_Pendulum: [KAGETSUNE, "[deep, final] Reap."],
   Kagetsune_Harvest: [KAGETSUNE, "[slow, hungry, intimate] Come home, all of you."],
+  Kagetsune_Levy: [KAGETSUNE, "[booming, commanding, slow] Rise, my dead. [pause] Fall in."],
   Kagetsune_Absorbed: [KAGETSUNE, "[satisfied, low] Mine again."],
   Kagetsune_Hurt: [KAGETSUNE, "[deep, irritated] Insolence."],
   Kagetsune_Hurt_2: [KAGETSUNE, "[slow, contemptuous] A scratch, little demon."],

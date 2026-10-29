@@ -14,6 +14,25 @@ public partial class Kagetsune
 
     bool LevyOut => LevyRemaining != null && LevyRemaining() > 0;
 
+    // While he calls them he stands in super armour: no stagger, and only a fifth of each blow gets through, edged in
+    // teal soul-fire.
+    bool levyArmour;
+    SpriteOutline armourEdge;
+    protected override bool SuperArmor => levyArmour;
+    protected override float ArmorDamageTaken => 0.2f;
+    protected override Color ArmorSpark => Teal;
+
+    void Armour(bool on)
+    {
+        levyArmour = on;
+        if (on && armourEdge == null) armourEdge = SpriteOutline.Wrap(sprite, new Color(Teal.r, Teal.g, Teal.b, 0.95f), Color.white);
+        if (!on && armourEdge != null)
+        {
+            Destroy(armourEdge);
+            armourEdge = null;
+        }
+    }
+
     // The formation's second rank stands just under his feet, so its front rank starts above the cover; a host's back
     // rank flanks his legs.
     float LevyTop(int rows) => sprite.bounds.min.y + Extents.y * LevyFeet + Mathf.Max(0, rows - 2) * LevyRankSpacing;
@@ -40,6 +59,7 @@ public partial class Kagetsune
     // his own moves while they fall in.
     IEnumerator RaiseLevy()
     {
+        Armour(true);
         Bark(BossLine.Levy, 8f);
         PlayAction(art.parry);
         SpriteRenderer gather = Glowing(Chest, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 57);
@@ -57,17 +77,30 @@ public partial class Kagetsune
             }
         }
         Drop(gather);
-        if (Muster == null || !Muster(LevyConfig(), Chest, Teal)) yield break;
+        if (Muster == null || !Muster(LevyConfig(), Chest, Teal))
+        {
+            Armour(false);
+            yield break;
+        }
         CameraShake.Add(0.3f);
         ElementFx.Glow(Chest, Teal, 0.4f, 7f, 0.6f);
         if (Sfx.Has(Sfx.SkullShriek)) Sfx.Play(Sfx.SkullShriek, 0.6f, 0.8f);
         Sfx.Play(Sfx.SamuraiCry, 0.9f, 0.8f);
-        yield return Wait(secondPhase ? 0.8f : 1.1f);
+        // He holds, armoured, until the last of them has fallen in (GameManager.MusterLevy's flight time and the
+        // soul-fire burning off them).
+        float pour = secondPhase ? 2.9f : 2.1f;
+        for (float t = 0; t < pour; t += Time.deltaTime * Tempo)
+        {
+            if (Random.value < 0.15f) ElementFx.Glow(Chest, new Color(Teal.r, Teal.g, Teal.b, 0.5f), 1f, 3f, 0.25f);
+            yield return null;
+        }
+        Armour(false);
     }
 
-    // His break and his fall send the levy back into him.
+    // His break and his fall send the levy back into him, and take off the armour he called it in.
     void DisbandLevy()
     {
+        Armour(false);
         if (LevyOut) Disband?.Invoke(Teal);
     }
 }

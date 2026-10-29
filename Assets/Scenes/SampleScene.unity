@@ -999,6 +999,7 @@ MonoBehaviour:
   kagetsuneRendLine: {fileID: 8300000, guid: bdc16aa084c0c4392a271c9cae9f9671, type: 3}
   kagetsunePendulumLine: {fileID: 8300000, guid: cec94653bdff2449295524673862d529, type: 3}
   kagetsuneHarvestLine: {fileID: 8300000, guid: 3256fe3cb4cd24720bfd91a7e6423081, type: 3}
+  kagetsuneLevyLine: {fileID: 8300000, guid: e0e3114dec8f1478398ae01adf4b6655, type: 3}
   kagetsuneAbsorbedLine: {fileID: 8300000, guid: 2fcf49b004b4548b0b0a02d91fa9ef1a, type: 3}
   echoBenibanaLine: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
   echoUtsusemiLine: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}

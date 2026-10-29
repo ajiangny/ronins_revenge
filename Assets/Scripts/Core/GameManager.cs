@@ -302,6 +302,7 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] AudioClip kagetsuneRendLine;
     [SerializeField] AudioClip kagetsunePendulumLine;
     [SerializeField] AudioClip kagetsuneHarvestLine;
+    [SerializeField] AudioClip kagetsuneLevyLine;
     [SerializeField] AudioClip kagetsuneAbsorbedLine;
     [SerializeField] AudioClip echoBenibanaLine;
     [SerializeField] AudioClip echoUtsusemiLine;

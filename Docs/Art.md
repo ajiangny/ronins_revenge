@@ -51,7 +51,7 @@ attack frames prefixed by boss (`Beni_`, `Utsu_`, `Shiro_`, `Kage_`) beside gene
 folder means updating `Editor/*.cs` too.
 
 Kagetsune's animated effects (`Kage_Shockwave`, `Kage_TollRing`, `Kage_ChainSnap`, `Kage_SoulFire`, `Kage_LockOn`,
-`Kage_WailFlare`, `Kage_SoulRise`, `Kage_OfudaBurn`, `Kage_SoulColumn`) were built in PixelLab's effect workbench and saved to its My effects
+`Kage_WailFlare`, `Kage_SoulRise`, `Kage_OfudaBurn`, `Kage_SoulColumn`, `Kage_SpiritBeam`) were built in PixelLab's effect workbench and saved to its My effects
 under the same names, so they can be reopened and re-exported there. An export is a spritesheet with a JSON frame list;
 each frame is cut out to `Fx/<Id>_<n>.png` at the JSON's exact x/y/w/h (with ffmpeg's `crop`: `sips --cropOffset` ignores a zero offset and cuts from the sheet's middle). A new id also needs a constant in `Fx.cs` and a row in `FxSetup.Clips`
 (its fps, loop and anchor: the export's origin as a 0-1 pivot from the bottom-left), then `Ninja/Apply VFX`. His hammer's fissures are drawn in code instead (`SoulFissure`).

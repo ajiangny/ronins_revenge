@@ -157,6 +157,202 @@ public partial class Kagetsune
         yield return Wait(0.3f);
     }
 
+    // Coffin Pendulum: he swings the coffin-hammer out on its broken chain like a pendulum, each pass scything the
+    // ground down one side of the field, the other side then the first, each faster than the last. The last pass
+    // sheds skulls that fall where it passed. The far side is always clear, and each tell lasts long enough to cross to it;
+    // the last pass he brings the coffin round overhead and down on the ronin's lane.
+    IEnumerator CoffinPendulum()
+    {
+        Bark(BossLine.Pendulum, 7f);
+        PlayAction(art.attack);
+        float mid = CameraShake.Center.x;
+        float side = ronin.Bounds.center.x < mid ? -1f : 1f;
+        SpriteRenderer coffin = CoffinOnChain(HammerHead);
+        SpriteRenderer chain = Tiled(Fx.KageChain, HammerHead, HammerHead, 0.4f, Bronze, 54);
+        const int Passes = 3;
+        for (int pass = 0; pass < Passes; pass++)
+        {
+            // The stretch this pass scythes: from just past the middle out to the edge, on one side.
+            float near = mid + side * 1.2f, far = side > 0 ? FieldRight : FieldLeft;
+            float lo = Mathf.Min(near, far), hi = Mathf.Max(near, far);
+            SpriteRenderer band = Bar(new Vector3(lo, Row, 0), new Vector3(hi, Row, 0), 1.6f, new Color(Crimson.r, Crimson.g, Crimson.b, 0f), 4);
+            // Long enough to cross to safety from wherever he stands.
+            float need = 0f;
+            float x0 = ronin.Bounds.center.x;
+            if (x0 >= lo - 0.6f && x0 <= hi + 0.6f) need = Mathf.Abs(x0 - (near - side * 1.6f)) / BulletHell.MaxDodgeSpeed;
+            float tell = Mathf.Max(Mathf.Lerp(1.1f, 0.75f, pass / (Passes - 1f)), need + 0.3f);
+            // The wind-up: the coffin swings back out to his other side, low and in plain view, the ground band
+            // glowing in.
+            Vector3 windFrom = coffin != null ? coffin.transform.position : HammerHead;
+            Vector3 start = new Vector3(Centre.x - side * 4.5f, Centre.y - Extents.y * 0.2f, 0);
+            for (float t = 0; t < tell; t += Time.deltaTime * Tempo)
+            {
+                float k = t / tell;
+                SetCoffin(coffin, chain, Vector3.Lerp(windFrom, start, Mathf.SmoothStep(0, 1, k)) + Vector3.up * Mathf.Sin(t * 9f) * 0.15f, -side * 30f * k);
+                if (band != null) band.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.1f + 0.35f * k);
+                if (k > 0.5f && Mathf.Repeat(t, 0.25f) < Time.deltaTime) Toll(0.3f, 0.9f + 0.1f * pass);
+                yield return null;
+            }
+            Drop(band);
+            if (Sfx.Has(Sfx.ChainSnap)) Sfx.Play(Sfx.ChainSnap, 0.8f, 0.6f + 0.1f * pass);
+            else Sfx.Play(Sfx.ParrySwing, 0.9f, 0.5f);
+            // The swing: down out of the wind-up, along the ground through the stretch, and up past its end.
+            float swing = 0.55f * Mathf.Pow(0.8f, pass);
+            Vector3 dip = new Vector3(near, Row, 0), outer = new Vector3(far, Row, 0);
+            Vector3 lift = new Vector3(far + side * 1.5f, Row + 4f, 0);
+            bool shed = false;
+            for (float t = 0; t < swing; t += Time.deltaTime * Tempo)
+            {
+                float k = t / swing;
+                Vector3 at = k < 0.3f ? Vector3.Lerp(start, dip, Mathf.SmoothStep(0, 1, k / 0.3f))
+                    : k < 0.8f ? Vector3.Lerp(dip, outer, (k - 0.3f) / 0.5f)
+                    : Vector3.Lerp(outer, lift, (k - 0.8f) / 0.2f);
+                Vector3 before = coffin != null ? coffin.transform.position : at;
+                SetCoffin(coffin, chain, at, side * Mathf.Lerp(-40f, 70f, k));
+                if (coffin != null) Afterimage(coffin, new Color(Teal.r, Teal.g, Teal.b, 0.45f));
+                // Along the ground it burns whatever it passes.
+                if (k >= 0.3f && k < 0.8f)
+                {
+                    if (Mathf.Abs(ronin.Bounds.center.x - at.x) < 1f) ronin.TakeHit(new Vector3(at.x, Row, 0));
+                    BeamEnd(at + Vector3.up * 2f, at, out Blocker cover);
+                    if (cover != null) cover.Hit(at);
+                    if (Random.value < 0.35f) Fx.Play(Fx.Impact, new Vector3(at.x, GroundY + 0.3f, 0), Teal, 1.2f);
+                    if (Mathf.Abs(at.x - before.x) > 0.01f && Random.value < 0.25f) GroundFire.Light(new Vector3(at.x, GroundY, 0));
+                }
+                // On the last upswing it sheds a row of skulls over the stretch it scythed, spaced wide enough to pass
+                // between; earlier passes don't, as he has to cross back through that side.
+                if (k >= 0.8f && !shed && pass == Passes - 1)
+                {
+                    shed = true;
+                    for (float x = lo + Random.Range(0.3f, 1.5f); x <= hi; x += 3f) Skull(new Vector3(x, at.y + 1f, 0), Vector3.down * 3.2f);
+                }
+                yield return null;
+            }
+            CameraShake.Add(0.25f);
+            side = -side;
+            yield return Wait(0.1f);
+        }
+        // The last swing comes round overhead and down on him.
+        var xs = new List<float> { ClampX(ronin.Bounds.center.x) };
+        var lane = new List<SpriteRenderer> { Bar(new Vector3(xs[0], TopOfScreen, 0), new Vector3(xs[0], GroundY, 0), 2.4f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.12f)) };
+        Vector3 over = new Vector3(xs[0], TopOfScreen - 1.5f, 0);
+        Vector3 from = coffin != null ? coffin.transform.position : HammerHead;
+        for (float t = 0; t < 0.7f; t += Time.deltaTime * Tempo)
+        {
+            float k = t / 0.7f;
+            SetCoffin(coffin, chain, Vector3.Lerp(from, over, Mathf.SmoothStep(0, 1, k)), 180f * k);
+            yield return null;
+        }
+        yield return CloseLanes(lane, xs, 2.4f, 1.5f, Crimson, 0.45f, 2);
+        Drop(lane[0]);
+        Drop(coffin);
+        Drop(chain);
+        yield return SlamDown(xs, true, 1.1f);
+        yield return Wait(0.4f);
+    }
+
+    // The coffin-hammer's head as a swung weight: its art, or a dark slab without it.
+    SpriteRenderer CoffinOnChain(Vector3 at)
+    {
+        var coffin = new GameObject("Coffin").AddComponent<SpriteRenderer>();
+        Sprite[] frames = Fx.Frames(Fx.KageCoffin);
+        coffin.sprite = frames != null ? frames[0] : ProceduralSprites.White;
+        coffin.color = frames != null ? Color.white : new Color(0.22f, 0.2f, 0.22f);
+        coffin.sortingOrder = 57;
+        coffin.transform.position = at;
+        coffin.transform.localScale = frames != null ? Vector3.one * (2.2f / frames[0].bounds.size.y) : new Vector3(1.2f, 2f, 1f);
+        transient.Add(coffin.gameObject);
+        return coffin;
+    }
+
+    void SetCoffin(SpriteRenderer coffin, SpriteRenderer chain, Vector3 at, float tilt)
+    {
+        if (coffin != null)
+        {
+            coffin.transform.position = at + Vector3.back * 0.3f;
+            coffin.transform.rotation = Quaternion.Euler(0, 0, tilt);
+        }
+        if (chain != null) Lay(chain, HammerHead, at, chain.drawMode == SpriteDrawMode.Tiled ? 0.4f : 0.12f);
+    }
+
+    // Soul Harvest: he calls the souls home. They well up out of the ground in rows, a glow marking each before it
+    // rises, and stream up into his chest, every row with one gap a few steps from the last. The souls cross the
+    // ronin's row from below, the one direction nothing else comes from. The last row in, his chest-fire swells.
+    IEnumerator SoulHarvest()
+    {
+        Bark(BossLine.Harvest, 7f);
+        PlayAction(art.parry);
+        const int Rows = 5;
+        const float Spacing = 1.5f;
+        const float Width = 3f;
+        const float Between = 0.65f;
+        float lo = FieldLeft + Width / 2f, hi = FieldRight - Width / 2f;
+        float gap = Mathf.Clamp(ronin.Bounds.center.x + (Random.value < 0.5f ? -1f : 1f) * Random.Range(2f, 4f), lo, hi);
+        for (int row = 0; row < Rows; row++)
+        {
+            yield return BulletHell.Room(20);
+            var spots = new List<Vector3>();
+            for (float x = FieldLeft; x <= FieldRight; x += Spacing)
+            {
+                if (Mathf.Abs(x - gap) < Width / 2f) continue;
+                spots.Add(new Vector3(x, GroundY - 0.4f, 0));
+            }
+            // The souls gather under the floor: a glow over each spot, so the gap reads before anything rises.
+            var glows = new List<SpriteRenderer>();
+            foreach (Vector3 spot in spots) glows.Add(Glowing(spot + Vector3.up * 0.4f, new Color(Teal.r, Teal.g, Teal.b, 0f), 0.9f, 6));
+            for (float t = 0; t < 0.55f; t += Time.deltaTime * Tempo)
+            {
+                float k = t / 0.55f;
+                foreach (SpriteRenderer glow in glows)
+                {
+                    if (glow == null) continue;
+                    glow.color = new Color(Teal.r, Teal.g, Teal.b, 0.6f * k);
+                    glow.transform.localScale = Vector3.one * Mathf.Lerp(0.6f, 1.3f, k);
+                }
+                yield return null;
+            }
+            foreach (SpriteRenderer glow in glows) Drop(glow);
+            Toll(0.35f, 1.2f + 0.05f * row);
+            foreach (Vector3 spot in spots)
+            {
+                // Each rises straight up through his row, then bends toward the chest; a straight aim at the chest
+                // would slant across the row and close the gap.
+                Arrow skull = Skull(spot, Vector3.up * 5f);
+                if (skull != null) StartCoroutine(HomeToChest(skull, spot.y + 3f));
+            }
+            yield return Wait(Between);
+            float want = gap + (Random.value < 0.5f ? -1f : 1f) * Random.Range(1.5f, 3.5f);
+            float next = BulletHell.NextGap(gap, Mathf.Clamp(want, lo, hi), Between + 0.55f, lo, hi);
+            BulletHell.GapOk(gap, next, Between + 0.55f, Width, "Soul Harvest");
+            gap = next;
+        }
+        yield return Wait(0.6f);
+        // Fed, the chest-fire flares and spits a last slow ring.
+        ElementFx.Glow(Chest, Teal, 2f, 12f, 0.7f);
+        Fx.Play(Fx.Explosion, Chest, Teal, 2f);
+        HitFlash.Flash(sprite, 0.12f);
+        TimeRipple.Emit(Chest, 5f, 0.4f, 0.6f, true);
+        BulletHell.Ring(Skull, Chest, 14, 3f, Random.Range(0f, 25f));
+        yield return Wait(0.6f);
+    }
+
+    // A rising soul turns toward his chest once it's above the ronin's row, and is gone when it gets there.
+    IEnumerator HomeToChest(Arrow skull, float turnAt)
+    {
+        while (skull != null && skull.transform.position.y < turnAt) yield return new WaitForFixedUpdate();
+        while (skull != null)
+        {
+            Vector3 to = Chest - skull.transform.position;
+            if (to.sqrMagnitude < 0.8f)
+            {
+                Destroy(skull.gameObject);
+                yield break;
+            }
+            skull.Steer(to.normalized * 6.5f * ShotSpeed);
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
     // Soul Coffin, parry-only: he hurls the coffin-hammer down on its broken chain. Parried, it bursts against his
     // own armor, and he stands open.
     IEnumerator SoulCoffin()
@@ -248,6 +444,8 @@ public partial class Kagetsune
         for (int i = 1; i < LaneCount; i++) if (Mathf.Abs(lanes[i] - ronin.Bounds.center.x) < Mathf.Abs(lanes[safe] - ronin.Bounds.center.x)) safe = i;
         safe = Mathf.Clamp(safe + (Random.value < 0.5f ? -1 : 1), 0, LaneCount - 1);
         const int Waves = 6;
+        // Under the Last Bell one wave's safe lane leaps two lanes instead of one; its tell runs longer to match.
+        bool leapt = false;
         for (int wave = 0; wave < Waves; wave++)
         {
             // The last toll has no safe lane: a wall of skulls with a bronze bell over him. Only the parry gets through.
@@ -273,7 +471,9 @@ public partial class Kagetsune
                 if (bells[i] != null) bells[i].color = BellColour(bells[i], 0.9f);
             }
             if (bells[safe] != null) bells[safe].color = BellColour(bells[safe], 0.2f);
-            yield return CloseLanes(bands, xs, halfWidth * 1.6f, halfWidth * 0.5f, Teal, wave == 0 ? 0.9f : 0.7f, 2, 0.2f);
+            float tell = wave == 0 ? 0.9f : leapt ? 0.7f + halfWidth * 2f / BulletHell.MaxDodgeSpeed : 0.7f;
+            leapt = false;
+            yield return CloseLanes(bands, xs, halfWidth * 1.6f, halfWidth * 0.5f, Teal, tell, 2, 0.2f);
             foreach (SpriteRenderer band in bands) Drop(band);
 
             Toll(1f, 0.7f + 0.05f * wave);
@@ -297,9 +497,11 @@ public partial class Kagetsune
             }
             foreach (SpriteRenderer column in columns) StartCoroutine(FadeOut(column, 0.35f));
             yield return Wait(0.3f - ColumnSeconds);
-            // The safe lane steps one over, never off the field.
-            int stepTo = safe + (Random.value < 0.5f ? -1 : 1);
+            // The safe lane steps one over (two on the Last Bell's leap), never off the field.
+            int stride = lastBell && wave == 2 ? 2 : 1;
+            int stepTo = safe + (Random.value < 0.5f ? -stride : stride);
             if (stepTo < 0 || stepTo >= LaneCount) stepTo = safe - (stepTo - safe);
+            leapt = stride == 2;
             safe = stepTo;
         }
         foreach (SpriteRenderer bell in bells) Drop(bell);

@@ -28,9 +28,9 @@ public partial class Kagetsune : Boss
     const int UltimateEvery = 6;
     const float ExposedSeconds = 1.8f;
 
-    float Recovery => secondPhase ? (lastBell ? 0.35f : 0.45f) : 0.8f;
-    float ComboChance => secondPhase ? 0.65f : 0.5f;
-    int MaxCombo => secondPhase ? 4 : 3;
+    float Recovery => secondPhase ? (lastBell ? 0.35f : 0.45f) : 0.7f;
+    float ComboChance => secondPhase ? 0.65f : 0.55f;
+    int MaxCombo => 4;
     float ShotSpeed => secondPhase ? 1.2f : 1f;
 
     public override string Title => "KAGETSUNE";
@@ -63,6 +63,9 @@ public partial class Kagetsune : Boss
         BossLine.SoulAbsorbed => "Mine again.",
         BossLine.RosaryCurtain => "Kneel, in rows.",
         BossLine.SoulRiver => "Drown in them.",
+        BossLine.Rend => "Again. And again.",
+        BossLine.Pendulum => "Reap.",
+        BossLine.Harvest => "Come home, all of you.",
         _ => null,
     };
 
@@ -92,7 +95,7 @@ public partial class Kagetsune : Boss
     {
         CofferSlam, Toll, Ofuda, Wail, LastToll, Curtain,
         Swarm, Chains, SoulCoffin, ThousandBells, River,
-        Summon,
+        Summon, Rend, Pendulum, Harvest,
     }
 
     bool secondPhase => SecondPhase;
@@ -287,6 +290,9 @@ public partial class Kagetsune : Boss
         Move.Chains => BrokenChains(),
         Move.SoulCoffin => SoulCoffin(),
         Move.ThousandBells => NightOfAThousandBells(),
+        Move.Rend => ReliquaryRend(),
+        Move.Pendulum => CoffinPendulum(),
+        Move.Harvest => SoulHarvest(),
         _ => SoulRiver(),
     };
 
@@ -296,7 +302,7 @@ public partial class Kagetsune : Boss
         // stay answerable), no parry-only blow of his own, no ultimate, no second soul.
         if (SoulOut)
         {
-            var plain = new List<Move> { Move.CofferSlam, Move.Toll, Move.Swarm, Move.Curtain, Move.CofferSlam, Move.Toll };
+            var plain = new List<Move> { Move.CofferSlam, Move.Toll, Move.Swarm, Move.Curtain, Move.Rend, Move.Toll };
             if (lastMove is Move previous) plain.Remove(previous);
             return plain[Random.Range(0, plain.Count)];
         }
@@ -305,13 +311,14 @@ public partial class Kagetsune : Boss
         if (movesSinceParry >= ParryAtLatest) return parry;
         if (secondPhase && movesSinceSoul >= SoulAtLatest) return Move.Summon;
 
-        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail, Move.Curtain };
+        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail, Move.Curtain, Move.Rend };
         if (secondPhase)
         {
             options.Add(Move.Swarm);
-            options.Add(Move.Swarm);
             options.Add(Move.Chains);
             options.Add(Move.River);
+            options.Add(Move.Pendulum);
+            options.Add(Move.Harvest);
         }
         else
         {

@@ -10,7 +10,8 @@ public partial class Kagetsune
 
     // Coffer Slam: the hammer marks the ronin's lane (two in phase 2), comes down, and a shockwave runs down it.
     // The first cover in its way takes the blow and breaks; past that it strikes the ronin. Skulls burst from the
-    // crack and curve back down at him.
+    // crack and curve back down at him. Hardened, he feints: halfway through the tell the mark jumps to where the
+    // ronin has moved, so stepping out early isn't enough.
     IEnumerator CofferSlam()
     {
         Bark(BossLine.CofferSlam, 7f);
@@ -20,12 +21,30 @@ public partial class Kagetsune
         foreach (float x in xs) bands.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), 2.6f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.12f)));
         SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.4f), 2.5f);
         PlayAction(art.attack);
-        yield return CloseLanes(bands, xs, 2.6f, 1.5f, Crimson, secondPhase ? 0.75f : 0.95f);
+        float tell = secondPhase ? 0.75f : 0.95f;
+        if (Hardened && Random.value < 0.5f)
+        {
+            yield return CloseLanes(bands, xs, 2.6f, 2f, Crimson, tell * 0.55f, 2);
+            // The feint: the mark jumps onto him, and the tell closes from there.
+            xs[0] = ClampX(ronin.Bounds.center.x);
+            Toll(0.6f, 1.25f);
+            Fx.Play(Fx.Impact, new Vector3(xs[0], Row, 0), Crimson, 1f);
+            yield return CloseLanes(bands, xs, 2.2f, 1.5f, Crimson, tell * 0.65f, 2);
+        }
+        else yield return CloseLanes(bands, xs, 2.6f, 1.5f, Crimson, tell);
         Drop(raised);
         foreach (SpriteRenderer band in bands) Drop(band);
+        yield return SlamDown(xs, true);
+        yield return Wait(0.5f);
+    }
 
-        Slam(1f);
-        CameraShake.Add(0.55f);
+    // The hammer comes down on the given lanes: a soul-fire shockwave runs down each to the ground (cover takes it
+    // and breaks), and the ground cracks where it lands. With `ring`, skulls burst from each crack.
+    IEnumerator SlamDown(List<float> xs, bool ring, float weight = 1f)
+    {
+        Slam(weight);
+        CameraShake.Add(0.55f * weight);
+        HitFlash.Flash(sprite, 0.08f);
         var waves = new List<SpriteRenderer>();
         var ends = new List<Vector3>();
         foreach (float x in xs)
@@ -41,7 +60,7 @@ public partial class Kagetsune
             if (cover != null) StartCoroutine(BreakAfter(cover, 0.18f));
         }
         bool hit = false;
-        for (float t = 0; t < 0.22f; t += Time.deltaTime)
+        for (float t = 0; t < 0.22f; t += Time.deltaTime * Tempo)
         {
             float k = t / 0.22f;
             for (int i = 0; i < xs.Count; i++)
@@ -58,11 +77,13 @@ public partial class Kagetsune
             }
             yield return null;
         }
+        HitStop?.Invoke(0.04f * weight);
         foreach (Vector3 end in ends)
         {
             Fx.Play(Fx.Impact, end, Teal, 2.2f);
             Fx.Play(Fx.SmokePuff, end, new Color(0.25f, 0.25f, 0.28f, 0.8f), 2f);
             ElementFx.Glow(end, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 0.5f, 7f, 0.4f);
+            TimeRipple.Emit(end, 3.5f * weight, 0.35f * weight, 0.45f);
             Crack(end);
             Shockwave(end, 3.2f);
             GroundFire.Light(end);
@@ -70,8 +91,51 @@ public partial class Kagetsune
         }
         foreach (SpriteRenderer wave in waves) StartCoroutine(FadeOut(wave, 0.3f));
         yield return Wait(0.15f);
-        foreach (Vector3 end in ends) SlamRing(end);
-        yield return Wait(0.5f);
+        if (ring) foreach (Vector3 end in ends) SlamRing(end);
+    }
+
+    // Reliquary Rend: three blows of the hammer. The first two come quick, each on the lane the ronin stands in; the
+    // third he holds overhead for a breath that's never the same length twice, the coffin blazing brighter the longer
+    // he holds, so it can't be timed by rhythm. A beat after it lands, the souls the first blow loosed erupt from its
+    // crack again.
+    IEnumerator ReliquaryRend()
+    {
+        Bark(BossLine.Rend, 7f);
+        float tell = secondPhase ? 0.45f : 0.55f;
+        float first = 0f;
+        for (int blow = 0; blow < 3; blow++)
+        {
+            var xs = new List<float> { ClampX(ronin.Bounds.center.x) };
+            if (blow == 0) first = xs[0];
+            var bands = new List<SpriteRenderer> { Bar(new Vector3(xs[0], TopOfScreen, 0), new Vector3(xs[0], GroundY, 0), 2.4f, new Color(Crimson.r, Crimson.g, Crimson.b, 0.12f)) };
+            PlayAction(art.attack);
+            yield return CloseLanes(bands, xs, 2.4f, 1.5f, Crimson, tell, 2);
+            if (blow == 2)
+            {
+                // The held blow: the mark stays closed and burning while the hammer gathers.
+                SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.3f), 2f);
+                float hold = Random.Range(0.4f, 1f);
+                for (float t = 0; t < hold; t += Time.deltaTime * Tempo)
+                {
+                    float k = t / hold;
+                    raised.transform.localScale = Vector3.one * Mathf.Lerp(2f, 4.5f, k);
+                    raised.color = new Color(Teal.r, Teal.g, Teal.b, 0.3f + 0.5f * k);
+                    if (bands[0] != null) bands[0].color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.5f + 0.15f * Mathf.Sin(t * 40f));
+                    yield return null;
+                }
+                Drop(raised);
+            }
+            Drop(bands[0]);
+            yield return SlamDown(xs, blow == 2, blow == 2 ? 1.2f : 0.75f);
+            yield return Wait(blow == 2 ? 0.1f : 0.15f);
+        }
+        // The aftershock: the first crack glows, then erupts.
+        var shock = new List<float> { first };
+        var mark = new List<SpriteRenderer> { Bar(new Vector3(first, TopOfScreen, 0), new Vector3(first, GroundY, 0), 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.12f)) };
+        yield return CloseLanes(mark, shock, 2.2f, 1.4f, Teal, 0.6f, 2, 0.35f);
+        Drop(mark[0]);
+        yield return SlamDown(shock, false, 0.8f);
+        yield return Wait(0.4f);
     }
 
     // A crack left in the courtyard where the hammer landed: dark rifts glowing teal from below, cooling over a few

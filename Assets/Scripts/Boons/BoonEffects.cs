@@ -76,7 +76,7 @@ public class BoonEffects
     {
         if (Projectile.Striking != null && Projectile.Striking.Kindled) return false;
         EquippedBoon flame = loadout.Find(BoonId.FlameBlade);
-        return flame != null && Random.value < Boons.FlameChanceAt(flame.Rarity) * share;
+        return flame != null && Random.value < flame.Extra * share;
     }
 
     public void OnKill(Samurai samurai, KillSource source)
@@ -303,7 +303,7 @@ public class BoonEffects
     {
         if (BossFight || army.Remaining == 0) return;
         EquippedBoon blade = loadout.Find(BoonId.FrostBlade);
-        int count = blade != null ? Boons.IceShardsAt(blade.Rarity) : Boons.IceShardsAt(Rarity.Common);
+        int count = blade != null ? (int)blade.Extra : Boons.IceShardsAt(Rarity.Common);
 
         var targets = new List<Samurai>(army.Soldiers);
         targets.RemoveAll(s => s.IsDead);

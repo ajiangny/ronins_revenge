@@ -209,7 +209,7 @@ public class BoonChoiceUI : MonoBehaviour
             scroll, null, onChosen);
     }
 
-    // A Spirit Bead (Hades' Pom of Power): the held boons it could raise, each card showing the step up.
+    // A Spirit Bead (Hades' Pom of Power): the held boons it could raise a level, each card showing the step up.
     public void ShowBead(List<BoonOffer> upgrades, Sprite[] bead, Action<int> onChosen)
     {
         Show("Spirit Bead", "a bead of the temple's prayer string, warm with old devotion.", Boons.BeadColor, upgrades,
@@ -379,21 +379,29 @@ public class BoonChoiceUI : MonoBehaviour
             BoonKind.Legendary => "Legendary",
             BoonKind.Offering => "Offering",
             BoonKind.Art => "Sword Art",
-            _ => offer.IsUpgrade ? $"Upgrade  {offer.Rarity}" : offer.Rarity.ToString(),
+            _ => offer.Kind switch
+            {
+                OfferKind.Level => $"Lv {offer.Level - 1} → {offer.Level}  ·  {offer.Rarity}",
+                OfferKind.Rarity => $"{offer.Rarity - 1} → {offer.Rarity}{(offer.Level > 1 ? $"  ·  Lv {offer.Level}" : "")}",
+                _ => offer.Level > 1 ? $"{offer.Rarity}  ·  Lv {offer.Level}" : offer.Rarity.ToString(),
+            },
         };
         string slot = boon.Kind == BoonKind.Offering ? "" : $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}><size=26>·  {boon.Slot.ToString().ToUpperInvariant()}</size></color>";
         card.rarity.text = rarity + slot;
         card.rarity.color = rarityColor;
         card.description.text = boon.Description;
 
-        string value = boon.Format(boon.ValueAt(offer.Rarity));
-        if (offer.IsUpgrade) value += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {boon.Format(boon.ValueAt(offer.Rarity - 1))})</color>";
+        // A raise shows what the boon was before it: a level lower for a Bead, a rarity lower for a Thread.
+        Rarity wasRarity = offer.Kind == OfferKind.Rarity ? offer.Rarity - 1 : offer.Rarity;
+        int wasLevel = offer.Kind == OfferKind.Level ? offer.Level - 1 : offer.Level;
+        string value = boon.Format(boon.ValueAt(offer.Rarity, offer.Level));
+        if (offer.IsUpgrade) value += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {boon.Format(boon.ValueAt(wasRarity, wasLevel))})</color>";
         card.stat.text = $"<color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>- {boon.StatLabel}</color>   <color={StatGreen}>{value}</color>";
         if (boon.ExtraValues != null)
         {
             System.Func<float, string> format = boon.ExtraFormat ?? (v => $"{v:0}");
-            string extra = format(boon.ExtraValues[(int)offer.Rarity]);
-            if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {format(boon.ExtraValues[(int)offer.Rarity - 1])})</color>";
+            string extra = format(boon.ExtraAt(offer.Rarity, offer.Level));
+            if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {format(boon.ExtraAt(wasRarity, wasLevel))})</color>";
             card.stat.text += $"     <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>{boon.ExtraLabel}</color>   <color={StatGreen}>{extra}</color>";
         }
         card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";
@@ -578,7 +586,7 @@ public class BoonChoiceUI : MonoBehaviour
                 Color color = Boons.Info(held.Boon.Element).Color;
                 SetIcon(slot.icon, slot.letter, held.Boon, color);
                 slot.ring.color = color;
-                slot.tip.text = $"{SlotKey(i)}  {held.Boon.Name}";
+                slot.tip.text = $"{SlotKey(i)}  {held.Boon.Name}{LevelTag(held)}";
             }
             else
             {
@@ -610,7 +618,7 @@ public class BoonChoiceUI : MonoBehaviour
             if (!shown) continue;
             BoonDefinition boon = loadout.Passives[i].Boon;
             SetIcon(passiveIcons[i], passiveIcons[i].GetComponentInChildren<TextMeshProUGUI>(), boon, ColorOf(boon));
-            passiveTips[i].text = boon.Name;
+            passiveTips[i].text = boon.Name + LevelTag(loadout.Passives[i]);
         }
         RefreshUltimate(loadout.InSlot(BoonSlot.Ultimate));
     }
@@ -623,8 +631,11 @@ public class BoonChoiceUI : MonoBehaviour
         UltimateColour = held != null ? Boons.Info(held.Boon.Element).Color : ShadowVioletColour;
         SetIcon(ultimateIcon, ultimateLetter, boon, UltimateColour);
         ultimateCharge.color = UltimateColour;
-        ultimateTip.text = held != null ? $"{UltimateKey}  Ultimate  ·  {held.Boon.Name}" : $"{UltimateKey}  Ultimate";
+        ultimateTip.text = held != null ? $"{UltimateKey}  Ultimate  ·  {held.Boon.Name}{LevelTag(held)}" : $"{UltimateKey}  Ultimate";
     }
+
+    // A held boon's level beside its name, once a Bead has raised it.
+    static string LevelTag(EquippedBoon held) => held.Level > 1 ? $"  Lv {held.Level}" : "";
 
     const float CardX = 170f;
     // Without art the soul floats on its own left of the cards; the ronin's portrait is huge and cropped by the

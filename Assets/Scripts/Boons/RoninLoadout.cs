@@ -4,14 +4,18 @@ public sealed class EquippedBoon
 {
     public readonly BoonDefinition Boon;
     public Rarity Rarity;
+    // Raised by Spirit Beads; kept when a Thread raises the rarity.
+    public int Level;
 
-    public EquippedBoon(BoonDefinition boon, Rarity rarity)
+    public EquippedBoon(BoonDefinition boon, Rarity rarity, int level = 1)
     {
         Boon = boon;
         Rarity = rarity;
+        Level = level;
     }
 
-    public float Value => Boon.ValueAt(Rarity);
+    public float Value => Boon.ValueAt(Rarity, Level);
+    public float Extra => Boon.ExtraAt(Rarity, Level);
 }
 
 // The boons the ronin holds this run: one per core slot plus any passives, and the stats they add up to.
@@ -57,7 +61,7 @@ public sealed class RoninLoadout
     public float Extra(BoonId id)
     {
         EquippedBoon held = Find(id);
-        return held?.Boon.ExtraValues != null ? held.Boon.ExtraValues[(int)held.Rarity] : 0f;
+        return held?.Extra ?? 0f;
     }
 
     public bool Has(BoonId id, out float value)
@@ -72,17 +76,19 @@ public sealed class RoninLoadout
     {
         // An Offering is a heal, not a boon: it doesn't count toward the ronin's elements.
         if (offer.Boon.Kind == BoonKind.Offering) return;
-        // A Spirit Bead's raise is the same boon, so it doesn't count toward its element again.
+        // A Bead's level or a Thread's rarity is the same boon, so it doesn't count toward its element again.
         if (offer.IsUpgrade)
         {
             EquippedBoon raised = Find(offer.Boon.Id);
-            if (raised != null) raised.Rarity = offer.Rarity;
+            if (raised == null) return;
+            raised.Rarity = offer.Rarity;
+            raised.Level = offer.Level;
             return;
         }
         // A Sword Art sits with the passives on the HUD but belongs to no element, so it doesn't steer souls.
         if (offer.Boon.Kind == BoonKind.Art)
         {
-            passives.Add(new EquippedBoon(offer.Boon, offer.Rarity));
+            passives.Add(new EquippedBoon(offer.Boon, offer.Rarity, offer.Level));
             return;
         }
         BoonCount++;
@@ -94,15 +100,16 @@ public sealed class RoninLoadout
         if (held != null)
         {
             held.Rarity = offer.Rarity;
+            held.Level = offer.Level;
         }
         else if (offer.Boon.Slot == BoonSlot.Passive)
         {
-            passives.Add(new EquippedBoon(offer.Boon, offer.Rarity));
+            passives.Add(new EquippedBoon(offer.Boon, offer.Rarity, offer.Level));
         }
         else
         {
             if (offer.Replaces != null) elementCounts[(int)offer.Replaces.Boon.Element]--;
-            slots[(int)offer.Boon.Slot] = new EquippedBoon(offer.Boon, offer.Rarity);
+            slots[(int)offer.Boon.Slot] = new EquippedBoon(offer.Boon, offer.Rarity, offer.Level);
         }
     }
 

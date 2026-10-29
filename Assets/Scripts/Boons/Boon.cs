@@ -59,10 +59,40 @@ public sealed class BoonDefinition
     // What the ronin must hold before a capstone is offered.
     public Func<RoninLoadout, bool> Requires;
 
+    // What a Spirit Bead's level adds, like Hades' Pom of Power: the first level adds LevelStep, each after it
+    // LevelFalloff of the one before, so the early levels count most. Rarity sets where the stat starts; levels add
+    // on top. A whole-number stat (strikes, shards, swings) only moves once the levels add up to a whole one, and
+    // Min/Max keep a stat in bounds however high it climbs. A boon with no step (capstones, arts) has no levels.
+    public float LevelStep;
+    public float ExtraLevelStep;
+    public bool Whole;
+    public bool ExtraWhole;
+    public float Min = float.MinValue;
+    public float Max = float.MaxValue;
+    public float ExtraMax = float.MaxValue;
+    public const float LevelFalloff = 0.8f;
+
     public bool IsCapstone => Kind == BoonKind.Duo || Kind == BoonKind.Legendary;
     public bool Offers(Element element) => Element == element || Partner == element;
+    public bool HasLevels => LevelStep != 0f;
 
-    public float ValueAt(Rarity rarity) => Values[(int)rarity];
+    public float ValueAt(Rarity rarity, int level = 1) => Levelled(Values[(int)rarity], LevelStep, level, Whole, Min, Max);
+
+    public float ExtraAt(Rarity rarity, int level = 1) => ExtraValues == null ? 0f
+        : Levelled(ExtraValues[(int)rarity], ExtraLevelStep, level, ExtraWhole, float.MinValue, ExtraMax);
+
+    static float Levelled(float value, float step, int level, bool whole, float min, float max)
+    {
+        float bonus = 0f, add = step;
+        for (int i = 1; i < level; i++)
+        {
+            bonus += add;
+            add *= LevelFalloff;
+        }
+        // Cut toward zero, so a falling stat (swings, regrow time) only drops once a whole step is earned too.
+        if (whole) bonus = (int)bonus;
+        return Mathf.Clamp(value + bonus, min, max);
+    }
 }
 
 public readonly struct ElementInfo
@@ -79,22 +109,30 @@ public readonly struct ElementInfo
     }
 }
 
-// Rarity is rolled per card. Souls only offer boons the ronin doesn't hold; a Spirit Bead raises a held one instead.
+// What a card does: a new boon, a Spirit Bead's level on a held one, or a Spirit Thread's rarity on a held one.
+public enum OfferKind { New, Level, Rarity }
+
+// Rarity is rolled per card. Souls only offer boons the ronin doesn't hold; a Bead or a Thread raises a held one instead.
 public readonly struct BoonOffer
 {
     public readonly BoonDefinition Boon;
     public readonly Rarity Rarity;
-    // Set when this card upgrades a boon the ronin already holds.
-    public readonly bool IsUpgrade;
+    // The level the boon will be at once taken (1 for a fresh one).
+    public readonly int Level;
+    public readonly OfferKind Kind;
     // The other element's boon this one would push out of its slot, if any.
     public readonly EquippedBoon Replaces;
 
-    public BoonOffer(BoonDefinition boon, Rarity rarity, bool isUpgrade, EquippedBoon replaces)
+    // Set when this card raises a boon the ronin already holds.
+    public bool IsUpgrade => Kind != OfferKind.New;
+
+    public BoonOffer(BoonDefinition boon, Rarity rarity, OfferKind kind, EquippedBoon replaces, int level = 1)
     {
         Boon = boon;
         Rarity = rarity;
-        IsUpgrade = isUpgrade;
+        Kind = kind;
         Replaces = replaces;
+        Level = level;
     }
 }
 
@@ -114,8 +152,7 @@ public static class Boons
     public static ElementInfo Info(Element element) => Elements[(int)element];
 
     // How many shards an ice statue bursts into: Frost Blade's shard count, or its Common count without it.
-    public static int IceShardsAt(Rarity rarity) => (int)Get(BoonId.FrostBlade).ExtraValues[(int)rarity];
-    public static float FlameChanceAt(Rarity rarity) => Get(BoonId.FlameBlade).ExtraValues[(int)rarity];
+    public static int IceShardsAt(Rarity rarity, int level = 1) => (int)Get(BoonId.FrostBlade).ExtraAt(rarity, level);
 
     public static Color RarityColor(Rarity rarity) => rarity switch
     {
@@ -157,10 +194,13 @@ public static class Boons
         return count >= 2;
     }
 
-    static string Plus(float v) => $"+{v:0.#}";
+    // However many levels a blast gathers it stays short of the diagonals (2.7), which are Wildfire's.
+    const float BlastCap = 2.6f;
+
+    static string Plus(float v) => $"+{v:0.##}";
     static string Percent(float v) => $"+{v * 100:0}%";
     static string MinusPercent(float v) => $"-{v * 100:0}%";
-    static string Seconds(float v) => $"{v:0.#}s";
+    static string Seconds(float v) => $"{v:0.##}s";
 
     public static readonly BoonDefinition[] All =
     {
@@ -171,68 +211,85 @@ public static class Boons
         new BoonDefinition { Id = BoonId.FlameBlade, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Blade",
             Description = "A <b>Slash</b> kill may burst into flame, burning nearby samurai.",
             StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
-            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent },
+            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
+            LevelStep = 0.17f, Max = BlastCap, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
         new BoonDefinition { Id = BoonId.InfernoShuriken, Element = Element.Fire, Slot = BoonSlot.Special, Name = "Inferno Shuriken",
             Description = "Every samurai your <b>Shuriken</b> cuts down explodes.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
+            LevelStep = 0.17f, Max = BlastCap },
         new BoonDefinition { Id = BoonId.BurningRiposte, Element = Element.Fire, Slot = BoonSlot.Parry, Name = "Burning Riposte",
             Description = "Arrows you <b>Parry</b> come back as a fireball that explodes on impact.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
+            LevelStep = 0.17f, Max = BlastCap },
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
             Description = "You <b>Slash</b> faster.",
-            StatLabel = "Slash cooldown:", Values = new[] { 0.08f, 0.14f, 0.2f }, Format = MinusPercent },
+            StatLabel = "Slash cooldown:", Values = new[] { 0.08f, 0.14f, 0.2f }, Format = MinusPercent,
+            LevelStep = 0.035f, Max = 0.3f },
         new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
             Description = "Every few swings, you hurl a great <b>Fireball</b> instead of a <b>Slash</b>. It burns through arrows and bursts in a wide blast.",
-            StatLabel = "Swings per fireball:", Values = new[] { 6f, 5f, 4f }, Format = v => $"{v:0}" },
+            StatLabel = "Swings per fireball:", Values = new[] { 6f, 5f, 4f }, Format = v => $"{v:0}",
+            LevelStep = -1f, Whole = true, Min = 3f },
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
             Description = "A <b>Slash</b> kill may encase up to two nearby samurai in ice. Cut one down and it freezes where it stands; strike the ice to <b>Shatter</b> it into shards.",
             StatLabel = "Freeze time:", Values = new[] { 1.5f, 2f, 2.5f }, Format = Seconds,
-            ExtraLabel = "Shards:", ExtraValues = new[] { 1f, 2f, 3f } },
+            ExtraLabel = "Shards:", ExtraValues = new[] { 1f, 2f, 3f },
+            LevelStep = 0.28f, ExtraLevelStep = 1f, ExtraWhole = true, ExtraMax = 5f },
         new BoonDefinition { Id = BoonId.GlacialShuriken, Element = Element.Water, Slot = BoonSlot.Special, Name = "Glacial Shuriken",
             Description = "Your <b>Shuriken</b> freezes the whole army: no marching, no arrows.",
-            StatLabel = "Freeze time:", Values = new[] { 0.6f, 0.9f, 1.2f }, Format = Seconds },
+            StatLabel = "Freeze time:", Values = new[] { 0.6f, 0.9f, 1.2f }, Format = Seconds,
+            LevelStep = 0.17f },
         new BoonDefinition { Id = BoonId.FrozenRiposte, Element = Element.Water, Slot = BoonSlot.Parry, Name = "Frozen Riposte",
             Description = "Arrows you <b>Parry</b> burst into homing ice shards that freeze what they hit.",
-            StatLabel = "Ice shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus },
+            StatLabel = "Ice shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 6f },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
             Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
         // Once Glacier Wall (tougher cover, which only stopped his own slashes the more); now a shell on him alone.
         new BoonDefinition { Id = BoonId.GlacierShell, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Shell",
             Description = "A shell of ice takes one blow for you, then <b>Shatters</b> into homing shards. It grows back over time.",
-            StatLabel = "Regrows in:", Values = new[] { 18f, 13f, 9f }, Format = Seconds },
+            StatLabel = "Regrows in:", Values = new[] { 18f, 13f, 9f }, Format = Seconds,
+            LevelStep = -2.8f, Min = 6f },
 
         // Lightning: jolt. Chains and speed.
         new BoonDefinition { Id = BoonId.StormBlade, Element = Element.Lightning, Slot = BoonSlot.Attack, Name = "Storm Blade",
             Description = "A <b>Slash</b> kill may arc lightning to a samurai further off in the ranks.",
-            StatLabel = "Chain chance:", Values = new[] { 0.45f, 0.6f, 0.8f }, Format = Percent },
+            StatLabel = "Chain chance:", Values = new[] { 0.45f, 0.6f, 0.8f }, Format = Percent,
+            LevelStep = 0.08f, Max = 0.95f },
         new BoonDefinition { Id = BoonId.ThunderShuriken, Element = Element.Lightning, Slot = BoonSlot.Special, Name = "Thunder Shuriken",
             Description = "Your <b>Shuriken</b> flies much faster, and may arc lightning into each samurai it passes near.",
-            StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent },
+            StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent,
+            LevelStep = 0.08f, Max = 0.95f },
         new BoonDefinition { Id = BoonId.ThunderRiposte, Element = Element.Lightning, Slot = BoonSlot.Parry, Name = "Thunder Riposte",
             Description = "A successful <b>Parry</b> strikes the samurai nearest above you with lightning.",
-            StatLabel = "Strikes:", Values = new[] { 1f, 2f, 3f }, Format = Plus },
+            StatLabel = "Strikes:", Values = new[] { 1f, 2f, 3f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 5f },
         new BoonDefinition { Id = BoonId.StormStep, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Storm Step",
             Description = "You move faster.",
-            StatLabel = "Move speed:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = Percent },
+            StatLabel = "Move speed:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = Percent,
+            LevelStep = 0.055f, Max = 0.5f },
         new BoonDefinition { Id = BoonId.StaticCharge, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Static Charge",
             Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster.",
-            StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent },
+            StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent,
+            LevelStep = 0.04f, Max = 0.45f },
 
         // Ultimate (Hades' Calls): one per element, held one at a time. Each lends the Shadow Clone its element; the
         // clone's own hits (KillSource.Clone) set off nothing else.
         new BoonDefinition { Id = BoonId.PyreShadow, Element = Element.Fire, Slot = BoonSlot.Ultimate, Name = "Pyre Shadow",
             Description = "Your <b>Shadow Clone</b>'s kills burst into flame, and it goes out in a great blast when your ultimate ends.",
-            StatLabel = "Blast radius:", Values = new[] { 1.6f, 1.9f, 2.2f }, Format = Plus },
+            StatLabel = "Blast radius:", Values = new[] { 1.6f, 1.9f, 2.2f }, Format = Plus,
+            LevelStep = 0.17f, Max = BlastCap },
         new BoonDefinition { Id = BoonId.FrostShadow, Element = Element.Water, Slot = BoonSlot.Ultimate, Name = "Frost Shadow",
             Description = "Unleashing your <b>Shadow Clone</b> freezes the whole army, and its kills may encase nearby samurai in ice.",
-            StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds },
+            StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds,
+            LevelStep = 0.28f },
         new BoonDefinition { Id = BoonId.StormShadow, Element = Element.Lightning, Slot = BoonSlot.Ultimate, Name = "Storm Shadow",
             Description = "Your <b>Shadow Clone</b>'s kills may arc lightning, and your <b>Ultimate</b> fills faster.",
             StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent,
-            ExtraLabel = "Fill speed:", ExtraValues = new[] { 0.15f, 0.25f, 0.35f }, ExtraFormat = Percent },
+            ExtraLabel = "Fill speed:", ExtraValues = new[] { 0.15f, 0.25f, 0.35f }, ExtraFormat = Percent,
+            LevelStep = 0.08f, Max = 0.95f, ExtraLevelStep = 0.055f, ExtraMax = 0.6f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
@@ -306,7 +363,7 @@ public static class Boons
         {
             BoonDefinition art = pool[UnityEngine.Random.Range(0, pool.Count)];
             pool.Remove(art);
-            offers.Add(new BoonOffer(art, Rarity.Common, false, null));
+            offers.Add(new BoonOffer(art, Rarity.Common, OfferKind.New, null));
         }
         return offers;
     }
@@ -324,24 +381,31 @@ public static class Boons
 
     public static BoonDefinition Get(BoonId id) => All[Array.FindIndex(All, b => b.Id == id)];
 
-    // Up to count held boons a Spirit Bead could raise one rarity, like Hades' Pom of Power. Capstones, arts and
-    // instant boons have no levels, and an Epic is already at the top.
+    // Up to count held boons a Spirit Bead could raise one level, like Hades' Pom of Power. Capstones, arts and
+    // instant boons have no levels, and one whose stats are already at their bounds has nothing left to gain.
     public static List<BoonOffer> DrawBead(RoninLoadout loadout, int count)
     {
         var pool = new List<EquippedBoon>();
         foreach (EquippedBoon held in loadout.Held)
         {
-            if (held.Boon.Kind == BoonKind.Normal && !held.Boon.Instant && held.Rarity < Rarity.Epic) pool.Add(held);
+            if (Levels(held.Boon) && Gains(held.Boon, held.Rarity, held.Level, held.Rarity, held.Level + 1)) pool.Add(held);
         }
         var offers = new List<BoonOffer>();
         while (offers.Count < count && pool.Count > 0)
         {
             EquippedBoon held = pool[UnityEngine.Random.Range(0, pool.Count)];
             pool.Remove(held);
-            offers.Add(new BoonOffer(held.Boon, held.Rarity + 1, true, null));
+            offers.Add(new BoonOffer(held.Boon, held.Rarity, OfferKind.Level, null, held.Level + 1));
         }
         return offers;
     }
+
+    static bool Levels(BoonDefinition boon) => boon.Kind == BoonKind.Normal && !boon.Instant && boon.HasLevels;
+
+    // Whether going from one rarity and level to another changes either stat.
+    static bool Gains(BoonDefinition boon, Rarity fromRarity, int fromLevel, Rarity toRarity, int toLevel) =>
+        boon.ValueAt(toRarity, toLevel) != boon.ValueAt(fromRarity, fromLevel)
+        || boon.ExtraAt(toRarity, toLevel) != boon.ExtraAt(fromRarity, fromLevel);
 
     // Up to count distinct boons of one element. Like Hades, the first boon of a run is always a core slot boon.
     // ensureCapstone puts an eligible Duo or Legendary in the offer (the stage boon), and no card rolls below minRarity.
@@ -371,7 +435,7 @@ public static class Boons
         {
             BoonDefinition capstone = capstones[UnityEngine.Random.Range(0, capstones.Count)];
             capstones.Remove(capstone);
-            offers.Add(new BoonOffer(capstone, Rarity.Common, false, null));
+            offers.Add(new BoonOffer(capstone, Rarity.Common, OfferKind.New, null));
         }
         pool.AddRange(capstones);
 
@@ -382,14 +446,14 @@ public static class Boons
 
             if (boon.IsCapstone)
             {
-                offers.Add(new BoonOffer(boon, Rarity.Common, false, null));
+                offers.Add(new BoonOffer(boon, Rarity.Common, OfferKind.New, null));
                 continue;
             }
             EquippedBoon replaces = boon.Slot == BoonSlot.Passive ? null : loadout.InSlot(boon.Slot);
             Rarity rolled = RollRarity();
-            offers.Add(new BoonOffer(boon, rolled > minRarity ? rolled : minRarity, false, replaces));
+            offers.Add(new BoonOffer(boon, rolled > minRarity ? rolled : minRarity, OfferKind.New, replaces));
         }
-        if (offers.Count == 0) offers.Add(new BoonOffer(Offering(element), Rarity.Common, false, null));
+        if (offers.Count == 0) offers.Add(new BoonOffer(Offering(element), Rarity.Common, OfferKind.New, null));
         return offers;
     }
 

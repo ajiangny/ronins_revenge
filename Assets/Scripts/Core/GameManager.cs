@@ -718,7 +718,7 @@ public partial class GameManager : MonoBehaviour
     string HeldSummary()
     {
         var held = new List<string>();
-        foreach (EquippedBoon boon in loadout.Held) held.Add(boon.Boon.Kind == BoonKind.Normal ? $"{boon.Boon.Name} ({boon.Rarity})" : boon.Boon.Name);
+        foreach (EquippedBoon boon in loadout.Held) held.Add(boon.Boon.Kind == BoonKind.Normal ? $"{boon.Boon.Name} ({boon.Rarity} Lv {boon.Level})" : boon.Boon.Name);
         return string.Join(", ", held);
     }
 

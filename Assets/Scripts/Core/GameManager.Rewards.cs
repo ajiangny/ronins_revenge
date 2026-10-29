@@ -83,7 +83,7 @@ public partial class GameManager
         Sfx.Play(Sfx.SoulCollect, 1f, 0.8f);
     }
 
-    // A Spirit Bead raises one held boon a rarity, like Hades' Pom of Power. With nothing left to raise it pays
+    // A Spirit Bead raises one held boon a level, like Hades' Pom of Power. With nothing left to raise it pays
     // Spirit Notes instead, and false (nothing shown).
     bool OfferBead(System.Action afterPick)
     {
@@ -346,9 +346,10 @@ public partial class GameManager
             firstBoonTaken = true;
             StartCoroutine(SoulBark());
         }
-        RunLog.Note(offer.IsUpgrade ? $"bead: {offer.Boon.Name} -> {offer.Rarity}"
-            : offer.Boon.Kind == BoonKind.Normal ? $"took {offer.Boon.Name} ({offer.Rarity})" : $"took {offer.Boon.Name}");
-        float value = offer.Boon.ValueAt(offer.Rarity);
+        RunLog.Note(offer.Kind == OfferKind.Level ? $"bead: {offer.Boon.Name} -> Lv {offer.Level}"
+            : offer.Kind == OfferKind.Rarity ? $"thread: {offer.Boon.Name} -> {offer.Rarity}"
+            : offer.Boon.Kind == BoonKind.Normal ? $"took {offer.Boon.Name} ({offer.Rarity} Lv {offer.Level})" : $"took {offer.Boon.Name}");
+        float value = offer.Boon.ValueAt(offer.Rarity, offer.Level);
         Color colour = offer.Boon.Kind == BoonKind.Art ? Boons.ArtColor : Boons.Info(offer.Boon.Element).Color;
         Color pillar = Color.Lerp(Color.white, colour, 0.7f);
         Fx.Play(Fx.BoonPillar, ronin.Feet, new Color(pillar.r, pillar.g, pillar.b, 0.75f), offer.Boon.Id == BoonId.TidalRenewal ? 1.4f : 1f);
@@ -630,7 +631,7 @@ public partial class GameManager
     string RewardDescription(PathReward reward) => reward switch
     {
         PathReward.Soul => "Receive a boon from a lost soul.",
-        PathReward.Bead => "Raise one of your boons to the next rarity.",
+        PathReward.Bead => "Raise one of your boons a level.",
         PathReward.Scroll => "Learn a Sword Art that reshapes your blade.",
         PathReward.Spring => "Restore one lost life.",
         PathReward.Notes => $"Gain {noteCache * (stageIndex + 1)} Spirit Notes to spend at the temple.",

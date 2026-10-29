@@ -228,7 +228,7 @@ public partial class Kagetsune
                     {
                         lastDust = at.x;
                         Fx.Play(Fx.SmokePuff, new Vector3(at.x, GroundY + 0.2f, 0), new Color(0.3f, 0.32f, 0.33f, 0.6f), 1.3f);
-                        GroundFire.Light(new Vector3(at.x, GroundY, 0));
+                        GroundFire.Light(new Vector3(at.x, GroundY, 0), soul: true);
                     }
                 }
                 // On the last upswing it sheds a row of skulls over the stretch it scythed, spaced wide enough to pass
@@ -427,6 +427,8 @@ public partial class Kagetsune
         ultimate = false;
         // The soul beside him fights on through his stagger; only his own chain cage stops.
         StopCage();
+        // A slam cut off mid-wind-up leaves his art reared up; put it back.
+        ResetView();
         // His own bell or coffin sent home: the whole field holds its breath for a moment.
         HitStop?.Invoke(0.12f);
         ElementFx.Glow(Centre, new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f), 1f, 12f, 0.5f);
@@ -520,7 +522,7 @@ public partial class Kagetsune
                 halo.sprite = ProceduralSprites.Glow;
                 columns.Add(halo);
                 if (SoulColumn(top, ground, halfWidth * 1.8f) == null) columns.Add(Bar(top, ground, halfWidth * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
-                GroundFire.Light(new Vector3(x, GroundY, 0));
+                GroundFire.Light(new Vector3(x, GroundY, 0), soul: true);
             }
             // The columns burn for their whole flash, not a single frame.
             for (float t = 0; t < ColumnSeconds; t += Time.deltaTime * Tempo)

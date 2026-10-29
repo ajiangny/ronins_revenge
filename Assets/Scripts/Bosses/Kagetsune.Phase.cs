@@ -18,6 +18,7 @@ public partial class Kagetsune
         ultimate = false;
         BanishSoul();
         StopCage();
+        ResetView();
         exposedUntil = 0;
         seals.Clear();
         Sfx.Stop(Sfx.SoulWail);

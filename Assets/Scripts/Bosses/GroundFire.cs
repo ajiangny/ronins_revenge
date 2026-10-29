@@ -13,6 +13,11 @@ public class GroundFire : MonoBehaviour
 
     static readonly Color HotEmbers = new Color(1f, 0.45f, 0.15f, 0.75f);
     static readonly Color ColdEmbers = new Color(0.3f, 0.05f, 0.03f, 0.45f);
+    // Kagetsune's soul-fire burns teal and cools to a dark sea-green.
+    static readonly Color SoulHotEmbers = new Color(0.3f, 1f, 0.82f, 0.7f);
+    static readonly Color SoulColdEmbers = new Color(0.03f, 0.2f, 0.17f, 0.45f);
+    Color hot = HotEmbers, cold = ColdEmbers;
+    bool soulFire;
     // A scorch glows briefly at its edge, then sets to a dark char mark that fades.
     static readonly Color ScorchHot = new Color(1f, 0.5f, 0.2f, 0.45f);
     static readonly Color ScorchChar = new Color(0.07f, 0.04f, 0.04f, 0.7f);
@@ -44,14 +49,23 @@ public class GroundFire : MonoBehaviour
         mark.embers.sortingOrder = 2;
     }
 
-    public static void Light(Vector3 at)
+    // A patch of fire; `soul` burns it in Kagetsune's teal soul-fire instead of the laser's orange.
+    public static void Light(Vector3 at, bool soul = false)
     {
         var fire = new GameObject("GroundFire").AddComponent<GroundFire>();
         fire.transform.position = new Vector3(at.x, at.y, 0f);
         fire.size = Random.Range(0.85f, 1.15f);
+        if (soul)
+        {
+            fire.soulFire = true;
+            fire.hot = SoulHotEmbers;
+            fire.cold = SoulColdEmbers;
+        }
 
-        Sprite[] frames = Fx.Frames(Fx.UtsuBurn);
-        FxPlayer player = frames != null ? Fx.Play(Fx.UtsuBurn, at, Color.white, Width * fire.size / frames[0].bounds.size.x, fire.transform, 3) : null;
+        string art = soul ? Fx.KageSoulFire : Fx.UtsuBurn;
+        Sprite[] frames = Fx.Frames(art);
+        FxPlayer player = frames != null ? Fx.Play(art, at, soul ? new Color(1f, 1f, 1f, 0.85f) : Color.white,
+            Width * fire.size / frames[0].bounds.size.x, fire.transform, 3) : null;
         if (player != null)
         {
             fire.flame = player.GetComponent<SpriteRenderer>();
@@ -64,7 +78,7 @@ public class GroundFire : MonoBehaviour
             fire.flame.transform.localPosition = new Vector3(0, 0.25f, -0.5f);
             fire.flame.transform.localScale = new Vector3(0.8f, 0.6f, 1f) * fire.size;
             fire.flame.sprite = ProceduralSprites.Glow;
-            fire.flame.color = new Color(1f, 0.4f, 0.12f, 0.8f);
+            fire.flame.color = soul ? new Color(0.3f, 1f, 0.82f, 0.8f) : new Color(1f, 0.4f, 0.12f, 0.8f);
             fire.flame.sortingOrder = 3;
         }
         fire.flameScale = fire.flame.transform.localScale;
@@ -74,7 +88,7 @@ public class GroundFire : MonoBehaviour
         fire.embers.transform.localPosition = new Vector3(0, 0.02f, 0.1f);
         fire.embers.transform.localScale = new Vector3(Width * 1.3f * fire.size, 0.32f, 1f);
         fire.embers.sprite = ProceduralSprites.Glow;
-        fire.embers.color = HotEmbers;
+        fire.embers.color = fire.hot;
         fire.embers.sortingOrder = 2;
     }
 
@@ -107,7 +121,7 @@ public class GroundFire : MonoBehaviour
             float width = age < Flare ? Mathf.Lerp(0.6f, 1f, age / Flare) : 1f;
             flame.transform.localScale = new Vector3(flameScale.x * width, flameScale.y * height, flameScale.z);
             Color c = flame.color;
-            c.a = (drawnFlame ? 1f : 0.8f) * alpha;
+            c.a = (drawnFlame ? (soulFire ? 0.85f : 1f) : 0.8f) * alpha;
             flame.color = c;
             if (age >= burnt + DieDown)
             {
@@ -116,9 +130,9 @@ public class GroundFire : MonoBehaviour
             }
         }
 
-        // The embers glow hot under the flame, then cool from orange to a dull red and fade.
+        // The embers glow hot under the flame, then cool (orange to a dull red, or teal to sea-green) and fade.
         float cooling = Mathf.Clamp01((age - burnt) / (DieDown + Cool));
-        Color e = Color.Lerp(HotEmbers, ColdEmbers, cooling);
+        Color e = Color.Lerp(hot, cold, cooling);
         e.a *= age < burnt ? 1f : 1f - cooling * cooling;
         embers.color = e;
         if (age >= burnt + DieDown + Cool) Destroy(gameObject);

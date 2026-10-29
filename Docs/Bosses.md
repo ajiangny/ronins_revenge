@@ -121,11 +121,14 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   and the Wail's source), `Waist` (bells), `HammerHead`, `Shoulder(side)`. Shots: `Skull` (a breakable `Fx.KageSkull`
   orb with `PassesShots`; `Arrow.Parried` → `FreeSoul` dresses a parried one's riposte as a teal freed soul),
   `SkullFan`, `SkullBurst`, `Hunt`; tells: `CloseLanes` (wide faint lane bands that narrow and brighten over ringing
-  beats), `LockOn` (a code-built ring closing on the ronin). Phase 1: Coffer Slam (`RaiseHammer` spreads his slam clip's
-  wind-up, everything before `ImpactFrame`, over the tell and `StrikeHammer` plays the impact on the blow; then a
-  `Fissure` runs from his feet down to the ronin's row and along it at `FissureSpeed`, and `EruptColumn`s burst out of
-  it in waves `Spacing` apart, each glowing for `ColumnTell` then a `SoulColumn` `EruptWidth` wide, wave B in wave A's
-  gaps, a third on A's spots when hardened; launched columns run in real time and crack cover), Toll of Fealty, Ofuda Decree (`Ofuda`
+  beats), `LockOn` (a code-built ring closing on the ronin). Phase 1: Coffer Slam (`RaiseHammer` plays his slam clip's
+  wind-up, everything before `ImpactFrame`, over half the tell while the art rears up and trembles off `viewHome`/
+  `viewScale`; `StrikeHammer` plays the impact on the blow and `SettleView` springs the squash back, `ResetView` on a
+  stagger or phase break; then fans of `OpenCrack`s, a cone `ConeHalfAngle` either side of straight down to the
+  ronin's row (three cracks, then two between them, then three again when hardened): each `Fissure` lays
+  `Fx.KageFissure` pieces along a jagged line at `FissureSpeed`, `BreakCoverAlong` demolishes any `Blocker` it crosses,
+  and `EruptColumn`s glow for `ColumnTell` then burst as `SoulColumn`s every `ColumnStep`, only the one at the row
+  burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
   Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,
@@ -149,7 +152,8 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`Kagetsune.Kit.cs`): `Shockwave` (`Fx.KageShockwave`), `TollRing` (`Fx.KageTollRing`), `LockOn` (`Fx.KageLockOn`
   closing with ticking pings), `Streak` (afterimages behind the thrown bell and coffin). `UpdateWisps` circles
   `Fx.KageSoulRise` ghosts (dimmer behind him); `UpdateLastBell` keeps its dark on the camera, gives way to the
-  ultimate's and beats a `Heartbeat`; `RisingSoul` uses the same ghost. Phase 2
+  ultimate's and beats a `Heartbeat`; `RisingSoul` uses the same ghost. His burns are `GroundFire.Light(at, soul: true)`,
+  `Fx.KageSoulFire` with teal embers instead of the laser's orange. Phase 2
   adds Coffin Pendulum (`CoffinPendulum`: three ground passes on alternating sides, each with a band tell long
   enough to cross to the clear side by `MaxDodgeSpeed`, the last shedding spaced skulls, then a `SlamDown` on the
   ronin's lane; `CoffinOnChain`/`SetCoffin`), Soul Harvest (`SoulHarvest`: rows of floor glows that rise as skulls

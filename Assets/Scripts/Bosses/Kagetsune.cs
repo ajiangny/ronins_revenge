@@ -140,6 +140,8 @@ public partial class Kagetsune : Boss
     void Start()
     {
         // The soul-fire in his open chest, always burning; it flares with each blow.
+        viewHome = sprite.transform.localPosition;
+        viewScale = sprite.transform.localScale;
         chestGlow = Glowing(Chest, Teal, 2.2f, 4, false);
         chestGlow.transform.SetParent(transform, true);
         Damaged += OnHitBy;

@@ -64,7 +64,7 @@ always leaving Oni a gap he can reach along his one row. Bronze is a bell Oni ca
 
 | Move | What happens | What it means |
 |---|---|---|
-| Coffer Slam | He raises the coffin-hammer over three tolls and brings it down at his feet. The courtyard splits: a fissure runs down to Oni's row and along it, and columns of soul-fire erupt out of it in waves, each wave in the last one's gaps (a third wave past half his bar). | The night the coffin opened. |
+| Coffer Slam | He rears back with the coffin-hammer over three tolls and slams it down at his feet. The courtyard splits in a cone of cracks down to Oni's row, breaking any cover in their way, and columns of soul-fire burst up along them; a second fan opens between the first (a third past half his bar). | The night the coffin opened. |
 | Reliquary Rend | Two quick slams on Oni's lane, then a third held overhead for a breath that's never the same length, then the first crack erupts again. | He does not tire, and he does not hurry. |
 | Toll of Fealty | Each toll winds a spiral of skulls out of his bells, turning the other way each time; the landings step along Oni's row a gap apart. | The souls answering him. |
 | Rosary Curtain | Rows of skulls fall with one gap each, a staircase down. Past half his bar one row has no gap, only a bronze bell to parry. | The court kneeling in rows. |

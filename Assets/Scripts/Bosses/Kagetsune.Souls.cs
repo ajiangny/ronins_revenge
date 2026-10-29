@@ -283,7 +283,7 @@ public partial class Kagetsune
             Sfx.Play(Sfx.LanternBeam, 0.5f, 1.3f);
             if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < 0.9f) ronin.TakeHit(spot + Vector3.up * 0.5f);
             Fx.Play(Fx.Impact, spot, Teal, 1.6f);
-            GroundFire.Light(spot);
+            GroundFire.Light(spot, soul: true);
             yield return new WaitForSeconds(0.15f);
             Destroy(laser.gameObject);
             if (ring != null) Destroy(ring.gameObject);

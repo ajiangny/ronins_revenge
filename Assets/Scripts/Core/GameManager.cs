@@ -296,6 +296,13 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] AudioClip kagetsuneSummonBenibanaLine;
     [SerializeField] AudioClip kagetsuneSummonUtsusemiLine;
     [SerializeField] AudioClip kagetsuneSummonShiroganeLine;
+    [Tooltip("His callouts for the Rosary Curtain, the Soul River, the Reliquary Rend, the Coffin Pendulum and the Soul Harvest, and his word as he drags a soul back into the coffin.")]
+    [SerializeField] AudioClip kagetsuneCurtainLine;
+    [SerializeField] AudioClip kagetsuneRiverLine;
+    [SerializeField] AudioClip kagetsuneRendLine;
+    [SerializeField] AudioClip kagetsunePendulumLine;
+    [SerializeField] AudioClip kagetsuneHarvestLine;
+    [SerializeField] AudioClip kagetsuneAbsorbedLine;
     [SerializeField] AudioClip echoBenibanaLine;
     [SerializeField] AudioClip echoUtsusemiLine;
     [SerializeField] AudioClip echoShiroganeLine;

@@ -248,7 +248,8 @@ public partial class GameManager
         public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang, kuonEnraged;
         // Kagetsune's callouts and summons, and the summoned souls' lines.
         public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, chains, coffin, thousandBells,
-            summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane;
+            summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane,
+            curtain, river, rend, pendulum, harvest, absorbed;
         // Lines with several takes: one is picked at random, never the one played last time.
         // A boss with stagger takes uses them instead of its single stagger clip.
         public AudioClip[] hurt, staggers, smokeRings, rosaryLash, iaido, rosaryBloom;
@@ -296,6 +297,12 @@ public partial class GameManager
                 BossLine.EchoBenibana => echoBenibana,
                 BossLine.EchoUtsusemi => echoUtsusemi,
                 BossLine.EchoShirogane => echoShirogane,
+                BossLine.RosaryCurtain => curtain,
+                BossLine.SoulRiver => river,
+                BossLine.Rend => rend,
+                BossLine.Pendulum => pendulum,
+                BossLine.Harvest => harvest,
+                BossLine.SoulAbsorbed => absorbed,
                 _ => null,
             };
             if (takes.Length == 0) return null;
@@ -364,6 +371,8 @@ public partial class GameManager
             coffin = kagetsuneCoffinLine, thousandBells = kagetsuneThousandBellsLine, summonBenibana = kagetsuneSummonBenibanaLine,
             summonUtsusemi = kagetsuneSummonUtsusemiLine, summonShirogane = kagetsuneSummonShiroganeLine,
             echoBenibana = echoBenibanaLine, echoUtsusemi = echoUtsusemiLine, echoShirogane = echoShiroganeLine,
+            curtain = kagetsuneCurtainLine, river = kagetsuneRiverLine, rend = kagetsuneRendLine, pendulum = kagetsunePendulumLine,
+            harvest = kagetsuneHarvestLine, absorbed = kagetsuneAbsorbedLine,
             hurt = kagetsuneHurtLines,
         },
         _ => default,

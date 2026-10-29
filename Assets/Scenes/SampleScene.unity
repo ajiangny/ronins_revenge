@@ -994,6 +994,12 @@ MonoBehaviour:
   kagetsuneSummonBenibanaLine: {fileID: 8300000, guid: d0bb098dd01e544be94b7ad469a3bc42, type: 3}
   kagetsuneSummonUtsusemiLine: {fileID: 8300000, guid: 1ef58837b43fa4902afa6018eac2f72a, type: 3}
   kagetsuneSummonShiroganeLine: {fileID: 8300000, guid: 2d883306e8a4d404b898b598b033d566, type: 3}
+  kagetsuneCurtainLine: {fileID: 8300000, guid: 2d568c07b2abb42f6a05292960a61606, type: 3}
+  kagetsuneRiverLine: {fileID: 8300000, guid: 2af3e0f2c164f406db799926b5a3c181, type: 3}
+  kagetsuneRendLine: {fileID: 8300000, guid: bdc16aa084c0c4392a271c9cae9f9671, type: 3}
+  kagetsunePendulumLine: {fileID: 8300000, guid: cec94653bdff2449295524673862d529, type: 3}
+  kagetsuneHarvestLine: {fileID: 8300000, guid: 3256fe3cb4cd24720bfd91a7e6423081, type: 3}
+  kagetsuneAbsorbedLine: {fileID: 8300000, guid: 2fcf49b004b4548b0b0a02d91fa9ef1a, type: 3}
   echoBenibanaLine: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
   echoUtsusemiLine: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}
   echoShiroganeLine: {fileID: 8300000, guid: 0447e34cfbda64b3694f9c19576c3253, type: 3}

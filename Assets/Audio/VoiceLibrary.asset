@@ -431,16 +431,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e9a75feb5655f42199dd7593eb150c3d, type: 3}
   - id: Hibiki_Poguru_4
     clip: {fileID: 8300000, guid: aaa0f7aa674bb4be088a90094590a658, type: 3}
+  - id: Kagetsune_Absorbed
+    clip: {fileID: 8300000, guid: 2fcf49b004b4548b0b0a02d91fa9ef1a, type: 3}
   - id: Kagetsune_Chains
     clip: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
   - id: Kagetsune_CofferSlam
     clip: {fileID: 8300000, guid: 04daba481377b46ee82f53f953d8deee, type: 3}
   - id: Kagetsune_Coffin
     clip: {fileID: 8300000, guid: 421d015ce93eb4de0a494a6669e2d287, type: 3}
+  - id: Kagetsune_Curtain
+    clip: {fileID: 8300000, guid: 2d568c07b2abb42f6a05292960a61606, type: 3}
   - id: Kagetsune_Defeat
     clip: {fileID: 8300000, guid: 7c7729ed3106d4ac399850c0ea09ce24, type: 3}
   - id: Kagetsune_Defeat_2
     clip: {fileID: 8300000, guid: e79b56adb9a804b40833e68407c02136, type: 3}
+  - id: Kagetsune_Harvest
+    clip: {fileID: 8300000, guid: 3256fe3cb4cd24720bfd91a7e6423081, type: 3}
   - id: Kagetsune_Hurt
     clip: {fileID: 8300000, guid: f0464b58c1a3b4156ade381d5d3b6721, type: 3}
   - id: Kagetsune_Hurt_2
@@ -475,10 +481,16 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: dd4d5de5cba9e4e5eafb6cf0c1563f86, type: 3}
   - id: Kagetsune_Ofuda
     clip: {fileID: 8300000, guid: 259391173c626452eb1bc4a3a78f4f51, type: 3}
+  - id: Kagetsune_Pendulum
+    clip: {fileID: 8300000, guid: cec94653bdff2449295524673862d529, type: 3}
   - id: Kagetsune_Phase
     clip: {fileID: 8300000, guid: 088e00b81f9894ced9b5e83f9a945974, type: 3}
   - id: Kagetsune_Phase_2
     clip: {fileID: 8300000, guid: 350d3098ef30b4ca48ecce32e3be4360, type: 3}
+  - id: Kagetsune_Rend
+    clip: {fileID: 8300000, guid: bdc16aa084c0c4392a271c9cae9f9671, type: 3}
+  - id: Kagetsune_River
+    clip: {fileID: 8300000, guid: 2af3e0f2c164f406db799926b5a3c181, type: 3}
   - id: Kagetsune_Stagger
     clip: {fileID: 8300000, guid: 2960e3ab4536f4a6abb738c58d84a42e, type: 3}
   - id: Kagetsune_SummonBenibana

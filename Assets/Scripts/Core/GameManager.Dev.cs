@@ -100,7 +100,14 @@ public partial class GameManager
         }
         else if (keyboard.f5Key.wasPressedThisFrame && activeSoul == null)
         {
-            SpawnSoul(ronin.Feet + Vector3.up * 2f, (Element)(devSoulElement++ % 3));
+            var element = (Element)(devSoulElement++ % System.Enum.GetValues(typeof(Element)).Length);
+            // A Water soul dropped by hand stands in for meeting Asagi, so her souls keep coming after it.
+            if (element == Element.Tide && !Save.Data.asagiMet)
+            {
+                Save.Data.asagiMet = true;
+                Save.Write();
+            }
+            SpawnSoul(ronin.Feet + Vector3.up * 2f, element);
         }
         else if (keyboard.f6Key.wasPressedThisFrame && activeScroll == null && Boons.DrawArts(loadout, 1).Count > 0)
         {

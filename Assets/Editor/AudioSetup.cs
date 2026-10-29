@@ -92,6 +92,10 @@ public static class AudioSetup
         (Sfx.SoulStingFire, 0.6f, 0f, 1f),
         (Sfx.SoulStingFrost, 0.6f, 0f, 1f),
         (Sfx.SoulStingStorm, 0.6f, 0f, 1f),
+        (Sfx.SoulStingWater, 0.6f, 0f, 1f),
+        // Asagi's water.
+        (Sfx.TideWave, 0.7f, 0.05f, 0.3f),
+        (Sfx.Splash, 0.5f, 0.1f, 0.15f),
     };
 
     [MenuItem("Ninja/Apply Audio")]

@@ -153,6 +153,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected readonly List<GameObject> transient = new List<GameObject>();
 
     float frozenUntil;
+    float soakedUntil;
     float staggeredUntil;
     float nextHurtLine;
     float age;
@@ -170,6 +171,9 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     protected bool Staggered => Time.time < staggeredUntil;
     public bool Frozen => Time.time < frozenUntil;
+    // Soaked by Asagi's water: every boon effect lands one point harder (TakeHit).
+    public bool Soaked => Time.time < soakedUntil;
+    static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
     // How fast the boss's clock runs: a freeze or a stagger stops her.
     protected float Tempo => Frozen || Staggered ? 0f : 1f;
     protected float HalfWidth => Camera.main.orthographicSize * Camera.main.aspect;
@@ -412,7 +416,8 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead) return;
         age += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f);
         body.MovePosition(anchor + Vector3.up * (Mathf.Sin(age * 2.4f) * BobHeight));
-        sprite.color = Frozen ? Color.Lerp(bodyTint, new Color(0.55f, 0.8f, 1f), 0.6f) : bodyTint;
+        Color tint = Soaked ? Color.Lerp(bodyTint, SoakTint, 0.35f) : bodyTint;
+        sprite.color = Frozen ? Color.Lerp(tint, new Color(0.55f, 0.8f, 1f), 0.6f) : tint;
     }
 
     // A dash to a new spot that leaves a trail of fading afterimages along the way.
@@ -611,6 +616,17 @@ public abstract class Boss : MonoBehaviour, IHittable
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
     }
 
+    // Soaks the boss: a splash, and every boon effect on her lands harder until it dries.
+    public void Soak(float seconds)
+    {
+        if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        bool fresh = !Soaked;
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        if (!fresh) return;
+        if (Fx.Play(Fx.Splash, Centre, Color.white, 1.4f) == null) ElementFx.Glow(Centre, SoakTint, 0.8f, 2.4f, 0.35f);
+        Sfx.Play(Sfx.Splash, 0.8f, 0.85f);
+    }
+
     // Broken stance: the boss stops dead and takes double damage for a moment.
     // Without the cry, for a stagger the boss has her own line for (Shirogane when her wolf falls).
     public void Stagger(float seconds, bool cry = true)
@@ -677,6 +693,8 @@ public abstract class Boss : MonoBehaviour, IHittable
     public void TakeHit(int damage, KillSource source)
     {
         if (IsDead || Down || PhaseBreaking) return;
+        // Soaked, every boon effect lands one point harder: the one place it's added.
+        if (Soaked && source == KillSource.Effect) damage++;
         // Read before the hit lands: a boon's nested hit would clear Projectile.Striking.
         bool setPiece = source == KillSource.Reflected && Projectile.Striking != null && Projectile.Striking.SetPiece;
         float stance = setPiece ? Damage.SetPieceStance : Damage.Stance(source);
@@ -730,7 +748,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         SecondPhase = true;
         PhaseBreaking = true;
         armorChip = 0;
-        staggeredUntil = frozenUntil = 0;
+        staggeredUntil = frozenUntil = soakedUntil = 0;
         SetPoise(0f);
         Interrupt();
         IEnumerator scene = PhaseBreak();

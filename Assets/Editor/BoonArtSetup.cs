@@ -22,6 +22,7 @@ public static class BoonArtSetup
         (Element.Fire, "Fire", 18f / 360f, 1.1f),
         (Element.Water, "Water", 205f / 360f, 1f),
         (Element.Lightning, "Lightning", 280f / 360f, 1.05f),
+        (Element.Tide, "Tide", 218f / 360f, 1f),
     };
 
     [MenuItem("Ninja/Apply Boon Art")]

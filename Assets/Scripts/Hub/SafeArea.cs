@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // What a station does when Oni uses it.
-public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths, Poguru }
+public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths, Poguru, Asagi }
 
 // A little life a station gives off: incense smoke rising, light glinting on blades, a soft glow.
 public enum StationFx { None, Incense, Glint, Glow }
@@ -28,6 +28,9 @@ public class SafeArea : MonoBehaviour
         public Sprite sealedArt;
         // Set by the game before the area is built; Unseal clears it.
         [System.NonSerialized] public bool isSealed;
+        // Not there yet (Asagi before Oni has met her): nothing built, nothing in reach. Set by the game before the
+        // area is built; Reveal clears it.
+        [System.NonSerialized] public bool hidden;
         [Tooltip("Drawn on the map itself (the temple gate), so no prop and no placeholder.")]
         public bool onMap;
         public Color placeholder = new Color(0.4f, 0.32f, 0.25f);
@@ -75,6 +78,8 @@ public class SafeArea : MonoBehaviour
         public Sprite poolRimFront;
         [Tooltip("A soul rising off the water, played as it drifts up and fades. Empty: a soft glow rises instead.")]
         public Sprite[] poolSouls = new Sprite[0];
+        [Tooltip("Asagi's clips, for her station at the pool's rim (Ninja/Apply Maps). Empty draws her as a block of her sea-blue.")]
+        public AsagiArt asagiArt = new AsagiArt();
         public Lamp[] lamps = new Lamp[0];
         [Tooltip("Ground painted on the map he can't walk through (lanterns, a dais's edges, a kerb): rectangles in map pixels, x and y their top-left corner.")]
         public Rect[] walls = new Rect[0];
@@ -113,6 +118,8 @@ public class SafeArea : MonoBehaviour
         public Bounds art;
         public SpriteRenderer glow;
         public float nextFx;
+        // Asagi's figure, when the station is her.
+        public Asagi figure;
     }
     readonly List<Standing> standing = new List<Standing>();
     readonly List<(SpriteRenderer floor, SpriteRenderer flame, Color colour, float seed)> lit = new List<(SpriteRenderer, SpriteRenderer, Color, float)>();
@@ -136,6 +143,8 @@ public class SafeArea : MonoBehaviour
 
     public Config Area => config;
     public Vector3 WakePoint => At(config.wakeSpot);
+    // Asagi at the pool's rim, once her station is built; null before she's met.
+    public Asagi AsagiFigure { get; private set; }
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
@@ -199,7 +208,13 @@ public class SafeArea : MonoBehaviour
         Vector3 low = At(area.floor.min), high = At(area.floor.max);
         WalkArea = Rect.MinMaxRect(low.x, low.y, high.x, high.y);
 
-        if (mapSpace && area.poolRadii.x > 0f && area.poolRadii.y > 0f) pool = SoulPool.Build(this, area, ronin, ground);
+        if (mapSpace && area.poolRadii.x > 0f && area.poolRadii.y > 0f)
+        {
+            pool = SoulPool.Build(this, area, ronin, ground);
+            // Until Oni has met her, the koi is under the water: her ripples cross it.
+            foreach (Station station in area.stations)
+                if (station.kind == StationKind.Asagi && station.hidden) pool.Koi = true;
+        }
         // Without its map there's still somewhere to wake and a way out.
         if (!mapArt) Block("Pool", ProceduralSprites.Disc, WakePoint, new Vector2(3f, 1.6f), new Color(0.2f, 0.6f, 0.55f), order - 3);
         wakeGlow = Block("WakeGlow", ProceduralSprites.SoftGlow, WakePoint, new Vector2(4.5f, 3f), area.wakeGlow, order - 2);
@@ -209,6 +224,15 @@ public class SafeArea : MonoBehaviour
         {
             Vector3 at = BaseOf(station);
             SpriteRenderer r = null;
+            if (station.kind == StationKind.Asagi)
+            {
+                // She stands on the rim's flat stone at Oni's pixel size, her own shadow and glow with her; before
+                // he's met her she's not there at all.
+                AsagiFigure = Asagi.Create(area.asagiArt, transform, at, ronin.ArtPixelSize, order - 1);
+                AsagiFigure.gameObject.SetActive(!station.hidden);
+                standing.Add(new Standing { station = station, renderer = AsagiFigure.Body, baseY = at.y, art = AsagiFigure.Bounds, figure = AsagiFigure, nextFx = float.MaxValue });
+                continue;
+            }
             Sprite art = station.isSealed && station.sealedArt != null ? station.sealedArt : station.art;
             if (art != null)
             {
@@ -398,6 +422,24 @@ public class SafeArea : MonoBehaviour
         }
     }
 
+    // A hidden station comes into the temple (Asagi at the rim on the wake he meets her): her figure appears where it
+    // was laid, the pool's koi ripples stop, and the station can be used.
+    public void Reveal(StationKind kind)
+    {
+        foreach (Standing s in standing)
+        {
+            if (s.station.kind != kind || !s.station.hidden) continue;
+            s.station.hidden = false;
+            if (s.figure != null)
+            {
+                s.figure.gameObject.SetActive(true);
+                s.art = s.figure.Bounds;
+            }
+            else s.renderer.gameObject.SetActive(true);
+        }
+        if (kind == StationKind.Asagi && pool != null) pool.Koi = false;
+    }
+
     // Where a station's prop stands: its place on the map, or just behind the spot he uses it from, so he faces it.
     Vector3 BaseOf(Station station) =>
         mapSpace && station.propAt != Vector2.zero ? MapToWorld(station.propAt) : At(station.spot) + Vector3.up * 0.2f;
@@ -418,7 +460,7 @@ public class SafeArea : MonoBehaviour
             }
             foreach (Station station in config.stations)
             {
-                if (station.footprint.x <= 0f || station.footprint.y <= 0f) continue;
+                if (station.hidden || station.footprint.x <= 0f || station.footprint.y <= 0f) continue;
                 Vector3 at = BaseOf(station);
                 blocks.Add(new Rect(at.x - station.footprint.x / 2f, at.y - 0.1f, station.footprint.x, station.footprint.y));
             }
@@ -433,6 +475,7 @@ public class SafeArea : MonoBehaviour
         float bestDistance = float.MaxValue;
         foreach (Station station in config.stations)
         {
+            if (station.hidden) continue;
             float distance = Vector2.Distance(feet, At(station.spot));
             if (distance <= station.reach && distance < bestDistance)
             {
@@ -450,6 +493,8 @@ public class SafeArea : MonoBehaviour
         if (station == null) return;
         prompt.text = $"<color=#{ColorUtility.ToHtmlStringRGB(Teal)}>E</color>  {station.label}";
         float lift = station.art != null ? station.art.bounds.size.y * mapPixel * station.art.pixelsPerUnit + 0.5f : 1.8f;
+        foreach (Standing s in standing)
+            if (s.station == station && s.figure != null) lift = s.figure.Bounds.size.y + 0.5f;
         Vector3 at = station.onMap ? At(station.spot) : BaseOf(station);
         prompt.transform.position = new Vector3(at.x, Mathf.Max(at.y + lift, At(station.spot).y + 1.2f), 0f);
     }
@@ -468,7 +513,8 @@ public class SafeArea : MonoBehaviour
         foreach (Standing s in standing)
         {
             // Behind its base he's hidden by it; in front, he hides it.
-            s.renderer.sortingOrder = feetY > s.baseY ? ronin.SpriteOrder + 5 : propOrder;
+            if (s.figure != null) s.figure.SetOrder(feetY > s.baseY ? ronin.SpriteOrder + 5 : propOrder);
+            else s.renderer.sortingOrder = feetY > s.baseY ? ronin.SpriteOrder + 5 : propOrder;
             if (s.glow != null)
             {
                 Color glow = s.station.glowColour.a > 0f ? s.station.glowColour : Teal;

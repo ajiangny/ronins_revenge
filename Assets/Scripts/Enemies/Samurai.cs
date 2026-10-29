@@ -8,6 +8,8 @@ public class Samurai : MonoBehaviour, IHittable
     // Encased samurai are drawn fully icy with a pale halo, so they stand out from the army's lighter frost tint.
     static readonly Color IceColor = new Color(0.45f, 0.85f, 1f);
     static readonly Color IceGlow = new Color(0.6f, 0.9f, 1f, 0.7f);
+    // Soaked samurai are washed sea-blue, layered under the ice tint the way the army's frost is.
+    static readonly Color SoakColor = new Color(0.18f, 0.48f, 1f);
     // Without their own art, shieldbearers wear steel-blue armour so the front wall reads apart from the archers.
     static readonly Color ShieldColor = new Color(0.6f, 0.72f, 0.95f);
     // Yurei are bodiless souls: a pale cyan, see-through body over a soft spirit glow, so they read apart from the
@@ -40,6 +42,10 @@ public class Samurai : MonoBehaviour, IHittable
     public bool IsDead { get; private set; }
     // Frozen solid by Frost Blade or an ice shard: holds its fire, and the ronin's next hit shatters it.
     public bool Encased => Time.time < encasedUntil;
+    // Soaked by Asagi's water: every boon effect deals it one more (TakeHit), and the Duos build on it.
+    public bool Soaked => Time.time < soakedUntil;
+    // Black Ice: how much longer a soaked samurai stays encased. Set from the loadout by the GameManager.
+    public static float BlackIce = 1f;
 
     SamuraiArmy army;
     SpriteAnimator animator;
@@ -49,6 +55,8 @@ public class Samurai : MonoBehaviour, IHittable
     int maxHealth;
     float frost;
     float encasedUntil;
+    float soakedUntil;
+    bool shownSoaked;
     SpriteRenderer iceGlow;
     SpriteRenderer ghostGlow;
     float ghostPhase;
@@ -233,10 +241,26 @@ public class Samurai : MonoBehaviour, IHittable
         return ice;
     }
 
-    // Encases the samurai in ice for a while: full ice tint and a frozen pose.
+    // Soaks the samurai for a while: a sea-blue wash and a splash. Nothing on its own; it's what the other effects
+    // hit harder, and what Black Ice, Scalding Steam and Thunder Rain look for.
+    public void Soak(float seconds)
+    {
+        if (IsDead || seconds <= 0f) return;
+        bool fresh = !Soaked;
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        if (fresh)
+        {
+            if (Fx.Play(Fx.Splash, transform.position, Color.white, 0.9f) == null) ElementFx.Glow(transform.position, SoakColor, 0.5f, 1.4f, 0.3f);
+            Sfx.Play(Sfx.Splash, 0.6f, Random.Range(0.9f, 1.1f));
+        }
+        SetFrost(frost);
+    }
+
+    // Encases the samurai in ice for a while: full ice tint and a frozen pose. Black Ice holds a soaked one longer.
     public void Encase(float seconds)
     {
         if (IsDead) return;
+        if (Soaked) seconds *= BlackIce;
         encasedUntil = Mathf.Max(encasedUntil, Time.time + seconds);
         animator.enabled = false;
         if (iceGlow == null) iceGlow = Projectile.CreateGlow(transform, 1.6f / transform.lossyScale.x, animator.Renderer.sortingOrder - 1, IceGlow);
@@ -247,7 +271,8 @@ public class Samurai : MonoBehaviour, IHittable
     void Update()
     {
         UpdateAlert();
-        // A ghost's body breathes in and out of sight, slowly, each on its own beat.
+        // The soak drying off retints once; a ghost's body breathes in and out of sight, slowly, each on its own beat.
+        if (shownSoaked != Soaked && !IsDead) SetFrost(frost);
         if (ghostGlow != null && !Encased && !IsDead) SetFrost(frost);
         if (iceGlow == null || Encased) return;
         Thaw();
@@ -278,6 +303,8 @@ public class Samurai : MonoBehaviour, IHittable
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
+        shownSoaked = Soaked;
+        if (shownSoaked) clan = Color.Lerp(clan, SoakColor, 0.45f);
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
         {
@@ -298,6 +325,8 @@ public class Samurai : MonoBehaviour, IHittable
         if (IsDead || army.Entering) return;
         // Ice is brittle: any of the ronin's own hits shatters an encased samurai outright.
         if (Encased && source != KillSource.Effect) damage = health;
+        // Soaked, every boon effect (blast, strike, shard, wave, drum) lands one point harder: the one place it's added.
+        if (Soaked && source == KillSource.Effect) damage++;
         health -= damage;
         if (health <= 0)
         {
@@ -335,7 +364,7 @@ public class Samurai : MonoBehaviour, IHittable
         }
         if (frozen)
         {
-            IceStatue.Create(animator.Renderer, gameObject.layer, art.deathParticles, army.IceShell);
+            IceStatue.Create(animator.Renderer, gameObject.layer, art.deathParticles, army.IceShell).Soaked = Soaked;
             Sfx.Play(Sfx.SamuraiDeath);
             army.OnSamuraiKilled(this, source);
             Destroy(gameObject);

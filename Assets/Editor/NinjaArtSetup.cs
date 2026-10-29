@@ -469,11 +469,22 @@ public static class NinjaArtSetup
             for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Fx/Temple_Soul_{k}.png") is Sprite frame; k++) soulFrames.Add(frame);
             souls.arraySize = soulFrames.Count;
             for (int k = 0; k < soulFrames.Count; k++) souls.GetArrayElementAtIndex(k).objectReferenceValue = soulFrames[k];
+            // Asagi's clips at the pool's rim; a missing one is left empty and she falls back to her idle, or a block.
+            SerializedProperty asagi = area.FindPropertyRelative("asagiArt");
+            foreach (string clip in new[] { "Idle", "Talk", "Lift" })
+            {
+                SerializedProperty frames = asagi.FindPropertyRelative(clip.ToLowerInvariant());
+                var found = new List<Sprite>();
+                for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Characters/Asagi/Asagi_{clip}_{k}.png") is Sprite frame; k++) found.Add(frame);
+                frames.arraySize = found.Count;
+                for (int k = 0; k < found.Count; k++) frames.GetArrayElementAtIndex(k).objectReferenceValue = found[k];
+            }
             SerializedProperty stations = area.FindPropertyRelative("stations");
             for (int j = 0; j < stations.arraySize; j++)
             {
                 SerializedProperty station = stations.GetArrayElementAtIndex(j);
                 var kind = (StationKind)station.FindPropertyRelative("kind").enumValueIndex;
+                // Asagi is a figure of her own clips (above), not a prop.
                 string art = System.Array.Find(StationArt, entry => entry.kind == kind).art;
                 station.FindPropertyRelative("art").objectReferenceValue =
                     art != null ? AssetDatabase.LoadAssetAtPath<Sprite>(SpriteRoot + art + ".png") : null;

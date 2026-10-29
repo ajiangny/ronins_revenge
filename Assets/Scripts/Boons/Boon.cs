@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// The three spirit elements a soul can carry. Like the gods in Hades, each has a theme:
-// Fire burns (explosions), Water chills (slows and freezes), Lightning jolts (chains).
-public enum Element { Fire, Water, Lightning }
+// The four spirit elements a soul can carry. Like the gods in Hades, each has a theme:
+// Fire burns (explosions), Water chills (slows and freezes), Lightning jolts (chains), Tide soaks and heals (the
+// pond's water: it amplifies the others and rolls the army back). Water is Frost on screen and Tide is Water:
+// Tide came last and is appended so every saved Element index and Frost asset keeps meaning what it did.
+public enum Element { Fire, Water, Lightning, Tide }
 
 // Attack, Special, Parry and Ultimate each hold one boon; taking another element's boon for that slot replaces it.
 // The Ultimate slot is Hades' Call: its boon gives the Shadow Clone its element, shown on the ultimate's medallion.
@@ -32,6 +34,9 @@ public enum BoonId
     SplitSlash, PiercingSlash, EchoSlash, ShadowClone,
     SpiritOffering,
     PyreShadow, FrostShadow, StormShadow,
+    // Water (Asagi), and Frost's Cold Compress, which took Tidal Renewal's place.
+    RiptideBlade, TidewakeShuriken, UndertowRiposte, HealingSpring, TideShadow, DragonGate,
+    ScaldingSteam, BlackIce, ThunderRain, ColdCompress,
 }
 
 public sealed class BoonDefinition
@@ -145,8 +150,9 @@ public static class Boons
     static readonly ElementInfo[] Elements =
     {
         new ElementInfo("Fire", "the ember spirits of the burned shrine lend you their fury.", new Color(1f, 0.38f, 0.2f)),
-        new ElementInfo("Frost", "the still waters of the temple pond lend you their calm.", new Color(0.35f, 0.75f, 1f)),
+        new ElementInfo("Frost", "the physician's cold hands of the fallen palace lend you their calm.", new Color(0.35f, 0.75f, 1f)),
         new ElementInfo("Storm", "the thunder over the mountain pass lends you its speed.", new Color(0.78f, 0.45f, 1f)),
+        new ElementInfo("Water", "the koi of the temple pond lends you its tide.", new Color32(0x2F, 0x7B, 0xFF, 255)),
     };
 
     public static ElementInfo Info(Element element) => Elements[(int)element];
@@ -180,10 +186,11 @@ public static class Boons
     // Polished steel: the Sword Arts belong to the blade, not to any spirit.
     public static readonly Color ArtColor = new Color(0.82f, 0.86f, 0.92f);
 
-    // The core slot boons each capstone builds on: fire blasts, ice, and lightning strikes.
+    // The core slot boons each capstone builds on: fire blasts, ice, lightning strikes, and the tide's soaking waves.
     static readonly BoonId[] BlastBoons = { BoonId.FlameBlade, BoonId.InfernoShuriken, BoonId.BurningRiposte, BoonId.PyreShadow };
     static readonly BoonId[] IceBoons = { BoonId.FrostBlade, BoonId.GlacialShuriken, BoonId.FrozenRiposte, BoonId.FrostShadow };
     static readonly BoonId[] StrikeBoons = { BoonId.StormBlade, BoonId.ThunderShuriken, BoonId.ThunderRiposte, BoonId.StormShadow };
+    static readonly BoonId[] TideBoons = { BoonId.RiptideBlade, BoonId.TidewakeShuriken, BoonId.UndertowRiposte, BoonId.TideShadow };
 
     static bool HoldsAny(RoninLoadout loadout, BoonId[] ids) => Array.Exists(ids, id => loadout.Find(id) != null);
 
@@ -247,9 +254,11 @@ public static class Boons
             Description = "Arrows you <b>Parry</b> burst into homing ice shards that freeze what they hit.",
             StatLabel = "Ice shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
             LevelStep = 1f, Whole = true, Max = 6f },
-        new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
-            Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
-            StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
+        // Frost's defensive passive, in the place Tidal Renewal held before it became Asagi's.
+        new BoonDefinition { Id = BoonId.ColdCompress, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Cold Compress",
+            Description = "When a blow lands on you, the cold answers: the army <b>Freezes</b>, or the warlord for half as long.",
+            StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds,
+            LevelStep = 0.28f, Max = 4f },
         // Once Glacier Wall (tougher cover, which only stopped his own slashes the more); now a shell on him alone.
         new BoonDefinition { Id = BoonId.GlacierShell, Element = Element.Water, Slot = BoonSlot.Passive, Name = "Glacier Shell",
             Description = "A shell of ice takes one blow for you, then <b>Shatters</b> into homing shards. It grows back over time.",
@@ -278,8 +287,8 @@ public static class Boons
             StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent,
             LevelStep = 0.04f, Max = 0.45f },
 
-        // Ultimate (Hades' Calls): one per element, held one at a time. Each lends the Shadow Clone its element; the
-        // clone's own hits (KillSource.Clone) set off nothing else.
+        // Ultimate (Hades' Calls): one per element, held one at a time (Tide Shadow sits with Water's above). Each
+        // lends the Shadow Clone its element; the clone's own hits (KillSource.Clone) set off nothing else.
         new BoonDefinition { Id = BoonId.PyreShadow, Element = Element.Fire, Slot = BoonSlot.Ultimate, Name = "Pyre Shadow",
             Description = "Your <b>Shadow Clone</b>'s kills burst into flame, and it goes out in a great blast when your ultimate ends.",
             StatLabel = "Blast radius:", Values = new[] { 1.6f, 1.9f, 2.2f }, Format = Plus,
@@ -293,6 +302,34 @@ public static class Boons
             StatLabel = "Chain chance:", Values = new[] { 0.4f, 0.55f, 0.7f }, Format = Percent,
             ExtraLabel = "Fill speed:", ExtraValues = new[] { 0.15f, 0.25f, 0.35f }, ExtraFormat = Percent,
             LevelStep = 0.08f, Max = 0.95f, ExtraLevelStep = 0.055f, ExtraMax = 0.6f },
+
+        // Water: tide. Soaks (so every other element's effect hits harder), rolls the army back, washes arrows away,
+        // and heals. Asagi's boons make few kills of their own; the Soaked status is what they're for.
+        new BoonDefinition { Id = BoonId.RiptideBlade, Element = Element.Tide, Slot = BoonSlot.Attack, Name = "Riptide Blade",
+            Description = "A <b>Slash</b> kill may send a wave up its column: every samurai in it is <b>Soaked</b> and its arrows wash away.",
+            StatLabel = "Soak time:", Values = new[] { 4f, 4f, 4f }, Format = Seconds,
+            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
+            LevelStep = 0.4f, Max = 8f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
+        new BoonDefinition { Id = BoonId.TidewakeShuriken, Element = Element.Tide, Slot = BoonSlot.Special, Name = "Tidewake Shuriken",
+            Description = "Your <b>Shuriken</b> leaves a wake: arrows it passes wash away, and samurai it passes are <b>Soaked</b>.",
+            StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
+            LevelStep = 0.4f, Max = 8f },
+        new BoonDefinition { Id = BoonId.UndertowRiposte, Element = Element.Tide, Slot = BoonSlot.Parry, Name = "Undertow Riposte",
+            Description = "A successful <b>Parry</b> sends a wave that pushes the army back up the field and <b>Soaks</b> its front rank.",
+            StatLabel = "Push back:", Values = new[] { 0.3f, 0.45f, 0.6f }, Format = Plus,
+            LevelStep = 0.08f, Max = 0.9f },
+        new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
+            Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
+            StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
+        new BoonDefinition { Id = BoonId.HealingSpring, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Healing Spring",
+            Description = "Every so many samurai cut down by your own hand, a lost life is restored (or points, at full health).",
+            StatLabel = "Kills per life:", Values = new[] { 45f, 35f, 25f }, Format = v => $"{v:0}",
+            LevelStep = -5f, Whole = true, Min = 15f },
+
+        new BoonDefinition { Id = BoonId.TideShadow, Element = Element.Tide, Slot = BoonSlot.Ultimate, Name = "Tide Shadow",
+            Description = "Unleashing your <b>Shadow Clone</b> sends a great wave: every arrow washes away and the army is pushed back. Its kills <b>Soak</b> their neighbours.",
+            StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
+            LevelStep = 0.4f, Max = 8f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
@@ -311,6 +348,22 @@ public static class Boons
             StatLabel = "Extra arcs:", Values = new[] { 3f, 3f, 3f }, Format = Plus,
             Requires = l => HoldsAny(l, IceBoons) && HoldsAny(l, StrikeBoons) },
 
+        new BoonDefinition { Id = BoonId.ScaldingSteam, Element = Element.Fire, Partner = Element.Tide, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Scalding Steam",
+            Description = "A fire <b>Blast</b> on a <b>Soaked</b> samurai boils wider and washes away the arrows inside it.",
+            StatLabel = "Blast radius:", Values = new[] { 0.5f, 0.5f, 0.5f }, Format = Plus,
+            Requires = l => HoldsAny(l, BlastBoons) && HoldsAny(l, TideBoons) },
+        new BoonDefinition { Id = BoonId.BlackIce, Element = Element.Water, Partner = Element.Tide, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Black Ice",
+            Description = "A <b>Soaked</b> samurai held in ice stays held twice as long, and its statue <b>Shatters</b> into double shards.",
+            StatLabel = "Ice on soaked:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => HoldsAny(l, IceBoons) && HoldsAny(l, TideBoons) },
+        new BoonDefinition { Id = BoonId.ThunderRain, Element = Element.Lightning, Partner = Element.Tide, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Thunder Rain",
+            Description = "<b>Lightning</b> that strikes a <b>Soaked</b> samurai leaps to every other <b>Soaked</b> samurai in its rank.",
+            StatLabel = "Rank struck:", Values = new[] { 1f, 1f, 1f }, Format = v => "all",
+            Requires = l => HoldsAny(l, StrikeBoons) && HoldsAny(l, TideBoons) },
+
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",
@@ -327,6 +380,11 @@ public static class Boons
             Description = "Every few hits beat the thunder drum: <b>Lightning</b> strikes the front samurai of the 3 columns nearest you.",
             StatLabel = "Hits per beat:", Values = new[] { 6f, 6f, 6f }, Format = v => $"{v:0}",
             Requires = l => TwoSlotsOf(l, Element.Lightning) },
+        new BoonDefinition { Id = BoonId.DragonGate, Element = Element.Tide, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
+            Name = "Dragon Gate",
+            Description = "Once a stage, a blow that would take your last life is turned aside, and the koi climbs the falls: 2 lives are healed.",
+            StatLabel = "Lives healed:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
+            Requires = l => TwoSlotsOf(l, Element.Tide) },
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
         new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",

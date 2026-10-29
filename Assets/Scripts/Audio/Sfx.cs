@@ -23,6 +23,9 @@ public static class Sfx
     public const string FireBlast = "FireBlast";
     public const string LightningStrike = "LightningStrike";
     public const string FrostChill = "FrostChill";
+    // Asagi's water: a wave rolling up the field, and the splash of a soaking.
+    public const string TideWave = "TideWave";
+    public const string Splash = "Splash";
     public const string UiMove = "UiMove";
     public const string UiConfirm = "UiConfirm";
     public const string StageStart = "StageStart";
@@ -72,6 +75,7 @@ public static class Sfx
     public const string SoulStingFire = "SoulStingFire";
     public const string SoulStingFrost = "SoulStingFrost";
     public const string SoulStingStorm = "SoulStingStorm";
+    public const string SoulStingWater = "SoulStingWater";
 
     const int VoiceCount = 16;
 

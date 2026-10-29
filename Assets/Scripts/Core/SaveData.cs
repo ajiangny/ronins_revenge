@@ -28,6 +28,8 @@ public class SaveData
     public int deathStreak;
     // The element he held most when the last run ended (Element), or -1: whose soul speaks in the temple.
     public int lastRunElement = -1;
+    // Whether Oni has met Asagi, the koi of the temple pond: until then no Water soul is drawn.
+    public bool asagiMet;
     public const int DeathCauses = 7;
     // A death or a win not yet answered on the hill.
     public bool hubPending;

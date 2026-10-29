@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 // The temple's spirit pool come alive: light plays over the water, rings spread on it now and then and souls drift up
-// out of it, and a few more wander up off the temple floor. When Oni steps in he wades: the water hides his feet, the
+// out of it, and a few more wander up off the temple floor; until Oni has met Asagi, her koi's wake crosses it. When Oni steps in he wades: the water hides his feet, the
 // near rim stands in front of his shins, rings spread from where he stands and it splashes as he enters and leaves. Built by SafeArea over the pool its map
 // already draws; everything here is code-built on top, and without the water layer it skips the masking.
 public class SoulPool : MonoBehaviour
@@ -26,6 +26,14 @@ public class SoulPool : MonoBehaviour
     SpriteRenderer meniscus;
     Vector3 lastFeet;
     float nextStep, nextStill, nextIdleRing, nextWisp, nextStray;
+
+    // The koi under the water (Asagi, before Oni has met her): where she is in the water, as a fraction of its radii
+    // from the middle, the way she's heading, and her next pair of rings.
+    public bool Koi { get; set; }
+    Vector2 koiAt;
+    float koiHeading, koiSeed, nextKoiRing;
+    const float KoiSpeed = 0.12f;
+    static readonly Color KoiTint = new Color(0.6f, 0.85f, 1f);
 
     public static SoulPool Build(SafeArea area, SafeArea.Config config, Ronin ronin, Bounds ground)
     {
@@ -133,6 +141,7 @@ public class SoulPool : MonoBehaviour
             nextIdleRing = time + Random.Range(1.6f, 3.2f);
             StartCoroutine(Ripple(PointInWater(0.75f), 2, Random.Range(6, 11), 1.4f, 0.35f));
         }
+        if (Koi) Swim(time);
         if (time >= nextWisp)
         {
             nextWisp = time + Random.Range(0.9f, 1.8f);
@@ -203,6 +212,36 @@ public class SoulPool : MonoBehaviour
         }
     }
 
+    // Something swims under the surface: a slow wandering point inside the water that leaves a pair of faint rings
+    // behind it, one a little ahead of the other along the way it's going, like a fish's wake. Its heading drifts
+    // on noise and bends back toward the middle near the edge, so it never leaves the pool.
+    void Swim(float time)
+    {
+        if (koiSeed == 0f)
+        {
+            koiSeed = Random.Range(1f, 100f);
+            koiHeading = Random.Range(0f, Mathf.PI * 2f);
+            koiAt = Vector2.zero;
+        }
+        koiHeading += (Mathf.PerlinNoise(time * 0.25f, koiSeed) - 0.5f) * 1.6f * Time.deltaTime;
+        Vector2 step = new Vector2(Mathf.Cos(koiHeading), Mathf.Sin(koiHeading)) * KoiSpeed * Time.deltaTime;
+        koiAt += step;
+        if (koiAt.magnitude > 0.7f)
+        {
+            // Turned back toward the middle, with a little of the old heading kept so the turn is a curve.
+            float home = Mathf.Atan2(-koiAt.y, -koiAt.x);
+            koiHeading = Mathf.LerpAngle(koiHeading * Mathf.Rad2Deg, home * Mathf.Rad2Deg, 0.1f) * Mathf.Deg2Rad;
+            koiAt = koiAt.normalized * 0.7f;
+        }
+        if (time < nextKoiRing) return;
+        nextKoiRing = time + 0.55f;
+        // Map rows run downward, so a heading's y is flipped into map pixels. The second ring trails a few pixels.
+        Vector2 ahead = new Vector2(Mathf.Cos(koiHeading), -Mathf.Sin(koiHeading));
+        Vector2 here = centre + koiAt * radii;
+        StartCoroutine(Ripple(area.MapToWorld(here + ahead * 2f), 1, 5, 1.6f, 0.2f, 0f, KoiTint));
+        StartCoroutine(Ripple(area.MapToWorld(here - ahead * 4f), 1, 4, 1.4f, 0.14f, 0.18f, KoiTint));
+    }
+
     // In: a few rings at once and drops thrown up. Out: one ring and a drop or two.
     void Splash(Vector3 feet, bool entering)
     {
@@ -222,8 +261,9 @@ public class SoulPool : MonoBehaviour
     }
 
     // A one-pixel ring stepping out from one radius to another (in map pixels) as it fades.
-    IEnumerator Ripple(Vector3 at, int from, int to, float seconds, float alpha, float delay = 0f)
+    IEnumerator Ripple(Vector3 at, int from, int to, float seconds, float alpha, float delay = 0f, Color? tint = null)
     {
+        Color colour = tint ?? Teal;
         if (delay > 0f) yield return new WaitForSeconds(delay);
         var r = new GameObject("Ripple").AddComponent<SpriteRenderer>();
         r.transform.SetParent(transform, false);
@@ -235,7 +275,7 @@ public class SoulPool : MonoBehaviour
         {
             float k = t / seconds;
             r.sprite = ProceduralSprites.Ring(Mathf.RoundToInt(Mathf.Lerp(from, to, 1f - (1f - k) * (1f - k))));
-            r.color = new Color(Teal.r, Teal.g, Teal.b, alpha * (1f - k));
+            r.color = new Color(colour.r, colour.g, colour.b, alpha * (1f - k));
             yield return null;
         }
         Destroy(r.gameObject);

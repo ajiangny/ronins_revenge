@@ -30,9 +30,14 @@ public static class FxSetup
         (Fx.Aura(Element.Fire), 12, true, AuraFeet),
         (Fx.Aura(Element.Water), 12, true, AuraFeet),
         (Fx.Aura(Element.Lightning), 12, true, AuraFeet),
+        (Fx.Aura(Element.Tide), 12, true, AuraFeet),
         (Fx.SoulCrackle(Element.Fire), 12, true, Centre),
         (Fx.SoulCrackle(Element.Water), 12, true, Centre),
         (Fx.SoulCrackle(Element.Lightning), 12, true, Centre),
+        (Fx.SoulCrackle(Element.Tide), 12, true, Centre),
+        // Asagi's water: the wave rolls up from its foot, like the frost wave; the splash sits on what it soaks.
+        (Fx.TideWave, 14, false, new Vector2(0.5f, 24f / 64f)),
+        (Fx.Splash, 16, false, Centre),
         (Fx.BeniSmokeRing, 10, true, Centre),
         (Fx.BeniCrescent, 14, true, Centre),
         // The draw streak starts at her and shoots right.

@@ -192,6 +192,7 @@ public partial class GameManager
         {
             killSoulsThisStage = 0;
             killHeartThisStage = false;
+            loadout.BeginStage();
             pendingReward = PathReward.Soul;
             pendingElement = PickSoulElement();
         }
@@ -296,9 +297,9 @@ public partial class GameManager
         ui.ShowSubtitle(null, "Some blows can't be turned. Dodge the crimson.", BulletHell.Crimson, 3f);
     }
 
-    void OnStatueShattered(Vector3 position)
+    void OnStatueShattered(Vector3 position, bool soaked)
     {
-        if (state == State.Playing) effects.OnStatueShattered(position);
+        if (state == State.Playing) effects.OnStatueShattered(position, soaked);
     }
 
     void OnRiposteImpact(Vector3 point, IHittable target)

@@ -286,6 +286,12 @@ public class Arrow : MonoBehaviour
         Pop(fire);
     }
 
+    // Asagi's waves: the arrow washes away. Like Burn, for ordinary arrows only; callers skip spears and boss shots.
+    public void Wash(Color water)
+    {
+        Pop(water);
+    }
+
     // Bursts harmlessly in a puff of the given colour (a fire blast, a bell's Resonance, a parry past its cap).
     public void Pop(Color colour)
     {

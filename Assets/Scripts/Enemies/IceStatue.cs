@@ -28,8 +28,10 @@ public class IceStatue : MonoBehaviour, IHittable
         public float age;
     }
 
-    // Raised with the statue's position when the ronin breaks it.
-    public static event Action<Vector3> Shattered;
+    // Raised with the statue's position, and whether its samurai was soaked, when the ronin breaks it.
+    public static event Action<Vector3, bool> Shattered;
+    // The samurai froze while soaked: Black Ice bursts it into double shards.
+    public bool Soaked { get; set; }
 
     SpriteRenderer body;
     SpriteRenderer glow;
@@ -190,7 +192,7 @@ public class IceStatue : MonoBehaviour, IHittable
         // Effects never break the ice, so shards can't set off a chain of statues; nor do the lesser shadow slashes.
         if (broken || !Damage.Procs(source)) return;
         Burst(1.5f);
-        Shattered?.Invoke(transform.position);
+        Shattered?.Invoke(transform.position, Soaked);
     }
 
     // The round is over: the ice breaks apart with no shards thrown.

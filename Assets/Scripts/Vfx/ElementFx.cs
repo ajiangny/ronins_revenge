@@ -14,6 +14,10 @@ public class ElementFx : MonoBehaviour
     float endScale;
     float lifetime;
     float age;
+    // A wave: the glow is stretched this wide for its height, and travels from where it starts to `driftTo`.
+    Vector2 stretch = Vector2.one;
+    Vector3 driftFrom, driftTo;
+    bool drifts;
 
     // A glowing disc that grows to the blast's size and fades, plus a burst of embers.
     public static void Blast(Vector3 position, float radius, Color color, Sprite[] embers)
@@ -32,6 +36,24 @@ public class ElementFx : MonoBehaviour
         fx.sprite.sprite = ProceduralSprites.Glow;
         fx.sprite.sortingOrder = 50;
         fx.Begin(color, fromSize, toSize, seconds);
+    }
+
+    // A wave of water: a wide, flat glow that rolls from one point to another and fades, with a few drops thrown
+    // off as it goes. Stands in for the TideWave art when the library has none.
+    public static void Wave(Vector3 from, Vector3 to, Color color, float width, float seconds, Sprite[] drops = null)
+    {
+        var go = new GameObject("Wave");
+        go.transform.position = from + Vector3.back * 0.5f;
+        var fx = go.AddComponent<ElementFx>();
+        fx.sprite = go.AddComponent<SpriteRenderer>();
+        fx.sprite.sprite = ProceduralSprites.Glow;
+        fx.sprite.sortingOrder = 50;
+        fx.stretch = new Vector2(width, Mathf.Max(0.6f, width * 0.3f));
+        fx.driftFrom = go.transform.position;
+        fx.driftTo = new Vector3(to.x, to.y, go.transform.position.z);
+        fx.drifts = true;
+        fx.Begin(color, 0.6f, 1f, seconds);
+        if (drops != null) Debris.BurstSprites((from + to) * 0.5f, drops, color, 8, 0.8f, 4f);
     }
 
     // A zig-zag lightning bolt between two points: a wide coloured glow with a thin white-hot core, re-jagged every
@@ -110,7 +132,9 @@ public class ElementFx : MonoBehaviour
         if (sprite != null)
         {
             sprite.color = c;
-            transform.localScale = Vector3.one * Mathf.Lerp(startScale, endScale, 1f - (1f - t) * (1f - t));
+            float size = Mathf.Lerp(startScale, endScale, 1f - (1f - t) * (1f - t));
+            transform.localScale = new Vector3(size * stretch.x, size * stretch.y, 1f);
+            if (drifts) transform.position = Vector3.Lerp(driftFrom, driftTo, 1f - (1f - t) * (1f - t));
         }
         if (line != null)
         {

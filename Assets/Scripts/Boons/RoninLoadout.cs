@@ -23,7 +23,7 @@ public sealed class RoninLoadout
 {
     readonly EquippedBoon[] slots = new EquippedBoon[4];
     readonly List<EquippedBoon> passives = new List<EquippedBoon>();
-    readonly int[] elementCounts = new int[3];
+    readonly int[] elementCounts = new int[System.Enum.GetValues(typeof(Element)).Length];
 
     public int BoonCount { get; private set; }
     public Element? LastElement { get; private set; }
@@ -139,4 +139,11 @@ public sealed class RoninLoadout
     public float FreezeMultiplier => 1f + Value(BoonId.StillWater);
     public float MarchSpeedUpScale => Find(BoonId.StillWater) != null ? 0.5f : 1f;
 
+    // Dragon Gate turns one lethal blow aside a stage; BeginStage opens the gate again.
+    public bool DragonGateUsed { get; set; }
+
+    public void BeginStage()
+    {
+        DragonGateUsed = false;
+    }
 }

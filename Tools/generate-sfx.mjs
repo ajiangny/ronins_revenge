@@ -219,6 +219,19 @@ const SOUNDS = {
       "Stepping down into a shallow pool of still water: a soft splash with a few droplets falling back and a " +
       "faint glassy shimmer, calm, video game sound effect, no music.",
   },
+  // Asagi's tide push and the splash of a soaked foe (the Water boons, Docs/BOON_DESIGN.md).
+  TideWave: {
+    seconds: 1.5,
+    prompt:
+      "A low wave of water surging forward and breaking across a stone courtyard: a deep rolling whoosh of water " +
+      "rising, then a wide wet crash and hiss as it spreads out, powerful but clean, video game sound effect, no music.",
+  },
+  Splash: {
+    seconds: 0.6,
+    prompt:
+      "A quick heavy splash of water hitting someone: a short wet slap with a burst of droplets scattering, close " +
+      "and punchy, video game sound effect, no music.",
+  },
   PoolAmbience: {
     seconds: 6,
     prompt:
@@ -255,6 +268,13 @@ const SOUNDS = {
     prompt:
       "A short energetic storm sting: a fast rolling Japanese taiko drumroll building up into a sharp thunderclap, " +
       "crackling electric sparks and a rumbling thunder tail, exciting and bright, video game sound effect, no music.",
+  },
+  SoulStingWater: {
+    seconds: 2.5,
+    prompt:
+      "A short warm magical water sting: a single water drop falling into a still pond with a clear ripple, a soft " +
+      "deep temple bell humming underneath, then a wave rising and washing gently over it, calm and kind, " +
+      "video game sound effect, no music.",
   },
 };
 

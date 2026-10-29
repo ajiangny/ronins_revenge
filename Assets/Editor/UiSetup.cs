@@ -16,7 +16,7 @@ public static class UiSetup
     const string OniCloseupPath = "Assets/Art/Portraits/Oni_Closeup.png";
     // The souls' paintings, by GameManager field: Portraits/<Soul>_Closeup.png (their _Full.png is imported the same
     // way, kept for cards to come).
-    static readonly string[] Souls = { "Akagane", "Mizore", "Hibiki" };
+    static readonly string[] Souls = { "Akagane", "Mizore", "Hibiki", "Asagi" };
     // A boss close-up whose import settings Oni's painting shares (smooth, full size, web-compressed).
     const string BossCloseupPath = "Assets/Art/Portraits/Benibana_Closeup.png";
 

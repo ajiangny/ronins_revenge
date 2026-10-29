@@ -18,7 +18,9 @@ public partial class GameManager
         gatheredScroll = false;
         ronin.Loadout = loadout;
         effects = new BoonEffects(army, ronin, loadout);
+        effects.SpringHeal += OnSpringHeal;
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
+        Samurai.BlackIce = 1f;
         shownElement = null;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
@@ -39,17 +41,53 @@ public partial class GameManager
         if (!soulCaught) activeSoul.ShowHint(soulHintArrow);
     }
 
+    // The elements a soul can carry this run: Asagi's Water joins once Oni has met her in the temple, as Hades'
+    // later gods do; until then the three-element pool.
+    static Element[] AvailableElements()
+    {
+        var elements = new List<Element>();
+        foreach (Element element in System.Enum.GetValues(typeof(Element)))
+        {
+            if (element != Element.Tide || Save.Data.asagiMet) elements.Add(element);
+        }
+        return elements.ToArray();
+    }
+
     // Like the gods a Hades run keeps meeting, souls lean toward the elements the ronin already carries.
     Element PickSoulElement()
     {
-        if (loadout.BoonCount == 0 || Random.value >= soulElementBias) return (Element)Random.Range(0, 3);
+        Element[] available = AvailableElements();
+        if (loadout.BoonCount == 0 || Random.value >= soulElementBias) return available[Random.Range(0, available.Length)];
         float roll = Random.value * loadout.BoonCount;
-        for (int i = 0; i < 3; i++)
+        foreach (Element element in available)
         {
-            roll -= loadout.ElementCount((Element)i);
-            if (roll < 0f) return (Element)i;
+            roll -= loadout.ElementCount(element);
+            if (roll < 0f) return element;
         }
         return loadout.DominantElement ?? Element.Fire;
+    }
+
+    // Healing Spring: enough of his own kills restore a lost life, or pay points at full health.
+    void OnSpringHeal()
+    {
+        if (state != State.Playing) return;
+        Color water = Boons.Info(Element.Tide).Color;
+        if (lives < maxLives)
+        {
+            lives++;
+            ui.SetLives(lives, maxLives);
+        }
+        else
+        {
+            score += OfferingPoints * (stageIndex + 1);
+            highScore = Mathf.Max(highScore, score);
+            ui.SetScore(score);
+        }
+        Fx.Play(Fx.Impact, ronin.Bounds.center, water, 1.4f);
+        if (Fx.Play(Fx.Splash, ronin.Feet, Color.white, 1.2f) == null) ElementFx.Glow(ronin.Feet, water, 0.6f, 2.4f, 0.4f);
+        Sfx.Play(Sfx.Splash, 0.9f, 0.9f);
+        Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
+        RunLog.Note("healing spring");
     }
 
     // Rare, and at most maxScrollsPerRun a run; one on the field at a time, and none once every art is held. Never from
@@ -335,15 +373,19 @@ public partial class GameManager
     {
         Element.Fire => "Akagane",
         Element.Water => "Mizore",
+        Element.Lightning => "Hibiki",
+        Element.Tide => "Asagi",
         _ => "Hibiki",
     };
 
     // The soul's sting as their talk opens: Akagane's war drum and flame, Mizore's ice chimes, Hibiki's drumroll
-    // into thunder.
+    // into thunder, Asagi's drip and ripple.
     static string StingFor(Element element) => element switch
     {
         Element.Fire => Sfx.SoulStingFire,
         Element.Water => Sfx.SoulStingFrost,
+        Element.Lightning => Sfx.SoulStingStorm,
+        Element.Tide => Sfx.SoulStingWater,
         _ => Sfx.SoulStingStorm,
     };
 
@@ -402,6 +444,7 @@ public partial class GameManager
                 break;
         }
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
+        Samurai.BlackIce = loadout.Has(BoonId.BlackIce, out float blackIce) ? blackIce : 1f;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
     }

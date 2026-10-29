@@ -156,9 +156,9 @@ public class Ronin : MonoBehaviour
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
 
     // Each upgrade he holds for an attack makes its hits break a boss's stance a quarter faster.
-    static readonly BoonId[] SlashUpgrades = { BoonId.FlameBlade, BoonId.FrostBlade, BoonId.StormBlade, BoonId.SplitSlash, BoonId.PiercingSlash, BoonId.EchoSlash };
-    static readonly BoonId[] ShurikenUpgrades = { BoonId.InfernoShuriken, BoonId.GlacialShuriken, BoonId.ThunderShuriken };
-    static readonly BoonId[] RiposteUpgrades = { BoonId.BurningRiposte, BoonId.FrozenRiposte, BoonId.ThunderRiposte };
+    static readonly BoonId[] SlashUpgrades = { BoonId.FlameBlade, BoonId.FrostBlade, BoonId.StormBlade, BoonId.RiptideBlade, BoonId.SplitSlash, BoonId.PiercingSlash, BoonId.EchoSlash };
+    static readonly BoonId[] ShurikenUpgrades = { BoonId.InfernoShuriken, BoonId.GlacialShuriken, BoonId.ThunderShuriken, BoonId.TidewakeShuriken };
+    static readonly BoonId[] RiposteUpgrades = { BoonId.BurningRiposte, BoonId.FrozenRiposte, BoonId.ThunderRiposte, BoonId.UndertowRiposte };
     const float StancePerUpgrade = 0.25f;
 
     public float StanceBoost(KillSource source)
@@ -1113,6 +1113,20 @@ public class Ronin : MonoBehaviour
                 spread[i] = shard;
             }
             sent = count > 0 ? spread[0] : null;
+        }
+        else if (Loadout.Has(BoonId.UndertowRiposte, out _))
+        {
+            // Undertow's wave is the parry's own doing (BoonEffects.OnParried); the arrow goes back as it came, but
+            // sea-blue and trailing a splash, so the slot's element shows on the shot.
+            Color water = Boons.Info(Element.Tide).Color;
+            Projectile riposte = SpawnProjectile(projectilePrefab, position);
+            riposte.Launch(Vector3.up, 1.1f, heavy ? 2 : 0, KillSource.Deflected, flipSprite: true, scale: 1.8f, lifetimeMultiplier: 2f);
+            riposte.Tint(Color.Lerp(Color.white, water, 0.5f), water);
+            riposte.Home(RiposteTarget);
+            riposte.Mimic(arrowArt);
+            riposte.ParryAura(Color.Lerp(Color.white, water, 0.7f));
+            if (Fx.Play(Fx.Splash, position, Color.white, 0.8f) == null) ElementFx.Glow(position, water, 0.5f, 1.4f, 0.3f);
+            sent = riposte;
         }
         else
         {

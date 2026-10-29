@@ -155,6 +155,7 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] Sprite akaganeCloseup;
     [SerializeField] Sprite mizoreCloseup;
     [SerializeField] Sprite hibikiCloseup;
+    [SerializeField] Sprite asagiCloseup;
     [Tooltip("Poguru's pixel clips (set by Ninja/Apply Boss Art). Empty draws him as a teal glow with eyes.")]
     [SerializeField] PoguruArt poguruArt = new PoguruArt();
     [Tooltip("Poguru's painted close-up for his talk scenes (set by Ninja/Apply UI Fonts). Empty shows his pixel frames instead.")]
@@ -163,8 +164,8 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] float titleWalkSpeed = 6f;
     [Tooltip("Seconds the title page takes to fade into the first stage's field as he walks.")]
     [SerializeField] float titleFadeTime = 2.2f;
-    [Tooltip("One entry per element: Fire, Water, Lightning.")]
-    [SerializeField] ElementArt[] elementArt = new ElementArt[3];
+    [Tooltip("One entry per element: Fire, Water (Frost), Lightning, Tide (Asagi's Water).")]
+    [SerializeField] ElementArt[] elementArt = new ElementArt[System.Enum.GetValues(typeof(Element)).Length];
 
     [Header("Effects")]
     [Tooltip("Animated effects; built by Ninja/Apply VFX. Effects fall back to simple glows when it's empty.")]

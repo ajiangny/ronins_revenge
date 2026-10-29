@@ -9,7 +9,9 @@ using UnityEngine;
 // The souls' boon-screen talks beyond SoulPickup (GameManager.SoulTalk): a Legendary or Duo on offer, the boss just
 // felled or still ahead, another soul's element leading (SoulJealous), and a line in the temple after a run (SoulHub).
 public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk,
-    Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub, PoguruStage, PoguruScout, PoguruLowLife, PoguruBossAhead }
+    Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub, PoguruStage, PoguruScout, PoguruLowLife, PoguruBossAhead,
+    // Asagi at the pool's rim in the temple: her meeting on a wake, then her station talk (Story/Asagi.md).
+    AsagiTalk }
 
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
 // the Repeatables, which every event has so nobody ever goes silent.

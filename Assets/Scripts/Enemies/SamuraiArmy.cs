@@ -179,6 +179,8 @@ public class SamuraiArmy : MonoBehaviour
     float ringAt;
     float landingY;
     float blockerTopY;
+    // Where the top rank stood once the march-in ended: the tide never pushes the army back above it.
+    float spawnTopY;
     float frozenUntil;
     float shownFrost;
     float marchTravel;
@@ -230,6 +232,7 @@ public class SamuraiArmy : MonoBehaviour
         dropRemaining = 0f;
         frozenUntil = 0f;
         shownFrost = 0f;
+        spawnTopY = config.topRowY;
 
         float spacingX = Mathf.Min(maxSpacingX, 0.6f * 2f * HalfWidth() / Mathf.Max(1, config.columns - 1));
         // The formation starts with its front rank just above the view, then MarchIn brings it down to its slots.
@@ -782,6 +785,60 @@ public class SamuraiArmy : MonoBehaviour
         marchTravel -= marchBeatDistance;
         Sfx.Play(Sfx.MarchStep, 0.8f, MarchPitches[marchBeat]);
         marchBeat = (marchBeat + 1) % MarchPitches.Length;
+    }
+
+    // Asagi's tide: lifts the whole formation back up the field by `units`, undoing march steps, never above where
+    // it spawned. Divers' slots move with it so they glide back into the right place. An army that was holding the
+    // cover's row and is lifted clear of it marches down again, and holds afresh when it gets there.
+    public void PushBack(float units)
+    {
+        if (soldiers.Count == 0 || Entering || units <= 0f) return;
+        float top = float.NegativeInfinity;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (!IsDiving(soldier)) top = Mathf.Max(top, soldier.Body.position.y);
+        }
+        if (top == float.NegativeInfinity) return;
+        float lift = Mathf.Min(units, spawnTopY - top);
+        if (lift <= 0f) return;
+        Vector3 step = Vector3.up * lift;
+        foreach (Dive dive in dives) dive.slot += step;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (!IsDiving(soldier)) soldier.Body.MovePosition(soldier.Body.position + step);
+        }
+        if (lastBottom < float.PositiveInfinity) lastBottom += lift;
+        if (holding && lastBottom - samuraiRadius > HoldY + 0.2f) holding = false;
+    }
+
+    // The lowest rank in formation: the samurai a wave breaking on the front soaks.
+    public List<Samurai> FrontRank()
+    {
+        var front = new List<Samurai>();
+        if (Entering || soldiers.Count == 0) return front;
+        float bottom = float.PositiveInfinity;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (!IsDiving(soldier)) bottom = Mathf.Min(bottom, soldier.Body.position.y);
+        }
+        foreach (Samurai soldier in soldiers)
+        {
+            if (!IsDiving(soldier) && soldier.Body.position.y <= bottom + 0.3f) front.Add(soldier);
+        }
+        return front;
+    }
+
+    // The other samurai standing in the same rank as `of` (Thunder Rain leaps along it).
+    public List<Samurai> SamuraiInRank(Samurai of)
+    {
+        var rank = new List<Samurai>();
+        if (Entering || of == null) return rank;
+        float y = of.Body.position.y;
+        foreach (Samurai soldier in soldiers)
+        {
+            if (soldier != of && !IsDiving(soldier) && Mathf.Abs(soldier.Body.position.y - y) < spacingY * 0.5f) rank.Add(soldier);
+        }
+        return rank;
     }
 
     // Glacial Shuriken: no marching or shooting until the ice thaws.

@@ -1,6 +1,6 @@
 // Generates the voice lines with ElevenLabs text-to-speech: all of Benibana's lines in her designed voice,
 // Utsusemi's in its designed voice, Shirogane's in Lily's, Kagetsune's in his designed voice, Oni's in his, Poguru's
-// in his, the tutorial's soldiers' in theirs and the three souls' in theirs (the story behind each is in
+// in his, the tutorial's soldiers' in theirs and the four souls' in theirs (the story behind each is in
 // Story/<Name>.md).
 // They land in Assets/Audio/Voice, where Ninja/Apply Boss Art
 // picks them up. Run with `npm run voice` (all) or `npm run voice -- Utsusemi_Intro`. Reads ELEVENLABS_API_KEY
@@ -31,12 +31,17 @@ const KAGETSUNE = "icDlqXtTOaetg6DNGlyW";
 // Designed in ElevenLabs for Oni: a low, quiet, tired baritone in his late twenties, slightly hoarse, slow and sparing,
 // weary and haunted, never theatrical. He plays through no voice filters.
 const ONI = "XySBombsrAu9uFxNYdaV";
-// Designed in ElevenLabs for the three souls (Story/Souls.md): Akagane, a Japanese samurai captain in his forties with
+// Designed in ElevenLabs for the four souls (Story/Souls.md): Akagane, a Japanese samurai captain in his forties with
 // a gravelly, angry, clipped bark; Mizore, a dry, unhurried physician of about seventy with a slight rasp; Hibiki, a
-// bright, quick, breathless seventeen-year-old drummer. Unity gives all three the same faint coffin echo.
+// bright, quick, breathless seventeen-year-old drummer; Asagi, a warm, unhurried, slightly bubbly village grandmother
+// of about eighty, teasing and nosy, with a soft gurgle of laughter under it, speaking as if from inside a small
+// room. Unity gives the first three the same faint coffin echo; Asagi was never in the coffin, so hers is baked
+// through GLASS below instead.
 const AKAGANE = "GpSqIE5EUQVhDQQOFpqm";
 const MIZORE = "6hb6jR2nJV34vAkWq2Gv";
 const HIBIKI = "2R377yXvV0jHG7sPjbOY";
+// Asagi's voice is designed later (Story/Asagi.md has the prompt); until then her lines can't be voiced.
+const ASAGI = "Nh75M3ecpjvyNLlZhjVX";
 // Designed in ElevenLabs for Poguru (Story/Poguru.md): a tiny cartoon baby-dragon spirit, young, boyish, high and bright
 // but warm (not shrill), fast and breathless, giggly, with comedic gasps and whines. Unity plays him through a light
 // chorus (GameManager.poguruVoice).
@@ -59,8 +64,14 @@ const GHOST =
 const LEVEL =
   "[0:a]highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=150:makeup=2," +
   "loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100";
+// Asagi speaks from inside her glass bowl, so hers get a light glassy ring: a highpass takes the chest out of the
+// voice, a very short comb (a few milliseconds, like the bowl's walls) gives it the glass, a small close echo the
+// water, then loudnorm brings it to the other souls' loudness. The pad leaves room for the ring's tail.
+const GLASS =
+  "[0:a]apad=pad_dur=0.3,highpass=f=160,aecho=0.9:0.3:4|7:0.35|0.25,aecho=0.7:0.4:38|61:0.22|0.14," +
+  "lowpass=f=9000,loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100";
 // Which voices are baked, and through what. Every other voice is saved as it arrives.
-const FX = { [SOLDIER]: GHOST, [HIBIKI]: LEVEL };
+const FX = { [SOLDIER]: GHOST, [HIBIKI]: LEVEL, [ASAGI]: GLASS };
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -676,6 +687,168 @@ const LINES = {
   Poguru_Talk_ImpressionNest: [POGURU, "[pleading, whiny] Can my nest be bigger? Pleeease?"],
   Poguru_Talk_ImpressionNest_2: [ONI, "[low, flat] No."],
   Poguru_Talk_ImpressionNest_3: [POGURU, "[doing a deep, gruff, deadpan impression of a brooding samurai] No. [normal voice, giggling, proud] Hehe. Still got it."],
+
+  // Asagi, the Pond Physician (Story/Asagi.md): her meeting at the pool, her first-meeting chain, reactions,
+  // greetings, jealousy, Legendary, boss lines, temple lines and her station talk at the pond. Ids follow
+  // Conversation.VoiceId, counting Oni's lines (in his voice; his silent "..." lines keep their number unvoiced).
+  Asagi_Meet_Pool: [ASAGI, "[warm, unhurried, a little out of breath] Up you come. There. [fond] Knees first, little fry, the rim is slippery."],
+  Asagi_Meet_Pool_2: [ONI, "[weak, dazed, barely a whisper] ...Who"],
+  Asagi_Meet_Pool_3: [ASAGI, "[warm, teasing] The pond. I've caught you eleven times now and you've never once said thank you. [plain, kindly] Asagi. I keep this water."],
+  Asagi_Meet_Pool_4: [ASAGI, "[nosy, fussing] You're cold through and you've been dying for weeks. Sit on the stone. Let me look at you."],
+  Asagi_Meet_Pool_5: [ONI, "[low, tired, quiet] ...I have to go back."],
+  Asagi_Meet_Pool_6: [ASAGI, "[fond, unhurried] You always do. Take some of the water with you, then. [a bubble of laughter] It's better at keeping you alive than you are."],
+  Asagi_Meet_Fry: [ASAGI, "[warm, pleased] There you are. Did the water help? [teasing] Don't answer, I can see it did."],
+  Asagi_Meet_Fry_2: [ASAGI, "[fussing, gentle] Hold still. No, warmer than that. Breathe out. [fond] Good boy."],
+  Asagi_Meet_Sleet: [ASAGI, "[nosy, amused] You've been seeing my student. I can tell. You've got that stiff, over-chilled look."],
+  Asagi_Meet_Sleet_2: [ONI, "[low, quiet] Mizore."],
+  Asagi_Meet_Sleet_3: [ASAGI, "[fond, remembering] Little sleet. She climbed my hill at twelve and wouldn't go home until I'd taught her. [proud] Best hands I ever made. [a bubble of laughter] Cold as the bottom of the pond."],
+  Asagi_Meet_Prince: [ASAGI, "[old, unhurried, remembering] A boy climbed my hill once. Fine clothes, no servants. He wanted to know how I'd lived so long."],
+  Asagi_Meet_Prince_2: [ASAGI, "[quiet, plain] I told him the truth. I never chose it, it's lonelier than dying, and there's no secret worth the having."],
+  Asagi_Meet_Prince_3: [ASAGI, "[quiet, a little sad] He thanked me very nicely and went down the hill to find one anyway."],
+  Asagi_Meet_Monk: [ASAGI, "[warm, remembering] The thing with the hat. It stopped at my pond every spring, when it was a man. Fed me rice. [fond] Talked to the fish, not the body. I liked him for that."],
+  Asagi_Meet_Monk_2: [ASAGI, "[quiet, asking a favour] Stop his clock for me, little fry. Gently, if you can."],
+  Asagi_Meet_Flute: [ASAGI, "[old, unhurried, remembering] Two guards used to climb up here to get away from the palace. One played a flute. The other one listened."],
+  Asagi_Meet_Flute_2: [ASAGI, "[quiet, plain] I never spoke to them. A doctor doesn't, unless she's asked. [softer] I knew their faces."],
+  Asagi_Meet_Flute_4: [ASAGI, "[quiet, fond] The flat stone by the water, flute boy. I keep it clear. Nobody else sits there."],
+  Asagi_Meet_Home: [ASAGI, "[old, warm, unhurried] Three hundred years of patients, and every one of them went down the hill well. [quiet] Except one."],
+  Asagi_Meet_Home_2: [ONI, "[low, quiet] ...Me."],
+  Asagi_Meet_Home_3: [ASAGI, "[warm, decided] You. I've decided. You're the last one, and I'm sending you home, [gently] Oni."],
+  Asagi_Meet_Home_4: [ONI, "[quiet, caught off guard] ...That's the first time you've used my name."],
+  Asagi_Meet_Home_5: [ASAGI, "[fond, a bubble of laughter] I was saving it."],
+  Asagi_Pickup_DiedBenibana: [ASAGI, "[quiet, remembering] That smoke drifted all the way up my hill that night. It settled on the water. [fussing] Keep your head above it, dear."],
+  Asagi_Pickup_DiedUtsusemi: [ASAGI, "[fond, wry] He never hurried when he was a man either. He just always arrived. [plain advice] Be somewhere else when he does."],
+  Asagi_Pickup_DiedShirogane: [ASAGI, "[quiet, gentle] She was the one who listened. [a pause, then fussing] ...Drink. You're shaking."],
+  Asagi_Pickup_DiedKagetsune: [ASAGI, "[quiet, old, sad] He got his forever. Look what it cost. [dry, fond] You tell him an old fish said so."],
+  Asagi_Pickup_DiedArmy: [ASAGI, "[teasing, fond] Arrows, little fry? I'll wash the next lot out of the air for you. [warning] Mind the ones after."],
+  Asagi_Pickup_FirstClear: [ASAGI, "[warm, wondering] You came back into my pond on your own feet last night. Walked in. I've never had a patient do that."],
+  Asagi_Pickup_FirstClear_2: [ASAGI, "[fond, brisk] Again, then. I'll have the water warm."],
+  Asagi_Pickup_Cleared: [ASAGI, "[warm, pleased] You won. I could tell by how you sat on the stone. Keep sitting like that."],
+  Asagi_Pickup_HoldsFire: [ASAGI, "[nosy, amused] You're running warm. That's the little kettle. [a bubble of laughter] Here, this will steam a bit when it meets him."],
+  Asagi_Pickup_HoldsFrost: [ASAGI, "[fond, tutting] Sleet's been at you. She always did chill a patient too far. [warm] Let me take the edge off her edge."],
+  Asagi_Pickup_HoldsStorm: [ASAGI, "[amused, fussing] The drummer girl's spark. Careful, dear, you'll shake the water out of my bowl."],
+  Asagi_Pickup_ManyRuns: [ASAGI, "[fond, teasing] Twenty-five times out of the pond. I've started counting you by the ripples."],
+  Asagi_Pickup_VeryManyRuns: [ASAGI, "[old, a bubble of laughter] Fifty. The carpenters built me four bodies in three hundred years, and you've worn through more than that."],
+  Asagi_Pickup_LowLives: [ASAGI, "[sharp for her, fussing] One left? Then you sit down right now and let me close it. [firm] No. Sit."],
+  Asagi_Pickup_Offering: [ASAGI, "[quiet, warm] I've given you all the water I have, dear. I can still give you the hands."],
+  Asagi_Greet_Fry: [ASAGI, "[warm, pleased] There's my little fry."],
+  Asagi_Greet_Warm: [ASAGI, "[fond, fussing] Warm hands, this time. Hold still."],
+  Asagi_Greet_Wash: [ASAGI, "[quiet, soothing] Let the water take it."],
+  Asagi_Greet_Wet: [ASAGI, "[amused] You're soaked. Good. So are they."],
+  Asagi_Greet_Tide: [ASAGI, "[warm, encouraging] Push them back up the hill, dear."],
+  Asagi_Greet_Breathe: [ASAGI, "[soothing, unhurried] Breathe out. All the way. There."],
+  Asagi_Greet_Stone: [ASAGI, "[quiet, fond] The stone's still clear. Go on."],
+  Asagi_Greet_Thanks: [ASAGI, "[teasing, warm] You can thank me by coming back walking."],
+  Asagi_Jealous_Mizore: [ASAGI, "[tutting, fond] All that ice, little sleet. You'll crack him."],
+  Asagi_Jealous_Mizore_2: [MIZORE, "[dry, respectful] Cold keeps a wound clean, Teacher."],
+  Asagi_Jealous_Mizore_3: [ASAGI, "[warm, pointed] And warm keeps a patient talking. Who taught you that?"],
+  Asagi_Jealous_Mizore_4: [MIZORE, "[a pause, quiet] ...You did."],
+  Asagi_Jealous_Akagane: [ASAGI, "[nosy, fussing] You're running a temperature, dear. It's the kettle."],
+  Asagi_Jealous_Akagane_2: [AKAGANE, "[gruff, dismissive] Stay in your pond, carp."],
+  Asagi_Jealous_Akagane_3: [ASAGI, "[mild, correcting] Koi."],
+  Asagi_Jealous_Hibiki: [ASAGI, "[amused, a little sloshed] Slow down, you'll slosh me."],
+  Asagi_Jealous_Hibiki_2: [HIBIKI, "[gasping, delighted] Great-Grandmother! You're in here too?"],
+  Asagi_Jealous_Hibiki_3: [ASAGI, "[fond, indulgent] Yes, dear."],
+  Asagi_Jealous_Hibiki_4: [MIZORE, "[dry, irritated] ...Don't encourage her."],
+  Asagi_Jealous_Frost: [ASAGI, "[fond, fussing] Too cold. Come and warm up."],
+  Asagi_Jealous_Fire: [ASAGI, "[fond, fussing] Too hot. Come and cool down."],
+  Asagi_Jealous_Storm: [ASAGI, "[fond, fussing] Too quick. Come and sit."],
+  Asagi_Jealous_Back: [ASAGI, "[warm, a bubble of laughter] Back to the pond. They all come back to the pond."],
+  Asagi_Legendary_DragonGate: [ASAGI, "[old, unhurried] There's a story that a koi who climbs the waterfall becomes a dragon. [plain] I never climbed it. I had patients."],
+  Asagi_Legendary_DragonGate_2: [ASAGI, "[warm, fond] Here's the climb anyway. When the last blow comes, you go up it instead."],
+  Asagi_Legendary_Again: [ASAGI, "[fond, encouraging] Up the falls, little fry."],
+  Asagi_Ahead_Benibana: [ASAGI, "[old, remembering] A dancer came up for her ankles once. Beautiful girl. [quiet] Something sweet and wrong under her sleeves. I treated the ankles."],
+  Asagi_Ahead_Utsusemi: [ASAGI, "[fond, remembering] The hat. He'd take it off to feed me. Nobody else ever did. [quiet] ...Go on, dear."],
+  Asagi_Ahead_Shirogane: [ASAGI, "[quiet, gentle] The one who listened. ...I'll keep her stone clear. Go and be gentle, if the fight lets you."],
+  Asagi_Ahead_Kagetsune: [ASAGI, "[quiet, old] The boy who wanted forever. He has it now. [firmer] Show him what it looks like from outside."],
+  Asagi_Ahead_KagetsuneWon: [ASAGI, "[quiet, regretful] I was honest with him, and this is what he did with it. [warm, firm] Go and finish the lesson for me, flute boy."],
+  Asagi_Ahead_Any: [ASAGI, "[fussing, brisk] Something big ahead. Drink first."],
+  Asagi_Felled_Benibana: [ASAGI, "[quiet, sad] Her ankles were never the problem. Poor girl."],
+  Asagi_Felled_Utsusemi: [ASAGI, "[quiet, gentle] Wound down. ...Thank you, dear. [fond] Next spring I'll put rice out anyway."],
+  Asagi_Felled_Shirogane: [ASAGI, "[quiet, old, remembering] She'd have come up the hill after that, in the old days, and sat, and said nothing. [gentle] Come and sit."],
+  Asagi_Felled_Any: [ASAGI, "[brisk, fussing] Done. Let me see those hands."],
+  Asagi_Hub_First: [ASAGI, "[warm, fond] You carried my water all night. Did it feel like home? [gently] It's allowed to."],
+  Asagi_Hub_Kagetsune: [ASAGI, "[quiet, fussing] He hit you with all of them at once, didn't he. A thousand bells. I heard it from here. [firm] Sit."],
+  Asagi_Hub_Rest: [ASAGI, "[brisk, fond] Dry off. Then go again."],
+  Asagi_Hub_Sleep: [ASAGI, "[nosy, fond] Do you sleep, in between? Sleet asked you that, I expect. She asks everyone."],
+  Asagi_Hub_Sleep_2: [ONI, "[low, quiet, flat] ...I play."],
+  Asagi_Hub_Sleep_3: [ASAGI, "[warm, quiet] I know. I can hear it from the water."],
+  Asagi_Pond_Hello: [ASAGI, "[warm, teasing] You can talk to me, you know. Patients do. [a bubble of laughter] Most of them can't stop."],
+  Asagi_Pond_Hello_3: [ASAGI, "[fond, unbothered] Or that. That's fine too."],
+  Asagi_Pond_Bodies: [ASAGI, "[old, plain, unhurried] This is my fourth body. The carpenters built the first out of a cart. [fond] The bowl's the same, though. The bowl is me."],
+  Asagi_Pond_Bodies_2: [ONI, "[low, quiet, hesitant] ...Does it hurt? Being in there."],
+  Asagi_Pond_Bodies_3: [ASAGI, "[gentle, a little sad] Only when it cracks, dear. Same as you."],
+  Asagi_Pond_Flute: [ASAGI, "[warm, teasing] Play something. The fish likes it. [a bubble of laughter] The old woman likes it too, but she won't say."],
+  Asagi_Pond_Stone: [ASAGI, "[quiet, warm, certain] The stone's been clear for a long time, Oni. When you bring her back up the hill, that's where she sits."],
+  Asagi_Pond_Dawn: [ASAGI, "[quiet, wondering] I saw the sun come up last night. First time in... well. The water went clear. [fond] Then it filled up again, and here you are."],
+  Asagi_Pond_Dawn_2: [ASAGI, "[warm, firm] Do it again. Keep doing it until it stays."],
+  Asagi_Pond_Rest: [ASAGI, "[warm, unhurried] Sit a while. The water's warm."],
+  Asagi_Pond_Ripples: [ASAGI, "[fond, nosy] Eleven ripples when you come up. I've counted. Always eleven."],
+  Asagi_Pond_Fish: [ASAGI, "[amused, mock-stern] Stop tapping the glass, dear. I can see you."],
+  // Her crossovers with Poguru and the other souls; each line in its speaker's voice.
+  Asagi_Poguru: [POGURU, "[gasping, amazed, fast] A FISH. Oni, it's a fish in a bowl, and it's a LADY."],
+  Asagi_Poguru_2: [ASAGI, "[fond, unbothered] And you're a very small dragon. We've all got something, dear."],
+  Asagi_Poguru_3: [POGURU, "[hushed, awed] ...Is it true? Koi that climb the waterfall turn into dragons?"],
+  Asagi_Poguru_4: [ASAGI, "[mild, amused] So they say."],
+  Asagi_Poguru_5: [POGURU, "[curious, small] Why didn't you?"],
+  Asagi_Poguru_6: [ASAGI, "[warm, simple, a bubble of laughter] I liked my pond."],
+  Asagi_Cut_Mizore: [ASAGI, "[fussing, fond] Warm him up, little sleet. He's blue."],
+  Asagi_Cut_Mizore_2: [MIZORE, "[dry, respectful] He's meant to be blue, Teacher. It keeps the wound clean."],
+  Asagi_Cut_Mizore_3: [ASAGI, "[mild, pointed] It keeps the patient quiet. Not the same thing."],
+  Asagi_Cut_Hibiki: [HIBIKI, "[exasperated, fast] Great-Grandmother, he won't sit still!"],
+  Asagi_Cut_Hibiki_2: [ASAGI, "[fond, amused] Neither did you, dear. Hold his other arm."],
+  // The Water Duos.
+  Duo_ScaldingSteam_First: [AKAGANE, "[gruff, scornful] Water. You'd put out my fire, carp?"],
+  Duo_ScaldingSteam_First_2: [ASAGI, "[mild, correcting, then warm] Koi. And no, dear. Wet a man and then burn him, and see how far the steam goes."],
+  Duo_ScaldingSteam_First_3: [AKAGANE, "[grudging, thinking] ...Hm. Soak them, then."],
+  Duo_ScaldingSteam_First_4: [ASAGI, "[fond, amused] Soak them. Then you may boil."],
+  Duo_ScaldingSteam_Kettle: [ASAGI, "[nosy, amused] The drummer girl calls you a kettle. I see why."],
+  Duo_ScaldingSteam_Kettle_2: [AKAGANE, "[gruff, stiff] The drummer girl is seventeen."],
+  Duo_ScaldingSteam_Kettle_3: [ASAGI, "[a bubble of laughter, teasing] And I'm three hundred, little kettle. Whistle when you're ready."],
+  Duo_ScaldingSteam_Again: [AKAGANE, "[barking an order] Wet them."],
+  Duo_ScaldingSteam_Again_2: [ASAGI, "[warm, brisk] Burn them, dear. Mind the steam."],
+  Duo_BlackIce_First: [MIZORE, "[quiet, formal, a little caught] Teacher."],
+  Duo_BlackIce_First_2: [ASAGI, "[fond, warm] Little sleet. Look at you. Still cold."],
+  Duo_BlackIce_First_3: [MIZORE, "[dry, clinical] You taught me that wet and cold together is worse than either."],
+  Duo_BlackIce_First_4: [ASAGI, "[mild, pointed] I taught you to warn patients about it. Not to do it to them."],
+  Duo_BlackIce_First_5: [MIZORE, "[dry, flat] These aren't patients."],
+  Duo_BlackIce_Hill: [ASAGI, "[quiet, old] You never came back up the hill."],
+  Duo_BlackIce_Hill_2: [MIZORE, "[dry, guarded] I had the court."],
+  Duo_BlackIce_Hill_3: [ASAGI, "[quiet, gentle] You had forty years, dear."],
+  Duo_BlackIce_Hill_4: [MIZORE, "[a pause, quieter] ...I had the court."],
+  Duo_BlackIce_Again: [ASAGI, "[warm, brisk] Soak them, sleet."],
+  Duo_BlackIce_Again_2: [MIZORE, "[dry, almost fond] Then freeze them, Teacher. The old way."],
+  Duo_ThunderRain_First: [HIBIKI, "[excited, then worried, fast] Great-Grandmother! Water and lightning! Is that safe?"],
+  Duo_ThunderRain_First_2: [ASAGI, "[mild, amused] Not for them, dear."],
+  Duo_ThunderRain_First_3: [HIBIKI, "[delighted, confiding] ...I like her, Oni."],
+  Duo_ThunderRain_Festival: [ASAGI, "[old, warm, remembering] There was a girl in the valley who drummed at the summer festival. I could hear it from the pond, every year."],
+  Duo_ThunderRain_Festival_2: [HIBIKI, "[stunned, then shouting with joy] ...That was me. That was ME!"],
+  Duo_ThunderRain_Festival_3: [ASAGI, "[fond, a bubble of laughter] I know, dear. You were always a little fast."],
+  Duo_ThunderRain_Again: [HIBIKI, "[excited shout] Rain and thunder!"],
+  Duo_ThunderRain_Again_2: [ASAGI, "[warm, brisk] Wet first. Then loud."],
+  // The other souls, the bosses and Poguru on Oni carrying her water.
+  Akagane_Pickup_HoldsWater: [AKAGANE, "[gruff, grumbling] You're wet through. The fish has been at you. [grudging] Fine. Wet wood burns slower, Guardsman. Not never."],
+  Mizore_Pickup_HoldsWater: [MIZORE, "[dry, then quieter] You've been to the pond. ...She taught me. Everything I know about hands. [flat] Don't tell her I said so."],
+  Hibiki_Pickup_HoldsWater: [HIBIKI, "[delighted, fast] Great-Grandmother's water! She says yes, dear, when I call her that. [sulky] Grandmother never does."],
+  Akagane_Jealous_Asagi: [AKAGANE, "[gruff, offended] You'd take a carp's puddle over the vanguard's fire?"],
+  Akagane_Jealous_Asagi_2: [ASAGI, "[mild, correcting] Koi, dear."],
+  Akagane_Jealous_Asagi_3: [AKAGANE, "[gruff, through his teeth] ...A koi's puddle."],
+  Akagane_Jealous_Water: [AKAGANE, "[gruff bark] Dry off. Then burn something."],
+  Mizore_Jealous_Asagi: [MIZORE, "[dry, observing] You're wet through and warm. That's her way. It was always her way."],
+  Mizore_Jealous_Asagi_2: [ASAGI, "[warm, teasing] It works, little sleet."],
+  Mizore_Jealous_Asagi_3: [MIZORE, "[a pause, grudging, dry] ...It does. Don't let it go to your bowl."],
+  Mizore_Jealous_Water: [MIZORE, "[dry, disapproving, then giving up] Too warm. Too wet. ...Fine."],
+  Hibiki_Jealous_Asagi: [HIBIKI, "[sulky, then faltering] You're all soggy. Did Great-Grandmother... no. I can't be cross with her. I tried."],
+  Hibiki_Jealous_Asagi_2: [ASAGI, "[fond, amused] Thank you, dear."],
+  Hibiki_Jealous_Asagi_3: [HIBIKI, "[bright, fast] Still! Hurry up!"],
+  Hibiki_Jealous_Water: [HIBIKI, "[teasing shout] Soggy! Come and be fast instead!"],
+  Benibana_Intro_Water: [BENIBANA, "[cool, wistful, a little sad] The pond on the hill. I went up for my ankles once, and the fish asked nothing at all. [quiet] I'd have told her."],
+  Utsusemi_Intro_Water: [UTSUSEMI, "[slow, grinding, wary] Water... Gears rust in water."],
+  Utsusemi_Intro_Water_2: [UTSUSEMI, "[suddenly warm, a gentle old man, remembering] ...The fish. Every spring. I fed the fish."],
+  Shirogane_Intro_Water: [SHIROGANE, "[calm, then softer, almost hopeful] The old koi's water. ...Does she still keep the stone clear?"],
+  Shirogane_Intro_Water_2: [ONI, "[low, quiet] ...Yes."],
+  Kagetsune_Intro_Water: [KAGETSUNE, "[slow, deep, bitter] The fish on the hill. I climbed to her once, and she told me no."],
+  Kagetsune_Intro_Water_2: [KAGETSUNE, "[contemptuous, booming] Look at me, little demon. Look at what no was worth."],
+  Poguru_Soul_Water: [POGURU, "[sniffing, delighted, fast] You smell like the pond! Did the fish lady give you that? [hopeful] Is she a dragon yet?"],
 };
 
 const args = process.argv.slice(2);

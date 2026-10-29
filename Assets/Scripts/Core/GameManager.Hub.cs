@@ -28,15 +28,35 @@ public partial class GameManager
         yield return PlayConversation(said, colour);
     }
 
-    // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended.
-    IEnumerator WakeTalk()
+    // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended. On the wake he meets Asagi, her
+    // scene takes the place of his line.
+    IEnumerator WakeTalk(bool meetAsagi)
     {
         bool pending = Save.Data.hubPending;
-        yield return HubReturn();
+        if (meetAsagi) yield return MeetAsagi();
+        else yield return HubReturn();
         yield return new WaitForSeconds(pending ? 0.6f : 1f);
         if (pending) yield return PoguruBark(DialogueEvent.PoguruWake);
         // Out of the wisp (if his word didn't already bring him) and off to his nest.
         if (state == State.Hub && safeArea != null && poguru.Current != Poguru.Mode.Perch) poguru.PerchAt(NestPoint);
+    }
+
+    // The wake after his second run: Asagi's hands under his arms as he comes out of the pool, and she's at the rim
+    // from then on (Story/Asagi.md, "The meeting"). Her scene answers the run instead of his own line.
+    bool AsagiDue => Save.Data.runsStarted >= 2 && !Save.Data.asagiMet;
+
+    IEnumerator MeetAsagi()
+    {
+        Save.Data.hubPending = false;
+        Conversation said = Dialogue.Find("Asagi_Meet_Pool");
+        Save.Data.asagiMet = true;
+        Save.Write();
+        if (said == null) yield break;
+        yield return new WaitForSeconds(0.8f);
+        Asagi asagi = safeArea != null ? safeArea.AsagiFigure : null;
+        if (asagi != null) asagi.Play(Asagi.Clip.Talk, true);
+        yield return PlayTalk(said, new TalkOptions { keepHud = true });
+        if (asagi != null) asagi.Play(Asagi.Clip.Idle);
     }
 
     // Loading a journey: no flute intro, the page just fades off Oni already standing in the temple.
@@ -62,9 +82,10 @@ public partial class GameManager
         if (backdrop != null) backdrop.Show(area.map);
         blockers.Clear();
         if (safeArea != null) Destroy(safeArea.gameObject);
-        // The oath stone stands in chains until the first dawn.
+        // The oath stone stands in chains until the first dawn; Asagi isn't at the rim until he's met her.
         foreach (SafeArea.Station station in area.stations)
         {
+            if (station.kind == StationKind.Asagi) station.hidden = !Save.Data.asagiMet;
             if (station.kind != StationKind.Oaths) continue;
             station.isSealed = !(Oaths.Unlocked && Save.Data.oathsUnsealed);
             station.label = station.isSealed ? "SEALED STONE" : "OATH STONE";
@@ -91,6 +112,7 @@ public partial class GameManager
         if (sfxLibrary != null) Music.Play(sfxLibrary.TempleMusic, sfxLibrary.musicVolume);
         if (wake)
         {
+            bool meetAsagi = AsagiDue;
             ronin.PlaceAt(BodyAt(safeArea.WakePoint));
             yield return ui.FadeTo(1f, 0f);
             yield return new WaitForSeconds(0.4f);
@@ -100,10 +122,17 @@ public partial class GameManager
             ElementFx.Glow(ronin.Bounds.center, OniColour, 1f, 6f, 1.2f);
             Sfx.Play(Sfx.SoulCollect);
             yield return new WaitForSeconds(0.7f);
+            // The first time she's seen, she's already at the rim with her hands out, lifting him.
+            if (meetAsagi)
+            {
+                safeArea.Reveal(StationKind.Asagi);
+                safeArea.AsagiFigure?.Play(Asagi.Clip.Lift);
+            }
             yield return ronin.WalkTo(BodyAt(safeArea.PoolExit), travelWalkSpeed * 0.3f);
+            if (meetAsagi) safeArea.AsagiFigure?.Play(Asagi.Clip.Idle);
             if (lastRunNotes > 0) StartCoroutine(NoteTally(lastRunNotes));
             lastRunNotes = 0;
-            StartCoroutine(WakeTalk());
+            StartCoroutine(WakeTalk(meetAsagi));
         }
         // The floor is where his feet may go; the clamp is on his body.
         Vector3 lift = BodyAt(Vector3.zero);
@@ -204,6 +233,7 @@ public partial class GameManager
             case StationKind.Memorial: OpenStation(() => ShowRecords(CloseStation)); break;
             case StationKind.WeaponRack: OpenStation(() => ShowRack(CloseStation)); break;
             case StationKind.Poguru: OpenStation(() => ShowPoguru(CloseStation)); break;
+            case StationKind.Asagi: OpenStation(() => StartCoroutine(TalkToAsagi())); break;
             case StationKind.Oaths:
                 if (Oaths.Unlocked) OpenStation(() => ShowOaths(CloseStation));
                 else ui.ShowSubtitle("Oni", "Bound in chains. Not until the Emperor falls.", OniColour, 2.5f);
@@ -303,6 +333,17 @@ public partial class GameManager
     {
         poguruTalked = true;
         yield return PlayTalk(Dialogue.Pick("Poguru", DialogueEvent.PoguruTalk, Dialogue.Context(loadout)), new TalkOptions { keepHud = true });
+        CloseStation();
+    }
+
+    // Asagi at the rim: her pond talk (AsagiTalk), a scene over the temple as it stands, her hands up while she speaks.
+    IEnumerator TalkToAsagi()
+    {
+        Conversation said = Dialogue.Pick("Asagi", DialogueEvent.AsagiTalk, Dialogue.Context(loadout));
+        Asagi asagi = safeArea.AsagiFigure;
+        if (said != null && asagi != null) asagi.Play(Asagi.Clip.Talk, true);
+        yield return PlayTalk(said, new TalkOptions { keepHud = true });
+        if (asagi != null) asagi.Play(Asagi.Clip.Idle);
         CloseStation();
     }
 

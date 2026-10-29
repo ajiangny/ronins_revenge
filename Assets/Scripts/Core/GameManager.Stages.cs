@@ -83,6 +83,24 @@ public partial class GameManager
         if (state != State.Playing) return;
         RunLog.Hit();
 
+        // Cold Compress: the cold answers the blow before the life is counted.
+        effects.OnRoninHit();
+        // Dragon Gate: once a stage, the blow that would take his last life is turned aside and the koi climbs the
+        // falls, healing two.
+        if (lives <= 1 && !loadout.DragonGateUsed && loadout.Has(BoonId.DragonGate, out float healed))
+        {
+            loadout.DragonGateUsed = true;
+            lives = Mathf.Min(lives + (int)healed, maxLives);
+            ui.SetLives(lives, maxLives);
+            Color water = Boons.Info(Element.Tide).Color;
+            if (Fx.Play(Fx.TideWave, ronin.Feet, Color.white, 3f) == null) ElementFx.Wave(ronin.Feet + Vector3.down, ronin.Feet + Vector3.up * 4f, water, 5f, 0.7f, ronin.art.deathParticles);
+            Fx.Play(Fx.BoonPillar, ronin.Feet, water, 1.4f);
+            Sfx.Play(Sfx.TideWave);
+            Sfx.Play(Sfx.SoulCollect, 1f, 1.2f);
+            RunLog.Note("dragon gate");
+            return;
+        }
+
         lives--;
         ui.SetLives(lives, maxLives);
         // Down to his last heart, once a run; not in a boss fight, where Poguru may be out pointing the way.

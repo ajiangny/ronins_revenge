@@ -571,6 +571,7 @@ public partial class GameManager
         }
         Sfx.Play(Sfx.SoulSpawn, 1f, 0.7f);
         if (tutorial.Active) yield return tutorial.PathsShown();
+        if (rewards.Exists(r => r.Item1 == PathReward.Boss)) StartCoroutine(PoguruBark(DialogueEvent.PoguruBossAhead, 1f, null, Stage.boss));
 
         ronin.MoveOnly = true;
         ronin.ControlsEnabled = true;

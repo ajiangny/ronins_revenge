@@ -9,7 +9,7 @@ using UnityEngine;
 // The souls' boon-screen talks beyond SoulPickup (GameManager.SoulTalk): a Legendary or Duo on offer, the boss just
 // felled or still ahead, another soul's element leading (SoulJealous), and a line in the temple after a run (SoulHub).
 public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk,
-    Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub }
+    Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub, PoguruStage, PoguruScout, PoguruLowLife, PoguruBossAhead }
 
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
 // the Repeatables, which every event has so nobody ever goes silent.
@@ -55,6 +55,9 @@ public struct DialogueContext
     // The boss at the end of the stage being played, before its fight; and the boons on this screen.
     public BossKind? NextBoss;
     public List<BoonId> Offers;
+    // The stage and round being played, counted from 1 (0 outside a run), for Poguru's first looks at each stage.
+    public int Stage;
+    public int Round;
 }
 
 // One requirement, with the words the debug view prints for it.
@@ -98,6 +101,8 @@ public static partial class Dialogue
     public static Req HoldsDuo => new Req("holds a Duo", c => c.Loadout != null && HasDuo(c.Loadout));
     public static Req OffersBoon(BoonId boon) => new Req($"offers {boon}", c => c.Offers != null && c.Offers.Contains(boon));
     public static Req NextBoss(BossKind boss) => new Req($"{boss} ahead", c => c.NextBoss == boss);
+    public static Req AtStage(int stage, int round) => new Req($"stage {stage} round {round}", c => c.Stage == stage && c.Round == round);
+    public static Req HeatOn => new Req("oaths sworn", c => Oaths.Heat > 0);
     // Another soul's element leads: 3+ of its boons, and 2+ more than the speaking soul's (Story/Souls.md#souljealous).
     public static Req Most(Element element) => new Req($"mostly {element}", c => Leads(c, element));
     public static Req Rival => new Req("another soul leads", c => c.Element is Element own
@@ -170,9 +175,9 @@ public static partial class Dialogue
     }
 
     public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false,
-        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null) =>
+        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null, int stage = 0, int round = 0) =>
         new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss,
-            NextBoss = nextBoss, Offers = offers };
+            NextBoss = nextBoss, Offers = offers, Stage = stage, Round = round };
 
     // Why a conversation can't play now, or null if it can. No dice are rolled here, so the answer is repeatable.
     static string Blocked(Conversation c, DialogueContext ctx)
@@ -206,6 +211,10 @@ public static partial class Dialogue
         }
         return null;
     }
+
+    // Whether Pick would find anything for this moment, without marking it heard.
+    public static bool CanPick(string speaker, DialogueEvent evt, DialogueContext ctx) =>
+        All.Exists(c => c.Speaker == speaker && c.Event == evt && Blocked(c, ctx) == null);
 
     static Conversation FromBag(List<Conversation> options, SaveData save)
     {

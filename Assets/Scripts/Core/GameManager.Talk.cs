@@ -12,12 +12,12 @@ public partial class GameManager
     // Poguru pops out of the wisp for a line and goes back in. Nothing is picked (or marked heard) unless it can play:
     // not in the tutorial, never over a full line or while he's already out, and only in play, between beats or in
     // the temple.
-    IEnumerator PoguruBark(DialogueEvent evt, float chance = 1f, BossKind? boss = null)
+    IEnumerator PoguruBark(DialogueEvent evt, float chance = 1f, BossKind? boss = null, BossKind? nextBoss = null)
     {
         if (tutorial.Active || poguru.IsOut || FullLinePlaying) yield break;
         if (state != State.Playing && state != State.Transition && state != State.Hub) yield break;
         if (Random.value >= chance) yield break;
-        Conversation said = Dialogue.Pick("Poguru", evt, Dialogue.Context(loadout, null, lives, false, boss));
+        Conversation said = Dialogue.Pick("Poguru", evt, BarkContext(boss, nextBoss));
         if (said == null || said.Lines.Length == 0) yield break;
         poguru.PopOut();
         yield return new WaitForSecondsRealtime(0.5f);
@@ -32,6 +32,9 @@ public partial class GameManager
         if (state == State.Hub && safeArea != null) poguru.PerchAt(NestPoint);
         else poguru.ReturnToWisp();
     }
+
+    DialogueContext BarkContext(BossKind? boss = null, BossKind? nextBoss = null) =>
+        Dialogue.Context(loadout, null, lives, false, boss, nextBoss, null, state == State.Hub ? 0 : stageIndex + 1, state == State.Hub ? 0 : roundIndex + 1);
 
     bool FullLinePlaying => dialogueScene.IsPlaying || (speakingFullLine && (voice.isPlaying || oniVoice.isPlaying || soulVoice.isPlaying));
 

@@ -85,6 +85,12 @@ public partial class GameManager
 
         lives--;
         ui.SetLives(lives, maxLives);
+        // Down to his last heart, once a run; not in a boss fight, where Poguru may be out pointing the way.
+        if (lives == 1 && maxLives > 1 && !lowLifeWarned && activeBoss == null)
+        {
+            lowLifeWarned = true;
+            StartCoroutine(PoguruBark(DialogueEvent.PoguruLowLife));
+        }
         // Second Dawn: once a run, the last blow doesn't take.
         if (lives <= 0 && !dawnUsed && Upgrades.Rank(UpgradeId.SecondDawn) > 0)
         {

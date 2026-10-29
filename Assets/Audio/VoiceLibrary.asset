@@ -669,6 +669,18 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: c58a86066c4ee4ae99b6ef9b4e6fec7c, type: 3}
   - id: Oni_NotYet
     clip: {fileID: 8300000, guid: 4f1891d9e18404b7face89be3d6df22d, type: 3}
+  - id: Poguru_Ahead_Benibana
+    clip: {fileID: 8300000, guid: f2790247aea2547a5b266f1093099572, type: 3}
+  - id: Poguru_Ahead_Door
+    clip: {fileID: 8300000, guid: 566e5aa1b4eae46d7b05393ac1acb815, type: 3}
+  - id: Poguru_Ahead_First
+    clip: {fileID: 8300000, guid: 268fa6ecf70984196863b3235f6fde43, type: 3}
+  - id: Poguru_Ahead_Kagetsune
+    clip: {fileID: 8300000, guid: ce665137a4e7e47258a7e56be7bfd568, type: 3}
+  - id: Poguru_Ahead_Shirogane
+    clip: {fileID: 8300000, guid: 3fa851e143b884448aef8554f180d8cc, type: 3}
+  - id: Poguru_Ahead_Utsusemi
+    clip: {fileID: 8300000, guid: 91b12297b3ee641bd814a96dfdbe10d7, type: 3}
   - id: Poguru_Block_1
     clip: {fileID: 8300000, guid: d675e096c25ca44dd9d3c1a9335ad26b, type: 3}
   - id: Poguru_Block_3
@@ -689,6 +701,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: cdaaef7086e454306a692db592fdc095, type: 3}
   - id: Poguru_Boss_Benibana
     clip: {fileID: 8300000, guid: 18bd07604d52f464c8f6d0ace8bad6c4, type: 3}
+  - id: Poguru_Boss_Cheer
+    clip: {fileID: 8300000, guid: 3629993d937ac4bbc87d0993b44a6a38, type: 3}
+  - id: Poguru_Boss_Notes
+    clip: {fileID: 8300000, guid: 7559a4ff8a299485692f6444f73d4768, type: 3}
   - id: Poguru_Boss_Shirogane
     clip: {fileID: 8300000, guid: 494ba81f45a744609a058e6219a459ff, type: 3}
   - id: Poguru_Boss_Utsusemi
@@ -697,6 +713,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 26008b03cdd2348c98c69cc11b093b9c, type: 3}
   - id: Poguru_Boss_Won
     clip: {fileID: 8300000, guid: 909c57353308644409c175082349ad31, type: 3}
+  - id: Poguru_Low_Careful
+    clip: {fileID: 8300000, guid: 2e4847bf61de640cbab514c5ad30bd66, type: 3}
+  - id: Poguru_Low_First
+    clip: {fileID: 8300000, guid: 7e20f776940614123bb6941604e5e37e, type: 3}
+  - id: Poguru_Low_Watching
+    clip: {fileID: 8300000, guid: a2241dffeb80d411ba2f0e3aadbcd80a, type: 3}
   - id: Poguru_Rage_Charge
     clip: {fileID: 8300000, guid: 99e0dac687aa5483f8c1a1a7d2017a81, type: 3}
   - id: Poguru_Roast_Arrow
@@ -803,12 +825,32 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: bf3eabf68fa524adeb06f242488b18c5, type: 3}
   - id: Poguru_Round_Count
     clip: {fileID: 8300000, guid: c4fd13a58fa4d44d9811beb6fc19e503, type: 3}
+  - id: Poguru_Round_Cover
+    clip: {fileID: 8300000, guid: 42cc22d63b67641ec8f473aee4b81e4a, type: 3}
   - id: Poguru_Round_Go
     clip: {fileID: 8300000, guid: 989e88e9df91c4dab959d764bcc3363e, type: 3}
+  - id: Poguru_Round_Heat
+    clip: {fileID: 8300000, guid: 3bf11a02857204c08b2965727f78bc21, type: 3}
+  - id: Poguru_Round_Heat_2
+    clip: {fileID: 8300000, guid: ac0d836da913d4fdd94cb28903557435, type: 3}
+  - id: Poguru_Round_Heat_3
+    clip: {fileID: 8300000, guid: 813487039bde54aeb8a63d2f7951e8e6, type: 3}
+  - id: Poguru_Round_Line
+    clip: {fileID: 8300000, guid: 8452bcafe9254471bb2151ff6ccea455, type: 3}
   - id: Poguru_Round_Snacks
     clip: {fileID: 8300000, guid: bf19c5bddf15b4e86981a6a2466649c9, type: 3}
+  - id: Poguru_Round_Song
+    clip: {fileID: 8300000, guid: 0d85f46ab102543ae96b143154b06794, type: 3}
   - id: Poguru_Round_Wave
     clip: {fileID: 8300000, guid: e631e1210302e42d4aa7146482e930e0, type: 3}
+  - id: Poguru_Scout_First
+    clip: {fileID: 8300000, guid: 855345611ffe84ee694f4901ab5a0d6a, type: 3}
+  - id: Poguru_Scout_Free
+    clip: {fileID: 8300000, guid: aca753575a2894066a61fee5a32d878e, type: 3}
+  - id: Poguru_Scout_Kite
+    clip: {fileID: 8300000, guid: 30121a84ff0cd4959852e3accfd8f071, type: 3}
+  - id: Poguru_Soul_Crowded
+    clip: {fileID: 8300000, guid: 34706ac84f3aa4c9d8cd9b7631858081, type: 3}
   - id: Poguru_Soul_Fire
     clip: {fileID: 8300000, guid: fda8f9a220fdb4efe914aa40ac2f87ce, type: 3}
   - id: Poguru_Soul_Frost
@@ -821,6 +863,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 4969edbd92606413bb5dc4307553d628, type: 3}
   - id: Poguru_Soul_Thanks
     clip: {fileID: 8300000, guid: 01771df404e24441facde3df9ed04fb3, type: 3}
+  - id: Poguru_Soul_Zappy
+    clip: {fileID: 8300000, guid: e88797a44210f47728ee8c61ed1bcdaa, type: 3}
+  - id: Poguru_Stage_Divers
+    clip: {fileID: 8300000, guid: bce716af75bbd4f9b8db843b99ee1b78, type: 3}
+  - id: Poguru_Stage_Mountain
+    clip: {fileID: 8300000, guid: 99c3eeda74cc24e6fa0846d28d020b88, type: 3}
+  - id: Poguru_Stage_Mountain_2
+    clip: {fileID: 8300000, guid: 66ad2ed5785ee4469b7eaf3aab9c916b, type: 3}
+  - id: Poguru_Stage_Mountain_3
+    clip: {fileID: 8300000, guid: e0a47bf034f634aeaaea68853633709f, type: 3}
+  - id: Poguru_Stage_Pass
+    clip: {fileID: 8300000, guid: 933f6cdca4df54a45a4c318f6b2c7f07, type: 3}
+  - id: Poguru_Stage_Shrine
+    clip: {fileID: 8300000, guid: 54e9a40b75fc94855bad0571037bee06, type: 3}
+  - id: Poguru_Stage_Shrine_2
+    clip: {fileID: 8300000, guid: f8b10b694cd674fcc9f386ba1e88259b, type: 3}
   - id: Poguru_Talk_Cape
     clip: {fileID: 8300000, guid: 88e771e720d1044908c083d3d8d0fd29, type: 3}
   - id: Poguru_Talk_Cape_2

@@ -126,14 +126,38 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | | Repeatable | | `Poguru_Round_Wave` | "Hi, army! He's going to beat you now! ...Sorry!" |
 | | Repeatable | | `Poguru_Round_Breathe` | "Deep breaths! Like me! Hff hff hff." |
 | | Repeatable | | `Poguru_Round_Count` | "I counted them. There's... a lot." |
+| | Reactive, rests 4 | an oath sworn (Heat) | `Poguru_Round_Heat` | P: "You swore to make it HARDER? On PURPOSE?" · Oni: "...Yes." · P: "I'm telling the stone." |
+| | Repeatable | | `Poguru_Round_Song` | "Slash the arrows! Parry the red ones! I made a song. It's bad." |
+| | Repeatable | | `Poguru_Round_Line` | "Your shuriken goes through a whole row! Line them up!" |
+| | Repeatable | | `Poguru_Round_Cover` | "Don't let them chew up all your cover!" |
 | PoguruSoul (first boon of a run) | Repeatable | | `Poguru_Soul_Shiny` | "Shiny! Can I hold it? No? Okay." |
 | | Repeatable | | `Poguru_Soul_Thanks` | "A friend from the coffin! Say thank you, Oni!" |
 | | Repeatable | | `Poguru_Soul_Glow` | "You're glowing! I'm glowing too. Solidarity." |
+| | Repeatable | | `Poguru_Soul_Crowded` | "Another friend! The wisp's getting crowded. Cosy crowded." |
+| | Repeatable | | `Poguru_Soul_Zappy` | "Is it warm? Cold? Zappy? I can't tell from in here!" |
 | PoguruBoss (after a boss falls, not Kagetsune) | Story | first win vs Benibana | `Poguru_Boss_Benibana` | "Smoke lady's gone! I kept one petal." |
 | | Story | first win vs Utsusemi | `Poguru_Boss_Utsusemi` | "The ticking stopped! Is it lunchtime?" |
 | | Story | first win vs Shirogane | `Poguru_Boss_Shirogane` | "She looked so sad... Wisps can't cry. I checked." |
 | | Repeatable | | `Poguru_Boss_Won` | "WE WON! I mean, you won. I helped. Emotionally." |
 | | Repeatable | | `Poguru_Boss_Wiggle` | "Victory wiggle! ...No? Okay." |
+| | Repeatable | | `Poguru_Boss_Notes` | "Spirit Notes everywhere! Can we buy a song? A snack song?" |
+| | Repeatable | | `Poguru_Boss_Cheer` | "Did you see me? I was cheering SO quietly." |
+| PoguruStage (a round's start, ahead of PoguruRound) | Story | stage 2, round 1 | `Poguru_Stage_Pass` | "Blue ones now! And the front ones brought DOORS. Who brings a door to a fight?" |
+| | Story | stage 2, round 2 | `Poguru_Stage_Divers` | "Some of them jump now! See the flash? Then MOVE!" |
+| | Story | stage 3, round 1 | `Poguru_Stage_Shrine` | P: "Brrr! I'm made of FIRE and I'm still cold!" · P: "And the white ladies shoot right through cover. Don't hide from those. Dodge!" |
+| | Story | stage 4, round 1 | `Poguru_Stage_Mountain` | P: "These stairs... Your wisps went all shivery. Is this where the bells started?" · Oni: "...Yes." · P: "Oh. ...The ones with the hand bells make the rest shoot faster. Get them first!" |
+| PoguruScout (a kite scout appears, 35%) | Story | | `Poguru_Scout_First` | "A kite! Up there! Bonk it down, it's carrying a soul!" |
+| | Repeatable | | `Poguru_Scout_Kite` | "Kite! Kite! KITE!" |
+| | Repeatable | | `Poguru_Scout_Free` | "Free soul on a string! Get it!" |
+| PoguruLowLife (down to the last heart, once a run, not in a boss fight) | Story | | `Poguru_Low_First` | "That's your LAST heart! Broken cover drops hearts sometimes. Go look!" |
+| | Repeatable | | `Poguru_Low_Careful` | "One heart left! Be careful! ...Carefuller!" |
+| | Repeatable | | `Poguru_Low_Watching` | "Last heart! I'm not watching. ...I'm watching." |
+| PoguruBossAhead (the boss's path among the paths) | Story | | `Poguru_Ahead_First` | "That path smells scary. Boss scary. ...We could go round again?" |
+| | Reactive, rests 3 | Benibana ahead, met her | `Poguru_Ahead_Benibana` | "Smoke lady's down that one. I'm holding my breath already." |
+| | Reactive, rests 3 | Utsusemi ahead, met it | `Poguru_Ahead_Utsusemi` | "I can hear ticking. Tick. Tock. Nope." |
+| | Reactive, rests 3 | Shirogane ahead, met her | `Poguru_Ahead_Shirogane` | P: "Your wisps are warm. She's down there, isn't she?" · Oni: "..." (not voiced) |
+| | Reactive, rests 3 | Kagetsune ahead, met him | `Poguru_Ahead_Kagetsune` | "Bells. SO many bells. I'll be in the wisp. Hiding. Bravely." |
+| | Repeatable | | `Poguru_Ahead_Door` | "Big door, big fight! Big snack after?" |
 | PoguruWake (climbing out of the pool) | Story | a death | `Poguru_Wake_First` | P: "Back in the damp temple. ...But I like that you're here." · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" (the tutorial had no time to answer) |
 | | Reactive, cooldown 3 | killed by the army | `Poguru_Wake_Army` | "Those soldiers were VERY pointy today." |
 | | Reactive, cooldown 3 | killed by Benibana | `Poguru_Wake_Benibana` | "Her smoke made me sneeze." |

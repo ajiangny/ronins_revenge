@@ -17,6 +17,7 @@ public partial class GameManager
         bool kiteArt = army.ScoutArt != null;
         CharacterArt scoutArt = kiteArt ? army.ScoutArt : army.samuraiByRow[army.samuraiByRow.Length - 1];
         activeScout = Scout.Spawn(scoutArt, kiteArt, Round.topRowY + 1.4f, OnScoutKilled);
+        StartCoroutine(PoguruBark(DialogueEvent.PoguruScout, 0.35f));
     }
 
     void OnScoutKilled(Scout scout)
@@ -112,6 +113,7 @@ public partial class GameManager
         noteFraction = 0f;
         notesThisRun = 0;
         dawnUsed = false;
+        lowLifeWarned = false;
         redrawsLeft = Upgrades.Rank(UpgradeId.FatesThread);
         banishesLeft = Upgrades.Rank(UpgradeId.BanishingBell);
         banished.Clear();
@@ -209,7 +211,9 @@ public partial class GameManager
         ronin.ControlsEnabled = true;
         army.Advance();
         tutorial.RoundStarted();
-        if (!tutorial.Active) StartCoroutine(PoguruBark(DialogueEvent.PoguruRound, 0.2f));
+        // His first look at a new stage comes before any round-start bark.
+        if (!tutorial.Active && Dialogue.CanPick("Poguru", DialogueEvent.PoguruStage, BarkContext())) StartCoroutine(PoguruBark(DialogueEvent.PoguruStage));
+        else if (!tutorial.Active) StartCoroutine(PoguruBark(DialogueEvent.PoguruRound, 0.2f));
         RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }

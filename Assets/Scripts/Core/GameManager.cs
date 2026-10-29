@@ -352,6 +352,8 @@ public partial class GameManager : MonoBehaviour
     float noteFraction;
     // Second Dawn and Fate's Thread work once a run.
     bool dawnUsed;
+    // Poguru's last-heart warning, once a run.
+    bool lowLifeWarned;
     // Fate's Thread redraws and Banishing Bell banishes left this run, and the boons banished.
     int redrawsLeft;
     int banishesLeft;

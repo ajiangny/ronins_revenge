@@ -169,6 +169,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 79412a22d558344119d9153aa9c2046b, type: 3}
     fps: 12
     loop: 1
+  - id: Aura_Tide
+    frames:
+    - {fileID: 21300000, guid: a4abf544f414e4f8dbdc2e2c66defa13, type: 3}
+    - {fileID: 21300000, guid: 06c7962c4af4d4d13a5f5b574e7b7585, type: 3}
+    - {fileID: 21300000, guid: 516704c2c769d46378febdd914404d2e, type: 3}
+    - {fileID: 21300000, guid: ab39db69f91124402be36f7e81312fe9, type: 3}
+    - {fileID: 21300000, guid: f278743e1338e486bb549d208746f0aa, type: 3}
+    - {fileID: 21300000, guid: 35afa1785e8894ca3a8c5519bc440d56, type: 3}
+    - {fileID: 21300000, guid: 6175989c19baa444393c40a268bcc64f, type: 3}
+    - {fileID: 21300000, guid: 30a843fcb2fc94ec3818de0a5fbcbbe5, type: 3}
+    fps: 12
+    loop: 1
   - id: SoulCrackle_Fire
     frames:
     - {fileID: 21300000, guid: 0f67d7aae23874c03bf19c8a5d48d811, type: 3}
@@ -203,6 +215,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 1cf6a0b9e12b74fbcacf36c6750b3e31, type: 3}
     - {fileID: 21300000, guid: f160db3ef11224b2da5cb97fa3c3c862, type: 3}
     - {fileID: 21300000, guid: 2a904128572304549a6c69ddf007a1a4, type: 3}
+    fps: 12
+    loop: 1
+  - id: SoulCrackle_Tide
+    frames:
+    - {fileID: 21300000, guid: 2c44090ddf7754a21be707886ac69d9f, type: 3}
+    - {fileID: 21300000, guid: b7d88a7245db24bbeb19f88b206cc92a, type: 3}
+    - {fileID: 21300000, guid: bc8ce319e2cc047499816a9a2fbfadc4, type: 3}
+    - {fileID: 21300000, guid: ac9f1ba2323a64456a54eff6afeb84ec, type: 3}
+    - {fileID: 21300000, guid: 52719fb7b371a4ef2b8d65f503f5c48b, type: 3}
+    - {fileID: 21300000, guid: 3eb2c69d220614d3d928931b166519d7, type: 3}
+    - {fileID: 21300000, guid: 903a161143bf14e21bdfe6a595f4fb89, type: 3}
+    - {fileID: 21300000, guid: 81125ce2528ac4e3993c8458a4b6e9ff, type: 3}
     fps: 12
     loop: 1
   - id: Beni_SmokeRing

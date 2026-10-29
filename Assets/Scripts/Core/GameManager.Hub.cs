@@ -29,12 +29,12 @@ public partial class GameManager
     }
 
     // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended. On the wake he meets Asagi, her
-    // scene takes the place of his line.
+    // scene (played by EnterSafeArea) takes the place of his line.
     IEnumerator WakeTalk(bool meetAsagi)
     {
         bool pending = Save.Data.hubPending;
-        if (meetAsagi) yield return MeetAsagi();
-        else yield return HubReturn();
+        // The meeting itself has already played (EnterSafeArea); it stands in for his own line.
+        if (!meetAsagi) yield return HubReturn();
         yield return new WaitForSeconds(pending ? 0.6f : 1f);
         if (pending) yield return PoguruBark(DialogueEvent.PoguruWake);
         // Out of the wisp (if his word didn't already bring him) and off to his nest.
@@ -132,6 +132,8 @@ public partial class GameManager
             if (meetAsagi) safeArea.AsagiFigure?.Play(Asagi.Clip.Idle);
             if (lastRunNotes > 0) StartCoroutine(NoteTally(lastRunNotes));
             lastRunNotes = 0;
+            // Her scene plays before he gets his controls back, so a press at her station can't open a second one.
+            if (meetAsagi) yield return MeetAsagi();
             StartCoroutine(WakeTalk(meetAsagi));
         }
         // The floor is where his feet may go; the clamp is on his body.

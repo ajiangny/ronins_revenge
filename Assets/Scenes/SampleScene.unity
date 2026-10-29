@@ -732,6 +732,22 @@ MonoBehaviour:
     shuriken: {fileID: 21300000, guid: 8634ec5d2e3ff4ab59215f6fbb2ea6e6, type: 3}
     portrait: {fileID: 21300000, guid: 6690511b54dfc4ff98ae91cc017b7c40, type: 3}
     heldSoul: {fileID: 21300000, guid: af7e7e2adc1a0457ca0fbbf09c75ce4d, type: 3}
+  - element: 3
+    soulFrames:
+    - {fileID: 21300000, guid: 2f3e99d5e95864594a4fe0210e5c62ba, type: 3}
+    - {fileID: 21300000, guid: fd78c1c0252ff46a19c6fbd227dbe1b6, type: 3}
+    - {fileID: 21300000, guid: 26520cf3a85c64e2988d1be7a4e63ba9, type: 3}
+    - {fileID: 21300000, guid: b06ed437624444c739747ebbc1f87758, type: 3}
+    - {fileID: 21300000, guid: a108ddc0ff15e4b3fa973618ee173711, type: 3}
+    - {fileID: 21300000, guid: 7600a49c6c5004955ad1231dec71d25e, type: 3}
+    - {fileID: 21300000, guid: 7653d1c3c9029489a870296558cc476e, type: 3}
+    - {fileID: 21300000, guid: 8019e0db9a9914c19bbab615670e61fe, type: 3}
+    ronin: {fileID: 11400000, guid: 6ef09ec7b406f46608ba4cae18c7db9e, type: 2}
+    slash: {fileID: 21300000, guid: 6d306297cb4174dba811c1e8224b9224, type: 3}
+    kunai: {fileID: 21300000, guid: cb407cd02f6314beea44eda586839ce2, type: 3}
+    shuriken: {fileID: 21300000, guid: 30a0aa366e5f344ada391d9f22357bfa, type: 3}
+    portrait: {fileID: 21300000, guid: 332011d40d61847dd9cdf5d5bdc8ce7f, type: 3}
+    heldSoul: {fileID: 21300000, guid: 4442b4a5f67b84ae09964ac94e5ce706, type: 3}
   fxLibrary: {fileID: 11400000, guid: bd9d599437bb141c490c7f26310fb69e, type: 2}
   sfxLibrary: {fileID: 11400000, guid: cb5383d442ce84581adff5a6908ff42b, type: 2}
   voiceLibrary: {fileID: 11400000, guid: c2bba46e69e0041d8ba653c9481056e6, type: 2}
@@ -1167,6 +1183,18 @@ MonoBehaviour:
       footprint: {x: 1.2, y: 0.4}
       fx: 3
       glowColour: {r: 0.45, g: 0.85, b: 1, a: 1}
+    - kind: 6
+      label: ASAGI
+      spot: {x: 0.395, y: 0.145}
+      art: {fileID: 0}
+      sealedArt: {fileID: 0}
+      onMap: 0
+      placeholder: {r: 0.184, g: 0.482, b: 1, a: 1}
+      reach: 1.8
+      propAt: {x: 292, y: 322}
+      footprint: {x: 0.8, y: 0.3}
+      fx: 0
+      glowColour: {r: 0, g: 0, b: 0, a: 0}
     poolCentre: {x: 343, y: 319}
     poolRadii: {x: 39, y: 30}
     poolWater: {fileID: 21300000, guid: 44621fbffbe7c4a5388fcfaaf490740c, type: 3}
@@ -1181,9 +1209,25 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 316770743f0c740388bb36e8ccbcca8a, type: 3}
     - {fileID: 21300000, guid: 5fd15b67d2ac34b4abad7ee99bef3c65, type: 3}
     asagiArt:
-      idle: []
-      talk: []
-      lift: []
+      idle:
+      - {fileID: 21300000, guid: a606d78d1ecb7480c9e203d33a724ef9, type: 3}
+      - {fileID: 21300000, guid: 316837c2869bc465e80e40f44f7b9626, type: 3}
+      - {fileID: 21300000, guid: 9d7730477ba7748359b7d2f6f2d570f9, type: 3}
+      - {fileID: 21300000, guid: 438935150196f4157bbf5c2c1ab97ff4, type: 3}
+      - {fileID: 21300000, guid: eb7fc9fed18694a169f588e3635b8705, type: 3}
+      - {fileID: 21300000, guid: 7a08b72919d94441699713e36895f805, type: 3}
+      talk:
+      - {fileID: 21300000, guid: b6bd4db833e344ca9b8dc5329cb5fb81, type: 3}
+      - {fileID: 21300000, guid: 71273c613265548a5b7f629a2c0af295, type: 3}
+      - {fileID: 21300000, guid: 848409ae76d1140a893bbebd901029a7, type: 3}
+      - {fileID: 21300000, guid: 534f5312509804c0898a554581b943b9, type: 3}
+      lift:
+      - {fileID: 21300000, guid: e07c09b0aa6664c34be116b44a6d2acb, type: 3}
+      - {fileID: 21300000, guid: f15822f2afbb9439abfe4535a61aeefa, type: 3}
+      - {fileID: 21300000, guid: 09e8f2afcafdd4159bda383308aa9e24, type: 3}
+      - {fileID: 21300000, guid: 1bcfbfa5da764457194a6c7f69e95f1d, type: 3}
+      - {fileID: 21300000, guid: a2ab5b2e78d6947db8b7dbb9f97191e1, type: 3}
+      - {fileID: 21300000, guid: 2fa48044c2d94467c8134da0bf6135c0, type: 3}
       fps: 6
     lamps:
     - px: {x: 100, y: 147}
@@ -2465,6 +2509,16 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 867ab3f6b2f3340c7adb173db415dc29, type: 3}
   - {fileID: 21300000, guid: 6139e317cd8954d39ab7a52418dfeb94, type: 3}
   - {fileID: 21300000, guid: f172ea4cdcd444cdc8723c1f04570e16, type: 3}
+  - {fileID: 21300000, guid: 975340a31d0df4441a7c0db26848fc32, type: 3}
+  - {fileID: 21300000, guid: ab38ba049c58a4b8f8bcba4ae0bf2d81, type: 3}
+  - {fileID: 21300000, guid: 36e1ee72ea75e46b0881bc8a9d0f43c1, type: 3}
+  - {fileID: 21300000, guid: 9e10fe86cc45c49d4a4b507fbae64c49, type: 3}
+  - {fileID: 21300000, guid: cb539398c87964dc4806788180914cf5, type: 3}
+  - {fileID: 21300000, guid: 982a14226fb8743c181b026d2ea5e20b, type: 3}
+  - {fileID: 21300000, guid: 3f2eff493ad8f45a49643ffab5878655, type: 3}
+  - {fileID: 21300000, guid: 741d67465baa34ce8adbb1fb3d9de0ff, type: 3}
+  - {fileID: 21300000, guid: 37641cd9894e348789739f51409603c8, type: 3}
+  - {fileID: 21300000, guid: d1b0b7a42e30f432a9ffbb1da47e4936, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}
   - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}

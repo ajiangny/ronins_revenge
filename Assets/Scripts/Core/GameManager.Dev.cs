@@ -105,6 +105,8 @@ public partial class GameManager
             if (element == Element.Tide && !Save.Data.asagiMet)
             {
                 Save.Data.asagiMet = true;
+                // Count the meeting as heard too, or her station would open on it and her chain stay gated.
+                Dialogue.Find("Asagi_Meet_Pool");
                 Save.Write();
             }
             SpawnSoul(ronin.Feet + Vector3.up * 2f, element);

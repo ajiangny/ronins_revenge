@@ -803,9 +803,14 @@ public class SamuraiArmy : MonoBehaviour
         if (lift <= 0f) return;
         Vector3 step = Vector3.up * lift;
         foreach (Dive dive in dives) dive.slot += step;
+        // Set, not MovePosition: the kinematic bodies only queue a MovePosition for the next physics step, and the
+        // march's own MovePosition in FixedUpdate would replace it with the old position plus a step.
         foreach (Samurai soldier in soldiers)
         {
-            if (!IsDiving(soldier)) soldier.Body.MovePosition(soldier.Body.position + step);
+            if (IsDiving(soldier)) continue;
+            Vector3 at = soldier.Body.position + step;
+            soldier.transform.position = at;
+            soldier.Body.position = at;
         }
         if (lastBottom < float.PositiveInfinity) lastBottom += lift;
         if (holding && lastBottom - samuraiRadius > HoldY + 0.2f) holding = false;

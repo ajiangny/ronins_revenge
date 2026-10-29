@@ -62,8 +62,9 @@ public partial class Kagetsune
         }
     }
 
-    // Broken Chains: the snapped chains lash from his shoulders, each sweeping a stretch of the ground. A thin
-    // line marks where each lash starts and ends.
+    // Broken Chains: the snapped chains lash from his shoulders, each sweeping a stretch of the ground. Before each
+    // lash the chain hangs taut over where it starts and the stretch glows crimson, chevrons running the way it
+    // will sweep; the tell is long enough to step out of the stretch at either end.
     IEnumerator BrokenChains()
     {
         Bark(BossLine.BrokenChains, 7f);
@@ -76,13 +77,12 @@ public partial class Kagetsune
             float centre = ClampX(ronin.Bounds.center.x + Random.Range(-1f, 1f));
             float dir = Random.value < 0.5f ? -1f : 1f;
             float a = ClampX(centre - dir * 4.5f), b = ClampX(centre + dir * 4.5f);
-            SpriteRenderer startTell = Bar(root, new Vector3(a, GroundY, 0), 0.05f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.6f));
-            SpriteRenderer endTell = Bar(root, new Vector3(b, GroundY, 0), 0.05f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.3f));
-            yield return Wait(0.65f);
-            Drop(startTell);
-            Drop(endTell);
+            float x0 = ronin.Bounds.center.x;
+            float escape = Mathf.Min(Mathf.Abs(x0 - a), Mathf.Abs(x0 - b)) + 0.6f;
+            float tell = Mathf.Max(0.65f, escape / BulletHell.MaxDodgeSpeed + 0.3f);
+            var chain = Tiled(Fx.KageChain, root, new Vector3(a, GroundY, 0), 0.5f, Bronze, 56);
+            yield return LashTell(chain, side, a, b, tell);
 
-            var chain = Tiled(Fx.KageChain, root, root, 0.5f, Bronze, 56);
             var glow = Bar(root, root, 0.8f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 54);
             glow.sprite = ProceduralSprites.Glow;
             if (Sfx.Has(Sfx.ChainSnap)) Sfx.Play(Sfx.ChainSnap, 0.7f, 0.8f);
@@ -110,6 +110,39 @@ public partial class Kagetsune
         }
     }
 
+    // A lash's tell: the chain hangs taut and trembling from his shoulder over the start of the stretch, and the
+    // stretch glows crimson under a row of chevrons that ripple toward its end.
+    IEnumerator LashTell(SpriteRenderer chain, float side, float a, float b, float seconds)
+    {
+        float band = GroundY + 0.9f;
+        float dir = Mathf.Sign(b - a);
+        SpriteRenderer span = Bar(new Vector3(a, band, 0), new Vector3(b, band, 0), 2.4f, new Color(Crimson.r, Crimson.g, Crimson.b, 0f), 2);
+        var chevrons = new List<SpriteRenderer>();
+        for (float d = 0.8f; d < Mathf.Abs(b - a) - 0.4f; d += 1.3f)
+        {
+            Vector3 tip = new Vector3(a + dir * d, band, 0);
+            for (int arm = -1; arm <= 1; arm += 2)
+            {
+                chevrons.Add(Bar(tip, tip + new Vector3(-dir * 0.35f, arm * 0.35f, 0), 0.1f, Color.clear, 3));
+            }
+        }
+        for (float t = 0; t < seconds; t += Time.deltaTime * Tempo)
+        {
+            float k = t / seconds;
+            Vector3 shake = new Vector3(Mathf.Sin(t * 50f) * 0.1f, 0, 0);
+            Lay(chain, Shoulder(side), new Vector3(a, GroundY, 0) + shake, chain.drawMode == SpriteDrawMode.Tiled ? 0.5f : 0.22f);
+            span.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.1f + 0.3f * k);
+            for (int i = 0; i < chevrons.Count; i++)
+            {
+                float wave = Mathf.Max(0f, Mathf.Sin(t * 10f - (i / 2) * 0.9f));
+                chevrons[i].color = new Color(1f, 0.6f, 0.5f, (0.25f + 0.6f * wave) * Mathf.Min(1f, k * 4f));
+            }
+            yield return null;
+        }
+        Drop(span);
+        foreach (SpriteRenderer chevron in chevrons) Drop(chevron);
+    }
+
     // Chain Cage: both chains slam into the ground either side of the ronin and stay there as walls, and while he's
     // caged a two-arm spiral of skulls winds down on him. Touching a chain burns.
     IEnumerator ChainCage()
@@ -118,19 +151,33 @@ public partial class Kagetsune
         const float Hold = 3f;
         float centre = Mathf.Clamp(ronin.Bounds.center.x, FieldLeft + HalfWidth + 0.5f, FieldRight - HalfWidth - 0.5f);
         float[] xs = { centre - HalfWidth, centre + HalfWidth };
-        var tells = new List<SpriteRenderer>();
-        for (int i = 0; i < 2; i++)
-        {
-            tells.Add(Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.05f, new Color(Bronze.r, Bronze.g, Bronze.b, 0.6f)));
-        }
-        yield return Wait(0.6f);
-        foreach (SpriteRenderer tell in tells) Drop(tell);
-
+        // The tell: each chain hangs faint over where it will land, trembling, over a bronze glow on the ground.
         var chains = new List<SpriteRenderer>();
-        var glows = new List<SpriteRenderer>();
+        var marks = new List<SpriteRenderer>();
         for (int i = 0; i < 2; i++)
         {
             chains.Add(Tiled(Fx.KageChain, Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.5f, Bronze, 56));
+            marks.Add(Glowing(new Vector3(xs[i], GroundY + 0.1f, 0), new Color(Bronze.r, Bronze.g, Bronze.b, 0f), 1.2f, 5));
+        }
+        for (float t = 0; t < 0.6f; t += Time.deltaTime * Tempo)
+        {
+            float k = t / 0.6f;
+            for (int i = 0; i < 2; i++)
+            {
+                Vector3 shake = new Vector3(Mathf.Sin(t * 50f + i) * 0.08f, 0, 0);
+                Lay(chains[i], Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0) + shake, chains[i].drawMode == SpriteDrawMode.Tiled ? 0.5f : 0.22f);
+                chains[i].color = ChainColour(chains[i], 0.25f + 0.25f * k);
+                marks[i].color = new Color(Bronze.r, Bronze.g, Bronze.b, 0.3f + 0.4f * k);
+                marks[i].transform.localScale = new Vector3(Mathf.Lerp(1.2f, 2f, k), 0.7f, 1f);
+            }
+            yield return null;
+        }
+        foreach (SpriteRenderer mark in marks) Drop(mark);
+
+        var glows = new List<SpriteRenderer>();
+        for (int i = 0; i < 2; i++)
+        {
+            chains[i].color = ChainColour(chains[i], 1f);
             SpriteRenderer glow = Bar(Shoulder(i == 0 ? -1f : 1f), new Vector3(xs[i], GroundY, 0), 0.8f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 54);
             glow.sprite = ProceduralSprites.Glow;
             glows.Add(glow);

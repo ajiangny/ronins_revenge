@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Stagger, the phase break (the overload, wild lasers and the break open), the burning shroud and embers of its second form, and its fall.
+// Stagger, the phase break (the overload, wild lasers and the break open), the burning shroud of its second form, and its fall.
 public partial class Utsusemi
 {
     // A parried thrust jams the gears: sparks and a grinding shudder.
@@ -241,28 +241,9 @@ public partial class Utsusemi
     static readonly Vector2[] FlamePoints = { new Vector2(109f, 50f), new Vector2(40f, 106f), new Vector2(112f, 102f), new Vector2(64f, 121f), new Vector2(94f, 120f) };
     // How many of its own pixels tall each of those flames stands at most: the claw's burns tallest.
     static readonly float[] FlameScale = { 1.3f, 1f, 1f, 0.8f, 0.8f };
-    const float EmberGap = 0.022f;
-    const int MaxEmbers = 90;
-    // Embers cool through these in hard steps, never blending: white-hot, gold, orange, ember red, a dying char.
-    static readonly Color[] EmberSteps =
-    {
-        new Color(1f, 1f, 0.92f), new Color(1f, 0.86f, 0.36f), new Color(0.95f, 0.36f, 0.05f),
-        new Color(0.62f, 0.12f, 0.04f), new Color(0.3f, 0.06f, 0.04f),
-    };
 
-    class Ember
-    {
-        public SpriteRenderer r;
-        public Vector3 at, velocity;
-        public float age, life, nextKick, drag;
-    }
-    readonly List<Ember> embers = new List<Ember>();
-
-    // Embers in the air when the fight is torn down go with it.
     protected override void OnCleared()
     {
-        foreach (Ember e in embers) if (e.r != null) Destroy(e.r.gameObject);
-        embers.Clear();
         ClearStoppedTime();
         TimeRipple.Clear();
         plumbsOut = false;
@@ -281,20 +262,8 @@ public partial class Utsusemi
         return new Vector3(Mathf.Round(at.x / pixel) * pixel, Mathf.Round(at.y / pixel) * pixel, at.z);
     }
 
-    void SpawnEmber(Vector3 from, Vector3 velocity, float life)
-    {
-        if (embers.Count >= MaxEmbers) return;
-        var ember = new GameObject("Ember").AddComponent<SpriteRenderer>();
-        ember.sprite = ProceduralSprites.White;
-        ember.sortingOrder = sprite.sortingOrder + 2;
-        // Tiny specks: one of its own pixels, now and then two, so the sparks read as pixel art beside it.
-        ember.transform.localScale = Vector3.one * BodyPixel * (Random.value < 0.85f ? 1f : 2f);
-        embers.Add(new Ember { r = ember, at = from + Vector3.back * 0.25f, velocity = velocity, life = life, drag = Random.Range(0.5f, 2.5f) });
-    }
-
-    // Its second form burns, as in its painting: pixel flames lick its raised claw and the torn hem, and embers boil off
-    // the shroud in fits, jerked about by gusts and kicks, some spat out sideways in bursts, cooling in hard steps on
-    // its own pixel grid. Built in code on whatever frame it's in, so it follows every clip.
+    // Its second form burns, as in its painting: pixel flames lick its raised claw and the torn hem, on its own pixel
+    // grid. Built in code on whatever frame it's in, so it follows every clip.
     IEnumerator BurnShroud()
     {
         Sprite[] flameFrames = ProceduralSprites.PixelFlame;
@@ -315,8 +284,6 @@ public partial class Utsusemi
         heat.sprite = ProceduralSprites.SoftGlow;
         heat.sortingOrder = sprite.sortingOrder - 2;
         tongues.Add(heat);
-        float nextEmber = 0f, nextBurst = Time.time + 0.5f, gustUntil = 0f, nextGust = Time.time + 1f;
-        Vector3 gust = Vector3.zero;
         while (!IsDead && sprite != null)
         {
             // Its fire stands still while it holds time.
@@ -343,63 +310,6 @@ public partial class Utsusemi
                 // Whole pixels only: stretched by a step now and then, never smoothly.
                 float tall = FlameScale[i] * (Random.value < 0.15f ? 1.25f : 1f);
                 tongue.transform.localScale = new Vector3(pixel, pixel * tall, 1f) / parent;
-            }
-
-            // Gusts: every so often every ember is shoved one way together.
-            if (Time.time >= nextGust)
-            {
-                gust = new Vector3(Random.Range(-2.2f, 2.2f), Random.Range(-0.3f, 0.8f), 0);
-                gustUntil = Time.time + Random.Range(0.15f, 0.35f);
-                nextGust = Time.time + Random.Range(0.6f, 1.6f);
-            }
-            Vector3 gustNow = Time.time < gustUntil ? gust : Vector3.zero;
-
-            Bounds b = sprite.bounds;
-            if (Time.time >= nextEmber)
-            {
-                nextEmber = Time.time + EmberGap * Random.Range(0.3f, 1.7f);
-                // Off the lower shroud, where the painting's hem burns.
-                Vector3 from = new Vector3(Random.Range(b.min.x + b.size.x * 0.08f, b.max.x - b.size.x * 0.08f),
-                    b.min.y + b.size.y * Random.Range(0.05f, 0.55f), 0);
-                SpawnEmber(from, new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(0.6f, 2.4f), 0), Random.Range(0.4f, 1.2f));
-            }
-            // Bursts: the shroud spits a fistful of sparks out sideways from one ragged end.
-            if (Time.time >= nextBurst)
-            {
-                nextBurst = Time.time + Random.Range(0.25f, 0.8f);
-                float side = Random.value < 0.5f ? -1f : 1f;
-                Vector3 from = new Vector3(side < 0 ? b.min.x + b.size.x * 0.15f : b.max.x - b.size.x * 0.15f,
-                    b.min.y + b.size.y * Random.Range(0.1f, 0.45f), 0);
-                int count = Random.Range(6, 13);
-                for (int n = 0; n < count; n++)
-                {
-                    SpawnEmber(from, new Vector3(side * Random.Range(1.5f, 4.5f), Random.Range(-0.5f, 2.5f), 0), Random.Range(0.25f, 0.6f));
-                }
-            }
-
-            for (int i = embers.Count - 1; i >= 0; i--)
-            {
-                Ember e = embers[i];
-                e.age += Time.deltaTime;
-                if (e.age >= e.life || e.r == null)
-                {
-                    if (e.r != null) Destroy(e.r.gameObject);
-                    embers.RemoveAt(i);
-                    continue;
-                }
-                // Kicked about at random, rising as they go, slowed by the air.
-                if (Time.time >= e.nextKick)
-                {
-                    e.velocity += new Vector3(Random.Range(-1.6f, 1.6f), Random.Range(-0.4f, 1.2f), 0);
-                    e.nextKick = Time.time + Random.Range(0.04f, 0.16f);
-                }
-                e.velocity = Vector3.Lerp(e.velocity, new Vector3(0, 1.2f, 0), e.drag * Time.deltaTime);
-                e.at += (e.velocity + gustNow) * Time.deltaTime;
-                e.r.transform.position = SnapToPixels(e.at);
-                // Cooling in hard steps, and guttering: some frames it blinks out.
-                float k = e.age / e.life;
-                Color c = EmberSteps[Mathf.Min(EmberSteps.Length - 1, (int)(k * EmberSteps.Length))];
-                e.r.color = new Color(c.r, c.g, c.b, Random.value < 0.12f * k ? 0f : 1f);
             }
             yield return null;
         }

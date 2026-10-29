@@ -54,7 +54,7 @@ public class SamuraiArmy : MonoBehaviour
     [SerializeField] float entryMargin = 1f;
 
     [Header("Last stand")]
-    [Tooltip("How far below the top of the cover the army's front rank stops descending. From there it walks the cover's row, smashing it, and its front rank lunges at the ronin instead of the run ending.")]
+    [Tooltip("How far below the top of the cover the army's last row lies. Each samurai that reaches it breaks formation and walks that row on its own, smashing the cover, while the ranks behind keep collapsing onto it and the row lunges at the ronin instead of the run ending.")]
     [SerializeField] float holdDepth = 2f;
     [Tooltip("Average seconds between lunges once the army holds the cover's row.")]
     [SerializeField] float lungeInterval = 2.4f;
@@ -84,6 +84,8 @@ public class SamuraiArmy : MonoBehaviour
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
     readonly List<Dive> dives = new List<Dive>();
+    // Samurai that reached the last row and walk it on their own, each with its direction (-1 left, 1 right).
+    readonly Dictionary<Samurai, float> loose = new Dictionary<Samurai, float>();
 
     // A samurai out of formation. Its slot keeps marching with the army so it can fly back into place.
     class Dive
@@ -170,7 +172,7 @@ public class SamuraiArmy : MonoBehaviour
     float nextSpearTime;
     float nextDiveTime;
     float nextLungeTime;
-    // The front rank reached the cover: no more drops, and lunges begin.
+    // A samurai stands in the last row: lunges begin (and dives stop).
     bool holding;
     float lastBottom = float.PositiveInfinity;
     float nextBellTime;
@@ -458,6 +460,7 @@ public class SamuraiArmy : MonoBehaviour
             Destroy(soldier.gameObject);
         }
         soldiers.Clear();
+        loose.Clear();
         foreach (Dive dive in dives) dive.ClearTell();
         dives.Clear();
         advancing = false;
@@ -521,48 +524,78 @@ public class SamuraiArmy : MonoBehaviour
         if (Frozen) return;
 
         float dt = Time.fixedDeltaTime;
+        float speed = CurrentSpeed();
         Vector3 step;
         if (dropRemaining > 0)
         {
             float drop = Mathf.Min(dropSpeed * dt, dropRemaining);
-            // The front rank stops in the cover's row: from there it walks along it and lunges.
-            float room = lastBottom - samuraiRadius - HoldY;
-            if (drop >= room)
-            {
-                drop = Mathf.Max(0f, room);
-                dropRemaining = 0f;
-                if (!holding) BeginHolding();
-            }
-            dropRemaining = Mathf.Max(0f, dropRemaining - drop);
+            dropRemaining -= drop;
             step = Vector3.down * drop;
         }
         else
         {
-            step = Vector3.right * (direction * CurrentSpeed() * dt);
+            step = Vector3.right * (direction * speed * dt);
         }
-        MarchBeat(step.magnitude);
-
-        // Move every soldier and track the army's extents in a single pass.
-        float left = float.PositiveInfinity, right = float.NegativeInfinity, bottom = float.PositiveInfinity;
-        foreach (Dive dive in dives) dive.slot += step;
-        foreach (Samurai soldier in soldiers)
-        {
-            if (IsDiving(soldier)) continue;
-            Vector3 position = soldier.Body.position + step;
-            soldier.Body.MovePosition(position);
-            left = Mathf.Min(left, position.x);
-            right = Mathf.Max(right, position.x);
-            bottom = Mathf.Min(bottom, position.y);
-        }
-        if (bottom < float.PositiveInfinity) lastBottom = bottom;
 
         // The resting camera position: a screen shake mustn't move the army's turning points.
         float centerX = CameraShake.Center.x;
         float bound = HalfWidth() - edgeMargin;
+        float rowY = RowY;
+
+        // Move every soldier and track the army's extents in a single pass. Only the formation's own extents turn it:
+        // the loose row turns each of its samurai on their own.
+        float left = float.PositiveInfinity, right = float.NegativeInfinity, bottom = float.PositiveInfinity;
+        bool marching = false;
+        foreach (Dive dive in dives)
+        {
+            if (loose.ContainsKey(dive.soldier)) continue;
+            dive.slot += step;
+            dive.slot.y = Mathf.Max(dive.slot.y, rowY);
+        }
+        foreach (Samurai soldier in soldiers)
+        {
+            if (IsDiving(soldier)) continue;
+            Vector3 position = soldier.Body.position;
+            if (loose.TryGetValue(soldier, out float heading))
+            {
+                position.x += heading * speed * dt;
+                if (heading > 0 && position.x >= centerX + bound || heading < 0 && position.x <= centerX - bound) loose[soldier] = -heading;
+                // Lifted by the tide, it sinks back about as fast as the march would bring it down: one drop per
+                // field's width walked.
+                if (position.y > rowY)
+                {
+                    position.y = Mathf.Max(rowY, position.y - dropDistance * speed / (2f * bound) * dt);
+                    if (position.y <= rowY && !holding) BeginHolding();
+                }
+            }
+            else
+            {
+                marching = true;
+                position += step;
+                // Reaching the last row it breaks formation and walks it on its own, left or right.
+                if (position.y <= rowY)
+                {
+                    position.y = rowY;
+                    loose[soldier] = UnityEngine.Random.value < 0.5f ? -1f : 1f;
+                    if (!holding) BeginHolding();
+                }
+                else
+                {
+                    left = Mathf.Min(left, position.x);
+                    right = Mathf.Max(right, position.x);
+                }
+            }
+            soldier.Body.MovePosition(position);
+            bottom = Mathf.Min(bottom, position.y);
+        }
+        if (bottom < float.PositiveInfinity) lastBottom = bottom;
+        // The drum follows the formation, or the loose row once every rank has collapsed into it.
+        MarchBeat(marching ? step.magnitude : speed * dt);
+
         if (dropRemaining <= 0 && (direction > 0 && right >= centerX + bound || direction < 0 && left <= centerX - bound))
         {
             direction = -direction;
-            dropRemaining = holding ? 0f : dropDistance;
+            dropRemaining = dropDistance;
         }
 
         if (bottom - samuraiRadius <= blockerTopY)
@@ -617,9 +650,14 @@ public class SamuraiArmy : MonoBehaviour
 
     // Where the front rank holds: inside the cover's row, but always clear of the ronin's head.
     float HoldY => Mathf.Max(blockerTopY - holdDepth, landingY + 0.6f);
+    // Where the samurai of the last row stand.
+    float RowY => HoldY + samuraiRadius;
 
-    // The army has reached the cover. In the original the run would end here; instead it holds this row and its
-    // front rank starts throwing itself at the ronin, who must parry or take the blow.
+    // Walking the last row on its own rather than marching in its column.
+    public bool IsLoose(Samurai soldier) => loose.ContainsKey(soldier);
+
+    // The army has reached the cover. In the original the run would end here; instead its last row walks the cover
+    // and starts throwing itself at the ronin, who must parry or take the blow.
     void BeginHolding()
     {
         holding = true;
@@ -788,8 +826,9 @@ public class SamuraiArmy : MonoBehaviour
     }
 
     // Asagi's tide: lifts the whole formation back up the field by `units`, undoing march steps, never above where
-    // it spawned. Divers' slots move with it so they glide back into the right place. An army that was holding the
-    // cover's row and is lifted clear of it marches down again, and holds afresh when it gets there.
+    // it spawned. Divers' slots move with it so they glide back into the right place. The loose last row is lifted too
+    // and keeps walking on its own, sinking back at the march's pace (rejoining the formation would spread it edge to
+    // edge, so it would turn and drop at once). An army lifted clear of the last row holds afresh when it gets back.
     public void PushBack(float units)
     {
         if (soldiers.Count == 0 || Entering || units <= 0f) return;
@@ -891,7 +930,26 @@ public class SamuraiArmy : MonoBehaviour
         nextShotTime = Time.time + level.fireInterval * haste * UnityEngine.Random.Range(0.5f, 1.5f);
 
         int column;
-        if (target != null && UnityEngine.Random.value < level.aimedShotChance)
+        bool aimed = target != null && UnityEngine.Random.value < level.aimedShotChance;
+        // The loose row has left its columns: an aimed shot comes from whichever of it walks nearest the ronin.
+        if (aimed && loose.Count > 0)
+        {
+            Samurai nearest = null;
+            foreach (Samurai soldier in loose.Keys)
+            {
+                if (soldier.CanFire && !IsDiving(soldier)
+                    && (nearest == null || Mathf.Abs(soldier.Body.position.x - target.position.x) < Mathf.Abs(nearest.Body.position.x - target.position.x)))
+                {
+                    nearest = soldier;
+                }
+            }
+            if (nearest != null)
+            {
+                nearest.Fire(level.arrowSpeed);
+                return;
+            }
+        }
+        if (aimed)
         {
             column = ClosestColumnTo(target.position.x);
         }
@@ -1021,6 +1079,7 @@ public class SamuraiArmy : MonoBehaviour
     public void OnSamuraiKilled(Samurai soldier, KillSource source)
     {
         if (!soldiers.Remove(soldier)) return;
+        loose.Remove(soldier);
         dives.RemoveAll(d =>
         {
             if (d.soldier != soldier) return false;

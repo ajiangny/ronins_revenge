@@ -450,7 +450,9 @@ public class BoonEffects
         float top = from.y;
         foreach (Samurai soldier in army.Soldiers)
         {
-            if (soldier.Column != column || soldier.IsDead) continue;
+            if (soldier.IsDead) continue;
+            // The loose last row has left its columns: the wave soaks whoever stands in its lane.
+            if (army.IsLoose(soldier) ? Mathf.Abs(soldier.Body.position.x - from.x) > ColumnHalfWidth : soldier.Column != column) continue;
             soldier.Soak(soak);
             top = Mathf.Max(top, soldier.Body.position.y);
         }

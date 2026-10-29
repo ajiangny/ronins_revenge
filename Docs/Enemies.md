@@ -6,8 +6,11 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 ## Samurai army (the "invaders")
 - `SamuraiArmy.cs` — spawns a round from a `LevelConfig` (`SpawnStage`), marches, speeds up as it shrinks
   (`CurrentSpeed`), drops and turns at the camera edges, fires from the front of a column, tramples blockers,
-  holds once its front rank reaches the cover's row (`HoldY` from `holdDepth`, `BeginHolding`: no more drops, it walks that row
-  and `ErodeBlockers` smashes the cover) and starts lunges (`StartLunge`/`UpdateLunge`: a front-rank samurai near the ronin
+  and collapses into a loose last row in the cover's row (`HoldY` from `holdDepth`, `RowY`): each samurai that reaches it breaks
+  formation (`loose`, `IsLoose`), picks left or right at random and walks the row on its own at the march speed, turning at the
+  edges and passing through the others, while the formation above keeps marching and dropping (its turns come from its own
+  extents only). The first to arrive calls `BeginHolding`; `ErodeBlockers` smashes the cover, aimed shots come from the loose
+  samurai nearest the ronin, and lunges begin (`StartLunge`/`UpdateLunge`: a front-rank samurai near the ronin
   shakes under `Samurai.WarnDive`'s red "!" (`ProceduralSprites.Exclaim`, white-edged, popping in), lunges through where he stood at a
   steady `lungeSpeed` (its `duration` from the distance) and walks back). Every warning (`Warn`: `WarnDive`, a `BladeRing`, a small
   shake) also draws `DrawTell`, a red streak from the samurai to the ronin and a mark at his `Feet`, until it launches. One at a time:

@@ -341,8 +341,9 @@ Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost 
   from every boon effect** (blasts, strikes, shards, waves). It does nothing on its own: it's the amplifier that
   makes mixing a second element pay, which the three-status note in §6 asked for.
 - **The tide push** (`SamuraiArmy.PushBack(units)`). The formation is lifted back up the screen, undoing march
-  steps, never above where it spawned. Space Invaders' whole tension is the descent; Water is the one element that
-  rolls it back.
+  steps, never above where it spawned. The loose last row is lifted with it and sinks back at the march's pace
+  (rejoining the formation would spread the march edge to edge, so it would turn and drop at once). Space Invaders'
+  whole tension is the descent; Water is the one element that rolls it back.
 - **Washing arrows** (`Arrow.Wash`): like Wildfire's burn, for ordinary arrows only, never spears or other
   unbreakable shots.
 

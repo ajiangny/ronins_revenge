@@ -64,7 +64,8 @@ always leaving Oni a gap he can reach along his one row. Bronze is a bell Oni ca
 
 | Move | What happens | What it means |
 |---|---|---|
-| Coffer Slam | The hammer marks Oni's lane over three tolls (two lanes past half his bar), then a shockwave runs down it. The first cover in its way takes the blow and breaks; the ground cracks and a slow ring of skulls bursts from it. | The night the coffin opened. |
+| Coffer Slam | The hammer marks Oni's lane over three tolls (two lanes past half his bar), then a shockwave runs down it. The first cover in its way takes the blow and breaks; the ground cracks and a slow ring of skulls bursts from it. Past half his bar the mark sometimes jumps onto Oni mid-tell. | The night the coffin opened. |
+| Reliquary Rend | Two quick slams on Oni's lane, then a third held overhead for a breath that's never the same length, then the first crack erupts again. | He does not tire, and he does not hurry. |
 | Toll of Fealty | Each toll winds a spiral of skulls out of his bells, turning the other way each time; the landings step along Oni's row a gap apart. | The souls answering him. |
 | Rosary Curtain | Rows of skulls fall with one gap each, a staircase down. Past half his bar one row has no gap, only a bronze bell to parry. | The court kneeling in rows. |
 | Ofuda Decree | Talisman strips drift down into two lanes (three in phase 2), always one of them Oni's. Inside a sealed lane he cannot parry. A slam, a toll, or a rain of crimson seal-darts round skull-walled seals follows. | Imperial law. |
@@ -82,10 +83,12 @@ he weakens, plus:
 | Wraith Swarm (the Thousand-Soul Bloom) | A flower of skulls blooms from his chest, halts, and turns on Oni in two volleys. Parried, a skull flies home at him as a freed soul. |
 | Soul River | Rows of skulls pour down round one snaking channel, bronze bells on its banks. |
 | Broken Chains | The snapped chains slam down either side of Oni and cage him under a skull spiral, then lash across the ground. |
+| Coffin Pendulum | He swings the coffin out on its broken chain and scythes the ground down one side of the field, then the other, faster each pass, then brings it down on Oni. |
+| Soul Harvest | Rows of souls well up out of the courtyard floor through Oni's row and stream into his chest, each row with one gap; fed, his chest-fire flares. |
 | Soul Coffin (parry-only) | He hurls the coffin-hammer down on its chain, seal-darts falling either side. Parried, it bursts against him: a stagger, and he stands open to double damage. |
 | Night of a Thousand Bells (every sixth move) | The field goes dark under eight hanging bells and soul-fire falls down every lane but one in five waves, the safe lane stepping aside each time; the last toll is a gapless wall with a bell to parry. Then he kneels, spent and open. |
-| **Summoned souls** | He drags a boss's soul out of the coffin, a teal ghost on a chain from the hammer, to use its own move on Oni while he keeps attacking: Benibana's smoke rings and Crimson Iaido, Utsusemi's hour marks and cleave, Shirogane's blade rain. Their parry-only blows fly back at him, not at them. Shirogane, bound to his will, can only warn Oni before her blades fall. |
-| **The Last Bell** (under 30%) | The dark closes in and pulses with his heart; four spiral arms, thicker blooms, the Night every fourth move. |
+| **Summoned souls** | He drags a boss out of the coffin, the boss itself at a third of its strength, outlined in his teal fire on a chain from the hammer, and it fights beside him with all of its old first form: Benibana, Utsusemi, Shirogane, one at a time. Cut it down and its chain snaps: the freed soul flies home into his chest like a clapper and rocks him. Leave it standing too long and he drags it back into the coffin ("Mine again.") and wears its power on his next blows: her smoke rings, its hour marks, her ghost swords. Shirogane, bound to his will, can only warn Oni before her blades fall. |
+| **The Last Bell** (under 30%) | The dark closes in and pulses with his heart; four spiral arms, thicker blooms, the Night every fourth move, one of its waves leaping two lanes. |
 
 **Defeat.** The coffin bursts. The bells fall silent one by one, each toll lower and quieter than the last, a soul
 rising free with each, and the armor sinks hollow and fades. One soul is left kneeling where he fell, still
@@ -120,8 +123,8 @@ when the chorus starts speaking over him.
 | Stagger **(in game)** | "You dare ring MY bell?" |
 | Hurt **(in game)** | "Insolence." / "A scratch, little demon." / "Hm." |
 | KilledOni **(in game)** | "Back to your hill, little demon. I will be here. I am always here." (also the end screen's text) |
-| Callouts **(in game)** | Coffer Slam "Bow." · Toll "Answer me." · Ofuda "By my decree." · Wail "Hear them, little demon." · Last Toll "Hear the last toll." · Swarm "Go. Fetch him." · Chains "Chains do not hold me." · Soul Coffin "Into the coffin!" · Thousand Bells "A thousand bells, Oni! Ring!" |
-| Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." |
+| Callouts **(in game)** | Coffer Slam "Bow." · Toll "Answer me." · Rosary Curtain "Kneel, in rows." · Ofuda "By my decree." · Wail "Hear them, little demon." · Last Toll "Hear the last toll." · Rend "Again. And again." · Swarm "Go. Fetch him." · Soul River "Drown in them." · Chains "Chains do not hold me." · Pendulum "Reap." · Harvest "Come home, all of you." · Soul Coffin "Into the coffin!" · Thousand Bells "A thousand bells, Oni! Ring!" |
+| Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." · a soul left standing, dragged back: "Mine again." |
 | The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "Move, Oni. I cannot hold my blades." |
 
 Reactive dialogue, in game (`Dialogue.cs`, voiced in `Tools/generate-voice.mjs`):

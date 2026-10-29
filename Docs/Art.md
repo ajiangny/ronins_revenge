@@ -49,3 +49,9 @@ TechniqueScroll, HealingSpring) and the paths' boss icons (`BossIcon_*`); `Fx/` 
 attack frames prefixed by boss (`Beni_`, `Utsu_`, `Shiro_`, `Kage_`) beside generic effects and the temple's ambience;
 `UI/` holds the ability and boon icons. The Ninja commands and the import hooks hardcode these paths, so moving a
 folder means updating `Editor/*.cs` too.
+
+Kagetsune's animated effects (`Kage_Shockwave`, `Kage_TollRing`, `Kage_ChainSnap`, `Kage_SoulFire`, `Kage_LockOn`,
+`Kage_WailFlare`, `Kage_SoulRise`, `Kage_OfudaBurn`) were built in PixelLab's effect workbench and saved to its My effects
+under the same names, so they can be reopened and re-exported there. An export is a spritesheet with a JSON frame list;
+each frame is cut out to `Fx/<Id>_<n>.png`. A new id also needs a constant in `Fx.cs` and a row in `FxSetup.Clips`
+(its fps, loop and anchor: the export's origin as a 0-1 pivot from the bottom-left), then `Ninja/Apply VFX`.

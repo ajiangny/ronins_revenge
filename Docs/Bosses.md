@@ -126,7 +126,11 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
   Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,
-  `Sfx.SoulWail` loop), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
+  `Sfx.SoulWail` loop; it gathers under a `Darkness` dim with `Fx.KageWailFlare` at the chest and the beam's end, opens
+  past its width and pinches shut over `OpenSeconds`/`CloseSeconds`), Reliquary Rend (`ReliquaryRend`: two quick
+  `SlamDown`s on the ronin's lane, a third held a random 0.4-1 s, then an aftershock on the first crack; Coffer Slam's
+  blow is `SlamDown(xs, ring, weight)`, which hit-stops and `TimeRipple`s, and hardened its tell can feint onto the
+  ronin halfway), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
   **Bullet hell** (built from `BulletHell`, all his skulls `Enlist`ed; `BellShot`/`SealDart` are his bronze and crimson
   shots; `Hardened` = phase 2 or past half of bar 1): the Toll of Fealty is a `Spiral` per toll from `Waist`; the
   Rosary Curtain (`RosaryCurtain`, `Move.Curtain`) drops gapped `Curtain` rows stepped by `NextGap`, one gapless row
@@ -136,21 +140,33 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `chestGlow` that swells as bar 2 drains; chains and soul-fire columns are `Tiled` strips (`Fx.KageChain`,
   `Fx.KageSoulPillar`, drawn `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the ultimate hangs
   `HangBell`s (`Fx.KageBell`) that `Swing` when rung.
-  `PhaseBreak`: bells clamour, chains snap, skulls burst, `WearPhaseArt`, teal `eyes`, `PhaseCard`. Phase 2
-  adds Wraith Swarm (the Thousand-Soul Bloom: a `Ring` from the chest under `HaltAndAim`), Soul River (`SoulRiver`,
+  `PhaseBreak`: bells clamour (each a `TollRing`), chains snap (`Fx.KageChainSnap`), skulls burst, `WearPhaseArt`, two
+  teal glint `eyes` (`Eye(i)`), `soulFire` (`Fx.KageSoulFire` behind him at `SoulFireAlpha`), `PhaseCard`. Kit
+  (`Kagetsune.Kit.cs`): `Shockwave` (`Fx.KageShockwave`), `TollRing` (`Fx.KageTollRing`), `LockOn` (`Fx.KageLockOn`
+  closing with ticking pings), `Streak` (afterimages behind the thrown bell and coffin). `UpdateWisps` circles
+  `Fx.KageSoulRise` ghosts (dimmer behind him); `UpdateLastBell` keeps its dark on the camera, gives way to the
+  ultimate's and beats a `Heartbeat`; `RisingSoul` uses the same ghost. Phase 2
+  adds Coffin Pendulum (`CoffinPendulum`: three ground passes on alternating sides, each with a band tell long
+  enough to cross to the clear side by `MaxDodgeSpeed`, the last shedding spaced skulls, then a `SlamDown` on the
+  ronin's lane; `CoffinOnChain`/`SetCoffin`), Soul Harvest (`SoulHarvest`: rows of floor glows that rise as skulls
+  through the ronin's row, `HomeToChest` bending them into his chest above it, gaps stepped by `NextGap`), Wraith Swarm
+  (the Thousand-Soul Bloom: a `Ring` from the chest under `HaltAndAim`), Soul River (`SoulRiver`,
   `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), Broken Chains
   (`ChainCage` first: two chain walls that `HitIfCrossed` for 3 s round a two-arm `cageSpiral`, then lashes from his
   shoulders), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
   chain; parried, its hit (`OnHitBy`, on `Damaged`) sees `coffinThrownAt` and sets `exposedUntil`, which a stagger pushes back past itself, doubling `DamageMultiplier`), the Night
   of a Thousand Bells (`ultimate`, every `Ultimate` moves: `Darkness`, eight lanes, five waves with a stepping
-  safe lane that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Summon` builds an `Echo`: the boss's own CharacterArt idle, set
-  by `SetEcho` from `GameManager.CreateBoss`, drawn teal and translucent on a chain from the hammer; `EchoBenibana`
-  smoke rings + a reflectable Iaido crescent, `EchoUtsusemi` three hour marks + a reflectable cleave, `EchoShirogane`
-  two waves of blade rain, her warning line spoken over the first). A soul runs beside the fight loop as
-  `echoRoutine` (`RunEcho`); while `EchoOut`, `NextMove` picks only light moves (no parry-only move, ultimate or second
-  soul), and `RecallEcho` (stagger, phase break, fall) stops it and drops `activeEcho` and the `cageSpiral`. Otherwise
-  `NextMove` forces the ultimate, then the phase's parry move (`ParryAtLatest`), then a soul (`EchoAtLatest`; the first
-  three in boss order). Under `LastBellAt` (30%) of bar 2, `lastBell`: four spiral arms, denser blooms, `Ultimate` 4,
+  safe lane that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Kagetsune.Souls.cs`): `CallSoul` raises a real boss through `Boss.Summon` (→
+  `GameManager.SummonSoul`) at 30% health on the boss row, `Haunt`s it (a teal wash and a `SpriteOutline`) and binds
+  it with `soulChain`/`soulAura`, laid every frame by `UpdateSoul`. The soul fights its own first phase (it is
+  `Summoned`, so it never phase-breaks) while his `NextMove` keeps to plain moves (no Ofuda, parry-only move, ultimate or
+  second soul; the ultimate's count holds). Its `Defeated` → `OnSoulFreed`: `Fx.KageChainSnap`, then `SoulComesHome`
+  arcs a freed soul into his chest for `AddStance(FreedStance)`. Left `AbsorbAfter` (20 s of his time), `Absorb`
+  banishes it and sets `borrowed`/`borrowedLeft`, and `Borrow` lays its power on his next `BorrowedBlows` plain moves
+  (`BorrowedSmoke`, `BorrowedHours`, `BorrowedBlades`). `BanishSoul` takes it off with no reward (phase break, `OnCleared`
+  on a halt or his fall, `OnDestroy`); a stagger leaves it fighting. `NextMove` forces the ultimate, then the phase's
+  parry move (`ParryAtLatest`), then a soul (`SoulAtLatest` moves after the last left; the first within two moves of the
+  break; `NextSoul` goes in boss order, then at random without repeats). Under `LastBellAt` (30%) of bar 2, `lastBell`: four spiral arms, denser blooms, `Ultimate` 4,
   quicker `Recovery`, and `UpdateLastBell`'s pulsing dark. `DamageMultiplier` doubles while exposed but not while
   staggered (×2 at most); `OnStaggered` adds a `Boss.HitStop`, a bronze flash and freed souls.
   `Speaker`/`SpeakerColour` (virtual on `Boss`) put the souls' answers under their own names; `OnBossSpoke` treats
@@ -159,6 +175,17 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `ChainSnap`, `SoulWail`, `OfudaFlutter`, `SkullShriek`, `DawnChime` (each falls back to an older sound via
   `Sfx.Has` until generated). Shared helpers lifted into `Boss` for him: `TopOfScreen`/`GroundY`/`LeftEdge`/
   `RightEdge`, `NearX`, `Lanes`, `Pursue`, `BeamEnd`, `HitIfCrossed`, `Stretch`.
+- Kagetsune is `partial`: `Kagetsune.cs` (fields, lifecycle, the fight loop and `NextMove`), `Kit` (stride, bullets,
+  telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls` (the summons and borrowed powers) and
+  `Phase` (the break and his fall).
+- Several bosses at once (Kagetsune's summons): `Boss.Summoned` skips the phase break, makes `Shoot`'s shots
+  `PassesShots` and swaps the fall for `SoulFall` (no Defeat line); `Boss.Banish` ends one without `Defeated` (raises
+  `Banished`); `Boss.Haunt` tints and outlines it; the static `Boss.Summon` is `GameManager.SummonSoul`, which builds it
+  with `CreateBoss(kind, pos, SummonHealth)`, glides it in without its `Entrance` (`RaiseSoul`), subscribes `Damaged`
+  (as `OnBossDamaged(hit, …)`), `Spoke` and its defeat score, never `OnBossDefeated`, and keeps it in `summons` and
+  `effects.Summons` (`LiveSummon`, `ClearSummons`). `ShowBossHealth` splits the Emperor's bar with the live soul,
+  `RandomEnemy` homes ripostes on it, `OnBossSpoke` voices each boss with its own clips (`KindOf`), and a summoned
+  Shirogane comes without Kuon.
 - Wiring in `GameManager`: `BeginBoss` (intro, boss moon via `Backdrop.SetBossMoon`: blood for Benibana, steel for Utsusemi, spirit blue for Shirogane, none for Kagetsune (`MoonLook.Soul`, whose clear moon colour keeps the disc hidden), `Backdrop.MoonLook`/`Moons`; `TuneVoice` retunes the shared chorus/echo/distortion filters per boss),
   `CreateBoss` (switch on `BossKind`), `VoiceFor` (portrait/close-up/voice clips), `OnBossSpoke`,
   `OnBossDamaged`, `OnBossDefeated` → `BossFell`. HP bar, subtitles and the intro cinematic are in `GameUI`

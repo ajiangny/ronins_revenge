@@ -30,14 +30,14 @@ Tools/                the ElevenLabs scripts (npm run music | sfx | voice)
 | `Core/` | `GameManager` (+ partials), `StageConfig`, `LevelConfig`, `SaveData`, `RunLog`, `Controls`, `IHittable` | The run's hub and state machine, stages and rounds as data, the save slots, the control schemes, the `IHittable` contract and `Damage.Of` | [GameFlow](Docs/GameFlow.md), [Progression](Docs/Progression.md) |
 | `Player/` | `Ronin`, `Projectile`, `Pickup`, `Heart`, `Soul`, `TechniqueScroll` | Oni: movement, slash, shuriken, parry, the ultimate, and what he walks into | [Player](Docs/Player.md) |
 | `Enemies/` | `Samurai`, `SamuraiArmy`, `SamuraiKind`, `SamuraiCounter`, `Scout`, `Arrow`, `ArrowShadow`, `IceStatue` | The army and its kinds, its arrows and spears, the kite scout, frozen statues | [Enemies](Docs/Enemies.md) |
-| `Bosses/` | `Boss`, `BulletHell`, `Benibana`, `Utsusemi` (+ partials), `Shirogane` (+ partials), `SpiritWolf`, `Kagetsune`, `FreedSoul`, `ShiroganeFreed`, `GroundFire`, `TimeRipple`, `TimeRippleFeature`, `Fader`, `Swell`, `VeilPuff` | The four warlords on their shared base and pattern kit, Kuon, the ending's freed Shirogane, and their helpers | [Bosses](Docs/Bosses.md) |
+| `Bosses/` | `Boss`, `BulletHell`, `Benibana`, `Utsusemi` (+ partials), `Shirogane` (+ partials), `SpiritWolf`, `Kagetsune` (+ partials), `FreedSoul`, `ShiroganeFreed`, `GroundFire`, `TimeRipple`, `TimeRippleFeature`, `Fader`, `Swell`, `VeilPuff` | The four warlords on their shared base and pattern kit, Kuon, the ending's freed Shirogane, and their helpers | [Bosses](Docs/Bosses.md) |
 | `Boons/` | `Boon`, `BoonEffects`, `RoninLoadout`, `ShurikenStorm`, `Upgrades`, `Oaths` | Elements, every boon's numbers and effects, the run's loadout, the Flute Songs and the Oaths | [Boons](Docs/Boons.md), [Progression](Docs/Progression.md) |
 | `Rewards/` | `RewardPath`, `RewardSpirit` | The paths between rounds and the reward drawn into Oni | [GameFlow](Docs/GameFlow.md) |
 | `Hub/` | `SafeArea`, `SoulPool` | The temple between runs, its stations, gate and spirit pool | [Hub](Docs/Hub.md) |
 | `Dialogue/` | `Dialogue` (+ `Dialogue.Lines`), `DialogueScene`, `Poguru`, `Tutorial`, `TrainingSoldier` | Reactive conversations and their picker, talk scenes, Poguru and his tutorial | [Progression](Docs/Progression.md), [GameFlow](Docs/GameFlow.md) |
 | `UI/` | `GameUI`, `MenuUI`, `BoonChoiceUI`, `SwirlUI`, `ResourceTray`, `SpriteAnimatorUI` | The HUD, menu pages, the boon screen, the resource tray | [UI](Docs/UI.md) |
 | `World/` | `Backdrop`, `Atmosphere`, `BlockerWall`, `Blocker`, `CameraShake` | Maps and travel, each map's mood, the cover row, the camera | [World](Docs/World.md) |
-| `Vfx/` | `Fx`, `FxPlayer`, `FxLibrary`, `ElementFx`, `Debris`, `HitFlash`, `ProceduralSprites`, `SpriteAnimator`, `CharacterArt` | Pixel effects by id, code-built glows and bolts, debris, hit flashes, procedural sprites, sprite clips | [Art](Docs/Art.md) |
+| `Vfx/` | `Fx`, `FxPlayer`, `FxLibrary`, `ElementFx`, `Debris`, `HitFlash`, `SpriteOutline`, `ProceduralSprites`, `SpriteAnimator`, `CharacterArt` | Pixel effects by id, code-built glows and bolts, debris, hit flashes, procedural sprites, sprite clips | [Art](Docs/Art.md) |
 | `Audio/` | `Music`, `Sfx`, `SfxLibrary`, `VoiceLibrary` | Music, sound effects by id, the voice clips | [Art](Docs/Art.md) |
 
 `GameManager` owns the run and is what everything reports to; the state machine and the flow from title to dawn are
@@ -52,6 +52,8 @@ the scene keeps pointing at `Name.cs`. Keep new members in the part they belong 
 - `GameManager`: `Defaults` (the stages and safe areas as written in code), `Menus`, `Hub`, `Dev`, `Rounds`,
   `Rewards`, `Bosses`, `Talk` and `Stages`.
 - `Utsusemi`: `Kasa`, `Lattice`, `Hours`, `Plumb`, `Lantern`, `Beams`, `Overload` and `Clock`, one per move family.
+- `Kagetsune`: `Kit` (stride, bullets, telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls`
+  (the summoned bosses and their borrowed powers) and `Phase` (the break and his fall).
 - `Shirogane`: `Moves` (phase 1 and the parry-only draws), `Wolf` (phase 2 and Kuon's Maw) and `Phase` (the break and
   her fall). Kuon is `SpiritWolf.cs`.
 - `Dialogue`: `Dialogue.Lines.cs` is the table of every conversation; `Dialogue.cs` holds the types and the picker.

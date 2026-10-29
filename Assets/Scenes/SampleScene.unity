@@ -1216,6 +1216,14 @@ MonoBehaviour:
       - {fileID: 21300000, guid: 438935150196f4157bbf5c2c1ab97ff4, type: 3}
       - {fileID: 21300000, guid: eb7fc9fed18694a169f588e3635b8705, type: 3}
       - {fileID: 21300000, guid: 7a08b72919d94441699713e36895f805, type: 3}
+      - {fileID: 21300000, guid: abb5470f171a1496f8831f70ca14e42e, type: 3}
+      - {fileID: 21300000, guid: e1d1e637032274e87b3d4c59ca267b0d, type: 3}
+      - {fileID: 21300000, guid: 276a7cfa8f61441a89b29981d08c7c1a, type: 3}
+      - {fileID: 21300000, guid: 09dc15332d1754797aab3313f8f40c02, type: 3}
+      - {fileID: 21300000, guid: 0ecfc2c5c97b14247806787055f0309e, type: 3}
+      - {fileID: 21300000, guid: a8e165c21b0fc4796902e9ff556b917c, type: 3}
+      - {fileID: 21300000, guid: ddbc52fcca2b14ce38fcd69953e7da79, type: 3}
+      - {fileID: 21300000, guid: e85f27a90011c499bb53085d222019db, type: 3}
       talk:
       - {fileID: 21300000, guid: b6bd4db833e344ca9b8dc5329cb5fb81, type: 3}
       - {fileID: 21300000, guid: 71273c613265548a5b7f629a2c0af295, type: 3}

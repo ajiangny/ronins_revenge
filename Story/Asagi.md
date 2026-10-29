@@ -44,7 +44,7 @@ coat holding a rack of vials.
   own colour, though the pond she stands in is teal soul-fire, which is not hers.
 
 **Pixel art** (`Assets/Art/Sprites/Characters/Asagi/Asagi_<Clip>_<i>.png`, PixelLab): she stands at the pool's rim
-in the temple. Clips: Idle (the koi drifting, a bubble now and then), Talk (the hands come up), and Lift (pulling
+in the temple. Clips: Idle (tending the pond from its back-left rim: her hands drift together and cup a little water, the koi turning in the bowl, played forward and back), Talk (the hands come up), and Lift (pulling
 Oni out of the pool).
 
 ## History

@@ -184,6 +184,8 @@ public class GameUI : MonoBehaviour
     Image portraitImage;
     TextMeshProUGUI godModeTag;
     float subtitleUntil;
+    // Where the line hung over its speaker follows them while it shows (a world point), or null where it stays put.
+    System.Func<Vector3> subtitleFollow;
     Image fade;
 
     TMP_FontAsset headerAsset;
@@ -459,6 +461,7 @@ public class GameUI : MonoBehaviour
             subtitleGroup.alpha = Mathf.MoveTowards(subtitleGroup.alpha, showing ? 1f : 0f,
                 Time.unscaledDeltaTime / (showing ? SubtitleFadeIn : SubtitleFadeOut));
             if (!showing && subtitleGroup.alpha <= 0f) subtitlePlate.gameObject.SetActive(false);
+            else if (subtitleFollow != null) PlaceOver(CanvasPoint(subtitleFollow()) + ((RectTransform)transform).rect.size / 2f);
         }
         UpdateBanner();
         UpdatePathInfo();
@@ -595,6 +598,7 @@ public class GameUI : MonoBehaviour
         subtitlePlate.sizeDelta = size;
         subtitle.rectTransform.sizeDelta = size;
         subtitleUntil = Time.unscaledTime + seconds;
+        subtitleFollow = null;
         // Over any menu page too: Oni speaks on the title hill.
         subtitlePlate.SetAsLastSibling();
         // A new line fades in unless one is already up.
@@ -610,13 +614,22 @@ public class GameUI : MonoBehaviour
     // A subtitle hung over whoever says it in the field (`head`: the top of their head, in canvas pixels from the
     // bottom-left), so it's clear who's talking. It wraps narrow and is kept wholly on screen; near the top it hangs
     // below the head instead.
-    public void ShowSubtitleOver(string speaker, string text, Color colour, float seconds, Vector2 head)
+    // `follow` keeps it over a speaker who moves while they talk (Poguru flying about), as a world point.
+    public void ShowSubtitleOver(string speaker, string text, Color colour, float seconds, Vector2 head, System.Func<Vector3> follow = null)
     {
         ShowSubtitle(speaker, text, colour, seconds);
         Vector2 size = subtitle.GetPreferredValues(text, OverWrap, 0f);
         size = new Vector2(Mathf.Min(size.x, OverWrap) + 64f, size.y + 28f);
         subtitlePlate.sizeDelta = size;
         subtitle.rectTransform.sizeDelta = size;
+        subtitleFollow = follow;
+        PlaceOver(head);
+    }
+
+    // Hangs the fitted plate over `head`, wholly on screen.
+    void PlaceOver(Vector2 head)
+    {
+        Vector2 size = subtitlePlate.sizeDelta;
         Vector2 canvas = ((RectTransform)transform).rect.size;
         // The speaker's name stands this far over the plate.
         const float NameRoom = 64f, Margin = 24f;

@@ -214,8 +214,10 @@ public partial class GameManager
             source.Play();
         }
         Color colour = speaker == "Poguru" ? PoguruColour : speaker == "Oni" ? OniColour : SoldierColour;
+        // Out of the wisp, Poguru's line follows him as he flies.
+        System.Func<Vector3> follow = speaker == "Poguru" && poguru.IsOut ? () => poguru.Centre + Vector3.up * 0.8f : (System.Func<Vector3>)null;
         if (subtitled && over is Vector3 head)
-            ui.ShowSubtitleOver(speaker, text, colour, seconds + 0.6f, ui.CanvasPoint(head) + ((RectTransform)ui.transform).rect.size / 2f);
+            ui.ShowSubtitleOver(speaker, text, colour, seconds + 0.6f, ui.CanvasPoint(head) + ((RectTransform)ui.transform).rect.size / 2f, follow);
         else if (subtitled) ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f);
         if (speaker == "Poguru") poguru.Talk(seconds);
         return seconds + 0.3f;

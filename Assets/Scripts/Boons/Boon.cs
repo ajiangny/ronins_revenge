@@ -174,6 +174,9 @@ public static class Boons
     // Prayer-bead amber, for the Spirit Bead's screen and pickup.
     public static readonly Color BeadColor = new Color(1f, 0.72f, 0.38f);
 
+    // Pale moon-silver, for the Spirit Thread's screen and path.
+    public static readonly Color ThreadColor = new Color(0.75f, 0.95f, 0.88f);
+
     // Polished steel: the Sword Arts belong to the blade, not to any spirit.
     public static readonly Color ArtColor = new Color(0.82f, 0.86f, 0.92f);
 
@@ -400,6 +403,24 @@ public static class Boons
         return offers;
     }
 
+    // Up to count held boons a Spirit Thread could raise one rarity, like Hades II's Yarn of Ariadne. The level stays.
+    public static List<BoonOffer> DrawThread(RoninLoadout loadout, int count)
+    {
+        var pool = new List<EquippedBoon>();
+        foreach (EquippedBoon held in loadout.Held)
+        {
+            if (Levels(held.Boon) && held.Rarity < Rarity.Epic) pool.Add(held);
+        }
+        var offers = new List<BoonOffer>();
+        while (offers.Count < count && pool.Count > 0)
+        {
+            EquippedBoon held = pool[UnityEngine.Random.Range(0, pool.Count)];
+            pool.Remove(held);
+            offers.Add(new BoonOffer(held.Boon, held.Rarity + 1, OfferKind.Rarity, null, held.Level));
+        }
+        return offers;
+    }
+
     static bool Levels(BoonDefinition boon) => boon.Kind == BoonKind.Normal && !boon.Instant && boon.HasLevels;
 
     // Whether going from one rarity and level to another changes either stat.
@@ -451,7 +472,16 @@ public static class Boons
             }
             EquippedBoon replaces = boon.Slot == BoonSlot.Passive ? null : loadout.InSlot(boon.Slot);
             Rarity rolled = RollRarity();
-            offers.Add(new BoonOffer(boon, rolled > minRarity ? rolled : minRarity, OfferKind.New, replaces));
+            if (rolled < minRarity) rolled = minRarity;
+            // Hades' Exchange: a boon that takes another element's slot keeps its level and comes one rarity higher.
+            int level = 1;
+            if (replaces != null && Levels(replaces.Boon))
+            {
+                level = replaces.Level;
+                Rarity raised = replaces.Rarity < Rarity.Epic ? replaces.Rarity + 1 : Rarity.Epic;
+                if (raised > rolled) rolled = raised;
+            }
+            offers.Add(new BoonOffer(boon, rolled, OfferKind.New, replaces, level));
         }
         if (offers.Count == 0) offers.Add(new BoonOffer(Offering(element), Rarity.Common, OfferKind.New, null));
         return offers;

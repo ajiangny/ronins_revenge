@@ -122,6 +122,8 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] Sprite[] beadFrames;
     [Tooltip("The painted bead held out on the Spirit Bead screen. Empty uses beadFrames.")]
     [SerializeField] Sprite beadPainted;
+    [Tooltip("The Spirit Thread portal's icon and the thing held out on its screen, looped. Empty: a glow in the thread's colour.")]
+    [SerializeField] Sprite[] threadFrames;
     [Tooltip("The Lost Melody portal's icon, looped.")]
     [FormerlySerializedAs("emberFrames")]
     [SerializeField] Sprite[] noteFrames;

@@ -216,6 +216,13 @@ public class BoonChoiceUI : MonoBehaviour
             bead, null, onChosen);
     }
 
+    // A Spirit Thread (Hades II's Yarn of Ariadne): the held boons it could raise a rarity, each keeping its level.
+    public void ShowThread(List<BoonOffer> upgrades, Sprite[] thread, Action<int> onChosen)
+    {
+        Show("Spirit Thread", "a silver thread from the temple's prayer string, spun fine as moonlight.", Boons.ThreadColor,
+            upgrades, thread, null, onChosen);
+    }
+
     void Show(string heading, string tagline, Color colour, List<BoonOffer> boonOffers, Sprite[] soulFrames, Sprite elementPortrait, Action<int> onChosen)
     {
         offers = boonOffers;
@@ -381,8 +388,9 @@ public class BoonChoiceUI : MonoBehaviour
             BoonKind.Art => "Sword Art",
             _ => offer.Kind switch
             {
-                OfferKind.Level => $"Lv {offer.Level - 1} → {offer.Level}  ·  {offer.Rarity}",
-                OfferKind.Rarity => $"{offer.Rarity - 1} → {offer.Rarity}{(offer.Level > 1 ? $"  ·  Lv {offer.Level}" : "")}",
+                // The name's colour already gives the rarity, and a longer line pushes the slot onto a second one.
+                OfferKind.Level => $"Lv {offer.Level - 1} → {offer.Level}",
+                OfferKind.Rarity => $"→ {offer.Rarity}{(offer.Level > 1 ? $"  ·  Lv {offer.Level}" : "")}",
                 _ => offer.Level > 1 ? $"{offer.Rarity}  ·  Lv {offer.Level}" : offer.Rarity.ToString(),
             },
         };
@@ -404,7 +412,10 @@ public class BoonChoiceUI : MonoBehaviour
             if (offer.IsUpgrade) extra += $"  <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>(was {format(boon.ExtraAt(wasRarity, wasLevel))})</color>";
             card.stat.text += $"     <color=#{ColorUtility.ToHtmlStringRGB(MutedText)}>{boon.ExtraLabel}</color>   <color={StatGreen}>{extra}</color>";
         }
-        card.note.text = offer.Replaces != null ? $"Replaces {offer.Replaces.Boon.Name}" : "";
+        // An Exchange keeps the boon it replaces' level, so the note says so.
+        card.note.text = offer.Replaces == null ? ""
+            : offer.Level > 1 ? $"Exchanges {offer.Replaces.Boon.Name}  ·  keeps Lv {offer.Level}"
+            : $"Exchanges {offer.Replaces.Boon.Name}";
         card.slide = 0f;
         // Hidden until AnimatePanel paints it in, so it never flashes at full opacity on the first frame.
         card.group.alpha = 0f;

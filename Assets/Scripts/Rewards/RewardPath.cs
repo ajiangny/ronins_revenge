@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 
 // What waits down a path: the next round's reward, given when that round is cleared, or the stage's boss.
-public enum PathReward { Soul, Bead, Notes, Spring, Scroll, Boss }
+public enum PathReward { Soul, Bead, Notes, Spring, Scroll, Boss, Thread }
 
 // One of the paths that open where the army stood once a round is cleared, like Hades' chamber doors: each shows the
 // reward of the round down it, floating over a soft glow. The one the ronin picks floats away up the field ahead of

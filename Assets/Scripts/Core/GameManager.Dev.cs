@@ -46,7 +46,7 @@ public partial class GameManager
         }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
-        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll  ·  F7 dialogue</color></size>",
+        menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll  ·  F7 dialogue  ·  F10 bead  ·  F11 thread</color></size>",
             items.ToArray(), back, startIndex, paper: OnPaper, gridColumns: 2);
     }
 
@@ -68,7 +68,7 @@ public partial class GameManager
 
     // Testing shortcuts (Editor and development builds): F1 wipes out the current army, F2 skips to the last
     // stage's boss, F3 opens the dev menu, F4 toggles god mode, F5 drops a soul (Fire, Frost, Storm in turn) at the
-    // ronin's feet.
+    // ronin's feet, F10 opens a Spirit Bead's screen and F11 a Spirit Thread's.
     void DevHotkeys(Keyboard keyboard)
     {
         if (keyboard.f4Key.wasPressedThisFrame) SetGodMode(!godMode);
@@ -105,6 +105,14 @@ public partial class GameManager
         else if (keyboard.f6Key.wasPressedThisFrame && activeScroll == null && Boons.DrawArts(loadout, 1).Count > 0)
         {
             SpawnScroll(ronin.Feet + Vector3.up * 2f);
+        }
+        else if (keyboard.f10Key.wasPressedThisFrame)
+        {
+            OfferBead(ResumePlay);
+        }
+        else if (keyboard.f11Key.wasPressedThisFrame)
+        {
+            OfferThread(ResumePlay);
         }
         else if (keyboard.f2Key.wasPressedThisFrame && activeBoss == null)
         {

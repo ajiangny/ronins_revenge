@@ -108,6 +108,31 @@ public partial class GameManager
         return true;
     }
 
+    // A Spirit Thread raises one held boon a rarity and keeps its level, like Hades II's Yarn of Ariadne. With
+    // nothing left to raise it pays Spirit Notes instead, and false (nothing shown).
+    bool OfferThread(System.Action afterPick)
+    {
+        var offers = Boons.DrawThread(loadout, 3);
+        if (offers.Count == 0)
+        {
+            Earn(BeadNotes * (stageIndex + 1));
+            return false;
+        }
+
+        state = State.Choosing;
+        ronin.ControlsEnabled = false;
+        Time.timeScale = 0f;
+        Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ThreadColor, 1.2f);
+        Sfx.Play(Sfx.SoulCollect, 1f, 1.25f);
+        boonChoice.ShowThread(offers, threadFrames, index =>
+        {
+            TakeOrReject(offers, index);
+            Time.timeScale = 1f;
+            afterPick();
+        });
+        return true;
+    }
+
     // The Sword Arts screen: up to three arts the ronin doesn't hold, like Daedalus's hammer in Hades.
     bool OfferArts(System.Action afterPick)
     {
@@ -502,6 +527,7 @@ public partial class GameManager
         if (reward == PathReward.Spring && lives >= maxLives) reward = PathReward.Notes;
         if (reward == PathReward.Scroll && Boons.DrawArts(loadout, 1).Count == 0) reward = PathReward.Notes;
         if (reward == PathReward.Bead && Boons.DrawBead(loadout, 1).Count == 0) reward = PathReward.Notes;
+        if (reward == PathReward.Thread && Boons.DrawThread(loadout, 1).Count == 0) reward = PathReward.Notes;
 
         RewardSpirit spirit = RewardSpirit.Spawn(CameraShake.Center, RewardIcon(reward, pendingElement),
             RewardColour(reward, pendingElement), ronin);
@@ -523,6 +549,11 @@ public partial class GameManager
                 Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.BeadColor, 1.2f);
                 Sfx.Play(Sfx.SoulCollect, 1f, 1.1f);
                 if (OfferBead(() => picked = true)) yield return new WaitUntil(() => picked);
+                break;
+            case PathReward.Thread:
+                Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ThreadColor, 1.2f);
+                Sfx.Play(Sfx.SoulCollect, 1f, 1.2f);
+                if (OfferThread(() => picked = true)) yield return new WaitUntil(() => picked);
                 break;
             case PathReward.Scroll:
                 scrollsDropped++;
@@ -632,6 +663,7 @@ public partial class GameManager
     {
         PathReward.Soul => "Receive a boon from a lost soul.",
         PathReward.Bead => "Raise one of your boons a level.",
+        PathReward.Thread => "Raise one of your boons a rarity; it keeps its level.",
         PathReward.Scroll => "Learn a Sword Art that reshapes your blade.",
         PathReward.Spring => "Restore one lost life.",
         PathReward.Notes => $"Gain {noteCache * (stageIndex + 1)} Spirit Notes to spend at the temple.",
@@ -678,6 +710,8 @@ public partial class GameManager
         if (Boons.DrawBead(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PathReward.Bead, 20f));
         if (lives < maxLives) weights.Add((PathReward.Spring, 10f));
         if (scrollsDropped < maxScrollsPerRun && Boons.DrawArts(loadout, 1).Count > 0) weights.Add((PathReward.Scroll, 5f));
+        // The Thread is rare, as Ariadne's Yarn is: rarity mostly comes from the roll and from Exchanges.
+        if (Boons.DrawThread(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PathReward.Thread, 6f));
 
         var picks = new List<(PathReward, Element)>();
         // Third Path opens one more.
@@ -707,6 +741,7 @@ public partial class GameManager
     {
         PathReward.Soul => Boons.Info(element).Color,
         PathReward.Bead => Boons.BeadColor,
+        PathReward.Thread => Boons.ThreadColor,
         PathReward.Scroll => Boons.ArtColor,
         PathReward.Spring => SpringColour,
         PathReward.Boss => BossPortalColour,
@@ -717,6 +752,7 @@ public partial class GameManager
     {
         PathReward.Soul => $"{Boons.Info(element).Name} Soul",
         PathReward.Bead => "Spirit Bead",
+        PathReward.Thread => "Spirit Thread",
         PathReward.Scroll => "Technique Scroll",
         PathReward.Spring => "Healing Spring",
         PathReward.Boss => Stage.boss == BossKind.None ? "Onward" : Stage.boss.ToString(),
@@ -728,6 +764,7 @@ public partial class GameManager
         PathReward.Soul => ArtFor(element)?.soulFrames,
         PathReward.Scroll => scrollFrames,
         PathReward.Bead => beadFrames,
+        PathReward.Thread => threadFrames,
         PathReward.Notes => NoteIcon,
         PathReward.Spring => springFrames != null && springFrames.Length > 0 ? springFrames : ui.LifeIcon != null ? new[] { ui.LifeIcon } : null,
         PathReward.Boss => BossIconOf(stages[stageIndex].boss),

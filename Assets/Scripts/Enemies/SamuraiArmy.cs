@@ -215,8 +215,9 @@ public class SamuraiArmy : MonoBehaviour
         cam = Camera.main;
     }
 
-    // Builds a fresh stage. The army stays still until Advance() is called.
-    public void SpawnStage(LevelConfig config, Transform player, float landingLineY, float blockerTop)
+    // Builds a fresh stage. The army stays still until Advance() is called. It starts above the view for MarchIn, or
+    // (`aboveView` false) in its slots, for Muster to fly each soldier into.
+    public void SpawnStage(LevelConfig config, Transform player, float landingLineY, float blockerTop, bool aboveView = true)
     {
         Clear();
         level = config;
@@ -233,7 +234,7 @@ public class SamuraiArmy : MonoBehaviour
         float spacingX = Mathf.Min(maxSpacingX, 0.6f * 2f * HalfWidth() / Mathf.Max(1, config.columns - 1));
         // The formation starts with its front rank just above the view, then MarchIn brings it down to its slots.
         float frontRowY = config.topRowY - (config.rows - 1) * spacingY;
-        entryOffset = Mathf.Max(0f, CameraShake.Center.y + cam.orthographicSize + entryMargin + samuraiRadius - frontRowY);
+        entryOffset = aboveView ? Mathf.Max(0f, CameraShake.Center.y + cam.orthographicSize + entryMargin + samuraiRadius - frontRowY) : 0f;
         Entering = true;
         for (int col = 0; col < config.columns; col++)
         {
@@ -272,6 +273,75 @@ public class SamuraiArmy : MonoBehaviour
         }
     }
 
+    Coroutine mustering;
+
+    // Kagetsune's levy, raised mid-fight: a formation built in its slots, each soldier pulled out of `from` (his chest)
+    // as a soul and flying down into its place over `seconds`, the front rank first and from the middle out. Once the
+    // last has fallen in it marches, drops and fires like any army.
+    public void Muster(LevelConfig config, Transform player, float landingLineY, float blockerTop, Vector3 from, float seconds, Color soul)
+    {
+        SpawnStage(config, player, landingLineY, blockerTop, false);
+        mustering = StartCoroutine(FallIn(from, seconds, soul));
+    }
+
+    IEnumerator FallIn(Vector3 from, float seconds, Color soul)
+    {
+        var order = new List<Samurai>(soldiers);
+        order.Sort((a, b) =>
+        {
+            int rank = a.transform.position.y.CompareTo(b.transform.position.y);
+            return rank != 0 ? rank : Mathf.Abs(a.transform.position.x).CompareTo(Mathf.Abs(b.transform.position.x));
+        });
+        // Slots are read before the soldiers are hidden: a hidden body's position isn't kept.
+        var slots = order.ConvertAll(s => s.transform.position);
+        foreach (Samurai soldier in order) soldier.gameObject.SetActive(false);
+        // Each flight takes a fixed share of the time; the launches are spread over the rest.
+        float flight = Mathf.Min(0.7f, seconds * 0.4f);
+        float gap = (seconds - flight) / Mathf.Max(1, order.Count);
+        for (int i = 0; i < order.Count; i++)
+        {
+            if (order[i] != null) StartCoroutine(FlyToSlot(order[i], from, slots[i], flight, soul));
+            yield return new WaitForSeconds(gap);
+        }
+        yield return new WaitForSeconds(flight + 0.15f);
+        mustering = null;
+        if (soldiers.Count > 0) Advance();
+    }
+
+    // One soul's flight: up out of him, then an arc down into its slot, where it lands in a puff and stands.
+    IEnumerator FlyToSlot(Samurai soldier, Vector3 from, Vector3 slot, float seconds, Color soul)
+    {
+        soldier.gameObject.SetActive(true);
+        Vector3 size = soldier.transform.localScale;
+        Vector3 rise = Vector3.Lerp(from, slot, 0.35f) + Vector3.up * 2.5f;
+        ElementFx.Glow(from, new Color(soul.r, soul.g, soul.b, 0.6f), 0.3f, 1.4f, 0.3f);
+        for (float t = 0; t < seconds && soldier != null; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0, 1, t / seconds);
+            Vector3 at = Vector3.Lerp(Vector3.Lerp(from, rise, k), Vector3.Lerp(rise, slot, k), k);
+            soldier.transform.position = at;
+            soldier.Body.position = at;
+            soldier.transform.localScale = size * Mathf.Lerp(0.3f, 1f, k);
+            yield return null;
+        }
+        if (soldier == null) yield break;
+        soldier.transform.position = slot;
+        soldier.Body.position = slot;
+        soldier.transform.localScale = size;
+        Fx.Play(Fx.SmokePuff, slot + Vector3.down * 0.4f, new Color(soul.r, soul.g, soul.b, 0.55f), 0.9f);
+        MarchBeat(marchBeatDistance);
+    }
+
+    // The levy goes back to the dark at once (its Emperor broke or fell): each soldier fades in a puff of soul-fire.
+    public void Disband(Color soul)
+    {
+        foreach (Samurai soldier in soldiers)
+        {
+            if (soldier != null && soldier.gameObject.activeSelf) Fx.Play(Fx.SmokePuff, soldier.Body.position, new Color(soul.r, soul.g, soul.b, 0.7f), 1.3f);
+        }
+        Clear();
+    }
+
     public void Advance()
     {
         if (Entering)
@@ -295,6 +365,8 @@ public class SamuraiArmy : MonoBehaviour
 
     public void Clear()
     {
+        if (mustering != null) StopCoroutine(mustering);
+        mustering = null;
         foreach (Samurai soldier in soldiers)
         {
             Destroy(soldier.gameObject);

@@ -442,6 +442,8 @@ public partial class GameManager
     void OnArmyDefeated()
     {
         if (state != State.Playing) return;
+        // A boss's levy cut down ends nothing: the boss is still standing.
+        if (activeBoss != null) return;
         if (tutorial.Active && stageIndex == 0 && roundIndex == 0)
         {
             StartCoroutine(TutorialRoundEnd());

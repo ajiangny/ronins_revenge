@@ -241,6 +241,8 @@ public partial class GameManager
             Fx.Play(Fx.Impact, samurai.transform.position, Color.Lerp(Color.white, spark, 0.6f), source == KillSource.Shuriken ? 1.4f : 1f);
         }
         effects.OnKill(samurai, source);
+        // A boss's levy drops no souls or scrolls: a boon screen mid-fight would stop the duel.
+        if (activeBoss != null) return;
         if (killSoulsThisStage < killSoulsPerStage && Random.value < killSoulChance && activeSoul == null && army.Remaining > 0)
         {
             killSoulsThisStage++;

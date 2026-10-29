@@ -21,7 +21,9 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     KuonEnraged,
     // Kagetsune dragging a soul left standing back into the coffin, and his callouts for the Rosary Curtain, the Soul
     // River, the Reliquary Rend, the Coffin Pendulum and the Soul Harvest.
-    SoulAbsorbed, RosaryCurtain, SoulRiver, Rend, Pendulum, Harvest }
+    SoulAbsorbed, RosaryCurtain, SoulRiver, Rend, Pendulum, Harvest,
+    // Kagetsune calling up his levy of the dead.
+    Levy }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -62,6 +64,13 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Set by the GameManager: raises a boss's soul out of Kagetsune's coffin at the given x, at a share of its health,
     // to fight beside him. It enters and begins on its own; null when it can't be raised.
     public static System.Func<BossKind, float, Boss> Summon;
+    // Set by the GameManager: musters a formation of the stage's dead to fight for Kagetsune, each soldier flying out
+    // of the given point (in the given soul colour) into its slot; false when one still stands or it can't be raised.
+    public static System.Func<LevelConfig, Vector3, Color, bool> Muster;
+    // Set by the GameManager: how many of the levy still stand (0 when none is out).
+    public static System.Func<int> LevyRemaining;
+    // Set by the GameManager: the levy goes back to the dark in puffs of the given colour (his phase break, his fall).
+    public static System.Action<Color> Disband;
 
     public abstract string Title { get; }
     // The name on the bar from the phase card on (Shirogane shares hers with Kuon).

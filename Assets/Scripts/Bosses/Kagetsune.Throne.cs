@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Phase 1, the Thousand-Soul Throne: the Coffer Slam, the Toll of Fealty, the Rosary Curtain, the Ofuda Decree, the
-// Thousand-Soul Wail and the parry-only Last Toll.
+// Spirit Hyper Beam and the parry-only Last Toll.
 public partial class Kagetsune
 {
     // --- Phase 1 ---
@@ -592,131 +592,221 @@ public partial class Kagetsune
         return false;
     }
 
-    const float GutterTell = 0.35f;
-    const float GutterSeconds = 0.4f;
+    // The Spirit Hyper Beam's footprint: it opens this wide at the edge Oni stands nearer and pinches out this far
+    // short of the far edge, leaving him a strip to stand in while it dies.
+    float HyperOpenWidth => secondPhase ? 12f : 11f;
+    const float HyperSafe = 3f;
+    // Seconds the beam takes to cross. Its leading edge covers the field less the opening and the safe strip in this
+    // time, well under Oni's run, so he can always stay ahead of it.
+    float HyperSweep => secondPhase ? 3.8f : Hardened ? 4.3f : 4.8f;
+    // Long enough to run out of the whole opening from the edge.
+    float HyperTell => secondPhase ? 1.5f : 1.6f;
+    static readonly Color HyperSafeColour = new Color(1f, 0.95f, 0.8f);
+    static readonly Collider[] HyperCover = new Collider[32];
 
-    // The Thousand-Soul Wail: a beam of soul-fire from his open chest sweeps the field, edge to edge (and back in
-    // phase 2). Cover stops it and burns; it lights the ground as it drags.
-    IEnumerator ThousandSoulWail()
+    // One layer of the beam: a trapezoid from his chest to the ground, rebuilt every frame. The glow layer is drawn
+    // with the soft glow texture across its width so its sides fade; the rest are flat.
+    class HyperLayer
+    {
+        public GameObject shape;
+        public Mesh mesh;
+        readonly Vector3[] vertices = new Vector3[4];
+        readonly Color[] colours = new Color[4];
+
+        public HyperLayer(Kagetsune owner, Texture texture, int order)
+        {
+            shape = new GameObject("HyperBeam");
+            mesh = new Mesh();
+            mesh.MarkDynamic();
+            shape.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = shape.AddComponent<MeshRenderer>();
+            // The sprites' own material, so the vertex colours give it its look.
+            renderer.sharedMaterial = owner.sprite.sharedMaterial;
+            var block = new MaterialPropertyBlock();
+            block.SetTexture("_MainTex", texture);
+            renderer.SetPropertyBlock(block);
+            renderer.sortingOrder = order;
+            owner.transient.Add(shape);
+            mesh.vertices = vertices;
+            mesh.uv = new[] { new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0f, 0.5f) };
+            mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
+        }
+
+        public void Set(Vector3 top, float topHalf, Vector3 bottom, float bottomHalf, Color topColour, Color bottomColour)
+        {
+            vertices[0] = top + Vector3.left * topHalf;
+            vertices[1] = top + Vector3.right * topHalf;
+            vertices[2] = bottom + Vector3.right * bottomHalf;
+            vertices[3] = bottom + Vector3.left * bottomHalf;
+            colours[0] = colours[1] = topColour;
+            colours[2] = colours[3] = bottomColour;
+            mesh.vertices = vertices;
+            mesh.colors = colours;
+            mesh.RecalculateBounds();
+        }
+
+        public void Remove(Kagetsune owner)
+        {
+            owner.Drop(shape.transform);
+            Object.Destroy(mesh);
+        }
+    }
+
+    // The Spirit Hyper Beam: every soul in him screams out of his open chest at once, a torrent of soul-fire that slams
+    // into the ground across a third of the field at the edge Oni stands nearer. It drives across to the far edge,
+    // burning through any cover it passes over, and thins as it goes, its leading edge slower than Oni can run, until
+    // it narrows to a thread short of the far edge and dissipates there. The strip past where it dies is safe, and is
+    // lit pale from the tell on.
+    IEnumerator SpiritHyperBeam()
     {
         Bark(BossLine.SoulWail, 7f);
-        float side = ronin.Bounds.center.x < CameraShake.Center.x ? 1f : -1f;
-        float from = side > 0 ? RightEdge - 0.5f : LeftEdge + 0.5f;
-        float to = side > 0 ? LeftEdge + 0.5f : RightEdge - 0.5f;
+        float dir = ronin.Bounds.center.x < CameraShake.Center.x ? 1f : -1f;
+        float start = dir > 0 ? LeftEdge : RightEdge;
+        float far = dir > 0 ? RightEdge : LeftEdge;
+        float stop = far - dir * HyperSafe;
+        float open = HyperOpenWidth;
+        float ground = GroundY - 0.3f;
+        float band = GroundY + 0.9f;
 
-        // The chest gathers, and a thin guide shows where the beam will start.
+        // The tell: the chest gathers, the ground it will open on pulses teal, two guides run down to its edges, and the
+        // safe strip at the far edge glows pale.
         SpriteRenderer gather = Glowing(Chest, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 57);
-        SpriteRenderer guide = Bar(Chest, BeamEnd(Chest, new Vector3(from, GroundY, 0), out _), 0.06f, new Color(Teal.r, Teal.g, Teal.b, 0.5f));
-        if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 0.4f, 0.8f);
-        else Sfx.Play(Sfx.LanternCharge, 0.8f, 0.7f);
-        // The flare at his chest: the souls' fire gathering, then pouring out of it while the beam burns.
         FxPlayer flare = Fx.Play(Fx.KageWailFlare, Chest, new Color(1f, 1f, 1f, 0f), 1f, null, 58);
         if (flare != null) transient.Add(flare.gameObject);
+        SpriteRenderer danger = Bar(new Vector3(start, band, 0), new Vector3(start + dir * open, band, 0), 2.4f, Color.clear, 2);
+        SpriteRenderer safe = Bar(new Vector3(stop, band, 0), new Vector3(far, band, 0), 2.4f, Color.clear, 2);
+        SpriteRenderer guideA = Bar(Chest, new Vector3(start, ground, 0), 0.05f, Color.clear, 54);
+        SpriteRenderer guideB = Bar(Chest, new Vector3(start + dir * open, ground, 0), 0.05f, Color.clear, 54);
+        if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 0.45f, 0.7f);
+        else Sfx.Play(Sfx.LanternCharge, 0.9f, 0.6f);
         SpriteRenderer dim = Darkness();
         HitFlash.Flash(sprite, 0.1f);
-        for (float t = 0; t < 1f; t += Time.deltaTime * Tempo)
+        float tell = HyperTell;
+        for (float t = 0; t < tell; t += Time.deltaTime * Tempo)
         {
-            gather.transform.localScale = Vector3.one * Mathf.Lerp(1f, 4f, t);
-            gather.color = new Color(Teal.r, Teal.g, Teal.b, 0.7f * t);
+            float k = t / tell;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(t * Mathf.Lerp(8f, 22f, k));
+            gather.transform.position = Chest + Vector3.back * 0.1f;
+            gather.transform.localScale = Vector3.one * Mathf.Lerp(1f, 6f, k);
+            gather.color = new Color(Teal.r, Teal.g, Teal.b, 0.8f * k);
             if (flare != null)
             {
                 flare.transform.position = Chest + Vector3.back * 0.3f;
-                flare.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, 2.2f, t * t);
-                flare.Color = new Color(1f, 1f, 1f, t);
+                flare.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, 3f, k * k);
+                flare.Color = new Color(1f, 1f, 1f, k);
             }
-            dim.color = new Color(0f, 0.02f, 0.02f, 0.25f * t);
+            danger.color = new Color(Teal.r, Teal.g, Teal.b, 0.12f + 0.3f * k * pulse);
+            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.18f + 0.14f * pulse);
+            guideA.color = guideB.color = new Color(Teal.r, Teal.g, Teal.b, 0.6f * k);
+            dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * k);
             yield return null;
         }
         Drop(gather);
-        Drop(guide);
-        TimeRipple.Emit(Chest, 5f, 0.5f, 0.5f);
-        // A splash where the beam meets the ground.
-        FxPlayer splash = Fx.Play(Fx.KageWailFlare, Chest, Color.white, 1.2f, null, 58);
-        if (splash != null) transient.Add(splash.gameObject);
+        Drop(danger);
+        Drop(guideA);
+        Drop(guideB);
+        Sfx.Stop(Sfx.SoulWail);
 
-        var glow = Bar(Chest, Chest, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.35f), 53);
-        glow.sprite = ProceduralSprites.Glow;
-        var body = Bar(Chest, Chest, 1f, new Color(Teal.r, Teal.g, Teal.b, 0.9f), 55);
-        var core = Bar(Chest, Chest, 1f, new Color(0.9f, 1f, 0.97f), 56);
-        if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 1f, 1f);
-        else Sfx.PlayLoop(Sfx.LanternBeam, 1f, 0.8f);
-        CameraShake.Add(0.3f);
-        int passes = secondPhase ? 2 : 1;
-        float sweep = secondPhase ? 1.9f : 2.6f;
-        float nextBurn = 0, lastFire = from, nextEmber = 0, nextRumble = 0;
-        // The beam bursts open past its full width and settles, and on its last stretch pinches shut.
-        const float OpenSeconds = 0.18f, CloseSeconds = 0.2f;
-        float burned = 0f, total = passes * sweep;
-        for (int pass = 0; pass < passes; pass++)
+        var glow = new HyperLayer(this, ProceduralSprites.Glow.texture, 53);
+        var body = new HyperLayer(this, Texture2D.whiteTexture, 55);
+        var core = new HyperLayer(this, Texture2D.whiteTexture, 56);
+        FxPlayer splash = Fx.Play(Fx.KageWailFlare, new Vector3(start + dir * open * 0.5f, ground, 0), Color.white, 2f, null, 58);
+        if (splash != null) transient.Add(splash.gameObject);
+        TimeRipple.Emit(Chest, 7f, 0.6f, 0.6f);
+        HitFlash.Flash(sprite, 0.15f);
+        CameraShake.Add(0.6f);
+        Slam(0.8f);
+        if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 1f, 0.85f);
+        Sfx.PlayLoop(Sfx.LanternBeam, 0.8f, 0.6f);
+
+        float sweep = HyperSweep;
+        float nextBurn = 0, nextRumble = 0, lastFire = start;
+        for (float t = 0; t < sweep; t += Time.deltaTime * Tempo)
         {
-            float a = pass % 2 == 0 ? from : to, b = pass % 2 == 0 ? to : from;
-            // Once a sweep the souls falter and the beam gutters out for a moment, thinning and stuttering just
-            // before, so even with every scrap of cover burnt away there's a way through it.
-            float gutterAt = Random.Range(0.35f, 0.6f) * sweep;
-            for (float t = 0; t < sweep; t += Time.deltaTime * Tempo)
+            float k = t / sweep;
+            float lead = Mathf.Lerp(start + dir * open, stop, k);
+            float trail = Mathf.Lerp(start - dir * 0.5f, stop, k);
+            float centre = (lead + trail) * 0.5f;
+            // It bursts open past its full width for a moment, then thins as it drives on.
+            float burst = t < 0.2f ? Mathf.Lerp(1.2f, 1f, t / 0.2f) : 1f;
+            float flicker = 1f + 0.06f * Mathf.Sin(Time.time * 47f) + 0.03f * Mathf.Sin(Time.time * 113f);
+            float half = Mathf.Abs(lead - trail) * 0.5f * burst;
+            float chestHalf = (0.4f + 2.2f * (1f - k)) * burst * flicker;
+            Vector3 top = Chest, foot = new Vector3(centre, ground, 0);
+            glow.Set(top, chestHalf * 1.8f, foot, half * 1.25f + 0.6f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), new Color(Teal.r, Teal.g, Teal.b, 0.6f));
+            body.Set(top, chestHalf, foot, half * flicker, new Color(Teal.r * 0.7f, Teal.g, Teal.b, 0.9f), new Color(Teal.r * 0.7f, Teal.g, Teal.b, 0.8f));
+            core.Set(top, chestHalf * 0.3f, foot, half * 0.28f * flicker, new Color(0.95f, 1f, 0.98f, 0.95f), new Color(0.85f, 1f, 0.95f, 0.8f));
+            if (flare != null)
             {
-                float x = Mathf.Lerp(a, b, Mathf.SmoothStep(0, 1, t / sweep));
-                Vector3 start = Chest;
-                Vector3 end = BeamEnd(start, new Vector3(x, GroundY, 0), out Blocker cover);
-                bool faltering = t > gutterAt - GutterTell && t < gutterAt;
-                bool guttered = t >= gutterAt && t < gutterAt + GutterSeconds;
-                float flicker = 1f + 0.18f * Mathf.Sin(Time.time * 47f) + 0.08f * Mathf.Sin(Time.time * 113f);
-                if (faltering) flicker *= Random.value < 0.5f ? 0.25f : 0.7f;
-                if (guttered) flicker = 0.06f;
-                burned += Time.deltaTime * Tempo;
-                float open = burned < OpenSeconds ? Mathf.Lerp(1.8f, 1f, burned / OpenSeconds)
-                    : total - burned < CloseSeconds ? Mathf.Max(0f, (total - burned) / CloseSeconds) : 1f;
-                Stretch(glow, start, end, 1.8f * flicker * open);
-                Stretch(body, start, end, 0.5f * flicker * open);
-                Stretch(core, start, end, (guttered ? 0.02f : 0.16f) * open);
-                if (flare != null)
-                {
-                    flare.transform.position = start + Vector3.back * 0.3f;
-                    flare.transform.localScale = Vector3.one * 2.2f * (guttered ? 0.4f : open);
-                }
-                if (splash != null)
-                {
-                    splash.transform.position = end + Vector3.back * 0.3f;
-                    splash.Color = new Color(1f, 1f, 1f, guttered ? 0f : 1f);
-                }
-                // A low rumble the whole time it burns.
-                if (Time.time >= nextRumble && !guttered)
-                {
-                    nextRumble = Time.time + 0.1f;
-                    CameraShake.Add(0.05f);
-                }
-                if (!guttered) HitIfCrossed(start, end);
-                // Hardened, the beam sheds embers as it drags: soul-skulls that drift down behind it.
-                float emberY = Row + 3.5f;
-                if (Hardened && !guttered && cover == null && end.y < emberY && Time.time >= nextEmber)
-                {
-                    nextEmber = Time.time + (secondPhase ? 0.18f : 0.25f);
-                    float emberX = Mathf.Lerp(start.x, end.x, Mathf.InverseLerp(start.y, end.y, emberY));
-                    Skull(new Vector3(emberX, emberY, 0), Vector3.down * 2.2f);
-                }
-                if (cover != null && Time.time >= nextBurn)
-                {
-                    nextBurn = Time.time + 0.25f;
-                    cover.Hit(end);
-                    Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
-                }
-                if (cover == null && Mathf.Abs(x - lastFire) >= 0.6f)
-                {
-                    lastFire = x;
-                    GroundFire.Light(end, soul: true);
-                }
-                if (Random.value < 0.2f) Fx.Play(Fx.Impact, end, Teal, 0.7f);
-                yield return null;
+                flare.transform.position = Chest + Vector3.back * 0.3f;
+                flare.transform.localScale = Vector3.one * Mathf.Lerp(3f, 1.4f, k);
             }
+            if (splash != null)
+            {
+                splash.transform.position = foot + Vector3.back * 0.3f;
+                splash.transform.localScale = Vector3.one * Mathf.Max(0.8f, half * 0.45f);
+            }
+            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f + 0.08f * Mathf.Sin(Time.time * 6f));
+            dim.color = new Color(0f, 0.02f, 0.02f, 0.35f);
+
+            // Oni burns wherever the beam spans his row.
+            float at = Mathf.InverseLerp(top.y, ground, Row);
+            float rowCentre = Mathf.Lerp(top.x, centre, at), rowHalf = Mathf.Lerp(chestHalf, half, at);
+            float x = ronin.Bounds.center.x;
+            if (Mathf.Abs(x - rowCentre) < rowHalf + 0.2f) ronin.TakeHit(new Vector3(Mathf.Clamp(x, rowCentre - rowHalf, rowCentre + rowHalf), Row, 0));
+            // It doesn't stop at cover: every piece it stands on burns through.
+            if (Time.time >= nextBurn)
+            {
+                nextBurn = Time.time + 0.2f;
+                int count = Physics.OverlapBoxNonAlloc(new Vector3(centre, GroundY + 3f, 0), new Vector3(half, 3f, 5f), HyperCover);
+                for (int i = 0; i < count; i++)
+                {
+                    if (!HyperCover[i].TryGetComponent(out Blocker cover)) continue;
+                    cover.Hit(cover.transform.position);
+                    if (Random.value < 0.3f) Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
+                }
+            }
+            // The ground it has crossed burns behind it, short of the safe strip.
+            if (Mathf.Abs(trail - lastFire) >= 0.9f && Mathf.Abs(stop - trail) > 2.5f)
+            {
+                lastFire = trail;
+                GroundFire.Light(new Vector3(trail, GroundY, 0), soul: true);
+            }
+            if (Random.value < 0.5f) Fx.Play(Fx.Impact, new Vector3(Mathf.Lerp(trail, lead, Random.value), ground + 0.3f, 0), Teal, 0.9f);
+            if (Time.time >= nextRumble)
+            {
+                nextRumble = Time.time + 0.1f;
+                CameraShake.Add(0.07f + 0.08f * (1f - k));
+            }
+            yield return null;
         }
+
+        // It thins to a thread where it stopped and dissipates in a scatter of freed souls.
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);
-        Drop(glow);
-        Drop(body);
-        Drop(core);
-        if (flare != null) Drop(flare);
+        Sfx.Play(Sfx.LanternCharge, 0.5f, 1.6f);
+        Vector3 end = new Vector3(stop, ground, 0);
+        ElementFx.Glow(end + Vector3.up * 0.5f, Teal, 0.5f, 4f, 0.6f);
+        for (int i = 0; i < 6; i++) Fx.Play(Fx.Impact, end + new Vector3(Random.Range(-0.6f, 0.6f), Random.Range(0f, 2.5f), 0), Teal, 0.8f);
         if (splash != null) Drop(splash);
-        StartCoroutine(FadeOut(dim, 0.4f));
+        for (float t = 0; t < 0.45f; t += Time.deltaTime * Tempo)
+        {
+            float fade = 1f - t / 0.45f;
+            float thread = 0.12f * fade;
+            glow.Set(Chest, 0.5f * fade, end, 0.5f * fade, new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade), new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade));
+            body.Set(Chest, thread, end, thread, new Color(Teal.r, Teal.g, Teal.b, 0.8f * fade), new Color(Teal.r, Teal.g, Teal.b, 0.8f * fade));
+            core.Set(Chest, thread * 0.4f, end, thread * 0.4f, new Color(1f, 1f, 1f, fade), new Color(1f, 1f, 1f, fade));
+            if (flare != null) flare.Color = new Color(1f, 1f, 1f, fade);
+            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f * fade);
+            dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * fade);
+            yield return null;
+        }
+        glow.Remove(this);
+        body.Remove(this);
+        core.Remove(this);
+        if (flare != null) Drop(flare);
+        Drop(safe);
+        Drop(dim);
     }
 
     // The Last Toll, parry-only: a lock-on rings the ronin, then a great bronze bell drops on him, steered onto

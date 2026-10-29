@@ -423,6 +423,9 @@ public partial class GameManager : MonoBehaviour
         };
         Boss.RenameBar = name => ui.RenameBossBar(name);
         Boss.Summon = SummonSoul;
+        Boss.Muster = MusterLevy;
+        Boss.LevyRemaining = () => army.Remaining;
+        Boss.Disband = army.Disband;
         Boss.PoguruWarn = PoguruWarns;
         Boss.PoguruRest = () =>
         {

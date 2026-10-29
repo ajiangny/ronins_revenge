@@ -135,9 +135,18 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
-  Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,
-  `Sfx.SoulWail` loop; it gathers under a `Darkness` dim with `Fx.KageWailFlare` at the chest and the beam's end, opens
-  past its width and pinches shut over `OpenSeconds`/`CloseSeconds`), Reliquary Rend (`ReliquaryRend`: two quick
+  Spirit Hyper Beam (`SpiritHyperBeam`, `Move.Beam`, his old Thousand-Soul Wail: three `HyperLayer` trapezoid meshes
+  from the chest to the ground, drawn with the sprites' material, the glow layer with `ProceduralSprites.Glow` across
+  its width; its footprint opens `HyperOpenWidth` wide (11, 12 in phase 2) at the edge the ronin stands nearer, both edges run to `stop`
+  (`HyperSafe` short of the far edge) over `HyperSweep`, so it thins as it goes and its leading edge stays well under
+  the ronin's speed; the hit is the wedge's span at his row; cover isn't a shield: an `OverlapBox` over the footprint
+  `Hit`s every `Blocker` in it; a pulsing danger band, two guides and the pale safe strip (`HyperSafeColour`) over
+  `HyperTell`; it dissipates as a thread at `stop`. `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
+  chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` tolls three times and
+  calls the static `Boss.Muster` (→ `GameManager.MusterLevy` → `SamuraiArmy.Muster`) with `LevyConfig()`: 8×2 archers
+  and ashigaru on the Throne, 13×3 (14 under the Last Bell) Taisho, archers and yurei with divers on the Wraith, its
+  top rank at `LevyTop` under his feet; `NextMove` calls it when `LevyRemaining` is 0 and `movesSinceLevy` reaches
+  `LevyAtLatest` (sometimes sooner), never while a soul is out; the phase break and `OnCleared` `DisbandLevy`), Reliquary Rend (`ReliquaryRend`: two quick
   `SlamDown`s on the ronin's lane, a third held a random 0.4-1 s, then an aftershock on the first crack; Coffer Slam's
   blow is `SlamDown(xs, ring, weight)`, which hit-stops and `TimeRipple`s, and hardened its tell can feint onto the
   ronin halfway), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
@@ -145,7 +154,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   shots; `Hardened` = phase 2 or past half of bar 1): the Toll of Fealty is a `Spiral` per toll from `Waist`; the
   Rosary Curtain (`RosaryCurtain`, `Move.Curtain`) drops gapped `Curtain` rows stepped by `NextGap`, one gapless row
   with a bell when hardened; the slam's `SlamRing`; the Ofuda Decree's `DecreeRain` (darts outside the seals, skull
-  walls inside); the Wail gutters once a sweep (`GutterTell`/`GutterSeconds`) and sheds embers; the Last Toll's
+  walls inside); hardened, the Spirit Hyper Beam sweeps faster; the Last Toll's
   `ClosingRing`. VFX: `Crack` and `Shockwave` under slams, stride dust and phase-2 afterimages, `UpdateWisps`, a
   `chestGlow` that swells as bar 2 drains; chains are `Tiled` strips (`Fx.KageChain`, drawn
   `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the slam's and the ultimate's soul-fire columns are
@@ -188,8 +197,12 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `Sfx.Has` until generated). Shared helpers lifted into `Boss` for him: `TopOfScreen`/`GroundY`/`LeftEdge`/
   `RightEdge`, `NearX`, `Lanes`, `Pursue`, `BeamEnd`, `HitIfCrossed`, `Stretch`.
 - Kagetsune is `partial`: `Kagetsune.cs` (fields, lifecycle, the fight loop and `NextMove`), `Kit` (stride, bullets,
-  telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls` (the summons and borrowed powers) and
-  `Phase` (the break and his fall).
+  telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls` (the summons and borrowed powers),
+  `Levy` (his levy of the dead army) and `Phase` (the break and his fall).
+- The levy uses the round's own `SamuraiArmy`: `Muster` builds the formation in its slots (`SpawnStage(…, aboveView:
+  false)`) and `FallIn` flies each soldier out of his chest into its slot, front rank first, then `Advance`s; `Disband`
+  clears it in puffs. While a boss is up, `GameManager` ignores `ArmyDefeated`, turns `ArmyReachedRonin` into a hit and
+  a disband, and levy kills drop no souls or scrolls (hearts still can).
 - Several bosses at once (Kagetsune's summons): `Boss.Summoned` skips the phase break, makes `Shoot`'s shots
   `PassesShots` and swaps the fall for `SoulFall` (no Defeat line); `Boss.Banish` ends one without `Defeated` (raises
   `Banished`); `Boss.Haunt` tints and outlines it; the static `Boss.Summon` is `GameManager.SummonSoul`, which builds it

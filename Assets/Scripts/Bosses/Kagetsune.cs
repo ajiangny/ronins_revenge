@@ -5,9 +5,9 @@ using UnityEngine;
 // Stage 4's final boss, "The Thousand-Soul Throne": Emperor Kagetsune, colossal and deathless inside an armor of a
 // thousand sealed souls, with the Soul Coffin on his shoulder as a hammer. He barely moves; everything he does is
 // slow, heavy and telegraphed. Phase 1 is his law (the Coffer Slam, the Toll of Fealty, the Ofuda Decree, the
-// Thousand-Soul Wail, and the parry-only Last Toll). His phase break snaps the coffin's chains and he becomes the
+// Spirit Hyper Beam, and the parry-only Last Toll), and his levy of the dead army falls in below him. His phase break snaps the coffin's chains and he becomes the
 // Unchained Wraith: faster, with skull swarms, lashing chains, the parry-only Soul Coffin, the Night of a Thousand
-// Bells, and the three bosses' souls dragged out of the coffin at 30% health to fight beside him with their own moves.
+// Bells, a far greater host of the dead, and the three bosses' souls dragged out of the coffin at 30% health to fight beside him with their own moves.
 public partial class Kagetsune : Boss
 {
     public const int StartingHealth = 210;
@@ -66,6 +66,7 @@ public partial class Kagetsune : Boss
         BossLine.Rend => "Again. And again.",
         BossLine.Pendulum => "Reap.",
         BossLine.Harvest => "Come home, all of you.",
+        BossLine.Levy => "Rise, my dead. Fall in.",
         _ => null,
     };
 
@@ -93,9 +94,9 @@ public partial class Kagetsune : Boss
 
     enum Move
     {
-        CofferSlam, Toll, Ofuda, Wail, LastToll, Curtain,
+        CofferSlam, Toll, Ofuda, Beam, LastToll, Curtain,
         Swarm, Chains, SoulCoffin, ThousandBells, River,
-        Summon, Rend, Pendulum, Harvest,
+        Summon, Rend, Pendulum, Harvest, Levy,
     }
 
     bool secondPhase => SecondPhase;
@@ -254,6 +255,7 @@ public partial class Kagetsune : Boss
     protected override void OnCleared()
     {
         BanishSoul();
+        DisbandLevy();
         StopCage();
     }
 
@@ -293,6 +295,7 @@ public partial class Kagetsune : Boss
                 Move move = NextMove();
                 movesSinceParry = move == Move.LastToll || move == Move.SoulCoffin ? 0 : movesSinceParry + 1;
                 movesSinceSoul = move == Move.Summon || SoulOut ? 0 : movesSinceSoul + 1;
+                movesSinceLevy = move == Move.Levy || LevyOut ? 0 : movesSinceLevy + 1;
                 // His ultimate's count holds while a soul fights: it waits for the field to clear.
                 movesSinceUltimate = move == Move.ThousandBells ? 0 : SoulOut ? movesSinceUltimate : movesSinceUltimate + 1;
                 lastMove = move;
@@ -326,7 +329,7 @@ public partial class Kagetsune : Boss
         Move.CofferSlam => CofferSlam(),
         Move.Toll => TollOfFealty(secondPhase ? 5 : 3),
         Move.Ofuda => OfudaDecree(),
-        Move.Wail => ThousandSoulWail(),
+        Move.Beam => SpiritHyperBeam(),
         Move.LastToll => LastToll(),
         Move.Curtain => RosaryCurtain(),
         Move.Swarm => WraithSwarm(),
@@ -336,6 +339,7 @@ public partial class Kagetsune : Boss
         Move.Rend => ReliquaryRend(),
         Move.Pendulum => CoffinPendulum(),
         Move.Harvest => SoulHarvest(),
+        Move.Levy => RaiseLevy(),
         _ => SoulRiver(),
     };
 
@@ -353,8 +357,10 @@ public partial class Kagetsune : Boss
         Move parry = secondPhase ? Move.SoulCoffin : Move.LastToll;
         if (movesSinceParry >= ParryAtLatest) return parry;
         if (secondPhase && movesSinceSoul >= SoulAtLatest) return Move.Summon;
+        // His dead are called again once the last levy is cut down: at the latest after a few moves, sometimes sooner.
+        if (!LevyOut && (movesSinceLevy >= LevyAtLatest || movesSinceLevy >= 2 && Random.value < 0.2f)) return Move.Levy;
 
-        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail, Move.Curtain, Move.Rend };
+        var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Beam, Move.Curtain, Move.Rend };
         if (secondPhase)
         {
             options.Add(Move.Swarm);

@@ -60,6 +60,13 @@ public partial class GameManager
     void OnArmyReachedRonin()
     {
         if (state != State.Playing) return;
+        // A boss's levy that reaches him costs a life, not the run, and is spent in the blow.
+        if (activeBoss != null)
+        {
+            army.Disband(activeBoss.Colour);
+            ronin.TakeHit(ronin.Bounds.center);
+            return;
+        }
         if (godMode)
         {
             KillArmy();

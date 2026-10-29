@@ -166,6 +166,17 @@ public partial class GameManager
         return summons.Count > 0 ? summons[0] : null;
     }
 
+    // Kagetsune's levy (Boss.Muster): his formation in the stage's colours and under the run's oaths, flying out of
+    // `from` into its slots. One at a time, and only mid-fight.
+    bool MusterLevy(LevelConfig levy, Vector3 from, Color soul)
+    {
+        if (state != State.Playing || activeBoss == null || army.Remaining > 0) return false;
+        levy = Sworn(levy);
+        levy.samuraiColor = Stage.rounds[Stage.rounds.Length - 1].samuraiColor;
+        army.Muster(levy, ronin.transform, ronin.TopY, blockers.TopY, from, levy.rows * levy.columns > 20 ? 2.4f : 1.6f, soul);
+        return true;
+    }
+
     void ClearSummons()
     {
         foreach (Boss soul in summons) if (soul != null) soul.Banish();

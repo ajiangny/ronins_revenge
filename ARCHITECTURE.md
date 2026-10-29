@@ -53,7 +53,7 @@ the scene keeps pointing at `Name.cs`. Keep new members in the part they belong 
   `Rewards`, `Bosses`, `Talk` and `Stages`.
 - `Utsusemi`: `Kasa`, `Lattice`, `Hours`, `Plumb`, `Lantern`, `Beams`, `Overload` and `Clock`, one per move family.
 - `Kagetsune`: `Kit` (stride, bullets, telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls`
-  (the summoned bosses and their borrowed powers) and `Phase` (the break and his fall).
+  (the summoned bosses and their borrowed powers), `Levy` (his levy of the dead army) and `Phase` (the break and his fall).
 - `Shirogane`: `Moves` (phase 1 and the parry-only draws), `Wolf` (phase 2 and Kuon's Maw) and `Phase` (the break and
   her fall). Kuon is `SpiritWolf.cs`.
 - `Dialogue`: `Dialogue.Lines.cs` is the table of every conversation; `Dialogue.cs` holds the types and the picker.

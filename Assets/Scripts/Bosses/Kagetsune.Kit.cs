@@ -63,7 +63,7 @@ public partial class Kagetsune
     float Row => ronin.Bounds.center.y;
     float FieldLeft => LeftEdge + 0.6f;
     float FieldRight => RightEdge - 0.6f;
-    // Past the middle of his first bar he hardens: a second slam lane, embers off the Wail, a gapless curtain row,
+    // Past the middle of his first bar he hardens: a second slam lane, a faster Spirit Hyper Beam, a gapless curtain row,
     // and a ring of skulls closing with the Last Toll.
     bool Hardened => secondPhase || HealthFraction < 0.5f;
     int SpiralArms => lastBell ? 4 : 3;

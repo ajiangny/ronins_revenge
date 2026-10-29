@@ -205,10 +205,19 @@ public partial class GameManager
             int bought = Upgrades.Bought(id);
             bool maxed = Upgrades.Maxed(id);
             bool affordable = Upgrades.CanBuy(id);
-            string price = maxed ? (Upgrades.IsOff(id) ? $"<color=#{muted}>OFF</color>" : "") : $"<color=#{(affordable ? noteHex : muted)}>{Upgrades.Price(id)}</color>";
+            // An upper rank that also asks for a seal or silk shows its price in that colour, and its note line says
+            // how many it takes and how many he holds.
+            (Relic relic, int needed) = Upgrades.Needs(id);
+            string relicHex = ColorUtility.ToHtmlStringRGB(Upgrades.RelicColour(relic));
+            string priceHex = !affordable ? muted : needed > 0 ? relicHex : noteHex;
+            string price = maxed ? (Upgrades.IsOff(id) ? $"<color=#{muted}>OFF</color>" : "") : $"<color=#{priceHex}>{Upgrades.Price(id)}</color>";
+            string needs = needed > 0
+                ? $"   <color=#{relicHex}>+ {needed} {Upgrades.RelicName(relic, needed)}</color> <color=#{muted}>(you have {Upgrades.Held(relic)})</color>"
+                : "";
+            string verdict = Upgrades.CanBuy(id) ? "Enter to learn" : !Upgrades.HasRelicsFor(id) ? $"needs {Upgrades.RelicName(relic, needed)}" : "not enough notes";
             string note = maxed
                 ? $"{song.Effect(song.MaxRank)}   <color=#{muted}>·  Enter switches it {(Upgrades.IsOff(id) ? "on" : "off")}</color>"
-                : $"{song.Effect(bought + 1)}   <color=#{muted}>·  {(Upgrades.CanBuy(id) ? "Enter to learn" : "not enough notes")}</color>";
+                : $"{song.Effect(bought + 1)}{needs}   <color=#{muted}>·  {verdict}</color>";
             MenuUI.Item item = MenuUI.Item.Button(song.Name.ToUpperInvariant(), () =>
             {
                 if (maxed) Upgrades.Toggle(id);
@@ -225,9 +234,24 @@ public partial class GameManager
         {
             Upgrades.RefundAll();
             ShowSongs(back, refundRow);
-        }, $"Forget every song and take back {Upgrades.Spent} notes"));
+        }, $"Forget every song and take back {Upgrades.Spent} notes{RelicRefund}"));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("FLUTE SONGS", null, items.ToArray(), back, startIndex, paper: paper, gridColumns: 2);
+    }
+
+    // The seals and silk a refund would also return, for its note line.
+    static string RelicRefund
+    {
+        get
+        {
+            string text = "";
+            foreach (Relic relic in System.Enum.GetValues(typeof(Relic)))
+            {
+                int spent = Upgrades.SpentOf(relic);
+                if (spent > 0) text += $", {spent} {Upgrades.RelicName(relic, spent)}";
+            }
+            return text;
+        }
     }
 
     // Three journeys side by side, like Hades' save profiles. An empty one is a new game, which starts on the hill
@@ -477,6 +501,12 @@ public partial class GameManager
         if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
         if (notesThisRun > 0)
             body += $"\n\n<color=#{ColorUtility.ToHtmlStringRGB(OniColour)}>+{notesThisRun} SPIRIT NOTES</color>  <color=#{muted}>({Save.Data.embers} to spend in the temple)</color>";
+        foreach (Relic relic in System.Enum.GetValues(typeof(Relic)))
+        {
+            int gained = relicsThisRun[(int)relic];
+            if (gained > 0)
+                body += $"\n<color=#{ColorUtility.ToHtmlStringRGB(Upgrades.RelicColour(relic))}>+{gained} {Upgrades.RelicName(relic, gained).ToUpperInvariant()}</color>";
+        }
         menu.Show(title, body, new[]
         {
             MenuUI.Item.Button("RETURN TO TEMPLE", () => ReloadToSafeArea(true)),

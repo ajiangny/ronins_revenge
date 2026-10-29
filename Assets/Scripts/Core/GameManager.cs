@@ -108,6 +108,8 @@ public partial class GameManager : MonoBehaviour
     [Header("Technique scrolls (Sword Arts)")]
     [Tooltip("Chance a downed kite scout also drops a technique scroll.")]
     [SerializeField, Range(0, 1)] float scrollChanceFromScout = 0.25f;
+    [Tooltip("Chance a downed kite scout leaves a Kite Silk, which the upper ranks of some Flute Songs ask for.")]
+    [SerializeField, Range(0, 1)] float silkChanceFromScout = 0.35f;
     [Tooltip("Chance any fallen samurai drops a technique scroll.")]
     [SerializeField, Range(0, 1)] float scrollChancePerKill = 0f;
     [Tooltip("Most technique scrolls that can drop in one run, like Hades' two Daedalus Hammers.")]
@@ -349,6 +351,8 @@ public partial class GameManager : MonoBehaviour
     int highScoreAtStart;
     // Spirit Notes earned this run (already added to the save), for the end screen.
     int notesThisRun;
+    // Seals and silk gained this run, by Relic, for the end screen.
+    readonly int[] relicsThisRun = new int[2];
     float noteFraction;
     // Second Dawn and Fate's Thread work once a run.
     bool dawnUsed;
@@ -604,6 +608,8 @@ public partial class GameManager : MonoBehaviour
         // The temple's resources, Hades-style in the corner. A new currency is one more line here.
         resources = ResourceTray.Build(ui);
         resources.Add("SpiritNotes", () => Save.Data.embers, NoteIcon);
+        resources.Add("WarlordSeals", () => Upgrades.Held(Relic.Seal), new[] { ProceduralSprites.Seal });
+        resources.Add("KiteSilk", () => Upgrades.Held(Relic.Silk), new[] { ProceduralSprites.Silk });
         dialogueScene = ui.gameObject.AddComponent<DialogueScene>();
         dialogueScene.Bind(ui);
         baseRoninArt = ronin.art;

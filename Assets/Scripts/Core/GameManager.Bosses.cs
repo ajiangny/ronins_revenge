@@ -539,6 +539,9 @@ public partial class GameManager
         yield return new WaitForSeconds(activeBoss.DefeatSeconds);
         Earn(Upgrades.ForBoss(Stage.boss));
         Save.BossFelled(Stage.boss);
+        // A seal for every warlord felled, and another the first time each one falls.
+        bool firstFall = Save.Data.winsVs[(int)Stage.boss] == 1;
+        GainRelic(Relic.Seal, Upgrades.SealsPerBoss + (firstFall ? Upgrades.SealsFirstFall : 0), where);
         // Poguru has a word for a fallen warlord; the Emperor's fall has the dawn instead.
         if (Stage.boss != BossKind.Kagetsune) yield return PoguruBark(DialogueEvent.PoguruBoss, 1f, Stage.boss);
         // The Emperor is the end: no boon, the dawn.

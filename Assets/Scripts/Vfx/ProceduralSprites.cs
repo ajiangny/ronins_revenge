@@ -44,8 +44,12 @@ public static class ProceduralSprites
     static readonly Sprite[] notes = new Sprite[NotePatterns.Length];
 
     // Rows are listed top to bottom; '#' is a filled pixel.
-    static Sprite FromPattern(string[] rows)
+    static Sprite FromPattern(string[] rows) => FromPattern(rows, new Color32(255, 255, 255, 255));
+
+    // '#' takes the colour, '+' a darker shade of it, for small icons drawn in their own colours.
+    static Sprite FromPattern(string[] rows, Color32 colour)
     {
+        var shade = new Color32((byte)(colour.r * 0.55f), (byte)(colour.g * 0.55f), (byte)(colour.b * 0.55f), 255);
         int width = rows[0].Length, height = rows.Length;
         var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
         var pixels = new Color32[width * height];
@@ -53,7 +57,8 @@ public static class ProceduralSprites
         {
             for (int x = 0; x < width; x++)
             {
-                pixels[(height - 1 - y) * width + x] = rows[y][x] == '#' ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
+                char c = rows[y][x];
+                pixels[(height - 1 - y) * width + x] = c == '#' ? colour : c == '+' ? shade : new Color32(0, 0, 0, 0);
             }
         }
         texture.SetPixels32(pixels);
@@ -680,6 +685,36 @@ public static class ProceduralSprites
         ".##.",
     });
     static Sprite exclaim;
+
+    // A warlord's square seal, red with its carved mark: until it has art, the Warlord's Seal in the resource tray.
+    public static Sprite Seal => seal != null ? seal : seal = FromPattern(new[]
+    {
+        "#########",
+        "#+++++++#",
+        "#+#####+#",
+        "#+#+#+#+#",
+        "#+#####+#",
+        "#+#+#+#+#",
+        "#+#####+#",
+        "#+++++++#",
+        "#########",
+    }, new Color32(220, 62, 52, 255));
+    static Sprite seal;
+
+    // A spool of pale kite silk: until it has art, the Kite Silk in the resource tray.
+    public static Sprite Silk => silk != null ? silk : silk = FromPattern(new[]
+    {
+        "+++++++++",
+        ".+++++++.",
+        "..#####..",
+        "..#+#+#..",
+        "..#####..",
+        "..#+#+#..",
+        "..#####..",
+        ".+++++++.",
+        "+++++++++",
+    }, new Color32(160, 220, 242, 255));
+    static Sprite silk;
 
     // A four-point pixel star, drawn white to be tinted: light catching a blade.
     public static Sprite Glint => glint != null ? glint : glint = FromPattern(new[]

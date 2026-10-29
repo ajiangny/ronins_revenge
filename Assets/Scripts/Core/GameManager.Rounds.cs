@@ -29,6 +29,17 @@ public partial class GameManager
         if (state == State.Playing && Random.value < scoutSoulChance) MaybeDropSoul(scout.transform.position);
         // Scouts are where scrolls usually come from; it lands beside the soul rather than on it.
         if (state == State.Playing) MaybeDropScroll(scout.transform.position + Vector3.right * 0.9f, scrollChanceFromScout);
+        if (Random.value < silkChanceFromScout) GainRelic(Relic.Silk, 1, scout.transform.position);
+    }
+
+    // A seal or silk goes into the save at once, like notes, so a death keeps it.
+    void GainRelic(Relic relic, int count, Vector3 where)
+    {
+        Upgrades.AddRelic(relic, count);
+        relicsThisRun[(int)relic] += count;
+        RunLog.Note($"+{count} {Upgrades.RelicName(relic, count)}");
+        Fx.Play(Fx.Impact, where, Upgrades.RelicColour(relic), 1.4f);
+        Sfx.Play(Sfx.SoulCollect, 0.7f, 1.3f);
     }
 
     // Drops into a stage's boss fight, or its rounds, on that fight's own map. A boss jump counts as the last round.
@@ -112,6 +123,7 @@ public partial class GameManager
         Boss.HealthScale = 1f + Oaths.Rank(OathId.IronGenerals) * Oaths.BossHealthPerRank;
         noteFraction = 0f;
         notesThisRun = 0;
+        System.Array.Clear(relicsThisRun, 0, relicsThisRun.Length);
         dawnUsed = false;
         lowLifeWarned = false;
         redrawsLeft = Upgrades.Rank(UpgradeId.FatesThread);

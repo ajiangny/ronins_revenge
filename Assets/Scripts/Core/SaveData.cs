@@ -44,6 +44,9 @@ public class SaveData
     // Indexed by UpgradeId: ranks bought, and the maxed songs switched off.
     public int[] ranks = new int[0];
     public List<int> songsOff = new List<int>();
+    // Indexed by Relic: the Warlord's Seals and Kite Silk held, and those spent on songs (a refund returns them).
+    public int[] relics = new int[0];
+    public int[] relicsSpent = new int[0];
     // The weapon rack's pick (Ronin.Blade): 0 the katana, 1 its kunai skin.
     public int weapon;
     // The ultimate taken from the rack beside it (Ronin.Ultimate).

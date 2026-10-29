@@ -11,6 +11,11 @@ public enum UpgradeId
     ThirdPath, BanishingBell, PondsBlessing, AncestralLore, CuttingWind, WideGuard,
 }
 
+// The rarer things the upper ranks of some songs ask for besides notes, like Hades' Chthonic Keys and Titan Blood or
+// Hades II's reagents: Warlord's Seals from the warlords felled, Kite Silk cut from the kite scouts. Saves index them
+// by this enum, so new ones go on the end.
+public enum Relic { Seal, Silk }
+
 public sealed class Song
 {
     public UpgradeId Id;
@@ -19,6 +24,8 @@ public sealed class Song
     public int BaseCost;
     // What the song does at a rank, for the shop's note line.
     public Func<int, string> Effect;
+    // What buying a rank asks for besides notes, indexed by rank - 1; a count of 0 asks for nothing.
+    public (Relic relic, int count)[] Needs;
     // No longer sold; ranks bought before are refunded (Soul Pull, once souls stopped dropping from kills).
     public bool Retired;
 }
@@ -41,12 +48,17 @@ public static class Upgrades
     public const float ParryRadiusPerRank = 0.1f;
     // Second Dawn raises him with this many lives.
     public const int DawnLives = 2;
+    // Seals for a warlord felled, and again the first time each one falls.
+    public const int SealsPerBoss = 1;
+    public const int SealsFirstFall = 1;
+
+    static readonly (Relic, int) None = (Relic.Seal, 0);
 
     public static readonly Song[] All =
     {
-        new Song { Id = UpgradeId.KeenEye, Name = "Keen Eye", MaxRank = 2, BaseCost = 60,
+        new Song { Id = UpgradeId.KeenEye, Name = "Keen Eye", MaxRank = 2, BaseCost = 60, Needs = new[] { None, (Relic.Silk, 2) },
             Effect = r => $"Parry window  +{r * ParryWindowPerRank:0.00} s" },
-        new Song { Id = UpgradeId.SwiftFeet, Name = "Swift Feet", MaxRank = 3, BaseCost = 60,
+        new Song { Id = UpgradeId.SwiftFeet, Name = "Swift Feet", MaxRank = 3, BaseCost = 60, Needs = new[] { None, None, (Relic.Silk, 3) },
             Effect = r => $"Move speed  +{r * 5}%" },
         new Song { Id = UpgradeId.QuickDraw, Name = "Quick Draw", MaxRank = 2, BaseCost = 80,
             Effect = r => $"Swing cooldown  -{r * 5}%" },
@@ -58,11 +70,11 @@ public static class Upgrades
             Effect = r => $"Untouchable after a hit  +{r * InvulnerablePerRank:0.0} s" },
         new Song { Id = UpgradeId.SoulPull, Name = "Soul Pull", MaxRank = 2, BaseCost = 100, Retired = true,
             Effect = r => "Souls now come from the portals" },
-        new Song { Id = UpgradeId.IronWill, Name = "Iron Will", MaxRank = 2, BaseCost = 450,
+        new Song { Id = UpgradeId.IronWill, Name = "Iron Will", MaxRank = 2, BaseCost = 450, Needs = new[] { None, (Relic.Seal, 2) },
             Effect = r => $"Start each run with  +{r} li{(r == 1 ? "fe" : "ves")}" },
         new Song { Id = UpgradeId.FatesThread, Name = "Fate's Thread", MaxRank = 3, BaseCost = 300,
             Effect = r => $"Redraw a boon offer  {r} time{(r == 1 ? "" : "s")} a run  (R)" },
-        new Song { Id = UpgradeId.SecondDawn, Name = "Second Dawn", MaxRank = 1, BaseCost = 1200,
+        new Song { Id = UpgradeId.SecondDawn, Name = "Second Dawn", MaxRank = 1, BaseCost = 1200, Needs = new[] { (Relic.Seal, 2) },
             Effect = r => $"Once a run, rise again with {DawnLives} lives" },
         new Song { Id = UpgradeId.ThirdPath, Name = "Third Path", MaxRank = 1, BaseCost = 400,
             Effect = r => "Three portals open after each round, not two" },
@@ -72,9 +84,9 @@ public static class Upgrades
             Effect = r => "A second Spirit Bead after the first boss" },
         new Song { Id = UpgradeId.AncestralLore, Name = "Ancestral Lore", MaxRank = 1, BaseCost = 600,
             Effect = r => "Each stage's first soul offers Rare or better" },
-        new Song { Id = UpgradeId.CuttingWind, Name = "Cutting Wind", MaxRank = 3, BaseCost = 70,
+        new Song { Id = UpgradeId.CuttingWind, Name = "Cutting Wind", MaxRank = 3, BaseCost = 70, Needs = new[] { None, None, (Relic.Silk, 3) },
             Effect = r => $"Slash speed  +{r * 5}%" },
-        new Song { Id = UpgradeId.WideGuard, Name = "Wide Guard", MaxRank = 2, BaseCost = 90,
+        new Song { Id = UpgradeId.WideGuard, Name = "Wide Guard", MaxRank = 2, BaseCost = 90, Needs = new[] { None, (Relic.Seal, 1) },
             Effect = r => $"Parry reach  +{r * ParryRadiusPerRank:0.0}" },
     };
 
@@ -115,16 +127,64 @@ public static class Upgrades
         return Get(id).BaseCost * (Bought(id) + 1) + fee;
     }
 
-    public static bool CanBuy(UpgradeId id) => !Maxed(id) && Save.Data.embers >= Price(id);
+    // What the next rank asks for besides notes (a count of 0 for nothing).
+    public static (Relic relic, int count) Needs(UpgradeId id)
+    {
+        Song song = Get(id);
+        int next = Bought(id);
+        return song.Needs != null && next < song.Needs.Length ? song.Needs[next] : None;
+    }
+
+    public static bool HasRelicsFor(UpgradeId id)
+    {
+        (Relic relic, int count) = Needs(id);
+        return Held(relic) >= count;
+    }
+
+    public static bool CanBuy(UpgradeId id) => !Maxed(id) && Save.Data.embers >= Price(id) && HasRelicsFor(id);
 
     public static bool Buy(UpgradeId id)
     {
         if (!CanBuy(id)) return false;
+        (Relic relic, int count) = Needs(id);
         Save.Data.embers -= Price(id);
+        Relics[(int)relic] -= count;
+        RelicsSpent[(int)relic] += count;
         Ranks[(int)id]++;
         Save.Write();
         return true;
     }
+
+    static int[] Relics => Sized(ref Save.Data.relics);
+    // Counted as they're spent rather than worked out from the ranks, so a rank bought before it asked for one
+    // gives nothing back on a refund.
+    static int[] RelicsSpent => Sized(ref Save.Data.relicsSpent);
+
+    static int[] Sized(ref int[] counts)
+    {
+        int length = Enum.GetValues(typeof(Relic)).Length;
+        if (counts == null || counts.Length < length) Array.Resize(ref counts, length);
+        return counts;
+    }
+
+    public static int Held(Relic relic) => Relics[(int)relic];
+    public static int SpentOf(Relic relic) => RelicsSpent[(int)relic];
+
+    public static void AddRelic(Relic relic, int count)
+    {
+        Relics[(int)relic] += count;
+        Save.Write();
+    }
+
+    public static string RelicName(Relic relic, int count) => relic switch
+    {
+        Relic.Seal => count == 1 ? "Warlord's Seal" : "Warlord's Seals",
+        _ => "Kite Silk",
+    };
+
+    public static readonly Color SealColour = new Color(0.86f, 0.24f, 0.2f);
+    public static readonly Color SilkColour = new Color(0.62f, 0.86f, 0.95f);
+    public static Color RelicColour(Relic relic) => relic == Relic.Seal ? SealColour : SilkColour;
 
     // Everything spent comes back. Prices are worked out again in buying order, since the surcharge grows with it.
     public static int Spent
@@ -149,6 +209,8 @@ public static class Upgrades
     public static void RefundAll()
     {
         Save.Data.embers += Spent;
+        for (int i = 0; i < Relics.Length; i++) Relics[i] += RelicsSpent[i];
+        Array.Clear(RelicsSpent, 0, RelicsSpent.Length);
         Array.Clear(Ranks, 0, Ranks.Length);
         Save.Data.songsOff.Clear();
         Save.Write();

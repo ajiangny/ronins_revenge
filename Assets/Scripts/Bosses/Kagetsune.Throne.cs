@@ -54,6 +54,13 @@ public partial class Kagetsune
         Shockwave(impact, 4.5f);
         TimeRipple.Emit(impact, 5f, 0.5f, 0.5f);
         Debris.BurstSprites(impact, art.deathParticles, Bronze, 16, 1f, 9f);
+        // The crater: short cracks split out all round where the hammer landed.
+        for (int i = 0; i < 6; i++)
+        {
+            float angle = i * 60f + Random.Range(-20f, 20f);
+            Vector3 reach = Quaternion.Euler(0, 0, angle) * Vector3.right * Random.Range(0.8f, 1.5f);
+            Split(impact, impact + new Vector3(reach.x, reach.y * 0.55f, 0), 24f, 0.75f);
+        }
 
         // The cone: each fan's cracks spread from the blow to the row, `ConeHalfAngle` either side of straight down.
         float ground = GroundY + 0.25f;
@@ -83,26 +90,29 @@ public partial class Kagetsune
     const float EruptWidth = 1.4f;
 
     // One crack of the cone: the fissure opens from the blow toward the row, and a column erupts every ColumnStep
-    // along it as it gets there, short ones on the way and a full one where it reaches the row (the one that burns).
+    // along it as it gets there (its stretch of crack flaring first), short ones on the way and a full one where it reaches the row (the one that burns).
     IEnumerator OpenCrack(Vector3 from, Vector3 to)
     {
+        SoulFissure crack = Split(from, to, FissureSpeed);
         float length = Vector3.Distance(from, to);
         for (float d = ColumnStep; d < length - ColumnStep * 0.5f; d += ColumnStep)
         {
             Vector3 spot = Vector3.Lerp(from, to, d / length);
-            StartCoroutine(EruptColumn(spot, d / FissureSpeed, 2.5f, false));
+            StartCoroutine(EruptColumn(spot, d / FissureSpeed, 2.5f, false, crack));
         }
-        StartCoroutine(EruptColumn(to, length / FissureSpeed, EruptHeight, true));
-        yield return Fissure(from, to, FissureSpeed);
+        StartCoroutine(EruptColumn(to, length / FissureSpeed, EruptHeight, true, crack));
+        yield return new WaitForSeconds(crack.OpenSeconds);
     }
 
     // One column out of a crack: its spot glows and swells for the tell, then soul-fire bursts up from it. On the
     // ronin's row (`burns`) it burns him if he's in it; anywhere it cracks the cover it rises through. Once the
     // crack is open it runs in real time: a stagger doesn't hold columns already glowing.
-    IEnumerator EruptColumn(Vector3 spot, float delay, float height, bool burns)
+    IEnumerator EruptColumn(Vector3 spot, float delay, float height, bool burns, SoulFissure crack)
     {
         yield return new WaitForSeconds(delay);
         if (IsDead) yield break;
+        // The crack itself flares where the column is coming.
+        if (crack != null) crack.Flare(spot, ColumnTell);
         float width = burns ? EruptWidth : EruptWidth * 0.7f;
         SpriteRenderer mark = Glowing(spot + Vector3.up * 0.2f, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 4);
         Detach(mark.gameObject);
@@ -138,54 +148,20 @@ public partial class Kagetsune
         if (burns) GroundFire.Light(spot, soul: true);
     }
 
-    // A fissure splitting the ground from one point to another at `speed`, piece by piece: each piece the Kage_Fissure
-    // crack (splitting open, soul-fire glowing up out of it, cooling dark), laid end to end along a jagged line, or
-    // a seam of teal light round a dark rift without the art. Any cover it runs through breaks. Not transient.
-    IEnumerator Fissure(Vector3 from, Vector3 to, float speed)
+    // A fissure splitting the courtyard from one point to another at `speed` (a SoulFissure, drawn in pixels the size
+    // of the ronin's art). As each piece opens, the cover over it breaks and stone chips and dust kick up from it.
+    SoulFissure Split(Vector3 from, Vector3 to, float speed, float width = 1f)
     {
-        float length = Vector3.Distance(from, to);
-        if (length < 0.1f) yield break;
-        Vector3 dir = (to - from) / length;
-        Vector3 side = new Vector3(-dir.y, dir.x, 0);
-        Sprite[] frames = Fx.Frames(Fx.KageFissure);
-        float piece = frames != null ? frames[0].bounds.size.x : 1.2f;
-        int segments = Mathf.Max(2, Mathf.CeilToInt(length / piece));
-        Vector3 last = from;
-        for (int i = 1; i <= segments; i++)
+        float pixel = ronin != null ? Mathf.Clamp(ronin.ArtPixelSize, 1f / 64f, 1f / 24f) : 1f / 48f;
+        SoulFissure crack = SoulFissure.Open(from, to, speed, pixel, width);
+        crack.Opened += (a, b) =>
         {
-            Vector3 next = from + dir * (length * i / segments) + (i < segments ? side * Random.Range(-0.25f, 0.25f) : Vector3.zero);
-            Vector3 step = next - last;
-            float angle = Mathf.Atan2(step.y, step.x) * Mathf.Rad2Deg;
-            FxPlayer crack = frames != null ? Fx.Play(Fx.KageFissure, (last + next) / 2f + Vector3.forward * 0.5f, Color.white, 1f, null, 4) : null;
-            if (crack != null)
-            {
-                // Stretched to just overlap the next piece, and flipped at random so the pieces don't repeat.
-                float scale = (step.magnitude + 0.1f) / piece;
-                crack.transform.rotation = Quaternion.Euler(0, 0, angle);
-                crack.transform.localScale = new Vector3(scale, CrackThickness * (Random.value < 0.5f ? 1f : -1f), 1f);
-            }
-            else
-            {
-                Vector3 a = last - dir * 0.06f, b = next + dir * 0.06f;
-                for (int layer = 0; layer < 2; layer++)
-                {
-                    var rift = new GameObject("Fissure").AddComponent<SpriteRenderer>();
-                    rift.sprite = ProceduralSprites.White;
-                    rift.color = layer == 0 ? new Color(Teal.r, Teal.g, Teal.b, 0.75f) : new Color(0.04f, 0.03f, 0.05f, 0.95f);
-                    rift.sortingOrder = 3 + layer;
-                    Stretch(rift, a, b, layer == 0 ? 0.24f : 0.09f);
-                    rift.transform.position += Vector3.forward * 0.5f;
-                    Fader.Fade(rift, 3.5f);
-                }
-            }
-            BreakCoverAlong(last, next);
-            last = next;
-            yield return new WaitForSeconds(length / segments / speed);
-        }
+            BreakCoverAlong(a, b);
+            Debris.BurstSprites(b, art.deathParticles, new Color(0.55f, 0.52f, 0.5f), 3, 0.5f * width, 3.5f);
+            if (Random.value < 0.5f) Fx.Play(Fx.SmokePuff, b, new Color(0.3f, 0.3f, 0.32f, 0.55f), 0.9f * width);
+        };
+        return crack;
     }
-
-    // How thick a fissure piece is drawn across its line: heavier than the art, so it reads as split stone.
-    const float CrackThickness = 1.7f;
 
     // The ground splits under the cover a crack runs through: every blocker on the way breaks.
     static readonly RaycastHit[] CrackHits = new RaycastHit[16];

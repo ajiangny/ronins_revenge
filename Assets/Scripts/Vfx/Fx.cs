@@ -101,8 +101,6 @@ public static class Fx
     public const string KageChain = "Kage_Chain";
     public const string KageShockwave = "Kage_Shockwave";
     public const string KageSoulColumn = "Kage_SoulColumn";
-    // A piece of the fissure his hammer splits the courtyard with, laid end to end along the crack.
-    public const string KageFissure = "Kage_Fissure";
     // His polish: a bronze sound ring off each toll, the Wail's flare, a chain bursting, an ofuda burning away, the
     // soul-fire he burns in once the chains snap, his lock-on reticle and a freed soul.
     public const string KageTollRing = "Kage_TollRing";

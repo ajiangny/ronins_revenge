@@ -862,24 +862,6 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 395bc87f88109401ab1abfa58f60ce1d, type: 3}
     fps: 14
     loop: 0
-  - id: Kage_Fissure
-    frames:
-    - {fileID: 21300000, guid: 7484380d575b8433ea68b9c942cd15c7, type: 3}
-    - {fileID: 21300000, guid: ef087aef7a7d54ad8940751d2afc9ba8, type: 3}
-    - {fileID: 21300000, guid: d3c6ea0e1175e4d0492f787b6ddda86a, type: 3}
-    - {fileID: 21300000, guid: e2fbdafacf3e74e44bc5927bf7a1cea2, type: 3}
-    - {fileID: 21300000, guid: 08ee7d7b0852e4067a9a3df30d2b8672, type: 3}
-    - {fileID: 21300000, guid: 77ad9e949e7c948768a5ada12c82ac84, type: 3}
-    - {fileID: 21300000, guid: ce01c74a82a9141de8ac8ac18fbe0d19, type: 3}
-    - {fileID: 21300000, guid: e791f520f2e7648bbb8473cea8d813a6, type: 3}
-    - {fileID: 21300000, guid: 88a7c6388f80e4e87a582ce504145a4c, type: 3}
-    - {fileID: 21300000, guid: 1ac8ed699c3294465b8f61924ef84110, type: 3}
-    - {fileID: 21300000, guid: 5a3f015e6683c459287fbb75a47c1975, type: 3}
-    - {fileID: 21300000, guid: 382dbc8cee3d342e89bc9a4acc2af68f, type: 3}
-    - {fileID: 21300000, guid: 28bc7f8c8381d451681eb22c1fc69015, type: 3}
-    - {fileID: 21300000, guid: c17af3c3bc505480e8d07e7cb972713c, type: 3}
-    fps: 7
-    loop: 0
   - id: Kage_TollRing
     frames:
     - {fileID: 21300000, guid: 5843db3af7af3495db8d0029448cf1ff, type: 3}

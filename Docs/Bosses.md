@@ -125,10 +125,14 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   wind-up, everything before `ImpactFrame`, over half the tell while the art rears up and trembles off `viewHome`/
   `viewScale`; `StrikeHammer` plays the impact on the blow and `SettleView` springs the squash back, `ResetView` on a
   stagger or phase break; then fans of `OpenCrack`s, a cone `ConeHalfAngle` either side of straight down to the
-  ronin's row (three cracks, then two between them, then three again when hardened): each `Fissure` lays
-  `Fx.KageFissure` pieces along a jagged line at `FissureSpeed`, `BreakCoverAlong` demolishes any `Blocker` it crosses,
-  and `EruptColumn`s glow for `ColumnTell` then burst as `SoulColumn`s every `ColumnStep`, only the one at the row
-  burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
+  ronin's row (three cracks, then two between them, then three again when hardened): each crack is a
+  `SoulFissure` (`Split`, `SoulFissure.cs`: pixel art drawn in code along its own jagged path at the ronin's art pixel
+  size: a near-black rift tapering from `StartWidth` to `TipWidth`, a lit far wall, a bright near lip and a shadowed far
+  edge, side cracks, a stepped teal light round it; it opens piece by piece at `FissureSpeed`, white-hot then teal with
+  motes rising, then cools to a scar; each piece's `Opened` runs `BreakCoverAlong`, which demolishes any `Blocker` it
+  crosses, and kicks up chips and dust), a star of short cracks marks the crater, and `EruptColumn`s glow for
+  `ColumnTell` (`Flare`ing their stretch of crack) then burst as `SoulColumn`s every `ColumnStep`, only the one at the
+  row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
   Thousand-Soul Wail (a three-bar beam from the chest using `Boss.BeamEnd`/`HitIfCrossed`/`Stretch`, burning cover,

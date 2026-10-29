@@ -7,7 +7,7 @@ using UnityEngine;
 // slow, heavy and telegraphed. Phase 1 is his law (the Coffer Slam, the Toll of Fealty, the Ofuda Decree, the
 // Thousand-Soul Wail, and the parry-only Last Toll). His phase break snaps the coffin's chains and he becomes the
 // Unchained Wraith: faster, with skull swarms, lashing chains, the parry-only Soul Coffin, the Night of a Thousand
-// Bells, and the souls of the three bosses summoned out of the coffin to use their own moves on Oni.
+// Bells, and the three bosses' souls dragged out of the coffin at 30% health to fight beside him with their own moves.
 public partial class Kagetsune : Boss
 {
     public const int StartingHealth = 210;
@@ -22,8 +22,9 @@ public partial class Kagetsune : Boss
     // Parry-only moves: one is offered once this many moves have passed, and forced by ParryAtLatest.
     const int ParryEvery = 3;
     const int ParryAtLatest = 4;
-    // In phase 2 a summoned soul comes at least this often, and the Night of a Thousand Bells every UltimateEvery moves.
-    const int EchoAtLatest = 3;
+    // In phase 2 a soul is summoned at least this many moves after the last one left the field, and the Night of a
+    // Thousand Bells comes every UltimateEvery moves.
+    const int SoulAtLatest = 4;
     const int UltimateEvery = 6;
     const float ExposedSeconds = 1.8f;
 
@@ -59,6 +60,9 @@ public partial class Kagetsune : Boss
         BossLine.SummonShirogane => "Rise, Shirogane. Kneel, and strike.",
         BossLine.EchoShirogane => "Move, Oni. I cannot hold my blades.",
         BossLine.KilledOni => "Back to your hill, little demon. I will be here. I am always here.",
+        BossLine.SoulAbsorbed => "Mine again.",
+        BossLine.RosaryCurtain => "Kneel, in rows.",
+        BossLine.SoulRiver => "Drown in them.",
         _ => null,
     };
 
@@ -88,7 +92,7 @@ public partial class Kagetsune : Boss
     {
         CofferSlam, Toll, Ofuda, Wail, LastToll, Curtain,
         Swarm, Chains, SoulCoffin, ThousandBells, River,
-        EchoBenibana, EchoUtsusemi, EchoShirogane,
+        Summon,
     }
 
     bool secondPhase => SecondPhase;
@@ -99,10 +103,9 @@ public partial class Kagetsune : Boss
     float exposedUntil;
     Move? lastMove;
     int movesSinceParry;
-    int movesSinceEcho;
+    // Moves since a summoned soul last left the field (or since the phase break).
+    int movesSinceSoul;
     int movesSinceUltimate;
-    // The souls take their turns in order the first time round, then come at random.
-    int nextEcho;
     float coffinThrownAt = float.NegativeInfinity;
 
     // Lanes the ofuda have sealed: no parry inside them until they lift.
@@ -117,14 +120,6 @@ public partial class Kagetsune : Boss
     // Open is double damage, but not on top of a stagger's own double: the best burst is ×2, not ×4.
     protected override int DamageMultiplier => Time.time < exposedUntil && !Staggered ? 2 : 1;
     public override float DefeatSeconds => 11f;
-
-    // The bosses whose souls he can summon: their art and the scale each is drawn at.
-    readonly Dictionary<BossKind, (CharacterArt art, float scale)> echoes = new Dictionary<BossKind, (CharacterArt, float)>();
-
-    public void SetEcho(BossKind kind, CharacterArt echoArt, float scale)
-    {
-        if (echoArt != null) echoes[kind] = (echoArt, scale);
-    }
 
     // Where his body parts sit on the art: the soul-fire chest, the bells at his waist, the coffin-hammer's head.
     Vector3 Extents => sprite.bounds.extents;
@@ -155,6 +150,7 @@ public partial class Kagetsune : Boss
         float drained = secondPhase && !IsDead ? 1f - HealthFraction : 0f;
         chestGlow.transform.localScale = Vector3.one * (2.2f + 2.2f * drained) / transform.lossyScale.x;
         UpdateWisps();
+        UpdateSoul();
         if (eyes != null) eyes.transform.position = Centre + Vector3.up * (Extents.y * 0.44f) + Vector3.back * 0.1f;
         UpdateLastBell();
     }
@@ -220,9 +216,17 @@ public partial class Kagetsune : Boss
         lastBellDark.color = new Color(0.02f, 0.06f, 0.06f, pulse);
     }
 
+    // A halt (the ronin fell) or his fall: the soul beside him goes back into the coffin with him.
+    protected override void OnCleared()
+    {
+        BanishSoul();
+        StopCage();
+    }
+
     protected override void OnDestroy()
     {
         base.OnDestroy();
+        BanishSoul();
         if (lastBellDark != null) Destroy(lastBellDark.gameObject);
         foreach (SpriteRenderer wisp in wisps) if (wisp != null) Destroy(wisp.gameObject);
     }
@@ -242,16 +246,18 @@ public partial class Kagetsune : Boss
                 if (Random.value < 0.4f) yield return Stride(NearX(1.5f, 4f));
                 Move move = NextMove();
                 movesSinceParry = move == Move.LastToll || move == Move.SoulCoffin ? 0 : movesSinceParry + 1;
-                movesSinceEcho = IsEcho(move) ? 0 : movesSinceEcho + 1;
-                movesSinceUltimate = move == Move.ThousandBells ? 0 : movesSinceUltimate + 1;
+                movesSinceSoul = move == Move.Summon || SoulOut ? 0 : movesSinceSoul + 1;
+                // His ultimate's count holds while a soul fights: it waits for the field to clear.
+                movesSinceUltimate = move == Move.ThousandBells ? 0 : SoulOut ? movesSinceUltimate : movesSinceUltimate + 1;
                 lastMove = move;
-                // A summoned soul fights beside him: it works its own pattern while he goes on with his.
-                if (IsEcho(move))
+                // A summoned soul fights beside him on its own: he calls it, then goes on with his own moves.
+                if (move == Move.Summon)
                 {
-                    echoRoutine = StartCoroutine(RunEcho(move));
-                    yield return Wait(1.2f);
+                    yield return CallSoul(NextSoul());
                     continue;
                 }
+                // A soul he has swallowed lends its power to his next plain blows.
+                Borrow(move);
                 yield return Play(move);
                 // The ultimate ends the combo.
                 if (move == Move.ThousandBells) i = combo;
@@ -260,41 +266,14 @@ public partial class Kagetsune : Boss
         }
     }
 
-    Coroutine echoRoutine;
-    bool EchoOut => echoRoutine != null;
+    Coroutine cageSpiral;
 
-    // Each soul sent out gets a number, so one that finishes late can't clear the flag for a newer one.
-    int echoId;
-
-    IEnumerator RunEcho(Move move)
+    // The chain cage's spiral runs beside the move; a stagger, the phase break or his fall stops it.
+    void StopCage()
     {
-        int id = ++echoId;
-        yield return Play(move);
-        if (id == echoId) echoRoutine = null;
-    }
-
-    // A stagger, the phase break or his fall sends the soul back into the coffin; its ghost and chain are transient,
-    // so the interrupt has already cleared them.
-    void RecallEcho()
-    {
-        if (echoRoutine != null) StopCoroutine(echoRoutine);
-        echoRoutine = null;
-        echoId++;
-        if (activeEcho != null)
-        {
-            Drop(activeEcho.body);
-            Drop(activeEcho.aura);
-            Drop(activeEcho.chain);
-            activeEcho = null;
-        }
         if (cageSpiral != null) StopCoroutine(cageSpiral);
         cageSpiral = null;
     }
-
-    Echo activeEcho;
-    Coroutine cageSpiral;
-
-    static bool IsEcho(Move move) => move == Move.EchoBenibana || move == Move.EchoUtsusemi || move == Move.EchoShirogane;
 
     IEnumerator Play(Move move) => move switch
     {
@@ -308,25 +287,23 @@ public partial class Kagetsune : Boss
         Move.Chains => BrokenChains(),
         Move.SoulCoffin => SoulCoffin(),
         Move.ThousandBells => NightOfAThousandBells(),
-        Move.River => SoulRiver(),
-        Move.EchoBenibana => EchoBenibana(),
-        Move.EchoUtsusemi => EchoUtsusemi(),
-        _ => EchoShirogane(),
+        _ => SoulRiver(),
     };
 
     Move NextMove()
     {
-        // While a soul is out he keeps to light patterns: no parry-only blow, no ultimate, no second soul.
-        if (EchoOut)
+        // While a soul fights beside him he keeps to plain patterns: no seal (the soul's own parry-only blows must
+        // stay answerable), no parry-only blow of his own, no ultimate, no second soul.
+        if (SoulOut)
         {
-            var light = new List<Move> { Move.Toll, Move.Swarm, Move.Toll, Move.Swarm, Move.CofferSlam };
-            if (lastMove is Move previous) light.Remove(previous);
-            return light[Random.Range(0, light.Count)];
+            var plain = new List<Move> { Move.CofferSlam, Move.Toll, Move.Swarm, Move.Curtain, Move.CofferSlam, Move.Toll };
+            if (lastMove is Move previous) plain.Remove(previous);
+            return plain[Random.Range(0, plain.Count)];
         }
         if (secondPhase && movesSinceUltimate >= Ultimate - 1 && lastMove != null) return Move.ThousandBells;
         Move parry = secondPhase ? Move.SoulCoffin : Move.LastToll;
         if (movesSinceParry >= ParryAtLatest) return parry;
-        if (secondPhase && movesSinceEcho >= EchoAtLatest) return NextEcho();
+        if (secondPhase && movesSinceSoul >= SoulAtLatest) return Move.Summon;
 
         var options = new List<Move> { Move.CofferSlam, Move.Toll, Move.Ofuda, Move.Wail, Move.Curtain };
         if (secondPhase)
@@ -346,15 +323,7 @@ public partial class Kagetsune : Boss
         Move pick = options[Random.Range(0, options.Count)];
         // Rather than open a seal over a parry-only blow, it waits for its own turn.
         if (pick == Move.Ofuda && movesSinceParry >= ParryEvery) pick = Move.Toll;
-        if (secondPhase && movesSinceEcho >= 2 && Random.value < 0.35f) return NextEcho();
-        return pick;
-    }
-
-    Move NextEcho()
-    {
-        var order = new[] { Move.EchoBenibana, Move.EchoUtsusemi, Move.EchoShirogane };
-        Move pick = nextEcho < order.Length ? order[nextEcho++] : order[Random.Range(0, order.Length)];
-        if (pick == lastMove) pick = order[(System.Array.IndexOf(order, pick) + 1) % order.Length];
+        if (secondPhase && movesSinceSoul >= 2 && Random.value < 0.35f) return Move.Summon;
         return pick;
     }
 }

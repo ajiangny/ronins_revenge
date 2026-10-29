@@ -156,6 +156,7 @@ public partial class Kagetsune
     // gap was: parry it, and its Resonance opens the way.
     IEnumerator RosaryCurtain()
     {
+        Bark(BossLine.RosaryCurtain, 7f);
         PlayAction(art.parry);
         const int Rows = 4;
         const float Spacing = 1.5f;

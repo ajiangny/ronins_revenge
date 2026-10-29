@@ -13,7 +13,8 @@ public partial class Kagetsune
     {
         breaking = true;
         ultimate = false;
-        RecallEcho();
+        BanishSoul();
+        StopCage();
         exposedUntil = 0;
         seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
@@ -64,7 +65,8 @@ public partial class Kagetsune
             Speak(BossLine.Phase);
             yield return new WaitForSeconds(2.2f);
         }
-        movesSinceEcho = EchoAtLatest - 1;
+        // The first soul comes within two moves of the chains snapping.
+        movesSinceSoul = SoulAtLatest - 2;
         movesSinceUltimate = 0;
         movesSinceParry = 0;
         breaking = false;
@@ -76,7 +78,6 @@ public partial class Kagetsune
     // free with each, until there is silence and the armor stands hollow, then fades.
     protected override IEnumerator Fall()
     {
-        RecallEcho();
         seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);

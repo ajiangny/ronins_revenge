@@ -147,6 +147,7 @@ public partial class GameManager
         soul.Banished += () => ShowBossHealth(activeBoss);
         summons.Add(soul);
         effects.Summons.Add(soul);
+        ShowBossHealth(activeBoss);
         StartCoroutine(RaiseSoul(soul, post));
         return soul;
     }
@@ -206,10 +207,6 @@ public partial class GameManager
                 Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Health(Kagetsune.StartingHealth),
                     position, hollow ? new Color(0.55f, 0.42f, 0.32f) : Color.white);
                 if (!hollow) emperor.SetPhaseArt(kagetsunePhaseArt);
-                // The souls he can drag out of the coffin, drawn in their own art at their own size.
-                emperor.SetEcho(BossKind.Benibana, benibanaPhaseArt != null ? benibanaPhaseArt : benibanaArt, benibanaScale);
-                emperor.SetEcho(BossKind.Utsusemi, utsusemiArt, utsusemiScale);
-                emperor.SetEcho(BossKind.Shirogane, shiroganeArt, shiroganeScale);
                 return emperor;
             case BossKind.Shirogane:
                 bool ghostly = shiroganeArt == null;

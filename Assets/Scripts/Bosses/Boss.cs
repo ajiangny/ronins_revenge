@@ -18,7 +18,10 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     // His line over the ronin when he falls to him.
     KilledOni,
     // Shirogane's word to Kuon when she falls before it does.
-    KuonEnraged }
+    KuonEnraged,
+    // Kagetsune dragging a soul left standing back into the coffin, and his callouts for the Rosary Curtain, the Soul
+    // River, the Reliquary Rend, the Coffin Pendulum and the Soul Harvest.
+    SoulAbsorbed, RosaryCurtain, SoulRiver, Rend, Pendulum, Harvest }
 
 // A warlord fought at the end of a stage: one big target with an HP bar that stands in the top band and attacks
 // in telegraphed patterns. Subclasses write the fight as a coroutine; this class handles the body, damage,
@@ -781,6 +784,13 @@ public abstract class Boss : MonoBehaviour, IHittable
         }
         Speak(BossLine.Defeat);
         StartCoroutine(Fall());
+    }
+
+    // Kagetsune's hold on a summoned soul: its body washed toward his soul-fire and edged in it.
+    public void Haunt(Color wash, Color edge, Color shimmer)
+    {
+        bodyTint = wash;
+        SpriteOutline.Wrap(sprite, edge, shimmer);
     }
 
     // Takes a summoned soul off the field without a defeat: the Emperor drags it back into the coffin, or his own fall

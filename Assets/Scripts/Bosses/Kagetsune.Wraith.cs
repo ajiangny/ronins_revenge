@@ -32,7 +32,7 @@ public partial class Kagetsune
     // than he can follow. Now and then a bronze bell rides the channel's bank: parry it, and the river widens.
     IEnumerator SoulRiver()
     {
-        Bark(BossLine.WraithSwarm, 7f);
+        Bark(BossLine.SoulRiver, 7f);
         const float Spacing = 1.6f;
         const float Speed = 6.5f;
         const float Between = 0.45f;
@@ -199,7 +199,8 @@ public partial class Kagetsune
     protected override void OnStaggered()
     {
         ultimate = false;
-        RecallEcho();
+        // The soul beside him fights on through his stagger; only his own chain cage stops.
+        StopCage();
         // His own bell or coffin sent home: the whole field holds its breath for a moment.
         HitStop?.Invoke(0.12f);
         ElementFx.Glow(Centre, new Color(Bronze.r, Bronze.g, Bronze.b, 0.8f), 1f, 12f, 0.5f);

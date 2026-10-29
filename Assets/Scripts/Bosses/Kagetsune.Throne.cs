@@ -464,11 +464,9 @@ public partial class Kagetsune
     }
 
     // Ofuda Decree: talismans drift down and stick to the ground, one where the ronin stands and the rest spread
-    // across the field, each over a crimson patch the width of its blast. Every paper burns down on its own fuse and
-    // goes off in turn, his first: step off it, then keep clear of each patch before its paper burns out.
+    // across the field. A thin ring of soul-fire marks each blast's edge, and a second ring closes in on the paper as
+    // its fuse burns: when it reaches the paper, it goes off. His goes first; step off it, then keep out of each ring.
     const float OfudaBlastHalf = 1.2f;
-    // The colour a talisman burns toward as its fuse runs down.
-    static readonly Color Ember = new Color(1f, 0.45f, 0.2f);
     // The ground between two blasts is never narrower than this, so there's always room to stand.
     const float OfudaRoom = 1f;
 
@@ -494,7 +492,8 @@ public partial class Kagetsune
             papers.Add(Ofuda(new Vector3(x, TopOfScreen + Random.Range(0f, 1.5f), 0)));
             sways.Add(Random.value * 6f);
         }
-        float land = GroundY + 0.65f;
+        float feet = ronin.Feet.y;
+        float land = feet + 0.55f;
         const float Fall = 0.9f;
         for (float t = 0; t < Fall; t += Time.deltaTime * Tempo)
         {
@@ -512,39 +511,41 @@ public partial class Kagetsune
         // Laid: each fuse is lit and runs on its own, so a stagger doesn't hold a paper already burning.
         float fuse = secondPhase ? 1.3f : 1.6f;
         float step = secondPhase ? 0.35f : 0.45f;
-        Fx.Play(Fx.Impact, new Vector3(spots[0], land, 0), SealRed, 1.2f);
         for (int i = 0; i < papers.Count; i++)
         {
             if (papers[i] == null) continue;
             papers[i].transform.SetPositionAndRotation(new Vector3(spots[i], land, -0.2f), Quaternion.identity);
-            float band = GroundY + 0.9f;
-            SpriteRenderer zone = Bar(new Vector3(spots[i] - OfudaBlastHalf, band, 0), new Vector3(spots[i] + OfudaBlastHalf, band, 0), 2.4f, new Color(SealRed.r, SealRed.g, SealRed.b, 0.12f), 2);
+            Fx.Play(Fx.Impact, new Vector3(spots[i], feet, 0), Teal, 0.8f);
             Detach(papers[i].gameObject);
-            Detach(zone.gameObject);
-            Launch(OfudaFuse(papers[i], zone, spots[i], fuse + i * step));
+            Launch(OfudaFuse(papers[i], new Vector3(spots[i], feet, 0), fuse + i * step));
         }
         yield return Wait(fuse + (papers.Count - 1) * step + 0.4f);
     }
 
-    // One talisman's fuse: the paper burns down toward the ground and its patch glows hotter, ticking faster, then
-    // it bursts in a pillar of seal-fire that burns whoever stands in the patch and breaks the cover over it.
-    IEnumerator OfudaFuse(SpriteRenderer paper, SpriteRenderer zone, float x, float seconds)
+    // One talisman's fuse: a fixed ring of soul-fire marks the blast's edge round the paper, and a brighter ring
+    // closes in from it onto the paper, ticking faster; the paper glows soul-white as it goes. When the closing ring
+    // reaches it, the paper bursts in a column of soul-fire that burns whoever stands inside the edge.
+    IEnumerator OfudaFuse(SpriteRenderer paper, Vector3 ground, float seconds)
     {
-        Vector3 scale = paper.transform.localScale, at = paper.transform.position;
+        float pixel = ronin != null ? Mathf.Clamp(ronin.ArtPixelSize, 1f / 64f, 1f / 24f) : 1f / 48f;
+        SpriteRenderer edge = PixelRing(ground, OfudaBlastHalf, pixel, new Color(Teal.r, Teal.g, Teal.b, 0f));
+        SpriteRenderer closing = PixelRing(ground, OfudaBlastHalf, pixel, new Color(0.85f, 1f, 0.96f, 0f));
+        SpriteRenderer under = Glowing(ground, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 3, track: false);
+        under.transform.localScale = new Vector3(OfudaBlastHalf * 2.2f, OfudaBlastHalf * 0.7f, 1f);
+        Detach(under.gameObject);
         Color fresh = paper.color;
-        float height = paper.bounds.size.y;
         float nextTick = 0f;
         for (float t = 0; t < seconds; t += Time.deltaTime)
         {
-            if (IsDead || breaking || paper == null || zone == null) break;
+            if (IsDead || breaking || paper == null) break;
             float k = t / seconds;
-            float pulse = 0.5f + 0.5f * Mathf.Sin(t * Mathf.Lerp(8f, 30f, k));
-            float left = Mathf.Lerp(1f, 0.3f, k);
-            paper.transform.localScale = new Vector3(scale.x, scale.y * left, scale.z);
-            paper.transform.position = at + Vector3.down * height * (1f - left) * 0.5f;
-            paper.color = Color.Lerp(fresh, Ember, k * k);
-            zone.color = new Color(SealRed.r, SealRed.g, SealRed.b, (0.12f + 0.4f * k) * (0.7f + 0.3f * pulse));
-            // A tick quickening as the paper burns down.
+            float fadeIn = Mathf.Clamp01(t / 0.2f);
+            edge.color = new Color(Teal.r, Teal.g, Teal.b, 0.75f * fadeIn);
+            SetRing(closing, Mathf.Lerp(OfudaBlastHalf, 0.15f, k), pixel);
+            closing.color = new Color(0.85f, 1f, 0.96f, (0.5f + 0.5f * k) * fadeIn);
+            under.color = new Color(Teal.r, Teal.g, Teal.b, 0.08f + 0.22f * k * k);
+            paper.color = Color.Lerp(fresh, new Color(0.75f, 1f, 0.95f), k * k);
+            // A tick quickening as the ring closes.
             if (t >= nextTick)
             {
                 nextTick = t + Mathf.Lerp(0.45f, 0.1f, k);
@@ -552,23 +553,58 @@ public partial class Kagetsune
             }
             yield return null;
         }
-        bool fizzle = IsDead || breaking;
-        if (paper != null) Destroy(paper.gameObject);
-        if (zone != null) Destroy(zone.gameObject);
-        if (fizzle || ronin == null) yield break;
+        bool fizzle = IsDead || breaking || ronin == null;
+        Vector3 paperAt = paper != null ? paper.transform.position : ground;
+        foreach (SpriteRenderer part in new[] { paper, edge, closing, under }) if (part != null) Destroy(part.gameObject);
+        if (fizzle) yield break;
+        OfudaBlast(ground, paperAt);
+    }
 
-        Vector3 ground = new Vector3(x, GroundY, 0);
-        if (Fx.Play(Fx.KageOfudaBurn, ground + Vector3.up * 0.6f, Color.white, 2.4f) == null) Fx.Play(Fx.Impact, ground, SealRed, 2f);
-        SpriteRenderer pillar = Bar(ground, ground + Vector3.up * 5f, OfudaBlastHalf * 2f, new Color(1f, 0.55f, 0.45f, 0.85f), 56);
-        Detach(pillar.gameObject);
-        Fader.Fade(pillar, 0.3f);
+    // The talisman goes off: a white flash, a column of soul-fire the blast's width, a shockwave along the ground and
+    // freed souls rising out of it. Only the column burns; it leaves a scorch.
+    void OfudaBlast(Vector3 ground, Vector3 paperAt)
+    {
+        float width = OfudaBlastHalf * 2f;
+        Vector3 top = ground + Vector3.up * 6f;
+        if (SoulColumn(top, ground, width) == null)
+        {
+            SpriteRenderer bar = Bar(ground, top, width * 0.6f, new Color(0.85f, 1f, 0.96f, 0.9f), 56);
+            Detach(bar.gameObject);
+            Fader.Fade(bar, 0.35f);
+        }
+        if (Fx.Play(Fx.KageOfudaBurn, paperAt, Color.white, 1.6f) == null) Fx.Play(Fx.Impact, paperAt, Teal, 1.2f);
+        Fx.Play(Fx.Impact, ground + Vector3.up * 0.4f, Teal, 2.4f);
+        ElementFx.Glow(ground + Vector3.up * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 1f, width * 2.2f, 0.3f);
+        Shockwave(ground, width * 1.3f);
+        for (int i = 0; i < 3; i++) RisingSoul(ground + new Vector3(Random.Range(-OfudaBlastHalf, OfudaBlastHalf) * 0.6f, 0.4f, 0));
+        if (Sfx.Has(Sfx.SoulWail)) Sfx.Play(Sfx.SoulWail, 0.3f, 1.7f);
         Slam(0.5f);
         CameraShake.Add(0.3f);
-        TimeRipple.Emit(ground, 2.5f, 0.3f, 0.35f);
-        if (Mathf.Abs(ronin.Bounds.center.x - x) < OfudaBlastHalf) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
-        BeamEnd(ground + Vector3.up * 5f, ground, out Blocker cover);
+        HitStop?.Invoke(0.03f);
+        TimeRipple.Emit(ground, 3f, 0.4f, 0.4f);
+        if (Mathf.Abs(ronin.Bounds.center.x - ground.x) < OfudaBlastHalf) ronin.TakeHit(new Vector3(ground.x, ronin.Bounds.center.y, 0));
+        BeamEnd(top, ground, out Blocker cover);
         if (cover != null) cover.Hit(ground);
-        GroundFire.Scorch(ground, 1.6f);
+        GroundFire.Scorch(ground, 1.6f, soul: true);
+    }
+
+    // A one-pixel ellipse on the ground (the courtyard's perspective), `radius` units across its half-width.
+    SpriteRenderer PixelRing(Vector3 at, float radius, float pixel, Color colour)
+    {
+        var ring = new GameObject("OfudaRing").AddComponent<SpriteRenderer>();
+        ring.color = colour;
+        ring.sortingOrder = 4;
+        ring.transform.position = at + Vector3.back * 0.1f;
+        SetRing(ring, radius, pixel);
+        Detach(ring.gameObject);
+        return ring;
+    }
+
+    // Swaps the ring's sprite for the one at this radius, so its line stays a single pixel as it shrinks.
+    static void SetRing(SpriteRenderer ring, float radius, float pixel)
+    {
+        ring.sprite = ProceduralSprites.Ring(Mathf.Max(1, Mathf.RoundToInt(radius / pixel)));
+        ring.transform.localScale = Vector3.one * pixel;
     }
 
     SpriteRenderer Ofuda(Vector3 at)

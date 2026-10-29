@@ -137,8 +137,9 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   with a bell when hardened; the slam's `SlamRing`; the Ofuda Decree's `DecreeRain` (darts outside the seals, skull
   walls inside); the Wail gutters once a sweep (`GutterTell`/`GutterSeconds`) and sheds embers; the Last Toll's
   `ClosingRing`. VFX: `Crack` and `Shockwave` under slams, stride dust and phase-2 afterimages, `UpdateWisps`, a
-  `chestGlow` that swells as bar 2 drains; chains and soul-fire columns are `Tiled` strips (`Fx.KageChain`,
-  `Fx.KageSoulPillar`, drawn `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the ultimate hangs
+  `chestGlow` that swells as bar 2 drains; chains are `Tiled` strips (`Fx.KageChain`, drawn
+  `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the slam's and the ultimate's soul-fire columns are
+  `SoulColumn` (`Fx.KageSoulColumn`, anchored on its ground ring and stretched up to the column's top; a bar without it); the ultimate hangs
   `HangBell`s (`Fx.KageBell`) that `Swing` when rung.
   `PhaseBreak`: bells clamour (each a `TollRing`), chains snap (`Fx.KageChainSnap`), skulls burst, `WearPhaseArt`, two
   teal glint `eyes` (`Eye(i)`), `soulFire` (`Fx.KageSoulFire` behind him at `SoulFireAlpha`), `PhaseCard`. Kit

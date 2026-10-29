@@ -592,6 +592,9 @@ public class GameUI : MonoBehaviour
         subtitleSpeaker.color = Color.Lerp(colour, Color.white, 0.25f);
         subtitle.text = text;
         subtitle.color = Color.white;
+        // Full size; a line hung over its speaker shrinks it again.
+        subtitle.fontSize = SubtitleSize;
+        subtitleSpeaker.fontSize = SpeakerSize;
         // Fit the plate to the line, wrapping past 1100 wide.
         Vector2 size = subtitle.GetPreferredValues(text, 1100f, 0f);
         size = new Vector2(Mathf.Min(size.x, 1100f) + 64f, size.y + 28f);
@@ -606,10 +609,14 @@ public class GameUI : MonoBehaviour
         subtitlePlate.gameObject.SetActive(true);
     }
 
-    // How wide a line hung over its speaker wraps, so it stays a compact bubble.
-    const float OverWrap = 620f;
-    // The gap between a line hung over its speaker and their head.
-    const float HeadGap = 24f;
+    // The centred subtitle's sizes, and the smaller bubble's over a speaker in the field: the readable floor (26px at
+    // 1080p), so it marks who's talking without covering the fight.
+    const float SubtitleSize = 34f, SpeakerSize = 30f, OverSize = 26f;
+    // How wide a line hung over its speaker wraps, and its padding, so it stays a compact bubble.
+    const float OverWrap = 440f;
+    static readonly Vector2 OverPadding = new Vector2(44f, 16f);
+    // The gap between a line hung over its speaker and their head, and how far its name stands over the plate.
+    const float HeadGap = 16f, OverNameGap = 26f;
 
     // A subtitle hung over whoever says it in the field (`head`: the top of their head, in canvas pixels from the
     // bottom-left), so it's clear who's talking. It wraps narrow and is kept wholly on screen; near the top it hangs
@@ -618,10 +625,14 @@ public class GameUI : MonoBehaviour
     public void ShowSubtitleOver(string speaker, string text, Color colour, float seconds, Vector2 head, System.Func<Vector3> follow = null)
     {
         ShowSubtitle(speaker, text, colour, seconds);
+        subtitle.fontSize = OverSize;
+        subtitleSpeaker.fontSize = OverSize;
+        subtitleSpeaker.rectTransform.anchoredPosition = new Vector2(0f, OverNameGap);
         Vector2 size = subtitle.GetPreferredValues(text, OverWrap, 0f);
-        size = new Vector2(Mathf.Min(size.x, OverWrap) + 64f, size.y + 28f);
+        size = new Vector2(Mathf.Min(size.x, OverWrap), size.y) + OverPadding;
         subtitlePlate.sizeDelta = size;
-        subtitle.rectTransform.sizeDelta = size;
+        // The line wraps inside the padding, so it never runs to the plate's edge.
+        subtitle.rectTransform.sizeDelta = size - new Vector2(OverPadding.x, 0f);
         subtitleFollow = follow;
         PlaceOver(head);
     }
@@ -632,10 +643,10 @@ public class GameUI : MonoBehaviour
         Vector2 size = subtitlePlate.sizeDelta;
         Vector2 canvas = ((RectTransform)transform).rect.size;
         // The speaker's name stands this far over the plate.
-        const float NameRoom = 64f, Margin = 24f;
+        const float NameRoom = 44f, Margin = 24f;
         bool below = head.y + HeadGap + size.y + NameRoom > canvas.y - Margin;
         float x = Mathf.Clamp(head.x, size.x / 2f + Margin, canvas.x - size.x / 2f - Margin);
-        float y = below ? head.y - 90f - HeadGap : head.y + HeadGap;
+        float y = below ? head.y - 70f - HeadGap : head.y + HeadGap;
         y = below ? Mathf.Max(y, size.y + Margin) : Mathf.Clamp(y, Margin, canvas.y - size.y - NameRoom);
         subtitlePlate.anchorMin = subtitlePlate.anchorMax = Vector2.zero;
         subtitlePlate.pivot = new Vector2(0.5f, below ? 1f : 0f);

@@ -30,7 +30,7 @@ public class Benibana : Boss
     public override string Line(BossLine line) => line switch
     {
         // Her story is in Story/Benibana.md; keep these in sync with Tools/generate-voice.mjs.
-        BossLine.Intro => "We both led our flocks to his altar, Oni... and only you walked away. The heavens have forsaken you. Let me paint your final moments in crimson.",
+        BossLine.Intro => "We both led our flocks to his altar, Oni... and only you walked away. Mine ring on his belt, every one of them. He silences one each time I kill you... so hold still, shepherd.",
         BossLine.Phase => "Every step I ever danced was his... This one is mine.",
         BossLine.Defeat => "Crimson... suits you... Find my bell, Oni... silence it for them...",
         BossLine.Stagger or BossLine.SmokeRings or BossLine.RosaryLash or BossLine.Iaido or BossLine.RosaryBloom => Line(line, 0),

@@ -65,7 +65,7 @@ const FX = { [SOLDIER]: GHOST, [HIBIKI]: LEVEL };
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
 const LINES = {
-  Benibana_Intro: [BENIBANA, "[low, bitter, amused] We both led our flocks to his altar, Oni... [cold] and only you walked away. [sultry, mocking] The heavens have forsaken you. Let me paint your final moments in crimson."],
+  Benibana_Intro: [BENIBANA, "[low, bitter, amused] We both led our flocks to his altar, Oni... [cold] and only you walked away. [grief under the mockery] Mine ring on his belt, every one of them. [cold, sultry] He silences one each time I kill you... [mocking] so hold still, shepherd."],
   Benibana_Phase: [BENIBANA, "[quiet, shaking with fury] Every step I ever danced was his... [fierce, drawing her sword] This one is mine."],
   Benibana_Defeat: [BENIBANA, "[weak, wry, fading] Crimson... suits you... [pleading, breathless] Find my bell, Oni... silence it for them..."],
   // Each move callout has three takes, picked at random; the texts match Benibana.Line's subtitles take for take.
@@ -141,7 +141,7 @@ const LINES = {
   Kagetsune_Hurt_2: [KAGETSUNE, "[slow, contemptuous] A scratch, little demon."],
   Kagetsune_Hurt_3: [KAGETSUNE, "[low grunt] Hm."],
   // The souls he drags out of the coffin, answering in their own voices.
-  Benibana_Echo: [BENIBANA, "[hollow, sorrowful, distant] Forgive me, Oni... he has my bell."],
+  Benibana_Echo: [BENIBANA, "[hollow, distant, cold contempt through her teeth] Your strings again, Kagetsune? [scoffs] Tch... I'm no puppet of yours."],
   Utsusemi_Echo: [UTSUSEMI, "[slow, grinding, straining] The hour... strikes... [urgent whisper] Run... boy."],
   Shirogane_Echo: [SHIROGANE, "[strained, urgent, sorrowful] Move, Oni. [anguished] I cannot hold my blades."],
 

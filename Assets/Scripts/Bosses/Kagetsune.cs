@@ -53,7 +53,7 @@ public partial class Kagetsune : Boss
         BossLine.SoulCoffin => "Into the coffin!",
         BossLine.ThousandBells => "A thousand bells, Oni! Ring!",
         BossLine.SummonBenibana => "Dance for me, Benibana.",
-        BossLine.EchoBenibana => "Forgive me, Oni... he has my bell.",
+        BossLine.EchoBenibana => "Your strings again, Kagetsune? Tch... I'm no puppet of yours.",
         BossLine.SummonUtsusemi => "Strike the hour, clock.",
         BossLine.EchoUtsusemi => "The hour... strikes... Run... boy.",
         BossLine.SummonShirogane => "Rise, Shirogane. Kneel, and strike.",

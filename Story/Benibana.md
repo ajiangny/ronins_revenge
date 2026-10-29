@@ -65,7 +65,7 @@ with "Dirty trick!" or "You dog!": short, and never as if it's their first fight
 
 | Line | Text |
 |---|---|
-| Intro | "We both led our flocks to his altar, Oni... and only you walked away. The heavens have forsaken you. Let me paint your final moments in crimson." |
+| Intro | "We both led our flocks to his altar, Oni... and only you walked away. Mine ring on his belt, every one of them. He silences one each time I kill you... so hold still, shepherd." |
 | Phase | "Every step I ever danced was his... This one is mine." |
 | Defeat | "Crimson... suits you... Find my bell, Oni... silence it for them..." |
 
@@ -111,7 +111,7 @@ Lines with the other characters (all voiced).
 Mockery, then envy, then the night she realises no bell has ever gone quiet, then telling Oni which bell is hers
 (`Benibana_Intro_Bell`). Once that line has played and he has beaten her again, her soul counts as freed for the
 ending. Until then, in Kagetsune's phase 2 he drags her soul out of the coffin to dance for him: a teal ghost of her
-looses her smoke rings and Crimson Iaido at Oni (her echo line: "Forgive me, Oni... he has my bell."). A parried
+looses her smoke rings and Crimson Iaido at Oni (her echo line: "Your strings again, Kagetsune? Tch... I'm no puppet of yours."). A parried
 Iaido flies back at the Emperor, not at her.
 
 ## Keep consistent

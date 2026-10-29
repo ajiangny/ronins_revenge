@@ -125,7 +125,7 @@ when the chorus starts speaking over him.
 | KilledOni **(in game)** | "Back to your hill, little demon. I will be here. I am always here." (also the end screen's text) |
 | Callouts **(in game)** | Coffer Slam "Bow." · Toll "Answer me." · Rosary Curtain "Kneel, in rows." · Ofuda "By my decree." · Spirit Hyper Beam "Hear them, little demon." · Levy "Rise, my dead. Fall in." · Last Toll "Hear the last toll." · Rend "Again. And again." · Swarm "Go. Fetch him." · Soul River "Drown in them." · Pendulum "Reap." · Harvest "Come home, all of you." · Soul Coffin "Into the coffin!" · Thousand Bells "A thousand bells, Oni! Ring!" |
 | Summons **(in game)** | "Dance for me, Benibana." · "Strike the hour, clock." · "Rise, Shirogane. Kneel, and strike." · a soul left standing, dragged back: "Mine again." |
-| The souls answer **(in game)**, in their own voices | Benibana: "Forgive me, Oni... he has my bell." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "Move, Oni. I cannot hold my blades." |
+| The souls answer **(in game)**, in their own voices | Benibana: "Your strings again, Kagetsune? Tch... I'm no puppet of yours." · Utsusemi: "The hour... strikes... Run... boy." · Shirogane: "Move, Oni. I cannot hold my blades." |
 
 Reactive dialogue, in game (`Dialogue.cs`, voiced in `Tools/generate-voice.mjs`):
 

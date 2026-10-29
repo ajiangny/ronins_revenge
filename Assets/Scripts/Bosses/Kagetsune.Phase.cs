@@ -20,7 +20,6 @@ public partial class Kagetsune
         DisbandLevy();
         // The Wraith's host comes early: his second move after the break.
         movesSinceLevy = LevyAtLatest - 1;
-        StopCage();
         ResetView();
         exposedUntil = 0;
         Sfx.Stop(Sfx.SoulWail);

@@ -262,7 +262,7 @@ public partial class GameManager
         public Vector2 phaseCloseupFocus, phaseCloseupAt;
         public AudioClip intro, phase, defeat, defeatFinal, stagger, kasaWheel, hourStrikes, crescentSlash, bladeRain, eclipseFang, kuonEnraged;
         // Kagetsune's callouts and summons, and the summoned souls' lines.
-        public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, chains, coffin, thousandBells,
+        public AudioClip killedOni, cofferSlam, toll, ofuda, wail, lastToll, swarm, coffin, thousandBells,
             summonBenibana, summonUtsusemi, summonShirogane, echoBenibana, echoUtsusemi, echoShirogane,
             curtain, river, rend, pendulum, harvest, absorbed, levy;
         // Lines with several takes: one is picked at random, never the one played last time.
@@ -303,7 +303,6 @@ public partial class GameManager
                 BossLine.SoulWail => wail,
                 BossLine.LastToll => lastToll,
                 BossLine.WraithSwarm => swarm,
-                BossLine.BrokenChains => chains,
                 BossLine.SoulCoffin => coffin,
                 BossLine.ThousandBells => thousandBells,
                 BossLine.SummonBenibana => summonBenibana,
@@ -383,7 +382,7 @@ public partial class GameManager
             phaseColour = new Color(0.3f, 1f, 0.82f),
             intro = kagetsuneIntroLine, phase = kagetsunePhaseLine, defeat = kagetsuneDefeatLine, stagger = kagetsuneStaggerLine,
             killedOni = kagetsuneKilledOniLine, cofferSlam = kagetsuneCofferSlamLine, toll = kagetsuneTollLine, ofuda = kagetsuneOfudaLine,
-            wail = kagetsuneWailLine, lastToll = kagetsuneLastTollLine, swarm = kagetsuneSwarmLine, chains = kagetsuneChainsLine,
+            wail = kagetsuneWailLine, lastToll = kagetsuneLastTollLine, swarm = kagetsuneSwarmLine,
             coffin = kagetsuneCoffinLine, thousandBells = kagetsuneThousandBellsLine, summonBenibana = kagetsuneSummonBenibanaLine,
             summonUtsusemi = kagetsuneSummonUtsusemiLine, summonShirogane = kagetsuneSummonShiroganeLine,
             echoBenibana = echoBenibanaLine, echoUtsusemi = echoUtsusemiLine, echoShirogane = echoShiroganeLine,

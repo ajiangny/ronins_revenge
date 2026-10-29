@@ -294,7 +294,6 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] AudioClip kagetsuneWailLine;
     [SerializeField] AudioClip kagetsuneLastTollLine;
     [SerializeField] AudioClip kagetsuneSwarmLine;
-    [SerializeField] AudioClip kagetsuneChainsLine;
     [SerializeField] AudioClip kagetsuneCoffinLine;
     [SerializeField] AudioClip kagetsuneThousandBellsLine;
     [SerializeField] AudioClip kagetsuneSummonBenibanaLine;

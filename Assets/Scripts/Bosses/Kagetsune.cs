@@ -50,7 +50,6 @@ public partial class Kagetsune : Boss
         BossLine.SoulWail => "Hear them, little demon.",
         BossLine.LastToll => "Hear the last toll.",
         BossLine.WraithSwarm => "Go. Fetch him.",
-        BossLine.BrokenChains => "Chains do not hold me.",
         BossLine.SoulCoffin => "Into the coffin!",
         BossLine.ThousandBells => "A thousand bells, Oni! Ring!",
         BossLine.SummonBenibana => "Dance for me, Benibana.",
@@ -95,7 +94,7 @@ public partial class Kagetsune : Boss
     enum Move
     {
         CofferSlam, Toll, Ofuda, Beam, LastToll, Curtain,
-        Swarm, Chains, SoulCoffin, ThousandBells, River,
+        Swarm, SoulCoffin, ThousandBells, River,
         Summon, Rend, Pendulum, Harvest, Levy,
     }
 
@@ -252,7 +251,6 @@ public partial class Kagetsune : Boss
     {
         BanishSoul();
         DisbandLevy();
-        StopCage();
     }
 
     float nextHeartbeat;
@@ -312,15 +310,6 @@ public partial class Kagetsune : Boss
         }
     }
 
-    Coroutine cageSpiral;
-
-    // The chain cage's spiral runs beside the move; a stagger, the phase break or his fall stops it.
-    void StopCage()
-    {
-        if (cageSpiral != null) StopCoroutine(cageSpiral);
-        cageSpiral = null;
-    }
-
     IEnumerator Play(Move move) => move switch
     {
         Move.CofferSlam => CofferSlam(),
@@ -330,7 +319,6 @@ public partial class Kagetsune : Boss
         Move.LastToll => LastToll(),
         Move.Curtain => RosaryCurtain(),
         Move.Swarm => WraithSwarm(),
-        Move.Chains => BrokenChains(),
         Move.SoulCoffin => SoulCoffin(),
         Move.ThousandBells => NightOfAThousandBells(),
         Move.Rend => ReliquaryRend(),
@@ -361,7 +349,6 @@ public partial class Kagetsune : Boss
         if (secondPhase)
         {
             options.Add(Move.Swarm);
-            options.Add(Move.Chains);
             options.Add(Move.River);
             options.Add(Move.Pendulum);
             options.Add(Move.Harvest);

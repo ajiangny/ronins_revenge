@@ -13,7 +13,7 @@ public enum BossLine { Intro, Phase, Defeat, Hurt, Stagger, SmokeRings, RosaryLa
     // Shirogane's later barks: Kuon broken, and her mirrored and parry-only moves.
     WolfFallen, MirrorMoon, Moonsplitter, OathFang,
     // Kagetsune's move callouts, his summons, and the summoned souls' own lines (spoken in their voices).
-    CofferSlam, TollOfFealty, OfudaDecree, SoulWail, LastToll, WraithSwarm, BrokenChains, SoulCoffin, ThousandBells,
+    CofferSlam, TollOfFealty, OfudaDecree, SoulWail, LastToll, WraithSwarm, SoulCoffin, ThousandBells,
     SummonBenibana, SummonUtsusemi, SummonShirogane, EchoBenibana, EchoUtsusemi, EchoShirogane,
     // His line over the ronin when he falls to him.
     KilledOni,

@@ -187,7 +187,7 @@ public static class BossArtSetup
             ("kagetsuneStaggerLine", "Kagetsune_Stagger"), ("kagetsuneKilledOniLine", "Kagetsune_KilledOni"),
             ("kagetsuneCofferSlamLine", "Kagetsune_CofferSlam"), ("kagetsuneTollLine", "Kagetsune_Toll"), ("kagetsuneOfudaLine", "Kagetsune_Ofuda"),
             ("kagetsuneWailLine", "Kagetsune_Wail"), ("kagetsuneLastTollLine", "Kagetsune_LastToll"), ("kagetsuneSwarmLine", "Kagetsune_Swarm"),
-            ("kagetsuneChainsLine", "Kagetsune_Chains"), ("kagetsuneCoffinLine", "Kagetsune_Coffin"),
+            ("kagetsuneCoffinLine", "Kagetsune_Coffin"),
             ("kagetsuneThousandBellsLine", "Kagetsune_ThousandBells"), ("kagetsuneSummonBenibanaLine", "Kagetsune_SummonBenibana"),
             ("kagetsuneSummonUtsusemiLine", "Kagetsune_SummonUtsusemi"), ("kagetsuneSummonShiroganeLine", "Kagetsune_SummonShirogane"),
             ("kagetsuneCurtainLine", "Kagetsune_Curtain"), ("kagetsuneRiverLine", "Kagetsune_River"), ("kagetsuneRendLine", "Kagetsune_Rend"),

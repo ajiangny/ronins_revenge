@@ -433,8 +433,6 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: aaa0f7aa674bb4be088a90094590a658, type: 3}
   - id: Kagetsune_Absorbed
     clip: {fileID: 8300000, guid: 2fcf49b004b4548b0b0a02d91fa9ef1a, type: 3}
-  - id: Kagetsune_Chains
-    clip: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
   - id: Kagetsune_CofferSlam
     clip: {fileID: 8300000, guid: 04daba481377b46ee82f53f953d8deee, type: 3}
   - id: Kagetsune_Coffin
@@ -479,6 +477,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 63feb2258bcd14c6a9a58519ad7debd8, type: 3}
   - id: Kagetsune_LastToll
     clip: {fileID: 8300000, guid: dd4d5de5cba9e4e5eafb6cf0c1563f86, type: 3}
+  - id: Kagetsune_Levy
+    clip: {fileID: 8300000, guid: e0e3114dec8f1478398ae01adf4b6655, type: 3}
   - id: Kagetsune_Ofuda
     clip: {fileID: 8300000, guid: 259391173c626452eb1bc4a3a78f4f51, type: 3}
   - id: Kagetsune_Pendulum

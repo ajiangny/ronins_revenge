@@ -125,7 +125,6 @@ const LINES = {
   Kagetsune_Wail: [KAGETSUNE, "[slow, cruel] Hear them, little demon."],
   Kagetsune_LastToll: [KAGETSUNE, "[slow, grave] Hear the last toll."],
   Kagetsune_Swarm: [KAGETSUNE, "[contemptuous] Go. Fetch him."],
-  Kagetsune_Chains: [KAGETSUNE, "[snarling] Chains do not hold me."],
   Kagetsune_Coffin: [KAGETSUNE, "[roaring] Into the coffin!"],
   Kagetsune_ThousandBells: [KAGETSUNE, "[booming, exultant] A thousand bells, Oni! Ring!"],
   Kagetsune_SummonBenibana: [KAGETSUNE, "[slow, mocking] Dance for me, Benibana."],

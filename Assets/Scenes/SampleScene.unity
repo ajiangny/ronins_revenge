@@ -1010,7 +1010,6 @@ MonoBehaviour:
   kagetsuneWailLine: {fileID: 8300000, guid: 6262f5c2e30024523952f52445162c8a, type: 3}
   kagetsuneLastTollLine: {fileID: 8300000, guid: dd4d5de5cba9e4e5eafb6cf0c1563f86, type: 3}
   kagetsuneSwarmLine: {fileID: 8300000, guid: e466dce6f30e24cd39af3dd2f3d0b2da, type: 3}
-  kagetsuneChainsLine: {fileID: 8300000, guid: 91073ec1eadf54302956c838a61a5b9d, type: 3}
   kagetsuneCoffinLine: {fileID: 8300000, guid: 421d015ce93eb4de0a494a6669e2d287, type: 3}
   kagetsuneThousandBellsLine: {fileID: 8300000, guid: 9627a09e2e2b84261ad521a0358b46f1, type: 3}
   kagetsuneSummonBenibanaLine: {fileID: 8300000, guid: d0bb098dd01e544be94b7ad469a3bc42, type: 3}

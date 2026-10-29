@@ -226,7 +226,7 @@ public partial class Kagetsune
 
     // A blow that can carry a borrowed power: only his plainer moves, so a borrowed pattern never closes the gap a
     // curtain or the ultimate leaves.
-    static bool CarriesBorrowed(Move move) => move is Move.CofferSlam or Move.Toll or Move.Swarm or Move.Rend or Move.Chains;
+    static bool CarriesBorrowed(Move move) => move is Move.CofferSlam or Move.Toll or Move.Swarm or Move.Rend;
 
     void Borrow(Move move)
     {

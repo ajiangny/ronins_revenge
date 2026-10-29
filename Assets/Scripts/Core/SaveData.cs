@@ -20,6 +20,8 @@ public class SaveData
     // How the last finished run ended, and what killed him (BossKind; None is the army).
     public bool lastRunCleared;
     public int lastKiller = -1;
+    // Whether that boss was in its second phase when it killed him (Utsusemi's rocks only fall then).
+    public bool lastKillerSecondPhase;
     // The blow that ended it (DeathCause), deaths counted per cause, and how many runs in a row ended the same way.
     public int lastDeathCause;
     public int[] deathsByCause = new int[DeathCauses];
@@ -176,7 +178,7 @@ public static class Save
     }
 
     // A finished run: a clear, or a death and what caused it. Restarting or quitting mid-run records nothing.
-    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null)
+    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null, bool secondPhase = false)
     {
         SaveData d = Data;
         d.lastRunElement = mostHeld is Element element ? (int)element : -1;
@@ -185,6 +187,7 @@ public static class Save
         bool same = !cleared && !d.lastRunCleared && d.lastDeathCause == (int)cause && d.lastKiller == (int)killer;
         d.lastRunCleared = cleared;
         d.lastKiller = cleared ? -1 : (int)killer;
+        d.lastKillerSecondPhase = !cleared && killer != BossKind.None && secondPhase;
         d.lastDeathCause = cleared ? 0 : (int)cause;
         d.deathStreak = cleared ? 0 : same ? d.deathStreak + 1 : 1;
         if (cleared) d.runsCleared++;

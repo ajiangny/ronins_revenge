@@ -77,6 +77,8 @@ public static partial class Dialogue
     public static Req Seen(string id) => new Req($"heard {id}", c => c.Save.SeenIn(id) >= 0);
     public static Req NotSeen(string id) => new Req($"not heard {id}", c => c.Save.SeenIn(id) < 0);
     public static Req LastKiller(BossKind boss) => new Req($"killed by {boss} last run", c => !c.Save.lastRunCleared && c.Save.lastKiller == (int)boss);
+    public static Req LastKillerSecondPhase(BossKind boss) => new Req($"killed by {boss} in phase 2 last run",
+        c => !c.Save.lastRunCleared && c.Save.lastKiller == (int)boss && c.Save.lastKillerSecondPhase);
     public static Req Deaths(int n) => new Req($"{n}+ deaths", c => c.Save.deaths >= n);
     public static Req DeathsTo(BossKind boss, int n) => new Req($"{n}+ deaths to {boss}", c => c.Save.deathsTo[(int)boss] >= n);
     public static Req WinsVs(BossKind boss, int n) => new Req($"{n}+ wins vs {boss}", c => c.Save.winsVs[(int)boss] >= n);

@@ -172,8 +172,8 @@ voiced (`Poguru_Roast_*`).
 | the army reached him | 3 | `Poguru_Roast_InvasionNose` | P: "Were you napping? They marched right up to your nose!" · Oni: "I was awake." · P: "Your nose wasn't." |
 | Benibana | 3 | `Poguru_Roast_Benibana` | P: "You fell asleep in the middle of a sword fight! Napping is MY thing!" |
 | Benibana | 3 | `Poguru_Roast_BenibanaDance` | P: "She danced. You lost. To a DANCE." · Oni: "...It was a good dance." |
-| Utsusemi | 3 | `Poguru_Roast_Utsusemi` | P: "Hide behind the rock! I said ROCK! You hid behind... air!" · Oni: "The rock fell apart." · P: "So you hide behind a DIFFERENT rock!" |
-| Utsusemi | 3 | `Poguru_Roast_UtsusemiPoint` | P: "Big shiny laser. I pointed. I flew out and POINTED, Oni." · Oni: "Hmph." |
+| Utsusemi, in its second phase (the rocks only fall then) | 3 | `Poguru_Roast_Utsusemi` | P: "Hide behind the rock! I said ROCK! You hid behind... air!" · Oni: "The rock fell apart." · P: "So you hide behind a DIFFERENT rock!" |
+| Utsusemi, in its second phase (the rocks only fall then) | 3 | `Poguru_Roast_UtsusemiPoint` | P: "Big shiny laser. I pointed. I flew out and POINTED, Oni." · Oni: "Hmph." |
 | Shirogane | 3 | `Poguru_Roast_Shirogane` | P: "She beat you with a sword! YOU have a sword! It's practically the same sword!" |
 | Shirogane | 3 | `Poguru_Roast_ShiroganeWolf` | P: "Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!" · Oni: "Tch." |
 | Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! But his hammer is SO big. Like, unfair big." · Oni: "I'll get under it." · P: "Good thing you're short!" |

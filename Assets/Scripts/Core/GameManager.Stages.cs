@@ -135,7 +135,7 @@ public partial class GameManager
         if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  notes {notesThisRun}  held: {HeldSummary()}");
-        Save.EndRun(cleared, killer, cause, loadout.DominantElement);
+        Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         ClearSummons();

@@ -562,9 +562,10 @@ public static partial class Dialogue
             O("I was awake."), P("Your nose wasn't.")),
         Roast("Poguru_Roast_Benibana", 3, When(LastKiller(BossKind.Benibana)), P("You fell asleep in the middle of a sword fight! Napping is MY thing!")),
         Roast("Poguru_Roast_BenibanaDance", 3, When(LastKiller(BossKind.Benibana)), P("She danced. You lost. To a DANCE."), O("...It was a good dance.")),
-        Roast("Poguru_Roast_Utsusemi", 3, When(LastKiller(BossKind.Utsusemi)), P("Hide behind the rock! I said ROCK! You hid behind... air!"),
+        // The rocks only fall in its second phase, so these wait for a death there.
+        Roast("Poguru_Roast_Utsusemi", 3, When(LastKillerSecondPhase(BossKind.Utsusemi)), P("Hide behind the rock! I said ROCK! You hid behind... air!"),
             O("The rock fell apart."), P("So you hide behind a DIFFERENT rock!")),
-        Roast("Poguru_Roast_UtsusemiPoint", 3, When(LastKiller(BossKind.Utsusemi)), P("Big shiny laser. I pointed. I flew out and POINTED, Oni."), O("Hmph.")),
+        Roast("Poguru_Roast_UtsusemiPoint", 3, When(LastKillerSecondPhase(BossKind.Utsusemi)), P("Big shiny laser. I pointed. I flew out and POINTED, Oni."), O("Hmph.")),
         Roast("Poguru_Roast_Shirogane", 3, When(LastKiller(BossKind.Shirogane)), P("She beat you with a sword! YOU have a sword! It's practically the same sword!")),
         Roast("Poguru_Roast_ShiroganeWolf", 3, When(LastKiller(BossKind.Shirogane)), P("Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!"), O("Tch.")),
         Roast("Poguru_Roast_Kagetsune", 3, When(LastKiller(BossKind.Kagetsune)), P("So close! But his hammer is SO big. Like, unfair big."),

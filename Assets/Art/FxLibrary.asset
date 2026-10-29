@@ -862,18 +862,6 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 395bc87f88109401ab1abfa58f60ce1d, type: 3}
     fps: 14
     loop: 0
-  - id: Kage_SpiritBeam
-    frames:
-    - {fileID: 21300000, guid: 2d5223641beb8483798b23eafbd96a69, type: 3}
-    - {fileID: 21300000, guid: 606ee73feb2364bcb9eab03e1894d76b, type: 3}
-    - {fileID: 21300000, guid: 713c1773d77524f6ab78ef41893f0bd8, type: 3}
-    - {fileID: 21300000, guid: 4bf01ebba9a754ff790c7152dd1a6ecc, type: 3}
-    - {fileID: 21300000, guid: 28d13d2662cee48d1acadb9dabea30fb, type: 3}
-    - {fileID: 21300000, guid: 9a3f6f2756bb346778769455142557b9, type: 3}
-    - {fileID: 21300000, guid: fa4691d8893c34025a63b656169a75d7, type: 3}
-    - {fileID: 21300000, guid: aa81c266025ac40c0938e945dfe5332b, type: 3}
-    fps: 12
-    loop: 1
   - id: Kage_TollRing
     frames:
     - {fileID: 21300000, guid: 5843db3af7af3495db8d0029448cf1ff, type: 3}

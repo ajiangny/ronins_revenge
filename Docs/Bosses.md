@@ -135,15 +135,19 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
   strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
   parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
-  Spirit Hyper Beam (`SpiritHyperBeam`, `Move.Beam`, his old Thousand-Soul Wail: three `HyperLayer` trapezoid meshes
-  from the chest to the ground, drawn with the sprites' material, the glow layer with `ProceduralSprites.Glow` across
-  its width; its footprint opens `HyperOpenWidth` wide (11, 12 in phase 2) at the edge the ronin stands nearer, both edges run to `stop`
+  Spirit Hyper Beam (`SpiritHyperBeam`, `Move.Beam`, his old Thousand-Soul Wail, drawn by `SpiritBeamView` in
+  `Kagetsune.Beam.cs` as pixel art built every frame on the art's 48-to-a-unit grid: `PixelMesh` quads of whole
+  pixels in vertex colours with the sprites' material; the body in `BeamRow`-pixel rows split into the stepped bands of
+  a lit cylinder (rim, teal, pale, white core) whose edges shift row by row as streaks pour down; strands on a 3D helix
+  (`CoilPitch`, `CoilSpin`; two, three in phase 2) walked a pixel row at a time, behind the beam as a dim 1-px line
+  under the body (order 54), in front as a 3-px stroke outlined in dark teal over it (57); `BeamSoul`s
+  (`Fx.KageSoulRise` at native size, 14 or 20) riding the helix, pixel-snapped, re-sorted and darkened behind it, only
+  flipped, never scaled or turned; a soft `HyperGlow` bloom behind it all; its footprint opens `HyperOpenWidth` wide (11, 12 in phase 2) at the edge the ronin stands nearer, both edges run to `stop`
   (`HyperSafe` short of the far edge) over `HyperSweep`, so it thins as it goes and its leading edge stays well under
   the ronin's speed; the hit is the wedge's span at his row; cover isn't a shield: an `OverlapBox` over the footprint
   `Hit`s every `Blocker` in it; a pulsing danger band, two guides and the pale safe strip (`HyperSafeColour`) over
-  `HyperTell`; it dissipates as a thread at `stop`. The body layer wears `Fx.KageSpiritBeam` (PixelLab, 96×320, 8
-  looping frames) stretched chest to ground, each frame's texture swapped in by `HyperLayer.ShowFrame`; without it a
-  flat body and core are drawn. `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
+  `HyperTell`; it dissipates as a thread at `stop`, the coil drawing in and the souls flung off, blinking out on twos.
+  `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
   chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` puts him in super
   armour (`levyArmour`: `SuperArmor`, `ArmorDamageTaken` 0.2, a teal `SpriteOutline`) until the last soldier has
   fallen in, tolls three times and
@@ -202,7 +206,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `RightEdge`, `NearX`, `Lanes`, `Pursue`, `BeamEnd`, `HitIfCrossed`, `Stretch`.
 - Kagetsune is `partial`: `Kagetsune.cs` (fields, lifecycle, the fight loop and `NextMove`), `Kit` (stride, bullets,
   telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls` (the summons and borrowed powers),
-  `Levy` (his levy of the dead army) and `Phase` (the break and his fall).
+  `Levy` (his levy of the dead army), `Beam` (how the Spirit Hyper Beam is drawn) and `Phase` (the break and his fall).
 - The levy uses the round's own `SamuraiArmy`: `Muster` builds the formation in its slots (`SpawnStage(…, aboveView:
   false)`), lifts every soldier's sprites to `LevyOrder` (in front of the boss and his wisps) and `FallIn` flies each
   soldier out of his chest into its slot, front rank first (`FlyToSlot`: a flat soul-fire `Silhouette` of its own

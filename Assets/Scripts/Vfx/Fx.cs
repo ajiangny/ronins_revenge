@@ -101,9 +101,6 @@ public static class Fx
     public const string KageChain = "Kage_Chain";
     public const string KageShockwave = "Kage_Shockwave";
     public const string KageSoulColumn = "Kage_SoulColumn";
-    // The Spirit Hyper Beam's body: a looping strip of soul-fire, skulls and twin soul streams pouring down, mapped onto
-    // the beam's mesh (Kagetsune.HyperLayer).
-    public const string KageSpiritBeam = "Kage_SpiritBeam";
     // His polish: a bronze sound ring off each toll, the Wail's flare, a chain bursting, an ofuda burning away, the
     // soul-fire he burns in once the chains snap, his lock-on reticle and a freed soul.
     public const string KageTollRing = "Kage_TollRing";

@@ -604,79 +604,6 @@ public partial class Kagetsune
     static readonly Color HyperSafeColour = new Color(1f, 0.95f, 0.8f);
     static readonly Collider[] HyperCover = new Collider[32];
 
-    // One layer of the beam: a trapezoid from his chest to the ground, rebuilt every frame. The glow layer is drawn
-    // with the soft glow texture across its width so its sides fade; the body wears the PixelLab beam strip
-    // (Fx.KageSpiritBeam) stretched from chest to ground and playing through its frames, or is flat without it.
-    class HyperLayer
-    {
-        public GameObject shape;
-        public Mesh mesh;
-        readonly Vector3[] vertices = new Vector3[4];
-        readonly Color[] colours = new Color[4];
-        readonly Sprite[] frames;
-        readonly MeshRenderer renderer;
-        readonly MaterialPropertyBlock block = new MaterialPropertyBlock();
-        int shown = -1;
-        const float FramesPerSecond = 12f;
-
-        public HyperLayer(Kagetsune owner, Sprite[] art, int order) : this(owner, art[0].texture, order)
-        {
-            frames = art;
-        }
-
-        public HyperLayer(Kagetsune owner, Texture texture, int order)
-        {
-            shape = new GameObject("HyperBeam");
-            mesh = new Mesh();
-            mesh.MarkDynamic();
-            shape.AddComponent<MeshFilter>().sharedMesh = mesh;
-            renderer = shape.AddComponent<MeshRenderer>();
-            // The sprites' own material, so the vertex colours give it its look.
-            renderer.sharedMaterial = owner.sprite.sharedMaterial;
-            block.SetTexture("_MainTex", texture);
-            renderer.SetPropertyBlock(block);
-            renderer.sortingOrder = order;
-            owner.transient.Add(shape);
-            mesh.vertices = vertices;
-            mesh.uv = new[] { new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0f, 0.5f) };
-            mesh.triangles = new[] { 0, 1, 2, 0, 2, 3 };
-        }
-
-        public void Set(Vector3 top, float topHalf, Vector3 bottom, float bottomHalf, Color topColour, Color bottomColour)
-        {
-            vertices[0] = top + Vector3.left * topHalf;
-            vertices[1] = top + Vector3.right * topHalf;
-            vertices[2] = bottom + Vector3.right * bottomHalf;
-            vertices[3] = bottom + Vector3.left * bottomHalf;
-            colours[0] = colours[1] = topColour;
-            colours[2] = colours[3] = bottomColour;
-            mesh.vertices = vertices;
-            mesh.colors = colours;
-            mesh.RecalculateBounds();
-            if (frames != null) ShowFrame((int)(Time.time * FramesPerSecond) % frames.Length);
-        }
-
-        // Each frame is its own texture: swap it in and map the trapezoid onto its rect, top of the art at his chest.
-        void ShowFrame(int index)
-        {
-            if (index == shown) return;
-            shown = index;
-            Sprite frame = frames[index];
-            Rect rect = frame.textureRect;
-            float w = frame.texture.width, h = frame.texture.height;
-            float u0 = rect.xMin / w, u1 = rect.xMax / w, v0 = rect.yMin / h, v1 = rect.yMax / h;
-            mesh.uv = new[] { new Vector2(u0, v1), new Vector2(u1, v1), new Vector2(u1, v0), new Vector2(u0, v0) };
-            block.SetTexture("_MainTex", frame.texture);
-            renderer.SetPropertyBlock(block);
-        }
-
-        public void Remove(Kagetsune owner)
-        {
-            owner.Drop(shape.transform);
-            Object.Destroy(mesh);
-        }
-    }
-
     // The Spirit Hyper Beam: every soul in him screams out of his open chest at once, a torrent of soul-fire that slams
     // into the ground across a third of the field at the edge Oni stands nearer. It drives across to the far edge,
     // burning through any cover it passes over, and thins as it goes, its leading edge slower than Oni can run, until
@@ -732,14 +659,8 @@ public partial class Kagetsune
         Drop(guideB);
         Sfx.Stop(Sfx.SoulWail);
 
-        var glow = new HyperLayer(this, ProceduralSprites.Glow.texture, 53);
-        // The PixelLab strip carries its own white-hot core; the flat fallback draws one.
-        Sprite[] art = Fx.Frames(Fx.KageSpiritBeam);
-        var body = art != null ? new HyperLayer(this, art, 55) : new HyperLayer(this, Texture2D.whiteTexture, 55);
-        HyperLayer core = art != null ? null : new HyperLayer(this, Texture2D.whiteTexture, 56);
-        Color bodyTint = art != null ? Color.white : new Color(Teal.r * 0.7f, Teal.g, Teal.b);
-        // The strip's soul-fire edge is ragged: its painted width runs a little past the hit.
-        float artWidth = art != null ? 1.1f : 1f;
+        // Drawn as pixel art in code (Kagetsune.Beam.cs): the stepped cylinder, its coil and the souls riding it.
+        var beam = new SpiritBeamView(this, secondPhase);
         FxPlayer splash = Fx.Play(Fx.KageWailFlare, new Vector3(start + dir * open * 0.5f, ground, 0), Color.white, 2f, null, 58);
         if (splash != null) transient.Add(splash.gameObject);
         TimeRipple.Emit(Chest, 7f, 0.6f, 0.6f);
@@ -763,9 +684,7 @@ public partial class Kagetsune
             float half = Mathf.Abs(lead - trail) * 0.5f * burst;
             float chestHalf = (0.4f + 2.2f * (1f - k)) * burst * flicker;
             Vector3 top = Chest, foot = new Vector3(centre, ground, 0);
-            glow.Set(top, chestHalf * 1.8f, foot, half * 1.25f + 0.6f, new Color(Teal.r, Teal.g, Teal.b, 0.45f), new Color(Teal.r, Teal.g, Teal.b, 0.6f));
-            body.Set(top, chestHalf * artWidth, foot, half * flicker * artWidth, new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.95f), new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.9f));
-            core?.Set(top, chestHalf * 0.3f, foot, half * 0.28f * flicker, new Color(0.95f, 1f, 0.98f, 0.95f), new Color(0.85f, 1f, 0.95f, 0.8f));
+            beam.Draw(top, chestHalf, foot, half);
             if (flare != null)
             {
                 flare.transform.position = Chest + Vector3.back * 0.3f;
@@ -822,18 +741,15 @@ public partial class Kagetsune
         for (float t = 0; t < 0.45f; t += Time.deltaTime * Tempo)
         {
             float fade = 1f - t / 0.45f;
-            float thread = 0.12f * fade;
-            glow.Set(Chest, 0.5f * fade, end, 0.5f * fade, new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade), new Color(Teal.r, Teal.g, Teal.b, 0.4f * fade));
-            body.Set(Chest, thread * 3f, end, thread * 3f, new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.8f * fade), new Color(bodyTint.r, bodyTint.g, bodyTint.b, 0.8f * fade));
-            core?.Set(Chest, thread * 0.4f, end, thread * 0.4f, new Color(1f, 1f, 1f, fade), new Color(1f, 1f, 1f, fade));
+            // Down to a thread a pixel or two wide, the coil drawing in with it and the souls flung off.
+            float thread = Mathf.Max(1f / BeamPixel, 0.3f * fade);
+            beam.Draw(Chest, thread, end, thread, 1f - fade);
             if (flare != null) flare.Color = new Color(1f, 1f, 1f, fade);
             safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f * fade);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * fade);
             yield return null;
         }
-        glow.Remove(this);
-        body.Remove(this);
-        core?.Remove(this);
+        beam.Remove();
         if (flare != null) Drop(flare);
         Drop(safe);
         Drop(dim);

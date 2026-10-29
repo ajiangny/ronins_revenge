@@ -188,7 +188,8 @@ public partial class Kagetsune
             for (float t = 0; t < tell; t += Time.deltaTime * Tempo)
             {
                 float k = t / tell;
-                SetCoffin(coffin, chain, Vector3.Lerp(windFrom, start, Mathf.SmoothStep(0, 1, k)) + Vector3.up * Mathf.Sin(t * 9f) * 0.15f, -side * 30f * k);
+                Vector3 winding = Vector3.Lerp(windFrom, start, Mathf.SmoothStep(0, 1, k)) + Vector3.up * Mathf.Sin(t * 9f) * 0.15f;
+                SetCoffin(coffin, chain, winding, HangTilt(winding));
                 if (band != null) band.color = new Color(Crimson.r, Crimson.g, Crimson.b, 0.1f + 0.35f * k);
                 if (k > 0.5f && Mathf.Repeat(t, 0.25f) < Time.deltaTime) Toll(0.3f, 0.9f + 0.1f * pass);
                 yield return null;
@@ -198,26 +199,37 @@ public partial class Kagetsune
             else Sfx.Play(Sfx.ParrySwing, 0.9f, 0.5f);
             // The swing: down out of the wind-up, along the ground through the stretch, and up past its end.
             float swing = 0.55f * Mathf.Pow(0.8f, pass);
-            Vector3 dip = new Vector3(near, Row, 0), outer = new Vector3(far, Row, 0);
+            // Through the stretch it swings in a shallow arc, lowest in the middle, as a weight on a chain would.
+            Vector3 dip = new Vector3(near, Row + 1.2f, 0), outer = new Vector3(far, Row + 1.2f, 0);
             Vector3 lift = new Vector3(far + side * 1.5f, Row + 4f, 0);
             bool shed = false;
+            float nextGhost = 0f, lastDust = near;
             for (float t = 0; t < swing; t += Time.deltaTime * Tempo)
             {
                 float k = t / swing;
                 Vector3 at = k < 0.3f ? Vector3.Lerp(start, dip, Mathf.SmoothStep(0, 1, k / 0.3f))
-                    : k < 0.8f ? Vector3.Lerp(dip, outer, (k - 0.3f) / 0.5f)
+                    : k < 0.8f ? ScytheArc(dip, outer, (k - 0.3f) / 0.5f)
                     : Vector3.Lerp(outer, lift, (k - 0.8f) / 0.2f);
-                Vector3 before = coffin != null ? coffin.transform.position : at;
-                SetCoffin(coffin, chain, at, side * Mathf.Lerp(-40f, 70f, k));
-                if (coffin != null) Afterimage(coffin, new Color(Teal.r, Teal.g, Teal.b, 0.45f));
+                SetCoffin(coffin, chain, at, HangTilt(at));
+                // A few faint ghosts of the coffin mark its sweep, not a solid smear.
+                if (coffin != null && Time.time >= nextGhost)
+                {
+                    nextGhost = Time.time + 0.05f;
+                    Afterimage(coffin, new Color(Teal.r, Teal.g, Teal.b, 0.22f));
+                }
                 // Along the ground it burns whatever it passes.
                 if (k >= 0.3f && k < 0.8f)
                 {
                     if (Mathf.Abs(ronin.Bounds.center.x - at.x) < 1f) ronin.TakeHit(new Vector3(at.x, Row, 0));
                     BeamEnd(at + Vector3.up * 2f, at, out Blocker cover);
                     if (cover != null) cover.Hit(at);
-                    if (Random.value < 0.35f) Fx.Play(Fx.Impact, new Vector3(at.x, GroundY + 0.3f, 0), Teal, 1.2f);
-                    if (Mathf.Abs(at.x - before.x) > 0.01f && Random.value < 0.25f) GroundFire.Light(new Vector3(at.x, GroundY, 0));
+                    // Where it scrapes past, dust kicks up and the ground catches soul-fire, every step or so.
+                    if (Mathf.Abs(at.x - lastDust) >= 1.4f)
+                    {
+                        lastDust = at.x;
+                        Fx.Play(Fx.SmokePuff, new Vector3(at.x, GroundY + 0.2f, 0), new Color(0.3f, 0.32f, 0.33f, 0.6f), 1.3f);
+                        GroundFire.Light(new Vector3(at.x, GroundY, 0));
+                    }
                 }
                 // On the last upswing it sheds a row of skulls over the stretch it scythed, spaced wide enough to pass
                 // between; earlier passes don't, as he has to cross back through that side.
@@ -240,7 +252,8 @@ public partial class Kagetsune
         for (float t = 0; t < 0.7f; t += Time.deltaTime * Tempo)
         {
             float k = t / 0.7f;
-            SetCoffin(coffin, chain, Vector3.Lerp(from, over, Mathf.SmoothStep(0, 1, k)), 180f * k);
+            Vector3 rising = Vector3.Lerp(from, over, Mathf.SmoothStep(0, 1, k));
+            SetCoffin(coffin, chain, rising, HangTilt(rising));
             yield return null;
         }
         yield return CloseLanes(lane, xs, 2.4f, 1.5f, Crimson, 0.45f, 2);
@@ -263,6 +276,21 @@ public partial class Kagetsune
         coffin.transform.localScale = frames != null ? Vector3.one * (2.2f / frames[0].bounds.size.y) : new Vector3(1.2f, 2f, 1f);
         transient.Add(coffin.gameObject);
         return coffin;
+    }
+
+    // The swing's path through the stretch: a shallow arc between its ends, a little lower in the middle.
+    Vector3 ScytheArc(Vector3 from, Vector3 to, float k)
+    {
+        Vector3 at = Vector3.Lerp(from, to, k);
+        at.y -= Mathf.Sin(k * Mathf.PI) * 1f;
+        return at;
+    }
+
+    // The coffin hangs off the end of its chain: its long axis points along the chain, away from the hammer.
+    float HangTilt(Vector3 at)
+    {
+        Vector3 pull = at - HammerHead;
+        return pull.sqrMagnitude < 0.01f ? 0f : Vector3.SignedAngle(Vector3.down, pull, Vector3.forward);
     }
 
     void SetCoffin(SpriteRenderer coffin, SpriteRenderer chain, Vector3 at, float tilt)

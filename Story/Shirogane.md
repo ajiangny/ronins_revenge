@@ -113,6 +113,7 @@ Lines with the other characters (all voiced).
 |---|---|---|---|---|
 | `Shirogane_Intro_Fire` | `BossIntro` | Reactive, rests 4 | `holds Fire` | **Shirogane:** "Copper's fire. Akagane never once beat me. Let's see if he does through you." |
 | `Shirogane_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Shirogane:** "Mizore's cold. She stitched me more often than I let you know. Guard your left." |
+| `Shirogane_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Shirogane:** "The old koi's water. ...Does she still keep the stone clear?"<br>**Oni:** "...Yes." |
 | `Shirogane_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Shirogane:** "The drummer girl. She dropped my sword in the mud. ...Tell her I laughed."<br>**Oni:** "...I'll tell her." |
 
 ## Arc across runs

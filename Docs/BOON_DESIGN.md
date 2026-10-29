@@ -313,7 +313,9 @@ Rarity and level are separate:
   - Burn: stacking damage over time, capped.
   - Chill: stacks that freeze at a threshold, then a short immunity.
   - Jolt: discharges on the samurai's next shot.
-  - These would give each element one readable status across every slot, like Hades' gods.
+  - These would give each element one readable status across every slot, like Hades' gods. Done since for one
+    element: Water's Soaked (§7) is the first status that every slot of an element applies and every other
+    element's effects read.
 - **More Sword Arts.** Arts for the shuriken and parry: the shuriken splits into three lanes, or the parry holds a
   stance that reflects every arrow for half a second.
 - **Cursed souls (Chaos).** For example the army marches 20% faster for two rounds, then the shuriken recharges
@@ -321,3 +323,56 @@ Rarity and level are separate:
 - **Run resources.** Redraws and banishes are now Flute Songs (Fate's Thread, Banishing Bell). Still open: never
   repeat the previous offer, and a rarity pity offset.
 - **Icons.** Done since: every capstone and the Offering has its icon in `UI/Boons/<BoonId>`.
+
+## 7. The fourth element: Water (Asagi)
+
+**Why a fourth.** Three elements give three Duos, and with ~12–16 picks a run every pair is reachable most runs.
+Hades' boon space is wide because the gods are many: a fourth element adds three new pairs (six Duos in all), a
+fourth Legendary, and a first element whose identity is defence rather than damage. It arrives late, as Hades'
+later gods do: the Water soul, [Asagi](../Story/Asagi.md), joins only once Oni has met her in the temple
+(`Save.Data.asagiMet`, the wake after the second run), so the first runs keep the three-element pool.
+
+**Code name.** `Element.Tide`, appended to the enum so `SaveData.lastRunElement` keeps meaning what it did.
+Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost asset is named by the enum).
+
+**What Water does.** Tide and healing, kept apart from Frost's freeze and shatter:
+
+- **Soaked**, the status (`Samurai.Soaked`, `Boss.Soaked`; a sea-blue tint and drips). A soaked target takes **+1
+  from every boon effect** (blasts, strikes, shards, waves). It does nothing on its own: it's the amplifier that
+  makes mixing a second element pay, which the three-status note in §6 asked for.
+- **The tide push** (`SamuraiArmy.PushBack(units)`). The formation is lifted back up the screen, undoing march
+  steps, never above where it spawned. Space Invaders' whole tension is the descent; Water is the one element that
+  rolls it back.
+- **Washing arrows** (`Arrow.Wash`): like Wildfire's burn, for ordinary arrows only, never spears or other
+  unbreakable shots.
+
+| Boon | Slot | Common / Rare / Epic |
+|---|---|---|
+| **Riptide Blade** | Attack | A slash kill may (40 / 55 / 70%) send a wave up the victim's column: every samurai in it is soaked (4 s) and the arrows in the column wash away. On a boss hit, the same chance soaks the boss. |
+| **Tidewake Shuriken** | Special | The shuriken leaves a wake: arrows it passes wash away, samurai it passes within reach are soaked for 3 / 4 / 5 s, a boss it passes too. |
+| **Undertow Riposte** | Parry | A parry sends a wave that pushes the army back up 0.3 / 0.45 / 0.6 units and soaks the front row. On a boss, soaks it. |
+| **Tidal Renewal** | Passive, instant | +1 / +1 / +2 max life. Moved here from Frost: it's her medicine and her name. |
+| **Healing Spring** | Passive | Every 45 / 35 / 25 kills by Oni's own hits (not effects) restores one lost life, or pays points at full health. |
+| **Tide Shadow** | Ultimate | Unleashing the clone sends a great wave: every arrow washes away and the army is pushed up 0.6 (a boss is soaked). Clone kills soak their neighbours. |
+| **Dragon Gate** | Legendary (two Tide slots) | Once a stage, a blow that would take the last life is turned aside and 2 lives are healed. The koi climbs the falls. |
+
+Frost loses Tidal Renewal and gains **Cold Compress** (Passive): when Oni is hit, the army freezes for 1 / 1.5 / 2 s,
+or the standing boss for half that. It is the defensive passive Frost never had, built on `SamuraiArmy.Freeze` and
+`Boss.Freeze`, and it keeps Mizore's family at five.
+
+**Duos** (the `TideBoons` family: Riptide Blade, Tidewake Shuriken, Undertow Riposte, Tide Shadow):
+
+| Duo | Pair | Effect |
+|---|---|---|
+| **Scalding Steam** | Fire + Water | A blast centred on a soaked samurai is +0.5 wider and washes away the arrows inside it. |
+| **Black Ice** | Frost + Water | A soaked samurai that is encased stays encased twice as long, and its statue shatters into double shards. |
+| **Thunder Rain** | Storm + Water | A strike on a soaked samurai leaps to every other soaked samurai in its row. |
+
+**Levels** (the §5 conventions): wave chances +8% a level to 90%; soak times +0.4 s to 8 s; the push +0.08 to 0.9;
+Healing Spring −5 kills (whole) to a floor of 15; Tidal Renewal is instant, so it isn't levelled; Cold Compress
++0.28 s to 4 s.
+
+**Balance to watch** (`RunLog`): Water should make few kills of its own, so its kill share will read low; what to
+check is the share of *other* elements' effect kills on soaked targets and the arrows washed per round. If Undertow
+alone holds the army off the floor, lower the push or let it apply only when the army is below half its descent.
+Dragon Gate is once a stage so it can't trivialise bosses.

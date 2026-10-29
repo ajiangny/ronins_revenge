@@ -104,6 +104,7 @@ Lines with the other characters (all voiced).
 | id | Event | Tier | Requires | Lines |
 |---|---|---|---|---|
 | `Benibana_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Benibana:** "The physician's cold on your hands. She treated my ankles once. She never asked why they bled." |
+| `Benibana_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Benibana:** "The pond on the hill. I went up for my ankles once, and the fish asked nothing at all. I'd have told her." |
 | `Benibana_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Benibana:** "The drummer girl's spark. She watched me dance with her mouth open. I'm sorry she stayed for the end." |
 
 ## Arc across runs

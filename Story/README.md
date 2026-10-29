@@ -20,6 +20,7 @@ maps every bond in the cast: what they call each other, which pairs already talk
 | **Akagane** | Captain of the Vanguard | The Fire soul behind the Fire boons; Oni's old captain. Talks on the boon screen. | [Akagane.md](Akagane.md) |
 | **Mizore** | the Court Physician | The Frost (Water) soul behind the Frost boons. | [Mizore.md](Mizore.md) |
 | **Hibiki** | the Village Drummer | The Storm (Lightning) soul behind the Storm boons. | [Hibiki.md](Hibiki.md) |
+| **Asagi** | the Pond Physician | The Water (Tide) soul behind the Water boons: the koi of the temple pond, who pulls Oni out of the pool each time he dies. Never in the coffin. Joins once he meets her in the temple. | [Asagi.md](Asagi.md) |
 
 ## The betrayal
 
@@ -50,7 +51,8 @@ new faces on his armor cast as snarling oni.
   tore himself out of: the game's hub (Hades' House, the pool his Styx). He walks its courtyard between runs: her
   flute on the altar (the Flute Songs), the memorial stones, the weapon rack, and the gate out. The title screen is
   the hill outside it. Each return
-  wears a little more of his memory away.
+  wears a little more of his memory away. The koi of the temple pond, [Asagi](Asagi.md), is the one who pulls him
+  out of the pool each time; she has from the first death, and a few runs in she says so.
 - **The army and the bosses** are souls from the armor, sent out each night. The army walks in the bodies it died
   in on the Night of a Thousand Bells: rotted armour and bone, a faint teal ember of soul in each eye slit
   ([Army.md](Army.md)). When one falls its body crumbles to bones and ash and its soul is drawn back into the coffin
@@ -59,7 +61,8 @@ new faces on his armor cast as snarling oni.
 - **The endless night.** The last bell froze the hour, and Utsusemi winds the clock that holds it there. The moons
   over the boss fights (blood, steel, spirit) belong to the bosses, not to Kagetsune.
 - **Boons.** When a soldier dies, its soul sometimes slips past the coffin's pull as a Fire, Frost or Storm soul.
-  It lends Oni its power because he is the only one who might set it free. Every boon is a soul stolen back.
+  It lends Oni its power because he is the only one who might set it free. Every boon is a soul stolen back. Once
+  he has met Asagi, the tired souls that slip back *with* him sink into her pond and come to him as Water.
   Technique scrolls are pages of Oni's own sword arts, the parts of himself the dying took.
 - **Teal fire.** The fire pouring from Kagetsune's chest is the same teal as Oni's spirit flames and wisps,
   because Oni tore himself out of it.

@@ -29,6 +29,7 @@ graph LR
     Oni --- |"rival; same mistake at the doors"| Akagane["Akagane<br/>Fire"]
     Oni --- |"his physician"| Mizore["Mizore<br/>Frost"]
     Oni --- |"his village; followed him up"| Hibiki["Hibiki<br/>Storm"]
+    Oni --- |"pulls him out of the pool"| Asagi["Asagi<br/>Water"]
     Oni --- |"lives in his left wisp"| Poguru["Poguru"]
     Oni --- |"the men he led up"| Army["The dead army"]
 
@@ -38,6 +39,7 @@ graph LR
     Kagetsune -.-> |"knelt 20 years"| Akagane
     Kagetsune -.-> |"held his sleeve"| Mizore
     Kagetsune -.-> |"village rings as one"| Hibiki
+    Kagetsune -.-> |"asked her for forever; no hold"| Asagi
     Kagetsune -.-> |"sends out each night"| Army
 ```
 
@@ -55,6 +57,7 @@ graph TD
         Akagane["Akagane · Fire"]
         Mizore["Mizore · Frost"]
         Hibiki["Hibiki · Storm"]
+        Asagi["Asagi · Water"]
     end
     Poguru["Poguru"]
     Army["The dead army"]
@@ -71,17 +74,24 @@ graph TD
     Hibiki --- |"watched the dance"| Benibana
     Hibiki --- |"the tea monk at the well"| Utsusemi
     Hibiki --- |"held her sword, dropped it"| Shirogane
+    Asagi --- |"fed her rice every spring"| Utsusemi
+    Asagi --- |"keeps her stone clear"| Shirogane
 
     Akagane --- |"set his arm · Thermal Shock"| Mizore
     Akagane --- |"her drum, his tent · Plasma Arc"| Hibiki
     Mizore --- |"counted her pulse · Superconductor"| Hibiki
+    Asagi --- |"carp / koi · Scalding Steam"| Akagane
+    Asagi --- |"taught her · Black Ice"| Mizore
+    Asagi --- |"heard her drum from the pond · Thunder Rain"| Hibiki
 
     Akagane --- |"my men"| Army
     Hibiki --- |"the festival dragon's cape"| Poguru
+    Asagi --- |"the Dragon Gate"| Poguru
 ```
 
-Every character but Poguru is Kagetsune's victim, and none of them serves him willingly any more. Kuon is bound to
-Shirogane by him but obeys only her.
+Every character but Poguru and Asagi is Kagetsune's victim, and none of them serves him willingly any more. Kuon is
+bound to Shirogane by him but obeys only her. Asagi was never on the mountain and has no bell; she is the only
+soul he never held.
 
 ## Who was on the mountain
 
@@ -93,25 +103,27 @@ to him and to each other.
 | **The court** | Mizore, Benibana (and her hidden congregation), the courtiers | Bells of rank. Mizore's is the small cracked one closest to his heart, the first he hung. |
 | **The army** | Akagane, his vanguard (now the dead army), the Bellringers (his shrine watch) | Bells of rank. Akagane's is the war bell on his right shoulder, the one the Bellringers answer. |
 | **The village** | Hibiki, her mother ("Ma"), the villagers, Oni's own people | No bells of their own: the whole village rings as one sound inside the coffin. |
-| Outside the three | Shirogane (a guard, like Oni), the monk (taken later, on the Pilgrim's Pass), Kuon (bound later, at the Frozen Shrine) | Shirogane's never rang. |
+| Outside the three | Shirogane (a guard, like Oni), the monk (taken later, on the Pilgrim's Pass), Kuon (bound later, at the Frozen Shrine), Asagi (never went: she was on her hill, and heard the bells stop from there) | Shirogane's never rang. Asagi has none. |
 
 ## What they call each other
 
 The fastest check before writing a line. Blank means they never address each other in game.
 
-| Speaker → | Oni | Kagetsune | Shirogane | Akagane | Mizore | Hibiki | Poguru |
-|---|---|---|---|---|---|---|---|
-| **Oni** | | (never by name in lines) | "Shirogane" | | "she" | "Hibiki" (once he remembers) | |
-| **Kagetsune** | **"little demon"** (his alone), "Oni" | | "Shirogane" | "my captain" | "Mizore" | "the village drum" | |
-| **Benibana** | "Oni", "shepherd", "demon" | "Kagetsune" | | | "the physician" | "the drummer girl" | |
-| **Utsusemi** | **"boy"** (its alone), "Oni", "clever boy" | | | | | "a drummer" | |
-| **Shirogane** | "Oni" | | | "Akagane", "copper" | "Mizore" | "the drummer girl" | |
-| **Akagane** | **"Guardsman"** (his alone) | "him" | "silver", "she" | | **"physician"** | **"girl"** | "that" |
-| **Mizore** | **"Oni"**, "young man" | "my prince" (the boy), "he" | "she" | **"Captain"** | | **"Hibiki"** | "creature", "your little dragon" |
-| **Hibiki** | "Oni", **"my lord guardsman"** | "he" | **"Lady Shirogane"** | **"Captain Kettle"** | **"Grandmother"** | | "the festival dragon" |
-| **Poguru** | "Oni" | (hides) | "the silver lady", "she" | "the grumpy captain" | "the wolf granny" | "the drummer girl" | |
+| Speaker → | Oni | Kagetsune | Shirogane | Akagane | Mizore | Hibiki | Asagi | Poguru |
+|---|---|---|---|---|---|---|---|---|
+| **Oni** | | (never by name in lines) | "Shirogane" | | "she" | "Hibiki" (once he remembers) | "Mizore" (to her, of her student) | |
+| **Kagetsune** | **"little demon"** (his alone), "Oni" | | "Shirogane" | "my captain" | "Mizore" | "the village drum" | "the fish on the hill" | |
+| **Benibana** | "Oni", "shepherd", "demon" | "Kagetsune" | | | "the physician" | "the drummer girl" | "the pond" | |
+| **Utsusemi** | **"boy"** (its alone), "Oni", "clever boy" | | | | | "a drummer" | "the fish" (the monk, surfacing) | |
+| **Shirogane** | "Oni" | | | "Akagane", "copper" | "Mizore" | "the drummer girl" | "the old koi" | |
+| **Akagane** | **"Guardsman"** (his alone) | "him" | "silver", "she" | | **"physician"** | **"girl"** | **"carp"** | "that" |
+| **Mizore** | **"Oni"**, "young man" | "my prince" (the boy), "he" | "she" | **"Captain"** | | **"Hibiki"** | **"Teacher"** | "creature", "your little dragon" |
+| **Hibiki** | "Oni", **"my lord guardsman"** | "he" | **"Lady Shirogane"** | **"Captain Kettle"** | **"Grandmother"** | | **"Great-Grandmother"** | "the festival dragon" |
+| **Asagi** | **"little fry"**, **"flute boy"**, "Oni" (only after `Asagi_Meet_Home`) | "the boy who wanted forever", "he" | "the one who listened", "she" | **"little kettle"** | **"little sleet"**, "my student" | "the drummer girl", "dear" | | "very small dragon", "dear" |
+| **Poguru** | "Oni" | (hides) | "the silver lady", "she" | "the grumpy captain" | "the wolf granny" | "the drummer girl" | "the fish lady" | |
 
-- Mizore always answers "Grandmother" with "I'm not your grandmother."
+- Mizore always answers "Grandmother" with "I'm not your grandmother." Asagi answers "Great-Grandmother" with
+  "Yes, dear." and "carp" with "Koi."
 - Utsusemi: the machine is **"it"**, the monk inside is **"he"**. The voice softens when he surfaces.
 - Kuon never speaks (growls and howls only). Only Shirogane addresses it: "Kuon".
 - The army calls Oni "the Emperor's runaway dog", "traitor", "the coffin's demon".
@@ -133,6 +145,7 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Oni – Akagane | Rivals for the Emperor's favour; Akagane got the vanguard, Oni the place beside Shirogane. Both guarded the wrong side of the door. Contempt, then grudging alliance, then a promised salute. | `Akagane_Meet_*` (Angry → Copper → Men → Doors → Bellringers → Salute), `Akagane_Hub_Salute` |
 | Oni – Mizore | Her patient. She set his collarbone at sixteen; she watches the coffin take his memories and minds. Dry, never cruel. | `Mizore_Meet_*` (Steady → Collarbone → Smoke → Prince → Smiths → Oath), `Mizore_Hub_Sleep` |
 | Oni – Hibiki | From his village; she adored him and drummed him out the morning he left. He forgets her name; she admits she blames him and would follow him anyway. He wins back the river memory on his own. Never romantic. | `Hibiki_Meet_*` (Out → Name → Procession → OneBell → Blame → River), `Hibiki_Hub_RiverSong` |
+| Oni – Asagi | The koi of the pond he wakes in; she pulls him out every time and has from the first death. Warm, nosy, fussing; she knew his face from the hill years before and doesn't say so until her fifth chapter. He is her last patient, and she's sending him home. | `Asagi_Meet_Pool` (the temple), `Asagi_Meet_*` (Fry → Sleet → Prince → Monk → Flute → Home), `Asagi_Pond_*` (her station), `Asagi_Hub_Sleep` |
 | Oni – the army | His own men and the court guard, walking in the bodies they died in. Every one he cuts down goes back to the coffin. | `Tut_*`, Akagane's lines about "my men" |
 
 ### Boss and boss
@@ -164,7 +177,12 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Hibiki – Utsusemi | The tea monk who stopped at the village well each spring and let the children wear his hat. She's sure he's still in there. | `Hibiki_Ahead_Utsusemi`, `Hibiki_Ahead_UtsusemiTea`, `Hibiki_Felled_Utsusemi`, `Hibiki_Pickup_DiedUtsusemi`, `Utsusemi_Intro_Storm` |
 | Hibiki – Shirogane | "Lady Shirogane" visited with Oni and let her hold her sword; she dropped it. Worship and terror in equal parts. Shirogane laughed. | `Hibiki_Ahead_Shirogane`, `Hibiki_Felled_Shirogane`, `Hibiki_Pickup_DiedShirogane`, `Shirogane_Intro_Storm` |
 | Hibiki – Kagetsune | Saw him once from the procession; he didn't look at any of them. Her drum against his bells. | `Hibiki_Meet_OneBell`, `Hibiki_Ahead_Kagetsune`, `Hibiki_Pickup_DiedKagetsune`, `Kagetsune_Intro_Storm` |
-| Any soul – Kuon | No stated bond. | — |
+| Asagi – Benibana | The dancer came up the hill for her ankles once; that night her smoke settled on the pond. Asagi treated the ankles and pities the girl. | `Asagi_Ahead_Benibana`, `Asagi_Felled_Benibana`, `Asagi_Pickup_DiedBenibana`, `Benibana_Intro_Water` |
+| Asagi – Utsusemi | The monk fed her rice every spring and talked to the fish, not the body. She wants his clock stopped, gently. | `Asagi_Meet_Monk`, `Asagi_Ahead_Utsusemi`, `Asagi_Felled_Utsusemi`, `Asagi_Pickup_DiedUtsusemi`, `Utsusemi_Intro_Water` |
+| Asagi – Shirogane | One of the two guards who sat by her pond: the one who listened. Asagi keeps her flat stone clear and never says who for. | `Asagi_Meet_Flute`, `Asagi_Ahead_Shirogane`, `Asagi_Felled_Shirogane`, `Asagi_Pickup_DiedShirogane`, `Asagi_Pond_Stone`, `Shirogane_Intro_Water` |
+| Asagi – Kagetsune | He climbed her hill young to ask how forever was done; she told him it wasn't worth having. She counts his armor as partly hers. He remembers the fish that told him no. | `Asagi_Meet_Prince`, `Asagi_Ahead_Kagetsune`, `Asagi_Ahead_KagetsuneWon`, `Asagi_Pickup_DiedKagetsune`, `Kagetsune_Intro_Water` |
+| Asagi – Kuon | A fellow guardian spirit: a shrine's, and a pond's. | (written in Asagi.md, not in game) |
+| Any other soul – Kuon | No stated bond. | — |
 
 ### Soul and soul
 
@@ -173,9 +191,14 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Akagane – Mizore | She set his arm; he called her a butcher. Old palace staff who bicker like a married couple; respect neither admits. | Duo **Thermal Shock** (`Duo_ThermalShock_First`, `_Arm`, `_Again`), `Akagane_Jealous_Mizore`, `Mizore_Jealous_Akagane`, `Akagane_Cut_Mizore`, `Akagane_Pickup_HoldsFrost`, `Mizore_Pickup_HoldsFire` |
 | Akagane – Hibiki | His men marched up the mountain to her drum, and he hasn't forgiven the drum; her fireworks burned his supply tent. Gruff and quietly protective; she runs to him first when scared. | Duo **Plasma Arc** (`Duo_PlasmaArc_First`, `_Pace`, `_Again`), `Akagane_Jealous_Hibiki`, `Hibiki_Jealous_Akagane`, `Hibiki_Cut_Akagane`, `Akagane_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsFire` |
 | Mizore – Hibiki | The old woman who held the girl's wrist and counted her pulse to the end. The gentlest pair; only Hibiki could make Mizore laugh. | Duo **Superconductor** (`Duo_Superconductor_First`, `_Count`, `_Again`), `Mizore_Jealous_Hibiki`, `Hibiki_Jealous_Mizore`, `Mizore_Cut_Hibiki`, `Mizore_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsFrost` |
+| Asagi – Mizore | Teacher and student: the girl climbed the hill at twelve and was taught for six years, then went to the palace and never came back up. Warm against cold, the same medicine two ways. | Duo **Black Ice** (`Duo_BlackIce_First`, `_Hill`, `_Again`), `Asagi_Meet_Sleet`, `Asagi_Jealous_Mizore`, `Mizore_Jealous_Asagi`, `Asagi_Cut_Mizore`, `Asagi_Pickup_HoldsFrost`, `Mizore_Pickup_HoldsWater` |
+| Asagi – Akagane | "Carp." "Koi." He wants her out of his fire; she wets the enemy first. She calls him "little kettle" and he hates it. | Duo **Scalding Steam** (`Duo_ScaldingSteam_First`, `_Kettle`, `_Again`), `Asagi_Jealous_Akagane`, `Akagane_Jealous_Asagi`, `Asagi_Pickup_HoldsFire`, `Akagane_Pickup_HoldsWater` |
+| Asagi – Hibiki | Asagi heard the girl's festival drum from her pond every summer. Hibiki adores her on sight and gets the "Great-Grandmother" Mizore refused her. | Duo **Thunder Rain** (`Duo_ThunderRain_First`, `_Festival`, `_Again`), `Asagi_Jealous_Hibiki`, `Hibiki_Jealous_Asagi`, `Asagi_Cut_Hibiki`, `Asagi_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsWater` |
 
 Jealousy, at a glance: Akagane is jealous of Hibiki most (a village girl's speed over the vanguard's fire), Mizore
-mildly. Mizore is dry about Fire ("fevers are popular, briefly"), worried about Storm. Hibiki sulks at both.
+mildly, and dismisses Asagi ("stay in your pond, carp"). Mizore is dry about Fire ("fevers are popular, briefly"),
+worried about Storm, and stiff about her teacher. Hibiki sulks at Fire and Frost and adores Water. Asagi is fond
+of all three and gives the boon anyway.
 
 ### Poguru and everyone
 
@@ -188,6 +211,7 @@ mildly. Mizore is dry about Fire ("fevers are popular, briefly"), worried about 
 | Poguru – Akagane | "The vanguard had a dog once. It was braver." | `Akagane_Poguru`, `Poguru_Soul_Fire` |
 | Poguru – Mizore | Diagnosed as running warm. "Do souls get fevers?" | `Mizore_Poguru`, `Poguru_Soul_Frost` |
 | Poguru – Hibiki | His cape is the village's paper festival dragon, which she paraded round the well every summer: why it smells like lanterns. | `Hibiki_Poguru`, `Poguru_Talk_Cape`, `Poguru_Soul_Storm` |
+| Poguru – Asagi | "A FISH, and it's a LADY." The Dragon Gate: koi that climb the falls become dragons. He's in awe; she liked her pond. | `Asagi_Poguru`, `Poguru_Soul_Water` |
 | Poguru – the army | He bonks their arrows; he says hi to them. | `Poguru_Tut_*`, `Poguru_Round_Wave` |
 
 ## Coverage: which pairs talk
@@ -196,19 +220,20 @@ How much the row's speaker says to or about the column's character, from the "Ca
 **●** three or more conversations, **◐** one or two, **○** none. Oni talks with everyone (his answers, the souls'
 chains, Poguru's talks), so he has no row. Read across a row to see who a character is missing.
 
-| Speaker ↓ / about → | Benibana | Utsusemi | Shirogane | Kuon | Kagetsune | Akagane | Mizore | Hibiki | Poguru |
-|---|---|---|---|---|---|---|---|---|---|
-| **Benibana** | | ○ | ○ | ○ | ◐ | ○ | ◐ | ◐ | ○ |
-| **Utsusemi** | ○ | | ○ | ○ | ○ | ◐ | ◐ | ◐ | ○ |
-| **Shirogane** | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
-| **Kagetsune** | ◐ | ◐ | ◐ | ○ | | ◐ | ◐ | ◐ | ○ |
-| **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ◐ |
-| **Mizore** | ● | ● | ● | ○ | ● | ● | | ● | ◐ |
-| **Hibiki** | ● | ● | ● | ○ | ● | ● | ● | | ◐ |
-| **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | |
+| Speaker ↓ / about → | Benibana | Utsusemi | Shirogane | Kuon | Kagetsune | Akagane | Mizore | Hibiki | Asagi | Poguru |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **Benibana** | | ○ | ○ | ○ | ◐ | ○ | ◐ | ◐ | ◐ | ○ |
+| **Utsusemi** | ○ | | ○ | ○ | ○ | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Shirogane** | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Kagetsune** | ◐ | ◐ | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ● | ◐ |
+| **Mizore** | ● | ● | ● | ○ | ● | ● | | ● | ● | ◐ |
+| **Hibiki** | ● | ● | ● | ○ | ● | ● | ● | | ● | ◐ |
+| **Asagi** | ● | ● | ● | ○ | ● | ● | ● | ● | | ◐ |
+| **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | ◐ | |
 
 The pattern: the souls talk about everyone, the bosses barely talk about each other, and nobody but Shirogane and
-Poguru mentions Kuon.
+Poguru mentions Kuon (Asagi's Kuon line is written but not in game).
 
 ## Where lines are missing
 
@@ -246,7 +271,10 @@ ids.
 |---|---|
 | `Benibana_Intro_Bell` (she names her bell) | Her soul counts as freed after one more win; Shirogane's "She told you which bell is hers" intro; `Akagane_Ahead_BenibanaBell` (he stops cursing her) |
 | `Utsusemi_Intro_WindDown` ("Boy. Wind me down.") | The monk freed after one more win; `Hibiki_Ahead_UtsusemiTea` |
-| `Shirogane_Intro_Oath` | Shirogane freed after one more win; `Oni_Hub_Together`; Kagetsune's "She never rang." intro; `Mizore_Meet_Oath` |
+| `Shirogane_Intro_Oath` | Shirogane freed after one more win; `Oni_Hub_Together`; Kagetsune's "She never rang." intro; `Mizore_Meet_Oath`; `Asagi_Meet_Home`; `Asagi_Pond_Stone` |
+| `Asagi_Meet_Pool` (the temple, on the wake after run 2) | Water souls on the paths (`Save.Data.asagiMet`); her chain; `Asagi_Pond_Hello` |
+| `Asagi_Meet_Flute` (she admits she knew their faces) | `Asagi_Pond_Flute` |
+| `Asagi_Meet_Home` (needs Shirogane's oath, like Mizore's last chapter) | (written) `Asagi_Dawn` |
 | `Akagane_Meet_Salute` | `Akagane_Hub_Salute`; (written) `Akagane_Freed` and the salute |
 | `Mizore_Meet_Oath` (needs Shirogane's oath, so she finishes last) | (written) `Mizore_Freed` |
 | `Hibiki_Meet_Name` | `Hibiki_Poguru`; (suggested) Oni's "Hibiki. ...Hibiki." |
@@ -281,4 +309,6 @@ existing cast already has a reason to know them.
   "my lord guardsman" Hibiki's.
 - Oni stays brief. Poguru stays the only one who jokes at length (Hibiki the only soul who jokes).
 - No sexualised framing for anyone, and nothing romantic between Oni and Hibiki.
-- Give them a place among the three groups (court, army, village) or a reason they were outside them.
+- Give them a place among the three groups (court, army, village) or a reason they were outside them. Asagi is
+  the one precedent for "outside": she never left her hill, so she has no bell and Kagetsune no hold on her, and
+  she joins the souls only once Oni has met her in the temple.

@@ -164,6 +164,7 @@ Lines with the other characters (all voiced).
 |---|---|---|---|---|
 | `Kagetsune_Intro_Fire` | `BossIntro` | Reactive, rests 4 | `holds Fire` | **Kagetsune:** "My captain's fire. He knelt to me for twenty years. He will kneel again." |
 | `Kagetsune_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Kagetsune:** "Mizore. She told me everyone dies. I have made very sure she was wrong."<br>**Oni:** "She wasn't." |
+| `Kagetsune_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Kagetsune:** "The fish on the hill. I climbed to her once, and she told me no."<br>**Kagetsune:** "Look at me, little demon. Look at what no was worth." |
 | `Kagetsune_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Kagetsune:** "The village drum. I had it thrown in with them. Did you think its beat was yours, little demon?" |
 
 ## Keep consistent

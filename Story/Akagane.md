@@ -67,9 +67,11 @@ Akagane is the voice behind it.
 | [Shirogane](Shirogane.md) | She beat him at every tournament and was kind about it, which was worse. He respects her more than anyone alive or dead, and won't say so. |
 | [Mizore](Mizore.md) (Frost) | She set his broken arm once, at the palace, and he called her a butcher. She calls him a patient who never followed instructions. Mutual respect neither admits; they bicker like an old married staff. |
 | [Hibiki](Hibiki.md) (Storm) | A village girl who should never have been on the mountain. Her drum set the army's pace up it, and he hasn't forgiven the drum. He is gruff with her and quietly protective; she calls him "Captain Kettle" because he boils. |
+| [Asagi](Asagi.md) (Water) | "Carp." She corrects him every time: "Koi." A three-hundred-year-old fish calling him "little kettle" is more than he can stand, and he can't make her stop. Their Duo, Scalding Steam, is the one thing they agree on: wet them first. |
 
 **Jealousy.** He is jealous of Hibiki above all: Oni taking a village girl's speed over a soldier's fire is an
-insult to the vanguard. Of Mizore, less: he thinks cold is for people who've given up.
+insult to the vanguard. Of Mizore, less: he thinks cold is for people who've given up. Of Asagi, least and loudest:
+a fish has no business in a fight, and he says so.
 
 ## Voice
 
@@ -115,6 +117,7 @@ Both Oni's and Akagane's lines are voiced (`Tools/generate-voice.mjs`).
 | `Akagane_Pickup_FirstClear` | `clears ≥ 1`, `lastCleared`, play once | **Akagane:** "He fell. I felt it. Every bell on him shook."<br>**Akagane:** "And here we all are again. So. Again, Guardsman." |
 | `Akagane_Pickup_Cleared` | `lastCleared`, `seen Akagane_Pickup_FirstClear`, `runsSince Akagane_Pickup_Cleared ≥ 2` | **Akagane:** "You broke him last night. My men felt the chains slack. Do it again." |
 | `Akagane_Pickup_HoldsFrost` | `holds Frost ≥ 1`, play once | **Akagane:** "You've been to the physician. She'll have told you to rest. Ignore her." |
+| `Akagane_Pickup_HoldsWater` | `holds Water ≥ 1`, play once | **Akagane:** "You're wet through. The fish has been at you. Fine. Wet wood burns slower, Guardsman. Not never." |
 | `Akagane_Pickup_HoldsStorm` | `holds Storm ≥ 1`, play once | **Akagane:** "That's the drummer's spark on you. Speed. Hm. My men marched up the mountain to her beat." |
 | `Akagane_Pickup_ManyRuns` | `runs ≥ 25`, play once | **Akagane:** "My men have marched every night since the Night. So have you. I'd stopped counting. You haven't stopped coming." |
 | `Akagane_Pickup_VeryManyRuns` | `runs ≥ 50`, play once | **Akagane:** "Fifty nights, give or take. I'd have promoted you by now. Don't let it go to your head." |
@@ -142,7 +145,9 @@ When Oni mostly holds another soul's boons (see [Souls.md](Souls.md#souljealous)
 |---|---|---|---|
 | `Akagane_Jealous_Hibiki` | Reactive, once | `most = Storm` | **Akagane:** "The drummer's spark, all over you. You'd take a village girl's speed over the vanguard's fire?"<br>**Hibiki:** "He would! He did!"<br>**Akagane:** "Quiet, girl." |
 | `Akagane_Jealous_Mizore` | Reactive, once | `most = Frost` | **Akagane:** "You're half frozen, Guardsman. The physician's cold is for people who've given up."<br>**Mizore:** "The physician's cold is why you still have two arms, Captain." |
+| `Akagane_Jealous_Asagi` | Reactive, once | `most = Water` | **Akagane:** "You'd take a carp's puddle over the vanguard's fire?"<br>**Asagi:** "Koi, dear."<br>**Akagane:** "...A koi's puddle." |
 | `Akagane_Jealous_Storm` | Repeatable | `most = Storm` | **Akagane:** "Fast won't save you. Fire will." |
+| `Akagane_Jealous_Water` | Repeatable | `most = Water` | **Akagane:** "Dry off. Then burn something." |
 | `Akagane_Jealous_Frost` | Repeatable | `most = Frost` | **Akagane:** "Thaw out. Here." |
 | `Akagane_Jealous_Back` | Repeatable | none (the event already means another soul leads) | **Akagane:** "Remembered who your captain is?" |
 

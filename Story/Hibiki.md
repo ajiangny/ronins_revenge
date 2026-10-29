@@ -67,9 +67,11 @@ speed, chain lightning, a faster draw. She does it at a run and talks the whole 
 | [Shirogane](Shirogane.md) | "Lady Shirogane" visited the village once with Oni and let Hibiki hold her sword. Hibiki dropped it. She worships her and is terrified of her in equal parts. |
 | [Akagane](Akagane.md) (Fire) | "Captain Kettle", because he boils. His men marched to her drum and he hasn't forgiven the drum. She teases him relentlessly and runs to him first when something scares her. |
 | [Mizore](Mizore.md) (Frost) | "Grandmother." Not her grandmother. The woman who held her wrist at the end. Hibiki is the only one who can make Mizore laugh, and she's never heard it. |
+| [Asagi](Asagi.md) (Water) | "Great-Grandmother!" Asagi says "Yes, dear," and Hibiki has never been so pleased with anyone. The old koi heard her festival drum from the pond every summer; Hibiki didn't know anyone outside the village could. |
 
 **Jealousy.** Loud and sulky. If Oni favours Fire she complains the Captain is boring; if Frost, that Grandmother
-will make him sit still. It always ends with her giving him the boon anyway.
+will make him sit still. Of Water, none: she tries to be cross with Great-Grandmother and can't. It always ends
+with her giving him the boon anyway.
 
 ## Voice
 
@@ -117,6 +119,7 @@ himself; keep it his longest line to the souls.
 | `Hibiki_Pickup_Cleared` | `lastCleared`, `seen Hibiki_Pickup_FirstClear`, `runsSince Hibiki_Pickup_Cleared ≥ 2` | **Hibiki:** "Again! Like last night! Ba-dum, down he goes!" |
 | `Hibiki_Pickup_HoldsFire` | `holds Fire ≥ 1`, play once | **Hibiki:** "You smell like smoke. Was that Captain Kettle? He's so grumpy. Here, have something fun." |
 | `Hibiki_Pickup_HoldsFrost` | `holds Frost ≥ 1`, play once | **Hibiki:** "Grandmother's been looking after you! She held my wrist, at the end. She's good at that." |
+| `Hibiki_Pickup_HoldsWater` | `holds Water ≥ 1`, play once | **Hibiki:** "Great-Grandmother's water! She says yes, dear, when I call her that. Grandmother never does." |
 | `Hibiki_Pickup_ManyRuns` | `runs ≥ 25`, play once | **Hibiki:** "I've been counting your nights in drumbeats. I've run out of rhythms. I'm making new ones." |
 | `Hibiki_Pickup_VeryManyRuns` | `runs ≥ 50`, play once | **Hibiki:** "Everyone in the coffin knows your name now. Even the ones who never met you. I told them all." |
 | `Hibiki_Pickup_Offering` | event offers `SpiritOffering` | **Hibiki:** "I'm all out of thunder! Um. Here's a hug instead. It's a soul hug. It counts." |
@@ -140,7 +143,9 @@ himself; keep it his longest line to the souls.
 |---|---|---|---|
 | `Hibiki_Jealous_Akagane` | Reactive, once | `most = Fire` | **Hibiki:** "You picked Captain Kettle? Over me? He doesn't even smile!"<br>**Akagane:** "I smile when it's earned."<br>**Hibiki:** "When was the last time?"<br>**Akagane:** "...Take her boon, Guardsman." |
 | `Hibiki_Jealous_Mizore` | Reactive, once | `most = Frost` | **Hibiki:** "You're all frosty and careful. Grandmother's made you sit still, hasn't she."<br>**Mizore:** "Someone has to."<br>**Hibiki:** "Not tonight!" |
+| `Hibiki_Jealous_Asagi` | Reactive, once | `most = Water` | **Hibiki:** "You're all soggy. Did Great-Grandmother... no. I can't be cross with her. I tried."<br>**Asagi:** "Thank you, dear."<br>**Hibiki:** "Still! Hurry up!" |
 | `Hibiki_Jealous_Fire` | Repeatable | `most = Fire` | **Hibiki:** "Fire's so slow. Watch this instead!" |
+| `Hibiki_Jealous_Water` | Repeatable | `most = Water` | **Hibiki:** "Soggy! Come and be fast instead!" |
 | `Hibiki_Jealous_Frost` | Repeatable | `most = Frost` | **Hibiki:** "Wake up, frosty! Thunder's here!" |
 | `Hibiki_Jealous_Back` | Repeatable | none | **Hibiki:** "You came back to me! I knew it. Mostly knew it." |
 

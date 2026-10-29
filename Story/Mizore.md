@@ -69,9 +69,11 @@ to keep them from spoiling. She sends them to Oni as Frost: freezes, ice, a stea
 | [Shirogane](Shirogane.md) | She told Shirogane what she suspected. She has never decided whether that was the right thing, since it got her killed. |
 | [Akagane](Akagane.md) (Fire) | The patient who never followed instructions. She set his arm; he called her a butcher. She calls him "Captain" in a tone that makes it a diagnosis. |
 | [Hibiki](Hibiki.md) (Storm) | The girl whose pulse she counted. She's gentler with Hibiki than with anyone and would deny it. Hibiki calls her "Grandmother"; Mizore says "I'm not your grandmother" every single time, and never means it less. |
+| [Asagi](Asagi.md) (Water) | Her teacher. Mizore climbed the hill at twelve, a herb-gatherer's daughter, and was taught for six years; then she went to the palace and never came back up, and has not decided whether that was cowardice. The only person she gives a title: **"Teacher"**. Asagi calls her "little sleet". They have disagreed about warmth for forty years. Their Duo, Black Ice, is the one place water turns to ice. |
 
 **Jealousy.** Quiet and cutting. She thinks Storm's speed will get Oni killed ("quick is how fevers spread") and
-that Fire is a patient refusing to rest. She doesn't compete; she just waits for him to come back to the cold.
+that Fire is a patient refusing to rest. She doesn't compete; she just waits for him to come back to the cold. Of
+Water she says nothing cutting at all, which from her is a tell.
 
 ## Voice
 
@@ -116,6 +118,7 @@ finish, by design: her story closes Shirogane's loop.
 | `Mizore_Pickup_Cleared` | `lastCleared`, `seen Mizore_Pickup_FirstClear`, `runsSince Mizore_Pickup_Cleared ≥ 2` | **Mizore:** "You won last night. Your pulse is calmer for it. Keep it that way." |
 | `Mizore_Pickup_HoldsFire` | `holds Fire ≥ 1`, play once | **Mizore:** "You're running hot. That'll be the Captain. Let me take the edge off." |
 | `Mizore_Pickup_HoldsStorm` | `holds Storm ≥ 1`, play once | **Mizore:** "You have Hibiki's spark in you. Mind it. She was always quicker than was good for her." |
+| `Mizore_Pickup_HoldsWater` | `holds Water ≥ 1`, play once | **Mizore:** "You've been to the pond. ...She taught me. Everything I know about hands. Don't tell her I said so." |
 | `Mizore_Pickup_ManyRuns` | `runs ≥ 25`, play once | **Mizore:** "Most patients die once. You've made a career of it." |
 | `Mizore_Pickup_VeryManyRuns` | `runs ≥ 50`, play once | **Mizore:** "I've stopped writing your case down. I ran out of paper in the coffin." |
 | `Mizore_Pickup_LowLives` | `lives = 1` | **Mizore:** "One life left, and you're still picking fights. Sit. Let me see." |
@@ -140,7 +143,9 @@ finish, by design: her story closes Shirogane's loop.
 |---|---|---|---|
 | `Mizore_Jealous_Akagane` | Reactive, once | `most = Fire` | **Mizore:** "You're burning up, Oni. The Captain never knew when to stop either."<br>**Akagane:** "And yet I'm the one he keeps choosing."<br>**Mizore:** "Fevers are popular, Captain. Briefly." |
 | `Mizore_Jealous_Hibiki` | Reactive, once | `most = Storm` | **Mizore:** "All that speed. Quick is how fevers spread."<br>**Hibiki:** "Quick is how you get there first, Grandmother!"<br>**Mizore:** "I'm not your grandmother." |
+| `Mizore_Jealous_Asagi` | Reactive, once | `most = Water` | **Mizore:** "You're wet through and warm. That's her way. It was always her way."<br>**Asagi:** "It works, little sleet."<br>**Mizore:** "...It does. Don't let it go to your bowl." |
 | `Mizore_Jealous_Fire` | Repeatable | `most = Fire` | **Mizore:** "Too hot. Sit down." |
+| `Mizore_Jealous_Water` | Repeatable | `most = Water` | **Mizore:** "Too warm. Too wet. ...Fine." |
 | `Mizore_Jealous_Storm` | Repeatable | `most = Storm` | **Mizore:** "Slow down before you shake apart." |
 | `Mizore_Jealous_Back` | Repeatable | none | **Mizore:** "Back for the cold, then. They always come back for the cold." |
 

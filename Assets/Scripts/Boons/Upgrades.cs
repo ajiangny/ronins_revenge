@@ -8,7 +8,7 @@ using UnityEngine;
 public enum UpgradeId
 {
     KeenEye, SwiftFeet, QuickDraw, SpiritShuriken, SteadyBreath, LongShadow, SoulPull, IronWill, FatesThread, SecondDawn,
-    ThirdPath, BanishingBell, PondsBlessing, AncestralLore,
+    ThirdPath, BanishingBell, PondsBlessing, AncestralLore, CuttingWind, WideGuard,
 }
 
 public sealed class Song
@@ -37,6 +37,8 @@ public static class Upgrades
     public const float ShurikenCutPerRank = 0.5f;
     public const float MissCutPerRank = 0.25f;
     public const float InvulnerablePerRank = 0.5f;
+    public const float SlashSpeedPerRank = 0.05f;
+    public const float ParryRadiusPerRank = 0.1f;
     // Second Dawn raises him with this many lives.
     public const int DawnLives = 2;
 
@@ -44,7 +46,7 @@ public static class Upgrades
     {
         new Song { Id = UpgradeId.KeenEye, Name = "Keen Eye", MaxRank = 2, BaseCost = 60,
             Effect = r => $"Parry window  +{r * ParryWindowPerRank:0.00} s" },
-        new Song { Id = UpgradeId.SwiftFeet, Name = "Swift Feet", MaxRank = 2, BaseCost = 60,
+        new Song { Id = UpgradeId.SwiftFeet, Name = "Swift Feet", MaxRank = 3, BaseCost = 60,
             Effect = r => $"Move speed  +{r * 5}%" },
         new Song { Id = UpgradeId.QuickDraw, Name = "Quick Draw", MaxRank = 2, BaseCost = 80,
             Effect = r => $"Swing cooldown  -{r * 5}%" },
@@ -56,8 +58,8 @@ public static class Upgrades
             Effect = r => $"Untouchable after a hit  +{r * InvulnerablePerRank:0.0} s" },
         new Song { Id = UpgradeId.SoulPull, Name = "Soul Pull", MaxRank = 2, BaseCost = 100, Retired = true,
             Effect = r => "Souls now come from the portals" },
-        new Song { Id = UpgradeId.IronWill, Name = "Iron Will", MaxRank = 1, BaseCost = 600,
-            Effect = r => $"Start each run with  +{r} life" },
+        new Song { Id = UpgradeId.IronWill, Name = "Iron Will", MaxRank = 2, BaseCost = 450,
+            Effect = r => $"Start each run with  +{r} li{(r == 1 ? "fe" : "ves")}" },
         new Song { Id = UpgradeId.FatesThread, Name = "Fate's Thread", MaxRank = 3, BaseCost = 300,
             Effect = r => $"Redraw a boon offer  {r} time{(r == 1 ? "" : "s")} a run  (R)" },
         new Song { Id = UpgradeId.SecondDawn, Name = "Second Dawn", MaxRank = 1, BaseCost = 1200,
@@ -70,6 +72,10 @@ public static class Upgrades
             Effect = r => "A second Spirit Bead after the first boss" },
         new Song { Id = UpgradeId.AncestralLore, Name = "Ancestral Lore", MaxRank = 1, BaseCost = 600,
             Effect = r => "Each stage's first soul offers Rare or better" },
+        new Song { Id = UpgradeId.CuttingWind, Name = "Cutting Wind", MaxRank = 3, BaseCost = 70,
+            Effect = r => $"Slash speed  +{r * 5}%" },
+        new Song { Id = UpgradeId.WideGuard, Name = "Wide Guard", MaxRank = 2, BaseCost = 90,
+            Effect = r => $"Parry reach  +{r * ParryRadiusPerRank:0.0}" },
     };
 
     public static Song Get(UpgradeId id) => All[(int)id];

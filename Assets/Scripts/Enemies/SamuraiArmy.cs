@@ -750,7 +750,8 @@ public class SamuraiArmy : MonoBehaviour
         }
         if (dive.hitRonin || !target.TryGetComponent(out Ronin ronin)) return;
         float distance = (ronin.Bounds.center - position).magnitude;
-        if (ronin.Parrying && distance < parryReach)
+        // Wide Guard widens his parry, and with it the reach that turns a diver.
+        if (ronin.Parrying && distance < parryReach + Upgrades.Rank(UpgradeId.WideGuard) * Upgrades.ParryRadiusPerRank)
         {
             ronin.ParryBody(position);
             dive.soldier.Knock(Color.Lerp(Color.white, ronin.ParryColor, 0.7f));

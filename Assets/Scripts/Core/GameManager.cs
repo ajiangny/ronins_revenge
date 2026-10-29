@@ -71,7 +71,7 @@ public partial class GameManager : MonoBehaviour
     [SerializeField, FormerlySerializedAs("ship")] Ronin ronin;
     [SerializeField, FormerlySerializedAs("shields")] BlockerWall blockers;
     [SerializeField] GameUI ui;
-    [SerializeField] int startingLives = 3;
+    [SerializeField] int startingLives = 2;
     [SerializeField] float levelIntroTime = 2.5f;
     [Tooltip("Keep DEV TOOLS and the F1-F4 hotkeys in release builds, for friends play-testing. Development builds always have them.")]
     [SerializeField] bool devToolsInRelease = true;

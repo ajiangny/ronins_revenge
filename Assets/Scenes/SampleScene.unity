@@ -480,7 +480,7 @@ MonoBehaviour:
   ronin: {fileID: 900000011}
   blockers: {fileID: 900000006}
   ui: {fileID: 2080831155}
-  startingLives: 3
+  startingLives: 2
   levelIntroTime: 2.5
   devToolsInRelease: 1
   boonChoice: {fileID: 2080831156}

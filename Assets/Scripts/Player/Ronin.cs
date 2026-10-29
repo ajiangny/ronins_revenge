@@ -47,9 +47,11 @@ public class Ronin : MonoBehaviour
     [Tooltip("The kunai skin's art, drawn on the slash wave in place of the crescent.")]
     [SerializeField] Sprite kunaiSprite;
     public CharacterArt art;
-    public float speed = 10f;
+    public float speed = 9.5f;
     [Tooltip("Seconds between swings. Kept slow enough that every slash is a choice, as in Space Invaders.")]
     [SerializeField] float shotCooldown = 0.45f;
+    [Tooltip("How fast the slash wave flies, as a share of the projectile's own speed. Below 1 so Cutting Wind has room to grow; it flies as far either way.")]
+    [SerializeField] float slashSpeed = 0.85f;
     [SerializeField] float invulnerableTime = 2f;
     [SerializeField] float screenMargin = 0.2f;
     [Tooltip("Degrees off its heading that each side slash of Split Slash peels away at.")]
@@ -389,6 +391,8 @@ public class Ronin : MonoBehaviour
         shurikenCooldown -= Upgrades.Rank(UpgradeId.SpiritShuriken) * Upgrades.ShurikenCutPerRank;
         parryMissCooldown -= Upgrades.Rank(UpgradeId.SteadyBreath) * Upgrades.MissCutPerRank;
         invulnerableTime += Upgrades.Rank(UpgradeId.LongShadow) * Upgrades.InvulnerablePerRank;
+        slashSpeed += Upgrades.Rank(UpgradeId.CuttingWind) * Upgrades.SlashSpeedPerRank;
+        parryRadius += Upgrades.Rank(UpgradeId.WideGuard) * Upgrades.ParryRadiusPerRank;
     }
 
     void Update()
@@ -702,7 +706,9 @@ public class Ronin : MonoBehaviour
     {
         Projectile projectile = SpawnProjectile(prefab, position);
         bool pierces = Loadout.Has(BoonId.PiercingSlash, out float passes);
-        projectile.Launch(direction, 1f, pierces ? (int)passes : 0, source, projectileSprite, scale: scale);
+        // A slower wave lives longer, so it still reaches the top of the field.
+        projectile.Launch(direction, slashSpeed, pierces ? (int)passes : 0, source, projectileSprite, scale: scale,
+            lifetimeMultiplier: 1f / slashSpeed);
         projectile.CutsArrows = pierces;
         if (clone) Shade(projectile, attackTint);
         else projectile.Tint(attackTint, attackGlow);

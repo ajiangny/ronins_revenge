@@ -145,7 +145,7 @@ public partial class Kagetsune
             if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < width / 2f) ronin.TakeHit(new Vector3(spot.x, ronin.Bounds.center.y, 0));
             yield return null;
         }
-        if (burns) GroundFire.Light(spot, soul: true);
+        if (burns) GroundFire.Scorch(spot, soul: true);
     }
 
     // A fissure splitting the courtyard from one point to another at `speed` (a SoulFissure, drawn in pixels the size
@@ -279,7 +279,7 @@ public partial class Kagetsune
             TimeRipple.Emit(end, 3.5f * weight, 0.35f * weight, 0.45f);
             Crack(end);
             Shockwave(end, 3.2f);
-            GroundFire.Light(end, soul: true);
+            GroundFire.Scorch(end, soul: true);
             Debris.BurstSprites(end, art.deathParticles, Bronze, 10, 0.8f, 7f);
         }
         foreach (SpriteRenderer wave in waves) StartCoroutine(FadeOut(wave, 0.3f));
@@ -322,17 +322,34 @@ public partial class Kagetsune
             yield return SlamDown(xs, blow == 2, blow == 2 ? 1.2f : 0.75f);
             yield return Wait(blow == 2 ? 0.1f : 0.15f);
         }
-        // The aftershock: the first crack glows, then erupts.
+        // The aftershock: the first crack, long gone dark, re-lights and pulses, then erupts. Only a crack that
+        // lights up again is a threat; a dark one is spent.
         var shock = new List<float> { first };
         var mark = new List<SpriteRenderer> { Bar(new Vector3(first, TopOfScreen, 0), new Vector3(first, GroundY, 0), 2.2f, new Color(Teal.r, Teal.g, Teal.b, 0.12f)) };
+        SpriteRenderer relit = Glowing(new Vector3(first, GroundY + 0.1f, 0), new Color(Teal.r, Teal.g, Teal.b, 0f), 2.2f, 5);
+        StartCoroutine(Relight(relit, 0.6f));
         yield return CloseLanes(mark, shock, 2.2f, 1.4f, Teal, 0.6f, 2, 0.35f);
         Drop(mark[0]);
+        Drop(relit);
         yield return SlamDown(shock, false, 0.8f);
         yield return Wait(0.4f);
     }
 
-    // A crack left in the courtyard where the hammer landed: dark rifts glowing teal from below, cooling over a few
-    // seconds. Only for show, and not transient, so it outlasts a stagger.
+    // The spent crack flaring back to life before the aftershock: a ground glow swelling and pulsing faster.
+    IEnumerator Relight(SpriteRenderer glow, float seconds)
+    {
+        for (float t = 0; t < seconds && glow != null; t += Time.deltaTime * Tempo)
+        {
+            float k = t / seconds;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(t * Mathf.Lerp(14f, 40f, k));
+            glow.transform.localScale = new Vector3(Mathf.Lerp(1.6f, 2.6f, k), Mathf.Lerp(0.5f, 0.9f, k), 1f);
+            glow.color = new Color(Teal.r, Teal.g, Teal.b, (0.35f + 0.5f * k) * (0.6f + 0.4f * pulse));
+            yield return null;
+        }
+    }
+
+    // A crack left in the courtyard where the hammer landed: dark rifts whose teal glow dies within a moment, so the
+    // spent crack reads as dead ground. Only for show, and not transient, so it outlasts a stagger.
     static void Crack(Vector3 at)
     {
         int rifts = Random.Range(3, 5);
@@ -351,7 +368,7 @@ public partial class Kagetsune
                 rift.transform.position = mid + Vector3.forward * 0.3f;
                 rift.transform.rotation = Quaternion.Euler(0, 0, angle);
                 rift.transform.localScale = new Vector3(length, layer == 0 ? 0.5f : 0.08f, 1f);
-                Fader.Fade(rift, 3f);
+                Fader.Fade(rift, layer == 0 ? 0.6f : 3f);
             }
         }
     }
@@ -765,7 +782,7 @@ public partial class Kagetsune
             if (Mathf.Abs(trail - lastFire) >= 0.9f && Mathf.Abs(stop - trail) > 2.5f)
             {
                 lastFire = trail;
-                GroundFire.Light(new Vector3(trail, GroundY, 0), soul: true);
+                GroundFire.Scorch(new Vector3(trail, GroundY, 0), soul: true);
             }
             if (Random.value < 0.5f) Fx.Play(Fx.Impact, new Vector3(Mathf.Lerp(trail, lead, Random.value), ground + 0.3f, 0), Teal, 0.9f);
             if (Time.time >= nextRumble)

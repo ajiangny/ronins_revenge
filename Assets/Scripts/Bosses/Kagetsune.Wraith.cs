@@ -228,7 +228,7 @@ public partial class Kagetsune
                     {
                         lastDust = at.x;
                         Fx.Play(Fx.SmokePuff, new Vector3(at.x, GroundY + 0.2f, 0), new Color(0.3f, 0.32f, 0.33f, 0.6f), 1.3f);
-                        GroundFire.Light(new Vector3(at.x, GroundY, 0), soul: true);
+                        GroundFire.Scorch(new Vector3(at.x, GroundY, 0), soul: true);
                     }
                 }
                 // On the last upswing it sheds a row of skulls over the stretch it scythed, spaced wide enough to pass
@@ -505,8 +505,12 @@ public partial class Kagetsune
             if (bells[safe] != null) bells[safe].color = BellColour(bells[safe], 0.2f);
             float tell = wave == 0 ? 0.9f : leapt ? 0.7f + halfWidth * 2f / BulletHell.MaxDodgeSpeed : 0.7f;
             leapt = false;
+            // The lane to stand in glows pale on the ground, the same way the beam marks its safe strip.
+            float strip = GroundY + 0.9f;
+            SpriteRenderer haven = Bar(new Vector3(lanes[safe] - halfWidth, strip, 0), new Vector3(lanes[safe] + halfWidth, strip, 0), 2.4f, new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f), 2);
             yield return CloseLanes(bands, xs, halfWidth * 1.6f, halfWidth * 0.5f, Teal, tell, 2, 0.2f);
             foreach (SpriteRenderer band in bands) Drop(band);
+            StartCoroutine(FadeOut(haven, 0.3f));
 
             Toll(1f, 0.7f + 0.05f * wave);
             CameraShake.Add(0.3f);
@@ -522,7 +526,7 @@ public partial class Kagetsune
                 halo.sprite = ProceduralSprites.Glow;
                 columns.Add(halo);
                 if (SoulColumn(top, ground, halfWidth * 1.8f) == null) columns.Add(Bar(top, ground, halfWidth * 0.6f, new Color(0.85f, 1f, 0.96f, 0.8f), 56));
-                GroundFire.Light(new Vector3(x, GroundY, 0), soul: true);
+                GroundFire.Scorch(new Vector3(x, GroundY, 0), soul: true);
             }
             // The columns burn for their whole flash, not a single frame.
             for (float t = 0; t < ColumnSeconds; t += Time.deltaTime * Tempo)

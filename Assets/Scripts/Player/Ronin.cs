@@ -147,8 +147,6 @@ public class Ronin : MonoBehaviour
     public Moves Allowed { get; set; } = Moves.All;
     // Picks the enemy a parried arrow homes in on; set by the GameManager, which knows who's on the field.
     public Func<Transform> RiposteTarget { get; set; }
-    // True while he stands where a parry is forbidden (inside a lane sealed by the Emperor's ofuda); set by that boss.
-    public Func<bool> ParrySealed { get; set; }
     // A fireball or ice shard riposte struck something.
     public event Action<Vector3, IHittable> RiposteImpact;
     // Kindling's fireball has hit something.
@@ -428,8 +426,7 @@ public class Ronin : MonoBehaviour
             }
             if (Controls.Parry(keyboard, mouse) && (Allowed & Moves.Parry) != 0 && ParryCharge >= 1f)
             {
-                if (ParrySealed != null && ParrySealed()) SealedParry();
-                else StartParry();
+                StartParry();
             }
             if (Controls.Ultimate(keyboard, mouse) && (Allowed & Moves.Ultimate) != 0 && UltimateReady) StartUltimate();
         }

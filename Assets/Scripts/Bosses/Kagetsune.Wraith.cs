@@ -54,7 +54,7 @@ public partial class Kagetsune
             // Every fourth row, the skull on one bank is a bell.
             float bank = gap + (row % 8 == 3 ? -1f : 1f) * (Width / 2f + Spacing * 0.75f);
             float left = FieldLeft;
-            bool bellRow = row % 4 == 3 && !SealActive;
+            bool bellRow = row % 4 == 3;
             BulletHell.Curtain(Skull, TopOfScreen, FieldLeft, FieldRight, Spacing, new[] { gap }, Width, Speed,
                 i => bellRow && Mathf.Abs(left + i * Spacing - bank) < Spacing / 2f ? BellShot : null);
             if (row % 2 == 0) Toll(0.3f, 1.1f + 0.03f * row);
@@ -385,7 +385,6 @@ public partial class Kagetsune
     // own armor, and he stands open.
     IEnumerator SoulCoffin()
     {
-        while (SealActive) yield return Wait(0.2f);
         Bark(BossLine.SoulCoffin, 5f);
         PlayAction(art.attack);
         SpriteRenderer raised = Glowing(HammerHead, new Color(Teal.r, Teal.g, Teal.b, 0.6f), 3f);
@@ -456,7 +455,6 @@ public partial class Kagetsune
     // falls down every lane but one in waves, the safe lane stepping aside each time. Then he kneels, spent.
     IEnumerator NightOfAThousandBells()
     {
-        while (SealActive) yield return Wait(0.2f);
         ultimate = true;
         Bark(BossLine.ThousandBells, 5f);
         yield return Stride(CameraShake.Center.x);

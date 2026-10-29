@@ -23,7 +23,6 @@ public partial class Kagetsune
         StopCage();
         ResetView();
         exposedUntil = 0;
-        seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);
         PlayAction(art.hit);
@@ -103,10 +102,8 @@ public partial class Kagetsune
     // free with each, until there is silence and the armor stands hollow, then fades.
     protected override IEnumerator Fall()
     {
-        seals.Clear();
         Sfx.Stop(Sfx.SoulWail);
         Sfx.Stop(Sfx.LanternBeam);
-        if (ronin != null && ronin.ParrySealed != null) ronin.ParrySealed = null;
         PlayAction(art.hit);
         CameraShake.Add(0.9f);
         Fx.Play(Fx.Explosion, HammerHead, Teal, 3.5f);

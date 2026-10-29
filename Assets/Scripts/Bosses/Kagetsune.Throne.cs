@@ -442,8 +442,7 @@ public partial class Kagetsune
         float lo = FieldLeft + width / 2f, hi = FieldRight - width / 2f;
         float side = Random.value < 0.5f ? -1f : 1f;
         float gap = Mathf.Clamp(ronin.Bounds.center.x + side * Random.Range(3f, 6f), lo, hi);
-        // No gapless row while a seal holds: inside one he couldn't parry the bell.
-        int bellRow = Hardened && !SealActive ? Random.Range(1, Rows - 1) : -1;
+        int bellRow = Hardened ? Random.Range(1, Rows - 1) : -1;
         for (int row = 0; row < Rows; row++)
         {
             yield return BulletHell.Room(26);
@@ -464,93 +463,112 @@ public partial class Kagetsune
         }
     }
 
-    // Ofuda Decree: talisman strips drift down and hang in two or three lanes, one always the ronin's. Inside a
-    // sealed lane the law holds: no parry. Then a slam or a toll comes while he's caught in it.
+    // Ofuda Decree: talismans drift down and stick to the ground, one where the ronin stands and the rest spread
+    // across the field, each over a crimson patch the width of its blast. Every paper burns down on its own fuse and
+    // goes off in turn, his first: step off it, then keep clear of each patch before its paper burns out.
+    const float OfudaBlastHalf = 1.2f;
+    // The colour a talisman burns toward as its fuse runs down.
+    static readonly Color Ember = new Color(1f, 0.45f, 0.2f);
+    // The ground between two blasts is never narrower than this, so there's always room to stand.
+    const float OfudaRoom = 1f;
+
     IEnumerator OfudaDecree()
     {
         Bark(BossLine.OfudaDecree, 7f);
-        var lanes = Lanes(6);
-        float halfWidth = (RightEdge - LeftEdge - 2.4f) / 12f;
-        int mine = 0;
-        for (int i = 1; i < lanes.Count; i++)
-        {
-            if (Mathf.Abs(lanes[i] - ronin.Bounds.center.x) < Mathf.Abs(lanes[mine] - ronin.Bounds.center.x)) mine = i;
-        }
-        var chosen = new List<float> { lanes[mine] };
-        var others = new List<float>(lanes);
-        others.RemoveAt(mine);
-        for (int i = 0; i < (secondPhase ? 2 : 1); i++)
-        {
-            int pick = Random.Range(0, others.Count);
-            chosen.Add(others[pick]);
-            others.RemoveAt(pick);
-        }
         if (Sfx.Has(Sfx.OfudaFlutter)) Sfx.Play(Sfx.OfudaFlutter, 0.8f);
         else Sfx.Play(Sfx.MistSwirl, 0.6f, 1.4f);
-
-        // The strips fall in a loose row across each lane, swaying as they come.
-        var strips = new List<(SpriteRenderer strip, float x, float sway)>();
-        var curtains = new List<SpriteRenderer>();
-        foreach (float x in chosen)
+        int count = secondPhase ? 5 : Hardened ? 4 : 3;
+        float lo = FieldLeft + OfudaBlastHalf, hi = FieldRight - OfudaBlastHalf;
+        var spots = new List<float> { Mathf.Clamp(ronin.Bounds.center.x, lo, hi) };
+        for (int tries = 0; tries < 60 && spots.Count < count; tries++)
         {
-            curtains.Add(Bar(new Vector3(x, TopOfScreen, 0), new Vector3(x, GroundY, 0), halfWidth * 2f, new Color(SealRed.r, SealRed.g, SealRed.b, 0f), 3));
-            for (int s = 0; s < 3; s++)
-            {
-                float sx = x + Mathf.Lerp(-halfWidth * 0.7f, halfWidth * 0.7f, s / 2f);
-                SpriteRenderer strip = Ofuda(new Vector3(sx, TopOfScreen + Random.Range(0f, 1.5f), 0));
-                strips.Add((strip, sx, Random.value * 6f));
-            }
+            float x = Random.Range(lo, hi);
+            if (spots.TrueForAll(s => Mathf.Abs(s - x) >= OfudaBlastHalf * 2f + OfudaRoom)) spots.Add(x);
         }
-        float fall = 0.9f;
-        float hang = ronin.Bounds.center.y + 1.6f;
-        for (float t = 0; t < fall; t += Time.deltaTime * Tempo)
+
+        // The papers flutter down onto their spots, swaying as they come.
+        var papers = new List<SpriteRenderer>();
+        var sways = new List<float>();
+        foreach (float x in spots)
         {
-            float k = Mathf.SmoothStep(0, 1, t / fall);
-            foreach (var (strip, x, sway) in strips)
+            papers.Add(Ofuda(new Vector3(x, TopOfScreen + Random.Range(0f, 1.5f), 0)));
+            sways.Add(Random.value * 6f);
+        }
+        float land = GroundY + 0.65f;
+        const float Fall = 0.9f;
+        for (float t = 0; t < Fall; t += Time.deltaTime * Tempo)
+        {
+            float k = Mathf.SmoothStep(0, 1, t / Fall);
+            for (int i = 0; i < papers.Count; i++)
             {
-                if (strip == null) continue;
-                float y = Mathf.Lerp(TopOfScreen + 1f, hang + Mathf.Sin(sway) * 0.6f, k);
-                strip.transform.position = new Vector3(x + Mathf.Sin(t * 4f + sway) * 0.25f, y, -0.2f);
-                strip.transform.rotation = Quaternion.Euler(0, 0, Mathf.Sin(t * 5f + sway) * 12f);
+                if (papers[i] == null) continue;
+                float swing = 1f - k;
+                papers[i].transform.position = new Vector3(spots[i] + Mathf.Sin(t * 4f + sways[i]) * 0.25f * swing, Mathf.Lerp(TopOfScreen + 1f, land, k), -0.2f);
+                papers[i].transform.rotation = Quaternion.Euler(0, 0, Mathf.Sin(t * 5f + sways[i]) * 12f * swing);
             }
-            foreach (SpriteRenderer curtain in curtains) curtain.color = new Color(SealRed.r, SealRed.g, SealRed.b, 0.08f * k);
             yield return null;
         }
-        float seconds = secondPhase ? 5f : 4.5f;
-        foreach (float x in chosen) seals.Add((x, halfWidth, Time.time + seconds));
-        StartCoroutine(LiftSeals(strips.ConvertAll(s => s.strip), curtains, seconds));
-        Fx.Play(Fx.Impact, new Vector3(lanes[mine], hang, 0), SealRed, 1.4f);
 
-        // The law is laid down; now the blow that can't be parried inside it.
-        yield return Wait(0.3f);
-        float roll = Random.value;
-        if (roll < (Hardened ? 0.5f : 0.34f)) yield return DecreeRain(chosen, halfWidth);
-        else if (roll < 0.75f) yield return TollOfFealty(secondPhase ? 3 : 2);
-        else yield return CofferSlam();
+        // Laid: each fuse is lit and runs on its own, so a stagger doesn't hold a paper already burning.
+        float fuse = secondPhase ? 1.3f : 1.6f;
+        float step = secondPhase ? 0.35f : 0.45f;
+        Fx.Play(Fx.Impact, new Vector3(spots[0], land, 0), SealRed, 1.2f);
+        for (int i = 0; i < papers.Count; i++)
+        {
+            if (papers[i] == null) continue;
+            papers[i].transform.SetPositionAndRotation(new Vector3(spots[i], land, -0.2f), Quaternion.identity);
+            float band = GroundY + 0.9f;
+            SpriteRenderer zone = Bar(new Vector3(spots[i] - OfudaBlastHalf, band, 0), new Vector3(spots[i] + OfudaBlastHalf, band, 0), 2.4f, new Color(SealRed.r, SealRed.g, SealRed.b, 0.12f), 2);
+            Detach(papers[i].gameObject);
+            Detach(zone.gameObject);
+            Launch(OfudaFuse(papers[i], zone, spots[i], fuse + i * step));
+        }
+        yield return Wait(fuse + (papers.Count - 1) * step + 0.4f);
     }
 
-    // The decree's sentence: crimson seal-darts rain everywhere the seals don't hang, while rows of skulls fall down
-    // the sealed lanes. Inside a seal he can't parry the skulls; outside it no parry turns the darts. He has to
-    // leave his lane and weave.
-    IEnumerator DecreeRain(List<float> sealedLanes, float halfWidth)
+    // One talisman's fuse: the paper burns down toward the ground and its patch glows hotter, ticking faster, then
+    // it bursts in a pillar of seal-fire that burns whoever stands in the patch and breaks the cover over it.
+    IEnumerator OfudaFuse(SpriteRenderer paper, SpriteRenderer zone, float x, float seconds)
     {
-        const float DartSpacing = 2.7f;
-        for (int wave = 0; wave < 3; wave++)
+        Vector3 scale = paper.transform.localScale, at = paper.transform.position;
+        Color fresh = paper.color;
+        float height = paper.bounds.size.y;
+        float nextTick = 0f;
+        for (float t = 0; t < seconds; t += Time.deltaTime)
         {
-            yield return BulletHell.Room(30);
-            float offset = Random.Range(0f, DartSpacing);
-            for (float x = FieldLeft + offset; x <= FieldRight; x += DartSpacing)
+            if (IsDead || breaking || paper == null || zone == null) break;
+            float k = t / seconds;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(t * Mathf.Lerp(8f, 30f, k));
+            float left = Mathf.Lerp(1f, 0.3f, k);
+            paper.transform.localScale = new Vector3(scale.x, scale.y * left, scale.z);
+            paper.transform.position = at + Vector3.down * height * (1f - left) * 0.5f;
+            paper.color = Color.Lerp(fresh, Ember, k * k);
+            zone.color = new Color(SealRed.r, SealRed.g, SealRed.b, (0.12f + 0.4f * k) * (0.7f + 0.3f * pulse));
+            // A tick quickening as the paper burns down.
+            if (t >= nextTick)
             {
-                if (sealedLanes.Exists(lane => Mathf.Abs(x - lane) < halfWidth + 0.4f)) continue;
-                SealDart(new Vector3(x, TopOfScreen, 0), Vector3.down * 6f);
+                nextTick = t + Mathf.Lerp(0.45f, 0.1f, k);
+                Toll(0.12f + 0.12f * k, 1.7f + 0.3f * k);
             }
-            foreach (float lane in sealedLanes)
-            {
-                BulletHell.Curtain(Skull, TopOfScreen, lane - halfWidth + 0.6f, lane + halfWidth - 0.6f, 1.5f, null, BulletHell.MinGap, 6f);
-            }
-            if (Sfx.Has(Sfx.OfudaFlutter)) Sfx.Play(Sfx.OfudaFlutter, 0.5f, 1.2f);
-            yield return Wait(0.7f);
+            yield return null;
         }
+        bool fizzle = IsDead || breaking;
+        if (paper != null) Destroy(paper.gameObject);
+        if (zone != null) Destroy(zone.gameObject);
+        if (fizzle || ronin == null) yield break;
+
+        Vector3 ground = new Vector3(x, GroundY, 0);
+        if (Fx.Play(Fx.KageOfudaBurn, ground + Vector3.up * 0.6f, Color.white, 2.4f) == null) Fx.Play(Fx.Impact, ground, SealRed, 2f);
+        SpriteRenderer pillar = Bar(ground, ground + Vector3.up * 5f, OfudaBlastHalf * 2f, new Color(1f, 0.55f, 0.45f, 0.85f), 56);
+        Detach(pillar.gameObject);
+        Fader.Fade(pillar, 0.3f);
+        Slam(0.5f);
+        CameraShake.Add(0.3f);
+        TimeRipple.Emit(ground, 2.5f, 0.3f, 0.35f);
+        if (Mathf.Abs(ronin.Bounds.center.x - x) < OfudaBlastHalf) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+        BeamEnd(ground + Vector3.up * 5f, ground, out Blocker cover);
+        if (cover != null) cover.Hit(ground);
+        GroundFire.Scorch(ground, 1.6f);
     }
 
     SpriteRenderer Ofuda(Vector3 at)
@@ -574,39 +592,6 @@ public partial class Kagetsune
         }
         transient.Add(strip.gameObject);
         return strip;
-    }
-
-    // The seals hold their time even if the attack that laid them is cut short; then the strips burn away.
-    IEnumerator LiftSeals(List<SpriteRenderer> strips, List<SpriteRenderer> curtains, float seconds)
-    {
-        foreach (SpriteRenderer s in strips) if (s != null) transient.Remove(s.gameObject);
-        foreach (SpriteRenderer c in curtains) if (c != null) transient.Remove(c.gameObject);
-        yield return new WaitForSeconds(seconds - 0.5f);
-        for (float t = 0; t < 0.5f; t += Time.deltaTime)
-        {
-            foreach (SpriteRenderer s in strips) if (s != null) s.color = new Color(s.color.r, s.color.g, s.color.b, 1f - t / 0.5f);
-            foreach (SpriteRenderer c in curtains) if (c != null) c.color = new Color(c.color.r, c.color.g, c.color.b, 0.08f * (1f - t / 0.5f));
-            yield return null;
-        }
-        // Each strip burns away in seal-fire.
-        foreach (SpriteRenderer s in strips)
-        {
-            if (s == null) continue;
-            if (Fx.Play(Fx.KageOfudaBurn, s.transform.position, Color.white, 1.4f) == null) Fx.Play(Fx.Impact, s.transform.position, SealRed, 0.6f);
-            Destroy(s.gameObject);
-        }
-        foreach (SpriteRenderer c in curtains) if (c != null) Destroy(c.gameObject);
-    }
-
-    bool InSealedLane()
-    {
-        if (ronin == null) return false;
-        float x = ronin.Bounds.center.x;
-        foreach (var (lane, halfWidth, until) in seals)
-        {
-            if (Time.time < until && Mathf.Abs(x - lane) < halfWidth) return true;
-        }
-        return false;
     }
 
     // The Spirit Hyper Beam's footprint: it opens this wide at the edge Oni stands nearer and pinches out this far
@@ -825,7 +810,6 @@ public partial class Kagetsune
     // his lane as fast as he runs. Parried, it flies back and rings against the Emperor's own armor.
     IEnumerator LastToll()
     {
-        while (SealActive) yield return Wait(0.2f);
         Bark(BossLine.LastToll, 5f);
         PlayAction(art.parry);
         Vector3 drop = new Vector3(ronin.Bounds.center.x, TopOfScreen + 1f, 0);

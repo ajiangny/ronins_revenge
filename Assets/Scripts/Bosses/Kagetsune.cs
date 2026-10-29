@@ -112,10 +112,6 @@ public partial class Kagetsune : Boss
     int movesSinceUltimate;
     float coffinThrownAt = float.NegativeInfinity;
 
-    // Lanes the ofuda have sealed: no parry inside them until they lift.
-    readonly List<(float x, float halfWidth, float until)> seals = new List<(float, float, float)>();
-    bool SealActive => seals.Exists(s => Time.time < s.until);
-
     protected override bool HasSecondPhase => true;
     protected override bool Busy => breaking || ultimate;
     protected override float StaggerSeconds => secondPhase ? 1.4f : 1.8f;
@@ -281,7 +277,6 @@ public partial class Kagetsune : Boss
 
     protected override IEnumerator Fight()
     {
-        ronin.ParrySealed = InSealedLane;
         // A fight restarted mid-levy (a halt, the watchdog) mustn't leave him armoured.
         Armour(false);
         while (breaking) yield return null;
@@ -379,8 +374,6 @@ public partial class Kagetsune : Boss
         if (movesSinceParry >= ParryEvery) options.Add(parry);
         if (lastMove is Move last) options.Remove(last);
         Move pick = options[Random.Range(0, options.Count)];
-        // Rather than open a seal over a parry-only blow, it waits for its own turn.
-        if (pick == Move.Ofuda && movesSinceParry >= ParryEvery) pick = Move.Toll;
         if (secondPhase && movesSinceSoul >= 2 && Random.value < 0.35f) return Move.Summon;
         return pick;
     }

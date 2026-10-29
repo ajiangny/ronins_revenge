@@ -24,6 +24,9 @@ public class CharacterArt : ScriptableObject
     public Sprite[] walkUpRight;
     public Sprite[] walkDownLeft;
     public Sprite[] walkDownRight;
+    [Tooltip("The ronin walking sideways in a safe area. Empty: his sprint.")]
+    public Sprite[] walkLeft;
+    public Sprite[] walkRight;
     [Tooltip("The ronin standing still facing us, in a safe area. Empty: his usual idle, which shows his back.")]
     public Sprite[] idleDown;
     [Tooltip("The ronin standing still facing each other way, in a safe area, so he keeps the way he last walked. Empty ones fall back to idleDown.")]

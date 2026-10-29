@@ -109,6 +109,24 @@ MonoBehaviour:
   - {fileID: 21300000, guid: a37731f6119b349828fd62657b284939, type: 3}
   - {fileID: 21300000, guid: 4b9536612450548e78a571c3d15a7498, type: 3}
   - {fileID: 21300000, guid: cc45908d7127d4847b47e22f87601975, type: 3}
+  walkLeft:
+  - {fileID: 21300000, guid: 84002f9a4fede4b089f02bfeb72708eb, type: 3}
+  - {fileID: 21300000, guid: 2c3796bdd49704f628e8e0584757b47b, type: 3}
+  - {fileID: 21300000, guid: 94a9eaf04b0244ff1bf9de4b0c6b84da, type: 3}
+  - {fileID: 21300000, guid: d44a0b0eb15ef4ca1bb96a9c4f850bce, type: 3}
+  - {fileID: 21300000, guid: 96afe1cbeaf5841b7b164ab1af7f035d, type: 3}
+  - {fileID: 21300000, guid: bf8ac04d892204e1ca237fc9dc73f60d, type: 3}
+  - {fileID: 21300000, guid: c0a3159eda9f84b45a1669be51b65789, type: 3}
+  - {fileID: 21300000, guid: b95d64b22b1fa498abe2488d1449179c, type: 3}
+  walkRight:
+  - {fileID: 21300000, guid: 140a1b4d08f104186ad7c9cf9c3c4341, type: 3}
+  - {fileID: 21300000, guid: 305b02fda19244012a1c724a32facd8d, type: 3}
+  - {fileID: 21300000, guid: c626f093dbe464166bbd8d8a9f30cc5f, type: 3}
+  - {fileID: 21300000, guid: 09fbf08ed82ab46879f04f51143da5a6, type: 3}
+  - {fileID: 21300000, guid: c3bd79446d6194aa284a7d265a92e51c, type: 3}
+  - {fileID: 21300000, guid: eaf27ab9f350d469f81483febb12b550, type: 3}
+  - {fileID: 21300000, guid: 3cae151f8eb1d4d139c254fa0daace82, type: 3}
+  - {fileID: 21300000, guid: 614ffe2a2300447b8a650c68abd2be45, type: 3}
   idleDown:
   - {fileID: 21300000, guid: aebd6d8e3d8534e03a9e6b9cba1f64f7, type: 3}
   - {fileID: 21300000, guid: dcd094a570b744b5681c8003ab862be3, type: 3}

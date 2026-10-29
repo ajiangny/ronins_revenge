@@ -1243,19 +1243,19 @@ public class Ronin : MonoBehaviour
         animator.Play(clip, true, null, ClipFps(clip));
     }
 
-    // His clip for a way across the screen, by the nearest of the eight compass points: sideways is his sprint,
-    // the rest his walks. A diagonal without frames of its own falls back to the sprint, and a missing walk up or
-    // down to null, which the callers play as the idle bobbing along.
+    // His clip for a way across the screen, by the nearest of the eight compass points: his walk every way. A sideways
+    // walk or a diagonal without frames of its own falls back to the sprint, and a missing walk up or down to null,
+    // which the callers play as the idle bobbing along.
     Sprite[] WalkClip(Vector2 direction)
     {
         if (direction == Vector2.zero) return null;
         switch (Compass(direction))
         {
-            case 0: return FirstOf(art.runRight);
+            case 0: return FirstOf(art.walkRight, art.runRight);
             case 1: return FirstOf(art.walkUpRight, art.runRight);
             case 2: return FirstOf(art.walkUp);
             case 3: return FirstOf(art.walkUpLeft, art.runLeft);
-            case 4: return FirstOf(art.runLeft);
+            case 4: return FirstOf(art.walkLeft, art.runLeft);
             case 5: return FirstOf(art.walkDownLeft, art.runLeft);
             case 6: return FirstOf(art.walkDown);
             default: return FirstOf(art.walkDownRight, art.runRight);

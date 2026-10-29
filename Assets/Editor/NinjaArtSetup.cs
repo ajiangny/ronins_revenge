@@ -390,6 +390,8 @@ public static class NinjaArtSetup
         ronin.walkUpRight = Frames("Ronin", "WalkNorthEast");
         ronin.walkDownLeft = Frames("Ronin", "WalkSouthWest");
         ronin.walkDownRight = Frames("Ronin", "WalkSouthEast");
+        ronin.walkLeft = Frames("Ronin", "WalkWest");
+        ronin.walkRight = Frames("Ronin", "WalkEast");
         ronin.idleDown = Frames("Ronin", "IdleSouth");
         ronin.idleLeft = Frames("Ronin", "IdleWest");
         ronin.idleRight = Frames("Ronin", "IdleEast");

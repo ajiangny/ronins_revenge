@@ -25,7 +25,7 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 ## Sprites and animation
 
 - `CharacterArt` ScriptableObject (`Art/Characters/*.asset`): clips `idle`, `attack`, `hit`, `death`, `parry`,
-  `runLeft`, `runRight`, `walkUp` (the ronin walking away between maps), `walkDown` and the four diagonal walks (the temple) and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
+  `runLeft`, `runRight`, `walkUp` (the ronin walking away between maps), `walkDown`, `walkLeft`/`walkRight` and the four diagonal walks (the temple) and death particles. Assets: Ronin (+ Fire/Water/Lightning), Ashigaru, Bushi, Taisho,
   Benibana, Utsusemi. A boss can rest in a different loop by overriding `Boss.IdleClip` (Utsusemi's bare-headed
   idle, `GameManager.utsusemiBareIdle`, while its hat is thrown, and its unarmed stance while its sword is planted).
 - `SpriteAnimator.cs` plays frame lists on a SpriteRenderer (no Animator controllers).

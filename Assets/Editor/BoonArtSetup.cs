@@ -160,6 +160,8 @@ public static class BoonArtSetup
         art.walkUpRight = Recolor(source.walkUpRight, suffix, hue, boost);
         art.walkDownLeft = Recolor(source.walkDownLeft, suffix, hue, boost);
         art.walkDownRight = Recolor(source.walkDownRight, suffix, hue, boost);
+        art.walkLeft = Recolor(source.walkLeft, suffix, hue, boost);
+        art.walkRight = Recolor(source.walkRight, suffix, hue, boost);
         art.idleDown = Recolor(source.idleDown, suffix, hue, boost);
         art.idleLeft = Recolor(source.idleLeft, suffix, hue, boost);
         art.idleRight = Recolor(source.idleRight, suffix, hue, boost);
@@ -370,7 +372,7 @@ public static class BoonArtSetup
     {
         var found = new List<Sprite>();
         var clips = new[] { art.idle, art.attack, art.hit, art.death, art.parry, art.slash, art.runLeft, art.runRight, art.walkUp,
-            art.walkDown, art.walkUpLeft, art.walkUpRight, art.walkDownLeft, art.walkDownRight, art.idleDown,
+            art.walkDown, art.walkUpLeft, art.walkUpRight, art.walkDownLeft, art.walkDownRight, art.walkLeft, art.walkRight, art.idleDown,
             art.idleLeft, art.idleRight, art.idleUpLeft, art.idleUpRight, art.idleDownLeft, art.idleDownRight };
         foreach (Sprite[] clip in clips)
         {

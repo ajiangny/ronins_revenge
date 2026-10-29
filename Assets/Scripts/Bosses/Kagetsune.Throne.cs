@@ -604,6 +604,21 @@ public partial class Kagetsune
     static readonly Color HyperSafeColour = new Color(1f, 0.95f, 0.8f);
     static readonly Collider[] HyperCover = new Collider[32];
 
+    // The muzzle flare's starburst fills about this much of its canvas.
+    const float FlareArtShare = 0.85f;
+    // How much wider than the beam it shows.
+    const float FlareOverBeam = 1.2f;
+
+    // Sizes the muzzle flare to the beam's half-width where it leaves his chest.
+    void SizeFlare(FxPlayer flare, float beamHalf)
+    {
+        if (flare == null) return;
+        Sprite[] frames = Fx.Frames(Fx.KageWailFlare);
+        float art = frames != null ? frames[0].bounds.size.x * FlareArtShare : 1f;
+        flare.transform.position = Chest + Vector3.back * 0.3f;
+        flare.transform.localScale = Vector3.one * (beamHalf * 2f * FlareOverBeam / art);
+    }
+
     // The Spirit Hyper Beam: every soul in him screams out of his open chest at once, a torrent of soul-fire that slams
     // into the ground across a third of the field at the edge Oni stands nearer. It drives across to the far edge,
     // burning through any cover it passes over, and thins as it goes, its leading edge slower than Oni can run, until
@@ -623,7 +638,9 @@ public partial class Kagetsune
         // The tell: the chest gathers, the ground it will open on pulses teal, two guides run down to its edges, and the
         // safe strip at the far edge glows pale.
         SpriteRenderer gather = Glowing(Chest, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 57);
-        FxPlayer flare = Fx.Play(Fx.KageWailFlare, Chest, new Color(1f, 1f, 1f, 0f), 1f, null, 58);
+        // The muzzle flare at his chest: behind the beam (under its glow), and once it fires a little wider than the
+        // beam where it leaves him, following it as it thins.
+        FxPlayer flare = Fx.Play(Fx.KageWailFlare, Chest, new Color(1f, 1f, 1f, 0f), 1f, null, 52);
         if (flare != null) transient.Add(flare.gameObject);
         SpriteRenderer danger = Bar(new Vector3(start, band, 0), new Vector3(start + dir * open, band, 0), 2.4f, Color.clear, 2);
         SpriteRenderer safe = Bar(new Vector3(stop, band, 0), new Vector3(far, band, 0), 2.4f, Color.clear, 2);
@@ -685,11 +702,7 @@ public partial class Kagetsune
             float chestHalf = (0.4f + 2.2f * (1f - k)) * burst * flicker;
             Vector3 top = Chest, foot = new Vector3(centre, ground, 0);
             beam.Draw(top, chestHalf, foot, half);
-            if (flare != null)
-            {
-                flare.transform.position = Chest + Vector3.back * 0.3f;
-                flare.transform.localScale = Vector3.one * Mathf.Lerp(3f, 1.4f, k);
-            }
+            SizeFlare(flare, chestHalf);
             if (splash != null)
             {
                 splash.transform.position = foot + Vector3.back * 0.3f;
@@ -744,6 +757,7 @@ public partial class Kagetsune
             // Down to a thread a pixel or two wide, the coil drawing in with it and the souls flung off.
             float thread = Mathf.Max(1f / BeamPixel, 0.3f * fade);
             beam.Draw(Chest, thread, end, thread, 1f - fade);
+            SizeFlare(flare, thread);
             if (flare != null) flare.Color = new Color(1f, 1f, 1f, fade);
             safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f * fade);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * fade);

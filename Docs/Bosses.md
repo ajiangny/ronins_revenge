@@ -147,7 +147,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   the ronin's speed; the hit is the wedge's span at his row; cover isn't a shield: an `OverlapBox` over the footprint
   `Hit`s every `Blocker` in it; a pulsing danger band, two guides and the pale safe strip (`HyperSafeColour`) over
   `HyperTell`; it dissipates as a thread at `stop`, the coil drawing in and the souls flung off, blinking out on twos.
-  `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` at the
+  `Sfx.SoulWail` + `LanternBeam` loops, `Fx.KageWailFlare` as the muzzle flare behind the beam (order 52, `SizeFlare`: `FlareOverBeam` × the beam's width at the chest, following it as it thins) and at the
   chest and the footprint), the levy of the dead (`Kagetsune.Levy.cs`, `Move.Levy`: `RaiseLevy` puts him in super
   armour (`levyArmour`: `SuperArmor`, `ArmorDamageTaken` 0.2, a teal `SpriteOutline`) until the last soldier has
   fallen in, tolls three times and

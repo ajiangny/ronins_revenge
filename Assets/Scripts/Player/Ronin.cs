@@ -1202,14 +1202,16 @@ public class Ronin : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    // The plain glow behind him, standing in for an aura whose art is missing.
+    public void SetAuraGlow(Color color) => aura.color = color;
+
     // Switches to an elemental look. Null sprites keep the prefab's art; the tints stand in until recoloured art exists.
     // A null glow colour keeps the default spirit-flame teal.
-    public void SetLook(CharacterArt lookArt, Color auraColor, Sprite slash, Sprite kunai, Color attackColor, Color? attackHalo,
+    public void SetLook(CharacterArt lookArt, Sprite slash, Sprite kunai, Color attackColor, Color? attackHalo,
         Sprite shuriken, Color shurikenColor, Color? shurikenHalo, Color parry)
     {
         attackGlow = attackHalo ?? DefaultGlow;
         shurikenGlow = shurikenHalo ?? DefaultGlow;
-        aura.color = auraColor;
         if (lookArt != null && lookArt != art)
         {
             art = lookArt;

@@ -34,6 +34,8 @@ For the boon screen's pixel bust:
   the whole village on one cord.
 - Palette: the Storm element colour (`#C773FF`) for the sparks and glow, indigo and white for the coat, warm skin.
   **No teal** until she's freed.
+- **Her aura** (`Fx/Aura_Lightning`, Oni wears it while a Storm Shadow Ultimate runs): two jagged violet bolts
+  re-striking over a shockwave ring that pulses like her drum's boom, sparks jumping off them.
 
 ## History
 

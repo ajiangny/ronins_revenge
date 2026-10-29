@@ -29,6 +29,8 @@ public static class Fx
     public const string BeniChainImpact = "Beni_ChainImpact";
     public const string BeniSmokeVeil = "Beni_SmokeVeil";
     public const string BeniPetals = "Beni_Petals";
+    // Her phase-2 aura: the plain flame Oni's Fire aura was before it became Akagane's bonfire.
+    public const string BeniAura = "Beni_Aura";
 
     // Utsusemi's effects.
     public const string UtsuKasa = "Utsu_Kasa";
@@ -89,6 +91,8 @@ public static class Fx
     public const string ShiroWolfSlash = "Shiro_WolfSlash";
     // A wisp of spirit light flying right, one of the shrine's souls that gather into Kuon at her phase break.
     public const string ShiroSpiritWisp = "Shiro_SpiritWisp";
+    // Her phase-2 aura: the plain pale flame Oni's Frost aura was before it became Mizore's.
+    public const string ShiroAura = "Shiro_Aura";
 
     // Kagetsune's: a soul-skull shot, an ofuda strip, the great bell of the Last Toll and the thrown Soul Coffin.
     public const string KageSkull = "Kage_Skull";
@@ -120,6 +124,8 @@ public static class Fx
     public static FxLibrary Library { get; set; }
 
     public static string Aura(Element element) => "Aura_" + element;
+    // The Ultimate's aura with no soul boon in its slot: violet shadow smoke.
+    public const string AuraShadow = "Aura_Shadow";
     public static string SoulCrackle(Element element) => "SoulCrackle_" + element;
 
     public static bool Has(string id) => Library != null && Library.Find(id) != null;

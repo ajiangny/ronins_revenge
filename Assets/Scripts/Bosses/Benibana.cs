@@ -468,7 +468,7 @@ public class Benibana : Boss
     void AddAura()
     {
         Vector3 feet = new Vector3(Centre.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0);
-        auraFlames = Fx.Play(Fx.Aura(Element.Fire), feet, new Color(1f, 0.22f, 0.28f, 0.9f), 3.4f, transform, sprite.sortingOrder - 1);
+        auraFlames = Fx.Play(Fx.BeniAura, feet, new Color(1f, 0.22f, 0.28f, 0.9f), 3.4f, transform, sprite.sortingOrder - 1);
         auraGlow = Projectile.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Crimson.r, Crimson.g, Crimson.b, 0.5f));
         StartCoroutine(PulseAura(auraGlow));
     }

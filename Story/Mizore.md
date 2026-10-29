@@ -33,6 +33,8 @@ For the boon screen's pixel bust:
 - **Her bell:** a small bronze bell, cracked, on a fine chain that runs out of frame from over her heart.
 - Palette: the Frost element colour (`#59BFFF`) for the glow, frost and eyes; slate blue and grey for the robes;
   white for breath and snow. **No teal** until she's freed.
+- **Her aura** (`Fx/Aura_Water`, Oni wears it while a Frost Shadow Ultimate runs): slow frost wisps rising out of a
+  ring of ice crystals, snowflakes drifting round them. Calm, no flame.
 
 ## History
 

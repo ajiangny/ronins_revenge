@@ -458,8 +458,8 @@ public partial class GameManager
         return null;
     }
 
-    // His flames and aura follow his Blade boon's element (or, before he has one, the element he has the most boons
-    // of); each projectile follows the element in its slot.
+    // His flames follow his Blade boon's element (or, before he has one, the element he has the most boons of); each
+    // projectile follows the element in its slot. His aura is the Ultimate's (UpdateUltimateAura).
     void UpdateRoninLook()
     {
         Element? attack = loadout.SlotElement(BoonSlot.Attack);
@@ -472,32 +472,53 @@ public partial class GameManager
         Sprite kunai = attack is Element a1 ? ArtFor(a1)?.kunai : null;
         Sprite shuriken = special is Element s ? ArtFor(s)?.shuriken : null;
 
-        // The animated aura replaces the plain glow when its art exists.
-        bool animatedAura = primary is Element a2 && Fx.Has(Fx.Aura(a2));
-        Color glowAura = primary is Element glow && !animatedAura ? Boons.Info(glow).Color * new Color(1f, 1f, 1f, 0.45f) : Color.clear;
-        ronin.SetLook(look, glowAura,
+        ronin.SetLook(look,
             slash, kunai, StandInTint(attack, slash), ElementColor(attack),
             shuriken, StandInTint(special, shuriken), ElementColor(special),
             parry is Element p ? Boons.Info(p).Color : Color.white);
 
-        if (primary != shownElement)
+        // A burst as his colours change, so a new boon's element reads on him.
+        if (primary != shownElement && primary is Element changed)
         {
-            if (aura != null) aura.Stop();
-            aura = null;
-            if (primary is Element changed)
+            Color burst = Boons.Info(changed).Color;
+            if (Fx.Play(Fx.Impact, ronin.Bounds.center, new Color(burst.r, burst.g, burst.b, 0.7f), 1.3f) == null)
             {
-                // Behind the ronin and wider than him so the flames show round his silhouette; faded so he stays readable.
-                aura = Fx.Play(Fx.Aura(changed), ronin.Feet + Vector3.up * auraLift, new Color(1f, 1f, 1f, 0.45f), 1.35f, ronin.transform, ronin.SpriteOrder - 1);
-                Color burst = Boons.Info(changed).Color;
-                if (Fx.Play(Fx.Impact, ronin.Bounds.center, new Color(burst.r, burst.g, burst.b, 0.7f), 1.3f) == null)
-                {
-                    ElementFx.Glow(ronin.Bounds.center, Boons.Info(changed).Color, 1f, 4f, 0.5f);
-                }
-                Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, Boons.Info(changed).Color, 14, 1f, 6f);
+                ElementFx.Glow(ronin.Bounds.center, burst, 1f, 4f, 0.5f);
             }
+            Debris.BurstSprites(ronin.Bounds.center, ronin.art.deathParticles, burst, 14, 1f, 6f);
         }
         shownElement = primary;
     }
+
+    // The aura is the Ultimate's signature: it burns only while the Ultimate runs, in the soul of its slot boon
+    // (Akagane's bonfire, Mizore's frost, Hibiki's storm, Asagi's tide), or as plain shadow without one. It follows
+    // the clone's rule for showing, so a talk, a pause or a reset puts it out with the clone.
+    void UpdateUltimateAura()
+    {
+        string wanted = null;
+        if (ronin.UltimateActive && ronin.ControlsEnabled)
+        {
+            wanted = loadout.SlotElement(BoonSlot.Ultimate) is Element e ? Fx.Aura(e) : Fx.AuraShadow;
+        }
+        if (wanted == shownAura) return;
+        if (aura != null) aura.Stop();
+        aura = null;
+        ronin.SetAuraGlow(Color.clear);
+        shownAura = wanted;
+        if (wanted == null) return;
+
+        // Behind the ronin and wider than him so it shows round his silhouette.
+        aura = Fx.Play(wanted, ronin.Feet + Vector3.up * auraLift, new Color(1f, 1f, 1f, auraAlpha), auraScale, ronin.transform, ronin.SpriteOrder - 1);
+        // Without the art, a plain glow in the soul's colour stands in.
+        if (aura == null)
+        {
+            Color glow = loadout.SlotElement(BoonSlot.Ultimate) is Element g ? Boons.Info(g).Color : ShadowAuraColour;
+            ronin.SetAuraGlow(glow * new Color(1f, 1f, 1f, 0.45f));
+        }
+    }
+
+    // The clone's violet, for the shadow aura's stand-in glow.
+    static readonly Color ShadowAuraColour = new Color(0.55f, 0.35f, 0.9f);
 
     static Color? ElementColor(Element? element) => element is Element e ? Boons.Info(e).Color : (Color?)null;
 

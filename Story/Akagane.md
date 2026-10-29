@@ -33,6 +33,8 @@ For the boon screen's pixel bust (head and shoulders, facing three-quarters towa
   always show their chain.
 - Palette: the Fire element colour (`#FF6133`) for the glow and embers, copper and lacquer red for the armor, soot
   black. **No teal**: his fire is what holds him out of the coffin; teal is only for when he is freed.
+- **His aura** (`Fx/Aura_Fire`, Oni wears it while a Pyre Shadow Ultimate runs): a war-camp bonfire, flame tongues
+  twisting up with soot-black curls at their tips and embers flying off.
 
 ## History
 

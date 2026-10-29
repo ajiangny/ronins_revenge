@@ -181,6 +181,42 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 30a843fcb2fc94ec3818de0a5fbcbbe5, type: 3}
     fps: 12
     loop: 1
+  - id: Aura_Shadow
+    frames:
+    - {fileID: 21300000, guid: a812cb742e6704057b9784ccb6334eb5, type: 3}
+    - {fileID: 21300000, guid: f01808217c2e6468788dd08a665d0d1c, type: 3}
+    - {fileID: 21300000, guid: 1185f9cb7e6d745a49f78a274c57946c, type: 3}
+    - {fileID: 21300000, guid: c2a617cc2e66747e8883f0b16ae06be9, type: 3}
+    - {fileID: 21300000, guid: ba6e4e30dcea0476e91e429be7feff2c, type: 3}
+    - {fileID: 21300000, guid: 4f739c9531f1949d4b6094d0e8aae624, type: 3}
+    - {fileID: 21300000, guid: 211c19cd5e4fc4f47999d0c3fe674495, type: 3}
+    - {fileID: 21300000, guid: dc4172d2a74aa487d82c2d01dad2e95e, type: 3}
+    fps: 12
+    loop: 1
+  - id: Beni_Aura
+    frames:
+    - {fileID: 21300000, guid: 240e6d086c7ba4a4f8f1da70315b034f, type: 3}
+    - {fileID: 21300000, guid: 5da2b728bdfd144d7ba2c424cd4a3ae9, type: 3}
+    - {fileID: 21300000, guid: fd32eda1210a2405f9011506a3e221d7, type: 3}
+    - {fileID: 21300000, guid: e490e0add2e7943e99bf740ffdd5d031, type: 3}
+    - {fileID: 21300000, guid: 0e25327aedd10478d966edec166866bc, type: 3}
+    - {fileID: 21300000, guid: 3dc5b2616b30a4e30b40444ea3f677b0, type: 3}
+    - {fileID: 21300000, guid: b4840392611fa4a2d90aa18aea638a95, type: 3}
+    - {fileID: 21300000, guid: b37b74af1db3640c0b69f4b19cc8e8c6, type: 3}
+    fps: 12
+    loop: 1
+  - id: Shiro_Aura
+    frames:
+    - {fileID: 21300000, guid: d031b0bbb70b44b1a90d1efdf536765d, type: 3}
+    - {fileID: 21300000, guid: ebabe01243ee14a04bc737ad60bdc08a, type: 3}
+    - {fileID: 21300000, guid: 1ac7763ed1e914077bd517821cbf2eb5, type: 3}
+    - {fileID: 21300000, guid: b03a3d32e39a944cabfa9180b932aa68, type: 3}
+    - {fileID: 21300000, guid: 58aa3004a765e409f8959b0051082097, type: 3}
+    - {fileID: 21300000, guid: fb58bd1624f8e4cd9820f9f4482ec358, type: 3}
+    - {fileID: 21300000, guid: 55edd5b25c57b4512a83346f49e44a53, type: 3}
+    - {fileID: 21300000, guid: 8ea8f8a28abe54bb2af6ea7f6d0e2b71, type: 3}
+    fps: 12
+    loop: 1
   - id: SoulCrackle_Fire
     frames:
     - {fileID: 21300000, guid: 0f67d7aae23874c03bf19c8a5d48d811, type: 3}

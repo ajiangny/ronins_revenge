@@ -214,7 +214,7 @@ public partial class Shirogane
     void AddAura()
     {
         Vector3 feet = new Vector3(Centre.x, sprite.bounds.min.y + sprite.bounds.size.y * 0.12f, 0);
-        auraFlames = Fx.Play(Fx.Aura(Element.Water), feet, new Color(0.5f, 0.9f, 1f, 0.9f), 3.2f, transform, sprite.sortingOrder - 1);
+        auraFlames = Fx.Play(Fx.ShiroAura, feet, new Color(0.5f, 0.9f, 1f, 0.9f), 3.2f, transform, sprite.sortingOrder - 1);
         auraGlow = Projectile.CreateGlow(sprite.transform, 2.2f, sprite.sortingOrder - 2, new Color(Cyan.r, Cyan.g, Cyan.b, 0.4f));
         StartCoroutine(PulseAura(auraGlow));
     }

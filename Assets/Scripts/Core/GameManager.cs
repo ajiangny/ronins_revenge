@@ -178,6 +178,10 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] float parryHitStop = 0.06f;
     [Tooltip("How far above the ronin's feet his element aura's flames start, in world units.")]
     [SerializeField] float auraLift = 0.3f;
+    [Tooltip("How opaque the Ultimate's aura burns; it only shows for the Ultimate, so it can be bold.")]
+    [SerializeField, Range(0f, 1f)] float auraAlpha = 0.85f;
+    [Tooltip("The Ultimate aura's size, relative to its art.")]
+    [SerializeField] float auraScale = 1.6f;
 
     [Header("Bosses")]
     [Tooltip("Benibana's sprite frames. Leave empty to use the Taisho art, tinted crimson, as a stand-in.")]
@@ -401,6 +405,8 @@ public partial class GameManager : MonoBehaviour
     bool soulCaught;
     bool firstBoonTaken;
     FxPlayer aura;
+    // The Ultimate aura's Fx id now burning, or null.
+    string shownAura;
     bool hitStopping;
     // The crimson-shot hint shows once a session.
     bool toldUnparryable;
@@ -702,6 +708,7 @@ public partial class GameManager : MonoBehaviour
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
         ronin.UltimateLocked = tutorial.Active;
+        UpdateUltimateAura();
         boonChoice.UltimateShown = !tutorial.Active || tutorial.ShowsUltimate;
     }
 

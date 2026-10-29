@@ -29,9 +29,9 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   coded stages into it (and re-applies the maps), so add or retune a stage in code and re-run it.
 - **Paths (Hades' chamber doors):** `EndRound` → `GatherDrops` (drops fly to Oni first; hearts heal him to full and the
   spare ones `Heart.Dissipate` into `SpareHeartPoints` × stage) → `GrantReward` (the round's `pendingReward`, a
-  `PathReward`, first materializes mid-field as a `RewardSpirit` that hangs a moment and is pulled into him; then: soul → `OfferBoons`, bead → `OfferBead`, scroll → `OfferArts`, spring heals, Lost Melody pays Spirit Notes `noteCache` ×
+  `PathReward`, first materializes mid-field as a `RewardSpirit` that hangs a moment and is pulled into him; then: soul → `OfferBoons`, bead → `OfferBead` (a level), thread → `OfferThread` (a rarity), scroll → `OfferArts`, spring heals, Lost Melody pays Spirit Notes `noteCache` ×
   stage; one with no use falls back to notes) → `ChoosePath`: `RollPaths` picks `portalChoices` (+ Third Path)
-  rewards, no two alike (souls 45, notes 20, beads 20, springs 10 while hurt, scrolls 5), plus the boss's from
+  rewards, no two alike (souls 45, notes 20, beads 20, springs 10 while hurt, threads 6, scrolls 5), plus the boss's from
   `BossPortalAfter` (`bossPortalAfterRound` + The Long Road). `RewardPath.Spawn` builds each (code-built glow, reward icon,
   TMP label). Each reward's icon is an 8-frame PixelLab loop from `RewardIcon`: the element's soul frames, `beadFrames`, `noteFrames` (`Effects/SpiritNotes_`; a procedural note without it), `springFrames`, `scrollFrames` and, for the boss's portal, `bossIcons` by the stage's boss (Benibana's kiseru and rosary, Utsusemi's hat, Kuon's head, Kagetsune's helm and bells), all wired by `Ninja/Apply Boon Art` from `Effects/<Name>_0..7`; a missing one is a disc. Oni walks his row with `Ronin.MoveOnly`; a path lights only while he's within `RewardPath.Reach` of it (between paths a "Walk under a path." prompt follows him, `GameUI.MovePathInfo`), and `GameUI.ShowPathInfo` hangs a tooltip under the lit one's name (`RewardPath.TooltipAnchor`: a brush rule in its colour, `RewardDescription` and the key hint over a soft shadow), and `ChooseKey` (E, Enter, pad A; not Space or a click, which slash)
   picks it: `RewardPath.Release` floats its reward away up the field (to come back as that round's reward) and `WalkOn` has him follow it into the dark and out at his place for the next round on the same map (cover and music kept), or
@@ -76,7 +76,7 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).
-  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni. The page also has +1000 NOTES and RESET SAVE.
+  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni, F10 opens a Spirit Bead's screen and F11 a Spirit Thread's. The page also has +1000 NOTES and RESET SAVE.
 
 - **Poguru's tutorial (`Tutorial.cs`, a component `GameManager.Start` adds):** replaces Stage I, Round 1 of a run when
   `Tutorial.ShouldOffer(save)` (`tutorialReplay`, or a journey with no runs that hasn't `tutorialSettled`), asked in

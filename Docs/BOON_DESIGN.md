@@ -262,7 +262,52 @@ crescent fans were cut down before they arrived.
   rarely taken. Now a shell of ice takes one blow, bursts into 5 homing shards and regrows in 18 / 13 / 9 s (a bead shortens it).
 - **Cover** is rebuilt every round.
 
-## 5. Later
+## 5. Levels, Exchanges and the Thread (Hades' boon growth)
+
+**The problem.** A Spirit Bead raised a boon one rarity, so every boon topped out after two beads and the bead stopped
+mattering once a build was Epic.
+
+**What Hades does** ([Hades wiki](https://hades.fandom.com/wiki/Pom_of_Power?oldid=9984),
+[Fextralife](https://hades.wiki.fextralife.com/Pom+of+Power), [Hades II](https://hades2.wiki.fextralife.com/Boon)).
+Rarity and level are separate:
+- **The Pom of Power adds a level.** Each level adds less than the last, so Lv1 → 2 is the biggest step. A level is
+  kept when the rarity changes.
+- **Poms can't touch capstones.** Duos, Legendaries and Infusions can't be pommed.
+- **Rarity rises in only a few ways.** An **Exchange**, a god's boon taking another god's slot, raises the slot's
+  rarity a tier and keeps its level; Hades II's Sacrifice does the same. Hades II's **Yarn of Ariadne** (sold at
+  Charon's well) and a few boons (Chaos favours, Hera's Bridal Glow) do too. Otherwise rarity is what the card rolled.
+- **Rule of thumb.** In Hades II a Lv2 Common is about a Lv1 Rare.
+
+**What we do.**
+- **Spirit Beads add a level** (`EquippedBoon.Level`, `OfferKind.Level`).
+  - `BoonDefinition.ValueAt(rarity, level)` adds `LevelStep` for the first level and 0.8 of the previous step for each
+    after it (`LevelFalloff`). The steps are sized so a **Lv3 Common is about a Lv1 Rare**.
+  - Whole-number stats (strikes, shards, Kindling's swings) move once the levels add up to a whole one.
+  - `Min` / `Max` bound every stat: blasts stay under the diagonals at 2.6, chances under 95%, Glacier Shell at 6 s or
+    more, Kindling at 3 swings or more.
+  - There is no level cap. A boon whose stats are already at their bounds isn't offered.
+- **Exchange.** A soul's boon that would replace another element's in its slot comes with that boon's level and at
+  least one rarity above it (`Boons.Draw`). The card says "Exchanges X · keeps Lv N".
+- **Spirit Thread** (`PathReward.Thread`, weight 6). It raises a held boon a rarity and keeps its level
+  (`Boons.DrawThread`, `BoonChoiceUI.ShowThread`, `Boons.ThreadColor`).
+
+| Boon | Step per level (first) | Bound |
+|---|---|---|
+| Fire blasts (Flame Blade, Inferno Shuriken, Burning Riposte, Pyre Shadow) | +0.17 radius | 2.6 |
+| Flame Blade chance | +8% | 90% |
+| Blazing Hands | +3.5% | 30% |
+| Kindling | −1 swing (whole) | 3 |
+| Frost Blade | +0.28 s, +1 shard (whole) | 5 shards |
+| Glacial Shuriken / Frost Shadow | +0.17 s / +0.28 s | |
+| Frozen Riposte | +1 shard (whole) | 6 |
+| Glacier Shell | −2.8 s | 6 s |
+| Storm Blade, Thunder Shuriken, Storm Shadow | +8% | 95% |
+| Thunder Riposte | +1 strike (whole) | 5 |
+| Storm Step | +5.5% | 50% |
+| Static Charge | +4% | 45% |
+| Storm Shadow fill speed | +5.5% | 60% |
+
+## 6. Later
 
 - **Shared statuses.**
   - Burn: stacking damage over time, capped.

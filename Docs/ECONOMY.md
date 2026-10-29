@@ -5,11 +5,16 @@ How strong Oni starts, what he can buy between runs, and the research behind the
 
 ## The decision
 
-A fresh save plays exactly like the game did before the shop: 3 lives, a 0.45 s swing, a 0.25 s parry window, a 6 s
-shuriken. The base game is tuned "harder but beatable" and someone may only play it once or twice, so a skilled
-player must be able to win run 1. The shop only adds on top, and keeps to the size Hades and Vampire Survivors land
-on when maxed: about twice the survivability, a little speed, better luck, and no flat damage bonus (damage growth
-belongs to the boons).
+The first shop only added on top of the tuned game (3 lives, speed 10, a full-speed slash), so the songs were too
+small to chase. **Since 2026-10-29 a fresh save starts weaker** and the songs buy it back: **2 lives** (Iron Will
+raises it to 4), **speed 9.5** (Swift Feet: 11 at its third rank, the old top), a **slash at 85% speed** (Cutting Wind:
+100% at its third rank; the slower wave lives longer, so it still reaches the top) and the old 1.1 parry reach (Wide
+Guard: 1.3). A skilled player can still win run 1; most will die once or twice and come back stronger, as in Hades,
+where Thick Skin and Death Defiance are the first things bought. Damage growth still belongs to the boons.
+
+The top ranks of the stat songs also ask for a **Warlord's Seal** or **Kite Silk** (below), like the Mirror's later rows
+asking for Chthonic Keys: notes alone buy the early ranks, and the last steps come from beating warlords and hunting
+scouts.
 
 ## Earning
 
@@ -18,6 +23,27 @@ samurai, 5 per scout, 25 / 40 / 60 / 100 per boss felled, plus Lost Melody paths
 Heat. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
 five clears. Notes go into the save the moment they're earned, so quitting mid-run keeps them.
+
+## Warlord's Seals and Kite Silk
+
+Two rarer things, kept in the save as they're found (`SaveData.relics`, `Relic`), shown in the temple's resource tray
+and on the end screen:
+
+- **Warlord's Seal** (Hades' Chthonic Keys and Titan Blood): 1 for every warlord felled, and 1 more the first time
+  each one falls (`Upgrades.SealsPerBoss`, `SealsFirstFall`). A first full clear brings 8.
+- **Kite Silk** (Hades II's gathered reagents, like the Moly that opens Night's Craftwork): a downed kite scout leaves
+  one 35% of the time (`GameManager.silkChanceFromScout`), so a few runs gather what a rank needs.
+
+| Rank | Asks for |
+|---|---|
+| Keen Eye 2 | 2 Kite Silk |
+| Swift Feet 3 | 3 Kite Silk |
+| Cutting Wind 3 | 3 Kite Silk |
+| Wide Guard 2 | 1 Warlord's Seal |
+| Iron Will 2 | 2 Warlord's Seals |
+| Second Dawn | 2 Warlord's Seals |
+
+They're counted as they're spent (`relicsSpent`), so Refund All gives back exactly what was paid.
 
 ## Spending
 
@@ -28,12 +54,14 @@ off for a harder run. The shop is the flute altar in the temple (`GameManager.Sh
 | Song | Fresh → max | Ranks | Base |
 |---|---|---|---|
 | Keen Eye (parry window) | 0.25 → 0.31 s | 2 | 60 |
-| Swift Feet (move speed) | 10 → 11 | 2 | 60 |
+| Swift Feet (move speed) | 9.5 → 11 | 3 | 60 |
+| Cutting Wind (slash speed) | 85% → 100% | 3 | 70 |
+| Wide Guard (parry reach) | 1.1 → 1.3 | 2 | 90 |
 | Quick Draw (swing cooldown) | 0.45 → 0.405 s | 2 | 80 |
 | Spirit Wind (shuriken cooldown) | 6 → 5 s | 2 | 80 |
 | Steady Breath (missed parry) | 2 → 1.5 s | 2 | 80 |
 | Long Shadow (invulnerability after a hit) | 2 → 2.5 s | 1 | 120 |
-| Iron Will (max lives) | 3 → 4 | 1 | 600 |
+| Iron Will (max lives) | 2 → 4 | 2 | 450 |
 | Fate's Thread (boon redraws a run, R on the boon screen) | 0 → 3 | 3 | 300 |
 | Second Dawn (once a run, rise again with 2 lives) | 0 → 1 | 1 | 1,200 |
 | Third Path (paths after each round) | 2 → 3 | 1 | 400 |
@@ -85,6 +113,15 @@ ever escaped ([Steam stats](https://steamcommunity.com/stats/1145360/achievement
 first clear. God Mode starts at 20% damage resistance and adds 2% per death up to 80%
 ([Inverse](https://www.inverse.com/gaming/hades-god-mode-interview)). Kasavin: "Our big focus from the start with
 Hades was how to take the sting of failure and reduce that as much as possible" (same source).
+
+**Hades' gated resources** ([PC Invasion](https://www.pcinvasion.com/hades-items-guide-nectars-keys-ambrosia-titan-blood-and-more/2),
+[Prima](https://primagames.com/gaming/hades-guide-mirror-of-night-upgrades-fated-list-of-prophecies)): Chthonic Keys open
+the Mirror's later rows and the other weapons (60 keys open the whole Mirror), and Titan Blood, Diamonds and Ambrosia
+come mostly from bosses, the first time each is beaten at a Heat. Hades II's Incantations at the Cauldron cost
+reagents gathered in runs (Silver, Moly and the like) as well as Bones and Ash
+([Shacknews](https://www.shacknews.com/article/146097/what-does-the-cauldron-do-hades-2),
+[Maxroll](https://maxroll.gg/hades-2/guides/hades-2-materials-guide)). Both make the early upgrades cheap in the common
+currency and put the late ones behind something only progress gives.
 
 **Vampire Survivors, PowerUps** ([wiki](https://vampire.survivors.wiki/w/PowerUps)): price = base × rank plus a
 global fee ⌊20 × 1.1^ranks bought⌋. First ranks cost 100–300 gold, the big ones 5,000 (Amount) and 10,000

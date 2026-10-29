@@ -312,11 +312,12 @@ public partial class GameManager
                 return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
                     focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 1.1f, right = true };
             // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces;
-            // Mizore's wolf head is wider than the others', so she's drawn smaller still.
-            case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
-            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f), 0.72f);
+            // Mizore's wolf head is wider than the others', so she's drawn a little smaller, and Asagi a little larger to
+            // stand her bowl up near Oni's eyes. Akagane, the captain, stands screen-tall, a little taller than Oni.
+            case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f), 1f);
+            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f), 0.78f);
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
-            case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f));
+            case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f), 0.88f);
             // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.
             case "Poguru":
                 return new DialogueScene.Speaker { name = "Poguru", epithet = "The Lost Dragon", colour = PoguruColour, art = poguruCloseup,
@@ -340,7 +341,8 @@ public partial class GameManager
     }
 
     // `eyes` is where the soul's eyes sit in their close-up, 0-1 across and down; `scale` is their height as a share of
-    // ScenePortraitHeight. They stand shorter than the screen, so their painting's top fades out rather than being cut.
+    // ScenePortraitHeight. Below 1 they stand shorter than the screen, their painting's top fading out rather than cut;
+    // at 1 they're placed like Oni, drawn screen-tall with the top pushed just off screen.
     DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes, float scale = 0.83f) => new DialogueScene.Speaker
     {
         name = name,
@@ -349,7 +351,7 @@ public partial class GameManager
         art = closeup,
         focus = eyes,
         height = ScenePortraitHeight * scale,
-        mayStandShort = true,
+        mayStandShort = scale < 1f,
         soulFrames = ArtFor(element)?.soulFrames,
     };
 

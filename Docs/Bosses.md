@@ -132,9 +132,11 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   motes rising, then cools to a scar; each piece's `Opened` runs `BreakCoverAlong`, which demolishes any `Blocker` it
   crosses, and kicks up chips and dust), a star of short cracks marks the crater, and `EruptColumn`s glow for
   `ColumnTell` (`Flare`ing their stretch of crack) then burst as `SoulColumn`s every `ColumnStep`, only the one at the
-  row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (`Ofuda`
-  strips; `seals` feed `Ronin.ParrySealed` = `InSealedLane`, which makes `Ronin.SealedParry` fizzle instead of
-  parrying; `LiftSeals` keeps them for their time even if the move is cut short; always followed by a toll or slam),
+  row burning the ronin; launched columns run in real time), Toll of Fealty, Ofuda Decree (timer bombs: `Ofuda`
+  strips land at spots `OfudaBlastHalf` × 2 + `OfudaRoom` apart, the ronin's first, each over a crimson zone `Bar`;
+  `OfudaFuse` runs `Launch`ed and `Detach`ed in real time, burning the paper down toward `Ember` with a quickening
+  `Toll` tick, then bursts (`Fx.KageOfudaBurn`, a pillar, `Slam`, `TimeRipple`), hits inside the zone, `Hit`s cover and
+  leaves a `GroundFire.Scorch`; fizzles if he falls or breaks phase; fuses step by 0.45 s, 0.35 s in phase 2),
   Spirit Hyper Beam (`SpiritHyperBeam`, `Move.Beam`, his old Thousand-Soul Wail, drawn by `SpiritBeamView` in
   `Kagetsune.Beam.cs` as pixel art built every frame on the art's 48-to-a-unit grid: `PixelMesh` quads of whole
   pixels in vertex colours with the sprites' material; the body in `BeamRow`-pixel rows split into the stepped bands of
@@ -158,14 +160,13 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   and ashigaru on the Throne, 13×3 (14 under the Last Bell) Taisho, archers and yurei with divers on the Wraith, its
   top rank at `LevyTop` under his feet; `NextMove` calls it when `LevyRemaining` is 0 and `movesSinceLevy` reaches
   `LevyAtLatest` (sometimes sooner), never while a soul is out; the phase break and `OnCleared` `DisbandLevy`), Reliquary Rend (`ReliquaryRend`: two quick
-  `SlamDown`s on the ronin's lane, a third held a random 0.4-1 s, then an aftershock on the first crack; Coffer Slam's
+  `SlamDown`s on the ronin's lane, a third held a random 0.4-1 s, then an aftershock on the first crack, which `Relight` flares back up first (`Crack`'s teal glow dies in 0.6 s so a spent crack reads dark); Coffer Slam's
   blow is `SlamDown(xs, ring, weight)`, which hit-stops and `TimeRipple`s, and hardened its tell can feint onto the
   ronin halfway), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
   **Bullet hell** (built from `BulletHell`, all his skulls `Enlist`ed; `BellShot`/`SealDart` are his bronze and crimson
   shots; `Hardened` = phase 2 or past half of bar 1): the Toll of Fealty is a `Spiral` per toll from `Waist`; the
   Rosary Curtain (`RosaryCurtain`, `Move.Curtain`) drops gapped `Curtain` rows stepped by `NextGap`, one gapless row
-  with a bell when hardened; the slam's `SlamRing`; the Ofuda Decree's `DecreeRain` (darts outside the seals, skull
-  walls inside); hardened, the Spirit Hyper Beam sweeps faster; the Last Toll's
+  with a bell when hardened; the slam's `SlamRing`; hardened, the Spirit Hyper Beam sweeps faster; the Last Toll's
   `ClosingRing`. VFX: `Crack` and `Shockwave` under slams, stride dust and phase-2 afterimages, `UpdateWisps`, a
   `chestGlow` that swells as bar 2 drains; chains are `Tiled` strips (`Fx.KageChain`, drawn
   `SpriteDrawMode.Tiled` and laid by `Lay`, bars without the art); the slam's and the ultimate's soul-fire columns are
@@ -176,19 +177,21 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`Kagetsune.Kit.cs`): `Shockwave` (`Fx.KageShockwave`), `TollRing` (`Fx.KageTollRing`), `LockOn` (`Fx.KageLockOn`
   closing with ticking pings), `Streak` (afterimages behind the thrown bell and coffin). `UpdateWisps` circles
   `Fx.KageSoulRise` ghosts (dimmer behind him); `UpdateLastBell` keeps its dark on the camera, gives way to the
-  ultimate's and beats a `Heartbeat`; `RisingSoul` uses the same ghost. His burns are `GroundFire.Light(at, soul: true)`,
-  `Fx.KageSoulFire` with teal embers instead of the laser's orange. Phase 2
+  ultimate's and beats a `Heartbeat`; `RisingSoul` uses the same ghost. His burns leave `GroundFire.Scorch(at, soul: true)`: a
+  char mark with a teal edge, never a live flame (players took the flames for a hazard). Phase 2
   adds Coffin Pendulum (`CoffinPendulum`: three ground passes on alternating sides, each with a band tell long
   enough to cross to the clear side by `MaxDodgeSpeed`, the last shedding spaced skulls, then a `SlamDown` on the
   ronin's lane; `CoffinOnChain`/`SetCoffin`), Soul Harvest (`SoulHarvest`: rows of floor glows that rise as skulls
   through the ronin's row, `HomeToChest` bending them into his chest above it, gaps stepped by `NextGap`), Wraith Swarm
   (the Thousand-Soul Bloom: a `Ring` from the chest under `HaltAndAim`), Soul River (`SoulRiver`,
   `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), Broken Chains
-  (`ChainCage` first: two chain walls that `HitIfCrossed` for 3 s round a two-arm `cageSpiral`, then lashes from his
-  shoulders), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
+  (`ChainCage` first: faint trembling chains over bronze ground marks for 0.6 s, then two chain walls that
+  `HitIfCrossed` for 3 s round a two-arm `cageSpiral`; then lashes from his shoulders, each told by `LashTell`: the chain
+  taut over the start, a crimson band over the span and chevrons rippling toward its end, for long enough to step out
+  of the span either way by `MaxDodgeSpeed`), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
   chain; parried, its hit (`OnHitBy`, on `Damaged`) sees `coffinThrownAt` and sets `exposedUntil`, which a stagger pushes back past itself, doubling `DamageMultiplier`), the Night
   of a Thousand Bells (`ultimate`, every `Ultimate` moves: `Darkness`, eight lanes, five waves with a stepping
-  safe lane that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Kagetsune.Souls.cs`): `CallSoul` raises a real boss through `Boss.Summon` (→
+  safe lane (a pale `HyperSafeColour` strip under it each tell) that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Kagetsune.Souls.cs`): `CallSoul` raises a real boss through `Boss.Summon` (→
   `GameManager.SummonSoul`) at 30% health on the boss row, `Haunt`s it (a teal wash and a `SpriteOutline`) and binds
   it with `soulChain`/`soulAura`, laid every frame by `UpdateSoul`. The soul fights its own first phase (it is
   `Summoned`, so it never phase-breaks) while his `NextMove` keeps to plain moves (no Ofuda, parry-only move, ultimate or

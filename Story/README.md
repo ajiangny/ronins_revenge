@@ -2,7 +2,8 @@
 
 The story behind Ronin's Revenge: what happened, why everyone keeps coming back, how it ends, and how lines should
 react as runs pile up, the way Hades' do. Each character has their own file. **Check a character's file before
-writing a line, a scene or art for them**, and update it when something about them changes.
+writing a line, a scene or art for them**, and update it when something about them changes. [RELATIONSHIPS.md](RELATIONSHIPS.md)
+maps every bond in the cast: what they call each other, which pairs already talk, and where lines are missing.
 
 ## Cast
 
@@ -84,8 +85,8 @@ intros (`BossIntro`), phase breaks (`BossPhase`) and defeats (`BossDefeat`), the
 (`KilledOni`), Oni waking in the temple after a run (`HubReturn`) and the souls on their first boon screen of a run
 (`SoulPickup`) pick from the conversations in the character files. Intros, defeats and soul greetings play as
 Hades-style talk scenes (the speaker painted large, Oni opposite); a phase break gets a scene only when Oni has an
-answer, otherwise its card speaks. The souls' `SoulPickup` tables are wired; their Duo, Legendary, jealousy and boss
-reactions are written ([Souls.md](Souls.md)) but not yet.
+answer, otherwise its card speaks. The souls' `SoulPickup`, Duo, Legendary, jealousy, boss and
+temple lines are wired and voiced ([Souls.md](Souls.md)); only their freed beats in the ending are not yet.
 
 ## Consistency rules
 
@@ -95,6 +96,8 @@ reactions are written ([Souls.md](Souls.md)) but not yet.
 - Every boss is a victim of Kagetsune as well as Oni's enemy. None of them serves him willingly any more.
 - No sexualised backgrounds or framing for any character (see the art guide's Shirogane notes for the same rule
   in art).
+- When a relationship changes or a line between two characters is added, update
+  [RELATIONSHIPS.md](RELATIONSHIPS.md) as well as both characters' files.
 - Lines marked **(in game)** in the character files must match `Line()` in the boss's script and
   `Tools/generate-voice.mjs` word for word.
 

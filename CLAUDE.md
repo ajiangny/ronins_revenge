@@ -8,6 +8,7 @@ Unity 6000.6.6f1, URP, new Input System. Single scene: `Assets/Scenes/SampleScen
 system, enemy or boss. [README.md](README.md) is the graded write-up; update it when a
 player-facing feature changes. [Story/](Story/README.md) holds the plot and a file per character (Oni, the bosses,
 Kagetsune): read the character's file before writing their lines, scenes or art, and update it when they change.
+[Story/RELATIONSHIPS.md](Story/RELATIONSHIPS.md) maps how the cast relate and where crossover lines are missing.
 
 ## Layout
 

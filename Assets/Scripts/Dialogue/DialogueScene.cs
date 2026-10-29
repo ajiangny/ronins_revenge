@@ -24,6 +24,8 @@ public class DialogueScene : MonoBehaviour
         public Sprite[] soulFrames;
         // Oni stands on the right; everyone else on the left.
         public bool right;
+        // Drawn at `height` even when that's shorter than the screen, the painting's cut top feathered away instead.
+        public bool mayStandShort;
     }
 
     public struct Line
@@ -44,6 +46,8 @@ public class DialogueScene : MonoBehaviour
         public CanvasGroup group;
         public RectTransform body;
         public Image glow;
+        // Masks the painting alone, its feathered edges brought in to meet a painting that stops short on screen.
+        public RectTransform frame;
         public Image art;
         public SpriteAnimatorUI animator;
         public string owner;
@@ -104,6 +108,8 @@ public class DialogueScene : MonoBehaviour
     const float MaskOverlap = 60f;
     // How far past the screen a painting's cut edge is pushed.
     const float EdgeHide = 12f;
+    // How far down from a short painting's top it fades in.
+    const float TopFeather = 60f;
 
     public void Bind(GameUI gameUI)
     {
@@ -198,7 +204,9 @@ public class DialogueScene : MonoBehaviour
         slot.glow = GameUI.CreateRect("Glow", slot.body, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000f, 1000f)).gameObject.AddComponent<Image>();
         slot.glow.sprite = ProceduralSprites.SoftGlow;
         slot.glow.raycastTarget = false;
-        slot.art = GameUI.CreateRect("Art", slot.body, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.one).gameObject.AddComponent<Image>();
+        slot.frame = GameUI.CreateRect("Frame", slot.body, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+        slot.frame.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(200, (int)TopFeather);
+        slot.art = GameUI.CreateRect("Art", slot.frame, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.one).gameObject.AddComponent<Image>();
         slot.art.raycastTarget = false;
         slot.animator = slot.art.gameObject.AddComponent<SpriteAnimatorUI>();
         return slot;
@@ -231,50 +239,54 @@ public class DialogueScene : MonoBehaviour
             Rect r = who.art.rect;
             Vector2 size = new Vector2(who.height * r.width / r.height, who.height);
             // A painting shorter than the screen would leave the field showing above or below it, so it's drawn at
-            // least screen height.
-            size *= Mathf.Max(1f, (root.rect.height + 2f * EdgeHide) / size.y);
+            // least screen height, unless its top can be feathered away.
+            if (!who.mayStandShort) size *= Mathf.Max(1f, (root.rect.height + 2f * EdgeHide) / size.y);
             art.sizeDelta = size;
             Vector2 at = eyes - new Vector2((who.focus.x - 0.5f) * size.x, (0.5f - who.focus.y) * size.y);
             // The paintings are cut at the hips and some fill their canvas to the sides, so the cut edges are kept off
             // screen: the foot below the bottom, the top above it, the outer side past the screen's edge.
             at.y = Mathf.Min(at.y, size.y / 2f - EdgeHide);
-            at.y = Mathf.Max(at.y, root.rect.height - size.y / 2f + EdgeHide);
+            if (!who.mayStandShort) at.y = Mathf.Max(at.y, root.rect.height - size.y / 2f + EdgeHide);
             at.x = who.right ? Mathf.Max(at.x, EdgeHide - size.x / 2f) : Mathf.Min(at.x, size.x / 2f - EdgeHide);
-            art.anchoredPosition = at;
-            // A painting that runs to its canvas edge would end in a hard line, so the mask's feathered edge comes in to
-            // meet it whenever it stops short of the middle of the screen.
-            float inner = who.right ? art.anchoredPosition.x - size.x / 2f : art.anchoredPosition.x + size.x / 2f;
-            Feather(slot, who.right, inner);
+            // A painting that runs to its canvas edge would end in a hard line, so the frame's feathered edges come in
+            // to meet it whenever it stops short of the middle of the screen or of its top.
+            float inner = who.right ? at.x - size.x / 2f : at.x + size.x / 2f;
+            Vector2 centre = Feather(slot, who.right, inner, at.y + size.y / 2f);
+            art.anchoredPosition = at - centre;
         }
         else if (who.soulFrames != null && who.soulFrames.Length > 0)
         {
-            Feather(slot, who.right, float.NaN);
+            Vector2 centre = Feather(slot, who.right, float.NaN, float.NaN);
             // No painting yet: the soul itself, burning large where a face would be.
             slot.art.sprite = who.soulFrames[0];
             slot.art.preserveAspect = true;
             slot.art.color = Color.white;
             slot.animator.Play(who.soulFrames, 8f);
             art.sizeDelta = new Vector2(460f, 460f);
-            art.anchoredPosition = eyes + new Vector2(0f, -120f);
+            art.anchoredPosition = eyes + new Vector2(0f, -120f) - centre;
         }
         else
         {
-            Feather(slot, who.right, float.NaN);
+            Feather(slot, who.right, float.NaN, float.NaN);
             slot.animator.Play(null, 0f);
             slot.art.sprite = null;
             slot.art.color = Color.clear;
         }
     }
 
-    // Moves the slot mask's inner edge to `inner` (from the speaker's screen edge, signed like the art's position), or
-    // back to just past the middle when it's NaN or further out than that.
-    void Feather(Slot slot, bool onRight, float inner)
+    // Fits the slot's frame around its painting: past the screen's bottom and outer edge, its inner edge on `inner` and
+    // its top on `top` (both from the speaker's bottom corner, x signed like the art's position) when those fall on
+    // screen, or well clear otherwise, where the slot's own mask feathers the middle. Returns the frame's centre.
+    Vector2 Feather(Slot slot, bool onRight, float inner, float top)
     {
         float half = root.rect.width / 2f;
-        float edge = float.IsNaN(inner) ? half + MaskOverlap : Mathf.Min(Mathf.Abs(inner) - EdgeHide, half + MaskOverlap);
-        float offset = edge - half;
-        if (onRight) slot.root.offsetMin = new Vector2(-offset, slot.root.offsetMin.y);
-        else slot.root.offsetMax = new Vector2(offset, slot.root.offsetMax.y);
+        float edge = !float.IsNaN(inner) && Mathf.Abs(inner) - EdgeHide < half + MaskOverlap ? Mathf.Abs(inner) - EdgeHide : half + 600f;
+        float ceiling = !float.IsNaN(top) && top < root.rect.height ? top : root.rect.height + 200f;
+        float xMin = onRight ? -edge : -200f, xMax = onRight ? 200f : edge;
+        var centre = new Vector2((xMin + xMax) / 2f, (ceiling - 200f) / 2f);
+        slot.frame.anchoredPosition = centre;
+        slot.frame.sizeDelta = new Vector2(xMax - xMin, ceiling + 200f);
+        return centre;
     }
 
     // Moves on to the next line as confirm would, typed or not (for test harnesses driving a scene).

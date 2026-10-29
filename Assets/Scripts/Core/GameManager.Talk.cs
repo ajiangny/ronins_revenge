@@ -311,9 +311,10 @@ public partial class GameManager
                 // Drawn a little taller than the bosses (1080) so the hero holds his own against them on screen.
                 return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
                     focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 1.1f, right = true };
-            // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces.
+            // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces;
+            // Mizore's wolf head is wider than the others', so she's drawn smaller still.
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f));
-            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f));
+            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f), 0.72f);
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
             case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f));
             // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.
@@ -338,15 +339,17 @@ public partial class GameManager
         return new DialogueScene.Speaker { name = name, colour = Color.white };
     }
 
-    // `eyes` is where the soul's eyes sit in their close-up, 0-1 across and down.
-    DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes) => new DialogueScene.Speaker
+    // `eyes` is where the soul's eyes sit in their close-up, 0-1 across and down; `scale` is their height as a share of
+    // ScenePortraitHeight. They stand shorter than the screen, so their painting's top fades out rather than being cut.
+    DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes, float scale = 0.83f) => new DialogueScene.Speaker
     {
         name = name,
         epithet = epithet,
         colour = Boons.Info(element).Color,
         art = closeup,
         focus = eyes,
-        height = ScenePortraitHeight * 0.9f,
+        height = ScenePortraitHeight * scale,
+        mayStandShort = true,
         soulFrames = ArtFor(element)?.soulFrames,
     };
 

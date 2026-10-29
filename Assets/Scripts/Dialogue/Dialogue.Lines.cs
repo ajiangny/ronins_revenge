@@ -449,7 +449,7 @@ public static partial class Dialogue
 
         // Poguru, the Lost Dragon in Oni's left wisp (Story/Poguru.md). The tutorial's lines are played by id.
         Tut("Poguru_Tut_Wake", P("ONI! ONI! WAKE UP! Scary dead soldiers are coming!"), O("...Who are you."),
-            P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!"), P("No time! Do you remember how to fight?")),
+            P("No time! Do you remember how to fight?")),
         Tut("Poguru_Tut_Again", P("Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson.")),
         Tut("Poguru_Tut_Yay", P("Yay! Stay close. They're coming!")),
         Tut("Poguru_Tut_Skip", P("Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly.")),
@@ -531,7 +531,9 @@ public static partial class Dialogue
             Felled(BossKind.Shirogane), WinsVs(BossKind.Shirogane, 1)),
         Line("Poguru_Boss_Won", Pog, DialogueEvent.PoguruBoss, Repeat, "WE WON! I mean, you won. I helped. Emotionally."),
         Line("Poguru_Boss_Wiggle", Pog, DialogueEvent.PoguruBoss, Repeat, "Victory wiggle! ...No? Okay."),
-        Line("Poguru_Wake_First", Pog, DialogueEvent.PoguruWake, Story, "Back in the damp temple. ...But I like that you're here.", Deaths(1)),
+        // The tutorial had no time for Oni's question, so he answers it on the first wake.
+        Talk("Poguru_Wake_First", Pog, DialogueEvent.PoguruWake, Story, When(Deaths(1)), P("Back in the damp temple. ...But I like that you're here."),
+            O("...Who are you."), P("Poguru! The Lost Dragon! I live in your wisp. Rent-free!")),
         // His roasts of whatever struck the last blow, ahead of the gentler wake lines. Each cause has a few, resting
         // between runs, so dying the same way again gets the next one; now and then Oni answers back.
         Roast("Poguru_Roast_StreakFive", 4, When(Streak(5)), P("Five in a row! The same way! Is this a plan? Is it a secret plan?"),

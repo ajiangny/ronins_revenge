@@ -72,7 +72,7 @@ The ids are the voice file names: line *n* > 0 of a conversation is `<Id>_<n+1>`
 
 | Id | Lines |
 |---|---|
-| `Poguru_Tut_Wake` | P: "ONI! ONI! WAKE UP! Scary dead soldiers are coming!" · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" · P: "No time! Do you remember how to fight?" |
+| `Poguru_Tut_Wake` | P: "ONI! ONI! WAKE UP! Scary dead soldiers are coming!" · Oni: "...Who are you." · P: "No time! Do you remember how to fight?" |
 | `Poguru_Tut_Again` | P: "Oni! Wake up! Soldiers! Again! Want the lesson again? I LOVE the lesson." |
 | `Poguru_Tut_Yay` | P: "Yay! Stay close. They're coming!" |
 | `Poguru_Tut_Skip` | P: "Okay okay okay! I'll be in your wisp. Cheering. Quietly. Mostly." |
@@ -134,7 +134,7 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | | Story | first win vs Shirogane | `Poguru_Boss_Shirogane` | "She looked so sad... Wisps can't cry. I checked." |
 | | Repeatable | | `Poguru_Boss_Won` | "WE WON! I mean, you won. I helped. Emotionally." |
 | | Repeatable | | `Poguru_Boss_Wiggle` | "Victory wiggle! ...No? Okay." |
-| PoguruWake (climbing out of the pool) | Story | a death | `Poguru_Wake_First` | "Back in the damp temple. ...But I like that you're here." |
+| PoguruWake (climbing out of the pool) | Story | a death | `Poguru_Wake_First` | P: "Back in the damp temple. ...But I like that you're here." · Oni: "...Who are you." · P: "Poguru! The Lost Dragon! I live in your wisp. Rent-free!" (the tutorial had no time to answer) |
 | | Reactive, cooldown 3 | killed by the army | `Poguru_Wake_Army` | "Those soldiers were VERY pointy today." |
 | | Reactive, cooldown 3 | killed by Benibana | `Poguru_Wake_Benibana` | "Her smoke made me sneeze." |
 | | Reactive, cooldown 3 | killed by Utsusemi | `Poguru_Wake_Utsusemi` | "Tick, tock, ow." |

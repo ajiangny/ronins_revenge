@@ -320,8 +320,7 @@ const LINES = {
   // death count, so it stays a subtitle.
   Poguru_Tut_Wake: [POGURU, "[panicked, squeaky shout] ONI! ONI! WAKE UP! [terrified, fast] Scary dead soldiers are coming!"],
   Poguru_Tut_Wake_2: [ONI, "[low, tired, flat] ...Who are you."],
-  Poguru_Tut_Wake_3: [POGURU, "[proud, puffed up] Poguru! The Lost Dragon! [giggles] I live in your wisp. Rent-free!"],
-  Poguru_Tut_Wake_4: [POGURU, "[gasps, fast, breathless] No time! Do you remember how to fight?"],
+  Poguru_Tut_Wake_3: [POGURU, "[gasps, fast, breathless] No time! Do you remember how to fight?"],
   Poguru_Tut_Again: [POGURU, "[excited, fast] Oni! Wake up! Soldiers! Again! [eager] Want the lesson again? [giggles] I LOVE the lesson."],
   Poguru_Tut_Yay: [POGURU, "[cheering] Yay! [nervous, fast] Stay close. They're coming!"],
   Poguru_Tut_Skip: [POGURU, "[fast, eager] Okay okay okay! I'll be in your wisp. Cheering. [whispering] Quietly. [giggles] Mostly."],
@@ -404,6 +403,8 @@ const LINES = {
   Poguru_Boss_Won: [POGURU, "[cheering shout] WE WON! [flustered] I mean, you won. I helped. [proud] Emotionally."],
   Poguru_Boss_Wiggle: [POGURU, "[giggles, excited] Victory wiggle! [deflated] ...No? Okay."],
   Poguru_Wake_First: [POGURU, "[whiny] Back in the damp temple. [soft, warm] ...But I like that you're here."],
+  Poguru_Wake_First_2: [ONI, "[low, tired, flat] ...Who are you."],
+  Poguru_Wake_First_3: [POGURU, "[proud, puffed up] Poguru! The Lost Dragon! [giggles] I live in your wisp. Rent-free!"],
   Poguru_Wake_Army: [POGURU, "[whiny, rubbing his head] Those soldiers were VERY pointy today."],
   Poguru_Wake_Benibana: [POGURU, "[sniffling] Her smoke made me sneeze."],
   Poguru_Wake_Utsusemi: [POGURU, "[sing-song, then wincing] Tick, tock, ow."],

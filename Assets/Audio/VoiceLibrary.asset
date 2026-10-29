@@ -952,8 +952,6 @@ MonoBehaviour:
   - id: Poguru_Tut_Wake_2
     clip: {fileID: 8300000, guid: 199f9cfe3727244e6be2770087182f6b, type: 3}
   - id: Poguru_Tut_Wake_3
-    clip: {fileID: 8300000, guid: 97226c2a7bbdc441788f13902f4f581f, type: 3}
-  - id: Poguru_Tut_Wake_4
     clip: {fileID: 8300000, guid: c13dac42c89964b8e9afbc06d5ab25c8, type: 3}
   - id: Poguru_Tut_Win
     clip: {fileID: 8300000, guid: be9728584e0564a02a530bf8c3deaf39, type: 3}
@@ -983,6 +981,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f3a47a788019146979e8d6f653039082, type: 3}
   - id: Poguru_Wake_First
     clip: {fileID: 8300000, guid: e020496478a1a44cc81ea94fc4292bef, type: 3}
+  - id: Poguru_Wake_First_2
+    clip: {fileID: 8300000, guid: fe585dd30721642c3a5d14dfcafe3b14, type: 3}
+  - id: Poguru_Wake_First_3
+    clip: {fileID: 8300000, guid: 97226c2a7bbdc441788f13902f4f581f, type: 3}
   - id: Poguru_Wake_Hug
     clip: {fileID: 8300000, guid: cce05113ef0774a01876cce59ef61d53, type: 3}
   - id: Poguru_Wake_Kagetsune

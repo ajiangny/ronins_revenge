@@ -226,7 +226,7 @@ public class SafeArea : MonoBehaviour
             SpriteRenderer r = null;
             if (station.kind == StationKind.Asagi)
             {
-                // She stands on the rim's flat stone at Oni's pixel size, her own shadow and glow with her; before
+                // She stands on the pool's back-left rim at Oni's pixel size, her own shadow and glow with her; before
                 // he's met her she's not there at all.
                 AsagiFigure = Asagi.Create(area.asagiArt, transform, at, ronin.ArtPixelSize, order - 1);
                 AsagiFigure.gameObject.SetActive(!station.hidden);

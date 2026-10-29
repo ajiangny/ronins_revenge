@@ -16,7 +16,7 @@ public class AsagiArt
 }
 
 // Asagi, the Pond Physician (Story/Asagi.md): the koi of the temple pond, in a made body with a glass bowl for a head.
-// She stands on the flat stone at the spirit pool's rim once Oni has met her, and is the temple's Asagi station. Code-
+// She stands on the spirit pool's back-left rim once Oni has met her, and is the temple's Asagi station. Code-
 // built by SafeArea at Oni's pixel size, and animated on unscaled time so she keeps moving while a talk scene holds
 // the temple still.
 public class Asagi : MonoBehaviour

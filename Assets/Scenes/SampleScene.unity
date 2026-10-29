@@ -1185,13 +1185,13 @@ MonoBehaviour:
       glowColour: {r: 0.45, g: 0.85, b: 1, a: 1}
     - kind: 6
       label: ASAGI
-      spot: {x: 0.395, y: 0.145}
+      spot: {x: 0.42, y: 0.217}
       art: {fileID: 0}
       sealedArt: {fileID: 0}
       onMap: 0
       placeholder: {r: 0.184, g: 0.482, b: 1, a: 1}
       reach: 1.8
-      propAt: {x: 292, y: 322}
+      propAt: {x: 310, y: 294}
       footprint: {x: 0.8, y: 0.3}
       fx: 0
       glowColour: {r: 0, g: 0, b: 0, a: 0}

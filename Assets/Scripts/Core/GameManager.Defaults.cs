@@ -41,9 +41,9 @@ public partial class GameManager
                 // Poguru's nest, an old offering bowl on the flagstones right of the pool, used from in front of it.
                 new SafeArea.Station { kind = StationKind.Poguru, label = "POGURU", spot = new Vector2(0.6105f, 0.215f), propAt = new Vector2(452f, 292f),
                     placeholder = new Color(0.3f, 0.45f, 0.55f), footprint = new Vector2(1.2f, 0.4f), fx = StationFx.Glow, glowColour = PoguruColour, reach = 1.8f },
-                // Asagi on the flat stone at the pool's left rim (clear of the way he climbs out, straight up its
-                // middle), used from the flagstones beside her. Hidden until he's met her (SaveData.asagiMet).
-                new SafeArea.Station { kind = StationKind.Asagi, label = "ASAGI", spot = new Vector2(0.395f, 0.145f), propAt = new Vector2(292f, 322f),
+                // Asagi on the rim stones at the pool's back left, at the water's edge (clear of the way he climbs out,
+                // straight up its middle), used from the flagstones beside her. Hidden until he's met her (SaveData.asagiMet).
+                new SafeArea.Station { kind = StationKind.Asagi, label = "ASAGI", spot = new Vector2(0.42f, 0.217f), propAt = new Vector2(310f, 294f),
                     placeholder = Asagi.Colour, footprint = new Vector2(0.8f, 0.3f), reach = 1.8f },
             },
             // The ghost-fires at either side, and the two stone lanterns at the dais, lit.

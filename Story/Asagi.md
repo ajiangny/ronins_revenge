@@ -117,12 +117,12 @@ Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). `holds 
 
 ### The meeting (the temple, on a wake)
 
-Plays once on the wake after the second run, before any Water soul can drop (`Save.Data.asagiMet`). Oni rises out
+Plays once on the wake after the tenth death (so she really has caught him that often), before any Water soul can drop (`Save.Data.asagiMet`). Oni rises out
 of the pool as always, but this time a pair of white hands are under his arms.
 
 | id | Requires | Lines |
 |---|---|---|
-| `Asagi_Meet_Pool` | `runs ≥ 2`, `!seen Asagi_Meet_Pool` | **Asagi:** "Up you come. There. Knees first, little fry, the rim is slippery."<br>**Oni:** "...Who"<br>**Asagi:** "The pond. I've caught you eleven times now and you've never once said thank you. Asagi. I keep this water."<br>**Asagi:** "You're cold through and you've been dying for weeks. Sit on the stone. Let me look at you."<br>**Oni:** "...I have to go back."<br>**Asagi:** "You always do. Take some of the water with you, then. It's better at keeping you alive than you are." |
+| `Asagi_Meet_Pool` | `deaths ≥ 10`, `!seen Asagi_Meet_Pool` | **Asagi:** "Up you come. There. Knees first, little fry, the rim is slippery."<br>**Oni:** "...Who"<br>**Asagi:** "The pond. I've caught you eleven times now and you've never once said thank you. Asagi. I keep this water."<br>**Asagi:** "You're cold through and you've been dying for weeks. Sit on the stone. Let me look at you."<br>**Oni:** "...I have to go back."<br>**Asagi:** "You always do. Take some of the water with you, then. It's better at keeping you alive than you are." |
 
 ### `SoulPickup`: first meeting (Story, play once, one per run)
 

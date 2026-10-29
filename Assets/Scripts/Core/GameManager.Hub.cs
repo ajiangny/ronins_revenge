@@ -41,9 +41,11 @@ public partial class GameManager
         if (state == State.Hub && safeArea != null && poguru.Current != Poguru.Mode.Perch) poguru.PerchAt(NestPoint);
     }
 
-    // The wake after his second run: Asagi's hands under his arms as he comes out of the pool, and she's at the rim
-    // from then on (Story/Asagi.md, "The meeting"). Her scene answers the run instead of his own line.
-    bool AsagiDue => Save.Data.runsStarted >= 2 && !Save.Data.asagiMet;
+    // The wake after his tenth death, so her "caught you eleven times" has been earned: Asagi's hands under his arms
+    // as he comes out of the pool, and she's at the rim from then on (Story/Asagi.md, "The meeting"). Her scene
+    // answers the run instead of his own line. Asagi_Meet_Pool asks for the same count.
+    const int AsagiDeaths = 10;
+    bool AsagiDue => Save.Data.deaths >= AsagiDeaths && !Save.Data.asagiMet;
 
     IEnumerator MeetAsagi()
     {

@@ -330,7 +330,7 @@ Rarity and level are separate:
 Hades' boon space is wide because the gods are many: a fourth element adds three new pairs (six Duos in all), a
 fourth Legendary, and a first element whose identity is defence rather than damage. It arrives late, as Hades'
 later gods do: the Water soul, [Asagi](../Story/Asagi.md), joins only once Oni has met her in the temple
-(`Save.Data.asagiMet`, the wake after the second run), so the first runs keep the three-element pool.
+(`Save.Data.asagiMet`, the wake after the tenth death), so the first runs keep the three-element pool.
 
 **Code name.** `Element.Tide`, appended to the enum so `SaveData.lastRunElement` keeps meaning what it did.
 Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost asset is named by the enum).

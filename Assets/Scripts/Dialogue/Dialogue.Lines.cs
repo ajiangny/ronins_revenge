@@ -608,9 +608,9 @@ public static partial class Dialogue
         Talk("Asagi_Hub_Sleep", Asa, DialogueEvent.SoulHub, Story, When(LastRunElement(Element.Tide), Runs(6)),
             A("Do you sleep, in between? Sleet asked you that, I expect. She asks everyone."), O("...I play."), A("I know. I can hear it from the water.")),
 
-        // Asagi at the pool's rim (AsagiTalk): the hands under his arms on the wake after the second run, before any
+        // Asagi at the pool's rim (AsagiTalk): the hands under his arms on the wake after his tenth death, before any
         // Water soul can drop, and then her station talk, once a visit, like Poguru's nest.
-        Talk("Asagi_Meet_Pool", Asa, AsaTalk, Story, When(Runs(2), NotSeen("Asagi_Meet_Pool")),
+        Talk("Asagi_Meet_Pool", Asa, AsaTalk, Story, When(Deaths(10), NotSeen("Asagi_Meet_Pool")),
             A("Up you come. There. Knees first, little fry, the rim is slippery."), O("...Who"),
             A("The pond. I've caught you eleven times now and you've never once said thank you. Asagi. I keep this water."),
             A("You're cold through and you've been dying for weeks. Sit on the stone. Let me look at you."), O("...I have to go back."),

@@ -11,11 +11,15 @@ using UnityEngine;
 public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubReturn, SoulPickup, Tutorial, PoguruRound, PoguruSoul, PoguruBoss, PoguruWake, PoguruTalk,
     Legendary, Duo, BossFelled, BossAhead, SoulJealous, SoulHub, PoguruStage, PoguruScout, PoguruLowLife, PoguruBossAhead,
     // Asagi at the pool's rim in the temple: her meeting on a wake, then her station talk (Story/Asagi.md).
-    AsagiTalk }
+    AsagiTalk,
+    // Poguru's word on something new the moment it's first had or seen: an item, a relic, a new kind of soldier
+    // (Firsts, DialogueContext.Just). Priority lines only, and no repeatable: with nothing new he stays quiet.
+    PoguruFirst }
 
+// Priority conversations are the major events (a first item, a first meeting): they play once and jump every queue.
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
 // the Repeatables, which every event has so nobody ever goes silent.
-public enum Tier { Story, Reactive, Repeatable }
+public enum Tier { Priority, Story, Reactive, Repeatable }
 
 public struct DialogueLine
 {
@@ -60,6 +64,8 @@ public struct DialogueContext
     // The stage and round being played, counted from 1 (0 outside a run), for Poguru's first looks at each stage.
     public int Stage;
     public int Round;
+    // The first just recorded (a Firsts key), for Poguru's word on it.
+    public string Just;
 }
 
 // One requirement, with the words the debug view prints for it.
@@ -112,8 +118,16 @@ public static partial class Dialogue
     public static Req LastRunElement(Element element) => new Req($"mostly {element} last run", c => c.Save.lastRunElement == (int)element);
     public static Req Felled(BossKind boss) => new Req($"just felled {boss}", c => c.Boss == boss);
     // Met in any way: fought, heard, or killed by.
-    public static Req Met(BossKind boss) => new Req($"met {boss}", c => c.Save.deathsTo[(int)boss] + c.Save.winsVs[(int)boss] > 0
-        || c.Save.seen.Exists(id => id.StartsWith(boss + "_")));
+    public static Req Met(BossKind boss) => new Req($"met {boss}", c => c.Save.FirstIn(Firsts.Boss(boss)) >= 0
+        || c.Save.deathsTo[(int)boss] + c.Save.winsVs[(int)boss] > 0 || c.Save.seen.Exists(id => id.StartsWith(boss + "_")));
+
+    // Firsts (SaveData.firsts): ever had or met; not yet; had within the last `runs` runs (so the news goes stale, like
+    // Hades' MaxRunsSince); and the one just recorded.
+    public static Req Got(string key) => new Req($"got {key}", c => c.Save.FirstIn(key) >= 0);
+    public static Req NotGot(string key) => new Req($"not got {key}", c => c.Save.FirstIn(key) < 0);
+    public static Req GotWithin(string key, int runs) => new Req($"got {key} in the last {runs} runs",
+        c => c.Save.FirstIn(key) > 0 && c.Run - c.Save.FirstIn(key) <= runs);
+    public static Req JustGot(string key) => new Req($"just got {key}", c => c.Just == key);
 
     static bool Leads(DialogueContext c, Element element)
     {
@@ -177,15 +191,15 @@ public static partial class Dialogue
     }
 
     public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false,
-        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null, int stage = 0, int round = 0) =>
+        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null, int stage = 0, int round = 0, string just = null) =>
         new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss,
-            NextBoss = nextBoss, Offers = offers, Stage = stage, Round = round };
+            NextBoss = nextBoss, Offers = offers, Stage = stage, Round = round, Just = just };
 
     // Why a conversation can't play now, or null if it can. No dice are rolled here, so the answer is repeatable.
     static string Blocked(Conversation c, DialogueContext ctx)
     {
         int heard = ctx.Save.SeenIn(c.Id);
-        if (c.Tier == Story && heard >= 0) return $"already heard (run {heard})";
+        if ((c.Tier == Story || c.Tier == Tier.Priority) && heard >= 0) return $"already heard (run {heard})";
         if (c.Cooldown > 0 && heard >= 0 && ctx.Run - heard < c.Cooldown) return $"cooling down (heard run {heard}, every {c.Cooldown} runs)";
         foreach (Req req in c.Requires)
         {
@@ -194,14 +208,14 @@ public static partial class Dialogue
         return null;
     }
 
-    // The conversation for this moment: the best tier with anything eligible; within it the first Story or Reactive
-    // one written, or a Repeatable drawn from a bag that refills once all of them have played. It's recorded as
+    // The conversation for this moment: the best tier with anything eligible; within it the first Priority, Story or
+    // Reactive one written, or a Repeatable drawn from a bag that refills once all of them have played. It's recorded as
     // heard. Null when nothing is written for this speaker and event.
     // Tiers outside best..worst are left out, so a caller can try one event's Story lines before another's.
-    public static Conversation Pick(string speaker, DialogueEvent evt, DialogueContext ctx, Tier best = Story, Tier worst = Repeat)
+    public static Conversation Pick(string speaker, DialogueEvent evt, DialogueContext ctx, Tier best = Tier.Priority, Tier worst = Repeat)
     {
         var eligible = All.FindAll(c => c.Speaker == speaker && c.Event == evt && Blocked(c, ctx) == null);
-        foreach (Tier tier in new[] { Story, Tier.Reactive, Repeat })
+        foreach (Tier tier in new[] { Tier.Priority, Story, Tier.Reactive, Repeat })
         {
             if (tier < best || tier > worst) continue;
             var options = eligible.FindAll(c => c.Tier == tier);
@@ -261,4 +275,24 @@ public static partial class Dialogue
         if (n < 100) return Tens[n / 10] + (n % 10 > 0 ? "-" + Ones[n % 10] : "");
         return n.ToString();
     }
+}
+
+// The keys of SaveData.firsts: each thing that can be had or met for the first time.
+public static class Firsts
+{
+    public static string Item(PathReward reward) => "Item_" + reward;
+    public static string Relic(Relic relic) => "Relic_" + relic;
+    public static string Enemy(SamuraiKind kind) => "Enemy_" + kind;
+    public static string Boss(BossKind boss) => "Boss_" + boss;
+    public static string Soul(Element element) => "Soul_" + element;
+    public static string Boon(BoonId boon) => "Boon_" + boon;
+    public const string Divers = "Enemy_Divers";
+    public const string Scout = "Enemy_Scout";
+    public const string Asagi = "Met_Asagi";
+    public const string Legendary = "Boon_AnyLegendary";
+    public const string Duo = "Boon_AnyDuo";
+    public const string SongBought = "Temple_Song";
+    public const string OathsUnsealed = "Temple_OathsUnsealed";
+    public const string OathSworn = "Temple_Oath";
+    public const string KunaiSkin = "Temple_Kunai";
 }

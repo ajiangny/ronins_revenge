@@ -41,6 +41,10 @@ public class SaveData
     public List<int> seenRun = new List<int>();
     // Repeatables already played since their bag was last emptied.
     public List<string> shuffleBag = new List<string>();
+    // Firsts: each thing obtained or met for the first time (Firsts keys), and the run it happened in, so the cast
+    // can bring it up while it's still news. Run 0 is a first worked out from an older save.
+    public List<string> firsts = new List<string>();
+    public List<int> firstsRun = new List<int>();
 
     // The Spirit Notes held. Still named for the old Soul Embers: JsonUtility matches fields by name, so renaming it
     // would empty every existing save.
@@ -83,6 +87,21 @@ public class SaveData
             seenRun.Add(run);
         }
         else seenRun[i] = run;
+    }
+
+    public int FirstIn(string key)
+    {
+        int i = firsts.IndexOf(key);
+        return i < 0 ? -1 : firstsRun[i];
+    }
+
+    // Records a first; false when it was already had.
+    public bool AddFirst(string key, int run)
+    {
+        if (firsts.Contains(key)) return false;
+        firsts.Add(key);
+        firstsRun.Add(run);
+        return true;
     }
 }
 
@@ -157,7 +176,43 @@ public static class Save
         if (read.deathsTo.Length < 5) Array.Resize(ref read.deathsTo, 5);
         if (read.winsVs.Length < 5) Array.Resize(ref read.winsVs, 5);
         if (read.deathsByCause == null || read.deathsByCause.Length < SaveData.DeathCauses) Array.Resize(ref read.deathsByCause, SaveData.DeathCauses);
+        if (read.firsts == null || read.firstsRun == null || read.firsts.Count != read.firstsRun.Count)
+        {
+            read.firsts = new List<string>();
+            read.firstsRun = new List<int>();
+        }
+        Backfill(read);
         return read;
+    }
+
+    // What an older save already shows was had or met, recorded at run 0 so nobody greets it as news.
+    static void Backfill(SaveData d)
+    {
+        for (int b = 1; b < d.deathsTo.Length; b++)
+        {
+            if (d.deathsTo[b] + d.winsVs[b] > 0 || d.seen.Exists(id => id.StartsWith((BossKind)b + "_")))
+                d.AddFirst(Firsts.Boss((BossKind)b), 0);
+        }
+        if (d.seen.Contains("Akagane_Meet_Angry")) d.AddFirst(Firsts.Soul(Element.Fire), 0);
+        if (d.seen.Contains("Mizore_Meet_Steady")) d.AddFirst(Firsts.Soul(Element.Water), 0);
+        if (d.seen.Contains("Hibiki_Meet_Out")) d.AddFirst(Firsts.Soul(Element.Lightning), 0);
+        if (d.seen.Contains("Asagi_Meet_Fry")) d.AddFirst(Firsts.Soul(Element.Tide), 0);
+        if (d.asagiMet) d.AddFirst(Firsts.Asagi, 0);
+        if (d.seen.Contains("Poguru_Scout_First")) d.AddFirst(Firsts.Scout, 0);
+        if (d.seen.Contains("Poguru_Stage_Pass")) d.AddFirst(Firsts.Enemy(SamuraiKind.Shieldbearer), 0);
+        if (d.seen.Contains("Poguru_Stage_Divers")) d.AddFirst(Firsts.Divers, 0);
+        if (d.seen.Contains("Poguru_Stage_Shrine")) d.AddFirst(Firsts.Enemy(SamuraiKind.Yurei), 0);
+        if (d.seen.Contains("Poguru_Stage_Mountain")) d.AddFirst(Firsts.Enemy(SamuraiKind.Bellringer), 0);
+        int[] held = d.relics ?? new int[0], spent = d.relicsSpent ?? new int[0];
+        foreach (Relic relic in (Relic[])Enum.GetValues(typeof(Relic)))
+        {
+            int r = (int)relic;
+            if ((r < held.Length ? held[r] : 0) + (r < spent.Length ? spent[r] : 0) > 0) d.AddFirst(Firsts.Relic(relic), 0);
+        }
+        if (d.ranks != null && Array.Exists(d.ranks, rank => rank > 0)) d.AddFirst(Firsts.SongBought, 0);
+        if (d.oathsUnsealed) d.AddFirst(Firsts.OathsUnsealed, 0);
+        if (d.oaths != null && Array.Exists(d.oaths, rank => rank > 0)) d.AddFirst(Firsts.OathSworn, 0);
+        if (d.weapon == 1) d.AddFirst(Firsts.KunaiSkin, 0);
     }
 
     // Saves from before the slots were one key; it becomes the first slot's, once.
@@ -206,6 +261,14 @@ public static class Save
         }
         d.hubPending = true;
         Write();
+    }
+
+    // Records a first in this run; true only the first time ever, so the caller knows it's news.
+    public static bool First(string key)
+    {
+        if (!Data.AddFirst(key, Run)) return false;
+        Write();
+        return true;
     }
 
     public static void BossFelled(BossKind boss)

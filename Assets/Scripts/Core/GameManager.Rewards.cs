@@ -330,9 +330,9 @@ public partial class GameManager
         if (said != null) return said;
         if (ctx.Boss != null) said = Dialogue.Pick(soul, DialogueEvent.BossFelled, ctx);
         if (said != null || !first) return said;
-        said = Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Story, Tier.Story)
-            ?? Dialogue.Pick(soul, DialogueEvent.BossAhead, ctx, Tier.Story, Tier.Reactive)
-            ?? Dialogue.Pick(soul, DialogueEvent.SoulJealous, ctx, Tier.Story, Tier.Reactive)
+        said = Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Priority, Tier.Story)
+            ?? Dialogue.Pick(soul, DialogueEvent.BossAhead, ctx, Tier.Priority, Tier.Reactive)
+            ?? Dialogue.Pick(soul, DialogueEvent.SoulJealous, ctx, Tier.Priority, Tier.Reactive)
             ?? Dialogue.Pick(soul, DialogueEvent.SoulPickup, ctx, Tier.Reactive, Tier.Reactive);
         if (said != null) return said;
         // The everyday lines: a grumble when another soul leads, now and then a word about the boss ahead, else hello.

@@ -19,7 +19,7 @@ public partial class GameManager
         {
             var element = (Element)Save.Data.lastRunElement;
             var ctx = Dialogue.Context(null, element);
-            said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Story, Tier.Reactive);
+            said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Priority, Tier.Reactive);
             if (said == null && Random.value < 0.4f) said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Repeatable);
             colour = Boons.Info(element).Color;
         }

@@ -70,8 +70,17 @@ const LEVEL =
 const GLASS =
   "[0:a]apad=pad_dur=0.3,highpass=f=160,aecho=0.9:0.3:4|7:0.35|0.25,aecho=0.7:0.4:38|61:0.22|0.14," +
   "lowpass=f=9000,loudnorm=I=-16:TP=-1.5:LRA=7,aresample=44100";
+// A hurt grunt must stay a grunt: v3 tends to draw a bare syllable out into a moan, so the take is cut to its first
+// half second (leading silence stripped) with a quick fade, then levelled.
+const GRUNT =
+  "[0:a]silenceremove=start_periods=1:start_threshold=-40dB,atrim=0:0.45,afade=t=out:st=0.32:d=0.13," +
+  "loudnorm=I=-16:TP=-1.5,aresample=44100";
 // Which voices are baked, and through what. Every other voice is saved as it arrives.
 const FX = { [SOLDIER]: GHOST, [HIBIKI]: LEVEL, [ASAGI]: GLASS };
+// Single lines baked whatever their voice; these win over FX.
+const LINE_FX = Object.fromEntries(
+  ["Benibana_Hurt", "Benibana_Hurt_2", "Benibana_Hurt_3", "Shirogane_Hurt", "Shirogane_Hurt_2", "Shirogane_Hurt_3"]
+    .map((n) => [n, GRUNT]));
 
 // [voice, text]. eleven_v3 reads the bracketed audio tags as delivery directions. Keep the spoken words in sync
 // with Benibana.Line / Utsusemi.Line / Shirogane.Line / Kagetsune.Line, which show them as subtitles.
@@ -97,9 +106,10 @@ const LINES = {
   // line from someone who has lost to this parry before (every fight is a rematch).
   Benibana_Stagger: [BENIBANA, "[sharp staggered grunt, knocked back] Ngh! [furious, through gritted teeth] Dirty trick!"],
   Benibana_Stagger_2: [BENIBANA, "[sharp staggered grunt, knocked back] Agh! [quick, furious, spitting it out] You dog!"],
-  Benibana_Hurt: [BENIBANA, "[pained grunt] Ngh!"],
-  Benibana_Hurt_2: [BENIBANA, "[pained cry] Hah!"],
-  Benibana_Hurt_3: [BENIBANA, "[sharp pained gasp] Agh!"],
+  // Hits draw a clipped grunt through set teeth, never a moan; hard consonants so v3 has no vowel to stretch.
+  Benibana_Hurt: [BENIBANA, "[short sharp grunt through clenched teeth, taking a sword blow] Kh!"],
+  Benibana_Hurt_2: [BENIBANA, "[clipped angry grunt, spitting it out] Tch!"],
+  Benibana_Hurt_3: [BENIBANA, "[sharp grunt, bracing against the hit] Hnn!"],
   Utsusemi_Intro: [UTSUSEMI, "[slow, cold, deliberate] Tick... tock... The monk who wore this hat once gave you shelter. Now I walk every road he walked, looking for you. [quietly menacing] Yours... ends here."],
   Utsusemi_Phase: [UTSUSEMI, "[strained, then rising menace] Mainspring... unwound. [cold fury] I will not... stop."],
   Utsusemi_Defeat: [UTSUSEMI, "[slowing down, fading away] The bell... has... stopped... [suddenly warm and human, a gentle old man's whisper] Run... boy..."],
@@ -118,9 +128,10 @@ const LINES = {
   Shirogane_BladeRain: [SHIROGANE, "[soft command] Blades... fall."],
   Shirogane_Eclipse: [SHIROGANE, "[slow, intense, building] Eclipse... [fierce] Fang."],
   Shirogane_KuonEnraged: [SHIROGANE, "[weak, kneeling, breathless] Kuon... [fierce, urgent] don't hold back."],
-  Shirogane_Hurt: [SHIROGANE, "[short pained breath] Hh!"],
-  Shirogane_Hurt_2: [SHIROGANE, "[sharp wince] Ah!"],
-  Shirogane_Hurt_3: [SHIROGANE, "[quiet pained exhale] Nn..."],
+  // Hits draw a short, controlled grunt, as Benibana's do; she absorbs the blow rather than sighing at it.
+  Shirogane_Hurt: [SHIROGANE, "[short controlled grunt, absorbing a blow] Hn!"],
+  Shirogane_Hurt_2: [SHIROGANE, "[sharp breath through the nose, teeth set] Kh!"],
+  Shirogane_Hurt_3: [SHIROGANE, "[clipped low grunt] Ngh!"],
   // The ending: Oni cuts the chain binding her soul to the fallen Emperor's hammer, as she once cut his tether.
   Shirogane_Freed: [SHIROGANE, "[soft, wondering, almost laughing through tears] You cut it... [tender] the way I cut yours."],
   Shirogane_Farewell: [SHIROGANE, "[warm, at peace] The oath is kept. [gentle, smiling] Play for me, Oni... one last time."],
@@ -854,7 +865,7 @@ const LINES = {
 const args = process.argv.slice(2);
 const fxOnly = args.includes("--fx-only");
 const wanted = args.filter((a) => a !== "--fx-only");
-const names = wanted.length > 0 ? wanted : Object.keys(LINES).filter((n) => !fxOnly || FX[LINES[n][0]]);
+const names = wanted.length > 0 ? wanted : Object.keys(LINES).filter((n) => !fxOnly || LINE_FX[n] || FX[LINES[n][0]]);
 const client = fxOnly ? null : new ElevenLabsClient();
 
 // Writes the clip from its raw take through the voice's filter.
@@ -873,7 +884,7 @@ for (const name of names) {
   }
 
   const [voice, text] = line;
-  const filter = FX[voice];
+  const filter = LINE_FX[name] ?? FX[voice];
   const file = new URL(`${name}.mp3`, OUT_DIR);
   const raw = new URL(`${name}.mp3`, RAW_DIR);
   try {

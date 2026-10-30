@@ -65,7 +65,8 @@ never raises her voice except at Eclipse Fang. Barks: "Crescent Moon.", "Blades.
 slow.", "Scatter.", "Go.", "Sing for them.", "Together.", "Hunt.", "Eclipse... Fang.", "My stance...", and the newer
 "Twin moons." (Mirror Moon), "Answer me." (Crossing Moons), "Remember." (Fang of the Oath) and "...Rest, Kuon."
 (Kuon broken). The newer four are subtitles only so far, like most of her barks. "Kuon... don't hold back." (as she
-falls before Kuon) is voiced, a full line.
+falls before Kuon) is voiced, a full line. A hit draws a short, controlled grunt ("Hn!", "Kh!"); she absorbs the
+blow rather than sighing at it.
 
 ## Lines
 

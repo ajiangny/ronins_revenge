@@ -36,11 +36,22 @@ public partial class GameManager
     DialogueContext BarkContext(BossKind? boss = null, BossKind? nextBoss = null, string just = null) =>
         Dialogue.Context(loadout, null, lives, false, boss, nextBoss, null, state == State.Hub ? 0 : stageIndex + 1, state == State.Hub ? 0 : roundIndex + 1, just);
 
-    // Records a first (Firsts) and, when it's news, Poguru pops out with his word on it (PoguruFirst). Nothing is
-    // recorded in the tutorial, which is its own introduction.
+    // Whether a bark could start now: PoguruBark's own checks, without its dice.
+    bool CanBark => !tutorial.Active && !poguru.IsOut && !FullLinePlaying
+        && (state == State.Playing || state == State.Transition || state == State.Hub);
+
+    bool HasFirstLine(string key) => Dialogue.CanPick("Poguru", DialogueEvent.PoguruFirst, BarkContext(null, null, key));
+
+    // Records a first (Firsts) and, when it's news, Poguru pops out with his word on it (PoguruFirst). One he has a
+    // word for but can't say yet (he's already out, a line is playing) stays unrecorded, so the next time it comes up
+    // gets it. Nothing is recorded in the tutorial, which is its own introduction.
     void FirstBark(string key)
     {
-        if (!tutorial.Active && Save.First(key)) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, key));
+        if (tutorial.Active || Save.Data.FirstIn(key) >= 0) return;
+        bool line = HasFirstLine(key);
+        if (line && !CanBark) return;
+        Save.First(key);
+        if (line) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, key));
     }
 
     // The same for a thing whose screen freezes the field (a bead, a thread, the Sword Arts): his word comes as a short
@@ -59,14 +70,21 @@ public partial class GameManager
         then();
     }
 
-    // The kinds of soldier in this army never met before are recorded; Poguru names the first he has a word for.
+    // The kinds of soldier in this army never met before. Those he has no word for are recorded; the first he has a
+    // word for is recorded and returned for his bark, and any others wait for a later army, one word a round.
     string NewEnemies()
     {
         string news = null;
         foreach (Samurai s in army.Soldiers)
         {
             string key = Firsts.Enemy(s.Kind);
-            if (Save.First(key) && news == null && Dialogue.CanPick("Poguru", DialogueEvent.PoguruFirst, BarkContext(null, null, key))) news = key;
+            if (Save.Data.FirstIn(key) >= 0) continue;
+            if (!HasFirstLine(key)) Save.First(key);
+            else if (news == null && CanBark)
+            {
+                Save.First(key);
+                news = key;
+            }
         }
         return news;
     }

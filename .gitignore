@@ -130,3 +130,6 @@ Tools/.voice-raw/
 
 # Burst output of a WebGL build, written beside Assets by Unity
 /Data/
+
+# Aura editor tool metadata
+.Aura/

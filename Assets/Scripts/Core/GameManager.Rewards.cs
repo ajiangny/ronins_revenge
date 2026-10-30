@@ -21,6 +21,7 @@ public partial class GameManager
         effects.SpringHeal += OnSpringHeal;
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
         Samurai.BlackIce = 1f;
+        Statuses.From(loadout);
         shownElement = null;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
@@ -465,6 +466,7 @@ public partial class GameManager
         }
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
         Samurai.BlackIce = loadout.Has(BoonId.BlackIce, out float blackIce) ? blackIce : 1f;
+        Statuses.From(loadout);
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
     }

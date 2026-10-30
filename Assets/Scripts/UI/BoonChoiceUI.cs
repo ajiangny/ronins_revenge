@@ -384,6 +384,7 @@ public class BoonChoiceUI : MonoBehaviour
         {
             BoonKind.Duo => $"Duo  ·  {Boons.Info(boon.Element).Name} + {Boons.Info(boon.Partner.Value).Name}",
             BoonKind.Legendary => "Legendary",
+            BoonKind.Infusion => $"Infusion  ·  {Boons.InfusionCount} {Boons.Info(boon.Element).Name}",
             BoonKind.Offering => "Offering",
             BoonKind.Art => "Sword Art",
             _ => offer.Kind switch

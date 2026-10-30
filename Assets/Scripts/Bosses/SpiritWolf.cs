@@ -190,7 +190,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
     {
         if (!Armed || IsBroken || seconds <= 0f) return;
         bool fresh = !Soaked;
-        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds * Statuses.SoakScale);
         if (!fresh) return;
         if (Fx.Play(Fx.Splash, Centre, Color.white, 1.2f) == null) ElementFx.Glow(Centre, SoakTint, 0.7f, 2f, 0.35f);
         Sfx.Play(Sfx.Splash, 0.8f, 0.9f);

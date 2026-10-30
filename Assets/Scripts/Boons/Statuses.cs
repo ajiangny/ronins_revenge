@@ -1,0 +1,58 @@
+using UnityEngine;
+
+// The four elements' statuses, one each like Hades' gods' curses, so whichever slot a boon sits in it carries its
+// element's mark. Most samurai fall to one hit, so the army's statuses work on its arrows rather than its health:
+// Burning samurai can't shoot, Chilled ones loose slow arrows, Jolted ones blow up when next they try to shoot, and
+// Soaked ones (Asagi's) take one more from every boon effect. On a warlord each gives an edge instead: Burning breaks
+// her stance faster, Chilled lengthens her next freeze, Jolted adds a point to the ronin's next blow.
+// The Infusions (Ember Heart, Hoarfrost, Static Field, Deep Current) deepen them once an element is held three times.
+public static class Statuses
+{
+    public const float BurnSeconds = 3f;
+    public const float ChillSeconds = 4f;
+    public const float JoltSeconds = 4f;
+
+    // A Chilled samurai's arrows fly at this share of their speed; Hoarfrost slows them further.
+    const float ChillArrowSpeed = 0.6f;
+    const float HoarfrostArrowSpeed = 0.35f;
+    // A Burning warlord's stance fills this much faster under the ronin's blows; Ember Heart, faster still.
+    const float BurnStanceBoost = 1.5f;
+    const float EmberHeartStanceBoost = 2f;
+    // A Chilled warlord's next freeze lasts this much longer.
+    public const float ChillFreeze = 1.5f;
+    // A Jolted warlord's discharge adds this much to the ronin's next blow; Static Field, more.
+    const int JoltBonus = 1;
+    const int StaticFieldJoltBonus = 2;
+    // Samurai this close beside a struck one, in its rank, are jolted (Static Field jolts the whole rank).
+    public const float JoltReach = 2.2f;
+
+    public static readonly Color BurnColor = new Color(1f, 0.5f, 0.2f);
+    public static readonly Color ChillColor = new Color(0.75f, 0.92f, 1f);
+    public static readonly Color JoltColor = new Color(0.78f, 0.45f, 1f);
+
+    // Set from the loadout whenever it changes (GameManager), like Samurai.BlackIce.
+    public static float BurnScale { get; private set; } = 1f;
+    public static float ChillScale { get; private set; } = 1f;
+    public static float SoakScale { get; private set; } = 1f;
+    public static float PushScale { get; private set; } = 1f;
+    public static float ChillArrow { get; private set; } = ChillArrowSpeed;
+    public static float BossBurnStance { get; private set; } = BurnStanceBoost;
+    public static int BossJoltBonus { get; private set; } = JoltBonus;
+    public static bool JoltWholeRank { get; private set; }
+
+    public static void From(RoninLoadout loadout)
+    {
+        bool ember = loadout.Find(BoonId.EmberHeart) != null;
+        bool hoarfrost = loadout.Find(BoonId.Hoarfrost) != null;
+        bool field = loadout.Find(BoonId.StaticField) != null;
+        bool current = loadout.Find(BoonId.DeepCurrent) != null;
+        BurnScale = ember ? loadout.Value(BoonId.EmberHeart) : 1f;
+        BossBurnStance = ember ? EmberHeartStanceBoost : BurnStanceBoost;
+        ChillScale = hoarfrost ? loadout.Value(BoonId.Hoarfrost) : 1f;
+        ChillArrow = hoarfrost ? HoarfrostArrowSpeed : ChillArrowSpeed;
+        JoltWholeRank = field;
+        BossJoltBonus = field ? StaticFieldJoltBonus : JoltBonus;
+        SoakScale = current ? loadout.Value(BoonId.DeepCurrent) : 1f;
+        PushScale = current ? 1.5f : 1f;
+    }
+}

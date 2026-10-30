@@ -44,6 +44,11 @@ public class Samurai : MonoBehaviour, IHittable
     public bool Encased => Time.time < encasedUntil;
     // Soaked by Asagi's water: every boon effect deals it one more (TakeHit), and the Duos build on it.
     public bool Soaked => Time.time < soakedUntil;
+    // The other elements' statuses (Statuses.cs): Burning holds its fire, Chilled slows its arrows, Jolted blows up
+    // the next time it shoots.
+    public bool Burning => Time.time < burningUntil;
+    public bool Chilled => Time.time < chilledUntil;
+    public bool Jolted => Time.time < joltedUntil;
     // Black Ice: how much longer a soaked samurai stays encased. Set from the loadout by the GameManager.
     public static float BlackIce = 1f;
 
@@ -56,7 +61,11 @@ public class Samurai : MonoBehaviour, IHittable
     float frost;
     float encasedUntil;
     float soakedUntil;
-    bool shownSoaked;
+    float burningUntil;
+    float chilledUntil;
+    float joltedUntil;
+    // The statuses last tinted in, so a status wearing off retints once.
+    int shownStatus;
     SpriteRenderer iceGlow;
     SpriteRenderer ghostGlow;
     float ghostPhase;
@@ -95,7 +104,7 @@ public class Samurai : MonoBehaviour, IHittable
     // The body's sprite, for effects laid over it (a levy forming out of soul energy).
     public SpriteRenderer Look => animator.Renderer;
 
-    public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased;
+    public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased && !Burning;
 
     // Shieldbearers and bellringers never shoot, so the rank behind them looses over their heads.
     public bool CanFireKind => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer;
@@ -107,16 +116,29 @@ public class Samurai : MonoBehaviour, IHittable
     public void Fire(float arrowSpeed)
     {
         if (Kind == SamuraiKind.Shieldbearer || Kind == SamuraiKind.Bellringer) return;
+        if (Jolted)
+        {
+            Discharge();
+            return;
+        }
+        // Chilled, its arrows crawl, frost-pale, and live long enough to still reach the ground.
+        bool chilled = Chilled;
+        float life = 1f;
+        if (chilled)
+        {
+            arrowSpeed *= Statuses.ChillArrow;
+            life = 1f / Statuses.ChillArrow;
+        }
         // Spawn just below the samurai's body (its collider radius is 0.5 in local space), whatever its scale.
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         if (Kind == SamuraiKind.Archer)
         {
-            Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 3, ArcherSpread, arrowSpeed * 0.9f);
+            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 3, ArcherSpread, arrowSpeed * 0.9f, life)) Frost(arrow, chilled);
         }
         else if (Kind == SamuraiKind.Yurei)
         {
             // Spirit arrows: a parted pair that drifts through the blockers, so cover only shelters from the living.
-            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 2, YureiSpread, arrowSpeed * 0.85f))
+            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 2, YureiSpread, arrowSpeed * 0.85f, life))
             {
                 arrow.PassesCover = true;
                 arrow.Cause = DeathCause.GhostArrow;
@@ -129,15 +151,24 @@ public class Samurai : MonoBehaviour, IHittable
         {
             Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             spear.MakeUnbreakable(spearSprite);
-            spear.Launch(Vector3.down * (arrowSpeed * SpearSpeedMultiplier), 1.5f);
+            spear.Launch(Vector3.down * (arrowSpeed * SpearSpeedMultiplier), 1.5f * life);
             Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
             return;
         }
         else
         {
-            Instantiate(arrowPrefab, muzzle, Quaternion.identity).Launch(arrowSpeed);
+            Arrow arrow = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
+            arrow.Launch(arrowSpeed, life);
+            Frost(arrow, chilled);
         }
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
+    }
+
+    static readonly Color ChilledArrowGlow = new Color(0.6f, 0.9f, 1f, 0.5f);
+
+    static void Frost(Arrow arrow, bool chilled)
+    {
+        if (chilled) arrow.Tint(Statuses.ChillColor, ChilledArrowGlow);
     }
 
     // A bellringer lifts its bell: it shudders and glows for a beat before the toll, so the haste can be seen coming.
@@ -247,7 +278,7 @@ public class Samurai : MonoBehaviour, IHittable
     {
         if (IsDead || seconds <= 0f) return;
         bool fresh = !Soaked;
-        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds * Statuses.SoakScale);
         if (fresh)
         {
             if (Fx.Play(Fx.Splash, transform.position, Color.white, 0.9f) == null) ElementFx.Glow(transform.position, SoakColor, 0.5f, 1.4f, 0.3f);
@@ -255,6 +286,41 @@ public class Samurai : MonoBehaviour, IHittable
         }
         SetFrost(frost);
     }
+
+    // Fire: it beats at the flames instead of shooting.
+    public void Ignite(float seconds)
+    {
+        if (IsDead || seconds <= 0f) return;
+        burningUntil = Mathf.Max(burningUntil, Time.time + seconds * Statuses.BurnScale);
+        SetFrost(frost);
+    }
+
+    // Frost: its arrows crawl.
+    public void Chill(float seconds)
+    {
+        if (IsDead || seconds <= 0f) return;
+        chilledUntil = Mathf.Max(chilledUntil, Time.time + seconds * Statuses.ChillScale);
+        SetFrost(frost);
+    }
+
+    // Storm: the charge waits in its armour until it draws a bow.
+    public void Jolt(float seconds)
+    {
+        if (IsDead || seconds <= 0f) return;
+        joltedUntil = Mathf.Max(joltedUntil, Time.time + seconds);
+        SetFrost(frost);
+    }
+
+    // A Jolted samurai tried to shoot: the charge goes off in its hands instead. An effect hit, so it sets off nothing.
+    void Discharge()
+    {
+        joltedUntil = 0f;
+        Fx.Play(Fx.Impact, transform.position, Color.Lerp(Color.white, Statuses.JoltColor, 0.5f), 1.1f);
+        Sfx.Play(Sfx.LightningStrike, 0.5f, 1.4f);
+        TakeHit(1, KillSource.Effect);
+    }
+
+    int StatusMask => (Soaked ? 1 : 0) | (Burning ? 2 : 0) | (Chilled ? 4 : 0) | (Jolted ? 8 : 0);
 
     // Encases the samurai in ice for a while: full ice tint and a frozen pose. Black Ice holds a soaked one longer.
     public void Encase(float seconds)
@@ -271,8 +337,9 @@ public class Samurai : MonoBehaviour, IHittable
     void Update()
     {
         UpdateAlert();
-        // The soak drying off retints once; a ghost's body breathes in and out of sight, slowly, each on its own beat.
-        if (shownSoaked != Soaked && !IsDead) SetFrost(frost);
+        // A status wearing off retints once (Burning and Jolted ones flicker while they last); a ghost's body breathes in and out
+        // of sight, slowly, each on its own beat.
+        if ((shownStatus != StatusMask || Jolted || Burning) && !IsDead) SetFrost(frost);
         if (ghostGlow != null && !Encased && !IsDead) SetFrost(frost);
         if (iceGlow == null || Encased) return;
         Thaw();
@@ -303,8 +370,11 @@ public class Samurai : MonoBehaviour, IHittable
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
-        shownSoaked = Soaked;
-        if (shownSoaked) clan = Color.Lerp(clan, SoakColor, 0.45f);
+        shownStatus = StatusMask;
+        if (Soaked) clan = Color.Lerp(clan, SoakColor, 0.45f);
+        if (Burning) clan = Color.Lerp(clan, Statuses.BurnColor, 0.4f + 0.1f * Mathf.Sin(Time.time * 9f));
+        if (Chilled) clan = Color.Lerp(clan, Statuses.ChillColor, 0.5f);
+        if (Jolted) clan = Color.Lerp(clan, Statuses.JoltColor, Mathf.Sin(Time.time * 30f) > 0.3f ? 0.6f : 0.2f);
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
         {

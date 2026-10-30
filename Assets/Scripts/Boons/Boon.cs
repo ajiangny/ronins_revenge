@@ -15,10 +15,12 @@ public enum BoonSlot { Attack, Special, Parry, Ultimate, Passive }
 
 public enum Rarity { Common, Rare, Epic }
 
-// Duo and Legendary boons are capstones, offered once their prerequisite boons are held and never upgraded.
+// Duo and Legendary boons are capstones, offered once their prerequisite boons are held and never upgraded. An
+// Infusion (Hades II's) is a capstone too: it wakes once three boons of its element are held, passives included,
+// and deepens that element's status.
 // An Offering stands in when a soul's element has nothing left to give. A Sword Art (from a Technique Scroll, like
 // Hades' Daedalus Hammer) reshapes the katana's slash itself; it belongs to no element and is never upgraded.
-public enum BoonKind { Normal, Duo, Legendary, Offering, Art }
+public enum BoonKind { Normal, Duo, Legendary, Offering, Art, Infusion }
 
 // Indexes the icon array, so keep the order in step with BoonChoiceUI.boonIcons.
 public enum BoonId
@@ -37,6 +39,8 @@ public enum BoonId
     // Water (Asagi), and Frost's Cold Compress, which took Tidal Renewal's place.
     RiptideBlade, TidewakeShuriken, UndertowRiposte, HealingSpring, TideShadow, DragonGate,
     ScaldingSteam, BlackIce, ThunderRain, ColdCompress,
+    // Infusions, one per element: each deepens its element's status (Statuses.cs).
+    EmberHeart, Hoarfrost, StaticField, DeepCurrent,
 }
 
 public sealed class BoonDefinition
@@ -77,7 +81,7 @@ public sealed class BoonDefinition
     public float ExtraMax = float.MaxValue;
     public const float LevelFalloff = 0.8f;
 
-    public bool IsCapstone => Kind == BoonKind.Duo || Kind == BoonKind.Legendary;
+    public bool IsCapstone => Kind == BoonKind.Duo || Kind == BoonKind.Legendary || Kind == BoonKind.Infusion;
     public bool Offers(Element element) => Element == element || Partner == element;
     public bool HasLevels => LevelStep != 0f;
 
@@ -174,6 +178,7 @@ public static class Boons
         BoonKind.Legendary => new Color(1f, 0.6f, 0.2f),
         BoonKind.Offering => new Color(1f, 0.85f, 0.5f),
         BoonKind.Art => ArtColor,
+        BoonKind.Infusion => InfusionColor,
         _ => RarityColor(rarity),
     };
 
@@ -182,6 +187,12 @@ public static class Boons
 
     // Pale moon-silver, for the Spirit Thread's screen and path.
     public static readonly Color ThreadColor = new Color(0.75f, 0.95f, 0.88f);
+
+    // Hades II's infusion pink-gold, apart from the Duo green and the Legendary orange.
+    public static readonly Color InfusionColor = new Color(1f, 0.55f, 0.75f);
+
+    // How many boons of its element an Infusion asks for: any of them, passives and capstones included.
+    public const int InfusionCount = 3;
 
     // Polished steel: the Sword Arts belong to the blade, not to any spirit.
     public static readonly Color ArtColor = new Color(0.82f, 0.86f, 0.92f);
@@ -383,6 +394,29 @@ public static class Boons
             Description = "Once a stage, a blow that would take your last life is turned aside, and the koi climbs the falls: 2 lives are healed.",
             StatLabel = "Lives healed:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
             Requires = l => TwoSlotsOf(l, Element.Tide) },
+
+        // Infusions: three boons of one element, any slot. Each deepens its element's status, so committing to an
+        // element pays through its passives too.
+        new BoonDefinition { Id = BoonId.EmberHeart, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Infusion,
+            Name = "Ember Heart",
+            Description = "<b>Burning</b> lasts twice as long, and a burning warlord's stance breaks twice as fast under your blows.",
+            StatLabel = "Burn time:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => l.ElementCount(Element.Fire) >= InfusionCount },
+        new BoonDefinition { Id = BoonId.Hoarfrost, Element = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Infusion,
+            Name = "Hoarfrost",
+            Description = "<b>Chilled</b> lasts twice as long, and chilled samurai's arrows crawl at a third of their speed.",
+            StatLabel = "Chill time:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => l.ElementCount(Element.Water) >= InfusionCount },
+        new BoonDefinition { Id = BoonId.StaticField, Element = Element.Lightning, Slot = BoonSlot.Passive, Kind = BoonKind.Infusion,
+            Name = "Static Field",
+            Description = "<b>Lightning</b> <b>Jolts</b> its target's whole rank, and a jolted warlord's discharge deals 2 more.",
+            StatLabel = "Rank jolted:", Values = new[] { 1f, 1f, 1f }, Format = v => "all",
+            Requires = l => l.ElementCount(Element.Lightning) >= InfusionCount },
+        new BoonDefinition { Id = BoonId.DeepCurrent, Element = Element.Tide, Slot = BoonSlot.Passive, Kind = BoonKind.Infusion,
+            Name = "Deep Current",
+            Description = "<b>Soaked</b> lasts twice as long, and every tide push rolls the army back half again as far.",
+            StatLabel = "Soak time:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => l.ElementCount(Element.Tide) >= InfusionCount },
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
         new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",

@@ -410,3 +410,38 @@ Two more from the same review:
   says "Opens <name>" in the capstone's colour. An Exchange that breaks a requirement opens nothing, so the hint
   never promises a capstone the swap would lose.
 
+## 9. Statuses and Infusions
+
+**Why.** §6 asked for one status per element, and the review found two gaps it would close: effect builds did a
+flat 1 damage whatever their rarity, and passives counted toward nothing. Most samurai have 1 HP (shieldbearers,
+taisho and bellringers 2), so a damage-over-time status would almost never matter against the army. The army's
+statuses work on its **arrows** instead, the real threat in a Space Invaders lane, and on a warlord each gives an
+edge rather than raw damage, so the fights' 60–120 s target holds.
+
+| Status | Applied by | On the army | On a warlord |
+|---|---|---|---|
+| Burning (3 s) | every fire blast, to the samurai in reach it doesn't kill | can't shoot | stance from your hits ×1.5 |
+| Chilled (4 s) | Frost Blade / Frost Shadow, to those not encased; every freeze, for its length + 4 s | arrows at 60% speed, frost-pale | next freeze ×1.5, spent |
+| Jolted (4 s) | every lightning strike, to the samurai beside its target in the rank | discharges instead of shooting: one effect hit | next own hit +1, spent |
+| Soaked | Water (§7) | +1 from boon effects | +1 from boon effects |
+
+Jolt's discharge is a `KillSource.Effect` hit, so the "effects never chain" rule holds: it kills, but sets off
+nothing. Chilled arrows have their lifetime stretched by the same factor, or they'd vanish before reaching the ground.
+
+**Infusions** (Hades II): a capstone per element, offered once 3 boons of that element are held, **any slot**, so
+the passives finally build toward something. Each deepens its status rather than adding a new mechanic:
+
+| Infusion | Effect |
+|---|---|
+| Ember Heart (Fire) | Burning ×2 duration; a burning warlord's stance ×2 instead of ×1.5 |
+| Hoarfrost (Frost) | Chilled ×2 duration; chilled arrows at 35% |
+| Static Field (Storm) | a strike jolts its target's whole rank; a warlord's discharge +2 |
+| Deep Current (Water) | Soaked ×2 duration; tide pushes ×1.5 |
+
+**Tested** in the editor: jolted samurai discharged (7 of 8 within 12 s, as each was picked to shoot), chilled arrows
+flew at 4.2 against 7 and reached the ground, and on Benibana a jolted slash dealt 2, a burning shuriken added 0.15
+stance against 0.10, and a chilled 1 s freeze held 1.5 s.
+
+**To watch** (`RunLog`): Storm's kill share (discharges are new effect kills), how often rounds pass with no arrows
+loosed under fire builds, and whether boss stagger rates climb too far with Ember Heart. No Infusion has an icon yet.
+

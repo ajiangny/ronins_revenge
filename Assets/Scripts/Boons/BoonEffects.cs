@@ -113,14 +113,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
-                    int encased = 0;
-                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
-                    {
-                        if (encased >= FrostEncaseTargets) break;
-                        if (Random.value >= FrostEncaseChance) continue;
-                        target.Encase(value * loadout.FreezeMultiplier);
-                        encased++;
-                    }
+                    EncaseOrChill(position, value);
                     Fx.Play(Fx.IceBurst, position, Color.white, 1.2f);
                     Sfx.Play(Sfx.FrostChill);
                 }
@@ -168,14 +161,7 @@ public class BoonEffects
         }
         if (loadout.Has(BoonId.FrostShadow, out value))
         {
-            int encased = 0;
-            foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
-            {
-                if (encased >= FrostEncaseTargets) break;
-                if (Random.value >= FrostEncaseChance) continue;
-                target.Encase(value * loadout.FreezeMultiplier);
-                encased++;
-            }
+            EncaseOrChill(position, value);
             Fx.Play(Fx.IceBurst, position, Color.white, 1f);
         }
         if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value)
@@ -184,6 +170,36 @@ public class BoonEffects
             reach.RemoveAll(s => s.IsDead || s == samurai);
             if (reach.Count > 0) Chain(position, reach[Random.Range(0, reach.Count)]);
         }
+    }
+
+    // Frost Blade and Frost Shadow: each samurai in reach may be encased, at most FrostEncaseTargets of them, nearest
+    // first; the cold still reaches the rest, which are Chilled.
+    void EncaseOrChill(Vector3 position, float seconds)
+    {
+        int encased = 0;
+        foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+        {
+            if (encased < FrostEncaseTargets && Random.value < FrostEncaseChance)
+            {
+                target.Encase(seconds * loadout.FreezeMultiplier);
+                encased++;
+            }
+            else target.Chill(Statuses.ChillSeconds);
+        }
+    }
+
+    // A freeze over the whole army chills every samurai too, so their arrows are still slow once it thaws.
+    void FreezeArmy(float seconds)
+    {
+        army.Freeze(seconds);
+        foreach (Samurai soldier in army.Soldiers) soldier.Chill(seconds + Statuses.ChillSeconds);
+    }
+
+    // A freeze on a warlord leaves her Chilled for the next one.
+    static void FreezeBoss(Boss boss, float seconds)
+    {
+        boss.Freeze(seconds);
+        boss.Chill(seconds + Statuses.ChillSeconds);
     }
 
     // On a boss or Kuon every clone hit lands, so the Ultimate boons fire on a share of them.
@@ -200,13 +216,13 @@ public class BoonEffects
                 foreach (Boss boss in Bosses) boss.Soak(soak);
                 if (WolfFight) Wolf.Soak(soak);
             }
-            else if (army.Remaining > 0) army.PushBack(TideShadowPush);
+            else if (army.Remaining > 0) army.PushBack(TideShadowPush * Statuses.PushScale);
             WashArrows(at, float.MaxValue);
             GreatWave(at, BossFight ? Boss.Centre : army.Centre);
         }
         if (!loadout.Has(BoonId.FrostShadow, out float seconds)) return;
-        if (BossFight) foreach (Boss boss in Bosses) boss.Freeze(seconds * 0.5f * loadout.FreezeMultiplier);
-        else if (army.Remaining > 0) army.Freeze(seconds * loadout.FreezeMultiplier);
+        if (BossFight) foreach (Boss boss in Bosses) FreezeBoss(boss, seconds * 0.5f * loadout.FreezeMultiplier);
+        else if (army.Remaining > 0) FreezeArmy(seconds * loadout.FreezeMultiplier);
         else return;
         if (Fx.Play(Fx.FrostWave, at, Color.white, 3.5f) == null) ElementFx.Glow(at, Frost, 1f, 6f, 0.4f);
         CameraShake.Add(0.2f);
@@ -244,7 +260,7 @@ public class BoonEffects
                     else if (Time.time >= nextBossFrost)
                     {
                         nextBossFrost = Time.time + BossFrostCooldown;
-                        boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
+                        FreezeBoss(boss, value * 0.25f * loadout.FreezeMultiplier);
                         Fx.Play(Fx.IceBurst, point, Color.white, 1.4f);
                         Sfx.Play(Sfx.FrostChill);
                     }
@@ -261,7 +277,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FrostShadow, out value) && !boss.Frozen && Time.time >= nextBossFrost)
                 {
                     nextBossFrost = Time.time + BossFrostCooldown;
-                    boss.Freeze(value * 0.25f * loadout.FreezeMultiplier);
+                    FreezeBoss(boss, value * 0.25f * loadout.FreezeMultiplier);
                     Fx.Play(Fx.IceBurst, point, Color.white, 1.2f);
                 }
                 if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, boss.Centre, boss);
@@ -315,7 +331,7 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
-            army.Freeze(value * loadout.FreezeMultiplier);
+            FreezeArmy(value * loadout.FreezeMultiplier);
             // A wave of frost rolls across the army, and every samurai's armour cracks with ice.
             if (Fx.Play(Fx.FrostWave, army.Centre, Color.white, 3.5f) == null) ElementFx.Glow(muzzle, Frost, 1f, 6f, 0.4f);
             foreach (Samurai soldier in army.Soldiers)
@@ -332,7 +348,7 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.GlacialShuriken, out value))
         {
-            foreach (Boss boss in Bosses) boss.Freeze(value * loadout.FreezeMultiplier);
+            foreach (Boss boss in Bosses) FreezeBoss(boss, value * loadout.FreezeMultiplier);
             if (Fx.Play(Fx.FrostWave, Boss.Centre, Color.white, 3f) == null) ElementFx.Glow(Boss.Centre, Frost, 1f, 5f, 0.4f);
             CameraShake.Add(0.2f);
             Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
@@ -359,7 +375,7 @@ public class BoonEffects
         // Undertow Riposte: a wave rolls up from him, pushes the army back and soaks its front rank.
         if (loadout.Has(BoonId.UndertowRiposte, out value) && army.Remaining > 0)
         {
-            army.PushBack(value);
+            army.PushBack(value * Statuses.PushScale);
             foreach (Samurai front in army.FrontRank()) front.Soak(UndertowSoakSeconds);
             GreatWave(ronin.Bounds.center, army.Centre);
         }
@@ -432,10 +448,11 @@ public class BoonEffects
         // A blast burns only the few samurai nearest its heart, so a packed army can't be wiped by chains of them
         // (the play log had boon effects making about 60% of the kills). Wildfire burns more.
         int burned = 0, most = burns + (loadout.Find(BoonId.Wildfire) != null ? WildfireExtraTargets : 0);
+        // The rest in reach, and any the blast burned that are still standing, are left Burning: no arrows from them.
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
-            if (burned++ >= most) break;
-            target.TakeHit(thermal && (target.Encased || army.Frozen) ? (int)iceDamage : 1, KillSource.Effect);
+            if (burned++ < most) target.TakeHit(thermal && (target.Encased || army.Frozen) ? (int)iceDamage : 1, KillSource.Effect);
+            if (!target.IsDead) target.Ignite(Statuses.BurnSeconds);
         }
         BurnArrows(position, radius);
         if (steam) WashArrows(position, radius);
@@ -512,8 +529,8 @@ public class BoonEffects
     {
         if (!loadout.Has(BoonId.ColdCompress, out float seconds)) return;
         Vector3 at = ronin.Bounds.center;
-        if (BossFight) foreach (Boss boss in Bosses) boss.Freeze(seconds * 0.5f * loadout.FreezeMultiplier);
-        else if (army.Remaining > 0) army.Freeze(seconds * loadout.FreezeMultiplier);
+        if (BossFight) foreach (Boss boss in Bosses) FreezeBoss(boss, seconds * 0.5f * loadout.FreezeMultiplier);
+        else if (army.Remaining > 0) FreezeArmy(seconds * loadout.FreezeMultiplier);
         else return;
         if (Fx.Play(Fx.FrostWave, at, Color.white, 3f) == null) ElementFx.Glow(at, Frost, 1f, 5f, 0.4f);
         Sfx.Play(Sfx.FrostChill, 1f, 0.9f);
@@ -528,6 +545,7 @@ public class BoonEffects
         CameraShake.Add(0.12f);
         Sfx.Play(Sfx.FireBlast);
         boss.Burn(position, radius);
+        boss.Ignite(Statuses.BurnSeconds);
         BurnArrows(position, radius);
         boss.TakeHit(boss.Frozen && loadout.Find(BoonId.ThermalShock) != null ? 2 : 1, KillSource.Effect);
     }
@@ -609,6 +627,7 @@ public class BoonEffects
             int damage = loadout.Find(BoonId.PlasmaArc) != null ? 2 : 1;
             if (struck.Frozen && loadout.Find(BoonId.Superconductor) != null) damage *= 2;
             target.TakeHit(damage, KillSource.Effect);
+            struck.Jolt(Statuses.JoltSeconds);
             return;
         }
 
@@ -616,6 +635,7 @@ public class BoonEffects
         bool iced = samurai != null && samurai.Encased;
         bool soaked = samurai != null && samurai.Soaked;
         target.TakeHit(1, KillSource.Effect);
+        if (samurai != null) JoltBeside(samurai, to);
         if (loadout.Has(BoonId.PlasmaArc, out float plasma)) Blast(to, plasma, BlastTargets, samurai);
         // Thunder Rain: the strike runs along the water to every other soaked samurai in the rank, once.
         if (arcs && soaked && loadout.Find(BoonId.ThunderRain) != null)
@@ -636,6 +656,18 @@ public class BoonEffects
                 Strike(to, next.transform.position, next, false, chain: true);
                 arced++;
             }
+        }
+    }
+
+    // Lightning leaves a charge in the samurai beside its target in the rank (Static Field: the whole rank), and in
+    // the target itself if it lived.
+    void JoltBeside(Samurai struck, Vector3 at)
+    {
+        if (!struck.IsDead) struck.Jolt(Statuses.JoltSeconds);
+        foreach (Samurai next in army.SamuraiInRank(struck))
+        {
+            if (next == struck || next.IsDead) continue;
+            if (Statuses.JoltWholeRank || Mathf.Abs(next.Body.position.x - at.x) <= Statuses.JoltReach) next.Jolt(Statuses.JoltSeconds);
         }
     }
 

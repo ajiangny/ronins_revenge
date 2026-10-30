@@ -175,9 +175,9 @@ public class Arrow : MonoBehaviour
         return true;
     }
 
-    public void Launch(float speed)
+    public void Launch(float speed, float lifetimeMultiplier = 1f)
     {
-        Launch(Vector3.down * speed);
+        Launch(Vector3.down * speed, lifetimeMultiplier);
     }
 
     // Angled shots turn the arrow to face where it flies. Slow shots pass a longer lifetime so they reach the ground.
@@ -190,14 +190,15 @@ public class Arrow : MonoBehaviour
 
     // count arrows spread evenly over ±spread degrees around direction. Arrows collide with each other,
     // so a volley is told to ignore itself.
-    public static List<Arrow> Fan(Arrow prefab, Vector3 position, Vector3 direction, int count, float spread, float speed)
+    public static List<Arrow> Fan(Arrow prefab, Vector3 position, Vector3 direction, int count, float spread, float speed,
+        float lifetimeMultiplier = 1f)
     {
         var volley = new List<Arrow>(count);
         for (int i = 0; i < count; i++)
         {
             float angle = count > 1 ? Mathf.Lerp(-spread, spread, i / (count - 1f)) : 0f;
             Arrow arrow = Instantiate(prefab, position, Quaternion.identity);
-            arrow.Launch(Quaternion.Euler(0, 0, angle) * direction.normalized * speed);
+            arrow.Launch(Quaternion.Euler(0, 0, angle) * direction.normalized * speed, lifetimeMultiplier);
             foreach (Arrow other in volley) arrow.IgnoreCollisionsWith(other);
             volley.Add(arrow);
         }

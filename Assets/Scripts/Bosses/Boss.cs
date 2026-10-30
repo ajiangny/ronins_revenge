@@ -154,6 +154,9 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     float frozenUntil;
     float soakedUntil;
+    float burningUntil;
+    float chilledUntil;
+    float joltedUntil;
     float staggeredUntil;
     float nextHurtLine;
     float age;
@@ -174,6 +177,11 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Soaked by Asagi's water: every boon effect lands one point harder (TakeHit).
     public bool Soaked => Time.time < soakedUntil;
     static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
+    // The other elements' statuses (Statuses.cs): Burning breaks her stance faster, Chilled lengthens her next freeze,
+    // Jolted adds to the ronin's next blow.
+    public bool Burning => Time.time < burningUntil;
+    public bool Chilled => Time.time < chilledUntil;
+    public bool Jolted => Time.time < joltedUntil;
     // How fast the boss's clock runs: a freeze or a stagger stops her.
     protected float Tempo => Frozen || Staggered ? 0f : 1f;
     protected float HalfWidth => Camera.main.orthographicSize * Camera.main.aspect;
@@ -417,6 +425,9 @@ public abstract class Boss : MonoBehaviour, IHittable
         age += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f);
         body.MovePosition(anchor + Vector3.up * (Mathf.Sin(age * 2.4f) * BobHeight));
         Color tint = Soaked ? Color.Lerp(bodyTint, SoakTint, 0.35f) : bodyTint;
+        if (Burning) tint = Color.Lerp(tint, Statuses.BurnColor, 0.25f + 0.08f * Mathf.Sin(Time.time * 9f));
+        if (Chilled) tint = Color.Lerp(tint, Statuses.ChillColor, 0.2f);
+        if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) tint = Color.Lerp(tint, Statuses.JoltColor, 0.4f);
         sprite.color = Frozen ? Color.Lerp(tint, new Color(0.55f, 0.8f, 1f), 0.6f) : tint;
     }
 
@@ -613,7 +624,31 @@ public abstract class Boss : MonoBehaviour, IHittable
     public void Freeze(float seconds)
     {
         if (SuperArmor || PhaseBreaking || Down) return;
+        // Chilled, the ice takes deeper hold, once.
+        if (Chilled)
+        {
+            seconds *= Statuses.ChillFreeze;
+            chilledUntil = 0f;
+        }
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
+    }
+
+    public void Ignite(float seconds)
+    {
+        if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        burningUntil = Mathf.Max(burningUntil, Time.time + seconds * Statuses.BurnScale);
+    }
+
+    public void Chill(float seconds)
+    {
+        if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        chilledUntil = Mathf.Max(chilledUntil, Time.time + seconds * Statuses.ChillScale);
+    }
+
+    public void Jolt(float seconds)
+    {
+        if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        joltedUntil = Mathf.Max(joltedUntil, Time.time + seconds);
     }
 
     // Soaks the boss: a splash, and every boon effect on her lands harder until it dries.
@@ -621,7 +656,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
         bool fresh = !Soaked;
-        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds * Statuses.SoakScale);
         if (!fresh) return;
         if (Fx.Play(Fx.Splash, Centre, Color.white, 1.4f) == null) ElementFx.Glow(Centre, SoakTint, 0.8f, 2.4f, 0.35f);
         Sfx.Play(Sfx.Splash, 0.8f, 0.85f);
@@ -695,10 +730,19 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead || Down || PhaseBreaking) return;
         // Soaked, every boon effect lands one point harder: the one place it's added.
         if (Soaked && source == KillSource.Effect) damage++;
+        // Jolted, the ronin's next own blow discharges the charge for a point or two more.
+        if (Jolted && Damage.Procs(source))
+        {
+            joltedUntil = 0f;
+            damage += Statuses.BossJoltBonus;
+            Fx.Play(Fx.Impact, Centre, Color.Lerp(Color.white, Statuses.JoltColor, 0.5f), 1.6f);
+            Sfx.Play(Sfx.LightningStrike, 0.6f, 1.3f);
+        }
         // Read before the hit lands: a boon's nested hit would clear Projectile.Striking.
         bool setPiece = source == KillSource.Reflected && Projectile.Striking != null && Projectile.Striking.SetPiece;
         float stance = setPiece ? Damage.SetPieceStance : Damage.Stance(source);
         if (ronin != null) stance *= ronin.StanceBoost(source);
+        if (Burning && Damage.Procs(source)) stance *= Statuses.BossBurnStance;
         if (Staggered) damage *= 2;
         damage *= DamageMultiplier;
         damage = Damage.Lessen(damage, source, ref shadowChip);
@@ -748,7 +792,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         SecondPhase = true;
         PhaseBreaking = true;
         armorChip = 0;
-        staggeredUntil = frozenUntil = soakedUntil = 0;
+        staggeredUntil = frozenUntil = soakedUntil = burningUntil = chilledUntil = joltedUntil = 0;
         SetPoise(0f);
         Interrupt();
         IEnumerator scene = PhaseBreak();

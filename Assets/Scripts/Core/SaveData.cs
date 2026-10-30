@@ -30,6 +30,8 @@ public class SaveData
     public int lastRunElement = -1;
     // Whether Oni has met Asagi, the koi of the temple pond: until then no Water soul is drawn.
     public bool asagiMet;
+    // Her first Water soul, owed from the meeting until its boons are offered: every soul is hers until then.
+    public bool asagiSoulOwed;
     public const int DeathCauses = 7;
     // A death or a win not yet answered on the hill.
     public bool hubPending;

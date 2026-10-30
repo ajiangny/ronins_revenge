@@ -56,6 +56,8 @@ public partial class GameManager
     // Like the gods a Hades run keeps meeting, souls lean toward the elements the ronin already carries.
     Element PickSoulElement()
     {
+        // The first soul after meeting Asagi is always hers.
+        if (Save.Data.asagiSoulOwed) return Element.Tide;
         Element[] available = AvailableElements();
         if (loadout.BoonCount == 0 || Random.value >= soulElementBias) return available[Random.Range(0, available.Length)];
         float roll = Random.value * loadout.BoonCount;
@@ -285,6 +287,11 @@ public partial class GameManager
     {
         var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
         if (offers.Count == 0) return false;
+        if (element == Element.Tide && Save.Data.asagiSoulOwed)
+        {
+            Save.Data.asagiSoulOwed = false;
+            Save.Write();
+        }
 
         bool offering = offers.Exists(o => o.Boon.Kind == BoonKind.Offering);
         BossKind? ahead = felled == null && activeBoss == null && Stage.boss != BossKind.None ? Stage.boss : (BossKind?)null;

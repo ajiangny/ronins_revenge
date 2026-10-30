@@ -77,6 +77,9 @@ A soul that dies tired, and only wants to be clean of it, sinks. It drifts to th
 Oni goes. She lifts it out and gives it to him: the tide that pushes the army back, waves that wash the arrows out
 of the air, and a healer's hands.
 
+The first soul he meets after she catches him is always hers: the next boon reward of the next run is a Water soul
+(`SaveData.asagiSoulOwed`).
+
 ## Relationships
 
 | With | |

@@ -52,6 +52,7 @@ public partial class GameManager
         Save.Data.hubPending = false;
         Conversation said = Dialogue.Find("Asagi_Meet_Pool");
         Save.Data.asagiMet = true;
+        Save.Data.asagiSoulOwed = true;
         Save.Write();
         if (said == null) yield break;
         yield return new WaitForSeconds(0.8f);

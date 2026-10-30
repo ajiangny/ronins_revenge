@@ -201,7 +201,7 @@ The Emperor himself waits in the broken coronation courtyard with no moon at all
 
 ### Boons & builds
 
-- **Elemental souls and Hades-style boons.** Fire, Frost, Storm and (once you've met Asagi) Water souls each offer three boons for the ronin's Attack, Special, Parry and Ultimate slots, or as passives. As in Hades, a boon's rarity and its level are separate: Spirit Threads raise the rarity and Spirit Beads the level. Duos and Legendaries unlock from the boons you already hold.
+- **Elemental souls and Hades-style boons.** Fire, Frost, Storm and (once you've met Asagi, whose Water soul is the first boon reward after the meeting) Water souls each offer three boons for the ronin's Attack, Special, Parry and Ultimate slots, or as passives. As in Hades, a boon's rarity and its level are separate: Spirit Threads raise the rarity and Spirit Beads the level. Duos and Legendaries unlock from the boons you already hold.
 
 <details><summary>How souls, boons and the boon screen work, and each element's boons</summary>
 

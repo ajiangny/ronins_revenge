@@ -132,6 +132,7 @@ public static partial class Dialogue
         c => c.Save.deathsTo[(int)boss] >= 3 && c.Save.deathsTo[(int)boss] >= c.Save.winsVs[(int)boss] + 2);
     // Freed bosses (SaveData.freed), and the fight that will free her if he wins it.
     public static Req Freed(BossKind boss) => new Req($"{boss} freed", c => c.Save.Freed(boss));
+    public static Req NotFreed(BossKind boss) => new Req($"{boss} not freed", c => !c.Save.Freed(boss));
     public static Req AnyFreed => new Req("a boss freed", c => Array.Exists(c.Save.freed, f => f));
     public static Req AllFreed => new Req("all three freed",
         c => c.Save.Freed(BossKind.Benibana) && c.Save.Freed(BossKind.Utsusemi) && c.Save.Freed(BossKind.Shirogane));

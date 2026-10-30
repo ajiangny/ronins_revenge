@@ -409,8 +409,20 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 1bd6c46f1cf16431ca2310ae5a272d31, type: 3}
   - id: Benibana_Defeat_2
     clip: {fileID: 8300000, guid: 0ff94c68f90f64a04b1ca902bc05ea8b, type: 3}
+  - id: Benibana_Defeat_Bell
+    clip: {fileID: 8300000, guid: 249d9e76811b9493a8ac065661290af3, type: 3}
+  - id: Benibana_Defeat_Bell_2
+    clip: {fileID: 8300000, guid: 8a6b58316760344549b1b9477cccedde, type: 3}
+  - id: Benibana_Defeat_Freed
+    clip: {fileID: 8300000, guid: 638ea51ca25d24ca7a51bcd443f2b286, type: 3}
+  - id: Benibana_Defeat_Freed_2
+    clip: {fileID: 8300000, guid: 7b0af729cd2034d749094aa8f52a085f, type: 3}
+  - id: Benibana_Defeat_Freed_3
+    clip: {fileID: 8300000, guid: 21ad80bb4a07a4b0cbe2cbe6845dc7c5, type: 3}
   - id: Benibana_Echo
     clip: {fileID: 8300000, guid: f17ef360767b24074b61d0972b629331, type: 3}
+  - id: Benibana_Echo_Defiant
+    clip: {fileID: 8300000, guid: 0c3256475d3fd4191b0db193c99768d8, type: 3}
   - id: Benibana_Hurt
     clip: {fileID: 8300000, guid: 1bd50a4aa2c0848f6ba1ad9c7ff62879, type: 3}
   - id: Benibana_Hurt_2
@@ -837,6 +849,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 7c7729ed3106d4ac399850c0ea09ce24, type: 3}
   - id: Kagetsune_Defeat_2
     clip: {fileID: 8300000, guid: e79b56adb9a804b40833e68407c02136, type: 3}
+  - id: Kagetsune_Defeat_Poured
+    clip: {fileID: 8300000, guid: 51d71e0776657473297a0cd32c914890, type: 3}
   - id: Kagetsune_Harvest
     clip: {fileID: 8300000, guid: 3256fe3cb4cd24720bfd91a7e6423081, type: 3}
   - id: Kagetsune_Hurt
@@ -953,6 +967,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 2af3e0f2c164f406db799926b5a3c181, type: 3}
   - id: Kagetsune_Stagger
     clip: {fileID: 8300000, guid: 2960e3ab4536f4a6abb738c58d84a42e, type: 3}
+  - id: Kagetsune_Summon_BenibanaGone
+    clip: {fileID: 8300000, guid: c186162ce536e4b3c9809ba180484dc6, type: 3}
+  - id: Kagetsune_Summon_ShiroganeGone
+    clip: {fileID: 8300000, guid: 0322467a7440240d7b110c18e5ca6361, type: 3}
+  - id: Kagetsune_Summon_UtsusemiGone
+    clip: {fileID: 8300000, guid: 2b5a000f550f949eb9ecf78cdfafd411, type: 3}
   - id: Kagetsune_SummonBenibana
     clip: {fileID: 8300000, guid: d0bb098dd01e544be94b7ad469a3bc42, type: 3}
   - id: Kagetsune_SummonShirogane
@@ -1661,10 +1681,24 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 5faa645c5f2644f3ca075d7bf787808f, type: 3}
   - id: Shirogane_Defeat_2
     clip: {fileID: 8300000, guid: f6ddd59a30a3d45bc90c39d8741c505a, type: 3}
+  - id: Shirogane_Defeat_Freed
+    clip: {fileID: 8300000, guid: 7d9cad88e2883493d9efa413fb41c11a, type: 3}
+  - id: Shirogane_Defeat_Freed_2
+    clip: {fileID: 8300000, guid: 9918a7c49f27d4984b1b239b6eb253cf, type: 3}
+  - id: Shirogane_Defeat_Freed_3
+    clip: {fileID: 8300000, guid: 990592a20b1ba4d5bb5ebb0ece543805, type: 3}
+  - id: Shirogane_Defeat_Oath
+    clip: {fileID: 8300000, guid: 35c030bd7a7f14bcd8bd21840730ec10, type: 3}
+  - id: Shirogane_Defeat_Oath_2
+    clip: {fileID: 8300000, guid: d47cdc0a4f82d4f3aa58370d07836a1b, type: 3}
+  - id: Shirogane_Defeat_Oath_3
+    clip: {fileID: 8300000, guid: 9d916be0e22d14692b82074500ad92fa, type: 3}
   - id: Shirogane_DefeatFinal
     clip: {fileID: 8300000, guid: e88c86627e26c423a880234515dcb1d4, type: 3}
   - id: Shirogane_Echo
     clip: {fileID: 8300000, guid: 0447e34cfbda64b3694f9c19576c3253, type: 3}
+  - id: Shirogane_Echo_Defiant
+    clip: {fileID: 8300000, guid: f90da7f58beb3453b912f017224a1022, type: 3}
   - id: Shirogane_Eclipse
     clip: {fileID: 8300000, guid: 74635955a71f441cfb3057b37c4bf616, type: 3}
   - id: Shirogane_Farewell
@@ -1789,8 +1823,18 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 02a75a57046f8430b9af9a2e168c71ef, type: 3}
   - id: Utsusemi_Defeat_2
     clip: {fileID: 8300000, guid: f863687a9461943839c4dbb731542ecb, type: 3}
+  - id: Utsusemi_Defeat_Freed
+    clip: {fileID: 8300000, guid: f2546d73dc6ea4538a9fd6f82853db09, type: 3}
+  - id: Utsusemi_Defeat_Freed_2
+    clip: {fileID: 8300000, guid: 05b44b76f9b89433aa28dc46f916d51c, type: 3}
+  - id: Utsusemi_Defeat_Freed_3
+    clip: {fileID: 8300000, guid: f434a052aad9e423bb54a274912ea5d1, type: 3}
+  - id: Utsusemi_Defeat_Monk
+    clip: {fileID: 8300000, guid: d42fd236b348d4445b76959a4f5e36af, type: 3}
   - id: Utsusemi_Echo
     clip: {fileID: 8300000, guid: d06ca7baab0c04f14b0b949347f7392f, type: 3}
+  - id: Utsusemi_Echo_Defiant
+    clip: {fileID: 8300000, guid: 26a9d4b1c01b848bb9ed3fe735d9271b, type: 3}
   - id: Utsusemi_HourStrikes
     clip: {fileID: 8300000, guid: e836e6340eff74b7bbda0181caa34156, type: 3}
   - id: Utsusemi_Hurt

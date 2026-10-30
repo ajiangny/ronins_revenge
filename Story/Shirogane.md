@@ -118,6 +118,14 @@ Lines with the other characters (all voiced).
 | `Shirogane_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Shirogane:** "The drummer girl. She dropped my sword in the mud. ...Tell her I laughed."<br>**Oni:** "...I'll tell her." |
 | `Shirogane_Intro_Scroll` | `BossIntro` | Reactive, rests 4 | `got Item_Scroll` | **Shirogane:** "You've been reading the guard's scrolls again. Show me the third form. You always dropped your elbow." |
 
+### The progressive story (in game)
+
+In [BOSS_ARCS.md](BOSS_ARCS.md) with text and requirements: `Shirogane_Intro_Monk`, `_Emperor`, `_Rebuilt`,
+`_Dancer`, `_Clock`, `_Wisp` (she notices Poguru), `_Three`, `_OniFive` ("I'm forgetting. Counting helps."), `_Ahead`;
+her phase card (`Shirogane_Phase_Kuon`, `_Oath`, `_Remember`, `_LastLife`, `_Clean`, `_Together`, `_Howl`); her
+defeats (`Shirogane_Defeat_Freed`, `Shirogane_Defeat_Oath`) and her defiant echo (`Shirogane_Echo_Defiant`). Once
+freed she is no longer summoned.
+
 ## Arc across runs
 
 A test, then reminders, then the oath given back (`Shirogane_Intro_Oath`), which also unlocks Oni's own memory of

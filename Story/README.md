@@ -78,7 +78,7 @@ three are free and Kagetsune falls again, he can't be rebuilt. The **true ending
 the sun comes up over the hill, Oni plays the flute one last time, and the second spirit wisp beside him is
 Shirogane.
 
-**As built:** there is no story save yet, so beating Kagetsune plays the true ending straight away: his bells fall
+**As built:** freeing is recorded (`SaveData.freed`, [BOSS_ARCS.md](BOSS_ARCS.md)): each boss's defeat on the freeing win is her farewell, and a freed soul no longer answers Kagetsune's summons. The true ending doesn't wait on it yet, so beating Kagetsune plays it straight away: his bells fall
 silent one by one and the souls rise, leaving Shirogane's soul chained to her bell. Oni cuts the chain, as she once
 cut his tether; her bell rings once and goes silent, and she rises as herself. The stopped hour ticks on and the dawn
 comes up over the arena while Oni plays the flute, and she becomes the wisp beside him (`GameManager.PlayDawn`,

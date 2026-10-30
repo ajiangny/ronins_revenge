@@ -282,6 +282,13 @@ own unlocks last one run, Asagi two, the rest three.
 | PATHS | "Walk under, press E. The boss's path opens after round three." |
 | SPIRIT NOTES | "They stay even when you fall. Spend them at the flute altar." |
 
+### The Emperor's spark
+
+Kagetsune names him a spark of the armor's own fire that ran when Oni ran (`Kagetsune_Intro_Spark`; Poguru: "...I'm
+not here."). At the nest afterwards (`Poguru_Talk_Spark`, Story): "Am I his?" / Oni: "You're mine." Shirogane
+notices him in the wisp once he has asked about her (`Shirogane_Intro_Wisp`: "...Hi." / "...Hello. Keep him warm,
+Oni."). Text in [BOSS_ARCS.md](BOSS_ARCS.md).
+
 ## Keep consistent
 
 - He never fights and never takes damage. In the tutorial he only bonks arrows aside, and the spear passes through him.

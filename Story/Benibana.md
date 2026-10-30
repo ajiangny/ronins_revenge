@@ -110,6 +110,15 @@ Lines with the other characters (all voiced).
 | `Benibana_Intro_Captain` | `BossIntro` | Reactive, once (ahead of `Benibana_Intro_Fire`) | `holds Fire`, `got Soul_Fire` | **Benibana:** "The captain's fire. His men stood at the doors, facing out. I danced right past them. They were very polite about falling asleep." |
 | `Benibana_Intro_Silver` | `BossIntro` | Story | `got Boss_Shirogane` (met her) | **Benibana:** "You've met her. The one who refused. She kept her bell silent, and I sold mine for a flock."<br>**Benibana:** "...Don't tell her I called her brave." |
 
+### The progressive story (in game)
+
+Her lines that follow the whole run history are in [BOSS_ARCS.md](BOSS_ARCS.md) with their text and requirements:
+the coffin gossip (`Benibana_Intro_Clock`, `_Sutra`, `_Emperor`, `_Broke`, `_ClockStopped`, `_SilverRests`, `_Kuon`,
+`_Army`, `_Further`), the score (`_Five`, `_Ten`, `_OniFive`, `_Ahead`, `_Behind`), her phase card
+(`Benibana_Phase_Robes`, `_ForThem`, `_Remember`, `_LastLife`, `_Clean`, `_Blade`, `_Smoke`), her defeats
+(`Benibana_Defeat_Freed`, the win that frees her; `Benibana_Defeat_Bell`) and her defiant echo in Kagetsune's phase 2
+(`Benibana_Echo_Defiant`). Once freed she is no longer summoned.
+
 ## Arc across runs
 
 Mockery, then envy, then the night she realises no bell has ever gone quiet, then telling Oni which bell is hers

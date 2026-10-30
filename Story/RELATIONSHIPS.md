@@ -158,8 +158,11 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Kuon – Kagetsune | He bound it to her to make her harder to beat, and gave her a friend. It obeys her, never him. | (fight only) |
 | Shirogane – Kuon | The shrine's guardian, who chose her as a girl feeding it rice cakes at the gate. One oath, one bar between them. | Barks: "...Rest, Kuon.", `Shirogane_KuonEnraged` ("Kuon... don't hold back.") |
 | Shirogane – Benibana | Shirogane pities her (she understands bargains made for others); Benibana resents and admires the one who refused. | Shirogane's intro after `Benibana_Intro_Bell` ("She told you which bell is hers."), `Benibana_Intro_Silver` ("Don't tell her I called her brave.") |
-| Utsusemi – Benibana | The monk once refused her confession. The machine doesn't remember why. | `Utsusemi_Intro_Confession` ("Why did I... send her away?") |
-| Benibana / Utsusemi – Shirogane, Utsusemi – Shirogane | No stated bond. | — |
+| Utsusemi – Benibana | The monk once refused her confession. The machine doesn't remember why. She hears it hum a sutra in the coffin; it hears her bell stop. | `Utsusemi_Intro_Confession` ("Why did I... send her away?"), `Utsusemi_Intro_Dancer`, `Utsusemi_Intro_BellQuiet`, `Benibana_Intro_Clock`, `Benibana_Intro_Sutra`, `Benibana_Intro_ClockStopped` |
+| Utsusemi – Shirogane | It envies her blades' perfect time; she wants the monk who sheltered Oni given rest. | `Utsusemi_Intro_Silver`, `Shirogane_Intro_Monk`, `Shirogane_Intro_Clock` |
+| Benibana / Utsusemi / Kagetsune – Kuon | It walks the coffin between the bells; it doesn't tick; it bit the Emperor. | `Benibana_Intro_Kuon`, `Utsusemi_Intro_Kuon`, `Kagetsune_Intro_Kuon` |
+| Every boss – Kagetsune broken | The whole coffin shook when Oni broke him, then he was poured back together out of them. | `Benibana_Intro_Broke`, `Utsusemi_Intro_Broke`, `Shirogane_Intro_Rebuilt`, `Kagetsune_Intro_Broken`, `Kagetsune_Phase_Poured` |
+| Kagetsune – the freed | Each freed bell is a loss he names; freed souls don't come when he calls. | `Kagetsune_Intro_Freed*`, `Kagetsune_Intro_Last`, `Kagetsune_Phase_Missing`, `Kagetsune_Summon_*Gone` |
 
 ### Soul and boss
 
@@ -222,18 +225,19 @@ chains, Poguru's talks), so he has no row. Read across a row to see who a charac
 
 | Speaker ↓ / about → | Benibana | Utsusemi | Shirogane | Kuon | Kagetsune | Akagane | Mizore | Hibiki | Asagi | Poguru |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **Benibana** | | ○ | ◐ | ○ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
-| **Utsusemi** | ◐ | | ○ | ○ | ○ | ◐ | ◐ | ◐ | ◐ | ○ |
-| **Shirogane** | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
-| **Kagetsune** | ◐ | ◐ | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Benibana** | | ● | ◐ | ◐ | ● | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Utsusemi** | ● | | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Shirogane** | ● | ◐ | | ● | ● | ◐ | ◐ | ◐ | ◐ | ◐ |
+| **Kagetsune** | ● | ● | ● | ◐ | | ◐ | ◐ | ◐ | ◐ | ◐ |
 | **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ● | ◐ |
 | **Mizore** | ● | ● | ● | ○ | ● | ● | | ● | ● | ◐ |
 | **Hibiki** | ● | ● | ● | ○ | ● | ● | ● | | ● | ◐ |
 | **Asagi** | ● | ● | ● | ○ | ● | ● | ● | ● | | ◐ |
 | **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | ◐ | |
 
-The pattern: the souls talk about everyone, the bosses barely talk about each other (Benibana on Shirogane and Utsusemi on Benibana are the first), and nobody but Shirogane and
-Poguru mentions Kuon (Asagi's Kuon line is written but not in game).
+The pattern: the souls talk about everyone; since the coffin gossip ([BOSS_ARCS.md](BOSS_ARCS.md)) the bosses talk
+about each other too, hearing one another come back into the coffin. Kuon is mentioned by every boss but by none of
+the souls (Asagi's Kuon line is written but not in game).
 
 ## Where lines are missing
 
@@ -244,18 +248,17 @@ Benibana – Shirogane (`Benibana_Intro_Silver`), "Tell her I laughed" (`Hibiki_
 souls (`Kagetsune_Intro_Souls`). The firsts record (`Got(...)`: items, relics, souls, bosses met) is a new way to gate
 lines like these.
 
-1. **Kuon.** Nobody but Shirogane and one roast acknowledges it. Mizore (a shrine's cold, a guardian), Hibiki (a
+1. **Kuon.** The bosses now mention it (`Benibana_Intro_Kuon`, `Utsusemi_Intro_Kuon`, `Kagetsune_Intro_Kuon`); the souls still don't. Mizore (a shrine's cold, a guardian), Hibiki (a
    wolf!) or Akagane (the vanguard's dog) could each react on `BossAhead` / `BossFelled` for Shirogane.
-2. **Shirogane – Poguru.** The wisps go warm near her, but she never notices him. A Shirogane intro or defeat beat
-   could, gently.
+2. **Shirogane – Poguru.** Carried: `Shirogane_Intro_Wisp` ("...Hello. Keep him warm, Oni.").
 3. **The freed beats.** `Akagane_Freed` ("Vanguard. Stand down..."), `Mizore_Freed` ("There, my prince..."),
    `Hibiki_Freed` ("We're out!...") and Akagane's salute are written in their files but not in game or voiced.
 4. **Suggested in [Souls.md](Souls.md#suggested-lines-for-other-files), not in game:** Kagetsune's `KilledOni` with
    `holds Fire ≥ 3`, and Oni's `HubReturn` "Hibiki. ...Hibiki. Hibiki." after `Hibiki_Meet_Name`.
 5. **Oni about the souls.** Oni has no `HubReturn` line about any of the three after their chains finish
    (Doors, Prince, Blame are the heaviest beats of his guilt arc).
-6. **Kagetsune about Kuon** (the gift that backfired) and **about Poguru** (a sliver of his own armor's fire that
-   got away with Oni) are open, if he should ever acknowledge either.
+6. **Kagetsune about Kuon and Poguru.** Carried: `Kagetsune_Intro_Kuon` ("It bit me.") and `Kagetsune_Intro_Spark`
+   (Poguru is a spark of the armor's own fire that ran with Oni), answered at the nest by `Poguru_Talk_Spark`.
 
 ## Arc gates: which line unlocks which
 
@@ -264,9 +267,9 @@ ids.
 
 | Once this plays | It unlocks |
 |---|---|
-| `Benibana_Intro_Bell` (she names her bell) | Her soul counts as freed after one more win; Shirogane's "She told you which bell is hers" intro; `Akagane_Ahead_BenibanaBell` (he stops cursing her) |
-| `Utsusemi_Intro_WindDown` ("Boy. Wind me down.") | The monk freed after one more win; `Hibiki_Ahead_UtsusemiTea` |
-| `Shirogane_Intro_Oath` | Shirogane freed after one more win; `Oni_Hub_Together`; Kagetsune's "She never rang." intro; `Mizore_Meet_Oath`; `Asagi_Meet_Home`; `Asagi_Pond_Stone` |
+| `Benibana_Intro_Bell` (she names her bell) | Her soul is freed on a win in a later run (`SaveData.freed`, `Benibana_Defeat_Freed`), after which Kagetsune can't summon her; `Benibana_Defeat_Bell`, `Benibana_Phase_ForThem`, `Benibana_Echo_Defiant`; Shirogane's "She told you which bell is hers" intro; `Akagane_Ahead_BenibanaBell` (he stops cursing her) |
+| `Utsusemi_Intro_WindDown` ("Boy. Wind me down.") | The monk freed on a win in a later run (`Utsusemi_Defeat_Freed`); `Utsusemi_Phase_Loose`, `Utsusemi_Echo_Defiant`, `Shirogane_Intro_Monk`; `Hibiki_Ahead_UtsusemiTea` |
+| `Shirogane_Intro_Oath` | Shirogane freed on a win in a later run (`Shirogane_Defeat_Freed`); `Shirogane_Defeat_Oath`, `Shirogane_Phase_Oath`, `Shirogane_Echo_Defiant`; `Oni_Hub_Together`; Kagetsune's "She never rang." intro; `Mizore_Meet_Oath`; `Asagi_Meet_Home`; `Asagi_Pond_Stone` |
 | `Asagi_Meet_Pool` (the temple, on the wake after run 2) | Water souls on the paths (`Save.Data.asagiMet`); her chain; `Asagi_Pond_Hello` |
 | `Asagi_Meet_Flute` (she admits she knew their faces) | `Asagi_Pond_Flute` |
 | `Asagi_Meet_Home` (needs Shirogane's oath, like Mizore's last chapter) | (written) `Asagi_Dawn` |
@@ -275,6 +278,9 @@ ids.
 | `Hibiki_Meet_Name` | `Hibiki_Poguru`; (suggested) Oni's "Hibiki. ...Hibiki." |
 | `Hibiki_Meet_River` (Oni's own remembered memory) | `Hibiki_Hub_RiverSong`; (written) `Hibiki_Freed` |
 | `Akagane_Meet_Copper` / `Mizore_Meet_Collarbone` | Their Poguru crossovers |
+| A boss freed (`Freed`) | The other bosses' `*_Intro_*` lines on her silence, `Kagetsune_Intro_Freed*`, `Kagetsune_Phase_Missing`; all three: `Kagetsune_Intro_Last` |
+| A first win vs Kagetsune | `Benibana_Intro_Broke`, `Utsusemi_Intro_Broke`, `Shirogane_Intro_Rebuilt`, `Kagetsune_Phase_Poured` |
+| `Kagetsune_Intro_Spark` | `Poguru_Talk_Spark` |
 | A first clear | `*_Pickup_FirstClear`, `Akagane_Meet_Salute`, `Hibiki_Meet_River` |
 
 ## Room for new characters

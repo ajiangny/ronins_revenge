@@ -42,6 +42,13 @@ Maw (it rears, gathers an orb in its jaws and swallows it).
 | "...Rest, Kuon." | She lets it stop fighting before she does. |
 | Defeat: it walks to her and dissolves under her hand | It goes first so she isn't alone when she follows. |
 
+## What the others say
+
+Once Oni has seen it (`Shirogane_Phase` heard), the other bosses each mention it once ([BOSS_ARCS.md](BOSS_ARCS.md)):
+Benibana (it walks the coffin between the bells and stops at hers, "counting who's left"), Utsusemi (it doesn't tick)
+and Kagetsune ("I gave her a wolf, so she wouldn't be lonely in there. It bit me." / Oni: "Good."). Shirogane's
+phase card brings up the rice cakes Oni ate (`Shirogane_Phase_Kuon`).
+
 ## Keep consistent
 
 - Kuon obeys Shirogane, never Kagetsune. It is the shrine's guardian, not his creature.

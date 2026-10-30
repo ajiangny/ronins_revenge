@@ -1,14 +1,14 @@
-# Plan: the bosses' progressive story
+# The bosses' progressive story
 
 [Back to the story](README.md)
 
-**Status: plan, nothing here is in game yet.** Every line below is a draft to be reviewed before it goes into
-`Dialogue.Lines.cs` and `Tools/generate-voice.mjs`. Once a line is in, move it into the character's file and mark it
-there, and update [RELATIONSHIPS.md](RELATIONSHIPS.md).
+**Status: in game (2026-10-30).** Every line below is in `Dialogue.Lines.cs`, voiced in `Tools/generate-voice.mjs`
+and wired into the VoiceLibrary. The tables are the source for these lines; each boss's file points here. Edit a
+line here, in code and in the voice script together.
 
-## Where things stand
+## Where things stood
 
-What the bosses already react to (`Dialogue.Lines.cs`):
+What the bosses reacted to before this work:
 
 | | Benibana | Utsusemi | Shirogane | Kagetsune |
 |---|---|---|---|---|
@@ -19,7 +19,7 @@ What the bosses already react to (`Dialogue.Lines.cs`):
 | Phase 2 | one Oni answer, then the card line forever | same | same | same |
 | Defeat | one Oni answer, then the built-in line | same | same | same |
 
-The gaps:
+The gaps this page fills:
 
 1. **The bosses don't know about each other.** Only three lines look sideways, and none of them looks *ahead*:
    Benibana never learns that Oni reached the clock, or the Emperor.
@@ -71,8 +71,9 @@ Draft lines. **Bold** = speaker; *(req)* = requirement.
 | `Benibana_Intro_Broke` | Story | `WinsVs(Kagetsune, 1)` | **Benibana:** "You broke him. Every bell rang at once... and then he was poured back together out of us." **Benibana:** "My flock is in his new hands, shepherd." **Oni:** "Then I'll break those too." |
 | `Benibana_Intro_ClockStopped` | Reactive, once | Utsusemi freed | **Benibana:** "The ticking's gone. I lie in the dark and miss it. Don't you dare tell anyone." |
 | `Benibana_Intro_SilverRests` | Reactive, once | Shirogane freed | **Benibana:** "She laid her blades down. The one who refused, resting." **Benibana:** "...Is that what it looks like?" |
+| `Benibana_Intro_Kuon` | Reactive, once | heard `Shirogane_Phase` (seen Kuon) | **Benibana:** "Her wolf walks the coffin all night, between the bells. It stops at mine." **Benibana:** "I think it's counting who's left." |
 | `Benibana_Intro_Army` | Reactive, rests 3 | died to the army on stage 1 last run | **Benibana:** "You didn't even reach me. Soldiers? Shepherd, I'm insulted." |
-| `Benibana_Intro_Further` | Reactive, rests 3 | died past stage 1 last run | **Benibana:** "You got past me last night. Don't look so pleased. Look where it got you." |
+| `Benibana_Intro_Further` | Reactive, rests 3 | got past her and died last run (`GotPast`) | **Benibana:** "You got past me last night. Don't look so pleased. Look where it got you." |
 
 ### Utsusemi (it counts what comes back)
 
@@ -83,6 +84,7 @@ Draft lines. **Bold** = speaker; *(req)* = requirement.
 | `Utsusemi_Intro_Winder` | Reactive, once | met Kagetsune | **Utsusemi:** "You have seen... the hand that winds me. Tick... Did he look... afraid?" **Oni:** "No." **Utsusemi:** "He will... boy." |
 | `Utsusemi_Intro_Broke` | Story | `WinsVs(Kagetsune, 1)` | **Utsusemi:** "The winder... broke. For one tick... nothing wound me." **Utsusemi:** "...It was... quiet. Do it... again." |
 | `Utsusemi_Intro_BellQuiet` | Reactive, once | Benibana freed | **Utsusemi:** "A bell... stopped. The dancer's. Tick... tock..." **Utsusemi** (the monk): "...Good. She can confess... to someone kinder." |
+| `Utsusemi_Intro_Kuon` | Reactive, once | heard `Shirogane_Phase` (seen Kuon) | **Utsusemi:** "The wolf... in the coffin... does not tick. It sleeps... when it likes." **Utsusemi:** "Animals... never kept my time." |
 | `Utsusemi_Intro_Road` | Reactive, rests 3 | died to the army on stage 2 last run | **Utsusemi:** "You died... on my road. Before the hour. Wasteful... boy." |
 
 ### Shirogane (she remembers for him)
@@ -100,10 +102,14 @@ Draft lines. **Bold** = speaker; *(req)* = requirement.
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
-| `Kagetsune_Intro_Lost` | Reactive, rests 4 | died to Benibana or Utsusemi last run | **Kagetsune:** "My dancer stopped you last night. Or was it the clock? You don't even reach me, little demon." (played on his next meeting) |
+| `Kagetsune_Intro_LostBenibana` | Reactive, rests 4 | killed by Benibana last run | **Kagetsune:** "My dancer stopped you last night. You never even reached my stair." |
+| `Kagetsune_Intro_LostUtsusemi` | Reactive, rests 4 | killed by Utsusemi last run | **Kagetsune:** "My clock struck you down last night. It keeps better time than you." |
+| `Kagetsune_Intro_LostShirogane` | Reactive, rests 4 | killed by Shirogane last run | **Kagetsune:** "She stopped you last night. She still guards me better than you ever did." |
 | `Kagetsune_Intro_FreedBenibana` | Reactive, once | Benibana freed | **Kagetsune:** "One of my bells is silent. The cracked one. I was fond of it." **Oni:** "She wasn't." |
 | `Kagetsune_Intro_FreedUtsusemi` | Reactive, once | Utsusemi freed | **Kagetsune:** "My clock has stopped. No matter. The hour stays where I put it." |
 | `Kagetsune_Intro_FreedShirogane` | Reactive, once | Shirogane freed | **Kagetsune:** "Even her silence was mine. Now there is nothing where she hung." **Kagetsune:** "...Nothing at all." |
+| `Kagetsune_Intro_Kuon` | Reactive, once | heard `Shirogane_Phase` (seen Kuon) | **Kagetsune:** "I gave her a wolf, so she wouldn't be lonely in there. It bit me." **Oni:** "Good." |
+| `Kagetsune_Intro_Spark` | Story | heard `Kagetsune_Intro`, 2+ runs since | **Kagetsune:** "Something of mine is hiding in your wisp, little demon. A spark of my own fire. It ran when you ran." **Poguru:** "...I'm not here." **Kagetsune:** "I will have it back." **Oni:** "No." (Poguru answers at his nest: `Poguru_Talk_Spark`) |
 | `Kagetsune_Intro_Last` | Story | all three freed | **Kagetsune:** "My dancer. My clock. My silent bell. You've taken my favourites." **Kagetsune:** "What's left of me is only... everyone else." **Oni:** "Then I'll send them home too." |
 
 ## 2. Keeping score
@@ -141,7 +147,7 @@ turns out to be how he holds on.
 The phase break is each boss's turning point (Benibana cutting off her robes, the clock's mainspring snapping,
 Kuon arriving, the Emperor's chains breaking), so each one gets its own small arc instead of one fixed line.
 
-**How it plays.** Today, any phase conversation is staged as a talk scene after the card. New rule: **a phase
+**How it plays.** A **phase
 line spoken by the boss alone plays on the card itself** (its own voice clip in place of the built-in one), and a
 scene happens only when Oni answers. Phase lines stay under ~6 s so the fight doesn't stall. Each boss gets:
 
@@ -210,55 +216,50 @@ In Kagetsune's phase 2 he drags the three bosses' souls out to fight. Their echo
 
 | Echo | Default (exists) | After their last arc beat | Once freed |
 |---|---|---|---|
-| Benibana | "Your strings again, Kagetsune? Tch... I'm no puppet of yours." | "Not your dance. Never again." | **Not summoned.** He calls, nothing comes: "Dance for me, Benibana. ...Benibana?" |
+| Benibana | "Your strings again, Kagetsune? Tch... I'm no puppet of yours." | "Not your dance. Never again." | **Not summoned.** He calls once, nothing comes: "Dance for me, Benibana. ...Benibana?" |
 | Utsusemi | "The hour... strikes... Run... boy." | "Strike him... boy... not me..." | **Not summoned:** "Strike the hour, clock. ...Clock?" |
 | Shirogane | "Move, Oni. I cannot hold my blades." | "Now, Oni. While he's looking at me." | **Not summoned:** "Rise, Shirogane. ...Rise!" |
 
-The "not summoned" column is a **gameplay change** (his phase 2 gets easier as Oni frees souls), so it needs your
-sign-off; see open questions.
+A freed soul is called once a fight to find it gone, then he stops calling it.
 
 ## 4. Defeats
 
-Like the phase breaks, each defeat gets one arc-aware line between the first answer and the repeatable:
+The win that frees a boss (`FreesNow`: her freeing line heard in an earlier run) is her farewell; until then each
+defeat gets one arc-aware line between the first answer and the repeatable.
 
 | Boss | id | Requires | Lines |
 |---|---|---|---|
-| Benibana | `Benibana_Defeat_Bell` | heard `Benibana_Intro_Bell` | **Benibana:** "The cracked one, shepherd... third from the left..." **Oni:** "I know which one." |
-| Utsusemi | `Utsusemi_Defeat_Monk` | heard `Utsusemi_Intro_Tea` | **Utsusemi** (the monk): "...The tea was... jasmine. Remember that... for me." |
-| Shirogane | `Shirogane_Defeat_Oath` | heard `Shirogane_Intro_Oath` | **Shirogane:** "Keep it, Oni. Keep it even when you forget me." **Oni:** "I won't forget." **Shirogane:** "You will. Keep it anyway." |
-| Kagetsune | `Kagetsune_Defeat_Again` | `WinsVs(Kagetsune, 2)` | **Kagetsune:** "Again... they won't ring... why won't they ring for me..." |
+| Benibana | `Benibana_Defeat_Freed` | this win frees her | **Benibana:** "...Listen. Did you hear that? A bell stopped." **Benibana:** "...It was mine." **Oni:** "Rest, Benibana." |
+| Benibana | `Benibana_Defeat_Bell` | heard `Benibana_Intro_Bell`, not freed | **Benibana:** "The cracked one, shepherd... third from the left..." **Oni:** "I know which one." |
+| Utsusemi | `Utsusemi_Defeat_Freed` | this win frees it | **Utsusemi:** "The ticking... has stopped." **Utsusemi** (the monk): "Thank you, boy. The road is yours now." **Oni:** "...Sleep well." |
+| Utsusemi | `Utsusemi_Defeat_Monk` | heard `Utsusemi_Intro_Tea`, not freed | **Utsusemi** (the monk): "...The tea was... jasmine. Remember that... for me." |
+| Shirogane | `Shirogane_Defeat_Freed` | this win frees her | **Shirogane:** "I'm laying them down, Oni. Both blades." **Shirogane:** "The last one is yours." **Oni:** "...Ours." |
+| Shirogane | `Shirogane_Defeat_Oath` | heard `Shirogane_Intro_Oath`, not freed | **Shirogane:** "Keep it, Oni. Keep it even when you forget me." **Oni:** "I won't forget." **Shirogane:** "You will. Keep it anyway." |
+| Kagetsune | `Kagetsune_Defeat_Poured` | `WinsVs(Kagetsune, 1)` (his second fall on) | **Kagetsune:** "Again... they won't ring... why won't they ring for me..." |
 
-## What has to be built
+## Poguru, after the Emperor names him
 
-| # | Piece | Where | Notes |
+| id | Event | Requires | Lines |
 |---|---|---|---|
-| 1 | `lastStage` (stage reached last run, 1–4) and `Req DiedOnStage(n)` / `GotPast(boss)` | `SaveData`, `Save.EndRun`, `Dialogue.cs` | For "you didn't even reach me" and "you got past me". Today an army death doesn't say where. |
-| 2 | Freed bosses: `SaveData.freed` and `Req Freed(boss)` | `Save.BossFelled`, `Dialogue.cs` | A boss is freed on a win once her last arc line (`Benibana_Intro_Bell`, `Utsusemi_Intro_WindDown`, `Shirogane_Intro_Oath`) has played. Also what the true ending should wait on (README, "Endings"). |
-| 3 | `Req Leads(boss)` / `Trails(boss)` | `Dialogue.cs` | `winsVs` against `deathsTo`, both at least 3 so it isn't noise. |
-| 4 | Phase context: hits taken in phase 1 | `Boss`/`GameManager.PlayPhaseCard`, `DialogueContext` | Pass `lives` and a `phaseOneHits` count into `Dialogue.Context`. |
-| 5 | Phase card plays a boss-only line on the card | `GameManager.PlayPhaseCard` | Use the conversation's voice clip and text in place of the built-in; scene only when Oni has a line. |
-| 6 | Echo lines by arc, freed bosses not summoned | `Kagetsune.Phase.cs` / summons | Only if approved. |
-| 7 | Voicing | `Tools/generate-voice.mjs`, `npm run voice`, then the Apply voice menu command | About 75 conversations, about 110 clips. Milestone numbers are written in, never `{placeholders}`. |
-| 8 | Docs | each boss's file, Oni.md, RELATIONSHIPS.md (coverage table, gaps 2 and 6), Docs/Progression.md | As each batch lands. |
+| `Poguru_Talk_Spark` | `PoguruTalk`, Story | heard `Kagetsune_Intro_Spark` | **Poguru:** "Oni... the big scary one said I'm HIS. A spark of his fire." **Poguru:** "...Am I his?" **Oni:** "You're mine." **Poguru:** "...Okay. Okay! I'm yours. Not his. YOURS." |
 
-## Order of work
+## How it's built
 
-Each step is its own commit, playable on its own:
+| Piece | Where |
+|---|---|
+| `SaveData.lastStage` (the stage he was on when the run ended, from `EndGame`) and `freed[]` by `BossKind` | `SaveData.cs` |
+| Freeing: `Dialogue.FreeingLine(boss)` (`Benibana_Intro_Bell`, `Utsusemi_Intro_WindDown`, `Shirogane_Intro_Oath`) and `Dialogue.Freeing(boss, save, run)`: not yet free and that line heard in an earlier run. `Save.BossFelled` frees her on that win, so she is already free when Kagetsune calls later the same run | `Dialogue.cs`, `SaveData.cs` |
+| Requirements: `DiedOnStage(n)`, `GotPast(boss)`, `OniAhead(boss)` / `OniBehind(boss)` (3+ on the leading side and 2 clear), `Freed`, `NotFreed`, `AnyFreed`, `AllFreed`, `FreesNow`, `Untouched` (`DialogueContext.Untouched`: no blow has landed in this boss fight, `GameManager.bossHits`) | `Dialogue.cs` |
+| The phase card speaks a boss's lone line itself (the built-in, or a written one-line conversation in its own clip); only an exchange where Oni answers plays as a scene | `GameManager.PlayPhaseCard` |
+| `Boss.Say(id)` / `Boss.Said`: a written line said mid-fight, played by id (`DialogueEvent.Echo`, never picked) by `GameManager.OnBossSaid`, voiced from the VoiceLibrary, the souls' answers subtitled in the summons' teal | `Boss.cs`, `GameManager.Bosses.cs` |
+| Summons: `Kagetsune.Callable(kind)` / `CanSummon`. A freed soul is called once a fight (`unanswered`), says its `Kagetsune_Summon_<Kind>Gone` line and no soul comes; after that `NextSoul` skips it, and with all three freed and called he no longer picks `Move.Summon`. A bound soul whose freeing line has played answers with `<Kind>_Echo_Defiant` instead of its built-in echo | `Kagetsune.Souls.cs`, `Kagetsune.cs` |
 
-1. **Engineering** (pieces 1–5), with the F7 debug view (`Dialogue.Explain`) checked for every new requirement.
-2. **Phase 2 rewrite** (section 3 minus the echoes): most visible, fixes the staleness the player hears every run.
-3. **The coffin talks** (section 1), then **keeping score** (section 2).
-4. **Defeats** (section 4) and Oni's hub counts.
-5. **Echoes and freed summons** (piece 6), if approved.
-6. Voice pass and docs for each batch as it lands, not saved up for the end.
+Voiced counts are fixed milestones written into each line; only subtitle-only lines use `{deaths}`.
 
-## Open questions
+## Decisions
 
-- **Freed bosses leave Kagetsune's phase 2?** Strong payoff, but it makes the final fight easier as the story
-  advances. The alternative: they're still summoned but turn their attack on him (one hit, then gone).
-- **Poguru and Kagetsune.** RELATIONSHIPS gap 6 floats Poguru being a sliver of the armor's own fire. A line like
-  "Something of mine is hiding in your wisp, little demon" would make that canon. In or out?
-- **Kuon.** Should any boss besides Shirogane acknowledge it? Benibana ("Her dog bit me once. Through the coffin.")
-  is the easiest fit.
-- **Pacing.** With these lines, a boss intro can carry a new Story beat most runs for the first ~20 runs. If that
-  feels talky, gossip lines can play only on runs where no arc beat is due (they already rank below Story).
+- **Freed souls leave Kagetsune's phase 2** from the run they're freed in: he calls once and nothing comes.
+- **Kagetsune notices Poguru:** a spark of the armor's own fire that ran with Oni (`Kagetsune_Intro_Spark`), now canon.
+- **Bosses besides Shirogane mention Kuon:** Benibana, Utsusemi and Kagetsune each have one line once Oni has seen it.
+- **Pacing:** arc beats are Story and play first; gossip and milestones are Reactive-once and wait for runs with no
+  arc beat due.

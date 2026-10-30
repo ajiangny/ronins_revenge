@@ -111,6 +111,14 @@ Lines with the other characters (all voiced).
 | `Utsusemi_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Utsusemi:** "Tick... tock... Faster than my count. A drummer's count."<br>**Utsusemi:** "The children wore my hat at the well." |
 | `Utsusemi_Intro_Confession` | `BossIntro` | Story | `seen Benibana_Intro_Bell`, `winsVs Utsusemi ≥ 1` | **Utsusemi:** "The dancer... knelt at my door once. She wanted... to confess."<br>**Utsusemi:** "I sent her away. Tick... tock... Why did I... send her away?" |
 
+### The progressive story (in game)
+
+In [BOSS_ARCS.md](BOSS_ARCS.md) with text and requirements: what it hears in the coffin (`Utsusemi_Intro_Dancer`,
+`_Silver`, `_Winder`, `_Broke`, `_BellQuiet`, `_Kuon`, `_Road`), its counts (`_Three`, `_OniFive`, `_OniTen`), its
+phase card (`Utsusemi_Phase_Tighter`, `_Monk`, `_Loose`, `_Remember`, `_LastLife`, `_Clean`, `_Overwound`,
+`_Thirteen`), its defeats (`Utsusemi_Defeat_Freed`, `Utsusemi_Defeat_Monk`) and its defiant echo
+(`Utsusemi_Echo_Defiant`). Once freed it is no longer summoned.
+
 ## Arc across runs
 
 Pure machine, then a machine that counts Oni's deaths aloud, then the monk surfacing through the gears (tea, the

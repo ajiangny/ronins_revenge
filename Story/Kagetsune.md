@@ -169,6 +169,16 @@ Lines with the other characters (all voiced).
 | `Kagetsune_Intro_Souls` | `BossIntro` | Story | `got Soul_Fire`, `got Soul_Water`, `got Soul_Lightning` (met all three first souls) | **Kagetsune:** "My captain, my physician, and a peasant's drum. You collect my bells, little demon. They are still mine." |
 | `Kagetsune_Intro_Seals` | `BossIntro` | Reactive, rests 4 | `got Relic_Seal` | **Kagetsune:** "My warlords' seals, rattling on your belt. I gave each of them one. What do you give them?"<br>**Oni:** "...Rest." |
 
+### The progressive story (in game)
+
+In [BOSS_ARCS.md](BOSS_ARCS.md) with text and requirements: who stopped Oni last night
+(`Kagetsune_Intro_LostBenibana`, `_LostUtsusemi`, `_LostShirogane`), each soul freed (`_FreedBenibana`,
+`_FreedUtsusemi`, `_FreedShirogane`, and `_Last` once all three are), Kuon (`_Kuon`), Poguru (`_Spark`: a spark of
+his own fire that ran with Oni), the count (`_Three`, `_Ten`, `_TwentyFive`); his phase card
+(`Kagetsune_Phase_Poured`, `_Missing`, `_Remember`, `_LastLife`, `_Clean`, `_Unchained`, `_Home`); his later falls
+(`Kagetsune_Defeat_Poured`). In his phase 2 a freed soul doesn't answer his call
+(`Kagetsune_Summon_<Kind>Gone`, once a fight), and then he stops calling it.
+
 ## Keep consistent
 
 - No moon motifs: bells, souls, seals and horns are his.

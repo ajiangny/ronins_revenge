@@ -88,6 +88,11 @@ are in the bosses' files, under "Oni's answers".
 | Frost | "Cold hands. Steady ones." |
 | Storm | "It wants out as badly as I do." |
 
+**Counting** ([BOSS_ARCS.md](BOSS_ARCS.md)): he keeps score because he is forgetting. In the bosses' intros
+(`Benibana_Intro_OniFive`, `Utsusemi_Intro_OniFive`, `Shirogane_Intro_OniFive`, `Kagetsune_Intro_Three`) and on
+the hill (`HubReturn`, Story, once each): `Oni_Hub_CountBenibana` (3 wins), `Oni_Hub_CountShirogane` (3 wins),
+`Oni_Hub_CountKagetsune` (2 wins).
+
 ## Arc across runs
 
 Confused, then driven, then guilty as he remembers who led the court up the mountain, then resolved once Shirogane

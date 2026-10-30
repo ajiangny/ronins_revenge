@@ -200,7 +200,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`BorrowedSmoke`, `BorrowedHours`, `BorrowedBlades`). `BanishSoul` takes it off with no reward (phase break, `OnCleared`
   on a halt or his fall, `OnDestroy`); a stagger leaves it fighting. `NextMove` forces the ultimate, then the phase's
   parry move (`ParryAtLatest`), then a soul (`SoulAtLatest` moves after the last left; the first within two moves of the
-  break; `NextSoul` goes in boss order, then at random without repeats). Under `LastBellAt` (30%) of bar 2, `lastBell`: four spiral arms, denser blooms, `Ultimate` 4,
+  break; `NextSoul` goes in boss order, then at random without repeats). A freed soul (`SaveData.freed`, [Story/BOSS_ARCS.md](../Story/BOSS_ARCS.md)) is `Callable` once a fight: `CallSoul` then `Say`s `Kagetsune_Summon_<Kind>Gone` and raises nothing (`unanswered`), and `CanSummon` gates `Move.Summon` once none is left; a bound soul whose `Dialogue.FreeingLine` has played answers with `Say("<Kind>_Echo_Defiant")` in place of its built-in echo. Under `LastBellAt` (30%) of bar 2, `lastBell`: four spiral arms, denser blooms, `Ultimate` 4,
   quicker `Recovery`, and `UpdateLastBell`'s pulsing dark. `DamageMultiplier` doubles while exposed but not while
   staggered (×2 at most); `OnStaggered` adds a `Boss.HitStop`, a bronze flash and freed souls.
   `Speaker`/`SpeakerColour` (virtual on `Boss`) put the souls' answers under their own names; `OnBossSpoke` treats

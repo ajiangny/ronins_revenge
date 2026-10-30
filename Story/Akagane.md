@@ -160,6 +160,15 @@ When Oni mostly holds another soul's boons (see [Souls.md](Souls.md#souljealous)
 | `Akagane_Legendary_Wildfire` | Story, once | **Akagane:** "Wildfire. Every man of the vanguard, burning at once."<br>**Akagane:** "Their arrows won't reach you through it. Nothing will." |
 | `Akagane_Legendary_Again` | Repeatable | **Akagane:** "All of it, Guardsman. Take all of it." |
 
+### `Legendary` event: Infusion (Ember Heart)
+
+Ember Heart wakes at three Fire boons; it speaks on the `Legendary` event, like Wildfire.
+
+| id | Tier | Lines |
+|---|---|---|
+| `Akagane_Infusion_EmberHeart` | Story, once | **Akagane:** "Ember Heart. The coal a soldier keeps when the rest of him's gone out."<br>**Akagane:** "Light them with it. A man on fire forgets his bow. ...Mine did." |
+| `Akagane_Infusion_Again` | Repeatable | **Akagane:** "Keep it lit, Guardsman." |
+
 ### `Duo`
 
 His Duos (Thermal Shock with Mizore, Plasma Arc with Hibiki) are two-soul conversations, written in

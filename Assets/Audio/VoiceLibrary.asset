@@ -69,6 +69,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 56ed3867d5d744fcb8ede8a0a91a9122, type: 3}
   - id: Akagane_Hub_Salute_3
     clip: {fileID: 8300000, guid: d14352a2fe3f949fc98a9365b672fc3c, type: 3}
+  - id: Akagane_Infusion_Again
+    clip: {fileID: 8300000, guid: f20f2b922aa1a4a448df33ad5fdee8ae, type: 3}
+  - id: Akagane_Infusion_EmberHeart
+    clip: {fileID: 8300000, guid: 998aa89b288164f10853d699624ab33b, type: 3}
+  - id: Akagane_Infusion_EmberHeart_2
+    clip: {fileID: 8300000, guid: 29c94aa8353ec4c2f954ac163be1b62c, type: 3}
   - id: Akagane_Jealous_Asagi
     clip: {fileID: 8300000, guid: e1187ed93fa18420e87df1a0b8bb52c4, type: 3}
   - id: Akagane_Jealous_Asagi_2
@@ -229,6 +235,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: b1e3a113b65ef44a08c11f0b21792730, type: 3}
   - id: Asagi_Hub_Sleep_3
     clip: {fileID: 8300000, guid: 0fae77fc7e35144f0a8dede03b412eb6, type: 3}
+  - id: Asagi_Infusion_Again
+    clip: {fileID: 8300000, guid: 6081ebd57a0774923be8b132bfc24c28, type: 3}
+  - id: Asagi_Infusion_DeepCurrent
+    clip: {fileID: 8300000, guid: 6f41e17028275499daac35a6d497e66d, type: 3}
+  - id: Asagi_Infusion_DeepCurrent_2
+    clip: {fileID: 8300000, guid: 71c2743ce20e944fbaf95f28e0d915bd, type: 3}
   - id: Asagi_Jealous_Akagane
     clip: {fileID: 8300000, guid: 79af26eb4096a479c8fb836ccc372e3b, type: 3}
   - id: Asagi_Jealous_Akagane_2
@@ -609,6 +621,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 948fe36fc4eb54219848ebfba3f86e52, type: 3}
   - id: Hibiki_Hub_Up
     clip: {fileID: 8300000, guid: 19ee4560b8b0246cc8f6f8cc19b47483, type: 3}
+  - id: Hibiki_Infusion_Again
+    clip: {fileID: 8300000, guid: 65a0fbab3fcd84f9dbe09ed20d483363, type: 3}
+  - id: Hibiki_Infusion_StaticField
+    clip: {fileID: 8300000, guid: 71d8cdf6070fa473ba5b371ab9093de6, type: 3}
+  - id: Hibiki_Infusion_StaticField_2
+    clip: {fileID: 8300000, guid: ca28cb5f6dca34884b9ba88ad03d8d84, type: 3}
   - id: Hibiki_Jealous_Akagane
     clip: {fileID: 8300000, guid: 3ee7f89d44620427da8359f5a5475cb3, type: 3}
   - id: Hibiki_Jealous_Akagane_2
@@ -851,6 +869,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 12675bff7fc4a4a3983aadbf15a7a8f7, type: 3}
   - id: Mizore_Hub_Sleep_3
     clip: {fileID: 8300000, guid: d531a7aca53be4599bfc452357b02751, type: 3}
+  - id: Mizore_Infusion_Again
+    clip: {fileID: 8300000, guid: 4b92de7035c3b432db2141112116b521, type: 3}
+  - id: Mizore_Infusion_Hoarfrost
+    clip: {fileID: 8300000, guid: 811186b196d6f4ef3ad76cf09b4d706f, type: 3}
+  - id: Mizore_Infusion_Hoarfrost_2
+    clip: {fileID: 8300000, guid: b925cfaf845454bb2a2ddf88b8fe958c, type: 3}
   - id: Mizore_Jealous_Akagane
     clip: {fileID: 8300000, guid: f67200455753844f6beab870cf9855c6, type: 3}
   - id: Mizore_Jealous_Akagane_2

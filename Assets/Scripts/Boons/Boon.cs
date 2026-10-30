@@ -472,21 +472,6 @@ public static class Boons
         return eligible;
     }
 
-    // The capstones taking this offer would bring within reach, like Enter the Gungeon's synergy arrow: the card says
-    // so before it's taken. Only a new boon can open one; a raise doesn't change what's held.
-    public static List<BoonDefinition> Unlocks(RoninLoadout loadout, BoonOffer offer)
-    {
-        var opened = new List<BoonDefinition>();
-        if (offer.Kind != OfferKind.New || offer.Boon.Kind != BoonKind.Normal) return opened;
-        RoninLoadout after = loadout.Copy();
-        after.Take(offer);
-        foreach (BoonDefinition boon in All)
-        {
-            if (boon.IsCapstone && loadout.Find(boon.Id) == null && !boon.Requires(loadout) && boon.Requires(after)) opened.Add(boon);
-        }
-        return opened;
-    }
-
     public static BoonDefinition Get(BoonId id) => All[Array.FindIndex(All, b => b.Id == id)];
 
     // Up to count held boons a Spirit Bead could raise one level, like Hades' Pom of Power. Capstones, arts and

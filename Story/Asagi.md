@@ -192,6 +192,13 @@ sending him home to is the dawn.
 | `Asagi_Legendary_DragonGate` | Story, once | **Asagi:** "There's a story that a koi who climbs the waterfall becomes a dragon. I never climbed it. I had patients."<br>**Asagi:** "Here's the climb anyway. When the last blow comes, you go up it instead." |
 | `Asagi_Legendary_Again` | Repeatable | **Asagi:** "Up the falls, little fry." |
 
+### `Legendary` event: Infusion (Deep Current)
+
+| id | Tier | Lines |
+|---|---|---|
+| `Asagi_Infusion_DeepCurrent` | Story, once | **Asagi:** "The pond's deeper than it looks, little fry. Three hundred years of current under all that stillness."<br>**Asagi:** "Let it have them. They'll stay wet longer, and the tide will carry them further up the hill." |
+| `Asagi_Infusion_Again` | Repeatable | **Asagi:** "Deep breath. Let the current take them." |
+
 ### `Duo`
 
 Her Duos (Scalding Steam with Akagane, Black Ice with Mizore, Thunder Rain with Hibiki) are in

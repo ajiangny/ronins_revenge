@@ -35,6 +35,12 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public bool Dazed => Time.time < dazedUntil;
     // Soaked by Asagi's water, as a boss is: every boon effect lands one point harder (TakeHit).
     public bool Soaked => Time.time < soakedUntil;
+    // The other statuses (Statuses.cs). Kuon has no stance to break and frost can't hold a spirit, so they're its own:
+    // Burning, the ronin's blows bite half again as deep; Chilled, its next daze lasts longer; Jolted, his next blow
+    // discharges for more.
+    public bool Burning => Time.time < burningUntil;
+    public bool Chilled => Time.time < chilledUntil;
+    public bool Jolted => Time.time < joltedUntil;
     // She has fallen and it fights on for both of them.
     public bool Enraged { get; private set; }
     // Only while it stands in plain sight: not in mist, not as the charge coming down a lane.
@@ -42,6 +48,11 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public Vector3 Centre => sprite.bounds.center;
     float dazedUntil;
     float soakedUntil;
+    float burningUntil;
+    float chilledUntil;
+    float joltedUntil;
+    // Burning's extra bite, in parts of a point until they add up to a whole one.
+    float burnChip;
     static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
     // Half points from shadow slashes that haven't yet made a whole one.
     float shadowChip;
@@ -163,7 +174,33 @@ public class SpiritWolf : MonoBehaviour, IHittable
     // Reeling where it stands, every blow landing twice as hard (its spent ultimate).
     public void Daze(float seconds)
     {
-        dazedUntil = Mathf.Max(dazedUntil, Time.time + seconds);
+        dazedUntil = Mathf.Max(dazedUntil, Time.time + Reel(seconds));
+    }
+
+    // How long a daze holds it: Chilled, the cold lengthens it, once.
+    float Reel(float seconds)
+    {
+        if (!Chilled) return seconds;
+        chilledUntil = 0f;
+        return seconds * Statuses.ChillFreeze;
+    }
+
+    public void Ignite(float seconds)
+    {
+        if (!Armed || IsBroken || seconds <= 0f) return;
+        burningUntil = Mathf.Max(burningUntil, Time.time + seconds * Statuses.BurnScale);
+    }
+
+    public void Chill(float seconds)
+    {
+        if (!Armed || IsBroken || seconds <= 0f) return;
+        chilledUntil = Mathf.Max(chilledUntil, Time.time + seconds * Statuses.ChillScale);
+    }
+
+    public void Jolt(float seconds)
+    {
+        if (!Armed || IsBroken || seconds <= 0f) return;
+        joltedUntil = Mathf.Max(joltedUntil, Time.time + seconds);
     }
 
     // Stays put for a move fired from where it stands, then pads on again.
@@ -201,10 +238,28 @@ public class SpiritWolf : MonoBehaviour, IHittable
         if (!Armed || IsBroken) return;
         if (!Targetable && source != KillSource.Reflected) return;
         if (Soaked && source == KillSource.Effect) damage++;
+        if (Damage.Procs(source))
+        {
+            if (Jolted)
+            {
+                joltedUntil = 0f;
+                damage += Statuses.BossJoltBonus;
+                Fx.Play(Fx.Impact, Centre, Color.Lerp(Color.white, Statuses.JoltColor, 0.5f), 1.4f);
+                Sfx.Play(Sfx.LightningStrike, 0.6f, 1.3f);
+            }
+            // Burning: half a point more a blow (a whole one with Ember Heart), paid as the halves add up.
+            if (Burning)
+            {
+                burnChip += damage * (Statuses.BossBurnStance - 1f);
+                int bite = Mathf.FloorToInt(burnChip);
+                burnChip -= bite;
+                damage += bite;
+            }
+        }
         if (source == KillSource.Reflected)
         {
             damage = ReflectedDamage;
-            dazedUntil = Time.time + DazeSeconds;
+            dazedUntil = Time.time + Reel(DazeSeconds);
             Sfx.Play(Sfx.WolfGrowl, 1f, 1.6f);
         }
         // Dazed, it can't guard itself: every other blow lands twice as hard.
@@ -436,7 +491,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
     {
         if (!Armed || IsBroken) return;
         TakeHit(damage, KillSource.Effect);
-        if (!IsBroken) dazedUntil = Time.time + DazeSeconds;
+        if (!IsBroken) dazedUntil = Time.time + Reel(DazeSeconds);
     }
 
     // Two eyes open in the dark behind her, before the body takes shape.
@@ -529,6 +584,9 @@ public class SpiritWolf : MonoBehaviour, IHittable
         float heat = rage * (0.5f + 0.5f * Mathf.Sin(Time.time * 6f));
         Color body = Color.Lerp(Body, RageColour, 0.35f * heat);
         if (Soaked) body = Color.Lerp(body, SoakTint, 0.35f);
+        if (Burning) body = Color.Lerp(body, Statuses.BurnColor, 0.3f + 0.08f * Mathf.Sin(Time.time * 9f));
+        if (Chilled) body = Color.Lerp(body, Statuses.ChillColor, 0.35f);
+        if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) body = Color.Lerp(body, Statuses.JoltColor, 0.45f);
         sprite.color = new Color(body.r, body.g, body.b, a * 0.78f * flicker);
         transform.localScale = Vector3.one * scale * grown * (1f + 0.25f * rage);
         Color halo = Color.Lerp(new Color(0.3f + 0.5f * glare, 0.9f, 1f), RageColour, 0.7f * rage);

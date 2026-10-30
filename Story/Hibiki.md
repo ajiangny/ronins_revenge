@@ -158,6 +158,13 @@ himself; keep it his longest line to the souls.
 | `Hibiki_Legendary_Drum` | Story, once | **Hibiki:** "My drum! He threw it in the coffin with us, can you believe that?"<br>**Hibiki:** "Every eighth beat's for the village. Count with me!" |
 | `Hibiki_Legendary_Again` | Repeatable | **Hibiki:** "Six, seven, EIGHT!" |
 
+### `Legendary` event: Infusion (Static Field)
+
+| id | Tier | Lines |
+|---|---|---|
+| `Hibiki_Infusion_StaticField` | Story, once | **Hibiki:** "You know when you scuff your feet on the shrine mats and touch someone? Bzzt?"<br>**Hibiki:** "That, but the whole row! And the first one to draw a bow goes ba-DUM!" |
+| `Hibiki_Infusion_Again` | Repeatable | **Hibiki:** "Whole row's buzzing, Oni!" |
+
 ### `Duo`
 
 Her Duos (Plasma Arc with Akagane, Superconductor with Mizore) are in

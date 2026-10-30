@@ -195,11 +195,12 @@ public class BoonEffects
         foreach (Samurai soldier in army.Soldiers) soldier.Chill(seconds + Statuses.ChillSeconds);
     }
 
-    // A freeze on a warlord leaves her Chilled for the next one.
-    static void FreezeBoss(Boss boss, float seconds)
+    // A freeze on a warlord leaves her Chilled for the next one. Frost can't hold Kuon, but the cold still chills it.
+    void FreezeBoss(Boss boss, float seconds)
     {
         boss.Freeze(seconds);
         boss.Chill(seconds + Statuses.ChillSeconds);
+        if (WolfFight) Wolf.Chill(seconds + Statuses.ChillSeconds);
     }
 
     // On a boss or Kuon every clone hit lands, so the Ultimate boons fire on a share of them.
@@ -558,6 +559,7 @@ public class BoonEffects
         CameraShake.Add(0.12f);
         Sfx.Play(Sfx.FireBlast);
         BurnArrows(position, radius);
+        Wolf.Ignite(Statuses.BurnSeconds);
         Wolf.TakeHit(1, KillSource.Effect);
     }
 
@@ -572,6 +574,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) WolfBlast(point, BlastRadius);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 if (WolfFight && loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) Wolf.Soak(value);
+                if (WolfFight && loadout.Has(BoonId.FrostBlade, out _)) Wolf.Chill(Statuses.ChillSeconds);
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out _)) WolfBlast(point, BlastRadius);
@@ -581,6 +584,7 @@ public class BoonEffects
                 if (loadout.Has(BoonId.PyreShadow, out _)) WolfBlast(point, PyreRadius);
                 if (WolfFight && loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 if (WolfFight && loadout.Has(BoonId.TideShadow, out value)) Wolf.Soak(value);
+                if (WolfFight && loadout.Has(BoonId.FrostShadow, out _)) Wolf.Chill(Statuses.ChillSeconds);
                 break;
         }
         if (!Damage.Procs(source)) return;
@@ -628,6 +632,14 @@ public class BoonEffects
             if (struck.Frozen && loadout.Find(BoonId.Superconductor) != null) damage *= 2;
             target.TakeHit(damage, KillSource.Effect);
             struck.Jolt(Statuses.JoltSeconds);
+            return;
+        }
+
+        // Kuon takes the charge as a warlord does.
+        if (target is SpiritWolf wolf)
+        {
+            wolf.TakeHit(loadout.Find(BoonId.PlasmaArc) != null ? 2 : 1, KillSource.Effect);
+            wolf.Jolt(Statuses.JoltSeconds);
             return;
         }
 

@@ -159,6 +159,13 @@ finish, by design: her story closes Shirogane's loop.
 | `Mizore_Legendary_StillWater` | Story, once | **Mizore:** "Still Water. Slow the pulse and a fever loses its hurry."<br>**Mizore:** "So does an army." |
 | `Mizore_Legendary_Again` | Repeatable | **Mizore:** "Slower. Slower. There." |
 
+### `Legendary` event: Infusion (Hoarfrost)
+
+| id | Tier | Lines |
+|---|---|---|
+| `Mizore_Infusion_Hoarfrost` | Story, once | **Mizore:** "Hoarfrost. It settles on whatever is too slow to shake it off."<br>**Mizore:** "Their arrows will crawl, Oni. Watch them come, and step aside. No need to hurry." |
+| `Mizore_Infusion_Again` | Repeatable | **Mizore:** "Let the frost settle." |
+
 ### `Duo`
 
 Her Duos (Thermal Shock with Akagane, Superconductor with Hibiki) are in

@@ -181,7 +181,7 @@ All soul events go through `GameManager.OfferBoons(element, …)`, the one place
 
 Speaker = the soul of `element`. Try these in order, and play the first that has an eligible conversation:
 
-1. **`Legendary`**: the offers include a Legendary (its `BoonId` → that soul's `Legendary` records).
+1. **`Legendary`**: the offers include a Legendary or an Infusion (its `BoonId` → that soul's `Legendary` records: `…_Legendary_…` or `…_Infusion_…`).
 2. **`Duo`**: the offers include a Duo (`Duo_<BoonId>_…` records).
 3. **`BossFelled`**: context is `BossReward` (the boon in `BossFell` after Benibana, Utsusemi or Shirogane).
 4. **`SoulPickup` Story**: the next first-meeting chapter.

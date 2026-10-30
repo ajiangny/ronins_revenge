@@ -113,19 +113,6 @@ public sealed class RoninLoadout
         }
     }
 
-    // A copy to try an offer on (the cards' "Opens" hint) without touching the real loadout.
-    public RoninLoadout Copy()
-    {
-        var copy = new RoninLoadout { BoonCount = BoonCount, LastElement = LastElement, DragonGateUsed = DragonGateUsed };
-        for (int i = 0; i < slots.Length; i++)
-        {
-            if (slots[i] != null) copy.slots[i] = new EquippedBoon(slots[i].Boon, slots[i].Rarity, slots[i].Level);
-        }
-        foreach (EquippedBoon held in passives) copy.passives.Add(new EquippedBoon(held.Boon, held.Rarity, held.Level));
-        elementCounts.CopyTo(copy.elementCounts, 0);
-        return copy;
-    }
-
     // The element the ronin has invested in most; ties go to the latest pick. Null before any boon.
     public Element? DominantElement
     {

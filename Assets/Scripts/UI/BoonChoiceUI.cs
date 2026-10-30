@@ -417,15 +417,6 @@ public class BoonChoiceUI : MonoBehaviour
         card.note.text = offer.Replaces == null ? ""
             : offer.Level > 1 ? $"Exchanges {offer.Replaces.Boon.Name}  ·  keeps Lv {offer.Level}"
             : $"Exchanges {offer.Replaces.Boon.Name}";
-        // A boon that would bring a Duo or Legendary within reach names it, in the capstone's colour.
-        if (shownLoadout != null)
-        {
-            foreach (BoonDefinition opened in Boons.Unlocks(shownLoadout, offer))
-            {
-                string colour = ColorUtility.ToHtmlStringRGB(Boons.KindColor(opened.Kind, Rarity.Common));
-                card.note.text += $"{(card.note.text.Length > 0 ? "  ·  " : "")}<color=#{colour}>Opens {opened.Name}</color>";
-            }
-        }
         card.slide = 0f;
         // Hidden until AnimatePanel paints it in, so it never flashes at full opacity on the first frame.
         card.group.alpha = 0f;
@@ -776,9 +767,7 @@ public class BoonChoiceUI : MonoBehaviour
         card.description.lineSpacing = -14f;
         card.stat = GameUI.CreateText(content, font, "Stat", center, new Vector2(70, -60), new Vector2(960, 34), 28, TextAlignmentOptions.Left);
         ui.Style(card.stat, TextStyle.Hud);
-        // Wide enough for an Exchange and an "Opens" hint together; the right edge stays where the stat line ends.
-        card.note = GameUI.CreateText(content, font, "Note", center, new Vector2(270, -60), new Vector2(560, 34), 26, TextAlignmentOptions.Right);
-        card.note.textWrappingMode = TextWrappingModes.NoWrap;
+        card.note = GameUI.CreateText(content, font, "Note", center, new Vector2(330, -60), new Vector2(440, 34), 26, TextAlignmentOptions.Right);
         card.note.color = new Color(1f, 0.75f, 0.55f, 0.85f);
         ui.Style(card.note, TextStyle.Hint);
         // The brush rule under the selected card's text.

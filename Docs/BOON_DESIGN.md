@@ -443,5 +443,11 @@ flew at 4.2 against 7 and reached the ground, and on Benibana a jolted slash dea
 stance against 0.10, and a chilled 1 s freeze held 1.5 s.
 
 **To watch** (`RunLog`): Storm's kill share (discharges are new effect kills), how often rounds pass with no arrows
-loosed under fire builds, and whether boss stagger rates climb too far with Ember Heart. No Infusion has an icon yet.
+loosed under fire builds, and whether boss stagger rates climb too far with Ember Heart. 
+
+**Since.** The "Opens …" card hint was taken out: playtesting found it distracting and too much text on a card that
+already carries a description and two stats. Infusions now have icons and voiced soul lines, and Kuon takes all
+four statuses (its own forms, since it has no stance and frost can't hold it): Burning adds half of each of the
+ronin's blows as extra damage, Chilled lengthens its next daze ×1.5, Jolted adds to his next blow. Tested on Kuon in
+phase 2: a jolted hit dealt 2 against 1, a burning 2-point hit dealt 3, a chilled 1 s daze held 1.5 s.
 

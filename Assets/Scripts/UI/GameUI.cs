@@ -136,6 +136,9 @@ public class GameUI : MonoBehaviour
     TextMeshProUGUI bannerBody;
     Image bannerIcon;
     SpriteAnimatorUI bannerIconAnimator;
+    // Where the body line and icon settle for the card showing now.
+    float bannerBodyY = BannerBodyY;
+    float bannerIconY = BannerIconY;
     bool bannerShown;
     float bannerShownAt;
 
@@ -1032,7 +1035,7 @@ public class GameUI : MonoBehaviour
     // A stage or round card across the middle of the screen: a stroke of ink paints on from the left, then a small
     // overline, a large title, a brush rule in the accent colour and a line of body text rise in one after another,
     // like the boss cards' lower third. The playfield stays visible above and below, and it all fades out together.
-    // An icon (a round's reward) sits at the end of the body line, the two centred together.
+    // An icon (a round's reward) sits centred on a line of its own under the body, which moves up to make room.
     public void ShowBanner(string overline, string title, string body, Color accent, Sprite[] icon = null)
     {
         bannerOverline.text = overline;
@@ -1042,18 +1045,17 @@ public class GameUI : MonoBehaviour
         bool hasIcon = icon != null && icon.Length > 0;
         bannerBody.gameObject.SetActive(hasBody);
         bannerIcon.gameObject.SetActive(hasIcon);
-        float iconSpan = 0f;
         if (hasIcon)
         {
             bannerIcon.sprite = icon[0];
             bannerIconAnimator.Play(icon, 8f);
-            iconSpan = BannerIconSize + (hasBody ? BannerIconGap : 0f);
         }
-        // Measured at the spacing the reveal settles on, not the wide spacing it starts from.
-        bannerBody.characterSpacing = 0f;
-        float bodyWidth = hasBody && hasIcon ? bannerBody.GetPreferredValues(body).x : 0f;
-        bannerBody.rectTransform.anchoredPosition = new Vector2(-iconSpan / 2f, bannerBody.rectTransform.anchoredPosition.y);
-        bannerIcon.rectTransform.anchoredPosition = new Vector2((bodyWidth + iconSpan) / 2f - BannerIconSize / 2f, BannerBodyY);
+        bool iconLine = hasIcon && hasBody;
+        bannerBodyY = iconLine ? BannerBodyY + BannerIconLift : BannerBodyY;
+        bannerIconY = hasBody ? BannerIconY : BannerBodyY;
+        // The stroke grows downward to hold the icon's line; its top edge stays put.
+        bannerInk.rectTransform.sizeDelta = new Vector2(BannerInkSize.x, BannerInkSize.y + (iconLine ? BannerInkGrow : 0f));
+        bannerInk.rectTransform.anchoredPosition = new Vector2(70f, iconLine ? -BannerInkGrow * 0.3f : 0f);
         foreach (Image mark in bannerRule.GetComponentsInChildren<Image>()) mark.color = Color.Lerp(accent, Color.white, 0.35f);
         bannerShown = true;
         bannerShownAt = Time.unscaledTime;
@@ -1069,8 +1071,12 @@ public class GameUI : MonoBehaviour
 
     const float BannerRuleWidth = 820f;
     const float BannerBodyY = -88f;
-    const float BannerIconSize = 88f;
-    const float BannerIconGap = 8f;
+    // With an icon the body line rises to where a two-line body's first line sat, and the icon takes the second.
+    const float BannerIconLift = 20f;
+    const float BannerIconY = -118f;
+    const float BannerIconSize = 64f;
+    static readonly Vector2 BannerInkSize = new Vector2(1760f, 340f);
+    const float BannerInkGrow = 90f;
 
     void BuildBanner()
     {
@@ -1078,7 +1084,7 @@ public class GameUI : MonoBehaviour
         banner = panel.gameObject.AddComponent<CanvasGroup>();
         banner.blocksRaycasts = false;
         // The stroke's dry tail is on the right, so it sits a little right of centre to look centred.
-        bannerInk = CreateInk(panel, new Vector2(0.5f, 0.5f), new Vector2(70, 0), new Vector2(1760, 340), new Color(0.03f, 0.02f, 0.04f, 0.9f));
+        bannerInk = CreateInk(panel, new Vector2(0.5f, 0.5f), new Vector2(70, 0), BannerInkSize, new Color(0.03f, 0.02f, 0.04f, 0.9f));
 
         bannerOverline = CreateText("Overline", new Vector2(0.5f, 0.5f), new Vector2(0, 100), new Vector2(1300, 50), 34, TextAlignmentOptions.Center, panel);
         bannerOverline.textWrappingMode = TextWrappingModes.NoWrap;
@@ -1110,11 +1116,11 @@ public class GameUI : MonoBehaviour
         Reveal(bannerOverline, since - 0.15f, 100f, -1f, 12f);
         Reveal(bannerTitle, since - 0.25f, 28f, -1f);
         AnimateRule(bannerRule, BannerRuleWidth, EaseOut(Mathf.Clamp01((since - 0.35f) / 0.5f)));
-        Reveal(bannerBody, since - 0.5f, BannerBodyY, -1f, 0f);
+        Reveal(bannerBody, since - 0.5f, bannerBodyY, -1f, 0f);
         // The icon rises in with the line, a beat behind it.
         float icon = EaseOut(Mathf.Clamp01((since - 0.6f) / 0.6f));
         bannerIcon.color = new Color(1f, 1f, 1f, icon);
-        bannerIcon.rectTransform.anchoredPosition = new Vector2(bannerIcon.rectTransform.anchoredPosition.x, BannerBodyY - 14f * (1f - icon));
+        bannerIcon.rectTransform.anchoredPosition = new Vector2(0f, bannerIconY - 14f * (1f - icon));
         if (bannerShown) return;
         banner.alpha = Mathf.MoveTowards(banner.alpha, 0f, Time.unscaledDeltaTime / 0.3f);
         if (banner.alpha <= 0f) banner.gameObject.SetActive(false);

@@ -1083,6 +1083,10 @@ MonoBehaviour:
   bossDepth: 4.5
   roundIntroTime: 1.2
   armyMarchInTime: 1.6
+  roundParSeconds: 40
+  bossParSeconds: 120
+  roundBonusPerSecond: 10
+  stageBonusPerSecond: 5
   safeAreas:
   - name: The Temple
     map:

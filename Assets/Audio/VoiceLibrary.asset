@@ -457,6 +457,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 8973700f7b05041729a016aa2cb0fcf3, type: 3}
   - id: Benibana_Phase_2
     clip: {fileID: 8300000, guid: 60e8b212cb29d4b6eafb53fdfc9da445, type: 3}
+  - id: Benibana_Phase_Blade
+    clip: {fileID: 8300000, guid: 4ccab68f050a447c4bfe1b489e309108, type: 3}
+  - id: Benibana_Phase_Clean
+    clip: {fileID: 8300000, guid: c5b764ef3ac8a440cb2554576076db89, type: 3}
+  - id: Benibana_Phase_ForThem
+    clip: {fileID: 8300000, guid: a715bc58d6a404d06b961b4e6dc1da0b, type: 3}
+  - id: Benibana_Phase_ForThem_2
+    clip: {fileID: 8300000, guid: 5ea7f634e00fa47e28832dd521c0a91e, type: 3}
+  - id: Benibana_Phase_LastLife
+    clip: {fileID: 8300000, guid: a02d7a2d977f6495f84ef794ee0f72b5, type: 3}
+  - id: Benibana_Phase_Remember
+    clip: {fileID: 8300000, guid: fa32f260421414ca9ba11bc1c919156a, type: 3}
+  - id: Benibana_Phase_Robes
+    clip: {fileID: 8300000, guid: 214a5985836c64025aa19445960115ac, type: 3}
+  - id: Benibana_Phase_Smoke
+    clip: {fileID: 8300000, guid: 57539d3d9bd8c4157a06ab29f7a0d5b7, type: 3}
   - id: Benibana_RosaryBloom
     clip: {fileID: 8300000, guid: 7d16fea8e77ff44fc9ac0cefd825b8bc, type: 3}
   - id: Benibana_RosaryBloom_2
@@ -831,6 +847,20 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 088e00b81f9894ced9b5e83f9a945974, type: 3}
   - id: Kagetsune_Phase_2
     clip: {fileID: 8300000, guid: 350d3098ef30b4ca48ecce32e3be4360, type: 3}
+  - id: Kagetsune_Phase_Clean
+    clip: {fileID: 8300000, guid: c62712285710e41a7a575fe76bf05044, type: 3}
+  - id: Kagetsune_Phase_Home
+    clip: {fileID: 8300000, guid: 253d986a67b614e42b92889de7da63e4, type: 3}
+  - id: Kagetsune_Phase_LastLife
+    clip: {fileID: 8300000, guid: f815c9b1b27474778a2e989345f3a41c, type: 3}
+  - id: Kagetsune_Phase_Missing
+    clip: {fileID: 8300000, guid: 6813986fddbfd4b21b43a2b35624f343, type: 3}
+  - id: Kagetsune_Phase_Poured
+    clip: {fileID: 8300000, guid: 14433b9cec8a542b49a827f4b2d6839b, type: 3}
+  - id: Kagetsune_Phase_Remember
+    clip: {fileID: 8300000, guid: 3a275305148994c87a7c38f4bc60ba68, type: 3}
+  - id: Kagetsune_Phase_Unchained
+    clip: {fileID: 8300000, guid: 37ea47434403f4ef892871f52d261298, type: 3}
   - id: Kagetsune_Rend
     clip: {fileID: 8300000, guid: bdc16aa084c0c4392a271c9cae9f9671, type: 3}
   - id: Kagetsune_River
@@ -1583,6 +1613,24 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: c947dbeb9ed7d4dfca27248a7b0c11e2, type: 3}
   - id: Shirogane_Phase_2
     clip: {fileID: 8300000, guid: 12bed8dab79ab437c9158d83cc29cc80, type: 3}
+  - id: Shirogane_Phase_Clean
+    clip: {fileID: 8300000, guid: da6474df465b6401088f427badf39760, type: 3}
+  - id: Shirogane_Phase_Howl
+    clip: {fileID: 8300000, guid: 728ad6ba895a84075adf1118ae4cc917, type: 3}
+  - id: Shirogane_Phase_Kuon
+    clip: {fileID: 8300000, guid: 6e0d25f15f91c46c59c7dfa9e04b7cc2, type: 3}
+  - id: Shirogane_Phase_Kuon_2
+    clip: {fileID: 8300000, guid: 1f798ca36f64c4975a2342c06aa935dd, type: 3}
+  - id: Shirogane_Phase_Kuon_3
+    clip: {fileID: 8300000, guid: fced0467c675646df80c47d28e1860c8, type: 3}
+  - id: Shirogane_Phase_LastLife
+    clip: {fileID: 8300000, guid: 7f05e6cb5bd0c4db289a60398b343122, type: 3}
+  - id: Shirogane_Phase_Oath
+    clip: {fileID: 8300000, guid: 1bd3cc9a868c54ad1a0f7524b143c62e, type: 3}
+  - id: Shirogane_Phase_Remember
+    clip: {fileID: 8300000, guid: 5d85c6ab3c9de4a1088dfa5064bde306, type: 3}
+  - id: Shirogane_Phase_Together
+    clip: {fileID: 8300000, guid: 4d1d7e465f77e41cfb88d56d063569bf, type: 3}
   - id: Shirogane_Stagger
     clip: {fileID: 8300000, guid: 99e78cff73eda46709a81f8f60805ac8, type: 3}
   - id: Tut_Charge_Taunt
@@ -1657,5 +1705,23 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 1b30d9fbdb3de4d1da819f848d500919, type: 3}
   - id: Utsusemi_Phase_2
     clip: {fileID: 8300000, guid: e58eadc71b539448488757c81a3effa8, type: 3}
+  - id: Utsusemi_Phase_Clean
+    clip: {fileID: 8300000, guid: 34c839bd40ea0493c9101c440f4cf7a4, type: 3}
+  - id: Utsusemi_Phase_LastLife
+    clip: {fileID: 8300000, guid: 4b4ba693cd23047609449af427add4f8, type: 3}
+  - id: Utsusemi_Phase_Loose
+    clip: {fileID: 8300000, guid: df4fe034172ec427baa3fa9f6e71d9b0, type: 3}
+  - id: Utsusemi_Phase_Monk
+    clip: {fileID: 8300000, guid: 10ea5e37ba5234bb8b5809a096fb87fe, type: 3}
+  - id: Utsusemi_Phase_Monk_2
+    clip: {fileID: 8300000, guid: c93e607dc59dd4b698eea5dacab03056, type: 3}
+  - id: Utsusemi_Phase_Overwound
+    clip: {fileID: 8300000, guid: d5bbb707bd57f4b6fb2e24e6a03cc5a4, type: 3}
+  - id: Utsusemi_Phase_Remember
+    clip: {fileID: 8300000, guid: e859706f4e412445fa960a869cde2ef6, type: 3}
+  - id: Utsusemi_Phase_Thirteen
+    clip: {fileID: 8300000, guid: ed2f36b3efe5d47868c6158ef18daba0, type: 3}
+  - id: Utsusemi_Phase_Tighter
+    clip: {fileID: 8300000, guid: ff958f86043664d00874183f81fdf586, type: 3}
   - id: Utsusemi_Stagger
     clip: {fileID: 8300000, guid: d8e7c0de73f6e4d93a50192952104d62, type: 3}

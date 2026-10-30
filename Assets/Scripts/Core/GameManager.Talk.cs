@@ -312,10 +312,11 @@ public partial class GameManager
                 return new DialogueScene.Speaker { name = "Oni", epithet = "The Ronin", colour = OniColour, art = oniCloseup,
                     focus = new Vector2(0.46f, 0.236f), height = ScenePortraitHeight * 1.1f, right = true };
             // The souls' paintings fill their canvases edge to edge, so they're drawn smaller than Oni's to match faces;
-            // Mizore's wolf head is wider than the others', so she's drawn a little smaller, and Asagi a little larger to
-            // stand her bowl up near Oni's eyes. Akagane, the captain, stands screen-tall, a little taller than Oni.
+            // Mizore's crane crest towers over her eyes, so she's drawn a little larger to bring them level with Oni's,
+            // and Asagi a little larger too, to stand her bowl up near his eyes. Akagane, the captain, stands screen-tall,
+            // a little taller than Oni.
             case "Akagane": return SoulSpeaker(name, "Captain of the Vanguard", Element.Fire, akaganeCloseup, new Vector2(0.62f, 0.24f), 1f);
-            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.62f, 0.23f), 0.78f);
+            case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.72f, 0.18f), 0.95f);
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
             case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f), 0.88f);
             // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.

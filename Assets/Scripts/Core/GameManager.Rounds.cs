@@ -206,14 +206,13 @@ public partial class GameManager
             : stageIndex == 0 ? "Get ready!"
             : stageIndex == 1 ? "Bigger, faster, angrier armies."
             : "The dead march too.";
-        // The round's reward shows as its icon beside the line, or in words while it has no art.
+        // The round's reward shows as its icon under the line, or in words while it has no art.
         Sprite[] rewardIcon = RewardIcon(pendingReward, pendingElement);
+        Color rewardColour = RewardColour(pendingReward, pendingElement);
         if (rewardIcon == null || rewardIcon.Length == 0)
-        {
-            Color rewardColour = RewardColour(pendingReward, pendingElement);
             body += $"\n<color=#{ColorUtility.ToHtmlStringRGB(rewardColour)}>Reward: {RewardLabel(pendingReward, pendingElement)}</color>";
-        }
-        ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor, rewardIcon);
+        ui.ShowBanner($"Stage {Roman(stageIndex + 1)}  ·  Round {roundIndex + 1}", Stage.name, body, round.samuraiColor, rewardIcon,
+            "Reward:", rewardColour);
         Sfx.Play(Sfx.StageStart);
         if (sfxLibrary != null) Music.Play(sfxLibrary.RoundsMusic(Stage.boss), sfxLibrary.musicVolume);
 

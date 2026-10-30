@@ -4,7 +4,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 `Ronin.cs` means the file in its system's folder.
 
 - `GameUI.cs` — HUD (score in one row; stage with the round as a smaller line under it, right-aligned; a small dim
-  label beside each number; lives; no high score, so the top centre stays free for the compact boss bar), the stage/round card (`ShowBanner(overline, title, body, accent, icon)`: an optional looping icon, the round's reward, sits centred on its own line under the body (the body rises a little and the ink stroke grows downward to hold it) and rises in just after it), boss bar, subtitles on a plate with the
+  label beside each number; lives; no high score, so the top centre stays free for the compact boss bar), the stage/round card (`ShowBanner(overline, title, body, accent, icon, iconLabel, iconColour)`: an optional looping icon, the round's reward, sits on its own line under the body with its label ("Reward:") beside it, centred as one row, over a softly pulsing `SoftGlow` in its colour (the body rises a little and the ink stroke grows downward to hold it) and rises in just after it), boss bar, subtitles on a plate with the
   speaker's name (fading in and out, with an optional speaker portrait, used only on the title hill: `ShowSubtitle(…, portrait)` takes a
   `GameUI.SpeakerPortrait`, a close-up plus the point to centre on and the height to draw it, cropped into a framed
   night-dark window at the plate's left, or standing on the plate when it sits `beside` someone), boss intro (a null

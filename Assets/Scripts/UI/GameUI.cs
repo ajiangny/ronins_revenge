@@ -135,10 +135,14 @@ public class GameUI : MonoBehaviour
     RectTransform bannerRule;
     TextMeshProUGUI bannerBody;
     Image bannerIcon;
+    Image bannerIconGlow;
+    TextMeshProUGUI bannerIconLabel;
     SpriteAnimatorUI bannerIconAnimator;
+    Color bannerIconColour;
     // Where the body line and icon settle for the card showing now.
     float bannerBodyY = BannerBodyY;
     float bannerIconY = BannerIconY;
+    float bannerIconX;
     bool bannerShown;
     float bannerShownAt;
 
@@ -1035,8 +1039,10 @@ public class GameUI : MonoBehaviour
     // A stage or round card across the middle of the screen: a stroke of ink paints on from the left, then a small
     // overline, a large title, a brush rule in the accent colour and a line of body text rise in one after another,
     // like the boss cards' lower third. The playfield stays visible above and below, and it all fades out together.
-    // An icon (a round's reward) sits centred on a line of its own under the body, which moves up to make room.
-    public void ShowBanner(string overline, string title, string body, Color accent, Sprite[] icon = null)
+    // An icon (a round's reward) sits on a line of its own under the body, which moves up to make room: its label and
+    // the icon centred together, the icon glowing in its colour.
+    public void ShowBanner(string overline, string title, string body, Color accent, Sprite[] icon = null,
+        string iconLabel = null, Color? iconColour = null)
     {
         bannerOverline.text = overline;
         bannerTitle.text = title;
@@ -1044,12 +1050,27 @@ public class GameUI : MonoBehaviour
         bool hasBody = !string.IsNullOrEmpty(body);
         bool hasIcon = icon != null && icon.Length > 0;
         bannerBody.gameObject.SetActive(hasBody);
+        bool hasLabel = hasIcon && !string.IsNullOrEmpty(iconLabel);
         bannerIcon.gameObject.SetActive(hasIcon);
+        bannerIconGlow.gameObject.SetActive(hasIcon);
+        bannerIconLabel.gameObject.SetActive(hasLabel);
+        bannerIconColour = iconColour ?? Color.white;
+        float labelWidth = 0f;
         if (hasIcon)
         {
             bannerIcon.sprite = icon[0];
             bannerIconAnimator.Play(icon, 8f);
         }
+        if (hasLabel)
+        {
+            bannerIconLabel.text = iconLabel;
+            bannerIconLabel.color = Color.Lerp(bannerIconColour, Color.white, 0.45f);
+            labelWidth = bannerIconLabel.GetPreferredValues(iconLabel).x;
+        }
+        // The label and the icon are centred as one row.
+        float rowWidth = labelWidth + (hasLabel ? BannerIconGap : 0f) + BannerIconSize;
+        bannerIconLabel.rectTransform.anchoredPosition = new Vector2(-rowWidth / 2f + labelWidth / 2f, 0f);
+        bannerIconX = rowWidth / 2f - BannerIconSize / 2f;
         bool iconLine = hasIcon && hasBody;
         bannerBodyY = iconLine ? BannerBodyY + BannerIconLift : BannerBodyY;
         bannerIconY = hasBody ? BannerIconY : BannerBodyY;
@@ -1073,10 +1094,12 @@ public class GameUI : MonoBehaviour
     const float BannerBodyY = -88f;
     // With an icon the body line rises to where a two-line body's first line sat, and the icon takes the second.
     const float BannerIconLift = 20f;
-    const float BannerIconY = -118f;
-    const float BannerIconSize = 64f;
+    const float BannerIconY = -136f;
+    const float BannerIconSize = 96f;
+    // The icons' art has room around it, so a small gap reads as an ordinary space.
+    const float BannerIconGap = 4f;
     static readonly Vector2 BannerInkSize = new Vector2(1760f, 340f);
-    const float BannerInkGrow = 90f;
+    const float BannerInkGrow = 150f;
 
     void BuildBanner()
     {
@@ -1098,6 +1121,15 @@ public class GameUI : MonoBehaviour
         bannerBody = CreateText("Body", new Vector2(0.5f, 0.5f), new Vector2(0, BannerBodyY), new Vector2(1300, 60), 34, TextAlignmentOptions.Center, panel);
         bannerBody.color = new Color(0.93f, 0.9f, 0.85f);
         Style(bannerBody, TextStyle.Body);
+        bannerIconGlow = CreateRect("IconGlow", panel, new Vector2(0.5f, 0.5f), new Vector2(0, BannerBodyY), Vector2.one * BannerIconSize * 1.7f)
+            .gameObject.AddComponent<Image>();
+        bannerIconGlow.sprite = ProceduralSprites.SoftGlow;
+        bannerIconGlow.raycastTarget = false;
+        bannerIconGlow.gameObject.SetActive(false);
+        bannerIconLabel = CreateText("IconLabel", new Vector2(0.5f, 0.5f), new Vector2(0, BannerBodyY), new Vector2(400, 60), 34, TextAlignmentOptions.Center, panel);
+        bannerIconLabel.textWrappingMode = TextWrappingModes.NoWrap;
+        Style(bannerIconLabel, TextStyle.Body);
+        bannerIconLabel.gameObject.SetActive(false);
         bannerIcon = CreateRect("Icon", panel, new Vector2(0.5f, 0.5f), new Vector2(0, BannerBodyY), new Vector2(BannerIconSize, BannerIconSize))
             .gameObject.AddComponent<Image>();
         bannerIcon.preserveAspect = true;
@@ -1117,10 +1149,16 @@ public class GameUI : MonoBehaviour
         Reveal(bannerTitle, since - 0.25f, 28f, -1f);
         AnimateRule(bannerRule, BannerRuleWidth, EaseOut(Mathf.Clamp01((since - 0.35f) / 0.5f)));
         Reveal(bannerBody, since - 0.5f, bannerBodyY, -1f, 0f);
-        // The icon rises in with the line, a beat behind it.
+        // The icon's row rises in with the line, a beat behind it, and its glow breathes slowly.
         float icon = EaseOut(Mathf.Clamp01((since - 0.6f) / 0.6f));
+        float rise = bannerIconY - 14f * (1f - icon);
         bannerIcon.color = new Color(1f, 1f, 1f, icon);
-        bannerIcon.rectTransform.anchoredPosition = new Vector2(0f, bannerIconY - 14f * (1f - icon));
+        bannerIcon.rectTransform.anchoredPosition = new Vector2(bannerIconX, rise);
+        bannerIconGlow.color = new Color(bannerIconColour.r, bannerIconColour.g, bannerIconColour.b,
+            icon * (0.32f + 0.08f * Mathf.Sin(Time.unscaledTime * 2.5f)));
+        bannerIconGlow.rectTransform.anchoredPosition = new Vector2(bannerIconX, rise);
+        bannerIconLabel.alpha = icon;
+        bannerIconLabel.rectTransform.anchoredPosition = new Vector2(bannerIconLabel.rectTransform.anchoredPosition.x, rise);
         if (bannerShown) return;
         banner.alpha = Mathf.MoveTowards(banner.alpha, 0f, Time.unscaledDeltaTime / 0.3f);
         if (banner.alpha <= 0f) banner.gameObject.SetActive(false);

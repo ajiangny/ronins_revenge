@@ -27,6 +27,16 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   (three rounds of every kind plus Bellringers, then the final boss Kagetsune). The array is written in
   `GameManager.DefaultStages()`; the scene's serialized copy wins at runtime, and `Ninja/Apply Stages` copies the
   coded stages into it (and re-applies the maps), so add or retune a stage in code and re-run it.
+- **Time bonus** (`GameManager.Clock.cs`): `TickClock` runs from `Update` only while `state == Playing` and the
+  tutorial is over, so banners, boon screens, talk scenes, paths, travel and pause aren't timed. `roundTime` resets with
+  each round and boss fight (`StartRoundClock`, beside `RunLog.BeginSegment`), `stageTime` with each stage's first
+  round or a jump (`StartStageClock`), `runTime` once a run. `EndRound` calls `PayRoundBonus`: whole seconds under
+  `roundParSeconds` (40) × `roundBonusPerSecond` (10) × the stage number. `OnBossDefeated` (or a boss-less stage's
+  `StageCleared`) calls `PayStageBonus`: seconds under `roundsThisStage × roundParSeconds + bossParSeconds` (120) ×
+  `stageBonusPerSecond` (5) × the stage number, so a longer road through more portals isn't punished. Bonuses are banked
+  in `timeBonus`, not the score; `EndGame` calls `BankTimeBonus` before the high score is saved, so a death keeps what
+  was banked. The dawn results show the run's time and the bonus split into rounds and stages; the run log notes each
+  payment and the run's time. Tuning is under "Time bonus" on `GameManager` (the scene's values win).
 - **Paths (Hades' chamber doors):** `EndRound` → `GatherDrops` (drops fly to Oni first; hearts heal him to full and the
   spare ones `Heart.Dissipate` into `SpareHeartPoints` × stage) → `GrantReward` (the round's `pendingReward`, a
   `PathReward`, first materializes mid-field as a `RewardSpirit` that hangs a moment and is pulled into him; then: soul → `OfferBoons`, bead → `OfferBead` (a level), thread → `OfferThread` (a rarity), scroll → `OfferArts`, spring heals, Lost Melody pays Spirit Notes `noteCache` ×

@@ -50,7 +50,7 @@ each `Name.Part.cs` beside it holds one family of members. Unity only needs the 
 the scene keeps pointing at `Name.cs`. Keep new members in the part they belong to.
 
 - `GameManager`: `Defaults` (the stages and safe areas as written in code), `Menus`, `Hub`, `Dev`, `Rounds`,
-  `Rewards`, `Bosses`, `Talk` and `Stages`.
+  `Rewards`, `Bosses`, `Talk`, `Stages` and `Clock` (the time bonus).
 - `Utsusemi`: `Kasa`, `Lattice`, `Hours`, `Plumb`, `Lantern`, `Beams`, `Overload` and `Clock`, one per move family.
 - `Kagetsune`: `Kit` (stride, bullets, telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls`
   (the summoned bosses and their borrowed powers), `Levy` (his levy of the dead army), `Beam` (how the Spirit Hyper Beam is drawn) and `Phase` (the break and his fall).

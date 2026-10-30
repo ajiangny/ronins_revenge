@@ -52,6 +52,7 @@ public partial class GameManager
         stageIndex = stage;
         boss &= Stage.boss != BossKind.None;
         roundIndex = boss ? BossPortalAfter - 1 : 0;
+        StartStageClock();
         ShowMap(boss ? BossMap : Stage.roundsMap);
         StartCoroutine(boss ? BeginBoss() : BeginRound());
     }
@@ -135,6 +136,7 @@ public partial class GameManager
         metThisRun.Clear();
         score = 0;
         highScoreAtStart = highScore;
+        StartRunClock();
         stageIndex = 0;
         roundIndex = 0;
         ResetLoadout();
@@ -193,6 +195,7 @@ public partial class GameManager
         if (roundIndex == 0)
         {
             killSoulsThisStage = 0;
+            StartStageClock();
             killHeartThisStage = false;
             loadout.BeginStage();
             pendingReward = PathReward.Soul;
@@ -237,6 +240,7 @@ public partial class GameManager
         if (newEnemy != null) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, newEnemy));
         else if (!tutorial.Active && Dialogue.CanPick("Poguru", DialogueEvent.PoguruStage, BarkContext())) StartCoroutine(PoguruBark(DialogueEvent.PoguruStage));
         else if (!tutorial.Active) StartCoroutine(PoguruBark(DialogueEvent.PoguruRound, 0.2f));
+        StartRoundClock();
         RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);
     }

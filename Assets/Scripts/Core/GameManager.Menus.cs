@@ -501,6 +501,8 @@ public partial class GameManager
         string gold = ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour);
         string body = $"{message}\n\n" +
             $"<color=#{muted}>SCORE</color>  <size=48>{score:000000}</size>        <color=#{muted}>HIGH SCORE</color>  <size=48><color=#{gold}>{highScore:000000}</color></size>\n" +
+            $"<color=#{muted}>TIME</color>  {Clock(runTime)}        <color=#{muted}>TIME BONUS</color>  <color=#{gold}>+{roundBonusTotal + stageBonusTotal}</color>  " +
+            $"<color=#{muted}>(rounds +{roundBonusTotal}, stages +{stageBonusTotal})</color>\n" +
             $"<color=#{muted}>Reached stage {stageIndex + 1} of {stages.Length}, round {roundIndex + 1}</color>";
         if (score > highScoreAtStart) body += $"\n\n<color=#{gold}><size=44>NEW HIGH SCORE!</size></color>";
         if (notesThisRun > 0)

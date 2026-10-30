@@ -337,6 +337,15 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] float roundIntroTime = 1.2f;
     [Tooltip("Seconds a new army takes to march down into the field. The round starts once it is in place and the intro time is up.")]
     [SerializeField] float armyMarchInTime = 1.6f;
+    [Header("Time bonus")]
+    [Tooltip("Seconds of play a round may take before it stops paying a time bonus.")]
+    [SerializeField] float roundParSeconds = 40f;
+    [Tooltip("Seconds a boss fight adds to its stage's par.")]
+    [SerializeField] float bossParSeconds = 120f;
+    [Tooltip("Points per second under par for a round, times the stage number.")]
+    [SerializeField] int roundBonusPerSecond = 10;
+    [Tooltip("Points per second under par for a whole stage (its rounds and its boss), times the stage number.")]
+    [SerializeField] int stageBonusPerSecond = 5;
     [Header("Safe areas")]
     [Tooltip("Where Oni lives between runs, walking in every direction. The first is the temple he wakes in; maps, props and spots are set by Ninja/Apply Maps.")]
     [SerializeField] SafeArea.Config[] safeAreas = DefaultSafeAreas();
@@ -708,6 +717,7 @@ public partial class GameManager : MonoBehaviour
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing)
         {
+            TickClock();
             UpdateScouts();
             effects.Tick();
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());

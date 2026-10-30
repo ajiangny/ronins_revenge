@@ -593,6 +593,7 @@ public partial class GameManager
     IEnumerator EndRound()
     {
         RunLog.EndSegment(lives, maxLives, null);
+        PayRoundBonus();
         state = State.Transition;
         ronin.ControlsEnabled = false;
         IceStatue.CrumbleAll();
@@ -915,6 +916,7 @@ public partial class GameManager
         }
         else
         {
+            PayStageBonus();
             OfferStageBoon();
         }
     }

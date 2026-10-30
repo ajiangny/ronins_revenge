@@ -123,6 +123,9 @@ public class GameUI : MonoBehaviour
     public static readonly Color HighScoreColour = new Color(1f, 0.84f, 0.42f);
 
     TextMeshProUGUI scoreText;
+    TextMeshProUGUI clockText;
+    // A cleared round's or stage's time and bonus holds the clock's row until then.
+    float clockResultUntil;
     TextMeshProUGUI levelText;
     RectTransform livesRow;
     readonly List<GameObject> lifeIcons = new List<GameObject>();
@@ -249,6 +252,9 @@ public class GameUI : MonoBehaviour
         hudParts.Add(shade.gameObject);
 
         scoreText = HudValue("Score", new Vector2(0f, 1f), new Vector2(36, -14), TextAlignmentOptions.TopLeft, Color.white);
+        // The time-bonus clock, a smaller row under the score.
+        clockText = HudValue("Clock", new Vector2(0f, 1f), new Vector2(36, -62), TextAlignmentOptions.TopLeft, Color.white);
+        clockText.fontSize = 30;
         levelText = HudValue("Level", new Vector2(1f, 1f), new Vector2(-36, -14), TextAlignmentOptions.TopRight, Color.white);
         levelText.rectTransform.sizeDelta = new Vector2(700, 100);
         levelText.lineSpacing = -12;
@@ -992,6 +998,24 @@ public class GameUI : MonoBehaviour
         scoreText.SetText(ScoreFormat, score);
     }
 
+    // The round's clock: bright while a time bonus is still to be had, dim once par is past.
+    public void SetClock(float seconds, float par)
+    {
+        if (Time.unscaledTime < clockResultUntil) return;
+        int whole = Mathf.FloorToInt(seconds);
+        clockText.SetText(seconds < par ? ClockFormat : ClockOverFormat, (float)(whole / 60), whole % 60);
+    }
+
+    // A cleared round or stage: its time and the bonus it banked, in gold, or dim with no bonus.
+    public void ShowClockResult(string label, float seconds, int bonus)
+    {
+        clockResultUntil = Time.unscaledTime + 3f;
+        int whole = Mathf.FloorToInt(seconds);
+        string time = $"{whole / 60}:{whole % 60:00}";
+        string gold = ColorUtility.ToHtmlStringRGB(HighScoreColour);
+        clockText.text = bonus > 0 ? $"{HudLabel(label)}<color=#{gold}>{time}  +{bonus}</color>" : $"{HudLabel(label)}{HudDim(time)}";
+    }
+
     public void SetStage(int stage, int stageCount, int round, int roundCount)
     {
         // The stage on the HUD row, with the round as a smaller line under it scaled to the stage line's width, so
@@ -1015,6 +1039,8 @@ public class GameUI : MonoBehaviour
 
     // Built once, as the score changes many times a second.
     static readonly string ScoreFormat = HudLabel("SCORE") + "{0:000000}";
+    static readonly string ClockFormat = HudLabel("TIME") + "{0}:{1:00}";
+    static readonly string ClockOverFormat = HudLabel("TIME") + HudDim("{0}:{1:00}");
 
     // A full heart per remaining life and a burnt-out one per life lost, up to his maximum: the same heart, its fire
     // gone dark, so the row keeps one silhouette (an outline of the flame-wreathed heart came out scraggly).

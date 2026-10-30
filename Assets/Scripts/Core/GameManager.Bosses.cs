@@ -85,6 +85,7 @@ public partial class GameManager
         state = State.Playing;
         ronin.ControlsEnabled = true;
         RunLog.Note($"held: {HeldSummary()}");
+        StartRoundClock();
         RunLog.BeginSegment($"S{stageIndex + 1} BOSS {Stage.boss} ({activeBoss.MaxHealth} hp)");
         activeBoss.Begin(ronin, army.samuraiPrefab.arrowPrefab);
     }
@@ -515,6 +516,7 @@ public partial class GameManager
     void OnBossDefeated()
     {
         if (state != State.Playing) return;
+        PayStageBonus();
         score += 2000 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);

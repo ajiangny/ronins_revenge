@@ -158,7 +158,8 @@ public partial class GameManager
         // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
         if (cleared) notesThisRun += Oaths.ClaimBounty();
         RunLog.EndSegment(lives, maxLives, null);
-        RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  notes {notesThisRun}  held: {HeldSummary()}");
+        BankTimeBonus();
+        RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  time {Clock(runTime)}  time bonus {roundBonusTotal + stageBonusTotal}  notes {notesThisRun}  held: {HeldSummary()}");
         Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();

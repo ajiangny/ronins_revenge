@@ -4,6 +4,8 @@ The story behind Ronin's Revenge: what happened, why everyone keeps coming back,
 react as runs pile up, the way Hades' do. Each character has their own file. **Check a character's file before
 writing a line, a scene or art for them**, and update it when something about them changes. [RELATIONSHIPS.md](RELATIONSHIPS.md)
 maps every bond in the cast: what they call each other, which pairs already talk, and where lines are missing.
+[BOSS_ARCS.md](BOSS_ARCS.md) is the plan (not yet in game) for the bosses' progressive story: what they say about
+each other, keeping score, and the phase 2 rewrite.
 
 ## Cast
 

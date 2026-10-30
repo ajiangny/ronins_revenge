@@ -221,7 +221,11 @@ public partial class GameManager
             MenuUI.Item item = MenuUI.Item.Button(song.Name.ToUpperInvariant(), () =>
             {
                 if (maxed) Upgrades.Toggle(id);
-                else if (Upgrades.Buy(id)) Sfx.Play(Sfx.SoulCollect);
+                else if (Upgrades.Buy(id))
+                {
+                    Sfx.Play(Sfx.SoulCollect);
+                    Save.First(Firsts.SongBought);
+                }
                 ShowSongs(back, row);
             }, note);
             item.detail = price;

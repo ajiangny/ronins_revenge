@@ -52,6 +52,7 @@ public partial class GameManager
         Save.Data.hubPending = false;
         Conversation said = Dialogue.Find("Asagi_Meet_Pool");
         Save.Data.asagiMet = true;
+        Save.Data.AddFirst(Firsts.Asagi, Save.Run);
         Save.Data.asagiSoulOwed = true;
         Save.Write();
         if (said == null) yield break;
@@ -159,6 +160,7 @@ public partial class GameManager
     {
         Save.Data.oathsUnsealed = true;
         Save.Write();
+        Save.First(Firsts.OathsUnsealed);
         yield return new WaitForSeconds(3.2f);
         Vector3 stone = safeArea.PointOf(StationKind.Oaths) + Vector3.up * 1.2f;
         Sfx.Play(Sfx.ChainSnap);
@@ -189,6 +191,7 @@ public partial class GameManager
             MenuUI.Item item = MenuUI.Item.Button(oath.Name.ToUpperInvariant(), () =>
             {
                 Oaths.Cycle(id);
+                if (Oaths.Rank(id) > 0) Save.First(Firsts.OathSworn);
                 Sfx.Play(Oaths.Rank(id) > 0 ? Sfx.ChainSnap : Sfx.UiMove);
                 ShowOaths(back, row);
             }, note);
@@ -393,6 +396,7 @@ public partial class GameManager
             items.Add(MenuUI.Item.Button(blade == carried ? $"{name}  <color=#{muted}>·  CARRIED</color>" : name, () =>
             {
                 Save.Data.weapon = (int)pick;
+                if (pick == Ronin.Blade.Kunai) Save.First(Firsts.KunaiSkin);
                 Save.Write();
                 ronin.Skin = pick;
                 Sfx.Play(Sfx.UiConfirm);

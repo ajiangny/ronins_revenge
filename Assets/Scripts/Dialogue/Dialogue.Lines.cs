@@ -742,13 +742,14 @@ public static partial class Dialogue
         Line("Poguru_Boss_Wiggle", Pog, DialogueEvent.PoguruBoss, Repeat, "Victory wiggle! ...No? Okay."),
         Line("Poguru_Boss_Notes", Pog, DialogueEvent.PoguruBoss, Repeat, "Spirit Notes everywhere! Can we buy a song? A snack song?"),
         Line("Poguru_Boss_Cheer", Pog, DialogueEvent.PoguruBoss, Repeat, "Did you see me? I was cheering SO quietly."),
-        // His first look at each stage after the first, and at what's new in its army.
-        Line("Poguru_Stage_Pass", Pog, DialogueEvent.PoguruStage, Story, "Blue ones now! And the front ones brought DOORS. Who brings a door to a fight?",
-            AtStage(2, 1)),
-        Line("Poguru_Stage_Divers", Pog, DialogueEvent.PoguruStage, Story, "Some of them jump now! See the flash? Then MOVE!", AtStage(2, 2)),
-        Talk("Poguru_Stage_Shrine", Pog, DialogueEvent.PoguruStage, Story, When(AtStage(3, 1)), P("Brrr! I'm made of FIRE and I'm still cold!"),
+        // His first look at each new kind of soldier (PoguruFirst, when it first marches in or first dives). These four
+        // came with the stage each kind first fights in, so they still open on the stage.
+        First("Poguru_Stage_Pass", Firsts.Enemy(SamuraiKind.Shieldbearer),
+            P("Blue ones now! And the front ones brought DOORS. Who brings a door to a fight?")),
+        First("Poguru_Stage_Divers", Firsts.Divers, P("Some of them jump now! See the flash? Then MOVE!")),
+        First("Poguru_Stage_Shrine", Firsts.Enemy(SamuraiKind.Yurei), P("Brrr! I'm made of FIRE and I'm still cold!"),
             P("And the white ladies shoot right through cover. Don't hide from those. Dodge!")),
-        Talk("Poguru_Stage_Mountain", Pog, DialogueEvent.PoguruStage, Story, When(AtStage(4, 1)),
+        First("Poguru_Stage_Mountain", Firsts.Enemy(SamuraiKind.Bellringer),
             P("These stairs... Your wisps went all shivery. Is this where the bells started?"), O("...Yes."),
             P("Oh. ...The ones with the hand bells make the rest shoot faster. Get them first!")),
         // A kite scout drifting over.
@@ -859,6 +860,10 @@ public static partial class Dialogue
     // The tutorial's soldiers, in the soldier voice (SOLDIER in Tools/generate-voice.mjs).
     public const string Soldier = "Ashigaru";
     static DialogueLine S(string text) => Say(Soldier, text);
+
+    // Poguru's word on a first (PoguruFirst): plays once, the moment `key` is first had or seen.
+    static Conversation First(string id, string key, params DialogueLine[] lines) =>
+        Talk(id, Pog, DialogueEvent.PoguruFirst, Tier.Priority, When(JustGot(key)), lines);
 
     // A roast at the temple, resting `cooldown` runs after it plays.
     static Conversation Roast(string id, int cooldown, Req[] requires, params DialogueLine[] lines) =>

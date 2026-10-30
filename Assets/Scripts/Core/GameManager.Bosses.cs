@@ -63,6 +63,7 @@ public partial class GameManager
         // What the boss says depends on every fight before this one; with nothing written it's its own intro line.
         Conversation intro = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossIntro, Dialogue.Context(loadout))
             ?? Unwritten(BossLine.Intro);
+        Save.First(Firsts.Boss(Stage.boss));
         // The card only names the boss; the talking happens in the scene after it.
         if (lines.portrait != null && lines.closeup != null)
         {

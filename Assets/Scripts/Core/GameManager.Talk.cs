@@ -12,12 +12,12 @@ public partial class GameManager
     // Poguru pops out of the wisp for a line and goes back in. Nothing is picked (or marked heard) unless it can play:
     // not in the tutorial, never over a full line or while he's already out, and only in play, between beats or in
     // the temple.
-    IEnumerator PoguruBark(DialogueEvent evt, float chance = 1f, BossKind? boss = null, BossKind? nextBoss = null)
+    IEnumerator PoguruBark(DialogueEvent evt, float chance = 1f, BossKind? boss = null, BossKind? nextBoss = null, string just = null)
     {
         if (tutorial.Active || poguru.IsOut || FullLinePlaying) yield break;
         if (state != State.Playing && state != State.Transition && state != State.Hub) yield break;
         if (Random.value >= chance) yield break;
-        Conversation said = Dialogue.Pick("Poguru", evt, BarkContext(boss, nextBoss));
+        Conversation said = Dialogue.Pick("Poguru", evt, BarkContext(boss, nextBoss, just));
         if (said == null || said.Lines.Length == 0) yield break;
         poguru.PopOut();
         yield return new WaitForSecondsRealtime(0.5f);
@@ -33,8 +33,48 @@ public partial class GameManager
         else poguru.ReturnToWisp();
     }
 
-    DialogueContext BarkContext(BossKind? boss = null, BossKind? nextBoss = null) =>
-        Dialogue.Context(loadout, null, lives, false, boss, nextBoss, null, state == State.Hub ? 0 : stageIndex + 1, state == State.Hub ? 0 : roundIndex + 1);
+    DialogueContext BarkContext(BossKind? boss = null, BossKind? nextBoss = null, string just = null) =>
+        Dialogue.Context(loadout, null, lives, false, boss, nextBoss, null, state == State.Hub ? 0 : stageIndex + 1, state == State.Hub ? 0 : roundIndex + 1, just);
+
+    // Records a first (Firsts) and, when it's news, Poguru pops out with his word on it (PoguruFirst). Nothing is
+    // recorded in the tutorial, which is its own introduction.
+    void FirstBark(string key)
+    {
+        if (!tutorial.Active && Save.First(key)) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, key));
+    }
+
+    // The same for a thing whose screen freezes the field (a bead, a thread, the Sword Arts): his word comes as a short
+    // talk over the frozen field, then `show` opens the screen.
+    void FirstThen(string key, System.Action show)
+    {
+        Conversation said = !tutorial.Active && Save.First(key)
+            ? Dialogue.Pick("Poguru", DialogueEvent.PoguruFirst, BarkContext(null, null, key)) : null;
+        if (said == null) show();
+        else StartCoroutine(TalkThen(said, show));
+    }
+
+    IEnumerator TalkThen(Conversation said, System.Action then)
+    {
+        yield return PlayTalk(said, new TalkOptions { keepHud = true, dim = 0.3f });
+        then();
+    }
+
+    // The kinds of soldier in this army never met before are recorded; Poguru names the first he has a word for.
+    string NewEnemies()
+    {
+        string news = null;
+        foreach (Samurai s in army.Soldiers)
+        {
+            string key = Firsts.Enemy(s.Kind);
+            if (Save.First(key) && news == null && Dialogue.CanPick("Poguru", DialogueEvent.PoguruFirst, BarkContext(null, null, key))) news = key;
+        }
+        return news;
+    }
+
+    void OnDiveStarted()
+    {
+        if (state == State.Playing) FirstBark(Firsts.Divers);
+    }
 
     bool FullLinePlaying => dialogueScene.IsPlaying || (speakingFullLine && (voice.isPlaying || oniVoice.isPlaying || soulVoice.isPlaying));
 

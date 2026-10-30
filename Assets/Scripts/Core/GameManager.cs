@@ -573,6 +573,7 @@ public partial class GameManager : MonoBehaviour
         army.SamuraiKilled += OnSamuraiKilled;
         army.ArmyDefeated += OnArmyDefeated;
         army.ArmyReachedRonin += OnArmyReachedRonin;
+        army.DiveStarted += OnDiveStarted;
         ronin.Hit += OnRoninHit;
         ronin.ShurikenThrown += OnShurikenThrown;
         ronin.Parried += OnParried;
@@ -591,6 +592,7 @@ public partial class GameManager : MonoBehaviour
         army.SamuraiKilled -= OnSamuraiKilled;
         army.ArmyDefeated -= OnArmyDefeated;
         army.ArmyReachedRonin -= OnArmyReachedRonin;
+        army.DiveStarted -= OnDiveStarted;
         ronin.Hit -= OnRoninHit;
         ronin.ShurikenThrown -= OnShurikenThrown;
         ronin.Parried -= OnParried;

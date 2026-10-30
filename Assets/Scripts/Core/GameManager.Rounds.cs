@@ -17,6 +17,7 @@ public partial class GameManager
         bool kiteArt = army.ScoutArt != null;
         CharacterArt scoutArt = kiteArt ? army.ScoutArt : army.samuraiByRow[army.samuraiByRow.Length - 1];
         activeScout = Scout.Spawn(scoutArt, kiteArt, Round.topRowY + 1.4f, OnScoutKilled);
+        if (!tutorial.Active) Save.First(Firsts.Scout);
         StartCoroutine(PoguruBark(DialogueEvent.PoguruScout, 0.35f));
     }
 
@@ -41,6 +42,7 @@ public partial class GameManager
         // It forms where it was won and flies into him, like a round's reward, only smaller.
         RewardSpirit.Spawn(where, relic == Relic.Seal ? Looped(sealFrames, ProceduralSprites.Seal) : Looped(silkFrames, ProceduralSprites.Silk),
             Upgrades.RelicColour(relic), ronin, 1f);
+        FirstBark(Firsts.Relic(relic));
     }
 
     // Drops into a stage's boss fight, or its rounds, on that fight's own map. A boss jump counts as the last round.
@@ -229,8 +231,11 @@ public partial class GameManager
         ronin.ControlsEnabled = true;
         army.Advance();
         tutorial.RoundStarted();
-        // His first look at a new stage comes before any round-start bark.
-        if (!tutorial.Active && Dialogue.CanPick("Poguru", DialogueEvent.PoguruStage, BarkContext())) StartCoroutine(PoguruBark(DialogueEvent.PoguruStage));
+        // A kind of soldier never met before gets his word first, then his first look at a new stage, before any
+        // round-start bark.
+        string newEnemy = tutorial.Active ? null : NewEnemies();
+        if (newEnemy != null) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, newEnemy));
+        else if (!tutorial.Active && Dialogue.CanPick("Poguru", DialogueEvent.PoguruStage, BarkContext())) StartCoroutine(PoguruBark(DialogueEvent.PoguruStage));
         else if (!tutorial.Active) StartCoroutine(PoguruBark(DialogueEvent.PoguruRound, 0.2f));
         RunLog.BeginSegment($"S{stageIndex + 1} R{roundIndex + 1} ({RewardLabel(pendingReward, pendingElement)})");
         nextScoutTime = Time.time + Random.Range(6f, 10f);

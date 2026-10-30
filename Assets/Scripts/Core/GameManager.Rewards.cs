@@ -153,12 +153,12 @@ public partial class GameManager
         Time.timeScale = 0f;
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.BeadColor, 1.2f);
         Sfx.Play(Sfx.SoulCollect, 1f, 1.15f);
-        boonChoice.ShowBead(offers, Held(beadPainted, beadFrames), index =>
+        FirstThen(Firsts.Item(PathReward.Bead), () => boonChoice.ShowBead(offers, Held(beadPainted, beadFrames), index =>
         {
             TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
-        });
+        }));
         return true;
     }
 
@@ -178,12 +178,12 @@ public partial class GameManager
         Time.timeScale = 0f;
         Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.ThreadColor, 1.2f);
         Sfx.Play(Sfx.SoulCollect, 1f, 1.25f);
-        boonChoice.ShowThread(offers, Held(threadPainted, threadFrames), index =>
+        FirstThen(Firsts.Item(PathReward.Thread), () => boonChoice.ShowThread(offers, Held(threadPainted, threadFrames), index =>
         {
             TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
-        });
+        }));
         return true;
     }
 
@@ -196,12 +196,12 @@ public partial class GameManager
         state = State.Choosing;
         ronin.ControlsEnabled = false;
         Time.timeScale = 0f;
-        boonChoice.ShowArts(offers, Held(scrollPainted, scrollFrames), index =>
+        FirstThen(Firsts.Item(PathReward.Scroll), () => boonChoice.ShowArts(offers, Held(scrollPainted, scrollFrames), index =>
         {
             TakeOrReject(offers, index);
             Time.timeScale = 1f;
             afterPick();
-        });
+        }));
         return true;
     }
 
@@ -428,6 +428,13 @@ public partial class GameManager
     void TakeBoon(BoonOffer offer)
     {
         loadout.Take(offer);
+        // Firsts for the cast to bring up: the boon itself, and the first Duo or Legendary ever taken.
+        if (!offer.IsUpgrade && !tutorial.Active)
+        {
+            Save.First(Firsts.Boon(offer.Boon.Id));
+            if (offer.Boon.Kind == BoonKind.Duo) Save.First(Firsts.Duo);
+            if (offer.Boon.Kind == BoonKind.Legendary) Save.First(Firsts.Legendary);
+        }
         // The run's first boon gets a word from Poguru once the screen has closed.
         if (!firstBoonTaken && offer.Boon.Kind != BoonKind.Art && !offer.IsUpgrade)
         {
@@ -627,6 +634,7 @@ public partial class GameManager
                 Fx.Play(Fx.BoonPillar, ronin.Feet, Boons.Info(pendingElement).Color, 1.4f);
                 Sfx.Play(Sfx.SoulCollect);
                 soulCaught = true;
+                if (!tutorial.Active) Save.First(Firsts.Soul(pendingElement));
                 // Ancestral Lore: each stage's first soul is Rare or better.
                 Rarity floor = roundIndex == 0 && Upgrades.Rank(UpgradeId.AncestralLore) > 0 ? Rarity.Rare : Rarity.Common;
                 if (OfferBoons(pendingElement, () => picked = true, false, floor)) yield return new WaitUntil(() => picked);
@@ -653,6 +661,7 @@ public partial class GameManager
                 Fx.Play(Fx.BoonPillar, ronin.Feet, RewardColour(reward, pendingElement), 1.2f);
                 Sfx.Play(Sfx.SoulCollect, 0.8f, 1.3f);
                 yield return new WaitForSeconds(0.6f);
+                FirstBark(Firsts.Item(PathReward.Spring));
                 break;
             case PathReward.Notes:
                 int notes = noteCache * (stageIndex + 1);
@@ -661,6 +670,7 @@ public partial class GameManager
                 Sfx.Play(Sfx.SoulCollect, 0.9f, 1.2f);
                 ui.ShowSubtitle(null, $"+{notes} Spirit Notes", RewardColour(reward, pendingElement), 1.6f);
                 yield return new WaitForSeconds(0.6f);
+                FirstBark(Firsts.Item(PathReward.Notes));
                 break;
         }
         state = State.Transition;

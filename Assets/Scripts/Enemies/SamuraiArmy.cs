@@ -80,6 +80,8 @@ public class SamuraiArmy : MonoBehaviour
     public event Action ArmyReachedRonin;
     // The front rank has reached the cover's row and holds there (BeginHolding).
     public event Action Holding;
+    // A diver breaks formation (its warning starts): the first one ever gets Poguru's word.
+    public event Action DiveStarted;
 
     readonly List<Samurai> soldiers = new List<Samurai>();
     readonly Collider[] overlapBuffer = new Collider[8];
@@ -646,6 +648,7 @@ public class SamuraiArmy : MonoBehaviour
         Samurai diver = candidates[UnityEngine.Random.Range(0, candidates.Count)];
         Warn(diver, diveWarning);
         dives.Add(new Dive { soldier = diver, slot = diver.Body.position });
+        DiveStarted?.Invoke();
     }
 
     // Where the front rank holds: inside the cover's row, but always clear of the ronin's head.

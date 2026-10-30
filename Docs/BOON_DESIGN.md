@@ -293,7 +293,7 @@ Rarity and level are separate:
 
 | Boon | Step per level (first) | Bound |
 |---|---|---|
-| Fire blasts (Flame Blade, Inferno Shuriken, Burning Riposte, Pyre Shadow) | +0.17 radius | 2.6 |
+| Fire blasts (Flame Blade, Inferno Shuriken, Burning Riposte, Pyre Shadow) | +1 samurai burned (whole; see §8) | 4 (5 for Inferno, Burning) |
 | Flame Blade chance | +8% | 90% |
 | Blazing Hands | +3.5% | 30% |
 | Kindling | −1 swing (whole) | 3 |
@@ -377,3 +377,26 @@ Healing Spring −5 kills (whole) to a floor of 15; Tidal Renewal is instant, so
 check is the share of *other* elements' effect kills on soaked targets and the arrows washed per round. If Undertow
 alone holds the army off the floor, lower the push or let it apply only when the army is below half its descent.
 Dragon Gate is once a stage so it can't trivialise bosses.
+
+## 8. Review fixes: dead levels, boss-fight healing, Kuon and Water
+
+A review of the code found three places where a boon's stat didn't do what its card said.
+
+- **Fire levels did almost nothing against the army.** A blast burned at most 2 samurai, nearest first, but rarity
+  and Spirit Beads raised its *radius* (1.8 → 2.6). Once two samurai were in reach, a bigger radius changed nothing,
+  so a bead on Inferno Shuriken, Burning Riposte or Pyre Shadow was close to wasted. Now every blast reaches a fixed
+  `BlastRadius` 2.1 (above, below and beside; the diagonals stay Wildfire's), and the stat is **samurai burned**:
+
+  | Boon | Common / Rare / Epic | Per level | Bound |
+  |---|---|---|---|
+  | Flame Blade | 2 / 2 / 3 (its chance is what Rare raises) | +1 (whole) | 4 |
+  | Inferno Shuriken, Burning Riposte | 2 / 3 / 4 | +1 (whole) | 5 |
+  | Pyre Shadow (radius 1.9; its end blast 2.9, one more) | 1 / 2 / 3 | +1 (whole) | 4 |
+
+  Wildfire now reads "+0.6 radius and two more burned" (it was 4 burned in place of 2). Kindling and Plasma Arc keep 2.
+  Common play is unchanged; Epic Inferno and Burning gain the most. Watch the fire kill share in `RunLog`.
+- **Healing Spring was dead in boss fights**, where the play log says the lives are lost: it counted only kills.
+  Three procing blows on a warlord (or Kuon) now count as one kill.
+- **Water did nothing to Kuon.** Kuon now has its own Soaked (+1 from boon effects, a sea-blue wash), applied by
+  Riptide Blade (at the boss share of its chance), Tidewake Shuriken's wake, Undertow Riposte and Tide Shadow.
+

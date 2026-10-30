@@ -204,9 +204,6 @@ public static class Boons
         return count >= 2;
     }
 
-    // However many levels a blast gathers it stays short of the diagonals (2.7), which are Wildfire's.
-    const float BlastCap = 2.6f;
-
     static string Plus(float v) => $"+{v:0.##}";
     static string Percent(float v) => $"+{v * 100:0}%";
     static string MinusPercent(float v) => $"-{v * 100:0}%";
@@ -214,23 +211,24 @@ public static class Boons
 
     public static readonly BoonDefinition[] All =
     {
-        // Fire: burn. Kills explode. Samurai stand 2 apart across and 1.75 apart down, so 1.8 reaches the samurai
-        // above and below and 2.1 adds the ones beside it. The diagonals (2.7) are left to Wildfire, so an Epic blast
-        // never wipes a 3x3 block on its own. Flame Blade only bursts on some kills: on every one, with the slash
-        // as fast as it is, it cleared whole waves by itself.
+        // Fire: burn. Kills explode. A blast's reach is fixed (BoonEffects.BlastRadius: the samurai above, below and
+        // beside, never the diagonals, which are Wildfire's); what rarity and levels raise is how many in reach it
+        // burns, nearest first. While the reach grew instead, the burn cap of 2 left most of a bead's radius unused.
+        // Flame Blade only bursts on some kills: on every one, with the slash as fast as it is, it cleared whole waves
+        // by itself.
         new BoonDefinition { Id = BoonId.FlameBlade, Element = Element.Fire, Slot = BoonSlot.Attack, Name = "Flame Blade",
             Description = "A <b>Slash</b> kill may burst into flame, burning nearby samurai.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
+            StatLabel = "Samurai burned:", Values = new[] { 2f, 2f, 3f }, Format = Plus,
             ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
-            LevelStep = 0.17f, Max = BlastCap, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
+            LevelStep = 1f, Whole = true, Max = 4f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
         new BoonDefinition { Id = BoonId.InfernoShuriken, Element = Element.Fire, Slot = BoonSlot.Special, Name = "Inferno Shuriken",
             Description = "Every samurai your <b>Shuriken</b> cuts down explodes.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
-            LevelStep = 0.17f, Max = BlastCap },
+            StatLabel = "Samurai burned:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 5f },
         new BoonDefinition { Id = BoonId.BurningRiposte, Element = Element.Fire, Slot = BoonSlot.Parry, Name = "Burning Riposte",
             Description = "Arrows you <b>Parry</b> come back as a fireball that explodes on impact.",
-            StatLabel = "Blast radius:", Values = new[] { 1.8f, 2.1f, 2.3f }, Format = Plus,
-            LevelStep = 0.17f, Max = BlastCap },
+            StatLabel = "Samurai burned:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 5f },
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
             Description = "You <b>Slash</b> faster.",
             StatLabel = "Slash cooldown:", Values = new[] { 0.08f, 0.14f, 0.2f }, Format = MinusPercent,
@@ -291,8 +289,8 @@ public static class Boons
         // lends the Shadow Clone its element; the clone's own hits (KillSource.Clone) set off nothing else.
         new BoonDefinition { Id = BoonId.PyreShadow, Element = Element.Fire, Slot = BoonSlot.Ultimate, Name = "Pyre Shadow",
             Description = "Your <b>Shadow Clone</b>'s kills burst into flame, and it goes out in a great blast when your ultimate ends.",
-            StatLabel = "Blast radius:", Values = new[] { 1.6f, 1.9f, 2.2f }, Format = Plus,
-            LevelStep = 0.17f, Max = BlastCap },
+            StatLabel = "Samurai burned:", Values = new[] { 1f, 2f, 3f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 4f },
         new BoonDefinition { Id = BoonId.FrostShadow, Element = Element.Water, Slot = BoonSlot.Ultimate, Name = "Frost Shadow",
             Description = "Unleashing your <b>Shadow Clone</b> freezes the whole army, and its kills may encase nearby samurai in ice.",
             StatLabel = "Freeze time:", Values = new[] { 1f, 1.5f, 2f }, Format = Seconds,
@@ -322,7 +320,7 @@ public static class Boons
             Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
         new BoonDefinition { Id = BoonId.HealingSpring, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Healing Spring",
-            Description = "Every so many samurai cut down by your own hand, a lost life is restored (or points, at full health).",
+            Description = "Every so many samurai cut down by your own hand (or three blows on a warlord for each), a lost life is restored (or points, at full health).",
             StatLabel = "Kills per life:", Values = new[] { 45f, 35f, 25f }, Format = v => $"{v:0}",
             LevelStep = -5f, Whole = true, Min = 15f },
 
@@ -367,7 +365,7 @@ public static class Boons
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",
-            Description = "Your fire <b>Blasts</b> grow wider and burn away the enemy arrows inside them.",
+            Description = "Your fire <b>Blasts</b> grow wider, burn two more samurai and burn away the enemy arrows inside them.",
             StatLabel = "Blast radius:", Values = new[] { 0.6f, 0.6f, 0.6f }, Format = Plus,
             Requires = l => TwoSlotsOf(l, Element.Fire) },
         new BoonDefinition { Id = BoonId.StillWater, Element = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,

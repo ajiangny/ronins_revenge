@@ -33,12 +33,16 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public bool Armed { get; private set; }
     public bool IsBroken { get; private set; }
     public bool Dazed => Time.time < dazedUntil;
+    // Soaked by Asagi's water, as a boss is: every boon effect lands one point harder (TakeHit).
+    public bool Soaked => Time.time < soakedUntil;
     // She has fallen and it fights on for both of them.
     public bool Enraged { get; private set; }
     // Only while it stands in plain sight: not in mist, not as the charge coming down a lane.
     public bool Targetable => Armed && !IsBroken && !hidden && shown > 0.5f;
     public Vector3 Centre => sprite.bounds.center;
     float dazedUntil;
+    float soakedUntil;
+    static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
     // Half points from shadow slashes that haven't yet made a whole one.
     float shadowChip;
     Collider hitbox;
@@ -181,10 +185,22 @@ public class SpiritWolf : MonoBehaviour, IHittable
         hitbox.enabled = false;
     }
 
+    // Soaks the wolf: a splash, and every boon effect on it lands harder until it dries.
+    public void Soak(float seconds)
+    {
+        if (!Armed || IsBroken || seconds <= 0f) return;
+        bool fresh = !Soaked;
+        soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds);
+        if (!fresh) return;
+        if (Fx.Play(Fx.Splash, Centre, Color.white, 1.2f) == null) ElementFx.Glow(Centre, SoakTint, 0.7f, 2f, 0.35f);
+        Sfx.Play(Sfx.Splash, 0.8f, 0.9f);
+    }
+
     public void TakeHit(int damage, KillSource source)
     {
         if (!Armed || IsBroken) return;
         if (!Targetable && source != KillSource.Reflected) return;
+        if (Soaked && source == KillSource.Effect) damage++;
         if (source == KillSource.Reflected)
         {
             damage = ReflectedDamage;
@@ -512,6 +528,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
         // Enraged, its flame runs hot: a red heart pulsing through the blue, and its glow and eyes burn red.
         float heat = rage * (0.5f + 0.5f * Mathf.Sin(Time.time * 6f));
         Color body = Color.Lerp(Body, RageColour, 0.35f * heat);
+        if (Soaked) body = Color.Lerp(body, SoakTint, 0.35f);
         sprite.color = new Color(body.r, body.g, body.b, a * 0.78f * flicker);
         transform.localScale = Vector3.one * scale * grown * (1f + 0.25f * rage);
         Color halo = Color.Lerp(new Color(0.3f + 0.5f * glare, 0.9f, 1f), RageColour, 0.7f * rage);

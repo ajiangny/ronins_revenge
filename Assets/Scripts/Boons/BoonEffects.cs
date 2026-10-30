@@ -17,9 +17,14 @@ public class BoonEffects
     // nearest first, so ice can't lock down a whole packed rank from one kill.
     const float FrostEncaseChance = 0.5f;
     const int FrostEncaseTargets = 2;
-    // Most samurai one fire blast can burn, nearest first; Wildfire's blasts burn more.
+    // A fire blast's reach: the samurai above, below and beside (2 across, 1.75 down), short of the diagonals (2.7),
+    // which are Wildfire's. Pyre Shadow's smaller blasts reach only above and below. How many in reach burn, nearest
+    // first, is the boon's own stat; blasts with none of their own (Kindling, Plasma Arc) burn BlastTargets.
+    const float BlastRadius = 2.1f;
+    const float PyreRadius = 1.9f;
     const int BlastTargets = 2;
-    const int WildfireBlastTargets = 4;
+    // Wildfire's blasts burn this many more.
+    const int WildfireExtraTargets = 2;
     // Flame Blade on a boss (or Kuon): every hit lands, so it bursts at this share of its kill chance.
     const float BossFlameShare = 0.6f;
     const float ShardFreezeSeconds = 1.5f;
@@ -45,7 +50,9 @@ public class BoonEffects
     readonly Material boltMaterial;
     float nextBossFrost;
     int drumHits;
-    int springKills;
+    // Healing Spring's tally, in thirds of a kill: a kill adds SpringPerKill, a blow on a warlord or Kuon one.
+    int springTally;
+    const int SpringPerKill = 3;
 
     // Healing Spring: raised when enough of the ronin's own kills have added up; the GameManager heals or pays.
     public event System.Action SpringHeal;
@@ -66,9 +73,11 @@ public class BoonEffects
     }
     // A boss that's still standing, when the thing struck is one.
     static Boss StandingBoss(IHittable target) => target is Boss boss && boss != null && !boss.IsDead ? boss : null;
-    // Shirogane's wolf, Kuon, while it can be fought: the damage boons land on it too, but frost doesn't hold a spirit.
+    // Shirogane's wolf, Kuon, while it can be fought: the damage boons and Asagi's soaking land on it too, but frost
+    // doesn't hold a spirit.
     public SpiritWolf Wolf { get; set; }
     bool WolfFight => Wolf != null && Wolf.Armed && !Wolf.IsBroken;
+    SpiritWolf FightingWolf => WolfFight ? Wolf : null;
 
     public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout)
     {
@@ -100,7 +109,7 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, value, samurai);
+                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, BlastRadius, (int)value, samurai);
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
@@ -123,7 +132,7 @@ public class BoonEffects
                 }
                 break;
             case KillSource.Shuriken:
-                if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, value, samurai);
+                if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, BlastRadius, (int)value, samurai);
                 break;
             case KillSource.Clone:
                 OnCloneKill(samurai, position);
@@ -131,19 +140,25 @@ public class BoonEffects
         }
         if (!Damage.Procs(source)) return;
         BeatDrum();
-        // Healing Spring counts only his own kills, never an effect's or a lesser blade's.
-        if (loadout.Has(BoonId.HealingSpring, out value) && ++springKills >= (int)value)
-        {
-            springKills = 0;
-            SpringHeal?.Invoke();
-        }
+        FillSpring(SpringPerKill);
+    }
+
+    // Healing Spring counts only his own blows, never an effect's or a lesser blade's. A warlord has no samurai to cut
+    // down, so three blows on her count as a kill: bosses are where the lives are lost.
+    void FillSpring(int thirds)
+    {
+        if (!loadout.Has(BoonId.HealingSpring, out float kills)) return;
+        springTally += thirds;
+        if (springTally < (int)kills * SpringPerKill) return;
+        springTally = 0;
+        SpringHeal?.Invoke();
     }
 
     // The Ultimate slot's boon, on a kill by the Shadow Clone: its element takes the samurai's neighbours.
     void OnCloneKill(Samurai samurai, Vector3 position)
     {
         float value;
-        if (loadout.Has(BoonId.PyreShadow, out value)) Blast(position, value, samurai);
+        if (loadout.Has(BoonId.PyreShadow, out value)) Blast(position, PyreRadius, (int)value, samurai);
         if (loadout.Has(BoonId.TideShadow, out value))
         {
             foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
@@ -180,7 +195,11 @@ public class BoonEffects
     {
         if (loadout.Has(BoonId.TideShadow, out float soak))
         {
-            if (BossFight) foreach (Boss boss in Bosses) boss.Soak(soak);
+            if (BossFight)
+            {
+                foreach (Boss boss in Bosses) boss.Soak(soak);
+                if (WolfFight) Wolf.Soak(soak);
+            }
             else if (army.Remaining > 0) army.PushBack(TideShadowPush);
             WashArrows(at, float.MaxValue);
             GreatWave(at, BossFight ? Boss.Centre : army.Centre);
@@ -194,12 +213,12 @@ public class BoonEffects
         Sfx.Play(Sfx.FrostChill, 1f, 0.8f);
     }
 
-    // Pyre Shadow: the clone goes out in a blast wider than its kills' (on a boss, a boss blast).
+    // Pyre Shadow: the clone goes out in a blast wider than its kills', burning one more (on a boss, a boss blast).
     public void OnUltimateEnded(Vector3 at)
     {
-        if (!loadout.Has(BoonId.PyreShadow, out float radius)) return;
-        if (BossFight) BossBlast(at, radius + 1f);
-        else Blast(at, radius + 1f);
+        if (!loadout.Has(BoonId.PyreShadow, out float burns)) return;
+        if (BossFight) BossBlast(at, PyreRadius + 1f);
+        else Blast(at, PyreRadius + 1f, (int)burns + 1);
     }
 
     // The kill effects, triggered by hits on a boss (the one fought, or a soul summoned beside him): fire bursts on
@@ -212,7 +231,7 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) BossBlast(point, value, boss);
+                if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) BossBlast(point, BlastRadius, boss);
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) SoakBoss(boss, point, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
@@ -233,11 +252,11 @@ public class BoonEffects
                 if (loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, boss.Centre, boss);
                 break;
             case KillSource.Shuriken:
-                if (loadout.Has(BoonId.InfernoShuriken, out value)) BossBlast(point, value, boss);
+                if (loadout.Has(BoonId.InfernoShuriken, out _)) BossBlast(point, BlastRadius, boss);
                 break;
             case KillSource.Clone:
                 if (Random.value >= CloneBossShare) break;
-                if (loadout.Has(BoonId.PyreShadow, out value)) BossBlast(point, value, boss);
+                if (loadout.Has(BoonId.PyreShadow, out _)) BossBlast(point, PyreRadius, boss);
                 if (loadout.Has(BoonId.TideShadow, out value)) SoakBoss(boss, point, value);
                 if (loadout.Has(BoonId.FrostShadow, out value) && !boss.Frozen && Time.time >= nextBossFrost)
                 {
@@ -248,7 +267,9 @@ public class BoonEffects
                 if (loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, boss.Centre, boss);
                 break;
         }
-        if (Damage.Procs(source)) BeatDrum();
+        if (!Damage.Procs(source)) return;
+        BeatDrum();
+        FillSpring(1);
     }
 
     // A fireball or ice shard sent back by a parry has struck something.
@@ -257,9 +278,9 @@ public class BoonEffects
         float value;
         if (loadout.Has(BoonId.BurningRiposte, out value))
         {
-            if (BossFight && StandingBoss(target) is Boss struck) BossBlast(point, value, struck);
-            else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, value);
-            else if (!BossFight) Blast(point, value);
+            if (BossFight && StandingBoss(target) is Boss struck) BossBlast(point, BlastRadius, struck);
+            else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, BlastRadius);
+            else if (!BossFight) Blast(point, BlastRadius, (int)value);
         }
         // Frozen Riposte shards encase the samurai they hit themselves (Projectile.FreezeOnHit); only the boss is left.
         if (loadout.Has(BoonId.FrozenRiposte, out _))
@@ -283,7 +304,7 @@ public class BoonEffects
         // Tidewake Shuriken: a wake that soaks what the blade passes and washes the arrows in its lane.
         if (loadout.Has(BoonId.TidewakeShuriken, out float soak) && shuriken != null)
         {
-            shuriken.gameObject.AddComponent<ShurikenWake>().Begin(army, () => Bosses, WakeRadius, soak, Water);
+            shuriken.gameObject.AddComponent<ShurikenWake>().Begin(army, () => Bosses, () => FightingWolf, WakeRadius, soak, Water);
         }
         if (BossFight)
         {
@@ -330,6 +351,7 @@ public class BoonEffects
             if (loadout.Has(BoonId.UndertowRiposte, out _))
             {
                 foreach (Boss boss in Bosses) SoakBoss(boss, boss.Centre, UndertowSoakSeconds);
+                if (WolfFight) Wolf.Soak(UndertowSoakSeconds);
                 GreatWave(ronin.Bounds.center, Boss.Centre);
             }
             return;
@@ -392,10 +414,10 @@ public class BoonEffects
         Sfx.Play(Sfx.WardShatter, 0.8f, 1.2f);
     }
 
-    // Flame Blade, Inferno Shuriken and Burning Riposte: everything within the radius burns. `centre` is the samurai
-    // the blast is centred on, when there is one: Scalding Steam boils wider off a soaked one and washes the arrows
-    // inside.
-    void Blast(Vector3 position, float radius, Samurai centre = null)
+    // Flame Blade, Inferno Shuriken and Burning Riposte: the `burns` samurai nearest its heart within the radius burn.
+    // `centre` is the samurai the blast is centred on, when there is one: Scalding Steam boils wider off a soaked one
+    // and washes the arrows inside.
+    void Blast(Vector3 position, float radius, int burns = BlastTargets, Samurai centre = null)
     {
         radius += loadout.Value(BoonId.Wildfire);
         bool steam = centre != null && centre.Soaked && loadout.Find(BoonId.ScaldingSteam) != null;
@@ -409,7 +431,7 @@ public class BoonEffects
         bool thermal = loadout.Has(BoonId.ThermalShock, out float iceDamage);
         // A blast burns only the few samurai nearest its heart, so a packed army can't be wiped by chains of them
         // (the play log had boon effects making about 60% of the kills). Wildfire burns more.
-        int burned = 0, most = loadout.Find(BoonId.Wildfire) != null ? WildfireBlastTargets : BlastTargets;
+        int burned = 0, most = burns + (loadout.Find(BoonId.Wildfire) != null ? WildfireExtraTargets : 0);
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
             if (burned++ >= most) break;
@@ -529,19 +551,23 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
-                if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(BossFlameShare)) WolfBlast(point, value);
+                if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) WolfBlast(point, BlastRadius);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
+                if (WolfFight && loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) Wolf.Soak(value);
                 break;
             case KillSource.Shuriken:
-                if (loadout.Has(BoonId.InfernoShuriken, out value)) WolfBlast(point, value);
+                if (loadout.Has(BoonId.InfernoShuriken, out _)) WolfBlast(point, BlastRadius);
                 break;
             case KillSource.Clone:
                 if (Random.value >= CloneBossShare) break;
-                if (loadout.Has(BoonId.PyreShadow, out value)) WolfBlast(point, value);
+                if (loadout.Has(BoonId.PyreShadow, out _)) WolfBlast(point, PyreRadius);
                 if (WolfFight && loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
+                if (WolfFight && loadout.Has(BoonId.TideShadow, out value)) Wolf.Soak(value);
                 break;
         }
-        if (Damage.Procs(source)) BeatDrum();
+        if (!Damage.Procs(source)) return;
+        BeatDrum();
+        FillSpring(1);
     }
 
     // A bolt from the source to the target, which the lightning strike art finishes with a flash and shockwave.
@@ -590,7 +616,7 @@ public class BoonEffects
         bool iced = samurai != null && samurai.Encased;
         bool soaked = samurai != null && samurai.Soaked;
         target.TakeHit(1, KillSource.Effect);
-        if (loadout.Has(BoonId.PlasmaArc, out float plasma)) Blast(to, plasma, samurai);
+        if (loadout.Has(BoonId.PlasmaArc, out float plasma)) Blast(to, plasma, BlastTargets, samurai);
         // Thunder Rain: the strike runs along the water to every other soaked samurai in the rank, once.
         if (arcs && soaked && loadout.Find(BoonId.ThunderRain) != null)
         {

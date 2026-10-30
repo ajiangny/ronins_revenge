@@ -2,21 +2,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Tidewake Shuriken: rides on the shuriken and soaks each samurai (or boss) it passes within reach, once each, and
-// washes away the ordinary arrows in its wake. Nothing here kills, so it can set off nothing else.
+// Tidewake Shuriken: rides on the shuriken and soaks each samurai (or boss, or Kuon) it passes within reach, once
+// each, and washes away the ordinary arrows in its wake. Nothing here kills, so it can set off nothing else.
 public class ShurikenWake : MonoBehaviour
 {
     SamuraiArmy army;
     Func<IEnumerable<Boss>> bosses;
+    Func<SpiritWolf> wolf;
     float radius;
     float seconds;
     Color water;
     readonly HashSet<IHittable> soaked = new HashSet<IHittable>();
 
-    public void Begin(SamuraiArmy owner, Func<IEnumerable<Boss>> currentBosses, float reach, float soakSeconds, Color colour)
+    public void Begin(SamuraiArmy owner, Func<IEnumerable<Boss>> currentBosses, Func<SpiritWolf> currentWolf, float reach,
+        float soakSeconds, Color colour)
     {
         army = owner;
         bosses = currentBosses;
+        wolf = currentWolf;
         radius = reach;
         seconds = soakSeconds;
         water = colour;
@@ -36,6 +39,8 @@ public class ShurikenWake : MonoBehaviour
             if (target == null || target.IsDead || (target.Centre - position).sqrMagnitude > radius * radius * 4f) continue;
             if (soaked.Add(target)) target.Soak(seconds);
         }
+        SpiritWolf kuon = wolf();
+        if (kuon != null && (kuon.Centre - position).sqrMagnitude <= radius * radius * 4f && soaked.Add(kuon)) kuon.Soak(seconds);
         foreach (Arrow arrow in FindObjectsByType<Arrow>())
         {
             if (arrow.Unbreakable || arrow.Reflectable) continue;

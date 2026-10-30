@@ -210,7 +210,7 @@ Lines with the other characters (all voiced).
 | id | Event | Tier | Requires | Lines |
 |---|---|---|---|---|
 | `Poguru_Soul_Fire` | `PoguruSoul` | Reactive, rests 3 | `holds Fire` | **Poguru:** "Ooh, toasty! The grumpy captain likes you!" |
-| `Poguru_Soul_Frost` | `PoguruSoul` | Reactive, rests 3 | `holds Frost` | **Poguru:** "Brr! The wolf granny made you all frosty!" |
+| `Poguru_Soul_Frost` | `PoguruSoul` | Reactive, rests 3 | `holds Frost` | **Poguru:** "Brr! The bird granny made you all frosty!" |
 | `Poguru_Soul_Water` | `PoguruSoul` | Reactive, rests 3 | `holds Water` | **Poguru:** "You smell like the pond! Did the fish lady give you that? Is she a dragon yet?" |
 | `Poguru_Soul_Storm` | `PoguruSoul` | Reactive, rests 3 | `holds Storm` | **Poguru:** "My scales are all fizzy! Is that the drummer girl?" |
 

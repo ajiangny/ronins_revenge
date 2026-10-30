@@ -120,7 +120,7 @@ The fastest check before writing a line. Blank means they never address each oth
 | **Mizore** | **"Oni"**, "young man" | "my prince" (the boy), "he" | "she" | **"Captain"** | | **"Hibiki"** | **"Teacher"** | "creature", "your little dragon" |
 | **Hibiki** | "Oni", **"my lord guardsman"** | "he" | **"Lady Shirogane"** | **"Captain Kettle"** | **"Grandmother"** | | **"Great-Grandmother"** | "the festival dragon" |
 | **Asagi** | **"little fry"**, **"flute boy"**, "Oni" (only after `Asagi_Meet_Home`) | "the boy who wanted forever", "he" | "the one who listened", "she" | **"little kettle"** | **"little sleet"**, "my student" | "the drummer girl", "dear" | | "very small dragon", "dear" |
-| **Poguru** | "Oni" | (hides) | "the silver lady", "she" | "the grumpy captain" | "the wolf granny" | "the drummer girl" | "the fish lady" | |
+| **Poguru** | "Oni" | (hides) | "the silver lady", "she" | "the grumpy captain" | "the bird granny" | "the drummer girl" | "the fish lady" | |
 
 - Mizore always answers "Grandmother" with "I'm not your grandmother." Asagi answers "Great-Grandmother" with
   "Yes, dear." and "carp" with "Koi."

@@ -230,7 +230,7 @@ Today `BoonChoiceUI.Show` puts Oni's painted portrait on the left with the caugh
 Busts go in `Assets/Art/Portraits/` (`Akagane_Bust.png`, `Mizore_Bust.png`, `Hibiki_Bust.png`) and are wired the way
 `ElementArt.portrait` is today, through a `Ninja/Apply …` command, not by hand. Each soul file's **Look** section is
 the art brief. They should match each other in framing. (The painted portraits, as revised, drop the chain on all three,
-and Mizore is a white wolf-woman; see each file's Look.)
+and Mizore is a white crane-woman; see each file's Look.)
 
 **The souls he holds (built).** Each element's soul on the boon screen is painted for the one who caught it (GPT image
 gen, `Assets/Art/Portraits/Soul_<Fire|Water|Lightning>_Painted.png`); in play the pixel soul frames still drop:

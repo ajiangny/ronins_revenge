@@ -16,23 +16,24 @@ useful.
 
 ## Look
 
-**The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Mizore_Closeup.png`, with `Mizore_Full.png`) was painted
-from this brief in the boss portraits' style (GPT image gen), then revised by the user: **she's painted as a white
-wolf-woman**, silver-furred with a wolf's face, ears and tail, in the same frosted indigo physician's robes, bell and
-inro, with ice-blue eyes. The art is the reference for how she looks now; the human description below is the earlier brief.
+**The painting.** Her talk-scene portrait (`Assets/Art/Portraits/Mizore_Closeup.png`, with `Mizore_Full.png`) is
+painted in the boss portraits' style (GPT image gen). **She's a white crane-woman** (she was a human, then a wolf-woman,
+in earlier passes). The brief, for the paintings and the boon screen's pixel bust:
 
-For the boon screen's pixel bust:
-
-- An old woman around seventy, small and very upright. Grey hair pinned back with a single plain comb, a few
-  loose strands stiff with frost. Lined face, thin mouth, pale ice-blue eyes that look at you like a wound.
-- **Court physician's robes** in dark slate blue over grey, sleeves tied back with a cord for work. Frost creeps
-  along the hems and her eyelashes.
+- Around seventy, small and very upright. A **pure white crane's head** and long neck, the feathers a little thin
+  and ragged at the crown, the crest plumes swept back and stiff with frost. A long, narrow grey-horn beak. Pale
+  ice-blue eyes that look at you like a wound.
+- A white **feather ruff** at the collar. **Court robes** in layered white and pale grey, cut long like old court
+  dress, the borders trimmed in dark slate, patterned with snowflakes and frost ferns (not Asagi's waves), with a
+  long slate-indigo sash tail. Frost creeps along the hems. The wide sleeves fray into **wing feathers**, white
+  shading to slate and frost blue at the tips.
+- **Talon hands**, dark grey and scaled. She holds a thin **silver needle** up between two talons, perfectly still,
+  the claws rimed with frost. On the full figure, thin crane legs and talons show under the hem.
 - An **inrō medicine case** at her sash, lacquered black with a white crane.
-- She holds a thin **silver needle** up between two fingers, perfectly still. Her fingertips are rimed with frost.
-- Her breath shows as a faint mist. Snow drifts very slowly around her, not falling: hanging.
-- **Her bell:** a small bronze bell, cracked, on a fine chain that runs out of frame from over her heart.
-- Palette: the Frost element colour (`#59BFFF`) for the glow, frost and eyes; slate blue and grey for the robes;
-  white for breath and snow. **No teal** until she's freed.
+- Snow drifts very slowly around her, not falling: hanging.
+- **Her bell:** a small bronze bell, cracked, on a fine chain over her heart.
+- Palette: the Frost element colour (`#59BFFF`) for the glow, frost and eyes; white, pale grey and slate for the
+  robes and feathers. **No red** (no crown patch), and **no teal** until she's freed.
 - **Her aura** (`Fx/Aura_Water`, Oni wears it while a Frost Shadow Ultimate runs): slow frost wisps rising out of a
   ring of ice crystals, snowflakes drifting round them. Calm, no flame.
 
@@ -220,3 +221,4 @@ over the place he fell, and speaks to the boy, not the Emperor:
 - She calls Oni **"Oni"** or "young man". Never "Guardsman" (Akagane's) or "little demon".
 - Her medicine is real-world plain: needles, cold cloths, bone-setting. No magic healing words.
 - Frost blue, slate and white; no teal until she's freed.
+- She's a white crane with talon hands, not a wolf: lines about her look (Poguru's "bird granny") say bird, never fur or fangs.

@@ -624,7 +624,7 @@ const LINES = {
   Mizore_Cut_Hibiki_2: [HIBIKI, "[cheeky, fast] He CAN'T hold still, Grandmother, he's got my spark!"],
   Mizore_Cut_Hibiki_3: [MIZORE, "[dry, unbothered] Then I'll work quickly."],
   Poguru_Soul_Fire: [POGURU, "[delighted, fanning himself] Ooh, toasty! The grumpy captain likes you!"],
-  Poguru_Soul_Frost: [POGURU, "[shivering, giggling] Brr! The wolf granny made you all frosty!"],
+  Poguru_Soul_Frost: [POGURU, "[shivering, giggling] Brr! The bird granny made you all frosty!"],
   Poguru_Soul_Storm: [POGURU, "[giggling, fizzy] My scales are all fizzy! Is that the drummer girl?"],
   Akagane_Hub_Salute: [AKAGANE, "[gruff] Still not done, Guardsman?"],
   Akagane_Hub_Salute_2: [ONI, "[low, tired] No."],

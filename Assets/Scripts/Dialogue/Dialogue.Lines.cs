@@ -594,7 +594,7 @@ public static partial class Dialogue
         Cooled(3, Talk("Poguru_Soul_Fire", "Poguru", DialogueEvent.PoguruSoul, Tier.Reactive, When(Holds(Element.Fire)),
             Say("Poguru", "Ooh, toasty! The grumpy captain likes you!"))),
         Cooled(3, Talk("Poguru_Soul_Frost", "Poguru", DialogueEvent.PoguruSoul, Tier.Reactive, When(Holds(Element.Water)),
-            Say("Poguru", "Brr! The wolf granny made you all frosty!"))),
+            Say("Poguru", "Brr! The bird granny made you all frosty!"))),
         Cooled(3, Talk("Poguru_Soul_Storm", "Poguru", DialogueEvent.PoguruSoul, Tier.Reactive, When(Holds(Element.Lightning)),
             Say("Poguru", "My scales are all fizzy! Is that the drummer girl?"))),
         Cooled(3, Talk("Poguru_Soul_Water", "Poguru", DialogueEvent.PoguruSoul, Tier.Reactive, When(Holds(Element.Tide)),

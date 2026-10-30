@@ -375,6 +375,8 @@ public partial class GameManager : MonoBehaviour
     int redrawsLeft;
     int banishesLeft;
     readonly HashSet<BoonId> banished = new HashSet<BoonId>();
+    // The boons on the last boon screen shown, which the next draw (a redraw or the next soul) passes over.
+    readonly HashSet<BoonId> lastShown = new HashSet<BoonId>();
     MenuUI menu;
     ResourceTray resources;
 
@@ -707,6 +709,7 @@ public partial class GameManager : MonoBehaviour
         if (state == State.Playing)
         {
             UpdateScouts();
+            effects.Tick();
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
         ronin.UltimateLocked = tutorial.Active;

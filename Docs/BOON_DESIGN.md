@@ -451,3 +451,34 @@ four statuses (its own forms, since it has no stance and frost can't hold it): B
 ronin's blows as extra damage, Chilled lengthens its next daze ×1.5, Jolted adds to his next blow. Tested on Kuon in
 phase 2: a jolted hit dealt 2 against 1, a burning 2-point hit dealt 3, a chilled 1 s daze held 1.5 s.
 
+## 10. Softer statuses, passives that play, fairer offers, two more arts
+
+**Statuses were as good as kills.** Every samurai that shoots has 1 HP (the 2-HP shieldbearers and bellringers
+never shoot, the taisho only throw spears), so a status that stopped a samurai shooting removed it from the fight,
+and Jolt's discharge simply killed it. Raising every samurai's HP was considered and rejected: the slash's one-hit
+kill is the Space Invaders feel, rounds would roughly double in length, and every on-kill boon would fire half as
+often. Instead Burning sends a samurai's shots **wild** (up to 35° off, ember-red) and a Jolted samurai's next shot
+**fizzles**, leaving it unhurt. The cost of 1 HP that remains: Soaked's +1 and Thermal Shock's ×2 do nothing to an
+ordinary samurai. If that needs fixing, the targeted answer is a rank of 2-HP veteran shooters in later stages, not HP
+everywhere.
+
+**Passives that play.** The three stat-stick passives each gained a behaviour tied to their element's status:
+
+| Passive | Was | Now |
+|---|---|---|
+| Blazing Hands | slash cooldown −8 / 14 / 20% | heat: up to −12 / 20 / 28% after three quick swings; at full heat a slash kill ignites its neighbours (a warlord, or Kuon) |
+| Storm Step | move speed +15 / 25 / 35% | +8 / 12 / 16%, and while moving, static breaks the nearest enemy arrow every 2.5 / 2 / 1.5 s |
+| Static Charge | cooldowns −15 / 22 / 30% | −10 / 15 / 20%, and a landed parry charges the next shuriken to jolt what it passes |
+
+**Fairer offers.** A redraw or the next soul no longer hands back the cards just shown, unless nothing else is left.
+Rarity has Slay the Spire's pity: each Common rolled adds 2 to the Rare weight and 0.5 to the Epic, reset by a Rare or
+better. Simulated over 60,000 cards: 70 / 25 / 5 becomes about 67 / 28 / 6, and dry spells of ten Commons halve.
+
+**Two more Sword Arts** (§6's "arts for the shuriken and parry"): **Scattering Star** (the shuriken splits, two lesser
+blades at ±14° that stop after two samurai) and **Mirror Stance** (a landed parry holds 0.5 s longer, turning back
+everything that arrives). Scrolls now draw from five arts.
+
+**Tested in the editor:** jolted samurai fizzled and none died; burning samurai's arrows flew at an angle; three quick
+swings reached full heat (cooldown ×0.88 at Common); Storm Step's static popped an arrow beside him; Mirror Stance held
+0.50 s; a charged, scattered shuriken left as three blades and jolted what it passed.
+

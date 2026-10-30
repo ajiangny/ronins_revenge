@@ -22,6 +22,8 @@ public partial class GameManager
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
         Samurai.BlackIce = 1f;
         Statuses.From(loadout);
+        Boons.ResetPity();
+        lastShown.Clear();
         shownElement = null;
         UpdateRoninLook();
         boonChoice.RefreshHud(loadout);
@@ -299,8 +301,9 @@ public partial class GameManager
     bool OfferBoons(Element element, System.Action afterPick, bool ensureCapstone = false, Rarity minRarity = Rarity.Common,
         BossKind? felled = null)
     {
-        var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
+        var offers = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished, lastShown);
         if (offers.Count == 0) return false;
+        Remember(offers);
         if (element == Element.Tide && Save.Data.asagiSoulOwed)
         {
             Save.Data.asagiSoulOwed = false;
@@ -365,8 +368,9 @@ public partial class GameManager
         // Fate's Thread and Banishing Bell. The new cards replace these in the same list, so the pick reads them.
         List<BoonOffer> Refill()
         {
-            var fresh = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished);
+            var fresh = Boons.Draw(element, 3, loadout, maxLives, ensureCapstone, minRarity, banished, lastShown);
             if (fresh.Count == 0) return null;
+            Remember(fresh);
             offers.Clear();
             offers.AddRange(fresh);
             OfferRerolls();
@@ -387,6 +391,12 @@ public partial class GameManager
             });
         }
         OfferRerolls();
+    }
+
+    void Remember(List<BoonOffer> offers)
+    {
+        lastShown.Clear();
+        foreach (BoonOffer offer in offers) lastShown.Add(offer.Boon.Id);
     }
 
     // The soul who catches each element's dead and hands them to Oni (Story/Souls.md).

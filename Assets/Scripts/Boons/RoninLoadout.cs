@@ -132,7 +132,6 @@ public sealed class RoninLoadout
 
     public Element? SlotElement(BoonSlot slot) => InSlot(slot)?.Boon.Element;
 
-    public float AttackCooldownMultiplier => 1f - Value(BoonId.BlazingHands);
     public float MoveSpeedMultiplier => 1f + Value(BoonId.StormStep);
     public float AbilityCooldownMultiplier => 1f - Value(BoonId.StaticCharge);
     // Still Water: freezes last longer and the army's march quickens half as much as it thins.

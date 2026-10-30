@@ -971,7 +971,7 @@ public class SamuraiArmy : MonoBehaviour
     void ThrowSpear()
     {
         nextSpearTime = Time.time + spearInterval * UnityEngine.Random.Range(0.7f, 1.3f);
-        List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho && !s.Encased && !s.Burning);
+        List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho && !s.Encased);
         if (taisho.Count == 0) return;
         taisho[UnityEngine.Random.Range(0, taisho.Count)].Fire(level.arrowSpeed);
     }

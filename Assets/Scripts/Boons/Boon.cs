@@ -41,6 +41,8 @@ public enum BoonId
     ScaldingSteam, BlackIce, ThunderRain, ColdCompress,
     // Infusions, one per element: each deepens its element's status (Statuses.cs).
     EmberHeart, Hoarfrost, StaticField, DeepCurrent,
+    // Sword Arts for the shuriken and the parry.
+    ScatterStar, MirrorStance,
 }
 
 public sealed class BoonDefinition
@@ -150,6 +152,14 @@ public static class Boons
     public const int MaxLives = 5;
 
     static readonly float[] RarityWeights = { 70f, 25f, 5f };
+    // Slay the Spire's hidden offset: every Common card rolled raises the Rare and Epic odds a little, until a Rare
+    // or better comes up and resets it, so a long dry spell can't last. Per run (ResetPity).
+    // Simulated: overall odds move from 70 / 25 / 5 to about 67 / 28 / 6, and dry spells of ten Commons halve.
+    const float PityRare = 2f;
+    const float PityEpic = 0.5f;
+    const int MaxPity = 30;
+    public static int Pity { get; private set; }
+    public static void ResetPity() => Pity = 0;
 
     static readonly ElementInfo[] Elements =
     {
@@ -240,10 +250,11 @@ public static class Boons
             Description = "Arrows you <b>Parry</b> come back as a fireball that explodes on impact.",
             StatLabel = "Samurai burned:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
             LevelStep = 1f, Whole = true, Max = 5f },
+        // Once a flat cut to the slash's cooldown; now it builds while he keeps swinging, and pays at full heat.
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
-            Description = "You <b>Slash</b> faster.",
-            StatLabel = "Slash cooldown:", Values = new[] { 0.08f, 0.14f, 0.2f }, Format = MinusPercent,
-            LevelStep = 0.035f, Max = 0.3f },
+            Description = "Keep swinging and your hands heat up: each quick <b>Slash</b> comes faster. At full heat, a slash kill sets the samurai beside it <b>Burning</b>.",
+            StatLabel = "Slash cooldown at full heat:", Values = new[] { 0.12f, 0.2f, 0.28f }, Format = MinusPercent,
+            LevelStep = 0.04f, Max = 0.4f },
         new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
             Description = "Every few swings, you hurl a great <b>Fireball</b> instead of a <b>Slash</b>. It burns through arrows and bursts in a wide blast.",
             StatLabel = "Swings per fireball:", Values = new[] { 6f, 5f, 4f }, Format = v => $"{v:0}",
@@ -287,14 +298,17 @@ public static class Boons
             Description = "A successful <b>Parry</b> strikes the samurai nearest above you with lightning.",
             StatLabel = "Strikes:", Values = new[] { 1f, 2f, 3f }, Format = Plus,
             LevelStep = 1f, Whole = true, Max = 5f },
+        // Once only speed: now the static he builds on the move breaks arrows out of the air around him.
         new BoonDefinition { Id = BoonId.StormStep, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Storm Step",
-            Description = "You move faster.",
-            StatLabel = "Move speed:", Values = new[] { 0.15f, 0.25f, 0.35f }, Format = Percent,
-            LevelStep = 0.055f, Max = 0.5f },
+            Description = "You move faster, and while you're on the move, static leaps from you to break an enemy arrow every few seconds.",
+            StatLabel = "Move speed:", Values = new[] { 0.08f, 0.12f, 0.16f }, Format = Percent,
+            ExtraLabel = "Arrow broken every:", ExtraValues = new[] { 2.5f, 2f, 1.5f }, ExtraFormat = Seconds,
+            LevelStep = 0.03f, Max = 0.3f, ExtraLevelStep = -0.25f },
+        // Once only shorter cooldowns: now a landed parry also charges the next shuriken.
         new BoonDefinition { Id = BoonId.StaticCharge, Element = Element.Lightning, Slot = BoonSlot.Passive, Name = "Static Charge",
-            Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster.",
-            StatLabel = "Cooldowns:", Values = new[] { 0.15f, 0.22f, 0.3f }, Format = MinusPercent,
-            LevelStep = 0.04f, Max = 0.45f },
+            Description = "Your <b>Shuriken</b> and <b>Parry</b> recharge faster, and a landed <b>Parry</b> charges your next <b>Shuriken</b> to <b>Jolt</b> everything it passes.",
+            StatLabel = "Cooldowns:", Values = new[] { 0.1f, 0.15f, 0.2f }, Format = MinusPercent,
+            LevelStep = 0.03f, Max = 0.35f },
 
         // Ultimate (Hades' Calls): one per element, held one at a time (Tide Shadow sits with Water's above). Each
         // lends the Shadow Clone its element; the clone's own hits (KillSource.Clone) set off nothing else.
@@ -428,6 +442,13 @@ public static class Boons
         new BoonDefinition { Id = BoonId.EchoSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Echo Slash",
             Description = "A swing may send a ghostly second <b>Slash</b> that hunts down an enemy.",
             StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
+        // The shuriken's and the parry's arts, so a scroll reshapes more than the slash.
+        new BoonDefinition { Id = BoonId.ScatterStar, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Scattering Star",
+            Description = "Your <b>Shuriken</b> splits as it leaves your hand: two lesser blades fly off at an angle to either side.",
+            StatLabel = "Side blades:", Values = new[] { 2f, 2f, 2f }, Format = Plus },
+        new BoonDefinition { Id = BoonId.MirrorStance, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Mirror Stance",
+            Description = "A landed <b>Parry</b> holds its stance a moment longer, turning back every arrow that reaches you.",
+            StatLabel = "Stance held:", Values = new[] { 0.5f, 0.5f, 0.5f }, Format = Seconds },
         // No longer drawn from scrolls: it's the Shadow Clone ultimate now (Ronin.Ultimate), kept here for its id and icon.
         new BoonDefinition { Id = BoonId.ShadowClone, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Shadow Clone",
             Description = "Your shadow fights at your side, copying your <b>Slash</b>, <b>Shuriken</b> and <b>Parry</b> at reduced strength. Nothing can touch it.",
@@ -520,8 +541,11 @@ public static class Boons
 
     // Up to count distinct boons of one element. Like Hades, the first boon of a run is always a core slot boon.
     // ensureCapstone puts an eligible Duo or Legendary in the offer (the stage boon), and no card rolls below minRarity.
+    // The boons in `avoid` (the screen just shown) are drawn only once nothing else is left, so a redraw or the next
+    // screen doesn't hand back the same cards.
     public static List<BoonOffer> Draw(Element element, int count, RoninLoadout loadout, int maxLives,
-        bool ensureCapstone = false, Rarity minRarity = Rarity.Common, ICollection<BoonId> banished = null)
+        bool ensureCapstone = false, Rarity minRarity = Rarity.Common, ICollection<BoonId> banished = null,
+        ICollection<BoonId> avoid = null)
     {
         var pool = new List<BoonDefinition>();
         var capstones = new List<BoonDefinition>();
@@ -552,7 +576,9 @@ public static class Boons
 
         while (offers.Count < count && pool.Count > 0)
         {
-            BoonDefinition boon = pool[UnityEngine.Random.Range(0, pool.Count)];
+            List<BoonDefinition> fresh = avoid == null ? pool : pool.FindAll(b => !avoid.Contains(b.Id));
+            if (fresh.Count == 0) fresh = pool;
+            BoonDefinition boon = fresh[UnityEngine.Random.Range(0, fresh.Count)];
             pool.Remove(boon);
 
             if (boon.IsCapstone)
@@ -571,6 +597,7 @@ public static class Boons
                 Rarity raised = replaces.Rarity < Rarity.Epic ? replaces.Rarity + 1 : Rarity.Epic;
                 if (raised > rolled) rolled = raised;
             }
+            Pity = rolled == Rarity.Common ? Mathf.Min(Pity + 1, MaxPity) : 0;
             offers.Add(new BoonOffer(boon, rolled, OfferKind.New, replaces, level));
         }
         if (offers.Count == 0) offers.Add(new BoonOffer(Offering(element), Rarity.Common, OfferKind.New, null));
@@ -579,9 +606,11 @@ public static class Boons
 
     static Rarity RollRarity()
     {
-        float roll = UnityEngine.Random.value * (RarityWeights[0] + RarityWeights[1] + RarityWeights[2]);
-        if (roll < RarityWeights[2]) return Rarity.Epic;
-        if (roll < RarityWeights[2] + RarityWeights[1]) return Rarity.Rare;
+        float epic = RarityWeights[2] + Pity * PityEpic;
+        float rare = RarityWeights[1] + Pity * PityRare;
+        float roll = UnityEngine.Random.value * (RarityWeights[0] + rare + epic);
+        if (roll < epic) return Rarity.Epic;
+        if (roll < epic + rare) return Rarity.Rare;
         return Rarity.Common;
     }
 }

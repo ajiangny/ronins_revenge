@@ -44,8 +44,8 @@ public class Samurai : MonoBehaviour, IHittable
     public bool Encased => Time.time < encasedUntil;
     // Soaked by Asagi's water: every boon effect deals it one more (TakeHit), and the Duos build on it.
     public bool Soaked => Time.time < soakedUntil;
-    // The other elements' statuses (Statuses.cs): Burning holds its fire, Chilled slows its arrows, Jolted blows up
-    // the next time it shoots.
+    // The other elements' statuses (Statuses.cs): Burning sends its shots wild, Chilled slows its arrows, and Jolted
+    // makes its next shot fizzle.
     public bool Burning => Time.time < burningUntil;
     public bool Chilled => Time.time < chilledUntil;
     public bool Jolted => Time.time < joltedUntil;
@@ -104,7 +104,7 @@ public class Samurai : MonoBehaviour, IHittable
     // The body's sprite, for effects laid over it (a levy forming out of soul energy).
     public SpriteRenderer Look => animator.Renderer;
 
-    public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased && !Burning;
+    public bool CanFire => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer && !Encased;
 
     // Shieldbearers and bellringers never shoot, so the rank behind them looses over their heads.
     public bool CanFireKind => Kind != SamuraiKind.Shieldbearer && Kind != SamuraiKind.Bellringer;
@@ -118,7 +118,7 @@ public class Samurai : MonoBehaviour, IHittable
         if (Kind == SamuraiKind.Shieldbearer || Kind == SamuraiKind.Bellringer) return;
         if (Jolted)
         {
-            Discharge();
+            Fizzle();
             return;
         }
         // Chilled, its arrows crawl, frost-pale, and live long enough to still reach the ground.
@@ -129,16 +129,19 @@ public class Samurai : MonoBehaviour, IHittable
             arrowSpeed *= Statuses.ChillArrow;
             life = 1f / Statuses.ChillArrow;
         }
+        // Burning, it can't hold its aim: the shot flies off at an angle, ember-red.
+        bool burning = Burning;
+        Vector3 aim = burning ? Quaternion.Euler(0, 0, Random.Range(-Statuses.WildAngle, Statuses.WildAngle)) * Vector3.down : Vector3.down;
         // Spawn just below the samurai's body (its collider radius is 0.5 in local space), whatever its scale.
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         if (Kind == SamuraiKind.Archer)
         {
-            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 3, ArcherSpread, arrowSpeed * 0.9f, life)) Frost(arrow, chilled);
+            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, aim, 3, ArcherSpread, arrowSpeed * 0.9f, life)) Mark(arrow, chilled, burning);
         }
         else if (Kind == SamuraiKind.Yurei)
         {
             // Spirit arrows: a parted pair that drifts through the blockers, so cover only shelters from the living.
-            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, Vector3.down, 2, YureiSpread, arrowSpeed * 0.85f, life))
+            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, aim, 2, YureiSpread, arrowSpeed * 0.85f, life))
             {
                 arrow.PassesCover = true;
                 arrow.Cause = DeathCause.GhostArrow;
@@ -151,24 +154,27 @@ public class Samurai : MonoBehaviour, IHittable
         {
             Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             spear.MakeUnbreakable(spearSprite);
-            spear.Launch(Vector3.down * (arrowSpeed * SpearSpeedMultiplier), 1.5f * life);
+            spear.Launch(aim * (arrowSpeed * SpearSpeedMultiplier), 1.5f * life);
             Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
             return;
         }
         else
         {
             Arrow arrow = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
-            arrow.Launch(arrowSpeed, life);
-            Frost(arrow, chilled);
+            arrow.Launch(aim * arrowSpeed, life);
+            Mark(arrow, chilled, burning);
         }
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
     }
 
     static readonly Color ChilledArrowGlow = new Color(0.6f, 0.9f, 1f, 0.5f);
+    static readonly Color WildArrowGlow = new Color(1f, 0.45f, 0.15f, 0.5f);
 
-    static void Frost(Arrow arrow, bool chilled)
+    // A status shows on the arrows it changes: frost-pale for a Chilled one's, ember for a Burning one's wild shots.
+    static void Mark(Arrow arrow, bool chilled, bool burning)
     {
         if (chilled) arrow.Tint(Statuses.ChillColor, ChilledArrowGlow);
+        else if (burning) arrow.Tint(Color.Lerp(Color.white, Statuses.BurnColor, 0.5f), WildArrowGlow);
     }
 
     // A bellringer lifts its bell: it shudders and glows for a beat before the toll, so the haste can be seen coming.
@@ -303,7 +309,7 @@ public class Samurai : MonoBehaviour, IHittable
         SetFrost(frost);
     }
 
-    // Storm: the charge waits in its armour until it draws a bow.
+    // Storm: the charge waits in its armour until it draws a bow, then spoils the shot.
     public void Jolt(float seconds)
     {
         if (IsDead || seconds <= 0f) return;
@@ -311,13 +317,14 @@ public class Samurai : MonoBehaviour, IHittable
         SetFrost(frost);
     }
 
-    // A Jolted samurai tried to shoot: the charge goes off in its hands instead. An effect hit, so it sets off nothing.
-    void Discharge()
+    // A Jolted samurai tried to shoot: the charge snaps through its bow and the shot is lost. It costs the charge,
+    // not the samurai: blowing it up made the status as good as a kill.
+    void Fizzle()
     {
         joltedUntil = 0f;
-        Fx.Play(Fx.Impact, transform.position, Color.Lerp(Color.white, Statuses.JoltColor, 0.5f), 1.1f);
-        Sfx.Play(Sfx.LightningStrike, 0.5f, 1.4f);
-        TakeHit(1, KillSource.Effect);
+        Fx.Play(Fx.Impact, transform.position + Vector3.down * 0.4f, Color.Lerp(Color.white, Statuses.JoltColor, 0.5f), 1.1f);
+        Sfx.Play(Sfx.LightningStrike, 0.4f, 1.6f);
+        SetFrost(frost);
     }
 
     int StatusMask => (Soaked ? 1 : 0) | (Burning ? 2 : 0) | (Chilled ? 4 : 0) | (Jolted ? 8 : 0);

@@ -2533,6 +2533,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 316bc59ec0dd84ec4922319ffa44b37d, type: 3}
   - {fileID: 21300000, guid: 8553feca034aa4973946a9fe2ea01bc1, type: 3}
   - {fileID: 21300000, guid: 8c10e6f8bc34c43628e050646dc840ab, type: 3}
+  - {fileID: 21300000, guid: 678fa9d0f90bc41d69eee2f1fa6cc9d9, type: 3}
+  - {fileID: 21300000, guid: 37d9f496ca4094068974a85d67c921cf, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}
   - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}

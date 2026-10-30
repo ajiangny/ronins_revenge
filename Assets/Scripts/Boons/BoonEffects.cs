@@ -39,6 +39,9 @@ public class BoonEffects
     const float ColumnHalfWidth = 0.9f;
     // Tidewake Shuriken: how close a samurai or arrow must come to the blade to be caught in its wake.
     const float WakeRadius = 1.2f;
+    // Storm Step's static reaches arrows this far from him. Static Charge's shuriken jolts what it passes this close.
+    const float StaticReach = 2.4f;
+    const float ChargedShurikenReach = 1.2f;
     // Tide Shadow's great wave pushes the army back this far.
     const float TideShadowPush = 0.6f;
     // Riptide Blade soaks the boss on this share of its kill chance, like Flame Blade's bursts.
@@ -50,6 +53,9 @@ public class BoonEffects
     readonly Material boltMaterial;
     float nextBossFrost;
     int drumHits;
+    float nextStatic;
+    // Static Charge: a landed parry has charged the next shuriken.
+    bool shurikenCharged;
     // Healing Spring's tally, in thirds of a kill: a kill adds SpringPerKill, a blow on a warlord or Kuon one.
     int springTally;
     const int SpringPerKill = 3;
@@ -109,6 +115,11 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
+                // Blazing Hands at full heat: the kill sets the samurai beside it Burning.
+                if (ronin.FullHeat)
+                {
+                    foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Ignite(Statuses.BurnSeconds);
+                }
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, BlastRadius, (int)value, samurai);
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
@@ -248,6 +259,7 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
+                if (ronin.FullHeat) boss.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) BossBlast(point, BlastRadius, boss);
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) SoakBoss(boss, point, value);
                 if (loadout.Has(BoonId.FrostBlade, out value))
@@ -318,6 +330,13 @@ public class BoonEffects
             shuriken.gameObject.AddComponent<ShurikenStorm>().Begin(army, () => Bosses, ShurikenArcRadius, arcChance,
                 (from, target, point) => Strike(from, point, target, chain: true));
         }
+        // Static Charge: the shuriken after a landed parry jolts everything it passes.
+        if (shurikenCharged && shuriken != null)
+        {
+            shurikenCharged = false;
+            shuriken.gameObject.AddComponent<ShurikenCharge>().Begin(army, () => Bosses, () => FightingWolf, ChargedShurikenReach);
+            Fx.Play(Fx.Impact, muzzle, Color.Lerp(Color.white, Storm, 0.6f), 1.2f);
+        }
         // Tidewake Shuriken: a wake that soaks what the blade passes and washes the arrows in its lane.
         if (loadout.Has(BoonId.TidewakeShuriken, out float soak) && shuriken != null)
         {
@@ -359,6 +378,12 @@ public class BoonEffects
     public void OnParried()
     {
         float value;
+        // Static Charge: the parry's spark is kept for the next shuriken.
+        if (loadout.Find(BoonId.StaticCharge) != null && !shurikenCharged)
+        {
+            shurikenCharged = true;
+            ElementFx.Glow(ronin.Bounds.center, Storm, 0.6f, 2f, 0.3f);
+        }
         if (BossFight)
         {
             if (loadout.Has(BoonId.ThunderRiposte, out value))
@@ -571,6 +596,7 @@ public class BoonEffects
         switch (source)
         {
             case KillSource.Slash:
+                if (ronin.FullHeat) Wolf.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) WolfBlast(point, BlastRadius);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 if (WolfFight && loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) Wolf.Soak(value);
@@ -689,6 +715,29 @@ public class BoonEffects
         if (BossFight && StandingBoss(target) is Boss struck) BossBlast(point, KindlingRadius, struck);
         else if (WolfFight && ReferenceEquals(target, Wolf)) WolfBlast(point, KindlingRadius);
         else if (!BossFight) Blast(point, KindlingRadius);
+    }
+
+    // Every frame of play. Storm Step: while he's moving, static leaps from him to break the nearest enemy arrow in
+    // reach, once every so often. Spears and the shots only a parry answers are left alone, as Wildfire leaves them.
+    public void Tick()
+    {
+        if (!loadout.Has(BoonId.StormStep, out _) || !ronin.Moving || Time.time < nextStatic) return;
+        Vector3 from = ronin.Bounds.center;
+        Arrow nearest = null;
+        float best = StaticReach * StaticReach;
+        foreach (Arrow arrow in Object.FindObjectsByType<Arrow>())
+        {
+            if (arrow.Unbreakable || arrow.Reflectable || arrow.Unparryable) continue;
+            float distance = (arrow.transform.position - from).sqrMagnitude;
+            if (distance > best) continue;
+            best = distance;
+            nearest = arrow;
+        }
+        if (nearest == null) return;
+        nextStatic = Time.time + loadout.Extra(BoonId.StormStep);
+        ElementFx.Chain(from, nearest.transform.position, Storm, boltMaterial);
+        Sfx.Play(Sfx.LightningStrike, 0.35f, 1.6f);
+        nearest.Pop(Storm);
     }
 
     // Raijin's Drum: every few of the ronin's own hits, lightning falls on the front of the nearest columns.

@@ -222,6 +222,10 @@ public class Ronin : MonoBehaviour
     float lastShot = float.NegativeInfinity;
     // Swings since Kindling's last fireball.
     int swingsSinceFireball;
+    // Blazing Hands' heat: swings in quick succession, up to MaxHeat. It cools once he stops swinging for HeatWindow.
+    int heat;
+    const int MaxHeat = 3;
+    const float HeatWindow = 1f;
     float lastShuriken = float.NegativeInfinity;
     float lastParry = float.NegativeInfinity;
     float invulnerableUntil;
@@ -420,7 +424,7 @@ public class Ronin : MonoBehaviour
         if (ControlsEnabled && !Roaming && !MoveOnly && !timeHeld && keyboard != null)
         {
             Controls.Detect(keyboard, mouse);
-            if (Controls.Slash(keyboard, mouse) && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * Loadout.AttackCooldownMultiplier)
+            if (Controls.Slash(keyboard, mouse) && (Allowed & Moves.Slash) != 0 && Time.time - lastShot >= shotCooldown * SlashCooldownMultiplier)
             {
                 Attack();
             }
@@ -613,8 +617,20 @@ public class Ronin : MonoBehaviour
             if (CloneOut) ThrowFireball(CloneMuzzle, true);
         }
         else Slash();
+        heat = Mathf.Min(Heat + 1, MaxHeat);
         lastShot = Time.time;
     }
+
+    int Heat => Time.time - lastShot <= HeatWindow ? heat : 0;
+
+    // Blazing Hands: each swing in a run comes quicker than the last, its full cut only at full heat.
+    float SlashCooldownMultiplier => 1f - Loadout.Value(BoonId.BlazingHands) * Heat / MaxHeat;
+
+    // Swinging at full heat with Blazing Hands: his slash kills set the samurai beside them Burning.
+    public bool FullHeat => Heat >= MaxHeat && Loadout.Find(BoonId.BlazingHands) != null;
+
+    // Moving with Storm Step, for its arrow-breaking static.
+    public bool Moving => moveInput != 0f;
 
     // Kindling's fireball: the Burning Riposte fireball drawn at twice its size, slower than a slash. It burns through
     // arrows, and its hit counts as a slash (so Frost and Storm Blade trigger, though not Flame Blade's blast) before
@@ -745,6 +761,24 @@ public class Ronin : MonoBehaviour
         PlayAction(art.attack);
         ShurikenThrown?.Invoke(Muzzle, shuriken);
         if (CloneOut) CloneShuriken(speed, hasArt);
+        if (Loadout.Has(BoonId.ScatterStar, out _)) ScatterShuriken(speed, hasArt);
+    }
+
+    // Scattering Star: two smaller blades peel off either side of the shuriken. Each is a lesser one (KillSource.Shadow,
+    // half on a warlord, no boon effects) that stops after a couple of samurai, so the spread can't sweep a formation.
+    const float ScatterAngle = 14f;
+    const int ScatterPierce = 2;
+
+    void ScatterShuriken(float speed, bool hasArt)
+    {
+        foreach (float angle in new[] { -ScatterAngle, ScatterAngle })
+        {
+            Projectile blade = SpawnProjectile(projectilePrefab, Muzzle);
+            float scale = (hasArt ? shurikenScale : shurikenScale * 0.6f) * 0.7f;
+            blade.Launch(Quaternion.Euler(0, 0, angle) * Vector3.up, speed, ScatterPierce, KillSource.Shadow,
+                hasArt ? shurikenSprite : null, scale: scale, spin: true, lifetimeMultiplier: 2f);
+            blade.Tint(Color.Lerp(shurikenTint, Boons.ArtColor, 0.4f), shurikenGlow);
+        }
     }
 
     // The clone's own shuriken flies up its column beside his: as fast and as far, but each hit a lesser one, and it
@@ -1152,6 +1186,12 @@ public class Ronin : MonoBehaviour
     {
         if (parryLanded) return;
         parryLanded = true;
+        // Mirror Stance: the parry holds, turning back whatever else arrives while it does.
+        if (Loadout.Has(BoonId.MirrorStance, out float hold))
+        {
+            parryUntil = Mathf.Max(parryUntil, Time.time + hold);
+            ElementFx.Glow(Bounds.center, Color.Lerp(parryColor, Boons.ArtColor, 0.5f), 0.7f, parryRadius * 2.4f, hold, transform);
+        }
         // A landed parry is ready again straight away, so a well-timed one can answer the next arrow too.
         lastParry = float.NegativeInfinity;
         Sfx.Play(Sfx.ParryClang);

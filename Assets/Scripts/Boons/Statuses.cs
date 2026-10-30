@@ -1,10 +1,11 @@
 using UnityEngine;
 
 // The four elements' statuses, one each like Hades' gods' curses, so whichever slot a boon sits in it carries its
-// element's mark. Most samurai fall to one hit, so the army's statuses work on its arrows rather than its health:
-// Burning samurai can't shoot, Chilled ones loose slow arrows, Jolted ones blow up when next they try to shoot, and
-// Soaked ones (Asagi's) take one more from every boon effect. On a warlord each gives an edge instead: Burning breaks
-// her stance faster, Chilled lengthens her next freeze, Jolted adds a point to the ronin's next blow.
+// element's mark. Most samurai fall to one hit, so the army's statuses work on its arrows rather than its health,
+// and none of them takes a samurai out of the fight (a samurai that can't shoot is as good as dead): Burning ones'
+// shots go wild, Chilled ones loose slow arrows, a Jolted one's next shot fizzles, and Soaked ones (Asagi's) take
+// one more from every boon effect. On a warlord each gives an edge instead: Burning breaks her stance faster,
+// Chilled lengthens her next freeze, Jolted adds a point to the ronin's next blow.
 // The Infusions (Ember Heart, Hoarfrost, Static Field, Deep Current) deepen them once an element is held three times.
 public static class Statuses
 {
@@ -12,6 +13,8 @@ public static class Statuses
     public const float ChillSeconds = 4f;
     public const float JoltSeconds = 4f;
 
+    // A Burning samurai's shots fly off up to this many degrees from straight down.
+    public const float WildAngle = 35f;
     // A Chilled samurai's arrows fly at this share of their speed; Hoarfrost slows them further.
     const float ChillArrowSpeed = 0.6f;
     const float HoarfrostArrowSpeed = 0.35f;

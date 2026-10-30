@@ -53,20 +53,33 @@ public partial class GameManager
         return elements.ToArray();
     }
 
-    // Like the gods a Hades run keeps meeting, souls lean toward the elements the ronin already carries.
-    Element PickSoulElement()
+    // How likely a second soul's path is to roll once a first one has, against the other rewards' weights.
+    const float SecondSoulWeight = 30f;
+
+    // Like the gods a Hades run keeps meeting, souls lean toward the elements the ronin already carries. `taken` are
+    // the elements already shown on this round's paths, which a second soul's path never repeats.
+    Element PickSoulElement(ICollection<Element> taken = null)
     {
         // The first soul after meeting Asagi is always hers.
-        if (Save.Data.asagiSoulOwed) return Element.Tide;
+        if (Save.Data.asagiSoulOwed && (taken == null || !taken.Contains(Element.Tide))) return Element.Tide;
         Element[] available = AvailableElements();
-        if (loadout.BoonCount == 0 || Random.value >= soulElementBias) return available[Random.Range(0, available.Length)];
-        float roll = Random.value * loadout.BoonCount;
+        if (taken != null && taken.Count > 0)
+        {
+            var left = new List<Element>(available);
+            left.RemoveAll(taken.Contains);
+            if (left.Count > 0) available = left.ToArray();
+        }
+        // Weighted by the boons held of each element still on offer (an exchanged boon no longer counts).
+        int held = 0;
+        foreach (Element element in available) held += loadout.ElementCount(element);
+        if (held == 0 || Random.value >= soulElementBias) return available[Random.Range(0, available.Length)];
+        float roll = Random.value * held;
         foreach (Element element in available)
         {
             roll -= loadout.ElementCount(element);
             if (roll < 0f) return element;
         }
-        return loadout.DominantElement ?? Element.Fire;
+        return available[Random.Range(0, available.Length)];
     }
 
     // Healing Spring: enough of his own kills restore a lost life, or pay points at full health.
@@ -773,8 +786,10 @@ public partial class GameManager
         yield return ronin.WalkTo(ronin.Home, travelWalkSpeed);
     }
 
-    // The next round's rewards to choose between: no two of a kind, and the boss's path once enough rounds are
-    // cleared. Souls are the common pick; springs only show while he's hurt, beads and scrolls only with a use.
+    // The next round's rewards to choose between, and the boss's path once enough rounds are cleared. Souls are the
+    // common pick; springs only show while he's hurt, beads and scrolls only with a use. No two of a kind, except
+    // that a soul may be offered beside a soul of another element (SecondSoulWeight), so the ronin sometimes
+    // chooses the god before the boon, as at Hades' doors.
     List<(PathReward, Element)> RollPaths()
     {
         var weights = new List<(PathReward reward, float weight)> { (PathReward.Soul, 45f), (PathReward.Notes, 20f) };
@@ -785,6 +800,7 @@ public partial class GameManager
         if (Boons.DrawThread(loadout, 1).Count > 0 && Oaths.Rank(OathId.FadedSpirits) == 0) weights.Add((PathReward.Thread, 6f));
 
         var picks = new List<(PathReward, Element)>();
+        var souls = new List<Element>();
         // Third Path opens one more.
         int choices = portalChoices + Upgrades.Rank(UpgradeId.ThirdPath);
         while (picks.Count < choices && weights.Count > 0)
@@ -796,7 +812,14 @@ public partial class GameManager
             while (index < weights.Count - 1 && (roll -= weights[index].weight) >= 0f) index++;
             PathReward reward = weights[index].reward;
             weights.RemoveAt(index);
-            picks.Add((reward, reward == PathReward.Soul ? PickSoulElement() : Element.Fire));
+            Element element = Element.Fire;
+            if (reward == PathReward.Soul)
+            {
+                element = PickSoulElement(souls);
+                souls.Add(element);
+                if (souls.Count == 1) weights.Add((PathReward.Soul, SecondSoulWeight));
+            }
+            picks.Add((reward, element));
         }
         if (roundIndex + 1 >= BossPortalAfter) picks.Add((PathReward.Boss, Element.Fire));
         return picks;

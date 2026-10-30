@@ -400,3 +400,13 @@ A review of the code found three places where a boon's stat didn't do what its c
 - **Water did nothing to Kuon.** Kuon now has its own Soaked (+1 from boon effects, a sea-blue wash), applied by
   Riptide Blade (at the boss share of its chance), Tidewake Shuriken's wake, Undertow Riposte and Tide Shadow.
 
+Two more from the same review:
+
+- **Choosing the element.** Paths offered at most one soul, so the "god first, boon second" choice was only a hidden
+  50% lean. Once a soul path rolls, a second soul path (weight 30 against the others) can roll beside it, never of
+  an element already shown. `PickSoulElement` now weights the lean by the boons held of the elements still on offer
+  (an exchanged-out boon no longer counts; before, the leftover fell to the dominant element).
+- **Synergy signposting** (Enter the Gungeon's arrow): a card whose boon would bring a Duo or Legendary within reach
+  says "Opens <name>" in the capstone's colour. An Exchange that breaks a requirement opens nothing, so the hint
+  never promises a capstone the swap would lose.
+

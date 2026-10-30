@@ -107,6 +107,8 @@ Lines with the other characters (all voiced).
 | `Benibana_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Benibana:** "The physician's cold on your hands. She treated my ankles once. She never asked why they bled." |
 | `Benibana_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Benibana:** "The pond on the hill. I went up for my ankles once, and the fish asked nothing at all. I'd have told her." |
 | `Benibana_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Benibana:** "The drummer girl's spark. She watched me dance with her mouth open. I'm sorry she stayed for the end." |
+| `Benibana_Intro_Captain` | `BossIntro` | Reactive, once (ahead of `Benibana_Intro_Fire`) | `holds Fire`, `got Soul_Fire` | **Benibana:** "The captain's fire. His men stood at the doors, facing out. I danced right past them. They were very polite about falling asleep." |
+| `Benibana_Intro_Silver` | `BossIntro` | Story | `got Boss_Shirogane` (met her) | **Benibana:** "You've met her. The one who refused. She kept her bell silent, and I sold mine for a flock."<br>**Benibana:** "...Don't tell her I called her brave." |
 
 ## Arc across runs
 

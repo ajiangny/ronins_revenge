@@ -132,42 +132,43 @@ say. Whatever plays is recorded in the save, which is what lets a conversation c
 
 ## Our version
 
-**A line record.**
+**A conversation record** (`Conversation` in `Assets/Scripts/Dialogue/Dialogue.cs`; every one is in
+`Dialogue.Lines.cs`).
 
 | Field | Meaning |
 |---|---|
-| `id` | Unique, e.g. `Benibana_Intro_Bell` |
-| `speaker` | `Benibana`, `Utsusemi`, `Shirogane`, `Kagetsune`, `Oni` |
-| `event` | Which moment it answers (below) |
-| `text` | Subtitle text; the voice clip is `Audio/Voice/<id>.mp3` |
-| `priority` | `Story` > `Reactive` > `Repeatable` |
-| `requires` | Conditions that must all hold (below) |
-| `playOnce` | Never repeats once heard |
-| `cooldownRuns` | Runs before it can play again (repeatables) |
+| `Id` | Unique, e.g. `Benibana_Intro_Bell`; the voice clips are `Audio/Voice/<Id>.mp3`, then `<Id>_<n>` |
+| `Speaker` | A boss, `Oni`, a soul (`Akagane`, `Mizore`, `Hibiki`, `Asagi`), `Poguru`, or `Duo` |
+| `Event` | Which moment it answers (below) |
+| `Lines` | The exchange, each line with its own speaker |
+| `Tier` | `Priority` > `Story` > `Reactive` > `Repeatable`. Priority (major events) and Story play once |
+| `Requires` | Conditions that must all hold (below) |
+| `Cooldown` | Runs before a Reactive or Repeatable can play again |
 
-**Requirements.** Runs started; total deaths; deaths to this boss; wins against this boss; `requiresSeen` /
-`requiresUnseen` (other line ids, which chain lines into a sequence); a boon or element held; the boss's phase; how
-the last run ended, and to whom.
+**Requirements.** Runs started and won; deaths, to whom and by what; wins against a boss; lines heard and not heard
+(which chain lines into a sequence), and runs since; a boon or element held; the boss felled or ahead; the stage;
+**firsts**: anything ever had or met (an item, a relic, a kind of soldier, a soul, a boss, Asagi, a temple
+unlock), when, and whether it is still news (`GotWithin`, Hades' `MaxRunsSince`).
 
 **Picking a line.** When an event fires, collect every line for that speaker and event whose requirements hold,
-keep only the highest priority tier, and play the first unseen line in authored order (or a random one among
-repeatables). Record it in the persistent save. Every event keeps at least one `Repeatable` line with no
-requirements, so nothing ever goes silent. Mid-fight barks (hurt, stagger, move callouts) stay as they are now:
-short, repeatable and never cutting off a full line (`GameManager.OnBossSpoke`).
+keep only the highest tier, and play the first unheard line in authored order (or a random one among
+repeatables, from a shuffle bag). Record it in the persistent save. Every event keeps at least one `Repeatable` line
+with no requirements, so nothing ever goes silent; the exceptions are `Tutorial` (played by id) and `PoguruFirst`
+(nothing new, nothing to say). Mid-fight barks (hurt, stagger, move callouts) stay short, repeatable and never
+cut off a full line (`GameManager.OnBossSpoke`).
 
 **Events.**
 
 | Event | When |
 |---|---|
-| `BossIntro` | Boss title card |
-| `BossPhase` | Phase card |
-| `BossDefeat` | Boss falls |
+| `BossIntro`, `BossPhase`, `BossDefeat` | Boss title card, phase card, boss falls |
 | `KilledOni` | Oni dies to this boss |
-| `HubReturn` | Oni wakes in the temple's spirit pool after a death |
-| `SoulPickup` | First boon screen of each soul in a run (Oni's first-soul lines open the first meetings) |
-| `Capstone` | A Duo or Legendary is taken |
-| `Scroll` | A technique scroll is caught |
-| `LastLife` | Oni is down to one life in a boss fight |
-| `GodMode` | Dev god mode is on (dev builds only, a joke line) |
+| `HubReturn`, `SoulHub` | Oni wakes in the temple pool; a soul speaks when he has nothing to say |
+| `SoulPickup`, `Legendary`, `Duo`, `BossFelled`, `BossAhead`, `SoulJealous` | A soul's boon screen |
+| `AsagiTalk` | Asagi at the pool's rim |
+| `Tutorial` | Poguru's lesson and warnings, played by id |
+| `PoguruRound`, `PoguruSoul`, `PoguruBoss`, `PoguruScout`, `PoguruLowLife`, `PoguruBossAhead`, `PoguruStage` | Poguru's barks in a run |
+| `PoguruFirst` | Something first had or seen: Poguru says what it is |
+| `PoguruWake`, `PoguruTalk` | Poguru on the wake (his roasts) and at his nest (news first) |
 
 Each character's file holds their sample lines for these events.

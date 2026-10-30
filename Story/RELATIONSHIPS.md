@@ -157,26 +157,26 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Shirogane – Kagetsune | The lord she refused to kneel to. Her bell is the only thing that unsettles him. | `Shirogane_Echo`, `Kagetsune_SummonShirogane`, `Kagetsune` intro "She never rang." |
 | Kuon – Kagetsune | He bound it to her to make her harder to beat, and gave her a friend. It obeys her, never him. | (fight only) |
 | Shirogane – Kuon | The shrine's guardian, who chose her as a girl feeding it rice cakes at the gate. One oath, one bar between them. | Barks: "...Rest, Kuon.", `Shirogane_KuonEnraged` ("Kuon... don't hold back.") |
-| Shirogane – Benibana | Shirogane pities her (she understands bargains made for others); Benibana resents and admires the one who refused. | Only Shirogane's intro after `Benibana_Intro_Bell` ("She told you which bell is hers.") |
-| Utsusemi – Benibana | The monk once refused her confession. The machine doesn't remember why. | **Nothing** |
+| Shirogane – Benibana | Shirogane pities her (she understands bargains made for others); Benibana resents and admires the one who refused. | Shirogane's intro after `Benibana_Intro_Bell` ("She told you which bell is hers."), `Benibana_Intro_Silver` ("Don't tell her I called her brave.") |
+| Utsusemi – Benibana | The monk once refused her confession. The machine doesn't remember why. | `Utsusemi_Intro_Confession` ("Why did I... send her away?") |
 | Benibana / Utsusemi – Shirogane, Utsusemi – Shirogane | No stated bond. | — |
 
 ### Soul and boss
 
 | Pair | The bond | Carried by |
 |---|---|---|
-| Akagane – Benibana | Her smoke put his vanguard on its knees. He curses her by name until she names her bell, then stops, mostly. | `Akagane_Ahead_Benibana`, `Akagane_Ahead_BenibanaBell`, `Akagane_Felled_Benibana`, `Akagane_Pickup_DiedBenibana`, `Akagane_Pickup_ManyDeaths`. Benibana never names him back. |
+| Akagane – Benibana | Her smoke put his vanguard on its knees. He curses her by name until she names her bell, then stops, mostly. | `Akagane_Ahead_Benibana`, `Akagane_Ahead_BenibanaBell`, `Akagane_Felled_Benibana`, `Akagane_Pickup_DiedBenibana`, `Akagane_Pickup_ManyDeaths`, and her answer, `Benibana_Intro_Captain` (his men at the doors, facing out). |
 | Akagane – Utsusemi | His men, in borrowed bodies, took the monk. He remembers marching, not choosing; it shames him. | `Akagane_Ahead_Utsusemi`, `Akagane_Felled_Utsusemi`, `Utsusemi_Intro_Fire` (the torches) |
 | Akagane – Shirogane | She beat him at every tournament and was kind about it. He respects her above anyone, and won't say so. | `Akagane_Ahead_Shirogane`, `Akagane_Felled_Shirogane`, `Akagane_Pickup_DiedShirogane`, `Shirogane_Intro_Fire` |
-| Akagane – Kagetsune | Twenty years on his knees. The only anger he never jokes about. | `Akagane_Ahead_Kagetsune`, `Akagane_Pickup_DiedKagetsune`, `Kagetsune_Intro_Fire` |
+| Akagane – Kagetsune | Twenty years on his knees. The only anger he never jokes about. | `Akagane_Ahead_Kagetsune`, `Akagane_Pickup_DiedKagetsune`, `Akagane_Pickup_Seal`, `Kagetsune_Intro_Fire`, `Kagetsune_Intro_Souls` |
 | Mizore – Benibana | Treated her ankles, saw the rosary, said nothing, and is glad. Blames the man who asked for the smoke, not her. | `Mizore_Ahead_Benibana`, `Mizore_Felled_Benibana`, `Mizore_Meet_Smoke`, `Benibana_Intro_Frost` |
 | Mizore – Utsusemi | A professional horror: she'd like to see how a soul was wound into gears, so she could undo it. | `Mizore_Ahead_Utsusemi`, `Mizore_Felled_Utsusemi`, `Utsusemi_Intro_Frost` (indirect) |
 | Mizore – Shirogane | She told Shirogane about the dying smiths, which began the oath, and has never decided whether that was right. She stitched Shirogane's left side often. | `Mizore_Meet_Smiths`, `Mizore_Meet_Oath`, `Mizore_Ahead_Shirogane`, `Mizore_Felled_Shirogane`, `Shirogane_Intro_Frost` |
-| Mizore – Kagetsune | Held his hand (he held her sleeve) as his father died; "Everyone dies, my prince. Even emperors." She thinks that sentence was the armor's first piece. The only one who pities him; pity isn't forgiveness. | `Mizore_Meet_Prince`, `Mizore_Ahead_Kagetsune`, `Mizore_Ahead_KagetsuneWon`, `Mizore_Pickup_FirstClear`, `Kagetsune_Intro_Frost` |
+| Mizore – Kagetsune | Held his hand (he held her sleeve) as his father died; "Everyone dies, my prince. Even emperors." She thinks that sentence was the armor's first piece. The only one who pities him; pity isn't forgiveness. | `Mizore_Meet_Prince`, `Mizore_Ahead_Kagetsune`, `Mizore_Ahead_KagetsuneWon`, `Mizore_Pickup_FirstClear`, `Kagetsune_Intro_Frost`, `Kagetsune_Intro_Souls` |
 | Hibiki – Benibana | The most beautiful thing she ever saw, then everyone got sleepy. Still working out how to feel. | `Hibiki_Ahead_Benibana`, `Hibiki_Felled_Benibana`, `Benibana_Intro_Storm` |
 | Hibiki – Utsusemi | The tea monk who stopped at the village well each spring and let the children wear his hat. She's sure he's still in there. | `Hibiki_Ahead_Utsusemi`, `Hibiki_Ahead_UtsusemiTea`, `Hibiki_Felled_Utsusemi`, `Hibiki_Pickup_DiedUtsusemi`, `Utsusemi_Intro_Storm` |
-| Hibiki – Shirogane | "Lady Shirogane" visited with Oni and let her hold her sword; she dropped it. Worship and terror in equal parts. Shirogane laughed. | `Hibiki_Ahead_Shirogane`, `Hibiki_Felled_Shirogane`, `Hibiki_Pickup_DiedShirogane`, `Shirogane_Intro_Storm` |
-| Hibiki – Kagetsune | Saw him once from the procession; he didn't look at any of them. Her drum against his bells. | `Hibiki_Meet_OneBell`, `Hibiki_Ahead_Kagetsune`, `Hibiki_Pickup_DiedKagetsune`, `Kagetsune_Intro_Storm` |
+| Hibiki – Shirogane | "Lady Shirogane" visited with Oni and let her hold her sword; she dropped it. Worship and terror in equal parts. Shirogane laughed. | `Hibiki_Ahead_Shirogane`, `Hibiki_Felled_Shirogane`, `Hibiki_Pickup_DiedShirogane`, `Shirogane_Intro_Storm`, and the message delivered, `Hibiki_Laughed` |
+| Hibiki – Kagetsune | Saw him once from the procession; he didn't look at any of them. Her drum against his bells. | `Hibiki_Meet_OneBell`, `Hibiki_Ahead_Kagetsune`, `Hibiki_Pickup_DiedKagetsune`, `Kagetsune_Intro_Storm`, `Kagetsune_Intro_Souls` |
 | Asagi – Benibana | The dancer came up the hill for her ankles once; that night her smoke settled on the pond. Asagi treated the ankles and pities the girl. | `Asagi_Ahead_Benibana`, `Asagi_Felled_Benibana`, `Asagi_Pickup_DiedBenibana`, `Benibana_Intro_Water` |
 | Asagi – Utsusemi | The monk fed her rice every spring and talked to the fish, not the body. She wants his clock stopped, gently. | `Asagi_Meet_Monk`, `Asagi_Ahead_Utsusemi`, `Asagi_Felled_Utsusemi`, `Asagi_Pickup_DiedUtsusemi`, `Utsusemi_Intro_Water` |
 | Asagi – Shirogane | One of the two guards who sat by her pond: the one who listened. Asagi keeps her flat stone clear and never says who for. | `Asagi_Meet_Flute`, `Asagi_Ahead_Shirogane`, `Asagi_Felled_Shirogane`, `Asagi_Pickup_DiedShirogane`, `Asagi_Pond_Stone`, `Shirogane_Intro_Water` |
@@ -222,8 +222,8 @@ chains, Poguru's talks), so he has no row. Read across a row to see who a charac
 
 | Speaker ↓ / about → | Benibana | Utsusemi | Shirogane | Kuon | Kagetsune | Akagane | Mizore | Hibiki | Asagi | Poguru |
 |---|---|---|---|---|---|---|---|---|---|---|
-| **Benibana** | | ○ | ○ | ○ | ◐ | ○ | ◐ | ◐ | ◐ | ○ |
-| **Utsusemi** | ○ | | ○ | ○ | ○ | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Benibana** | | ○ | ◐ | ○ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
+| **Utsusemi** | ◐ | | ○ | ○ | ○ | ◐ | ◐ | ◐ | ◐ | ○ |
 | **Shirogane** | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
 | **Kagetsune** | ◐ | ◐ | ◐ | ○ | | ◐ | ◐ | ◐ | ◐ | ○ |
 | **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ● | ◐ |
@@ -232,35 +232,30 @@ chains, Poguru's talks), so he has no row. Read across a row to see who a charac
 | **Asagi** | ● | ● | ● | ○ | ● | ● | ● | ● | | ◐ |
 | **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | ◐ | |
 
-The pattern: the souls talk about everyone, the bosses barely talk about each other, and nobody but Shirogane and
+The pattern: the souls talk about everyone, the bosses barely talk about each other (Benibana on Shirogane and Utsusemi on Benibana are the first), and nobody but Shirogane and
 Poguru mentions Kuon (Asagi's Kuon line is written but not in game).
 
 ## Where lines are missing
 
 Bonds the files set up that no line in game pays off yet. These are the best places for new voice lines.
 
-1. **Utsusemi – Benibana.** "The monk once refused her confession" has no line. A `BossIntro` for Utsusemi gated on
-   `seen Benibana_Intro_Bell`, or Benibana's echo in Kagetsune's fight noticing the hat, would carry it. Remember the
-   machine doesn't remember why; the monk might.
-2. **Benibana – Akagane.** He curses her in five conversations; she never names him. Her `holds Fire` intro ("Fire?
-   You'd burn my smoke? Cute.") is generic: a variant naming the captain at the doors would answer him.
-3. **Benibana – Shirogane.** Her resentment and admiration for "the one who refused" has no line. A Benibana intro
-   gated on meeting Shirogane (`winsVs Shirogane ≥ 1` or `seen Shirogane_Intro_Oath`).
-4. **"Tell her I laughed."** Shirogane asks Oni to tell Hibiki (`Shirogane_Intro_Storm`, Oni: "...I'll tell her.").
-   He never does. A Hibiki `SoulPickup` gated on `seen Shirogane_Intro_Storm`.
-5. **Kuon.** Nobody but Shirogane and one roast acknowledges it. Mizore (a shrine's cold, a guardian), Hibiki (a
+Carried since: Utsusemi – Benibana (`Utsusemi_Intro_Confession`), Benibana – Akagane (`Benibana_Intro_Captain`),
+Benibana – Shirogane (`Benibana_Intro_Silver`), "Tell her I laughed" (`Hibiki_Laughed`) and Kagetsune on the three
+souls (`Kagetsune_Intro_Souls`). The firsts record (`Got(...)`: items, relics, souls, bosses met) is a new way to gate
+lines like these.
+
+1. **Kuon.** Nobody but Shirogane and one roast acknowledges it. Mizore (a shrine's cold, a guardian), Hibiki (a
    wolf!) or Akagane (the vanguard's dog) could each react on `BossAhead` / `BossFelled` for Shirogane.
-6. **Shirogane – Poguru.** The wisps go warm near her, but she never notices him. A Shirogane intro or defeat beat
+2. **Shirogane – Poguru.** The wisps go warm near her, but she never notices him. A Shirogane intro or defeat beat
    could, gently.
-7. **The freed beats.** `Akagane_Freed` ("Vanguard. Stand down..."), `Mizore_Freed` ("There, my prince..."),
+3. **The freed beats.** `Akagane_Freed` ("Vanguard. Stand down..."), `Mizore_Freed` ("There, my prince..."),
    `Hibiki_Freed` ("We're out!...") and Akagane's salute are written in their files but not in game or voiced.
-8. **Suggested in [Souls.md](Souls.md#suggested-lines-for-other-files), not in game:** Kagetsune's intro once Oni has
-   met all three souls ("My captain, my physician, and a peasant's drum..."), Kagetsune's `KilledOni` with
+4. **Suggested in [Souls.md](Souls.md#suggested-lines-for-other-files), not in game:** Kagetsune's `KilledOni` with
    `holds Fire ≥ 3`, and Oni's `HubReturn` "Hibiki. ...Hibiki. Hibiki." after `Hibiki_Meet_Name`.
-9. **Oni about the souls.** Oni has no `HubReturn` line about any of the three after their chains finish
+5. **Oni about the souls.** Oni has no `HubReturn` line about any of the three after their chains finish
    (Doors, Prince, Blame are the heaviest beats of his guilt arc).
-10. **Kagetsune about Kuon** (the gift that backfired) and **about Poguru** (a sliver of his own armor's fire that
-    got away with Oni) are open, if he should ever acknowledge either.
+6. **Kagetsune about Kuon** (the gift that backfired) and **about Poguru** (a sliver of his own armor's fire that
+   got away with Oni) are open, if he should ever acknowledge either.
 
 ## Arc gates: which line unlocks which
 

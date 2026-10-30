@@ -284,7 +284,7 @@ valley. Asagi has no bell and nothing to burn out of her: her beat is the dawn i
 Not added to their files; take them if you like them.
 
 - **Kagetsune** `BossIntro` once Oni has met all three: "My captain, my physician, and a peasant's drum. You
-  collect my bells, little demon. They are still mine."
+  collect my bells, little demon. They are still mine." Now in game as `Kagetsune_Intro_Souls`.
 - **Kagetsune** `KilledOni`, `holds Fire ≥ 3`: "Akagane's fire. He knelt so well, once."
 - **Oni** `HubReturn`, `seen Hibiki_Meet_Name`: "Hibiki. ...Hibiki. Hibiki." (repeating it, so he keeps it)
 

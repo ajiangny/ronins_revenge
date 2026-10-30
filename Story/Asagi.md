@@ -238,6 +238,7 @@ Her own station, like Poguru's nest. Oni walks up to her at the pool's rim and p
 | `Asagi_Pond_Flute` | Story, once | `seen Asagi_Meet_Flute` | **Asagi:** "Play something. The fish likes it. The old woman likes it too, but she won't say." |
 | `Asagi_Pond_Stone` | Story, once | `seen Shirogane_Intro_Oath` | **Asagi:** "The stone's been clear for a long time, Oni. When you bring her back up the hill, that's where she sits." |
 | `Asagi_Pond_Dawn` | Story, once | `clears ≥ 1` | **Asagi:** "I saw the sun come up last night. First time in... well. The water went clear. Then it filled up again, and here you are."<br>**Asagi:** "Do it again. Keep doing it until it stays." |
+| `Asagi_Pond_Spring` | Story, once | `got Item_Spring` (a Healing Spring path ever taken) | **Asagi:** "You found one of my springs on the road. I leave them where the hill water comes up."<br>**Oni:** "...It helped."<br>**Asagi:** "Drink them, little fry. Don't paddle in them." |
 | `Asagi_Pond_Rest` | Repeatable | none | **Asagi:** "Sit a while. The water's warm." |
 | `Asagi_Pond_Ripples` | Repeatable | none | **Asagi:** "Eleven ripples when you come up. I've counted. Always eleven." |
 | `Asagi_Pond_Fish` | Repeatable | none | **Asagi:** "Stop tapping the glass, dear. I can see you." |
@@ -252,6 +253,7 @@ Lines with the other characters (all voiced).
 | `Asagi_Cut_Mizore` | `SoulPickup` | Reactive, rests 5 | `holds Frost`, `seen Asagi_Meet_Sleet` | **Asagi:** "Warm him up, little sleet. He's blue."<br>**Mizore:** "He's meant to be blue, Teacher. It keeps the wound clean."<br>**Asagi:** "It keeps the patient quiet. Not the same thing." |
 | `Asagi_Cut_Hibiki` | `SoulPickup` | Reactive, rests 5 | `holds Storm`, `seen Asagi_Meet_Fry` | **Hibiki:** "Great-Grandmother, he won't sit still!"<br>**Asagi:** "Neither did you, dear. Hold his other arm." |
 | `Asagi_Hub_Sleep` | `SoulHub` | Story | `lastRunElement = Water`, `runs ≥ 6` | **Asagi:** "Do you sleep, in between? Sleet asked you that, I expect. She asks everyone."<br>**Oni:** "...I play."<br>**Asagi:** "I know. I can hear it from the water." |
+| `Asagi_Pickup_Bead` | `SoulPickup` | Reactive, once | `got Item_Bead` (a Spirit Bead ever offered) | **Asagi:** "A spirit bead. Put it where it'll do the most good, dear. That's all medicine ever is." |
 
 ## Arc across runs
 

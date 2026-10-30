@@ -116,6 +116,7 @@ Lines with the other characters (all voiced).
 | `Shirogane_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Shirogane:** "Mizore's cold. She stitched me more often than I let you know. Guard your left." |
 | `Shirogane_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Shirogane:** "The old koi's water. ...Does she still keep the stone clear?"<br>**Oni:** "...Yes." |
 | `Shirogane_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Shirogane:** "The drummer girl. She dropped my sword in the mud. ...Tell her I laughed."<br>**Oni:** "...I'll tell her." |
+| `Shirogane_Intro_Scroll` | `BossIntro` | Reactive, rests 4 | `got Item_Scroll` | **Shirogane:** "You've been reading the guard's scrolls again. Show me the third form. You always dropped your elbow." |
 
 ## Arc across runs
 

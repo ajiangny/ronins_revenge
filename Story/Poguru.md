@@ -142,10 +142,6 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | | Repeatable | | `Poguru_Boss_Wiggle` | "Victory wiggle! ...No? Okay." |
 | | Repeatable | | `Poguru_Boss_Notes` | "Spirit Notes everywhere! Can we buy a song? A snack song?" |
 | | Repeatable | | `Poguru_Boss_Cheer` | "Did you see me? I was cheering SO quietly." |
-| PoguruStage (a round's start, ahead of PoguruRound) | Story | stage 2, round 1 | `Poguru_Stage_Pass` | "Blue ones now! And the front ones brought DOORS. Who brings a door to a fight?" |
-| | Story | stage 2, round 2 | `Poguru_Stage_Divers` | "Some of them jump now! See the flash? Then MOVE!" |
-| | Story | stage 3, round 1 | `Poguru_Stage_Shrine` | P: "Brrr! I'm made of FIRE and I'm still cold!" · P: "And the white ladies shoot right through cover. Don't hide from those. Dodge!" |
-| | Story | stage 4, round 1 | `Poguru_Stage_Mountain` | P: "These stairs... Your wisps went all shivery. Is this where the bells started?" · Oni: "...Yes." · P: "Oh. ...The ones with the hand bells make the rest shoot faster. Get them first!" |
 | PoguruScout (a kite scout appears, 35%) | Story | | `Poguru_Scout_First` | "A kite! Up there! Bonk it down, it's carrying a soul!" |
 | | Repeatable | | `Poguru_Scout_Kite` | "Kite! Kite! KITE!" |
 | | Repeatable | | `Poguru_Scout_Free` | "Free soul on a string! Get it!" |
@@ -167,6 +163,30 @@ come up, then every two or three runs, two or three lines in such a run. Each ha
 | | Repeatable | | `Poguru_Wake_Up` | "Up you get! The pool's warm. Ish." |
 | | Repeatable | | `Poguru_Wake_Hug` | "Wisp hug! Very warm. Very small." |
 | | Repeatable | | `Poguru_Wake_Count` | "That's {deaths}! I'm keeping count." (subtitle only: the number changes) |
+
+### Firsts (`PoguruFirst`, Priority, once each)
+
+The first time a thing is had or a kind of soldier is seen (`Firsts`, recorded outside the tutorial), he says what
+it is. In the field he pops out of the wisp; before a bead, thread or Sword Arts screen his word is a short talk over
+the frozen field. A soldier kind is named at the start of the first round it marches in. The four `Poguru_Stage_*`
+ids came with the stage each kind first fights in, so they keep their clips.
+
+| Requires (just got) | Id | Lines |
+|---|---|---|
+| a Shieldbearer | `Poguru_Stage_Pass` | P: "Blue ones now! And the front ones brought DOORS. Who brings a door to a fight?" |
+| a first dive | `Poguru_Stage_Divers` | P: "Some of them jump now! See the flash? Then MOVE!" |
+| a Yurei | `Poguru_Stage_Shrine` | P: "Brrr! I'm made of FIRE and I'm still cold!" · P: "And the white ladies shoot right through cover. Don't hide from those. Dodge!" |
+| a Bellringer | `Poguru_Stage_Mountain` | P: "These stairs... Your wisps went all shivery. Is this where the bells started?" · Oni: "...Yes." · P: "Oh. ...The ones with the hand bells make the rest shoot faster. Get them first!" |
+| an Archer | `Poguru_First_Archer` | P: "That row's got BOWS! Three arrows at once, in a fan. Stand in the gaps!" |
+| a Taisho, tutorial's parry not heard | `Poguru_First_Taisho` | P: "Big hat in the back! He throws glowing red spears." · P: "You can't cut those. PARRY them!" |
+| a Taisho | `Poguru_First_TaishoAgain` | P: "Big hat in the back! That's the red spear man. Remember? PARRY!" |
+| a Spirit Bead | `Poguru_First_Bead` | P: "A Spirit Bead! Feed it to a boon and the boon grows a level. A power snack!" |
+| a Spirit Thread | `Poguru_First_Thread` | P: "Ooh, a Spirit Thread! It makes a boon RARER. Same level, more sparkle!" |
+| a technique scroll | `Poguru_First_Scroll` | P: "A technique scroll! Old sword stuff!" · P: "Learn one and your slash changes shape. Pick the stabbiest." |
+| a Healing Spring path | `Poguru_First_Spring` | P: "Healing water! One heart back. It tastes like the temple pool. ...Don't think about it." |
+| a Spirit Notes path | `Poguru_First_Notes` | P: "Spirit Notes! Little lost bits of song. Save them for the temple. It teaches you Flute Songs!" |
+| a Warlord's Seal | `Poguru_First_Seal` | P: "A Warlord's Seal! Off a real warlord! The fanciest Flute Songs want those." |
+| Kite Silk | `Poguru_First_Silk` | P: "Kite Silk! Some Flute Songs need it. ...Can I wear it as a second cape? No? Okay." |
 
 ### Roasts at the wake (`PoguruWake`, Reactive, ahead of the wake lines above)
 
@@ -216,8 +236,25 @@ Lines with the other characters (all voiced).
 
 ### Temple talk (`PoguruTalk`, at his nest)
 
+News comes first (Priority, once each, `GotWithin`): a longer word on a first while it's still news. The temple's
+own unlocks last one run, Asagi two, the rest three.
+
 | Priority | Requires | Id | Lines |
 |---|---|---|---|
+| Priority | met Asagi, last 2 runs | `Poguru_Talk_Asagi` | P: "The pond lady is a FISH. In a BOWL. With ARMS." · Oni: "...She pulled me out." · P: "I know! I'm going to say thank you. From over here." |
+| Priority | a Flute Song bought, last run | `Poguru_Talk_Song` | P: "You learned a Flute Song! It stays with you now. Every run." · P: "Even when you forget everything else, your fingers remember. I asked them." |
+| Priority | the oath stone unsealed, last run | `Poguru_Talk_OathStone` | P: "The chains on the big stone fell off! I didn't touch it. ...I touched it a little." · P: "Swear on it and the army gets meaner. But the Spirit Notes get BIGGER." |
+| Priority | an oath sworn, last run | `Poguru_Talk_Oath` | P: "You swore on the stone. I heard it go CLUNK." · P: "You can un-swear whenever you want! I checked." · Oni: "...I'll keep it." |
+| Priority | the kunai picked, last run | `Poguru_Talk_Kunai` | P: "Kunai! Same cuts, but THROWN. Very ninja." · Oni: "I'm not a ninja." · P (the impression): "'I'm not a ninja.' Hehe." |
+| Priority | a bead, last 3 runs | `Poguru_Talk_Bead` | P: "I've been thinking about Spirit Beads." · P: "Bosses drop one when they fall. Put it on the boon you use MOST. That's the secret. I made it up. It's still true." · Oni: "...Fine." |
+| Priority | a thread, last 3 runs | `Poguru_Talk_Thread` | P: "Spirit Threads are rare! Common goes Rare. Rare goes Epic." · P: "Save it for your favourite boon. Like how I'm your favourite dragon." · Oni: "...You're the only dragon." |
+| Priority | a scroll, last 3 runs | `Poguru_Talk_Scroll` | P: "Your sword remembers things you don't. The scrolls wake them up." · Oni: "...Guard techniques. From before." · P: "You remembered something! Quick, remember another one!" |
+| Priority | a spring, last 3 runs | `Poguru_Talk_Spring` | P: "That healing water. Do you think it's the SAME water as the pool?" · Oni: "...Maybe." · P: "Then I'm never swimming in it again. ...I've never swum in it. Still." |
+| Priority | notes, last 3 runs | `Poguru_Talk_Notes` | P: "All those Spirit Notes! They're bits of songs the dead forgot." · P: "Take them to the flute stand and learn a song. It stays with you every run!" · Oni: "...I know where the flute is." |
+| Priority | a seal, last 3 runs | `Poguru_Talk_Seal` | P: "That Warlord's Seal is SO heavy. Who gives warlords seals?" · Oni: "...He did. One each." · P: "Then let's take ALL of them back." |
+| Priority | silk, last 3 runs | `Poguru_Talk_Silk` | P: "I made a kite out of the silk. In my head. It flew SO high." · P: "The real silk's for your songs, though. The really good ranks want it." |
+| Priority | a Legendary, last 3 runs | `Poguru_Talk_Legendary` | P: "That Legendary boon! The whole wisp went WOOSH." · P: "Souls only give those away when they REALLY like you." · Oni: "...They don't like me." · P: "They REALLY like you." |
+| Priority | a Duo, last 3 runs | `Poguru_Talk_Duo` | P: "Two souls, ONE boon! They had to agree on something!" · Oni: "...They argued." · P: "They ALWAYS argue. That's how you know they care." |
 | Story | | `Poguru_Talk_Who` | Oni: "Where did you come from." · P: "Your wisp! The left one. It's cosy. I think I was always there, I just woke up late." · P: "I'm a dragon! Probably. A small one. Lost. That's my title!" |
 | Story | heard Who, a run since | `Poguru_Talk_Cape` | Oni: "That red cloth." · P: "My cape! It smells like festival lanterns. Do you know why?" · Oni: "...No." |
 | Story | 3 runs | `Poguru_Talk_Remember` | P: "Every time you wake up, you forget a little. So I remember for you!" · P: "Mostly the wrong things. Did you used to like plums?" · Oni: "...I did." |

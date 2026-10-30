@@ -69,6 +69,8 @@ already talking, and **no barks at all while a conversation is on screen**.
 
 - The record is a conversation with lines inside it.
 - Requirements need negation, any-of, last-run scope and an expiry, and runs played apart from runs won.
+- A Priority tier above Story for the major events, and a record of firsts (each thing had or met, and the run)
+  with an expiry, so "you just found this" lines play while they're news and never thirty runs later.
 - Every event ends in a repeatable with no requirements.
 - Story lines are play-once; repeatables go through a shuffle bag that resets.
 - No random rolls inside eligibility, and a debug view that says why each line passed or failed (Hades' own code

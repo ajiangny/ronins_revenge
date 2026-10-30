@@ -203,6 +203,8 @@ Lines with the other characters (all voiced).
 | `Mizore_Poguru` | `SoulPickup` | Reactive, once | `seen Mizore_Meet_Collarbone` | **Mizore:** "Your little dragon is running warm. Hold still, creature."<br>**Poguru:** "Is it bad? Do I have a fever?"<br>**Mizore:** "Dragons don't get fevers."<br>**Poguru:** "...Do souls?"<br>**Mizore:** "...Take the boon, Oni." |
 | `Mizore_Cut_Hibiki` | `SoulPickup` | Reactive, rests 5 | `holds Storm`, `seen Mizore_Meet_Steady` | **Mizore:** "Hold still, Oni. Let me see."<br>**Hibiki:** "He CAN'T hold still, Grandmother, he's got my spark!"<br>**Mizore:** "Then I'll work quickly." |
 | `Mizore_Hub_Sleep` | `SoulHub` | Story | `lastRunElement = Frost`, `runs ≥ 6` | **Mizore:** "Do you sleep, in between?"<br>**Oni:** "...I play."<br>**Mizore:** "That'll do. Doctor's orders." |
+| `Mizore_Pickup_Spring` | `SoulPickup` | Reactive, once | `got Item_Spring` (a Healing Spring path ever taken) | **Mizore:** "Spring water. Good. A clean wound and a full heart, in that order." |
+| `Mizore_Pickup_Thread` | `SoulPickup` | Reactive, once | `got Item_Thread` (a Spirit Thread ever offered) | **Mizore:** "Someone's been stitching your boons finer. Neat work. Not mine. I'd have used fewer knots." |
 
 ## Arc across runs
 

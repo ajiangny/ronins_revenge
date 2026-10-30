@@ -166,6 +166,8 @@ Lines with the other characters (all voiced).
 | `Kagetsune_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Kagetsune:** "Mizore. She told me everyone dies. I have made very sure she was wrong."<br>**Oni:** "She wasn't." |
 | `Kagetsune_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Kagetsune:** "The fish on the hill. I climbed to her once, and she told me no."<br>**Kagetsune:** "Look at me, little demon. Look at what no was worth." |
 | `Kagetsune_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Kagetsune:** "The village drum. I had it thrown in with them. Did you think its beat was yours, little demon?" |
+| `Kagetsune_Intro_Souls` | `BossIntro` | Story | `got Soul_Fire`, `got Soul_Water`, `got Soul_Lightning` (met all three first souls) | **Kagetsune:** "My captain, my physician, and a peasant's drum. You collect my bells, little demon. They are still mine." |
+| `Kagetsune_Intro_Seals` | `BossIntro` | Reactive, rests 4 | `got Relic_Seal` | **Kagetsune:** "My warlords' seals, rattling on your belt. I gave each of them one. What do you give them?"<br>**Oni:** "...Rest." |
 
 ## Keep consistent
 

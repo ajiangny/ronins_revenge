@@ -109,6 +109,7 @@ Lines with the other characters (all voiced).
 | `Utsusemi_Intro_Frost` | `BossIntro` | Reactive, rests 4 | `holds Frost` | **Utsusemi:** "Cold... Gears slow in the cold. Clever. Clever boy." |
 | `Utsusemi_Intro_Water` | `BossIntro` | Reactive, rests 4 | `holds Water` | **Utsusemi:** "Water... Gears rust in water."<br>**Utsusemi:** "...The fish. Every spring. I fed the fish." |
 | `Utsusemi_Intro_Storm` | `BossIntro` | Reactive, rests 4 | `holds Storm` | **Utsusemi:** "Tick... tock... Faster than my count. A drummer's count."<br>**Utsusemi:** "The children wore my hat at the well." |
+| `Utsusemi_Intro_Confession` | `BossIntro` | Story | `seen Benibana_Intro_Bell`, `winsVs Utsusemi ≥ 1` | **Utsusemi:** "The dancer... knelt at my door once. She wanted... to confess."<br>**Utsusemi:** "I sent her away. Tick... tock... Why did I... send her away?" |
 
 ## Arc across runs
 

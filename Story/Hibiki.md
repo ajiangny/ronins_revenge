@@ -202,6 +202,8 @@ Lines with the other characters (all voiced).
 | `Hibiki_Poguru` | `SoulPickup` | Reactive, once | `seen Hibiki_Meet_Name` | **Hibiki:** "Wait. Is that the festival dragon? The paper one, with the red cape?"<br>**Poguru:** "I'm a REAL dragon!"<br>**Hibiki:** "You've got its cape! We paraded that dragon round the well every summer!"<br>**Poguru:** "...So THAT'S why it smells like lanterns." |
 | `Hibiki_Cut_Akagane` | `SoulPickup` | Reactive, rests 5 | `holds Fire`, `seen Hibiki_Meet_Out` | **Hibiki:** "Oni! Hi! Oh, you've got Captain Kettle's fire on you."<br>**Akagane:** "Captain Akagane, girl."<br>**Hibiki:** "Captain Kettle Akagane."<br>**Akagane:** "...Take her boon before I boil." |
 | `Hibiki_Hub_RiverSong` | `SoulHub` | Story | `lastRunElement = Storm`, `seen Hibiki_Meet_River` | **Hibiki:** "You remembered the river. Do you remember the song too?"<br>**Oni:** "...It goes up at the end."<br>**Hibiki:** "It goes UP at the end! Yes! Ba-dum!" |
+| `Hibiki_Pickup_Silk` | `SoulPickup` | Reactive, once | `got Relic_Silk` (Kite Silk ever won) | **Hibiki:** "Kite silk! We flew kites off the river bank every festival. Mine always crashed."<br>**Hibiki:** "Into Captain Kettle, once. Best day of my life." |
+| `Hibiki_Laughed` | `SoulPickup` | Story | `seen Shirogane_Intro_Storm`, `seen Hibiki_Meet_Name` | **Oni:** "Shirogane said to tell you. About the sword in the mud. She laughed."<br>**Hibiki:** "...She LAUGHED? At me?"<br>**Hibiki:** "...Good. Good! I'll take it. Tell her I'm still sorry about the mud." |
 
 ## Arc across runs
 

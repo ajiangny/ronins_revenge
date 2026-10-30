@@ -208,6 +208,8 @@ Lines with the other characters (all voiced).
 | `Akagane_Poguru` | `SoulPickup` | Reactive, once | `seen Akagane_Meet_Copper` | **Akagane:** "What is that, at your shoulder."<br>**Poguru:** "A SUPPORT dragon!"<br>**Akagane:** "The vanguard had a dog once. It was braver."<br>**Poguru:** "HEY." |
 | `Akagane_Cut_Mizore` | `SoulPickup` | Reactive, rests 5 | `holds Frost`, `seen Akagane_Meet_Angry` | **Akagane:** "Fire's ready, Guardsman. Use it."<br>**Mizore:** "You'll scorch his hands again, Captain."<br>**Akagane:** "Hands heal."<br>**Mizore:** "Not in here, they don't." |
 | `Akagane_Hub_Salute` | `SoulHub` | Story | `lastRunElement = Fire`, `seen Akagane_Meet_Salute` | **Akagane:** "Still not done, Guardsman?"<br>**Oni:** "No."<br>**Akagane:** "Good. I haven't practised the salute." |
+| `Akagane_Pickup_Seal` | `SoulPickup` | Reactive, once | `got Relic_Seal` (a Warlord's Seal ever won) | **Akagane:** "A warlord's seal on you. He handed those out like bells. I never got one."<br>**Akagane:** "...Good. Melt it down, Guardsman." |
+| `Akagane_Pickup_Scroll` | `SoulPickup` | Reactive, once | `got Item_Scroll` (a technique scroll ever learned from) | **Akagane:** "The guard's scrolls. I drilled half those cuts into recruits. Badly. Do them better." |
 
 ## Arc across runs
 

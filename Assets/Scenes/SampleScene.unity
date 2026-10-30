@@ -753,6 +753,8 @@ MonoBehaviour:
   voiceLibrary: {fileID: 11400000, guid: c2bba46e69e0041d8ba653c9481056e6, type: 2}
   parryHitStop: 0.06
   auraLift: 0.3
+  auraAlpha: 0.85
+  auraScale: 1.6
   benibanaArt: {fileID: 11400000, guid: af4aa1df3782443738ea1a5b4e5dcece, type: 2}
   benibanaPhaseArt: {fileID: 11400000, guid: 9b4571d9092d54887b777900c9618f84, type: 2}
   benibanaScale: 2.3

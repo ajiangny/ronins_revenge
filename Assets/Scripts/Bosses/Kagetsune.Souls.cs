@@ -30,13 +30,26 @@ public partial class Kagetsune
     // The souls take their turns in order the first time round, then come at random, never the same twice running.
     int nextSoul;
     BossKind? lastSoul;
+    // Freed souls he has already called this fight: nothing came, and he doesn't call them again.
+    readonly List<BossKind> unanswered = new List<BossKind>();
 
     bool SoulOut => soul != null && !soul.IsDead;
 
+    // A freed soul (SaveData.freed) can be called once, to find it gone; after that only the bound ones answer.
+    bool Callable(BossKind kind) => !Save.Data.Freed(kind) || !unanswered.Contains(kind);
+    bool CanSummon => System.Array.Exists(SoulOrder, Callable);
+
     BossKind NextSoul()
     {
-        BossKind pick = nextSoul < SoulOrder.Length ? SoulOrder[nextSoul++] : SoulOrder[Random.Range(0, SoulOrder.Length)];
-        if (pick == lastSoul) pick = SoulOrder[(System.Array.IndexOf(SoulOrder, pick) + 1) % SoulOrder.Length];
+        while (nextSoul < SoulOrder.Length && !Callable(SoulOrder[nextSoul])) nextSoul++;
+        if (nextSoul < SoulOrder.Length)
+        {
+            lastSoul = SoulOrder[nextSoul++];
+            return lastSoul.Value;
+        }
+        var open = new List<BossKind>(System.Array.FindAll(SoulOrder, Callable));
+        BossKind pick = open[Random.Range(0, open.Count)];
+        if (pick == lastSoul && open.Count > 1) pick = open[(open.IndexOf(pick) + 1) % open.Count];
         lastSoul = pick;
         return pick;
     }
@@ -58,6 +71,16 @@ public partial class Kagetsune
     // He tolls, the coffin-hammer opens and a boss's soul is dragged out on its chain to the far side of the field.
     IEnumerator CallSoul(BossKind kind)
     {
+        // A freed soul's bell is silent: he calls, and nothing comes.
+        if (Save.Data.Freed(kind))
+        {
+            unanswered.Add(kind);
+            Say($"Kagetsune_Summon_{kind}Gone");
+            PlayAction(art.parry);
+            Toll(0.9f, 0.6f);
+            yield return Wait(2.2f);
+            yield break;
+        }
         Speak(SummonLine(kind));
         PlayAction(art.parry);
         Toll(0.9f, 0.6f);
@@ -87,7 +110,13 @@ public partial class Kagetsune
         Fx.Play(Fx.SmokePuff, new Vector3(x, TopOfScreen - 1f, 0), new Color(Teal.r, Teal.g, Teal.b, 0.7f), 3f);
         yield return Wait(0.9f);
         // The soul speaks for itself, in his choir: it knows what it's been made to do.
-        if (SoulOut) Speak(AnswerLine(kind));
+        // Once it has told Oni how to free it, it fights its chain out loud.
+        if (SoulOut)
+        {
+            string freeing = Dialogue.FreeingLine(kind);
+            if (freeing != null && Save.Data.SeenIn(freeing) >= 0) Say($"{kind}_Echo_Defiant");
+            else Speak(AnswerLine(kind));
+        }
     }
 
     // The chain follows the soul every frame, taut from the coffin-hammer; the soul-fire round it breathes. Its time

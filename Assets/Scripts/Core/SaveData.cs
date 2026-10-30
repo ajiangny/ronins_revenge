@@ -28,6 +28,11 @@ public class SaveData
     public int deathStreak;
     // The element he held most when the last run ended (Element), or -1: whose soul speaks in the temple.
     public int lastRunElement = -1;
+    // The stage he was on when the last run ended, counted from 1 (0 before any): how far he got.
+    public int lastStage;
+    // Indexed by BossKind: the bosses whose souls are free (Dialogue.FreeingLine heard, then beaten again). A freed
+    // boss still fights on her stage, but Kagetsune can no longer drag her out of the coffin.
+    public bool[] freed = new bool[5];
     // Whether Oni has met Asagi, the koi of the temple pond: until then no Water soul is drawn.
     public bool asagiMet;
     // Her first Water soul, owed from the meeting until its boons are offered: every soul is hers until then.
@@ -71,6 +76,8 @@ public class SaveData
     // Poguru's mid-fight warnings: the last run he said any (0 for never) and how many runs until he says them again.
     public int poguruWarnRun;
     public int poguruWarnGap;
+
+    public bool Freed(BossKind boss) => freed[(int)boss];
 
     public int SeenIn(string id)
     {
@@ -175,6 +182,7 @@ public static class Save
         // A save from before a field grew keeps its old length.
         if (read.deathsTo.Length < 5) Array.Resize(ref read.deathsTo, 5);
         if (read.winsVs.Length < 5) Array.Resize(ref read.winsVs, 5);
+        if (read.freed == null || read.freed.Length < 5) Array.Resize(ref read.freed, 5);
         if (read.deathsByCause == null || read.deathsByCause.Length < SaveData.DeathCauses) Array.Resize(ref read.deathsByCause, SaveData.DeathCauses);
         if (read.firsts == null || read.firstsRun == null || read.firsts.Count != read.firstsRun.Count)
         {
@@ -240,9 +248,11 @@ public static class Save
     }
 
     // A finished run: a clear, or a death and what caused it. Restarting or quitting mid-run records nothing.
-    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null, bool secondPhase = false)
+    public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null, bool secondPhase = false,
+        int stage = 0)
     {
         SaveData d = Data;
+        d.lastStage = stage;
         d.lastRunElement = mostHeld is Element element ? (int)element : -1;
         // A boss's blow is the boss's, whatever it threw.
         if (!cleared && killer != BossKind.None) cause = DeathCause.Boss;
@@ -271,9 +281,12 @@ public static class Save
         return true;
     }
 
+    // A win frees the boss once her last arc line was heard in an earlier run: she told him, and he came back and
+    // beat her again (Story/README.md, Endings).
     public static void BossFelled(BossKind boss)
     {
         Data.winsVs[(int)boss]++;
+        if (Dialogue.Freeing(boss, Data, Run)) Data.freed[(int)boss] = true;
         Write();
     }
 

@@ -14,7 +14,9 @@ public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubRetu
     AsagiTalk,
     // Poguru's word on something new the moment it's first had or seen: an item, a relic, a new kind of soldier
     // (Firsts, DialogueContext.Just). Priority lines only, and no repeatable: with nothing new he stays quiet.
-    PoguruFirst }
+    PoguruFirst,
+    // Kagetsune's summons in his phase 2, and the souls' answers, by arc: played by id (Boss.Say), never picked.
+    Echo }
 
 // Priority conversations are the major events (a first item, a first meeting): they play once and jump every queue.
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
@@ -66,6 +68,8 @@ public struct DialogueContext
     public int Round;
     // The first just recorded (a Firsts key), for Poguru's word on it.
     public string Just;
+    // In a boss fight: whether nothing has touched him yet (the phase card's "not a scratch").
+    public bool Untouched;
 }
 
 // One requirement, with the words the debug view prints for it.
@@ -116,6 +120,42 @@ public static partial class Dialogue
     public static Req Rival => new Req("another soul leads", c => c.Element is Element own
         && Array.Exists((Element[])Enum.GetValues(typeof(Element)), e => e != own && Leads(c, e)));
     public static Req LastRunElement(Element element) => new Req($"mostly {element} last run", c => c.Save.lastRunElement == (int)element);
+    // How far the last run got: died to the army on this stage, or got past this boss and died further on.
+    public static Req DiedOnStage(int stage) => new Req($"killed by the army on stage {stage} last run",
+        c => !c.Save.lastRunCleared && c.Save.lastKiller == (int)BossKind.None && c.Save.lastStage == stage);
+    public static Req GotPast(BossKind boss) => new Req($"got past {boss} and died last run",
+        c => !c.Save.lastRunCleared && c.Save.lastStage > (int)boss);
+    // The score against a boss: two clear of the other side, and enough fights that it isn't noise.
+    public static Req OniAhead(BossKind boss) => new Req($"ahead of {boss}",
+        c => c.Save.winsVs[(int)boss] >= 3 && c.Save.winsVs[(int)boss] >= c.Save.deathsTo[(int)boss] + 2);
+    public static Req OniBehind(BossKind boss) => new Req($"behind {boss}",
+        c => c.Save.deathsTo[(int)boss] >= 3 && c.Save.deathsTo[(int)boss] >= c.Save.winsVs[(int)boss] + 2);
+    // Freed bosses (SaveData.freed), and the fight that will free her if he wins it.
+    public static Req Freed(BossKind boss) => new Req($"{boss} freed", c => c.Save.Freed(boss));
+    public static Req AnyFreed => new Req("a boss freed", c => Array.Exists(c.Save.freed, f => f));
+    public static Req AllFreed => new Req("all three freed",
+        c => c.Save.Freed(BossKind.Benibana) && c.Save.Freed(BossKind.Utsusemi) && c.Save.Freed(BossKind.Shirogane));
+    public static Req FreesNow(BossKind boss) => new Req($"this win frees {boss}", c => Freeing(boss, c.Save, c.Run));
+    public static Req Untouched => new Req("not hit this fight", c => c.Untouched);
+
+    // The line that tells Oni how to free each boss; null for the Emperor, who is never freed.
+    public static string FreeingLine(BossKind boss) => boss switch
+    {
+        BossKind.Benibana => "Benibana_Intro_Bell",
+        BossKind.Utsusemi => "Utsusemi_Intro_WindDown",
+        BossKind.Shirogane => "Shirogane_Intro_Oath",
+        _ => null,
+    };
+
+    // Whether beating this boss now frees her: not yet free, and her freeing line heard in an earlier run.
+    public static bool Freeing(BossKind boss, SaveData save, int run)
+    {
+        string id = FreeingLine(boss);
+        if (id == null || save.Freed(boss)) return false;
+        int heard = save.SeenIn(id);
+        return heard >= 0 && heard < run;
+    }
+
     public static Req Felled(BossKind boss) => new Req($"just felled {boss}", c => c.Boss == boss);
     // Met in any way: fought, heard, or killed by.
     public static Req Met(BossKind boss) => new Req($"met {boss}", c => c.Save.FirstIn(Firsts.Boss(boss)) >= 0
@@ -191,9 +231,10 @@ public static partial class Dialogue
     }
 
     public static DialogueContext Context(RoninLoadout loadout = null, Element? element = null, int lives = 0, bool offering = false,
-        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null, int stage = 0, int round = 0, string just = null) =>
+        BossKind? boss = null, BossKind? nextBoss = null, List<BoonId> offers = null, int stage = 0, int round = 0, string just = null,
+        bool untouched = false) =>
         new DialogueContext { Save = Save.Data, Run = Save.Run, Loadout = loadout, Element = element, Lives = lives, Offering = offering, Boss = boss,
-            NextBoss = nextBoss, Offers = offers, Stage = stage, Round = round, Just = just };
+            NextBoss = nextBoss, Offers = offers, Stage = stage, Round = round, Just = just, Untouched = untouched };
 
     // Why a conversation can't play now, or null if it can. No dice are rolled here, so the answer is repeatable.
     static string Blocked(Conversation c, DialogueContext ctx)

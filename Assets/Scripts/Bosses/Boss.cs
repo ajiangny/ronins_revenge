@@ -93,6 +93,12 @@ public abstract class Boss : MonoBehaviour, IHittable
         Spoke?.Invoke(this, line);
     }
 
+    // A written line said mid-fight by its conversation id (DialogueEvent.Echo in Dialogue.Lines.cs), for lines that
+    // change with the story: GameManager voices it from the VoiceLibrary.
+    public event Action<Boss, string> Said;
+
+    protected void Say(string id) => Said?.Invoke(this, id);
+
     readonly Dictionary<BossLine, float> lastBarked = new Dictionary<BossLine, float>();
 
     // A move callout that stays quiet if the same line was called within cooldown seconds, so a move she

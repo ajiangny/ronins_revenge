@@ -341,7 +341,7 @@ public partial class Kagetsune : Boss
         if (secondPhase && movesSinceUltimate >= Ultimate - 1 && lastMove != null) return Move.ThousandBells;
         Move parry = secondPhase ? Move.SoulCoffin : Move.LastToll;
         if (movesSinceParry >= ParryAtLatest) return parry;
-        if (secondPhase && movesSinceSoul >= SoulAtLatest) return Move.Summon;
+        if (secondPhase && CanSummon && movesSinceSoul >= SoulAtLatest) return Move.Summon;
         // His dead are called again once the last levy is cut down: at the latest after a few moves, sometimes sooner.
         if (!LevyOut && (movesSinceLevy >= LevyAtLatest || movesSinceLevy >= 2 && Random.value < 0.2f)) return Move.Levy;
 
@@ -361,7 +361,7 @@ public partial class Kagetsune : Boss
         if (movesSinceParry >= ParryEvery) options.Add(parry);
         if (lastMove is Move last) options.Remove(last);
         Move pick = options[Random.Range(0, options.Count)];
-        if (secondPhase && movesSinceSoul >= 2 && Random.value < 0.35f) return Move.Summon;
+        if (secondPhase && CanSummon && movesSinceSoul >= 2 && Random.value < 0.35f) return Move.Summon;
         return pick;
     }
 }

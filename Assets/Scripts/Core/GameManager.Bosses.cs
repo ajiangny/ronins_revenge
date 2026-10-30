@@ -51,6 +51,8 @@ public partial class GameManager
         // A boss with no phase card still changes music when its second phase starts; with one, this is a no-op.
         activeBoss.SecondPhaseBegan += PlayPhaseMusic;
         activeBoss.Spoke += OnBossSpoke;
+        activeBoss.Said += OnBossSaid;
+        bossHits = 0;
         effects.Boss = activeBoss;
         yield return activeBoss.Enter(post, 1.6f);
         yield return activeBoss.Entrance();
@@ -92,13 +94,27 @@ public partial class GameManager
 
     // The second-phase title card: the same cinematic as the intro with the phase art, epithet and line. The music
     // ducks under it as it would under the spoken line.
-    // When Oni has something to answer (a phase exchange not heard yet), the card only names the new form and the
-    // exchange plays as a scene after it; otherwise the card speaks the line itself.
+    // A line the boss says alone is spoken by the card itself (her built-in line, or a written one in its own clip),
+    // so the fight doesn't stop for a scene; only an exchange where Oni answers plays as a scene after the card.
     IEnumerator PlayPhaseCard(Boss boss)
     {
         BossVoice lines = VoiceFor(Stage.boss);
-        Conversation exchange = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossPhase, Dialogue.Context(loadout));
-        AudioClip clip = exchange == null ? lines.phase : null;
+        Conversation exchange = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossPhase,
+            Dialogue.Context(loadout, lives: lives, untouched: bossHits == 0));
+        AudioClip clip = null;
+        string said = null;
+        if (exchange == null || exchange.BuiltIn == BossLine.Phase && exchange.Lines.Length == 0)
+        {
+            clip = lines.phase;
+            said = boss.Line(BossLine.Phase);
+            exchange = null;
+        }
+        else if (exchange.BuiltIn == null && exchange.Lines.Length == 1 && exchange.Lines[0].Speaker == exchange.Speaker)
+        {
+            clip = voiceLibrary != null ? voiceLibrary.Find(exchange.VoiceId(0)) : null;
+            said = Dialogue.Fill(exchange.Lines[0].Text, Dialogue.Context());
+            exchange = null;
+        }
         Music.Duck(0.3f, (clip != null ? clip.length : 3f) + 2.5f);
         // The new form brings its own music, rising in under the card.
         PlayPhaseMusic();
@@ -106,7 +122,7 @@ public partial class GameManager
         // The wash behind the art follows the transformed painting where its colours change (Utsusemi's molten core).
         Color wash = lines.phaseColour.a > 0f ? lines.phaseColour : boss.Colour;
         yield return ui.PlayBossIntro(lines.phasePortrait, lines.phaseCloseup, lines.phaseCloseupHeight, lines.phaseCloseupFocus,
-            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, exchange == null ? boss.Line(BossLine.Phase) : null);
+            lines.phaseCloseupAt, boss.Title, lines.phaseEpithet, wash, voice, clip, said);
         // The bar carries the name the card just announced.
         ui.RenameBossBar($"{boss.PhaseTitle}, {lines.phaseEpithet}");
         if (exchange != null) yield return PlayScene(exchange);
@@ -394,6 +410,29 @@ public partial class GameManager
         },
         _ => default,
     };
+
+    // A written mid-fight line (Boss.Say): story, like the summons, so it cuts in over any bark. The souls' answers
+    // carry their own speaker and the summons' teal.
+    void OnBossSaid(Boss boss, string id)
+    {
+        Conversation said = Dialogue.Find(id, mark: false);
+        if (said == null || said.Lines.Length == 0) return;
+        DialogueLine line = said.Lines[0];
+        AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(0)) : null;
+        float seconds = clip != null ? clip.length : 2.5f;
+        if (clip != null)
+        {
+            voice.Stop();
+            voice.volume = voiceVolume * Sfx.Volume;
+            voice.clip = clip;
+            voice.Play();
+            speakingFullLine = true;
+            Music.Duck(0.3f, seconds + 0.3f);
+        }
+        bool own = line.Speaker == said.Speaker;
+        ui.ShowSubtitle(line.Speaker.ToUpperInvariant(), Dialogue.Fill(line.Text, Dialogue.Context()),
+            own ? boss.Colour : boss.SpeakerColour(BossLine.EchoBenibana), seconds + 0.6f);
+    }
 
     // Mid-fight lines (her phase break, her defeat) play over the music, which dips under them. A bark (move
     // callout, gasp) never cuts off anything still playing: it's dropped, since a callout played late would name

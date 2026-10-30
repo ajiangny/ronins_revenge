@@ -365,6 +365,8 @@ public partial class GameManager : MonoBehaviour
     int stageIndex;
     int roundIndex;
     int lives;
+    // Blows that have landed on him in this boss fight, for the phase card's lines.
+    int bossHits;
     // Lives he can heal back up to; only Tidal Renewal raises it.
     int maxLives;
     int score;

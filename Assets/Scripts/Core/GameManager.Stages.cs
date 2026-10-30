@@ -82,6 +82,8 @@ public partial class GameManager
     {
         if (state != State.Playing) return;
         RunLog.Hit();
+        // Counted before any boon turns the blow aside: the boss saw it land (her phase card's "not a scratch").
+        if (activeBoss != null) bossHits++;
 
         // Cold Compress: the cold answers the blow before the life is counted.
         effects.OnRoninHit();
@@ -160,7 +162,7 @@ public partial class GameManager
         RunLog.EndSegment(lives, maxLives, null);
         BankTimeBonus();
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  time {Clock(runTime)}  time bonus {roundBonusTotal + stageBonusTotal}  notes {notesThisRun}  held: {HeldSummary()}");
-        Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase);
+        Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase, stageIndex + 1);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         ClearSummons();

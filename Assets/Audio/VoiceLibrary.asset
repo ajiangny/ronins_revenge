@@ -427,24 +427,68 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 126d0f563be954d7fbaa233b87797292, type: 3}
   - id: Benibana_Intro_2
     clip: {fileID: 8300000, guid: 1b3c476f95ad5434ca08945f7d3ed407, type: 3}
+  - id: Benibana_Intro_Ahead
+    clip: {fileID: 8300000, guid: ec2fa3c2d2e6e4453b61e66849685f14, type: 3}
+  - id: Benibana_Intro_Army
+    clip: {fileID: 8300000, guid: 568d5387f39d14477a6ea11789e71457, type: 3}
   - id: Benibana_Intro_Back
     clip: {fileID: 8300000, guid: 4a519e1bb8e4d46f98c2825f6d223fcf, type: 3}
+  - id: Benibana_Intro_Behind
+    clip: {fileID: 8300000, guid: 15b0e2cdf74984b25adf56a4d00254f7, type: 3}
+  - id: Benibana_Intro_Behind_2
+    clip: {fileID: 8300000, guid: 6ac699316fea84cc9899c024bcbd5438, type: 3}
   - id: Benibana_Intro_Bell
     clip: {fileID: 8300000, guid: 89888afc4d5134ab483c55cd96cc6ed5, type: 3}
+  - id: Benibana_Intro_Broke
+    clip: {fileID: 8300000, guid: fc5adda9d95a9470ea8a1a938739fdab, type: 3}
+  - id: Benibana_Intro_Broke_2
+    clip: {fileID: 8300000, guid: 792fd4d88bd2941ecab6527c5c0ccd31, type: 3}
+  - id: Benibana_Intro_Broke_3
+    clip: {fileID: 8300000, guid: 026b0a6308dd4441d98672ff4c2074ff, type: 3}
   - id: Benibana_Intro_Captain
     clip: {fileID: 8300000, guid: 43eaed53be7404e999386f818f0d1ada, type: 3}
+  - id: Benibana_Intro_Clock
+    clip: {fileID: 8300000, guid: 93d9ba7a5fd7f4a7680e18bb8ec4dc26, type: 3}
+  - id: Benibana_Intro_ClockStopped
+    clip: {fileID: 8300000, guid: 6d57eec62cc1a41cb94591ebeab527f8, type: 3}
   - id: Benibana_Intro_Dance
     clip: {fileID: 8300000, guid: 3b982a02497dd4e508ab73ca082ca735, type: 3}
+  - id: Benibana_Intro_Emperor
+    clip: {fileID: 8300000, guid: 0733635228e7444f19bdb93cdfc33973, type: 3}
+  - id: Benibana_Intro_Emperor_2
+    clip: {fileID: 8300000, guid: c6074441ba3fe43e7a3c8079e5528f07, type: 3}
   - id: Benibana_Intro_Fire
     clip: {fileID: 8300000, guid: 10669490e07224978bf1e0e7c5bc83e2, type: 3}
+  - id: Benibana_Intro_Five
+    clip: {fileID: 8300000, guid: a7ecd6171a10643bbb4fe72d18cb6578, type: 3}
   - id: Benibana_Intro_Frost
     clip: {fileID: 8300000, guid: 490d38e57f6e74139b636d75c169d384, type: 3}
+  - id: Benibana_Intro_Further
+    clip: {fileID: 8300000, guid: c176a6184deec46b79aba0b5ecf7ac1e, type: 3}
+  - id: Benibana_Intro_Kuon
+    clip: {fileID: 8300000, guid: 5cc3a7a079a58403393a320033c262c7, type: 3}
+  - id: Benibana_Intro_Kuon_2
+    clip: {fileID: 8300000, guid: e7ac17caaa0b34fa69bee5a1f8be1393, type: 3}
+  - id: Benibana_Intro_OniFive
+    clip: {fileID: 8300000, guid: 55e3a461cd84c417aa698a9fca7fb02f, type: 3}
+  - id: Benibana_Intro_OniFive_2
+    clip: {fileID: 8300000, guid: 45862f322807c4a6997f1fc1a367ce61, type: 3}
   - id: Benibana_Intro_Silver
     clip: {fileID: 8300000, guid: 47a8b3c1c92db4eb5b17162eb31c8472, type: 3}
   - id: Benibana_Intro_Silver_2
     clip: {fileID: 8300000, guid: 0002184a82c784dc384d934bf99c2e63, type: 3}
+  - id: Benibana_Intro_SilverRests
+    clip: {fileID: 8300000, guid: 6b9caa1cf76ec422785be18a30a43418, type: 3}
+  - id: Benibana_Intro_SilverRests_2
+    clip: {fileID: 8300000, guid: 4a7821178e1bf4357b1bfeb3e29ae304, type: 3}
   - id: Benibana_Intro_Storm
     clip: {fileID: 8300000, guid: 242e437790bf04460b3898ab530ce841, type: 3}
+  - id: Benibana_Intro_Sutra
+    clip: {fileID: 8300000, guid: b7427947d88e74a61b6927ee54ecd486, type: 3}
+  - id: Benibana_Intro_Sutra_2
+    clip: {fileID: 8300000, guid: 1ec38ec3ddaa04a4bb1e3fe7be07c8d7, type: 3}
+  - id: Benibana_Intro_Ten
+    clip: {fileID: 8300000, guid: 50ff48728375644268c15317dbe42db5, type: 3}
   - id: Benibana_Intro_Three
     clip: {fileID: 8300000, guid: f89e7bdcd5377473482e055990fd0ea9, type: 3}
   - id: Benibana_Intro_Water
@@ -809,12 +853,38 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a7601c9259aaa4758a6f63b5512f00ed, type: 3}
   - id: Kagetsune_Intro_Fire
     clip: {fileID: 8300000, guid: 7c3f43f68e5a5433882ba1051a180eef, type: 3}
+  - id: Kagetsune_Intro_FreedBenibana
+    clip: {fileID: 8300000, guid: 2f507d27ee23d493cadd60e97692587c, type: 3}
+  - id: Kagetsune_Intro_FreedBenibana_2
+    clip: {fileID: 8300000, guid: e8362e6a4141e40168bdaddecb4c9c15, type: 3}
+  - id: Kagetsune_Intro_FreedShirogane
+    clip: {fileID: 8300000, guid: cfa9c033673f845cbbbce29d15220a50, type: 3}
+  - id: Kagetsune_Intro_FreedShirogane_2
+    clip: {fileID: 8300000, guid: ed0dc20bd58ce476b81cf0d6af86f974, type: 3}
+  - id: Kagetsune_Intro_FreedUtsusemi
+    clip: {fileID: 8300000, guid: b30f80b8b087a4032b30757a4d3c33d1, type: 3}
   - id: Kagetsune_Intro_Frost
     clip: {fileID: 8300000, guid: ef0b46a884cc74e2a84347958da42326, type: 3}
   - id: Kagetsune_Intro_Frost_2
     clip: {fileID: 8300000, guid: 4253dab1e5a534d5eba035c0f775c809, type: 3}
   - id: Kagetsune_Intro_Kneel
     clip: {fileID: 8300000, guid: 61a717de16efb456caf49d099467ba3b, type: 3}
+  - id: Kagetsune_Intro_Kuon
+    clip: {fileID: 8300000, guid: a0fd8d0aa93ff4963b3d5c34ab05dc16, type: 3}
+  - id: Kagetsune_Intro_Kuon_2
+    clip: {fileID: 8300000, guid: f133ed620f57147738187d848b68b368, type: 3}
+  - id: Kagetsune_Intro_Last
+    clip: {fileID: 8300000, guid: 5a40974421dfa4be3a24c1538fec9639, type: 3}
+  - id: Kagetsune_Intro_Last_2
+    clip: {fileID: 8300000, guid: 66c0221b5b7bb4f559c8c0945cf608c2, type: 3}
+  - id: Kagetsune_Intro_Last_3
+    clip: {fileID: 8300000, guid: e8eb12752973b40388b0e175cafa2098, type: 3}
+  - id: Kagetsune_Intro_LostBenibana
+    clip: {fileID: 8300000, guid: 141e10a41c1334aecb260920ee280689, type: 3}
+  - id: Kagetsune_Intro_LostShirogane
+    clip: {fileID: 8300000, guid: 20d1c16f60091495eafd515273294453, type: 3}
+  - id: Kagetsune_Intro_LostUtsusemi
+    clip: {fileID: 8300000, guid: c24be82606fcc46a2a7b33bcdd74c223, type: 3}
   - id: Kagetsune_Intro_Seals
     clip: {fileID: 8300000, guid: 2c7ce48e642b341abb4252574e5698ac, type: 3}
   - id: Kagetsune_Intro_Seals_2
@@ -823,8 +893,24 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 669e3c19961ab437f9ba0bebda204122, type: 3}
   - id: Kagetsune_Intro_Souls
     clip: {fileID: 8300000, guid: d3a1503000087411a9e94e31ed34b81e, type: 3}
+  - id: Kagetsune_Intro_Spark
+    clip: {fileID: 8300000, guid: 2c6f533da83584cf6a717e7674b5940f, type: 3}
+  - id: Kagetsune_Intro_Spark_2
+    clip: {fileID: 8300000, guid: a885aadc1fd2049ae96f0f276ab645d2, type: 3}
+  - id: Kagetsune_Intro_Spark_3
+    clip: {fileID: 8300000, guid: 312f5df413839493fb2efb1f038ef240, type: 3}
+  - id: Kagetsune_Intro_Spark_4
+    clip: {fileID: 8300000, guid: f76f21dee512b4b3cac712763a5c369a, type: 3}
   - id: Kagetsune_Intro_Storm
     clip: {fileID: 8300000, guid: f24547d124808489f8d9aff6a84899cd, type: 3}
+  - id: Kagetsune_Intro_Ten
+    clip: {fileID: 8300000, guid: 4ff7d09e57f2243aa826a9bbbffd6655, type: 3}
+  - id: Kagetsune_Intro_Three
+    clip: {fileID: 8300000, guid: 6319cab8913b145afb0d4d6367363826, type: 3}
+  - id: Kagetsune_Intro_Three_2
+    clip: {fileID: 8300000, guid: 375ea89ecec5547479eb0cd54b7df5c6, type: 3}
+  - id: Kagetsune_Intro_TwentyFive
+    clip: {fileID: 8300000, guid: 16704a92dfa634541b4cf2c094bf94a8, type: 3}
   - id: Kagetsune_Intro_Water
     clip: {fileID: 8300000, guid: 0f142532884814b31a0eff1ba3e45b1a, type: 3}
   - id: Kagetsune_Intro_Water_2
@@ -1051,6 +1137,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e24a69a2058214943bb2ddbde1f76510, type: 3}
   - id: Mizore_Poguru_5
     clip: {fileID: 8300000, guid: 317d2afda7f954184981eb81ce9ea1dc, type: 3}
+  - id: Oni_Hub_CountBenibana
+    clip: {fileID: 8300000, guid: 340eac8d45a064f0d85113afb585809a, type: 3}
+  - id: Oni_Hub_CountKagetsune
+    clip: {fileID: 8300000, guid: 302f117c3e7cb4989beee1a1285643da, type: 3}
+  - id: Oni_Hub_CountShirogane
+    clip: {fileID: 8300000, guid: 5ae43c21a50f84476b69fd0e417766d5, type: 3}
   - id: Oni_Hub_First
     clip: {fileID: 8300000, guid: 47e965644a7aa47dba1fa577fe327ac8, type: 3}
   - id: Oni_Hub_Hat
@@ -1415,6 +1507,14 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a510949d6666a4d19971a6724f7cb2ee, type: 3}
   - id: Poguru_Talk_Song_2
     clip: {fileID: 8300000, guid: f447956d46a1a41aa9126718a91f2393, type: 3}
+  - id: Poguru_Talk_Spark
+    clip: {fileID: 8300000, guid: ff0ce1f552fc342889a48f3049b9bbad, type: 3}
+  - id: Poguru_Talk_Spark_2
+    clip: {fileID: 8300000, guid: d1d2b40efd9b7461c894854de459434a, type: 3}
+  - id: Poguru_Talk_Spark_3
+    clip: {fileID: 8300000, guid: cafd02a0fd5904a0ca6e86b8c7e0ab2f, type: 3}
+  - id: Poguru_Talk_Spark_4
+    clip: {fileID: 8300000, guid: 65d23a21b6bb243a191a587e7e3328bd, type: 3}
   - id: Poguru_Talk_Spring
     clip: {fileID: 8300000, guid: 1b1e35e65879c4942b95a9d59244dfeb, type: 3}
   - id: Poguru_Talk_Spring_2
@@ -1583,26 +1683,56 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 411c290f3522743bc820c396344ead14, type: 3}
   - id: Shirogane_Intro_Again2
     clip: {fileID: 8300000, guid: 49eaca8840fa843a69bf0e26ad868848, type: 3}
+  - id: Shirogane_Intro_Ahead
+    clip: {fileID: 8300000, guid: 9d4b70f74b59444a29d0cf833d86d366, type: 3}
   - id: Shirogane_Intro_Bell
     clip: {fileID: 8300000, guid: e3878f90aeee84de2a7067b68021e4af, type: 3}
+  - id: Shirogane_Intro_Clock
+    clip: {fileID: 8300000, guid: 6a83c556b3b854dc1961e3dba20c32da, type: 3}
+  - id: Shirogane_Intro_Dancer
+    clip: {fileID: 8300000, guid: 8f691154730dd4f7abf35d7800f06976, type: 3}
+  - id: Shirogane_Intro_Dancer_2
+    clip: {fileID: 8300000, guid: d2faeaf81cc894121a72d9f6bd4bce3a, type: 3}
+  - id: Shirogane_Intro_Emperor
+    clip: {fileID: 8300000, guid: 9e1bccf219fa24840b35368d7096f685, type: 3}
   - id: Shirogane_Intro_Fire
     clip: {fileID: 8300000, guid: db2c1ed6d1989462ba8a64c9a6fbaab5, type: 3}
   - id: Shirogane_Intro_Frost
     clip: {fileID: 8300000, guid: 2cbcd036775934eca826060d54a5f2bf, type: 3}
   - id: Shirogane_Intro_Hesitated
     clip: {fileID: 8300000, guid: e06b3c7e67c544d1ea63b1e96c7d3027, type: 3}
+  - id: Shirogane_Intro_Monk
+    clip: {fileID: 8300000, guid: d715e4fedd65f4cc2bb987e768cfca67, type: 3}
   - id: Shirogane_Intro_Oath
     clip: {fileID: 8300000, guid: f68db7ae63c1743778513971c7a0329d, type: 3}
+  - id: Shirogane_Intro_OniFive
+    clip: {fileID: 8300000, guid: a1286ebd133a24405997633460a6c2aa, type: 3}
+  - id: Shirogane_Intro_OniFive_2
+    clip: {fileID: 8300000, guid: 6da910e3868a04d6a881c5e4dcc03f2b, type: 3}
+  - id: Shirogane_Intro_OniFive_3
+    clip: {fileID: 8300000, guid: 5ed5cbc36259d4933bfb5a6eaed0775b, type: 3}
+  - id: Shirogane_Intro_Rebuilt
+    clip: {fileID: 8300000, guid: 9cadb2ab9859b46c9a55aee27ae97022, type: 3}
+  - id: Shirogane_Intro_Rebuilt_2
+    clip: {fileID: 8300000, guid: e9a5f219fda7c48cb963d164c65fcbbe, type: 3}
   - id: Shirogane_Intro_Scroll
     clip: {fileID: 8300000, guid: cbf1e22ea515b42e3b1f152ee338f27b, type: 3}
   - id: Shirogane_Intro_Storm
     clip: {fileID: 8300000, guid: 366b1ac43ac67446a912f3328530969d, type: 3}
   - id: Shirogane_Intro_Storm_2
     clip: {fileID: 8300000, guid: 648c0284b5a0b4ebf8393f21571696e3, type: 3}
+  - id: Shirogane_Intro_Three
+    clip: {fileID: 8300000, guid: 798029b641bb04b7bb5bdb2f389c5549, type: 3}
   - id: Shirogane_Intro_Water
     clip: {fileID: 8300000, guid: 90ecc54bdbcc546b9be0ac8565655c67, type: 3}
   - id: Shirogane_Intro_Water_2
     clip: {fileID: 8300000, guid: d9ad5bd3012344e6e8eebdd01f215f13, type: 3}
+  - id: Shirogane_Intro_Wisp
+    clip: {fileID: 8300000, guid: d4f0fb8db9c8e42148f0c4060913b8d9, type: 3}
+  - id: Shirogane_Intro_Wisp_2
+    clip: {fileID: 8300000, guid: 8db3fe0c3a78c4952a329d9add0e6d43, type: 3}
+  - id: Shirogane_Intro_Wisp_3
+    clip: {fileID: 8300000, guid: 14513fcae776743dba9bc42c99d6e463, type: 3}
   - id: Shirogane_Killed
     clip: {fileID: 8300000, guid: 26308ec5cf4aa4a9d8a35a94f325431a, type: 3}
   - id: Shirogane_Killed_Rise
@@ -1673,20 +1803,48 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a56e622e912b24336a5dd663a2e52f19, type: 3}
   - id: Utsusemi_Intro_2
     clip: {fileID: 8300000, guid: c14a6f1f7be7f4cc88e7e50f1c88ed87, type: 3}
+  - id: Utsusemi_Intro_BellQuiet
+    clip: {fileID: 8300000, guid: 709b931325c0c4a21a733e6b6b1afb3c, type: 3}
+  - id: Utsusemi_Intro_BellQuiet_2
+    clip: {fileID: 8300000, guid: 6f88c7940f2ac475db48c9df20d51bf3, type: 3}
+  - id: Utsusemi_Intro_Broke
+    clip: {fileID: 8300000, guid: 20b7c4f09ac8c4ec0972ddcfadada431, type: 3}
+  - id: Utsusemi_Intro_Broke_2
+    clip: {fileID: 8300000, guid: c19ba1a1e913c40d2b8429f6ad4af638, type: 3}
   - id: Utsusemi_Intro_Confession
     clip: {fileID: 8300000, guid: 15015fa6d608e4910be3a37fb16ec973, type: 3}
   - id: Utsusemi_Intro_Confession_2
     clip: {fileID: 8300000, guid: 9cf92a18050b547b9bfb5e41fdb66846, type: 3}
+  - id: Utsusemi_Intro_Dancer
+    clip: {fileID: 8300000, guid: 0bb94627bf1ff4d03919e827470cbbf4, type: 3}
   - id: Utsusemi_Intro_Fire
     clip: {fileID: 8300000, guid: 8528b7645e75d4ea28cdfecdd433b0e9, type: 3}
   - id: Utsusemi_Intro_Frost
     clip: {fileID: 8300000, guid: 69cbba331382c4f8ba18155dcae60c2c, type: 3}
+  - id: Utsusemi_Intro_Kuon
+    clip: {fileID: 8300000, guid: 192fd218358e5400ea93bccf7ae98b1b, type: 3}
+  - id: Utsusemi_Intro_Kuon_2
+    clip: {fileID: 8300000, guid: ed348b6209e9a4090b39474170e04c3b, type: 3}
+  - id: Utsusemi_Intro_OniFive
+    clip: {fileID: 8300000, guid: 3d5f72f8edb564ed19cc217bde27d350, type: 3}
+  - id: Utsusemi_Intro_OniFive_2
+    clip: {fileID: 8300000, guid: cc55c753a27924252be625bb9d6a7c4a, type: 3}
+  - id: Utsusemi_Intro_OniTen
+    clip: {fileID: 8300000, guid: abf7b4e8e56e04aff8984c5bea08d939, type: 3}
+  - id: Utsusemi_Intro_Road
+    clip: {fileID: 8300000, guid: 6ecc2b9b44a6346e79d6c9fefb7710ee, type: 3}
+  - id: Utsusemi_Intro_Silver
+    clip: {fileID: 8300000, guid: 6fd08ca1d5f934a00948bea9ae20892a, type: 3}
+  - id: Utsusemi_Intro_Silver_2
+    clip: {fileID: 8300000, guid: 3f202e9aa564a43d28633d2555d35c9a, type: 3}
   - id: Utsusemi_Intro_Storm
     clip: {fileID: 8300000, guid: fbc18f79e91cf423dbd681faf07b6684, type: 3}
   - id: Utsusemi_Intro_Storm_2
     clip: {fileID: 8300000, guid: 2440729cacb0a449ab0acc0b74093165, type: 3}
   - id: Utsusemi_Intro_Tea
     clip: {fileID: 8300000, guid: 6445c319c0cb94d8ba30d0bbaf5c45b8, type: 3}
+  - id: Utsusemi_Intro_Three
+    clip: {fileID: 8300000, guid: e27a511c0412e46cbb685c7abc66d735, type: 3}
   - id: Utsusemi_Intro_Tick
     clip: {fileID: 8300000, guid: 1a02184f326d64ddf8fd5982ae32320d, type: 3}
   - id: Utsusemi_Intro_Water
@@ -1695,6 +1853,12 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e40cd9e772fbf4d3ebe788cbb648d4bd, type: 3}
   - id: Utsusemi_Intro_WindDown
     clip: {fileID: 8300000, guid: 2a28b47d7b00a415e8294756d7fb077d, type: 3}
+  - id: Utsusemi_Intro_Winder
+    clip: {fileID: 8300000, guid: 5f889c573285c4e13969bbc728f6619f, type: 3}
+  - id: Utsusemi_Intro_Winder_2
+    clip: {fileID: 8300000, guid: 97abbbc755603466586f424ed989c94e, type: 3}
+  - id: Utsusemi_Intro_Winder_3
+    clip: {fileID: 8300000, guid: 9d353c6de798243b188bc49ec813e256, type: 3}
   - id: Utsusemi_Kasa
     clip: {fileID: 8300000, guid: cc324ee4c78b8477fad210001b1c5295, type: 3}
   - id: Utsusemi_Killed

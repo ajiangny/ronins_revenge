@@ -752,6 +752,20 @@ public static partial class Dialogue
         First("Poguru_Stage_Mountain", Firsts.Enemy(SamuraiKind.Bellringer),
             P("These stairs... Your wisps went all shivery. Is this where the bells started?"), O("...Yes."),
             P("Oh. ...The ones with the hand bells make the rest shoot faster. Get them first!")),
+        First("Poguru_First_Archer", Firsts.Enemy(SamuraiKind.Archer), P("That row's got BOWS! Three arrows at once, in a fan. Stand in the gaps!")),
+        // The Taisho's spear was the tutorial's last lesson; without it, he explains it here.
+        Talk("Poguru_First_Taisho", Pog, DialogueEvent.PoguruFirst, Tier.Priority, When(JustGot(Firsts.Enemy(SamuraiKind.Taisho)), NotSeen("Poguru_Tut_ParryIt")),
+            P("Big hat in the back! He throws glowing red spears."), P("You can't cut those. PARRY them!")),
+        First("Poguru_First_TaishoAgain", Firsts.Enemy(SamuraiKind.Taisho), P("Big hat in the back! That's the red spear man. Remember? PARRY!")),
+        // What's new from a path or a drop, said the moment it's first had: what it is, and roughly what it does.
+        First("Poguru_First_Bead", Firsts.Item(PathReward.Bead), P("A Spirit Bead! Feed it to a boon and the boon grows a level. A power snack!")),
+        First("Poguru_First_Thread", Firsts.Item(PathReward.Thread), P("Ooh, a Spirit Thread! It makes a boon RARER. Same level, more sparkle!")),
+        First("Poguru_First_Scroll", Firsts.Item(PathReward.Scroll), P("A technique scroll! Old sword stuff!"),
+            P("Learn one and your slash changes shape. Pick the stabbiest.")),
+        First("Poguru_First_Spring", Firsts.Item(PathReward.Spring), P("Healing water! One heart back. It tastes like the temple pool. ...Don't think about it.")),
+        First("Poguru_First_Notes", Firsts.Item(PathReward.Notes), P("Spirit Notes! Little lost bits of song. Save them for the temple. It teaches you Flute Songs!")),
+        First("Poguru_First_Seal", Firsts.Relic(Relic.Seal), P("A Warlord's Seal! Off a real warlord! The fanciest Flute Songs want those.")),
+        First("Poguru_First_Silk", Firsts.Relic(Relic.Silk), P("Kite Silk! Some Flute Songs need it. ...Can I wear it as a second cape? No? Okay.")),
         // A kite scout drifting over.
         Line("Poguru_Scout_First", Pog, DialogueEvent.PoguruScout, Story, "A kite! Up there! Bonk it down, it's carrying a soul!"),
         Line("Poguru_Scout_Kite", Pog, DialogueEvent.PoguruScout, Repeat, "Kite! Kite! KITE!"),
@@ -823,7 +837,37 @@ public static partial class Dialogue
         // Subtitle only: the count changes, so it can't be recorded.
         Line("Poguru_Wake_Count", Pog, DialogueEvent.PoguruWake, Repeat, "That's {deaths}! I'm keeping count."),
 
-        // His talk at the temple nest, once a visit.
+        // His talk at the temple nest, once a visit. News first: a longer word on the temple's own unlocks the visit
+        // they happen, on Asagi once she's met, and on what was new in the last few runs.
+        // The visit's own news goes stale soonest, so it comes first.
+        News("Poguru_Talk_Asagi", Firsts.Asagi, 2, P("The pond lady is a FISH. In a BOWL. With ARMS."), O("...She pulled me out."),
+            P("I know! I'm going to say thank you. From over here.")),
+        News("Poguru_Talk_Song", Firsts.SongBought, 1, P("You learned a Flute Song! It stays with you now. Every run."),
+            P("Even when you forget everything else, your fingers remember. I asked them.")),
+        News("Poguru_Talk_OathStone", Firsts.OathsUnsealed, 1, P("The chains on the big stone fell off! I didn't touch it. ...I touched it a little."),
+            P("Swear on it and the army gets meaner. But the Spirit Notes get BIGGER.")),
+        News("Poguru_Talk_Oath", Firsts.OathSworn, 1, P("You swore on the stone. I heard it go CLUNK."),
+            P("You can un-swear whenever you want! I checked."), O("...I'll keep it.")),
+        News("Poguru_Talk_Kunai", Firsts.KunaiSkin, 1, P("Kunai! Same cuts, but THROWN. Very ninja."), O("I'm not a ninja."),
+            P("'I'm not a ninja.' Hehe.")),
+        News("Poguru_Talk_Bead", Firsts.Item(PathReward.Bead), 3, P("I've been thinking about Spirit Beads."),
+            P("Bosses drop one when they fall. Put it on the boon you use MOST. That's the secret. I made it up. It's still true."), O("...Fine.")),
+        News("Poguru_Talk_Thread", Firsts.Item(PathReward.Thread), 3, P("Spirit Threads are rare! Common goes Rare. Rare goes Epic."),
+            P("Save it for your favourite boon. Like how I'm your favourite dragon."), O("...You're the only dragon.")),
+        News("Poguru_Talk_Scroll", Firsts.Item(PathReward.Scroll), 3, P("Your sword remembers things you don't. The scrolls wake them up."),
+            O("...Guard techniques. From before."), P("You remembered something! Quick, remember another one!")),
+        News("Poguru_Talk_Spring", Firsts.Item(PathReward.Spring), 3, P("That healing water. Do you think it's the SAME water as the pool?"),
+            O("...Maybe."), P("Then I'm never swimming in it again. ...I've never swum in it. Still.")),
+        News("Poguru_Talk_Notes", Firsts.Item(PathReward.Notes), 3, P("All those Spirit Notes! They're bits of songs the dead forgot."),
+            P("Take them to the flute stand and learn a song. It stays with you every run!"), O("...I know where the flute is.")),
+        News("Poguru_Talk_Seal", Firsts.Relic(Relic.Seal), 3, P("That Warlord's Seal is SO heavy. Who gives warlords seals?"),
+            O("...He did. One each."), P("Then let's take ALL of them back.")),
+        News("Poguru_Talk_Silk", Firsts.Relic(Relic.Silk), 3, P("I made a kite out of the silk. In my head. It flew SO high."),
+            P("The real silk's for your songs, though. The really good ranks want it.")),
+        News("Poguru_Talk_Legendary", Firsts.Legendary, 3, P("That Legendary boon! The whole wisp went WOOSH."),
+            P("Souls only give those away when they REALLY like you."), O("...They don't like me."), P("They REALLY like you.")),
+        News("Poguru_Talk_Duo", Firsts.Duo, 3, P("Two souls, ONE boon! They had to agree on something!"), O("...They argued."),
+            P("They ALWAYS argue. That's how you know they care.")),
         Talk("Poguru_Talk_Who", Pog, PogTalk, Story, When(), O("Where did you come from."),
             P("Your wisp! The left one. It's cosy. I think I was always there, I just woke up late."),
             P("I'm a dragon! Probably. A small one. Lost. That's my title!")),
@@ -864,6 +908,10 @@ public static partial class Dialogue
     // Poguru's word on a first (PoguruFirst): plays once, the moment `key` is first had or seen.
     static Conversation First(string id, string key, params DialogueLine[] lines) =>
         Talk(id, Pog, DialogueEvent.PoguruFirst, Tier.Priority, When(JustGot(key)), lines);
+
+    // Poguru's longer word at the nest on a first had in the last `runs` runs; plays once, ahead of his other talk.
+    static Conversation News(string id, string key, int runs, params DialogueLine[] lines) =>
+        Talk(id, Pog, PogTalk, Tier.Priority, When(GotWithin(key, runs)), lines);
 
     // A roast at the temple, resting `cooldown` runs after it plays.
     static Conversation Roast(string id, int cooldown, Req[] requires, params DialogueLine[] lines) =>

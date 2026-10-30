@@ -28,7 +28,8 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   `GameManager.DefaultStages()`; the scene's serialized copy wins at runtime, and `Ninja/Apply Stages` copies the
   coded stages into it (and re-applies the maps), so add or retune a stage in code and re-run it.
 - **Time bonus** (`GameManager.Clock.cs`): `TickClock` runs from `Update` only while `state == Playing` and the
-  tutorial is over, so banners, boon screens, talk scenes, paths, travel and pause aren't timed. `roundTime` resets with
+  tutorial is over, so banners, boon screens, talk scenes, paths, travel and pause aren't timed; it also holds while
+  `Ronin.TimeHeld` is set (Utsusemi's Stopped Hour), since Oni can't act through it. `roundTime` resets with
   each round and boss fight (`StartRoundClock`, beside `RunLog.BeginSegment`), `stageTime` with each stage's first
   round or a jump (`StartStageClock`), `runTime` once a run. `EndRound` calls `PayRoundBonus`: whole seconds under
   `roundParSeconds` (40) × `roundBonusPerSecond` (10) × the stage number. `OnBossDefeated` (or a boss-less stage's

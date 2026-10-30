@@ -17,10 +17,10 @@ public partial class GameManager
     float SegmentPar => activeBoss != null ? bossParSeconds : roundParSeconds;
 
     // Banners, boon screens, talk scenes and pauses aren't Playing, so only the fighting is timed. Poguru's drills
-    // aren't a race.
+    // aren't a race. Utsusemi's Stopped Hour holds the clock with the world: Oni can't act through it.
     void TickClock()
     {
-        if (tutorial.Active) return;
+        if (tutorial.Active || ronin.TimeHeld) return;
         roundTime += Time.deltaTime;
         stageTime += Time.deltaTime;
         runTime += Time.deltaTime;

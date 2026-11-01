@@ -187,6 +187,9 @@ public partial class Utsusemi
     const float RockHeight = 1.5f;
     const int MaxRocks = 3;
     const float RockSpacing = 3.5f;
+    // How far in from the edges they rest. A rock's shade lands further out than the rock does, so one nearer the edge
+    // would cast it past where the ronin can walk (or under the HUD's boon column), and the Hyper Beam couldn't be dodged.
+    const float RockEdgeMargin = 5.3f;
     // How long the move's overload shakes the hall and rains rocks.
     const float RockfallSeconds = 2.6f;
     // The Hyper Beam: its wind-up, its sweep from edge to edge, how many times a laser's breadth it's drawn, and how
@@ -485,8 +488,7 @@ public partial class Utsusemi
     List<float> RockSpots(int count)
     {
         var spots = new List<float>();
-        // Clear of the HUD's boon column at the left and of the edges.
-        float lo = LeftEdge + 3.5f, hi = RightEdge - 3f;
+        float lo = LeftEdge + RockEdgeMargin, hi = RightEdge - RockEdgeMargin;
         for (int i = 0; i < count; i++)
         {
             for (int tries = 0; tries < 20; tries++)

@@ -36,7 +36,7 @@ public partial class Utsusemi
         Sfx.Play(Sfx.GearGrind, 1f, 0.75f);
         Music.Duck(0.15f, 8f);
         yield return new WaitForSeconds(0.4f);
-        // The whole hall shakes with it and rocks rain down; one or two come to rest in the cover row and stay, which
+        // The whole hall shakes with it and rocks rain down; one or two come to rest and stay, which
         // its first move once it has broken open (the Hyper Beam) will need.
         StartCoroutine(Rockfall(OverloadSeconds + 0.6f, Random.Range(1, 3), false));
         yield return Overload();

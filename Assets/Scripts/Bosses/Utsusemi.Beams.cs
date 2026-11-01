@@ -164,12 +164,12 @@ public partial class Utsusemi
 
     Vector3 BeamEnd(Vector3 from, float x, out Blocker cover) => BeamEnd(from, new Vector3(x, GroundY, 0), out cover);
 
-    // The height of the cover row its entrance razed, where the rocks it shakes loose come to rest; just above the
+    // The height of the cover row its entrance razed, the lowest the rocks it shakes loose come to rest; just above the
     // ronin's head if the entrance never measured it.
     float coverRowY = float.NaN;
     float CoverRowY => float.IsNaN(coverRowY) ? ronin.TopY + 0.8f : coverRowY;
 
-    // A rock lying in the cover row. Blows only flash off it; only the Hyper Beam breaks it, and only once the whole
+    // A rock lying on the field. Blows only flash off it; only the Hyper Beam breaks it, and only once the whole
     // beam has passed it.
     class Rock
     {
@@ -183,13 +183,18 @@ public partial class Utsusemi
     // Set by the phase break: the Hyper Beam opens the second phase.
     bool hyperNext;
 
-    // How tall a rock that stays stands, how many can lie in the row at once, and how far apart they come to rest.
+    // How tall a rock that stays stands, and how many can lie on the field at once.
     const float RockHeight = 1.5f;
     const int MaxRocks = 3;
-    const float RockSpacing = 3.5f;
-    // How far in from the edges they rest. A rock's shade lands further out than the rock does, so one nearer the edge
-    // would cast it past where the ronin can walk (or under the HUD's boon column), and the Hyper Beam couldn't be dodged.
-    const float RockEdgeMargin = 5.3f;
+    // They come to rest anywhere from the old cover row to this far above it, this far apart in height, so they never
+    // read as one line.
+    const float RockRowSpread = 3.5f, RockRowGap = 1.2f;
+    // How far apart their shades lie on the ronin's row, so each is a different place to run to.
+    const float RockShadeSpacing = 5f;
+    // How far in from the edge the middle of a shade can lie. A shade lands further out than its rock, the more so the
+    // higher the rock, so spots are chosen by their shade: a rock anywhere else could cast it past where he can walk,
+    // and the Hyper Beam couldn't be dodged.
+    const float RockShadeMargin = 2.3f;
     // How long the move's overload shakes the hall and rains rocks.
     const float RockfallSeconds = 2.6f;
     // The Hyper Beam: its wind-up, its sweep from edge to edge, how many times a laser's breadth it's drawn, and how
@@ -197,8 +202,8 @@ public partial class Utsusemi
     const float HyperChargeSeconds = 2.2f, HyperSweepSeconds = 3f, HyperWidth = 3.2f, HyperReach = 1.1f;
 
     // The Hyper Beam (second phase only). In super armour it overloads as at its phase break, lasers firing wild from
-    // its eye and core (these ones burn) while the hall shakes and rocks rain down, one or two coming to rest in the
-    // cover row. The armour drops, Poguru yells to get behind a rock and hovers in its shade, and it winds up a vast
+    // its eye and core (these ones burn) while the hall shakes and rocks rain down, one or two coming to rest and
+    // staying. The armour drops, Poguru yells to get behind a rock and hovers in its shade, and it winds up a vast
     // beam that sweeps the field from one edge to the other. Only a rock saves the ronin: the beam can't get through
     // one, and a rock it burns crumbles only once the whole beam has passed it. Straight after the phase break it skips
     // the overload: the break shook the rocks down already.
@@ -451,13 +456,13 @@ public partial class Utsusemi
     float ShadeX(Rock rock) => Project(Core, rock.cover.transform.position + Vector3.up * rock.height * 0.5f, ronin.Bounds.center.y);
 
     // The hall shakes and rocks rain down across it for `seconds`: most smash on the ground (on the ronin, if
-    // `harmful` and he's still under it), and `keep` of them land in the cover row and stay there as cover, making
-    // room first if the row already holds as many as it can.
+    // `harmful` and he's still under it), and `keep` of them land and stay there as cover, making room first if the
+    // field already holds as many as it can.
     IEnumerator Rockfall(float seconds, int keep, bool harmful, System.Action done = null)
     {
         rocks.RemoveAll(r => r.cover == null);
         while (rocks.Count > 0 && rocks.Count + keep > MaxRocks) Crumble(rocks[0]);
-        List<float> spots = RockSpots(keep);
+        List<Vector2> spots = RockSpots(keep);
         Sfx.Play(Sfx.GearGrind, 0.7f, 0.5f);
         CameraShake.Add(0.4f);
         float nextRock = 0.1f;
@@ -474,40 +479,49 @@ public partial class Utsusemi
             // The ones that stay come down through the middle of it.
             if (dropped < spots.Count && t >= seconds * (0.3f + 0.4f * dropped / spots.Count))
             {
-                StartCoroutine(FallingRock(spots[dropped], false, () => landed++));
+                StartCoroutine(FallingRock(spots[dropped].x, false, () => landed++, spots[dropped].y));
                 dropped++;
             }
             yield return null;
         }
-        for (; dropped < spots.Count; dropped++) StartCoroutine(FallingRock(spots[dropped], false, () => landed++));
+        for (; dropped < spots.Count; dropped++) StartCoroutine(FallingRock(spots[dropped].x, false, () => landed++, spots[dropped].y));
         while (landed < spots.Count) yield return null;
         done?.Invoke();
     }
 
-    // Spots in the cover row for new rocks, well apart from each other and from those already there.
-    List<float> RockSpots(int count)
+    // Where new rocks come to rest (x, and the height of their foot): in different rows, with their shades on the ronin's
+    // row well apart from each other and from those already there. Each is worked back from where its shade should fall,
+    // with its core at the middle of the field, where it stands to fire.
+    List<Vector2> RockSpots(int count)
     {
-        var spots = new List<float>();
-        float lo = LeftEdge + RockEdgeMargin, hi = RightEdge - RockEdgeMargin;
+        var spots = new List<Vector2>();
+        var shades = new List<float>();
+        float centre = CameraShake.Center.x, reach = HalfWidth - RockShadeMargin;
+        float low = CoverRowY, coreY = Core.y, row = ronin.Bounds.center.y;
+        Vector2 Spot(float shade, float y) => new Vector2(centre + (shade - centre) * (coreY - (y + RockHeight * 0.5f)) / Mathf.Max(0.01f, coreY - row), y);
         for (int i = 0; i < count; i++)
         {
             for (int tries = 0; tries < 20; tries++)
             {
-                float x = Random.Range(lo, hi);
-                bool clear = spots.TrueForAll(s => Mathf.Abs(s - x) >= RockSpacing)
-                    && rocks.TrueForAll(r => r.cover == null || Mathf.Abs(r.cover.transform.position.x - x) >= RockSpacing);
+                float shade = Random.Range(centre - reach, centre + reach);
+                float y = Random.Range(low, low + RockRowSpread);
+                bool clear = shades.TrueForAll(other => Mathf.Abs(other - shade) >= RockShadeSpacing)
+                    && spots.TrueForAll(other => Mathf.Abs(other.y - y) >= RockRowGap)
+                    && rocks.TrueForAll(r => r.cover == null
+                        || (Mathf.Abs(ShadeX(r) - shade) >= RockShadeSpacing && Mathf.Abs(r.cover.transform.position.y - y) >= RockRowGap));
                 if (!clear) continue;
-                spots.Add(x);
+                spots.Add(Spot(shade, y));
+                shades.Add(shade);
                 break;
             }
         }
-        if (spots.Count == 0 && rocks.Count == 0) spots.Add(Random.Range(lo, hi));
+        if (spots.Count == 0 && rocks.Count == 0) spots.Add(Spot(Random.Range(centre - reach, centre + reach), low));
         return spots;
     }
 
     // One rock falling from above the screen onto its shadow, which darkens as it nears. A rock that `stayed` lands
-    // in the cover row and stays (calling it once it has); the rest smash on the ground.
-    IEnumerator FallingRock(float x, bool harmful, System.Action stayed)
+    // at `restY` and stays (calling it once it has); the rest smash on the ground.
+    IEnumerator FallingRock(float x, bool harmful, System.Action stayed, float restY = 0f)
     {
         bool stays = stayed != null;
         Sprite[] frames = Fx.Frames(Fx.UtsuRock);
@@ -518,7 +532,7 @@ public partial class Utsusemi
             states = new[] { frames[first], frames[first + 1], frames[first + 2] };
         }
         float height = stays ? RockHeight : Random.Range(0.45f, 0.85f);
-        float landY = stays ? CoverRowY : GroundY + 0.15f;
+        float landY = stays ? restY : GroundY + 0.15f;
 
         // The rock stands on its own foot: the object's origin is the bottom of its art. Launched, so a stagger leaves
         // it falling (and lying there); only a halt or its fall clears it.
@@ -566,7 +580,7 @@ public partial class Utsusemi
             yield break;
         }
 
-        // It thuds into the row and stays: cover that only the Hyper Beam will break.
+        // It thuds down and stays: cover that only the Hyper Beam will break.
         Fx.Play(Fx.SmokePuff, foot + Vector3.up * 0.3f, new Color(0.8f, 0.75f, 0.7f, 0.9f), 2f);
         Debris.BurstSprites(foot + Vector3.up * 0.3f, states, new Color(0.8f, 0.72f, 0.65f), 6, 0.2f, 4f);
         Sfx.Play(Sfx.HammerSlam, 0.8f, 0.7f);

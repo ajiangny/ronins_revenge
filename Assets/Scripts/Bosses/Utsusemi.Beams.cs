@@ -235,8 +235,9 @@ public partial class Utsusemi
         float GroundFor(float rowX) => aim.x + (rowX - aim.x) * (aim.y - GroundY) / Mathf.Max(0.01f, aim.y - row);
         float from = GroundFor(dir > 0 ? LeftEdge - HyperReach : RightEdge + HyperReach);
         float to = GroundFor(dir > 0 ? RightEdge + HyperReach : LeftEdge - HyperReach);
-        GameObject fan = MakeHyperFan();
-        yield return HyperCharge(from, to);
+        SunrayFan fan = SunrayFan.Create(sprite.sharedMaterial);
+        transient.Add(fan.gameObject);
+        yield return HyperCharge(from, to, fan);
 
         Beam beam = MakeBeam(Core, 2.6f);
         beam.width = HyperWidth;
@@ -258,12 +259,12 @@ public partial class Utsusemi
             CrumblePassed(x, dir);
             lastX = x;
             // The shade still matters while the beam is on its way, so the fan stays, faint, over what's left to sweep.
-            DrawHyperFan(from, to, t / HyperSweepSeconds, 1f, FanSweepAlpha, 0f);
+            DrawHyperFan(fan, from, to, t / HyperSweepSeconds, 1f, FanSweepAlpha, 0f);
             yield return null;
         }
         EndBeam(beam);
-        transient.Remove(fan);
-        Destroy(fan);
+        transient.Remove(fan.gameObject);
+        Destroy(fan.gameObject);
         Sfx.Stop(Sfx.LanternBeam);
         foreach (Rock rock in rocks.ToArray())
         {
@@ -278,7 +279,7 @@ public partial class Utsusemi
     // into its heart from all round, a molten orb growing there, the whine climbing and the ticks racing, the hall
     // shaking harder, a guide line to the edge the beam will start from, and the sunray fan pouring out over everything
     // it will sweep, with each rock's shade left pale. Full, it flashes white with a ripple.
-    IEnumerator HyperCharge(float from, float to)
+    IEnumerator HyperCharge(float from, float to, SunrayFan fan)
     {
         // The clip winds up once, then its last two frames (the blaze at full power) flicker until it fires.
         if (hyperChargeFrames != null)
@@ -328,7 +329,7 @@ public partial class Utsusemi
             guide.color = new Color(Molten.r, Molten.g, Molten.b, (0.2f + 0.5f * k) * (0.7f + 0.3f * Mathf.Sin(Time.time * 40f)));
             // In its last moments the fan flickers white: the beam is coming now.
             float white = k > 0.9f ? Mathf.PingPong(Time.time * 12f, 1f) * 0.7f : 0f;
-            DrawHyperFan(from, to, 0f, Mathf.SmoothStep(0f, 1f, k / FanPourShare), Mathf.Lerp(FanChargeAlpha.x, FanChargeAlpha.y, k), white);
+            DrawHyperFan(fan, from, to, 0f, Mathf.SmoothStep(0f, 1f, k / FanPourShare), Mathf.Lerp(FanChargeAlpha.x, FanChargeAlpha.y, k), white);
             yield return null;
         }
         RemoveTransient(orb);
@@ -339,104 +340,20 @@ public partial class Utsusemi
         HitFlash.Flash(sprite, 0.12f);
     }
 
-    // How many rays the fan is measured with, how many wedges make one band of light, and how fast the bands drift.
-    const int FanRays = 180, FanBand = 6;
-    // On the floor (the backdrop is at -97 and below), under the ronin (0) and his aura (-1), so it never hides him.
-    const int FanOrder = -10;
-    const float FanDrift = 4f;
-    // How much of the wind-up it takes to pour out from the core, how bright it is across the wind-up and during the
-    // sweep, and how bright the shade is, relative to that.
-    const float FanPourShare = 0.3f, FanSweepAlpha = 0.09f, FanShadeShare = 1.1f;
+    // How much of the wind-up its warning takes to pour out from the core, and how bright it is across the wind-up and
+    // during the sweep.
+    const float FanPourShare = 0.3f, FanSweepAlpha = 0.09f;
     static readonly Vector2 FanChargeAlpha = new Vector2(0.1f, 0.26f);
-    // Its dark bands, as a share of its bright ones.
-    const float FanDimBand = 0.5f;
     // The rocks' shade: the same pale colour as the safe strip under Kagetsune's beam.
     static readonly Color FanShade = new Color(1f, 0.95f, 0.8f);
 
-    // One mesh, reused cast to cast and destroyed with the fight, so a cut-short cast can't leak one; only the object
-    // drawing it goes with the attack.
-    Mesh hyperFanMesh;
-    Vector3[] fanVertices;
-    Color[] fanColours;
-
-    // The Hyper Beam's warning: light on the floor, under the rocks and everyone standing there.
-    GameObject MakeHyperFan()
+    // Lays the warning over the ground from `from` to `to`. Every ray is measured as the beam's own will be, so the pale
+    // shade behind a rock is exactly where HyperHit finds him covered.
+    void DrawHyperFan(SunrayFan fan, float from, float to, float swept, float pour, float alpha, float white)
     {
-        if (hyperFanMesh == null)
-        {
-            hyperFanMesh = new Mesh();
-            hyperFanMesh.MarkDynamic();
-            // Each wedge is a lit triangle and a quad of shade, sharing no vertices, so the bands have hard edges.
-            fanVertices = new Vector3[FanRays * 7];
-            fanColours = new Color[FanRays * 7];
-            var triangles = new int[FanRays * 9];
-            for (int w = 0; w < FanRays; w++)
-            {
-                int v = w * 7, i = w * 9;
-                triangles[i] = v; triangles[i + 1] = v + 1; triangles[i + 2] = v + 2;
-                triangles[i + 3] = v + 3; triangles[i + 4] = v + 4; triangles[i + 5] = v + 5;
-                triangles[i + 6] = v + 3; triangles[i + 7] = v + 5; triangles[i + 8] = v + 6;
-            }
-            hyperFanMesh.vertices = fanVertices;
-            hyperFanMesh.colors = fanColours;
-            hyperFanMesh.triangles = triangles;
-        }
-        var fan = new GameObject("HyperFan");
-        fan.AddComponent<MeshFilter>().sharedMesh = hyperFanMesh;
-        var renderer = fan.AddComponent<MeshRenderer>();
-        // Drawn with the sprites' own material, white, so the vertex colours give it its look.
-        renderer.sharedMaterial = sprite.sharedMaterial;
-        var block = new MaterialPropertyBlock();
-        block.SetTexture("_MainTex", Texture2D.whiteTexture);
-        renderer.SetPropertyBlock(block);
-        renderer.sortingOrder = FanOrder;
-        transient.Add(fan);
-        return fan;
-    }
-
-    // Lays the fan from its core over the ground from `from` to `to`, leaving out what the beam has swept (`swept`, a
-    // share of the way across). Every ray is measured as the beam's own will be, so the pale shade behind a rock is
-    // exactly where HyperHit finds him covered. `pour` is how far down the rays it has reached so far.
-    void DrawHyperFan(float from, float to, float swept, float pour, float alpha, float white)
-    {
-        if (hyperFanMesh == null) return;
         Vector3 core = Core;
-        Vector3 back = Vector3.back * 0.2f;
-        Color lit = Color.Lerp(Molten, Color.white, white);
-        int drift = Mathf.FloorToInt(Time.time * FanDrift);
-        // One ray's ends: where the light stops, and how far the shade behind a rock runs on.
-        void Ray(int r, out Vector3 stop, out Vector3 shade)
-        {
-            float x = Mathf.Lerp(from, to, Mathf.Max((float)r / FanRays, swept));
-            Vector3 ground = new Vector3(x, GroundY, 0);
-            float length = (ground - core).magnitude;
-            float blocked = (BeamEnd(core, x, out _) - core).magnitude / Mathf.Max(0.01f, length);
-            stop = Vector3.LerpUnclamped(core, ground, Mathf.Min(blocked, pour)) + back;
-            shade = Vector3.LerpUnclamped(core, ground, pour) + back;
-        }
-        Ray(0, out Vector3 stopA, out Vector3 shadeA);
-        for (int w = 0; w < FanRays; w++)
-        {
-            Ray(w + 1, out Vector3 stopB, out Vector3 shadeB);
-            int v = w * 7;
-            fanVertices[v] = core + back;
-            fanVertices[v + 1] = stopA;
-            fanVertices[v + 2] = stopB;
-            fanVertices[v + 3] = stopA;
-            fanVertices[v + 4] = stopB;
-            fanVertices[v + 5] = shadeB;
-            fanVertices[v + 6] = shadeA;
-            bool bright = (w + drift) / FanBand % 2 == 0;
-            Color light = new Color(lit.r, lit.g, lit.b, alpha * (bright ? 1f : FanDimBand));
-            Color pale = new Color(FanShade.r, FanShade.g, FanShade.b, alpha * FanShadeShare);
-            for (int i = 0; i < 3; i++) fanColours[v + i] = light;
-            for (int i = 3; i < 7; i++) fanColours[v + i] = pale;
-            stopA = stopB;
-            shadeA = shadeB;
-        }
-        hyperFanMesh.vertices = fanVertices;
-        hyperFanMesh.colors = fanColours;
-        hyperFanMesh.RecalculateBounds();
+        fan.Draw(core, GroundY, from, to, swept, pour, alpha, Color.Lerp(Molten, Color.white, white), FanShade, x =>
+            (BeamEnd(core, x, out _) - core).magnitude / Mathf.Max(0.01f, (new Vector3(x, GroundY, 0) - core).magnitude));
     }
 
     // A streak of light pulled in from the air to its core.

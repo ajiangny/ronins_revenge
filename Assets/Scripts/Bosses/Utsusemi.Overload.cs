@@ -266,7 +266,6 @@ public partial class Utsusemi
         foreach (Rock rock in rocks) if (rock.cover != null) Destroy(rock.cover.gameObject);
         rocks.Clear();
         hyperNext = false;
-        if (hyperFanMesh != null) Destroy(hyperFanMesh);
     }
 
     // One world pixel of its sprite, so its fire is drawn on its own pixel grid.

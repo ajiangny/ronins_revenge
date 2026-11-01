@@ -645,6 +645,13 @@ public partial class Kagetsune
     // Long enough to run out of the whole opening from the edge.
     float HyperTell => secondPhase ? 1.5f : 1.6f;
     static readonly Color HyperSafeColour = new Color(1f, 0.95f, 0.8f);
+    // Its warning: how far past the beam's end the pale safe part starts (the beam's wide top and the hit's own margin
+    // reach a little past a line from his chest), and how far off each edge its rays land, so they fill the view on his
+    // row. How long it takes to pour out, and how bright it is across the tell and during the sweep.
+    const float HyperFanMargin = 0.55f, HyperFanOverhang = 2f, HyperFanPourShare = 0.3f, HyperFanSweepAlpha = 0.12f;
+    static readonly Vector2 HyperFanTellAlpha = new Vector2(0.12f, 0.3f);
+    // The ground past the opening is drawn at this share: it burns later, and he can stay ahead of it.
+    const float HyperFanLater = 0.5f;
     static readonly Collider[] HyperCover = new Collider[32];
 
     // His beam pose (PixelLab): the hammer comes off his shoulder and slams down at his side on its impact frame, then he
@@ -697,8 +704,9 @@ public partial class Kagetsune
     // The Spirit Hyper Beam: every soul in him screams out of his open chest at once, a torrent of soul-fire that slams
     // into the ground across a third of the field at the edge Oni stands nearer. It drives across to the far edge,
     // burning through any cover it passes over, and thins as it goes, its leading edge slower than Oni can run, until
-    // it narrows to a thread short of the far edge and dissipates there. The strip past where it dies is safe, and is
-    // lit pale from the tell on.
+    // it narrows to a thread short of the far edge and dissipates there. A fan of teal rays from his chest shows all it
+    // will cross, brightest over where it opens, and goes through cover because the beam does; the rays past where it
+    // dies are pale from the tell on, and that's where he's safe.
     IEnumerator SpiritHyperBeam()
     {
         Bark(BossLine.SoulWail, 7f);
@@ -708,17 +716,21 @@ public partial class Kagetsune
         float stop = far - dir * HyperSafe;
         float open = HyperOpenWidth;
         float ground = GroundY - 0.3f;
-        float band = GroundY + 0.9f;
 
-        // The tell: the chest gathers, the ground it will open on pulses teal, two guides run down to its edges, and the
-        // safe strip at the far edge glows pale.
+        // The tell: the chest gathers, the fan pours out from it, two guides run down to the edges of where it opens, and
+        // the safe rays at the far edge show pale.
         SpriteRenderer gather = Glowing(Chest, new Color(Teal.r, Teal.g, Teal.b, 0f), 1f, 57);
         // The muzzle flare at his chest: behind the beam (under its glow), and once it fires a little wider than the
         // beam where it leaves him, following it as it thins.
         FxPlayer flare = Fx.Play(Fx.KageWailFlare, Chest, new Color(1f, 1f, 1f, 0f), 1f, null, 52);
         if (flare != null) transient.Add(flare.gameObject);
-        SpriteRenderer danger = Bar(new Vector3(start, band, 0), new Vector3(start + dir * open, band, 0), 2.4f, Color.clear, 2);
-        SpriteRenderer safe = Bar(new Vector3(stop, band, 0), new Vector3(far, band, 0), 2.4f, Color.clear, 2);
+        SunrayFan fan = SunrayFan.Create(sprite.sharedMaterial);
+        transient.Add(fan.gameObject);
+        float fanFrom = start - dir * HyperFanOverhang, fanTo = far + dir * HyperFanOverhang;
+        float safeFrom = stop + dir * HyperFanMargin;
+        float opening = Mathf.InverseLerp(fanFrom, fanTo, start + dir * open);
+        // Cover doesn't stop it, so nothing stops these rays: each either burns or is safe.
+        System.Func<float, float> fanStops = x => dir * (x - safeFrom) >= 0f ? 0f : 1f;
         SpriteRenderer guideA = Bar(Chest, new Vector3(start, ground, 0), 0.05f, Color.clear, 54);
         SpriteRenderer guideB = Bar(Chest, new Vector3(start + dir * open, ground, 0), 0.05f, Color.clear, 54);
         if (Sfx.Has(Sfx.SoulWail)) Sfx.PlayLoop(Sfx.SoulWail, 0.45f, 0.7f);
@@ -740,14 +752,15 @@ public partial class Kagetsune
                 flare.transform.localScale = Vector3.one * Mathf.Lerp(0.5f, 3f, k * k);
                 flare.Color = new Color(1f, 1f, 1f, k);
             }
-            danger.color = new Color(Teal.r, Teal.g, Teal.b, 0.12f + 0.3f * k * pulse);
-            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.18f + 0.14f * pulse);
+            // In its last moments it flickers white: the beam is coming now.
+            float white = k > 0.9f ? Mathf.PingPong(Time.time * 12f, 1f) * 0.6f : 0f;
+            fan.Draw(Chest, ground, fanFrom, fanTo, 0f, Mathf.SmoothStep(0f, 1f, k / HyperFanPourShare),
+                Mathf.Lerp(HyperFanTellAlpha.x, HyperFanTellAlpha.y, k) * (0.85f + 0.15f * pulse), Color.Lerp(Teal, Color.white, white), HyperSafeColour, fanStops, opening, HyperFanLater);
             guideA.color = guideB.color = new Color(Teal.r, Teal.g, Teal.b, 0.6f * k);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * k);
             yield return null;
         }
         Drop(gather);
-        Drop(danger);
         Drop(guideA);
         Drop(guideB);
         Sfx.Stop(Sfx.SoulWail);
@@ -784,7 +797,8 @@ public partial class Kagetsune
                 splash.transform.position = foot + Vector3.back * 0.3f;
                 splash.transform.localScale = Vector3.one * Mathf.Max(0.8f, half * 0.45f);
             }
-            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f + 0.08f * Mathf.Sin(Time.time * 6f));
+            // Still there, faint, over what it has yet to cross.
+            fan.Draw(Chest, ground, fanFrom, fanTo, Mathf.InverseLerp(fanFrom, fanTo, lead), 1f, HyperFanSweepAlpha, Teal, HyperSafeColour, fanStops);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f);
 
             // Oni burns wherever the beam spans his row.
@@ -835,13 +849,14 @@ public partial class Kagetsune
             beam.Draw(Chest, thread, end, thread, 1f - fade);
             SizeFlare(flare, thread);
             if (flare != null) flare.Color = new Color(1f, 1f, 1f, fade);
-            safe.color = new Color(HyperSafeColour.r, HyperSafeColour.g, HyperSafeColour.b, 0.24f * fade);
+            fan.Draw(Chest, ground, fanFrom, fanTo, Mathf.InverseLerp(fanFrom, fanTo, stop), 1f, HyperFanSweepAlpha * fade, Teal, HyperSafeColour, fanStops);
             dim.color = new Color(0f, 0.02f, 0.02f, 0.35f * fade);
             yield return null;
         }
         beam.Remove();
         if (flare != null) Drop(flare);
-        Drop(safe);
+        transient.Remove(fan.gameObject);
+        Destroy(fan.gameObject);
         Drop(dim);
         // Out of his stance.
         if (BeamFrames != null && !IsDead) PlayIdle();

@@ -107,7 +107,7 @@ After Stage 1's last round, the music cuts out, smoke rolls across the top of th
 
 #### Utsusemi, the Hollow Pilgrim (Stage 2)
 
-Utsusemi is a karakuri automaton wearing a dead pilgrim's hat and shroud. It has two 120 HP bars, opens by lasering away all the cover, and stalks the top of the screen in ticking steps with every attack keeping time to its clock: a boomerang hat that leaves its eye open to double damage, lace curtains, an escapement wheel, hour strikes and swinging plumb weights. In phase 2 it overloads into the Unwound Hour and fights mostly with lasers: you shelter behind its own planted sword or the rocks it shakes loose, and once it stops time itself.
+Utsusemi is a karakuri automaton wearing a dead pilgrim's hat and shroud. It has two 120 HP bars, opens by lasering away all the cover, and stalks the top of the screen in ticking steps with every attack keeping time to its clock: a boomerang hat that leaves its eye open to double damage, lace curtains, an escapement wheel, hour strikes and swinging plumb weights. In phase 2 it overloads into the Unwound Hour and fights mostly with lasers: you shelter behind its own planted sword or the rocks it shakes loose (before its Hyper Beam a fan of light pours from its core over the whole field, each rock's shade left pale, so you can see where to hide), and once it stops time itself.
 
 <details><summary>Full fight</summary>
 

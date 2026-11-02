@@ -433,6 +433,12 @@ public static class Boons
             StatLabel = "Arrows burned per scrap:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
             Requires = l => HoldsAny(l, BlastBoons) && HoldsAny(l, SteelBoons) },
 
+        new BoonDefinition { Id = BoonId.Quenching, Element = Element.Water, Partner = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Quenching",
+            Description = "Samurai you cut down frozen or held in ice shed <b>Scrap</b> that mends double.",
+            StatLabel = "Scrap mends:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
+            Requires = l => HoldsAny(l, IceBoons) && HoldsAny(l, SteelBoons) },
+
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",

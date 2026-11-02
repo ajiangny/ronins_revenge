@@ -146,7 +146,10 @@ public partial class BoonEffects
                 break;
         }
         if (!Damage.Procs(source)) return;
-        if (samurai.Cracked) ShedScrap(position);
+        // Quenching: cut down frozen or held in ice, it sheds whether cracked or not, and that scrap mends double. Kill
+        // leaves encasedUntil set, so this reads true for a statue too.
+        if (loadout.Has(BoonId.Quenching, out float quenched) && (samurai.Encased || army.Frozen)) ShedScrap(position, 1, (int)quenched);
+        else if (samurai.Cracked) ShedScrap(position);
         BeatDrum();
         FillSpring(SpringPerKill);
     }
@@ -224,6 +227,7 @@ public partial class BoonEffects
         boss.Freeze(seconds);
         boss.Chill(seconds + Statuses.ChillSeconds);
         if (WolfFight) Wolf.Chill(seconds + Statuses.ChillSeconds);
+        QuenchBoss(boss);
     }
 
     // On a boss or Kuon every clone hit lands, so the Ultimate boons fire on a share of them.
@@ -337,6 +341,7 @@ public partial class BoonEffects
             if (BossFight && StandingBoss(target) is Boss struck)
             {
                 struck.Freeze(BossShardFreezeSeconds * loadout.FreezeMultiplier);
+                QuenchBoss(struck);
                 Fx.Play(Fx.IceBurst, point, Color.white, 1f);
             }
         }

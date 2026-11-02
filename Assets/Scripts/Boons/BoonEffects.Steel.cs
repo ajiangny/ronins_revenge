@@ -127,6 +127,15 @@ public partial class BoonEffects
         Sfx.Play(Sfx.BlockerBreak, 0.6f, 1.3f);
     }
 
+    // Quenching: a freeze on a warlord cracks her, and the cold reaches Kuon as it does for Chilled. Not routed through
+    // FreezeBoss from Frozen Riposte's shards, because that also Chills, which would change them for every build.
+    void QuenchBoss(Boss boss)
+    {
+        if (loadout.Find(BoonId.Quenching) == null) return;
+        boss.Crack(Statuses.CrackSeconds);
+        if (WolfFight) Wolf.Crack(Statuses.CrackSeconds);
+    }
+
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
     // pays at most once per BossCrackCooldown.
     void PayBossCrack(Boss boss, Vector3 point, KillSource source)

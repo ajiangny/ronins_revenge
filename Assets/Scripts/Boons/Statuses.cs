@@ -44,6 +44,11 @@ public static class Statuses
     // Dull iron with bright seams: never flat gold on the field, where bronze means a parry that opens a way.
     public static readonly Color CrackColor = new Color32(0x6F, 0x6A, 0x63, 255);
     public static readonly Color SeamColor = new Color32(0xFF, 0xE0, 0x8A, 255);
+    // Rust: what's both wet and split goes the colour of old iron. Never gold.
+    static readonly Color RustColor = new Color32(0x9A, 0x55, 0x2E, 255);
+    // What a Cracked body is tinted, this strongly: dull enough to tell at a glance, since the seams carry the rest.
+    public static Color CrackBody => Rust ? RustColor : CrackColor;
+    public const float CrackBodyStrength = 0.72f;
 
     // Set from the loadout whenever it changes (GameManager), like Samurai.BlackIce.
     public static float BurnScale { get; private set; } = 1f;

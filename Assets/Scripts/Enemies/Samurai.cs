@@ -326,7 +326,16 @@ public class Samurai : MonoBehaviour, IHittable
     public void Crack(float seconds)
     {
         if (IsDead || seconds <= 0f) return;
+        bool fresh = !Cracked;
         crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+        CrackSeams.Hold(animator.Renderer, crackedUntil);
+        if (fresh)
+        {
+            Fx.Steel(Fx.SteelCrack, transform.position);
+            // Rust flakes off as the water finds the split.
+            if (Statuses.Rust) Debris.BurstSprites(transform.position, Fx.Frames(Fx.SteelScrapHot), Statuses.CrackBody, 4, 0.35f, 3f);
+            Sfx.Play(Sfx.BlockerHit, 0.3f, Random.Range(1.6f, 1.9f));
+        }
         SetFrost(frost);
     }
 
@@ -397,9 +406,9 @@ public class Samurai : MonoBehaviour, IHittable
         if (Jolted) clan = Color.Lerp(clan, Statuses.JoltColor, Mathf.Sin(Time.time * 30f) > 0.3f ? 0.6f : 0.2f);
         if (Cracked)
         {
-            clan = Color.Lerp(clan, Statuses.CrackColor, 0.5f);
-            // The seams catch the light now and then.
-            if (Mathf.Sin(Time.time * 7f + transform.position.x) > 0.75f) clan = Color.Lerp(clan, Statuses.SeamColor, 0.5f);
+            clan = Color.Lerp(clan, Statuses.CrackBody, Statuses.CrackBodyStrength);
+            // Without the seams' material, the body catches the light now and then instead.
+            if (!CrackSeams.Available && Mathf.Sin(Time.time * 7f + transform.position.x) > 0.75f) clan = Color.Lerp(clan, Statuses.SeamColor, 0.5f);
         }
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
@@ -451,6 +460,7 @@ public class Samurai : MonoBehaviour, IHittable
 
         // Leave the army straight away so the corpse can't be hit, shoot or land while it falls.
         IsDead = true;
+        CrackSeams.Clear(animator.Renderer);
         // Cut down while held in ice, it freezes solid where it stood instead of falling.
         bool frozen = Encased;
         Thaw();

@@ -208,11 +208,22 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public void Crack(float seconds)
     {
         if (!Armed || IsBroken || seconds <= 0f) return;
+        bool fresh = !Cracked;
         crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+        CrackSeams.Hold(sprite, crackedUntil);
+        if (!fresh) return;
+        Fx.Steel(Fx.SteelCrack, Centre, 2f, sprite.sortingOrder + 1);
+        Sfx.Play(Sfx.BlockerHit, 0.6f, 1.2f);
     }
 
     // Oni's blow has knocked the scrap loose: the crack is spent.
-    public void SpendCrack() => crackedUntil = 0f;
+    public int SpriteOrder => sprite.sortingOrder;
+
+    public void SpendCrack()
+    {
+        crackedUntil = 0f;
+        CrackSeams.Clear(sprite);
+    }
 
     // Stays put for a move fired from where it stands, then pads on again.
     public void Hold() => held = true;
@@ -600,7 +611,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
         if (Burning) body = Color.Lerp(body, Statuses.BurnColor, 0.3f + 0.08f * Mathf.Sin(Time.time * 9f));
         if (Chilled) body = Color.Lerp(body, Statuses.ChillColor, 0.35f);
         if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) body = Color.Lerp(body, Statuses.JoltColor, 0.45f);
-        if (Cracked) body = Color.Lerp(body, Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackColor, 0.4f);
+        if (Cracked) body = Color.Lerp(body, !CrackSeams.Available && Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackBody, 0.5f);
         sprite.color = new Color(body.r, body.g, body.b, a * 0.78f * flicker);
         transform.localScale = Vector3.one * scale * grown * (1f + 0.25f * rage);
         Color halo = Color.Lerp(new Color(0.3f + 0.5f * glare, 0.9f, 1f), RageColour, 0.7f * rage);

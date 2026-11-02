@@ -429,14 +429,19 @@ public abstract class Boss : MonoBehaviour, IHittable
 
     void FixedUpdate()
     {
-        if (IsDead) return;
+        if (IsDead)
+        {
+            CrackSeams.Clear(sprite);
+            return;
+        }
         age += Time.fixedDeltaTime * Mathf.Max(Tempo, 0.2f);
         body.MovePosition(anchor + Vector3.up * (Mathf.Sin(age * 2.4f) * BobHeight));
         Color tint = Soaked ? Color.Lerp(bodyTint, SoakTint, 0.35f) : bodyTint;
         if (Burning) tint = Color.Lerp(tint, Statuses.BurnColor, 0.25f + 0.08f * Mathf.Sin(Time.time * 9f));
         if (Chilled) tint = Color.Lerp(tint, Statuses.ChillColor, 0.2f);
         if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) tint = Color.Lerp(tint, Statuses.JoltColor, 0.4f);
-        if (Cracked) tint = Color.Lerp(tint, Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackColor, 0.3f);
+        // A warlord keeps more of her own colours than a samurai does: her art has to stay readable through a whole fight.
+        if (Cracked) tint = Color.Lerp(tint, !CrackSeams.Available && Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackBody, 0.45f);
         sprite.color = Frozen ? Color.Lerp(tint, new Color(0.55f, 0.8f, 1f), 0.6f) : tint;
     }
 
@@ -663,11 +668,23 @@ public abstract class Boss : MonoBehaviour, IHittable
     public void Crack(float seconds)
     {
         if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        bool fresh = !Cracked;
         crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+        CrackSeams.Hold(sprite, crackedUntil);
+        if (!fresh) return;
+        // She stands over the arrows' order, so this one flash has to as well or she'd hide it.
+        Fx.Steel(Fx.SteelCrack, Centre, 2f, sprite.sortingOrder + 1);
+        Sfx.Play(Sfx.BlockerHit, 0.6f, 1.2f);
     }
 
     // Oni's blow has knocked the scrap loose: the crack is spent.
-    public void SpendCrack() => crackedUntil = 0f;
+    public int SpriteOrder => sprite.sortingOrder;
+
+    public void SpendCrack()
+    {
+        crackedUntil = 0f;
+        CrackSeams.Clear(sprite);
+    }
 
     // Soaks the boss: a splash, and every boon effect on her lands harder until it dries.
     public void Soak(float seconds)

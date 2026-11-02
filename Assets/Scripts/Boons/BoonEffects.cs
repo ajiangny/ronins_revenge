@@ -4,7 +4,7 @@ using UnityEngine;
 // Carries out the elemental boons while a stage is played: blasts on kills, ice and freeze, lightning strikes,
 // and the tide's waves. Kills made here count as KillSource.Effect, which never triggers another effect. A soaked
 // target takes one more from every effect, added once in Samurai.TakeHit and Boss.TakeHit.
-public class BoonEffects
+public partial class BoonEffects
 {
     const float ChainRange = 3f;
     // Storm Blade's arc leaps to a random samurai this far away, not just the one beside the kill.
@@ -50,6 +50,7 @@ public class BoonEffects
     readonly SamuraiArmy army;
     readonly Ronin ronin;
     readonly RoninLoadout loadout;
+    readonly BlockerWall wall;
     readonly Material boltMaterial;
     float nextBossFrost;
     int drumHits;
@@ -85,8 +86,9 @@ public class BoonEffects
     bool WolfFight => Wolf != null && Wolf.Armed && !Wolf.IsBroken;
     SpiritWolf FightingWolf => WolfFight ? Wolf : null;
 
-    public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout)
+    public BoonEffects(SamuraiArmy army, Ronin ronin, RoninLoadout loadout, BlockerWall wall)
     {
+        this.wall = wall;
         this.army = army;
         this.ronin = ronin;
         this.loadout = loadout;
@@ -134,6 +136,7 @@ public class BoonEffects
                     reach.RemoveAll(s => s.IsDead || s == samurai);
                     if (reach.Count > 0) Chain(position, reach[Random.Range(0, reach.Count)]);
                 }
+                if (loadout.Has(BoonId.AnvilBlade, out value) && Random.value < loadout.Extra(BoonId.AnvilBlade)) RingAnvil(samurai, position, (int)value);
                 break;
             case KillSource.Shuriken:
                 if (loadout.Has(BoonId.InfernoShuriken, out value)) Blast(position, BlastRadius, (int)value, samurai);
@@ -143,6 +146,7 @@ public class BoonEffects
                 break;
         }
         if (!Damage.Procs(source)) return;
+        if (samurai.Cracked) ShedScrap(position);
         BeatDrum();
         FillSpring(SpringPerKill);
     }
@@ -256,9 +260,12 @@ public class BoonEffects
         if (!BossFight) return;
         Boss boss = hit != null && !hit.IsDead ? hit : Boss;
         float value;
+        // Above the switch, so a crack this same blow applies pays on the next one.
+        PayBossCrack(boss, point, source);
         switch (source)
         {
             case KillSource.Slash:
+                if (AnvilRings) boss.Crack(Statuses.CrackSeconds);
                 if (ronin.FullHeat) boss.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) BossBlast(point, BlastRadius, boss);
                 if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) SoakBoss(boss, point, value);
@@ -593,9 +600,11 @@ public class BoonEffects
     {
         if (!WolfFight) return;
         float value;
+        PayWolfCrack(point, source);
         switch (source)
         {
             case KillSource.Slash:
+                if (AnvilRings) Wolf.Crack(Statuses.CrackSeconds);
                 if (ronin.FullHeat) Wolf.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) WolfBlast(point, BlastRadius);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);

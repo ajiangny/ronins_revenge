@@ -360,6 +360,13 @@ public static class Boons
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
 
+        // Steel: attacking rebuilds the cover. Anvil Blade has Flame Blade's shape, so an Exchange carries its level cleanly.
+        new BoonDefinition { Id = BoonId.AnvilBlade, Element = Element.Steel, Slot = BoonSlot.Attack, Name = "Anvil Blade",
+            Description = "A <b>Slash</b> kill may ring the anvil: it sheds <b>Scrap</b> and <b>Cracks</b> the samurai beside it.",
+            StatLabel = "Samurai cracked:", Values = new[] { 1f, 2f, 2f }, Format = Plus,
+            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
+            LevelStep = 1f, Whole = true, Max = 4f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
+
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
             Name = "Thermal Shock",

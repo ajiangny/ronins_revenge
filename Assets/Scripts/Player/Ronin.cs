@@ -293,10 +293,24 @@ public class Ronin : MonoBehaviour
     {
         if (UltimateActive || UltimateLocked || UltimateFill >= 1f || !Damage.Procs(source)) return;
         if (!(target is Samurai || target is Scout || target is Boss || target is SpiritWolf)) return;
-        // Storm Shadow fills it faster.
-        float step = (1f + Loadout.Extra(BoonId.StormShadow)) / Mathf.Max(1, ultimateHits);
-        UltimateFill = Mathf.Min(1f, UltimateFill + step);
+        AddUltimate(UltimateStep);
+    }
+
+    // Storm Shadow fills it faster.
+    float UltimateStep => (1f + Loadout.Extra(BoonId.StormShadow)) / Mathf.Max(1, ultimateHits);
+
+    void AddUltimate(float amount)
+    {
+        UltimateFill = Mathf.Min(1f, UltimateFill + amount);
         if (UltimateFill >= 1f) UltimateFilled?.Invoke();
+    }
+
+    // Spare scrap: half a hit. All scrap traces back to his own blow, parry or throw, and UltimateActive blocks it, so
+    // it can't feed itself.
+    public void ChargeSpare()
+    {
+        if (UltimateActive || UltimateLocked || UltimateFill >= 1f) return;
+        AddUltimate(UltimateStep * 0.5f);
     }
 
     // Glacier Shell: a bubble of ice that takes one blow for him, bursts into homing shards and grows back after the

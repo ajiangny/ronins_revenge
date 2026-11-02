@@ -1,0 +1,86 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+// Steel (Oliver): attacking rebuilds the cover. Scrap is what carries it, and only Oni's own hits shed it, since a kill
+// by an effect must not trigger another effect. An effect may still apply Cracked, as blasts apply Burning.
+public partial class BoonEffects
+{
+    // How far sideways hurt cover draws a falling scrap, in a round. In a warlord's fight it reaches any on the field.
+    const float ScrapReach = 2.5f;
+    const float ScrapSpread = 0.5f;
+    const int MaxPlates = 4;
+    // Past this many in the air a scrap lands at once.
+    const int MaxScrapLive = 12;
+
+    // One for every warlord and Kuon: the payout is cover and there is one wall, so a soul at his side must not double it.
+    float nextBossCrack;
+
+    static Color Steel => Boons.Info(Element.Steel).Color;
+
+    // Scrap from `from`, each piece drawn to the hurt cover nearest it as it falls. What it does is settled on landing,
+    // so a target gone by then isn't a bug.
+    void ShedScrap(Vector3 from, int count = 1, int points = 1)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 at = from + Vector3.right * Random.Range(-ScrapSpread, ScrapSpread);
+            Blocker hurt = wall.NearestHurt(at.x, BossFight ? float.MaxValue : ScrapReach);
+            float toX = hurt != null ? hurt.transform.position.x : at.x;
+            if (Scrap.Live >= MaxScrapLive) Settle(toX, points);
+            else Scrap.Drop(at, toX, wall.TopY, wall.transform, x => Settle(x, points));
+        }
+    }
+
+    // Mend, plate, spare, so a scrap is never dead, even after Utsusemi razes the wall.
+    void Settle(float x, int points)
+    {
+        Blocker hurt = wall.NearestHurt(x, BossFight ? float.MaxValue : ScrapReach);
+        if (hurt != null)
+        {
+            hurt.Mend(points);
+            Fx.Play(Fx.Impact, hurt.transform.position, Statuses.SeamColor, 0.7f);
+            Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
+            return;
+        }
+        // No new Blocker in a warlord's fight: it would be a beam stop no warning showed.
+        if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach, null))
+        {
+            Sfx.Play(Sfx.BlockerHit, 0.6f, 0.8f);
+            return;
+        }
+        ronin.ChargeSpare();
+    }
+
+    // Anvil Blade's proc on a slash kill: scrap at once, so it pays before anything cracked is cut down, and the samurai
+    // nearest in the victim's rank crack.
+    void RingAnvil(Samurai samurai, Vector3 position, int cracks)
+    {
+        ShedScrap(position);
+        List<Samurai> rank = army.SamuraiInRank(samurai);
+        rank.Sort((a, b) => (a.Body.position - position).sqrMagnitude.CompareTo((b.Body.position - position).sqrMagnitude));
+        for (int i = 0; i < rank.Count && i < cracks; i++) rank[i].Crack(Statuses.CrackSeconds);
+        Fx.Play(Fx.Impact, position, Steel, 1f);
+        Sfx.Play(Sfx.Deflect, 0.5f, 1.3f);
+    }
+
+    // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
+    // pays at most once per BossCrackCooldown.
+    void PayBossCrack(Boss boss, Vector3 point, KillSource source)
+    {
+        if (!Damage.Procs(source) || !boss.Cracked || Time.time < nextBossCrack) return;
+        nextBossCrack = Time.time + Statuses.BossCrackCooldown;
+        boss.SpendCrack();
+        ShedScrap(point, Statuses.BossCrackScrapNow);
+    }
+
+    void PayWolfCrack(Vector3 point, KillSource source)
+    {
+        if (!Damage.Procs(source) || !Wolf.Cracked || Time.time < nextBossCrack) return;
+        nextBossCrack = Time.time + Statuses.BossCrackCooldown;
+        Wolf.SpendCrack();
+        ShedScrap(point, Statuses.BossCrackScrapNow);
+    }
+
+    // Anvil Blade on a warlord or Kuon: every hit lands, so it rings on a share of its chance, like Flame Blade's bursts.
+    bool AnvilRings => loadout.Find(BoonId.AnvilBlade) != null && Random.value < loadout.Extra(BoonId.AnvilBlade) * BossRiptideShare;
+}

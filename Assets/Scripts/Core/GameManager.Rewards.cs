@@ -17,7 +17,7 @@ public partial class GameManager
         scrollsDropped = 0;
         gatheredScroll = false;
         ronin.Loadout = loadout;
-        effects = new BoonEffects(army, ronin, loadout);
+        effects = new BoonEffects(army, ronin, loadout, blockers);
         effects.SpringHeal += OnSpringHeal;
         army.SpeedUpScale = loadout.MarchSpeedUpScale;
         Samurai.BlackIce = 1f;

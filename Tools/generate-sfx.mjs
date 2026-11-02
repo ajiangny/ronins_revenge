@@ -276,6 +276,13 @@ const SOUNDS = {
       "deep temple bell humming underneath, then a wave rising and washing gently over it, calm and kind, " +
       "video game sound effect, no music.",
   },
+  SoulStingSteel: {
+    seconds: 2.5,
+    prompt:
+      "A short warm forge sting: one heavy smith's hammer falling once on an iron anvil, a bright ringing clang with " +
+      "a few sparks, then the ring cooling slowly over the low breath of a banked furnace, grave and unhurried, " +
+      "video game sound effect, no music.",
+  },
 };
 
 const client = new ElevenLabsClient();

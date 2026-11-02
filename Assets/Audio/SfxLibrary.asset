@@ -691,6 +691,17 @@ MonoBehaviour:
     - 2.5338776
     - 2.3257823
     ownSource: 0
+  - id: SoulStingSteel
+    clips:
+    - {fileID: 8300000, guid: 425cae8b01e1b4c118883b5617e66408, type: 3}
+    - {fileID: 8300000, guid: 4fbe926db33bd4ac9bec901638cc06b9, type: 3}
+    volume: 0.6
+    pitchJitter: 0
+    minInterval: 1
+    audible:
+    - 2.0973244
+    - 2.5338776
+    ownSource: 0
   - id: TideWave
     clips:
     - {fileID: 8300000, guid: abc310f72ece041cdbf641e93d25c37d, type: 3}

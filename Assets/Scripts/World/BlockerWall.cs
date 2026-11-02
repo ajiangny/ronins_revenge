@@ -42,6 +42,8 @@ public class BlockerWall : MonoBehaviour
     [Tooltip("World units kept clear at each side of the view, so the outer sites stand on open ground rather than the map's edge scenery.")]
     [SerializeField] float sideInset = 2.5f;
     [SerializeField] float gap = 0.05f;
+    [Tooltip("The steel plate scrap forms in a gap (Ninja/Apply Boon Art). Empty draws a bar of tinted iron with a bright seam.")]
+    [SerializeField] Sprite plateArt;
 
     // The set Rebuild builds from: the courtyard's own, unless the map on show brought its own (Use).
     BlockerType[] activeTypes;
@@ -223,17 +225,18 @@ public class BlockerWall : MonoBehaviour
 
     // A steel plate in the gap at x, or as near as reach allows: it steps outward until a spot is free, and false means
     // none was. Without art it stands as a bar of tinted iron with a bright seam.
-    public bool TryPlate(float x, float reach, Sprite sprite)
+    public bool TryPlate(float x, float reach)
     {
         for (float step = 0f; step <= reach; step += PlateStep)
         {
-            if (BuildPlateAt(x + step, sprite) || (step > 0f && BuildPlateAt(x - step, sprite))) return true;
+            if (BuildPlateAt(x + step) || (step > 0f && BuildPlateAt(x - step))) return true;
         }
         return false;
     }
 
-    bool BuildPlateAt(float x, Sprite sprite)
+    bool BuildPlateAt(float x)
     {
+        Sprite sprite = plateArt;
         Camera cam = Camera.main;
         float half = cam.orthographicSize * cam.aspect - sideInset;
         if (Mathf.Abs(x - CameraShake.Center.x) > half - PlateWidth / 2f) return false;

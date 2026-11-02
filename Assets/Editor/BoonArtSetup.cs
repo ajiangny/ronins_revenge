@@ -23,6 +23,7 @@ public static class BoonArtSetup
         (Element.Water, "Water", 205f / 360f, 1f),
         (Element.Lightning, "Lightning", 280f / 360f, 1.05f),
         (Element.Tide, "Tide", 218f / 360f, 1f),
+        (Element.Steel, "Steel", 40f / 360f, 1.05f),
     };
 
     [MenuItem("Ninja/Apply Boon Art")]
@@ -120,6 +121,11 @@ public static class BoonArtSetup
         var armySo = new SerializedObject(army);
         armySo.FindProperty("iceShell").objectReferenceValue = Load("Effects/IceShell");
         armySo.ApplyModifiedPropertiesWithoutUndo();
+
+        // The steel plate scrap forms in a gap; without it the wall draws a bar of tinted iron.
+        var wallSo = new SerializedObject(Object.FindAnyObjectByType<BlockerWall>());
+        wallSo.FindProperty("plateArt").objectReferenceValue = Load("Blockers/SteelPlate");
+        wallSo.ApplyModifiedPropertiesWithoutUndo();
 
         var choiceSo = new SerializedObject(choice);
         var icons = new List<Sprite>();

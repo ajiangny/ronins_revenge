@@ -634,7 +634,7 @@ MonoBehaviour:
   mizoreCloseup: {fileID: 21300000, guid: b5c3a3e041e3946158e6a725a709c327, type: 3}
   hibikiCloseup: {fileID: 21300000, guid: 1c1a8e443b485410fb586a6a7a21cc7c, type: 3}
   asagiCloseup: {fileID: 21300000, guid: b67bd87389af644bba3b30a817815c80, type: 3}
-  oliverCloseup: {fileID: 0}
+  oliverCloseup: {fileID: 21300000, guid: 8c09fc64ed0864ebcaed521a353215f0, type: 3}
   poguruArt:
     idle:
     - {fileID: 21300000, guid: 3bf6ddac069384009b50def4167cbab8, type: 3}
@@ -749,6 +749,22 @@ MonoBehaviour:
     shuriken: {fileID: 21300000, guid: 30a0aa366e5f344ada391d9f22357bfa, type: 3}
     portrait: {fileID: 21300000, guid: 332011d40d61847dd9cdf5d5bdc8ce7f, type: 3}
     heldSoul: {fileID: 21300000, guid: 4442b4a5f67b84ae09964ac94e5ce706, type: 3}
+  - element: 4
+    soulFrames:
+    - {fileID: 21300000, guid: 8c6789e9178c54478aab0a4877036f89, type: 3}
+    - {fileID: 21300000, guid: 664a3ce1ac81042d0989aa9c744c7dda, type: 3}
+    - {fileID: 21300000, guid: 358297bc1af7d4a6ba9ffed5dcb4bcdb, type: 3}
+    - {fileID: 21300000, guid: 78b599f6d32a44b63b4e5100c506c22c, type: 3}
+    - {fileID: 21300000, guid: 46dc506f9c01b4980a1d73dd56d3bf5d, type: 3}
+    - {fileID: 21300000, guid: 9b5a2b76134ff450fbb9c3f0c0d62fa0, type: 3}
+    - {fileID: 21300000, guid: 2052f8714665249aca5cbddea530098b, type: 3}
+    - {fileID: 21300000, guid: 33e103586def542faa3680bc59feb258, type: 3}
+    ronin: {fileID: 11400000, guid: a5cdde4c13df74b36b927d8f6609e8fb, type: 2}
+    slash: {fileID: 21300000, guid: b9ff4307282464a73874a15d9f136633, type: 3}
+    kunai: {fileID: 21300000, guid: a0ce399e9622a4017bc600227b85cd6d, type: 3}
+    shuriken: {fileID: 21300000, guid: 6c30ebb6062194e89b6f65a3d2a4cc63, type: 3}
+    portrait: {fileID: 21300000, guid: b7a5d13d419584eca8ac1b9e532bf359, type: 3}
+    heldSoul: {fileID: 21300000, guid: 39cce23764333450db6e35fabecfc76f, type: 3}
   fxLibrary: {fileID: 11400000, guid: bd9d599437bb141c490c7f26310fb69e, type: 2}
   sfxLibrary: {fileID: 11400000, guid: cb5383d442ce84581adff5a6908ff42b, type: 2}
   voiceLibrary: {fileID: 11400000, guid: c2bba46e69e0041d8ba653c9481056e6, type: 2}
@@ -2038,6 +2054,7 @@ MonoBehaviour:
   siteCount: 4
   sideInset: 2.5
   gap: 0.05
+  plateArt: {fileID: 21300000, guid: 4df4182e0e05c4fb4be6207052e7186e, type: 3}
 --- !u!1 &900000007
 GameObject:
   m_ObjectHideFlags: 0
@@ -2540,6 +2557,18 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 8c10e6f8bc34c43628e050646dc840ab, type: 3}
   - {fileID: 21300000, guid: 678fa9d0f90bc41d69eee2f1fa6cc9d9, type: 3}
   - {fileID: 21300000, guid: 37d9f496ca4094068974a85d67c921cf, type: 3}
+  - {fileID: 21300000, guid: 540a426b3f3084a52a7407781375f39f, type: 3}
+  - {fileID: 21300000, guid: 660032ae9796a4a70a019ad075f7870d, type: 3}
+  - {fileID: 21300000, guid: 28ce6be08222e458b86bb90c91c6fc2a, type: 3}
+  - {fileID: 21300000, guid: e1d918e8e5ca54495804c0bea2eb6cee, type: 3}
+  - {fileID: 21300000, guid: 30a28c42c3a504a8490b402e49f7ecc1, type: 3}
+  - {fileID: 21300000, guid: d5b29cd4456cd4bbaacf472c410fdf23, type: 3}
+  - {fileID: 21300000, guid: ea382adcbd9534e04accb83c5185f403, type: 3}
+  - {fileID: 21300000, guid: 8c19dc97d75704ce6aad723d93ab4ea5, type: 3}
+  - {fileID: 21300000, guid: af90d7f93116b406ba1b265bbaa4895c, type: 3}
+  - {fileID: 21300000, guid: 26f7fa7c559414a5e83260ff0edc6f07, type: 3}
+  - {fileID: 21300000, guid: 7c3c29cd68fe846c7962a011f6a904f3, type: 3}
+  - {fileID: 21300000, guid: f1aed9ff00fb94301838a32816081b0d, type: 3}
   abilityIcons:
   - {fileID: 21300000, guid: 6d6622ef50cec4c22be017ac03231fa4, type: 3}
   - {fileID: 21300000, guid: 435491973e1fc406f8bac021a9074dbe, type: 3}

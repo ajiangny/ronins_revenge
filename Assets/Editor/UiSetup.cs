@@ -16,7 +16,7 @@ public static class UiSetup
     const string OniCloseupPath = "Assets/Art/Portraits/Oni_Closeup.png";
     // The souls' paintings, by GameManager field: Portraits/<Soul>_Closeup.png (their _Full.png is imported the same
     // way, kept for cards to come).
-    static readonly string[] Souls = { "Akagane", "Mizore", "Hibiki", "Asagi" };
+    static readonly string[] Souls = { "Akagane", "Mizore", "Hibiki", "Asagi", "Oliver" };
     // A boss close-up whose import settings Oni's painting shares (smooth, full size, web-compressed).
     const string BossCloseupPath = "Assets/Art/Portraits/Benibana_Closeup.png";
 
@@ -33,6 +33,13 @@ public static class UiSetup
         var header = AssetDatabase.LoadAssetAtPath<Font>(FontRoot + "Cinzel.ttf");
         TMP_FontAsset bodyBaked = Bake(body, FontRoot + "ZenKakuGothicNew-Bold SDF.asset", GameUI.BodySampling, GameUI.BodyPadding);
         TMP_FontAsset headerBaked = Bake(header, FontRoot + "Cinzel SDF.asset", GameUI.HeaderSampling, GameUI.HeaderPadding);
+        // Zen Kaku has no macrons, so the ū in "Jūsuke" comes from Cinzel, the one TTF here that draws it.
+        if (bodyBaked != null && headerBaked != null && bodyBaked.fallbackFontAssetTable?.Contains(headerBaked) != true)
+        {
+            bodyBaked.fallbackFontAssetTable ??= new List<TMP_FontAsset>();
+            bodyBaked.fallbackFontAssetTable.Add(headerBaked);
+            EditorUtility.SetDirty(bodyBaked);
+        }
         ui.FindProperty("bodyFontBaked").objectReferenceValue = bodyBaked;
         ui.FindProperty("headerFontBaked").objectReferenceValue = headerBaked;
         ui.FindProperty("bodyFont").objectReferenceValue = bodyBaked != null ? null : body;

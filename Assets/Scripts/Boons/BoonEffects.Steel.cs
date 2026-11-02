@@ -77,7 +77,7 @@ public partial class BoonEffects
             }
         }
         // No new Blocker in a warlord's fight: it would be a beam stop no warning showed.
-        if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach, null))
+        if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach))
         {
             platesFormed++;
             Sfx.Play(Sfx.BlockerHit, 0.6f, 0.8f);
@@ -115,7 +115,7 @@ public partial class BoonEffects
             hurt.Mend(points);
             pointsMended += points;
         }
-        else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(at.x, ScrapReach, null)) platesFormed++;
+        else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(at.x, ScrapReach)) platesFormed++;
         Fx.Play(Fx.Impact, at, Steel, 1.2f);
         Sfx.Play(Sfx.BlockerHit, 0.7f, 0.7f);
     }

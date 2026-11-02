@@ -484,8 +484,8 @@ swings reached full heat (cooldown ×0.88 at Common); Storm Step's static popped
 
 ## 11. The fifth element: Steel (Oliver)
 
-**Status: in progress.** Every number below is a paper value and none has been play tested. The code
-references were checked against the current scripts.
+**Status: built, except his art and figure (§12, steps 18 and 19).** Every number below is a paper value and none has
+been balance tested: see [Tested](#tested) in §12. The code references were checked against the scripts.
 
 **Why a fifth.** Four elements give six Duos; a fifth adds four more pairs, a fifth Legendary and a fifth Infusion. It
 also fills the one gap left in the lane. Fire and Storm deal damage, Frost controls, Water soaks and heals, and nothing
@@ -690,7 +690,8 @@ round for scrap shed, points mended, plates formed, arrows stopped by cover and 
 
 ## 12. Steel in the rest of the game
 
-**Status: integration spec, nothing built yet.** Checked line by line against the scripts on 2026-11-01. §11 stays the
+**Status: steps 1 to 17, 20 and 21 are built; 18 and 19 wait for pixel art. Not played by hand: see [Tested](#tested).**
+The spec was checked line by line against the scripts on 2026-11-01. §11 stays the
 authority on what Steel does; where the code forced a change it is listed under Overrides. The build list at the end
 is ordered so the game compiles and plays after every step, and Steel is out of reach until step 8.
 
@@ -803,6 +804,36 @@ meetOliver)`.
 **No new station.** The scene's saved `stations` win over `DefaultSafeAreas`, so a seventh kind would need
 `Ninja/Apply Maps`. He is at the rack by story anyway: `ShowRack` gets a TALK row when `oliverMet`, and step 19's
 figure stands by the rack without being a station.
+
+### Tested
+
+**As of 2026-11-01; this is everything these builds ran.** Steps 2 to 17: effects were mostly fired by direct calls in
+god mode in the Editor. There was no real input and no visual check, so no key or button was pressed and no plate, tint
+or scrap was looked at.
+
+Step 20, by script and in the Editor, with the save backed up and restored:
+
+- **Text.** A script compared all 94 conversations (221 lines) in `Dialogue.Lines.cs` with the Story tables and with
+  `LINES` in `generate-voice.mjs`: ids, speakers, voices and text agree. The clip for `Oliver_Dawn` has no conversation,
+  since the freed beats aren't built.
+- **Clips.** `Ninja/Apply Voice Lines` made 1051 clips. 90 of the 91 new ones match a written line. 131 of Oliver's
+  lines have no clip (6 others in the game don't either, 137 in the log).
+- **The meeting.** A wake on a test save (`EnterSafeArea`, `deaths` 12, `asagiMet`) played `Oliver_Meet_Rack` with all six
+  clips: Oni's three on `oniVoice`, Oliver's three on `soulVoice` with its chorus and echo filters enabled and a signal
+  on the source. That confirms the routing. Nobody listened to it, and the web build doesn't run those filters.
+- **Silent lines.** `Oliver_Greet_Draft`, `Oliver_Rack_Mine` and `Oliver_Hub_Name` (through `PlayTalk`, advanced by a
+  script), and the "..." inside `Duo_RedHotIron_First`, played as subtitles with no error.
+- **Picking.** Direct calls to `GameManager.SoulTalk` and `Dialogue.Pick` chose the expected id for the next chain
+  chapter, Legendary and its repeat, Infusion, all four Duos' first talks, `Felled`, `Ahead`, `SoulHub` and a reactive
+  line. `Dialogue.Explain` showed the Scabbard and Seventh greetings gated and the others' `Jealous_Steel` eligible.
+- **Found by that run:** the static fonts have no `ū`, so "Jūsuke" shows as "J□suke" in `Oliver_Meet_Enormous` and
+  `Oliver_Meet_Cold`. `GameUI.PrintableCharacters` now has it, and step 18's `Ninja/Apply UI Fonts` bakes it in. That
+  menu hasn't been run, so the box is still there.
+
+**Not tested:** Kagetsune and his summons with Steel; a real parried Iaido; real Utsusemi rocks; the real F5 key; a real
+Taisho yari at stage 1 round 3; stage 2 to 4 rounds; balance, including every number in §11 and the Ultimate fill rate; how
+plates and tints look; Steel's art, which waits on steps 18 and 19; a whole run with Steel. Docs that describe a Steel
+effect describe what the code is written to do, not something seen in play.
 
 ### Build list
 
@@ -976,6 +1007,9 @@ plan that with the user.
 `Story/Souls.md`. `Dev.cs`'s and `CLAUDE.md`'s F5 lists should say Fire → Frost → Storm → Water → Steel; `CLAUDE.md`
 is the user's, so raise it with them. Add a "Tested" paragraph here. Do a short version of this step first if time is
 about to run out, since the write-up is what's graded.
+
+*Step 20 as built:* his Legendary uses `Story/Oliver.md`'s voiced line, not the proposal above, and his voice was designed
+and picked before this step. *Step 21 as built:* `Hub: Oliver` waits on step 19.
 
 **Riskiest:** steps 3 and 9, since they sit in the collision path of the game's main attack. Both `OnCollisionEnter`s
 fire for one contact and neither order is promised, which is why `Blocker` returns and `Projectile` does the wearing.

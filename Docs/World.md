@@ -14,6 +14,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   posts (`STS`), Shirogane = frosted shrubs and shrine lanterns (`ISI`), Mountain Shrine = grave markers and temple bell
   frames (`GBG`), Kagetsune = oni braziers and broken palace pillars (`OPO`), three looks each, art in `Art/Sprites/Blockers/`
   as `<Name>_0..2`, `<Name>B_0..2`, `<Name>C_0..2` (from PixelLab), wired by `Ninja/Apply Maps`.
+- Steel works on the cover (`BoonEffects.Steel.cs`). `BlockerWall` keeps a `Slot` per wall blocker, so `Restore(raise)` can bring standing cover to full and, in a round, rebuild the fallen. `Blocker.Mend` never passes `maxHealth`; `Temper` (Tamahagane) raises it, up to `baseHealth` + 2. `NearestHurt` and `NearestUntempered` pick the target. **Plates**: `TryPlate` adds a 1.1 × 0.8 tinted iron `Blocker` (`Plate`, `Forged`; one hit) in the gap below, stepping outward by 0.5 up to the reach, at most 4, rounds only; `Rebuild` clears them, so none reaches a warlord's fight. Slashes pass a plate and arrows pop it, and it pays nothing when it breaks. `Forged` cover doesn't raise `Blocker.Broken`, and `Blocker.Chipped` fires when an arrow strikes wall cover.
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
   ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
   `BambooRoad_Stage1` (a dirt road with bamboo only at the edges), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),

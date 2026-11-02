@@ -31,9 +31,9 @@ Tools/                the ElevenLabs scripts (npm run music | sfx | voice)
 | `Player/` | `Ronin`, `Projectile`, `Pickup`, `Heart`, `Soul`, `TechniqueScroll` | Oni: movement, slash, shuriken, parry, the ultimate, and what he walks into | [Player](Docs/Player.md) |
 | `Enemies/` | `Samurai`, `SamuraiArmy`, `SamuraiKind`, `SamuraiCounter`, `Scout`, `Arrow`, `ArrowShadow`, `IceStatue` | The army and its kinds, its arrows and spears, the kite scout, frozen statues | [Enemies](Docs/Enemies.md) |
 | `Bosses/` | `Boss`, `BulletHell`, `Benibana`, `Utsusemi` (+ partials), `Shirogane` (+ partials), `SpiritWolf`, `Kagetsune` (+ partials), `FreedSoul`, `ShiroganeFreed`, `GroundFire`, `SunrayFan`, `TimeRipple`, `TimeRippleFeature`, `Fader`, `Swell`, `VeilPuff` | The four warlords on their shared base and pattern kit, Kuon, the ending's freed Shirogane, and their helpers | [Bosses](Docs/Bosses.md) |
-| `Boons/` | `Boon`, `BoonEffects`, `Statuses`, `RoninLoadout`, `ShurikenStorm`, `ShurikenWake`, `Upgrades`, `Oaths` | Elements, every boon's numbers, levels and effects, the four elemental statuses, the run's loadout, the Flute Songs with their Warlord's Seals and Kite Silk, and the Oaths | [Boons](Docs/Boons.md), [Progression](Docs/Progression.md) |
+| `Boons/` | `Boon`, `BoonEffects` (+ `BoonEffects.Steel`), `Statuses`, `RoninLoadout`, `ShurikenStorm`, `ShurikenWake`, `ShurikenLodestone`, `Scrap`, `Upgrades`, `Oaths` | Elements, every boon's numbers, levels and effects, the five elemental statuses, Steel's falling scrap, the run's loadout, the Flute Songs with their Warlord's Seals and Kite Silk, and the Oaths | [Boons](Docs/Boons.md), [Progression](Docs/Progression.md) |
 | `Rewards/` | `RewardPath`, `RewardSpirit` | The paths between rounds and the reward drawn into Oni | [GameFlow](Docs/GameFlow.md) |
-| `Hub/` | `SafeArea`, `SoulPool`, `Asagi` | The temple between runs, its stations, gate and spirit pool, and Asagi at the pool's rim | [Hub](Docs/Hub.md) |
+| `Hub/` | `SafeArea`, `SoulPool`, `Asagi` | The temple between runs, its stations, gate and spirit pool, and Asagi at the pool's rim. Oliver has no script yet: he is the weapon rack's TALK row until his figure is built ([BOON_DESIGN §12](Docs/BOON_DESIGN.md), step 19) | [Hub](Docs/Hub.md) |
 | `Dialogue/` | `Dialogue` (+ `Dialogue.Lines`), `DialogueScene`, `Poguru`, `Tutorial`, `TrainingSoldier` | Reactive conversations and their picker, talk scenes, Poguru and his tutorial | [Progression](Docs/Progression.md), [GameFlow](Docs/GameFlow.md) |
 | `UI/` | `GameUI`, `MenuUI`, `BoonChoiceUI`, `SwirlUI`, `ResourceTray`, `SpriteAnimatorUI` | The HUD, menu pages, the boon screen, the resource tray | [UI](Docs/UI.md) |
 | `World/` | `Backdrop`, `Atmosphere`, `BlockerWall`, `Blocker`, `CameraShake` | Maps and travel, each map's mood, the cover row, the camera | [World](Docs/World.md) |
@@ -56,6 +56,7 @@ the scene keeps pointing at `Name.cs`. Keep new members in the part they belong 
   (the summoned bosses and their borrowed powers), `Levy` (his levy of the dead army), `Beam` (how the Spirit Hyper Beam is drawn) and `Phase` (the break and his fall).
 - `Shirogane`: `Moves` (phase 1 and the parry-only draws), `Wolf` (phase 2 and Kuon's Maw) and `Phase` (the break and
   her fall). Kuon is `SpiritWolf.cs`.
+- `BoonEffects`: `Steel` holds all of Steel's effects: scrap, cracks, plates and its Duos' hooks.
 - `Dialogue`: `Dialogue.Lines.cs` is the table of every conversation; `Dialogue.cs` holds the types and the picker.
 
 ## Pages

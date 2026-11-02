@@ -885,7 +885,7 @@ public class GameUI : MonoBehaviour
     }
 
     public const string PrintableCharacters =
-        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•–—…←↑→↓";
+        " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·•–—…←↑→↓ū";
 
     // Gives text its font and a shared outline-and-shadow material, so it stays readable over the busy playfield.
     // Titles use the Roman-capital header font; everything else the clean body font. Colour and size are left to

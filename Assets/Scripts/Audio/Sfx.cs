@@ -76,6 +76,7 @@ public static class Sfx
     public const string SoulStingFrost = "SoulStingFrost";
     public const string SoulStingStorm = "SoulStingStorm";
     public const string SoulStingWater = "SoulStingWater";
+    public const string SoulStingSteel = "SoulStingSteel";
 
     const int VoiceCount = 16;
 

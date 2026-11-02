@@ -37,6 +37,10 @@ public class SaveData
     public bool asagiMet;
     // Her first Water soul, owed from the meeting until its boons are offered: every soul is hers until then.
     public bool asagiSoulOwed;
+    // Whether Oni has met Oliver, the smith's cat at the rack: until then no Steel soul is drawn.
+    public bool oliverMet;
+    // His first Steel soul, owed from the meeting until its boons are offered.
+    public bool oliverSoulOwed;
     public const int DeathCauses = 7;
     // A death or a win not yet answered on the hill.
     public bool hubPending;

@@ -156,9 +156,9 @@ public class Ronin : MonoBehaviour
     public RoninLoadout Loadout { get; set; } = new RoninLoadout();
 
     // Each upgrade he holds for an attack makes its hits break a boss's stance a quarter faster.
-    static readonly BoonId[] SlashUpgrades = { BoonId.FlameBlade, BoonId.FrostBlade, BoonId.StormBlade, BoonId.RiptideBlade, BoonId.SplitSlash, BoonId.PiercingSlash, BoonId.EchoSlash };
-    static readonly BoonId[] ShurikenUpgrades = { BoonId.InfernoShuriken, BoonId.GlacialShuriken, BoonId.ThunderShuriken, BoonId.TidewakeShuriken };
-    static readonly BoonId[] RiposteUpgrades = { BoonId.BurningRiposte, BoonId.FrozenRiposte, BoonId.ThunderRiposte, BoonId.UndertowRiposte };
+    static readonly BoonId[] SlashUpgrades = { BoonId.FlameBlade, BoonId.FrostBlade, BoonId.StormBlade, BoonId.RiptideBlade, BoonId.AnvilBlade, BoonId.SplitSlash, BoonId.PiercingSlash, BoonId.EchoSlash };
+    static readonly BoonId[] ShurikenUpgrades = { BoonId.InfernoShuriken, BoonId.GlacialShuriken, BoonId.ThunderShuriken, BoonId.TidewakeShuriken, BoonId.LodestoneShuriken };
+    static readonly BoonId[] RiposteUpgrades = { BoonId.BurningRiposte, BoonId.FrozenRiposte, BoonId.ThunderRiposte, BoonId.UndertowRiposte, BoonId.HammerRiposte };
     const float StancePerUpgrade = 0.25f;
 
     public float StanceBoost(KillSource source)

@@ -45,13 +45,15 @@ public partial class GameManager
     }
 
     // The elements a soul can carry this run: Asagi's Water joins once Oni has met her in the temple, as Hades'
-    // later gods do; until then the three-element pool.
+    // later gods do, and Oliver's Steel once Oni has met him at the rack; until then the smaller pool.
     static Element[] AvailableElements()
     {
         var elements = new List<Element>();
         foreach (Element element in System.Enum.GetValues(typeof(Element)))
         {
-            if (element != Element.Tide || Save.Data.asagiMet) elements.Add(element);
+            if (element == Element.Tide && !Save.Data.asagiMet) continue;
+            if (element == Element.Steel && !Save.Data.oliverMet) continue;
+            elements.Add(element);
         }
         return elements.ToArray();
     }
@@ -406,17 +408,19 @@ public partial class GameManager
         Element.Water => "Mizore",
         Element.Lightning => "Hibiki",
         Element.Tide => "Asagi",
+        Element.Steel => "Oliver",
         _ => "Hibiki",
     };
 
     // The soul's sting as their talk opens: Akagane's war drum and flame, Mizore's ice chimes, Hibiki's drumroll
-    // into thunder, Asagi's drip and ripple.
+    // into thunder, Asagi's drip and ripple, Oliver's hammer on the anvil.
     static string StingFor(Element element) => element switch
     {
         Element.Fire => Sfx.SoulStingFire,
         Element.Water => Sfx.SoulStingFrost,
         Element.Lightning => Sfx.SoulStingStorm,
         Element.Tide => Sfx.SoulStingWater,
+        Element.Steel => Sfx.SoulStingSteel,
         _ => Sfx.SoulStingStorm,
     };
 

@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// The four spirit elements a soul can carry. Like the gods in Hades, each has a theme:
+// The five spirit elements a soul can carry. Like the gods in Hades, each has a theme:
 // Fire burns (explosions), Water chills (slows and freezes), Lightning jolts (chains), Tide soaks and heals (the
-// pond's water: it amplifies the others and rolls the army back). Water is Frost on screen and Tide is Water:
-// Tide came last and is appended so every saved Element index and Frost asset keeps meaning what it did.
-public enum Element { Fire, Water, Lightning, Tide }
+// pond's water: it amplifies the others and rolls the army back), Steel rebuilds the cover by attacking. Water is
+// Frost on screen and Tide is Water: Tide and Steel came last and are appended so every saved Element index and
+// Frost asset keeps meaning what it did.
+public enum Element { Fire, Water, Lightning, Tide, Steel }
 
 // Attack, Special, Parry and Ultimate each hold one boon; taking another element's boon for that slot replaces it.
 // The Ultimate slot is Hades' Call: its boon gives the Shadow Clone its element, shown on the ultimate's medallion.
@@ -43,6 +44,9 @@ public enum BoonId
     EmberHeart, Hoarfrost, StaticField, DeepCurrent,
     // Sword Arts for the shuriken and the parry.
     ScatterStar, MirrorStance,
+    // Steel (Oliver): the four slots, two passives, the Legendary, the Infusion and the four Duos.
+    AnvilBlade, LodestoneShuriken, HammerRiposte, SteelShadow, Whetstone, Shrapnel, SpearBreaker, Tamahagane,
+    RedHotIron, Quenching, LightningRod, Rust,
 }
 
 public sealed class BoonDefinition
@@ -167,6 +171,7 @@ public static class Boons
         new ElementInfo("Frost", "the physician's cold hands of the fallen palace lend you their calm.", new Color(0.35f, 0.75f, 1f)),
         new ElementInfo("Storm", "the thunder over the mountain pass lends you its speed.", new Color(0.78f, 0.45f, 1f)),
         new ElementInfo("Water", "the koi of the temple pond lends you its tide.", new Color32(0x2F, 0x7B, 0xFF, 255)),
+        new ElementInfo("Steel", "the smith's cat of the Emperor's forge lends you his master's hammer.", new Color32(0xE0, 0xA8, 0x3A, 255)),
     };
 
     public static ElementInfo Info(Element element) => Elements[(int)element];
@@ -212,6 +217,7 @@ public static class Boons
     static readonly BoonId[] IceBoons = { BoonId.FrostBlade, BoonId.GlacialShuriken, BoonId.FrozenRiposte, BoonId.FrostShadow };
     static readonly BoonId[] StrikeBoons = { BoonId.StormBlade, BoonId.ThunderShuriken, BoonId.ThunderRiposte, BoonId.StormShadow };
     static readonly BoonId[] TideBoons = { BoonId.RiptideBlade, BoonId.TidewakeShuriken, BoonId.UndertowRiposte, BoonId.TideShadow };
+    static readonly BoonId[] SteelBoons = { BoonId.AnvilBlade, BoonId.LodestoneShuriken, BoonId.HammerRiposte, BoonId.SteelShadow };
 
     static bool HoldsAny(RoninLoadout loadout, BoonId[] ids) => Array.Exists(ids, id => loadout.Find(id) != null);
 

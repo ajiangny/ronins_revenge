@@ -16,6 +16,9 @@ public partial class BoonEffects
 
     // One for every warlord and Kuon: the payout is cover and there is one wall, so a soul at his side must not double it.
     float nextBossCrack;
+    float nextRod;
+    // Lightning Rod strikes a warlord less often than the army's front.
+    const float RodBossSeconds = 8f;
 
     static Color Steel => Boons.Info(Element.Steel).Color;
 
@@ -134,6 +137,24 @@ public partial class BoonEffects
         if (loadout.Find(BoonId.Quenching) == null) return;
         boss.Crack(Statuses.CrackSeconds);
         if (WolfFight) Wolf.Crack(Statuses.CrackSeconds);
+    }
+
+    // Lightning Rod: an arrow chipping the cover strikes up its lane. Arrows don't record who shot them, so it takes the
+    // front of the nearest column. The limit is the guard against the effect kill share of §4 coming back.
+    public void OnCoverChipped(Vector3 position)
+    {
+        if (!loadout.Has(BoonId.LightningRod, out float seconds) || Time.time < nextRod) return;
+        if (BossFight)
+        {
+            nextRod = Time.time + RodBossSeconds;
+            Strike(Boss.Centre + Vector3.up * 6f, Boss.Centre, Boss);
+            return;
+        }
+        if (army.Remaining == 0) return;
+        Samurai front = army.FrontSamuraiInColumn(army.ClosestColumnTo(position.x));
+        if (front == null || front.IsDead) return;
+        nextRod = Time.time + seconds;
+        Strike(front.transform.position + Vector3.up * 6f, front);
     }
 
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and

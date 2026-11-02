@@ -439,6 +439,12 @@ public static class Boons
             StatLabel = "Scrap mends:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
             Requires = l => HoldsAny(l, IceBoons) && HoldsAny(l, SteelBoons) },
 
+        new BoonDefinition { Id = BoonId.LightningRod, Element = Element.Lightning, Partner = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Lightning Rod",
+            Description = "When an arrow chips your cover, <b>Lightning</b> strikes up its lane.",
+            StatLabel = "Strikes every:", Values = new[] { 3f, 3f, 3f }, Format = Seconds,
+            Requires = l => HoldsAny(l, StrikeBoons) && HoldsAny(l, SteelBoons) },
+
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",

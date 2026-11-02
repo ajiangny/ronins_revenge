@@ -599,6 +599,7 @@ public partial class GameManager : MonoBehaviour
         ronin.UltimateEnded += OnUltimateEnded;
         Blocker.Broken += OnBlockerBroken;
         Arrow.SpearBroken += OnSpearBroken;
+        Blocker.Chipped += OnCoverChipped;
         IceStatue.Shattered += OnStatueShattered;
     }
 
@@ -617,6 +618,7 @@ public partial class GameManager : MonoBehaviour
         ronin.UltimateEnded -= OnUltimateEnded;
         Blocker.Broken -= OnBlockerBroken;
         Arrow.SpearBroken -= OnSpearBroken;
+        Blocker.Chipped -= OnCoverChipped;
         IceStatue.Shattered -= OnStatueShattered;
     }
 

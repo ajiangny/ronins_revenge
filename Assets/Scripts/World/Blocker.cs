@@ -6,6 +6,8 @@ public class Blocker : MonoBehaviour
 {
     // Raised when hits wear a blocker down (not when it's trampled or razed), so it may drop a heart.
     public static event Action<Vector3> Broken;
+    // An arrow has struck the wall's own cover (Lightning Rod; RunLog's tally of arrows it stopped).
+    public static event Action<Vector3> Chipped;
 
     SpriteRenderer tile;
     Sprite[] damageStates;
@@ -41,7 +43,9 @@ public class Blocker : MonoBehaviour
         Projectile shot = coll.collider.GetComponentInParent<Projectile>();
         // The projectile decides what a pass does (Projectile.OnCollisionEnter), so this doesn't hang on who's called first.
         if (shot != null && (shot.Spinning || shot.PassesCover || Plate || (shot.Whets && InWall))) return;
-        if (coll.collider.GetComponentInParent<Arrow>() is { PassesCover: true }) return;
+        Arrow arrow = coll.collider.GetComponentInParent<Arrow>();
+        if (arrow != null && arrow.PassesCover) return;
+        if (arrow != null && InWall && !Plate) Chipped?.Invoke(transform.position);
         Hit(coll.GetContact(0).point);
     }
 

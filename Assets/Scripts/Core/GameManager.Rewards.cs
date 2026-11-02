@@ -241,6 +241,11 @@ public partial class GameManager
         if (state == State.Playing) effects.OnSpearBroken(position);
     }
 
+    void OnCoverChipped(Vector3 position)
+    {
+        if (state == State.Playing) effects.OnCoverChipped(position);
+    }
+
     // Hearts only heal: at full health they wait on his row until he's lost a life.
     bool CanHeal() => state != State.GameOver && lives < maxLives;
 

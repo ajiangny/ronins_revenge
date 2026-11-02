@@ -52,14 +52,16 @@ public class Projectile : MonoBehaviour
     public bool Spinning { get; set; }
     // A steel shard: it crosses his cover without chipping it, since a burst must not set off the next one.
     public bool PassesCover { get; set; }
-    // Whetstone: it crosses the wall's cover, wearing it down.
+    // Whetstone: it crosses the wall's cover, wearing it down, with this chance of sparing each blocker.
     public bool Whets { get; set; }
+    public float WhetSpared { get; set; }
 
     Rigidbody body;
     SpriteRenderer art;
     SpriteRenderer glow;
     Vector3 velocity;
     int pierceLeft;
+    bool whetted;
     bool spent;
     bool launched;
     Func<Transform> pickTarget;
@@ -287,6 +289,21 @@ public class Projectile : MonoBehaviour
         Blocker met = coll.collider.GetComponentInParent<Blocker>();
         if (met != null && (met.Plate || PassesCover))
         {
+            KeepFlying(coll.collider);
+            return;
+        }
+
+        // Whetstone wears the wall's cover down (never Utsusemi's rocks or sword, whose shade is the Hyper Beam's risk).
+        // One pierce a shot, and only on a plain slash: a pierced fireball would blast twice, and a homing shot with
+        // extra pierce re-targets and can circle.
+        if (met != null && Whets && met.InWall)
+        {
+            met.Wear(coll.GetContact(0).point, WhetSpared);
+            if (!whetted && !Kindled && pickTarget == null)
+            {
+                whetted = true;
+                pierceLeft++;
+            }
             KeepFlying(coll.collider);
             return;
         }

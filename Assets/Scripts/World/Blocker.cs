@@ -64,6 +64,12 @@ public class Blocker : MonoBehaviour
         }
     }
 
+    // Whetstone's slash crossing: a chip, unless it's spared. Holding still under cover always costs something.
+    public void Wear(Vector3 point, float spared)
+    {
+        if (UnityEngine.Random.value >= spared) Hit(point);
+    }
+
     // Scrap or a hammer's ring: health back, never above its maximum. Mending doesn't re-arm anything, since each
     // blocker can only break once a round.
     public void Mend(int points)

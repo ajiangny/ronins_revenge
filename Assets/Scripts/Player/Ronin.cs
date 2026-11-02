@@ -676,6 +676,11 @@ public class Ronin : MonoBehaviour
         }
         fireball.ParryAura(Color.Lerp(fire, Color.yellow, 0.3f));
         fireball.Kindled = true;
+        if (Loadout.Has(BoonId.Whetstone, out float spared))
+        {
+            fireball.Whets = true;
+            fireball.WhetSpared = spared;
+        }
         fireball.Impacted += (point, target) => FireballImpact?.Invoke(point, target);
         Sfx.Play(Sfx.FireBlast, 0.8f, 1.3f);
         Fx.Play(Fx.SlashArc, Bounds.center + Vector3.up * 0.35f, fire, 1f, transform);
@@ -740,6 +745,12 @@ public class Ronin : MonoBehaviour
         projectile.Launch(direction, slashSpeed, pierces ? (int)passes : 0, source, projectileSprite, scale: scale,
             lifetimeMultiplier: 1f / slashSpeed);
         projectile.CutsArrows = pierces;
+        // Only his own blade whets: forks and the clone's slashes stop at cover.
+        if (source == KillSource.Slash && Loadout.Has(BoonId.Whetstone, out float spared))
+        {
+            projectile.Whets = true;
+            projectile.WhetSpared = spared;
+        }
         if (clone) Shade(projectile, attackTint);
         else projectile.Tint(attackTint, attackGlow);
         return projectile;

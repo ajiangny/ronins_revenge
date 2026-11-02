@@ -378,6 +378,10 @@ public static class Boons
             Description = "Unleashing your <b>Shadow Clone</b> restores all your cover, and its kills <b>Crack</b> their neighbours.",
             StatLabel = "Crack time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
+        new BoonDefinition { Id = BoonId.Whetstone, Element = Element.Steel, Slot = BoonSlot.Passive, Name = "Whetstone",
+            Description = "Your <b>Slash</b> passes through your own cover, wearing it down, and pierces one samurai.",
+            StatLabel = "Cover spared:", Values = new[] { 0.15f, 0.3f, 0.45f }, Format = Percent,
+            LevelStep = 0.08f, Max = 0.6f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,

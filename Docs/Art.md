@@ -34,7 +34,7 @@ Missing libraries or clips fall back gracefully (simple glows, silence), so the 
 - Boss intro paintings: `Art/Portraits/` (each side a multiple of 4, or WebGL can't compress them). Fonts:
   `Art/Fonts/` (Cinzel headers, Zen Kaku Gothic New body, pixel fallback font); the two TTFs are baked into static
   `… SDF.asset` TMP fonts of `GameUI.PrintableCharacters` by Apply UI Fonts (`GameUI.bodyFontBaked`/`headerFontBaked`),
-  so builds don't ship or rasterise the TTFs. Delete a baked asset to re-bake it after adding characters.
+  so builds don't ship or rasterise the TTFs. Delete a baked asset to re-bake it after adding characters. Zen Kaku has no `ū`, so Cinzel is its fallback for "Jūsuke" (set by Apply UI Fonts).
 - `Editor/WebImportSettings.cs` (an `AssetPostprocessor`) keeps the web build lean on every import: portraits
   and logo crunch-compressed for WebGL at full size, sound effects and voice lines preloaded (no hitch
   the first time one plays), voice lines mono at quality 0.5 for WebGL. Pixel sprites stay uncompressed.

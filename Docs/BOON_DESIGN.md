@@ -484,7 +484,7 @@ swings reached full heat (cooldown ×0.88 at Common); Storm Step's static popped
 
 ## 11. The fifth element: Steel (Oliver)
 
-**Status: built, except his art and figure (§12, steps 18 and 19).** Every number below is a paper value and none has
+**Status: built, with his art and figure (§12, steps 18 and 19).** Every number below is a paper value and none has
 been balance tested: see [Tested](#tested) in §12. The code references were checked against the scripts.
 
 **Why a fifth.** Four elements give six Duos; a fifth adds four more pairs, a fifth Legendary and a fifth Infusion. It
@@ -690,7 +690,7 @@ round for scrap shed, points mended, plates formed, arrows stopped by cover and 
 
 ## 12. Steel in the rest of the game
 
-**Status: steps 1 to 17, 20 and 21 are built; 18 and 19 wait for pixel art. Not played by hand: see [Tested](#tested).**
+**Status: all 21 steps are built. The auras and crackle have no art and stay on their fallback. Not played by hand: see [Tested](#tested).**
 The spec was checked line by line against the scripts on 2026-11-01. §11 stays the
 authority on what Steel does; where the code forced a change it is listed under Overrides. The build list at the end
 is ordered so the game compiles and plays after every step, and Steel is out of reach until step 8.
@@ -827,12 +827,30 @@ Step 20, by script and in the Editor, with the save backed up and restored:
   chapter, Legendary and its repeat, Infusion, all four Duos' first talks, `Felled`, `Ahead`, `SoulHub` and a reactive
   line. `Dialogue.Explain` showed the Scabbard and Seventh greetings gated and the others' `Jealous_Steel` eligible.
 - **Found by that run:** the static fonts have no `ū`, so "Jūsuke" shows as "J□suke" in `Oliver_Meet_Enormous` and
-  `Oliver_Meet_Cold`. `GameUI.PrintableCharacters` now has it, and step 18's `Ninja/Apply UI Fonts` bakes it in. That
-  menu hasn't been run, so the box is still there.
+  `Oliver_Meet_Cold`. Step 18 fixed it; see below.
+
+Steps 18 and 19, on 2026-11-01, in the Editor, driven by script with the three saves backed up and restored byte for
+byte. Screenshots were taken and looked at; no key was pressed:
+
+- **Menus.** Apply Boon Art, VFX, Audio, UI Fonts and Maps each changed only what they should: the new `Ronin_Steel`
+  frames, Steel's scene entries, the `SoulStingSteel` entry. No other character's asset was rewritten.
+- **Fonts.** Zen Kaku Gothic has no `ū` at all, so a re-bake could never fix the body text. Deleting the baked fonts was
+  blocked by the tool's safety check, so `ū` was added to `Cinzel SDF` in place, and `UiSetup` makes Cinzel the body
+  font's fallback. "Jūsuke" now draws in the scene, but as a thin serif capital among bold gothic letters.
+- **Temple.** He stands right of the rack at the size wanted, out of the rack's use spot, whose prompt still shows. Oni
+  sorts over him in front and under him behind. He's absent before the meeting; on a replayed wake he went Loaf, Talk,
+  Strike, Idle (the Strike was seen as one frame), and `oliverMet` was set.
+- **Talk.** `Oliver_Meet_Cold`: the close-up is framed well and `soulVoice` was playing the right clips. Nobody listened.
+- **Boon screen.** All twelve cards were seen: each icon matches its boon, and all 57 `boonIcons` names match `BoonId`.
+  The soul painting and `Oni_Boon_Steel` are right. Long Duo headers wrap, and "PASSIVE" touches Quenching's text.
+- **Round (stage 1, round 1).** Scrap fell (`ShedScrap` by direct call), formed plates in the gaps, and stopped at 4. Half
+  the army was cracked by direct call: the tint and flicker show, but subtly. The scrap is a pale soft disc that's hard to
+  see on this ground. The field soul, its arrow, its pickup scene, the boon choice and the HUD's gold rings all worked.
 
 **Not tested:** Kagetsune and his summons with Steel; a real parried Iaido; real Utsusemi rocks; the real F5 key; a real
 Taisho yari at stage 1 round 3; stage 2 to 4 rounds; balance, including every number in §11 and the Ultimate fill rate; how
-plates and tints look; Steel's art, which waits on steps 18 and 19; a whole run with Steel. Docs that describe a Steel
+a thrown Steel shuriken; the Ultimate's aura and crackle on their fallback; how the sting and voice sound; plates or tints
+on any other map; a build, web or otherwise; a whole run with Steel. Docs that describe a Steel
 effect describe what the code is written to do, not something seen in play.
 
 ### Build list

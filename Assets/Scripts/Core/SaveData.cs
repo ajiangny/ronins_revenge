@@ -85,8 +85,15 @@ public class SaveData
     // Poguru's mid-fight warnings: the last run he said any (0 for never) and how many runs until he says them again.
     public int poguruWarnRun;
     public int poguruWarnGap;
+    // The memorial stones' encyclopedia: every foe Oni has seen in a fight, how many rounds or fights it was in, and
+    // how many he cut down. Bosses' falls and deaths stay in winsVs / deathsTo.
+    public List<FoeRecord> foes = new List<FoeRecord>();
+    // Older saves are filled in from firsts once, so FORGET EVERY FOE (dev) sticks.
+    public bool foesBackfilled;
 
     public bool Freed(BossKind boss) => freed[(int)boss];
+
+    public FoeRecord Foe(string id) => foes.Find(f => f.id == id);
 
     public int SeenIn(string id)
     {
@@ -222,6 +229,8 @@ public static class Save
             read.firsts = new List<string>();
             read.firstsRun = new List<int>();
         }
+        if (read.foes == null) read.foes = new List<FoeRecord>();
+        read.foes.RemoveAll(f => f == null || string.IsNullOrEmpty(f.id));
         Backfill(read);
         return read;
     }
@@ -255,6 +264,34 @@ public static class Save
         if (d.oathsUnsealed) d.AddFirst(Firsts.OathsUnsealed, 0);
         if (d.oaths != null && Array.Exists(d.oaths, rank => rank > 0)) d.AddFirst(Firsts.OathSworn, 0);
         if (d.weapon == 1) d.AddFirst(Firsts.KunaiSkin, 0);
+        BackfillFoes(d);
+    }
+
+    // The encyclopedia's records for a save from before it: each foe the firsts (and the boss tallies) show he met,
+    // once at least. Runs once, so a cleared encyclopedia stays cleared.
+    static void BackfillFoes(SaveData d)
+    {
+        if (d.foesBackfilled) return;
+        d.foesBackfilled = true;
+        void Met(string id, int times)
+        {
+            if (d.Foe(id) == null) d.foes.Add(new FoeRecord { id = id, met = Mathf.Max(1, times) });
+        }
+        foreach (SamuraiKind kind in (SamuraiKind[])Enum.GetValues(typeof(SamuraiKind)))
+        {
+            if (d.FirstIn(Firsts.Enemy(kind)) >= 0) Met(Foes.Of(kind), 1);
+        }
+        // Every run opens on the Ashigaru, whether Poguru named them or not.
+        if (d.runsStarted > 0) Met(Foes.Of(SamuraiKind.Ashigaru), 1);
+        if (d.FirstIn(Firsts.Scout) >= 0) Met(Foes.Scout, 1);
+        for (int b = 1; b < d.deathsTo.Length; b++)
+        {
+            if (d.FirstIn(Firsts.Boss((BossKind)b)) >= 0) Met(Foes.Of((BossKind)b), d.deathsTo[b] + d.winsVs[b]);
+        }
+        // Kuon only comes at Shirogane's break: a win over her, a line from her second phase, or a death to it.
+        bool kuon = d.winsVs[(int)BossKind.Shirogane] > 0 || d.seen.Exists(id => id.StartsWith("Shirogane_Phase"))
+            || (d.lastKiller == (int)BossKind.Shirogane && d.lastKillerSecondPhase);
+        if (kuon) Met(Foes.Kuon, 1);
     }
 
     // Saves from before the slots were one key; it becomes the first slot's, once.
@@ -318,6 +355,33 @@ public static class Save
         return true;
     }
 
+    // A foe seen in a fight (Foes ids), once per round or fight it's in. True the first time ever; that first meeting
+    // is saved at once.
+    public static bool Meet(string id)
+    {
+        FoeRecord record = Data.Foe(id);
+        if (record != null)
+        {
+            record.met++;
+            return false;
+        }
+        Data.foes.Add(new FoeRecord { id = id, met = 1 });
+        Write();
+        return true;
+    }
+
+    // One of a foe cut down. Like Spirit Notes, it rides along with the next write.
+    public static void FoeKilled(string id)
+    {
+        FoeRecord record = Data.Foe(id);
+        if (record == null)
+        {
+            record = new FoeRecord { id = id };
+            Data.foes.Add(record);
+        }
+        record.kills++;
+    }
+
     // A win frees the boss once her last arc line was heard in an earlier run: she told him, and he came back and
     // beat her again (Story/README.md, Endings).
     public static void BossFelled(BossKind boss)
@@ -332,4 +396,13 @@ public static class Save
         data = new SaveData();
         Write();
     }
+}
+
+// One encyclopedia entry's tally: a Foes id, the rounds or fights it was in, and how many Oni cut down.
+[Serializable]
+public class FoeRecord
+{
+    public string id;
+    public int met;
+    public int kills;
 }

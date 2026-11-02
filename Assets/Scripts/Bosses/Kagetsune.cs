@@ -13,7 +13,7 @@ public partial class Kagetsune : Boss
     public const int StartingHealth = 210;
     public const string PhaseEpithet = "The Unchained Wraith";
 
-    static readonly Color Crimson = new Color(0.78f, 0.1f, 0.14f);
+    internal static readonly Color Crimson = new Color(0.78f, 0.1f, 0.14f);
     static readonly Color Teal = new Color(0.3f, 1f, 0.82f);
     static readonly Color Bronze = new Color(0.88f, 0.62f, 0.32f);
     static readonly Color Paper = new Color(0.96f, 0.9f, 0.78f);

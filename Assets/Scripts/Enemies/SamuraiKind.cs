@@ -1,4 +1,5 @@
-// How a samurai fights. The army's rows take their kind from LevelConfig.rowKinds.
+// How a samurai fights. The army's rows take their kind from LevelConfig.rowKinds. The save keeps these names (the
+// encyclopedia's Foes ids), so never rename a value; a new kind also needs a Foes.All entry.
 public enum SamuraiKind
 {
     Ashigaru,

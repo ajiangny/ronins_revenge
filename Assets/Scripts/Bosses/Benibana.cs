@@ -10,7 +10,7 @@ public class Benibana : Boss
     // Per bar: she fights two, the second after her phase break.
     public const int StartingHealth = 70;
 
-    static readonly Color Crimson = new Color(0.95f, 0.15f, 0.22f);
+    internal static readonly Color Crimson = new Color(0.95f, 0.15f, 0.22f);
     static readonly Color Silver = new Color(0.85f, 0.88f, 0.95f);
     static readonly Color Smoke = new Color(0.6f, 0.58f, 0.62f, 0.8f);
     static readonly Color VeilColour = new Color(0.16f, 0.14f, 0.17f, 0.72f);

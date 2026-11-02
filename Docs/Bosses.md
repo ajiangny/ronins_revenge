@@ -247,7 +247,9 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 
 **Adding a boss:** add a value to `BossKind` (`StageConfig.cs`) → subclass `Boss` (override `Title`, `Epithet`,
 `Colour`, `Line`, the fight coroutine) → add cases to `GameManager.CreateBoss` and `VoiceFor` plus serialized
-art/voice fields → set `boss` on a `StageConfig` → extend `BossArtSetup` for its frames.
+art/voice fields → set `boss` on a `StageConfig` → extend `BossArtSetup` for its frames → add a `Foes.All` entry
+(`EncyclopediaUI.cs`) and a `GameManager.FoeArt` case (with a stand-in tint like `CreateBoss`'s) for the encyclopedia.
 
 **Adding a samurai kind:** add to `SamuraiKind` → branch its behaviour in `Samurai.Fire` (or elsewhere) →
-give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's `rowKinds`.
+give it art/points in `SamuraiArmy.ArtFor` / `PointsFor` → use it in a round's `rowKinds` → add its `Foes.All`
+entry (the encyclopedia).

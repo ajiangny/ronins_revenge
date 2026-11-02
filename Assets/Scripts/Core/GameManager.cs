@@ -390,6 +390,9 @@ public partial class GameManager : MonoBehaviour
     // The boons on the last boon screen shown, which the next draw (a redraw or the next soul) passes over.
     readonly HashSet<BoonId> lastShown = new HashSet<BoonId>();
     MenuUI menu;
+    // The memorial stones' encyclopedia, and the entry it last showed, so it reopens there.
+    EncyclopediaUI encyclopedia;
+    int encyclopediaIndex;
     ResourceTray resources;
 
     RoninLoadout loadout;
@@ -640,6 +643,8 @@ public partial class GameManager : MonoBehaviour
         boonChoice.Bind(ronin, ui);
         menu = ui.gameObject.AddComponent<MenuUI>();
         menu.Bind(ui);
+        encyclopedia = ui.gameObject.AddComponent<EncyclopediaUI>();
+        encyclopedia.Bind(ui);
         // The temple's resources, Hades-style in the corner. A new currency is one more line here.
         resources = ResourceTray.Build(ui);
         resources.Add("SpiritNotes", () => Save.Data.embers, NoteIcon);
@@ -720,7 +725,8 @@ public partial class GameManager : MonoBehaviour
             || (tutorial.Active && (state == State.Transition || state == State.Dialogue) && !menu.IsOpen);
         if (canPause && (pause || leftFullScreen)) Pause();
         if (state == State.Hub) UpdateSafeArea(keyboard, gamepad, pause);
-        resources.SetVisible(state == State.Hub);
+        // The encyclopedia's tile strip runs under the tray's corner, so the tray steps aside while it's open.
+        resources.SetVisible(state == State.Hub && !encyclopedia.IsOpen);
         if (DevToolsOn && keyboard != null) DevHotkeys(keyboard);
         if (state == State.Playing)
         {

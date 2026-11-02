@@ -470,7 +470,7 @@ public class SamuraiArmy : MonoBehaviour
         samuraiCounter.SetCount(0);
     }
 
-    static SamuraiKind KindForRow(LevelConfig config, int row)
+    public static SamuraiKind KindForRow(LevelConfig config, int row)
     {
         if (config.rowKinds == null || config.rowKinds.Length == 0) return SamuraiKind.Ashigaru;
         return config.rowKinds[Mathf.Min(row, config.rowKinds.Length - 1)];
@@ -500,6 +500,11 @@ public class SamuraiArmy : MonoBehaviour
 
     // The kite scout's art, or null to fly the Ashigaru as before.
     public CharacterArt ScoutArt => scoutArt;
+
+    // The look a kind marches in, and whether it's borrowing another kind's (tinted to tell it apart), for the
+    // memorial stones' encyclopedia.
+    public CharacterArt ArtOf(SamuraiKind kind) => ArtFor(kind);
+    public bool StandsIn(SamuraiKind kind) => OwnArt(kind) == null;
 
     CharacterArt ArtFor(SamuraiKind kind) => kind switch
     {

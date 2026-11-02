@@ -10,7 +10,7 @@ public partial class Utsusemi : Boss
     // Per bar: it fights two, the second after its phase break.
     public const int StartingHealth = 120;
 
-    static readonly Color Steel = new Color(0.55f, 0.68f, 0.95f);
+    internal static readonly Color Steel = new Color(0.55f, 0.68f, 0.95f);
     static readonly Color Gold = new Color(0.9f, 0.75f, 0.4f);
     static readonly Color CoreRed = new Color(1f, 0.22f, 0.18f);
     static readonly Color Lace = new Color(0.92f, 0.94f, 1f, 0.95f);

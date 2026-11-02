@@ -382,6 +382,28 @@ public class Samurai : MonoBehaviour, IHittable
         iceGlow = null;
     }
 
+    // A kind drawn in another's art takes a colour of its own: steel for the shieldbearer, bronze for the bellringer.
+    static Color KindTint(Color clan, SamuraiKind kind, bool standIn)
+    {
+        if (standIn && kind == SamuraiKind.Shieldbearer) return Color.Lerp(clan, ShieldColor, 0.6f);
+        if (standIn && kind == SamuraiKind.Bellringer) return Color.Lerp(clan, BronzeColor, 0.65f);
+        return clan;
+    }
+
+    // Yurei are pale cyan, more so on the Bushi art they borrow.
+    static Color GhostTint(Color body, bool standIn) => Color.Lerp(body, GhostColor, standIn ? 0.7f : 0.35f);
+
+    // How a kind looks standing unhurt with no statuses on it (the encyclopedia's figures): its stand-in colour, and a
+    // yurei's ghostly see-through cyan.
+    public static Color LookTint(SamuraiKind kind, bool standIn)
+    {
+        Color look = KindTint(Color.white, kind, standIn);
+        if (kind != SamuraiKind.Yurei) return look;
+        look = GhostTint(look, standIn);
+        look.a = 0.75f;
+        return look;
+    }
+
     // Tints the samurai towards ice blue while the army is frozen (0 = normal, 1 = fully frozen); being encased
     // in ice always shows full frost.
     public void SetFrost(float amount)
@@ -393,9 +415,7 @@ public class Samurai : MonoBehaviour, IHittable
             return;
         }
         frost = amount;
-        Color clan = Color.Lerp(Color.white, clanTint, tintStrength);
-        if (StandIn && Kind == SamuraiKind.Shieldbearer) clan = Color.Lerp(clan, ShieldColor, 0.6f);
-        if (StandIn && Kind == SamuraiKind.Bellringer) clan = Color.Lerp(clan, BronzeColor, 0.65f);
+        Color clan = KindTint(Color.Lerp(Color.white, clanTint, tintStrength), Kind, StandIn);
         // Armour that has taken hits darkens, so wounded samurai stand out.
         float wounds = 1f - (float)health / maxHealth;
         clan = Color.Lerp(clan, new Color(0.45f, 0.3f, 0.3f), wounds * 0.6f);
@@ -413,7 +433,7 @@ public class Samurai : MonoBehaviour, IHittable
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
         {
-            body = Color.Lerp(body, GhostColor, StandIn ? 0.7f : 0.35f);
+            body = GhostTint(body, StandIn);
             body.a = 0.65f + 0.15f * Mathf.Sin(Time.time * 2.2f + ghostPhase);
         }
         animator.Renderer.color = body;

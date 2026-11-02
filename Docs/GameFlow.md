@@ -87,7 +87,7 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   reloads the scene and `StartGame` hands it to `StartAt`, which shows that fight's map and begins it. God mode
   (`SetGodMode`, F4, kept across reloads) sets `Ronin.Invincible` so `TakeHit` ignores everything, sweeps away an
   army that lands instead of ending the run, and shows a gold tag over the lives (`GameUI.SetGodMode`).
-  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni, F10 opens a Spirit Bead's screen and F11 a Spirit Thread's. The page also has +1000 NOTES and RESET SAVE.
+  `DevHotkeys`: F1 kills the current army, F2 jumps to the last stage's boss (or last round if it has none), F5 drops a soul at the ronin (`SpawnSoul`, elements in turn), F6 a technique scroll (`SpawnScroll`), F7 logs `Dialogue.Explain` for the stage's boss and Oni, F10 opens a Spirit Bead's screen and F11 a Spirit Thread's. The page also has +1000 NOTES, RESET SAVE, MEET EVERY FOE (marks every encyclopedia entry met) and FORGET EVERY FOE (clears them, and they aren't refilled from the firsts).
 
 - **Poguru's tutorial (`Tutorial.cs`, a component `GameManager.Start` adds):** replaces Stage I, Round 1 of a run when
   `Tutorial.ShouldOffer(save)` (`tutorialReplay`, or a journey with no runs that hasn't `tutorialSettled`), asked in

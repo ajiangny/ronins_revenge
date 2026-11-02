@@ -1,6 +1,7 @@
 using UnityEngine;
 
-// The warlord fought after a stage's last round.
+// The warlord fought after a stage's last round. The save keeps these names (the encyclopedia's Foes ids), so
+// never rename a value.
 public enum BossKind { None, Benibana, Utsusemi, Shirogane, Kagetsune }
 
 // One stage: a few rounds of samurai armies, cleared one after another, then its boss. Blockers are rebuilt for

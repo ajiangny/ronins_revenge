@@ -12,7 +12,7 @@ public class Scout : MonoBehaviour, IHittable
     const float BobRate = 2.2f;
     const int SamuraiLayer = 7;
     static readonly int[] BonusPoints = { 100, 150, 300 };
-    static readonly Color KiteColor = new Color(1f, 0.55f, 0.45f);
+    internal static readonly Color KiteColor = new Color(1f, 0.55f, 0.45f);
     // On its own art the scout keeps its colours under a pale grave-light; the stand-in keeps the warm glow.
     static readonly Color GhostGlow = new Color(0.75f, 0.9f, 0.85f, 0.4f);
     static readonly Color WarmGlow = new Color(1f, 0.5f, 0.3f, 0.45f);

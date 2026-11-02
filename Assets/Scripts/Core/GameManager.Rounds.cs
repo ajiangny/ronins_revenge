@@ -17,12 +17,14 @@ public partial class GameManager
         bool kiteArt = army.ScoutArt != null;
         CharacterArt scoutArt = kiteArt ? army.ScoutArt : army.samuraiByRow[army.samuraiByRow.Length - 1];
         activeScout = Scout.Spawn(scoutArt, kiteArt, Round.topRowY + 1.4f, OnScoutKilled);
+        Save.Meet(Foes.Scout);
         if (!tutorial.Active) Save.First(Firsts.Scout);
         StartCoroutine(PoguruBark(DialogueEvent.PoguruScout, 0.35f));
     }
 
     void OnScoutKilled(Scout scout)
     {
+        Save.FoeKilled(Foes.Scout);
         Earn(Upgrades.PerScout);
         score += scout.Points * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
@@ -236,6 +238,7 @@ public partial class GameManager
         tutorial.RoundStarted();
         // A kind of soldier never met before gets his word first, then his first look at a new stage, before any
         // round-start bark.
+        MeetArmy();
         string newEnemy = tutorial.Active ? null : NewEnemies();
         if (newEnemy != null) StartCoroutine(PoguruBark(DialogueEvent.PoguruFirst, 1f, null, null, newEnemy));
         else if (!tutorial.Active && Dialogue.CanPick("Poguru", DialogueEvent.PoguruStage, BarkContext())) StartCoroutine(PoguruBark(DialogueEvent.PoguruStage));
@@ -256,8 +259,18 @@ public partial class GameManager
         Upgrades.AddNotes(whole);
     }
 
+    // Each kind in the army now on the field, once a round, for the memorial stones' encyclopedia. The tutorial's
+    // soldiers count too: Oni has seen them either way.
+    void MeetArmy()
+    {
+        var kinds = new HashSet<SamuraiKind>();
+        foreach (Samurai soldier in army.Soldiers) kinds.Add(soldier.Kind);
+        foreach (SamuraiKind kind in kinds) Save.Meet(Foes.Of(kind));
+    }
+
     void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
+        Save.FoeKilled(Foes.Of(samurai.Kind));
         RunLog.Kill(source);
         Earn(Upgrades.PerSamurai);
         score += samurai.Points * (stageIndex + 1);

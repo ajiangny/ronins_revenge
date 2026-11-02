@@ -70,8 +70,8 @@ public class MenuUI : MonoBehaviour
     const float CardLinesTop = 140f;
     const float CardLineHeight = 58f;
     const float SliderStep = 0.1f;
-    static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
-    static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
+    internal static readonly Color Accent = new Color(1f, 0.36f, 0.3f);
+    internal static readonly Color Idle = new Color(0.86f, 0.83f, 0.78f);
     // The title screen is ink on paper, like a Final Fantasy title: dark labels, a deep red for the selection.
     const float LightRowWidth = 300f;
     const float LightRowHeight = 66f;
@@ -443,7 +443,7 @@ public class MenuUI : MonoBehaviour
         }
     }
 
-    static bool Pressed(params ButtonControl[] buttons)
+    internal static bool Pressed(params ButtonControl[] buttons)
     {
         foreach (ButtonControl button in buttons)
         {

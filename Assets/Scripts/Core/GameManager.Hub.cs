@@ -386,8 +386,8 @@ public partial class GameManager
     }
 
     // The memorial stones (Hades' Codex, cut down): how the runs went, and each warlord he has met by how often they
-    // have killed him and he them. Ones he hasn't met stay worn smooth.
-    void ShowRecords(System.Action back)
+    // have killed him and he them. Ones he hasn't met stay worn smooth. The encyclopedia opens from here.
+    void ShowRecords(System.Action back, int startIndex = 0)
     {
         SaveData d = Save.Data;
         string muted = MenuUI.MutedHex(false);
@@ -406,7 +406,119 @@ public partial class GameManager
             body += met ? Row(boss.ToString().ToUpperInvariant(), fell.ToString(), felled.ToString()) : Row($"<color=#{muted}>· · ·</color>", "-", "-");
         }
         body += $"</align>\n<size=30><color=#{muted}>Names worn into the old stones. Fewer read clearly every time he wakes.</color></size>";
-        menu.Show("MEMORIAL STONES", body, new[] { MenuUI.Item.Button("BACK", back) }, back);
+        var items = new[]
+        {
+            MenuUI.Item.Button("ENCYCLOPEDIA", () => ShowEncyclopedia(back)),
+            MenuUI.Item.Button("BACK", back),
+        };
+        menu.Show("MEMORIAL STONES", body, items, back, startIndex);
+    }
+
+    // Every foe Oni has met, from the memorial stones: each with its figure, story line and his tally against it; the
+    // rest only a silhouette. Leaving it goes back to the stones' records, ENCYCLOPEDIA still selected.
+    void ShowEncyclopedia(System.Action back)
+    {
+        menu.Hide();
+        SaveData d = Save.Data;
+        var entries = new EncyclopediaUI.Entry[Foes.All.Length];
+        for (int i = 0; i < entries.Length; i++)
+        {
+            Foes.Foe foe = Foes.All[i];
+            FoeRecord record = d.Foe(foe.id);
+            Sprite[] frames = FoeArt(foe, out Color tint, out float fps);
+            entries[i] = new EncyclopediaUI.Entry
+            {
+                name = foe.name,
+                epithet = foe.epithet,
+                line = foe.line,
+                stats = record != null ? FoeStats(foe, record, d) : "",
+                frames = frames,
+                fps = fps,
+                tint = tint,
+                accent = foe.accent,
+                met = record != null,
+                warlord = foe.warlord,
+            };
+        }
+        encyclopedia.Show(entries, encyclopediaIndex, last =>
+        {
+            encyclopediaIndex = last;
+            ShowRecords(back, 0);
+        });
+    }
+
+    // His tally against a foe, on one line: how often they met, how many fell to him and how many times it killed
+    // him. Bosses count fights and falls (winsVs), and add FREED once their soul is free.
+    static string FoeStats(Foes.Foe foe, FoeRecord record, SaveData d)
+    {
+        string muted = MenuUI.MutedHex(false);
+        string Stat(string label, string value) => $"<color=#{muted}>{label}</color>  {value}        ";
+        if (foe.boss != BossKind.None)
+        {
+            string stats = Stat("FOUGHT", record.met.ToString()) + Stat("FELLED", d.winsVs[(int)foe.boss].ToString())
+                + Stat("DEATHS", d.deathsTo[(int)foe.boss].ToString());
+            if (d.Freed(foe.boss)) stats += $"<color=#{ColorUtility.ToHtmlStringRGB(GameUI.HighScoreColour)}>FREED</color>";
+            return stats;
+        }
+        if (foe.id == Foes.Kuon)
+            return Stat("FOUGHT", record.met.ToString()) + Stat("BROKEN", record.kills.ToString()) + Stat("DEATHS", "with Shirogane");
+        if (foe.id == Foes.Scout)
+            return Stat("SIGHTED", record.met.ToString()) + Stat("DOWNED", record.kills.ToString()) + Stat("DEATHS", "-");
+        // Only the army's spears and ghost arrows are told apart by who threw them.
+        string deaths = foe.id == Foes.Of(SamuraiKind.Taisho) ? d.deathsByCause[(int)DeathCause.Spear].ToString()
+            : foe.id == Foes.Of(SamuraiKind.Yurei) ? d.deathsByCause[(int)DeathCause.GhostArrow].ToString()
+            : "-";
+        return Stat("MET", record.met.ToString()) + Stat("FELLED", record.kills.ToString()) + Stat("DEATHS", deaths);
+    }
+
+    // A foe's looping figure for the encyclopedia, read off the art the fights use (the scene's army holds the army's
+    // even in the temple), with the tint it wears there. A foe without its own art borrows the army's as its fight
+    // does; with none at all the frames are null and the page draws a disc.
+    Sprite[] FoeArt(Foes.Foe foe, out Color tint, out float fps)
+    {
+        tint = Color.white;
+        fps = 6f;
+        CharacterArt[] byRow = army != null ? army.samuraiByRow : null;
+        bool hasRows = byRow != null && byRow.Length > 0;
+        CharacterArt Row(int row) => hasRows ? byRow[Mathf.Clamp(row, 0, byRow.Length - 1)] : null;
+        CharacterArt art = null;
+        Color standIn = Color.white;
+        switch (foe.id)
+        {
+            case Foes.Scout:
+                art = army != null && army.ScoutArt != null ? army.ScoutArt : Row(hasRows ? byRow.Length - 1 : 0);
+                standIn = army != null && army.ScoutArt != null ? Color.white : Scout.KiteColor;
+                break;
+            case Foes.Kuon:
+                tint = new Color(1f, 1f, 1f, 0.85f);
+                fps = 8f;
+                return shiroWolfIdle != null && shiroWolfIdle.Length > 0 ? shiroWolfIdle : null;
+            case nameof(BossKind.Benibana):
+                art = benibanaArt != null ? benibanaArt : Row(0);
+                standIn = benibanaArt != null ? Color.white : BenibanaStandIn;
+                break;
+            case nameof(BossKind.Utsusemi):
+                art = utsusemiArt != null ? utsusemiArt : Row(0);
+                standIn = utsusemiArt != null ? Color.white : UtsusemiStandIn;
+                break;
+            case nameof(BossKind.Shirogane):
+                art = shiroganeArt != null ? shiroganeArt : Row(1);
+                standIn = shiroganeArt != null ? Color.white : ShiroganeStandIn;
+                break;
+            case nameof(BossKind.Kagetsune):
+                art = kagetsuneArt != null ? kagetsuneArt : Row(0);
+                standIn = kagetsuneArt != null ? Color.white : KagetsuneStandIn;
+                break;
+            default:
+                if (army == null || !hasRows || !System.Enum.TryParse(foe.id, out SamuraiKind kind)) break;
+                art = army.ArtOf(kind);
+                standIn = Samurai.LookTint(kind, army.StandsIn(kind));
+                break;
+        }
+        if (art == null || art.idle == null || art.idle.Length == 0) return null;
+        tint = standIn;
+        fps = art.idleFps;
+        return art.idle;
     }
 
     // Where Poguru sits on his nest.

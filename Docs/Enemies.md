@@ -36,7 +36,10 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `LevelConfig.rowKinds`; art and points come from `SamuraiArmy.ArtFor` / `PointsFor`
   (`samuraiByRow` art: Taisho, Bushi, Bushi, Ashigaru; the Taisho kind wears the Taisho art, the Archer the Bushi's).
   The Bellringer, Shieldbearer and Yurei wear their own art (`bellringerArt`, `shieldbearerArt`, `yureiArt`, via
-  `OwnArt`); a kind without it wears the Bushi as a `Samurai.StandIn`, tinted bronze, steel or a stronger cyan. The
+  `OwnArt`); a kind without it wears the Bushi as a `Samurai.StandIn`, tinted bronze, steel or a stronger cyan
+  (`Samurai.LookTint` gives that look without statuses; the encyclopedia reads it with `SamuraiArmy.ArtOf` / `StandsIn`).
+  Every kind, and the kite scout, has an entry in the memorial stones' encyclopedia (`Foes.All` in `EncyclopediaUI.cs`;
+  its id is the kind's name, so a new `SamuraiKind` needs one and an old one is never renamed). The
   look is the undead army of [Story/Army.md](../Story/Army.md); its death debris is `Effects/Bone` and `Ash` (petals and
   smoke without them).
 - `Arrow.cs` — enemy projectile; also restyled into boss shots (`Restyle`, `MakeReflectable`, `Arrow.Fan`).

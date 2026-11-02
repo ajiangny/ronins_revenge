@@ -41,6 +41,16 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   ronin on his row at his in-game pixel scale (`GameManager.titleFluteFrames`, falling back to his idle). The figure
   stays on every paper page opened from the title (`figureWanted`), so START's stand-up can play from the slots page,
   and `LeaveTitle` fades a paper page's words as well as the title's.
+- `EncyclopediaUI.cs` — the memorial stones' encyclopedia, opened from `ShowRecords` by `GameManager.ShowEncyclopedia`
+  (added to the Canvas by `GameManager.Start`). Also holds `Foes`: the twelve entries (`Foes.All`: id, name, epithet,
+  story line, group, accent; ids are the `SamuraiKind` / `BossKind` names plus `Foes.Scout` and `Foes.Kuon`). The page:
+  the title, a count of names met, the selected foe's figure looping in a 420-unit box (whole-number scales; halves,
+  thirds… when the art is bigger) on a glow in its colour, its name over an ink stroke in that colour, epithet, story
+  line and tally, and a strip of 116-unit tiles along the bottom, the dead army's seven then the warlords' five. Unmet
+  entries are a dark silhouette of their first frame and "???"; an entry with no art is a soft disc. ← → step (wrapping),
+  ↑ ↓ cross between the groups, the mouse hovers or clicks a tile and the wheel steps, Esc/Backspace/East/Start or the
+  BACK label returns the last index to the caller. Unscaled time, like `MenuUI` (whose `Accent`, `Idle` and `Pressed`
+  it shares).
 - `BoonChoiceUI.cs` — see Boons. For the tutorial: `SlotRect(slot)`, `LiftSlots(layer)`/`DropSlots()` move the ability (and, once shown, the ultimate's medallion)
   slots onto a talk's overlay and back, and `InputLocked` stops a pick while Poguru talks over the screen.
   `GameUI.LivesRow` is lifted the same way for the hearts lesson. `SpriteAnimatorUI.cs` animates UI images in unscaled time.

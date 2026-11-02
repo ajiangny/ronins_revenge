@@ -44,6 +44,24 @@ public partial class GameManager
             Save.Reset();
             ShowDevMenu(back, resetRow);
         }));
+        // The memorial stones' encyclopedia: every entry met at once, or every one forgotten (and not refilled from
+        // the save's firsts), to see its silhouettes again.
+        int meetRow = items.Count;
+        int met = System.Array.FindAll(Foes.All, f => Save.Data.Foe(f.id) != null).Length;
+        items.Add(MenuUI.Item.Button($"MEET EVERY FOE  ({met}/{Foes.All.Length})", () =>
+        {
+            foreach (Foes.Foe foe in Foes.All) Save.Meet(foe.id);
+            Save.Write();
+            ShowDevMenu(back, meetRow);
+        }));
+        int forgetRow = items.Count;
+        items.Add(MenuUI.Item.Button("FORGET EVERY FOE", () =>
+        {
+            Save.Data.foes.Clear();
+            Save.Data.foesBackfilled = true;
+            Save.Write();
+            ShowDevMenu(back, forgetRow);
+        }));
         items.Add(MenuUI.Item.Button("BACK", back));
         string muted = MenuUI.MutedHex(OnPaper);
         menu.Show("DEV TOOLS", $"<size=30><color=#{muted}>F1 kill the army  ·  F2 last boss  ·  F3 this menu  ·  F4 god mode  ·  F5 soul  ·  F6 scroll  ·  F7 dialogue  ·  F10 bead  ·  F11 thread</color></size>",

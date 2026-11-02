@@ -13,7 +13,7 @@ public partial class Shirogane : Boss
     // Per bar: she fights two, the second with her wolf.
     public const int StartingHealth = 140;
 
-    static readonly Color Spirit = new Color(0.45f, 0.85f, 1f);
+    internal static readonly Color Spirit = new Color(0.45f, 0.85f, 1f);
     static readonly Color Cyan = new Color(0.3f, 0.92f, 1f);
     static readonly Color Frost = new Color(0.85f, 0.97f, 1f);
     static readonly Color MistColour = new Color(0.55f, 0.85f, 1f, 0.7f);

@@ -66,6 +66,7 @@ public partial class GameManager
         Conversation intro = Dialogue.Pick(Stage.boss.ToString(), DialogueEvent.BossIntro, Dialogue.Context(loadout))
             ?? Unwritten(BossLine.Intro);
         Save.First(Firsts.Boss(Stage.boss));
+        Save.Meet(Foes.Of(Stage.boss));
         // The card only names the boss; the talking happens in the scene after it.
         if (lines.portrait != null && lines.closeup != null)
         {
@@ -151,6 +152,7 @@ public partial class GameManager
         Camera cam = Camera.main;
         Vector3 post = new Vector3(x, CameraShake.Center.y + cam.orthographicSize - bossDepth, 0);
         Boss soul = CreateBoss(kind, post + Vector3.up * 4f, SummonHealth);
+        Save.Meet(Foes.Of(kind));
         soul.Summoned = true;
         soul.Damaged += (point, source) => OnBossDamaged(soul, point, source);
         soul.Spoke += OnBossSpoke;
@@ -192,6 +194,10 @@ public partial class GameManager
         levy = Sworn(levy);
         levy.samuraiColor = Stage.rounds[Stage.rounds.Length - 1].samuraiColor;
         army.Muster(levy, ronin.transform, ronin.TopY, blockers.TopY, from, levy.rows * levy.columns > 20 ? 2.4f : 1.6f, soul);
+        // His levy's soldiers are the army's kinds, so the encyclopedia counts them as met.
+        var kinds = new HashSet<SamuraiKind>();
+        for (int row = 0; row < levy.rows; row++) kinds.Add(SamuraiArmy.KindForRow(levy, row));
+        foreach (SamuraiKind kind in kinds) Save.Meet(Foes.Of(kind));
         return true;
     }
 
@@ -211,6 +217,12 @@ public partial class GameManager
         _ => BossKind.Benibana,
     };
 
+    // The tints a boss without art wears over the army art it borrows; the encyclopedia draws it the same way.
+    internal static readonly Color BenibanaStandIn = new Color(1f, 0.55f, 0.6f);
+    internal static readonly Color UtsusemiStandIn = new Color(0.6f, 0.7f, 0.95f);
+    internal static readonly Color ShiroganeStandIn = new Color(0.6f, 0.9f, 1f);
+    internal static readonly Color KagetsuneStandIn = new Color(0.55f, 0.42f, 0.32f);
+
     Boss CreateBoss(BossKind kind, Vector3 position, float healthScale = 1f)
     {
         int Health(int full) => Mathf.Max(1, Mathf.RoundToInt(full * healthScale));
@@ -219,7 +231,7 @@ public partial class GameManager
             case BossKind.Utsusemi:
                 bool noArt = utsusemiArt == null;
                 Utsusemi automaton = Boss.Create<Utsusemi>(noArt ? army.samuraiByRow[0] : utsusemiArt, utsusemiScale, Health(Utsusemi.StartingHealth),
-                    position, noArt ? new Color(0.6f, 0.7f, 0.95f) : Color.white);
+                    position, noArt ? UtsusemiStandIn : Color.white);
                 if (!noArt)
                 {
                     automaton.SetBareIdle(utsusemiBareIdle);
@@ -234,7 +246,7 @@ public partial class GameManager
             case BossKind.Kagetsune:
                 bool hollow = kagetsuneArt == null;
                 Kagetsune emperor = Boss.Create<Kagetsune>(hollow ? army.samuraiByRow[0] : kagetsuneArt, kagetsuneScale, Health(Kagetsune.StartingHealth),
-                    position, hollow ? new Color(0.55f, 0.42f, 0.32f) : Color.white);
+                    position, hollow ? KagetsuneStandIn : Color.white);
                 if (!hollow)
                 {
                     emperor.SetPhaseArt(kagetsunePhaseArt);
@@ -244,7 +256,7 @@ public partial class GameManager
             case BossKind.Shirogane:
                 bool ghostly = shiroganeArt == null;
                 Shirogane blade = Boss.Create<Shirogane>(ghostly ? army.samuraiByRow[Mathf.Min(1, army.samuraiByRow.Length - 1)] : shiroganeArt,
-                    shiroganeScale, Health(Shirogane.StartingHealth), position, ghostly ? new Color(0.6f, 0.9f, 1f) : Color.white);
+                    shiroganeScale, Health(Shirogane.StartingHealth), position, ghostly ? ShiroganeStandIn : Color.white);
                 if (!ghostly)
                 {
                     blade.SetDashFrames(shiroganeDash);
@@ -257,7 +269,7 @@ public partial class GameManager
             default:
                 bool standIn = benibanaArt == null;
                 CharacterArt art = standIn ? army.samuraiByRow[0] : benibanaArt;
-                Color tint = standIn ? new Color(1f, 0.55f, 0.6f) : Color.white;
+                Color tint = standIn ? BenibanaStandIn : Color.white;
                 Benibana warlord = Boss.Create<Benibana>(art, benibanaScale, Health(Benibana.StartingHealth), position, tint);
                 if (!standIn) warlord.SetPhaseArt(benibanaPhaseArt);
                 return warlord;
@@ -492,6 +504,7 @@ public partial class GameManager
     // Kuon takes the field at her phase break: it shares her bar, and it can be hit until it breaks.
     void OnWolfJoined(SpiritWolf wolf)
     {
+        Save.Meet(Foes.Kuon);
         activeWolf = wolf;
         effects.Wolf = wolf;
         wolf.Damaged += OnWolfDamaged;
@@ -525,6 +538,7 @@ public partial class GameManager
     // Kuon is broken: its share of the bar is gone, and she fights on enraged (or, if she was already down, falls).
     void OnWolfBroken()
     {
+        Save.FoeKilled(Foes.Kuon);
         score += 750 * (stageIndex + 1);
         highScore = Mathf.Max(highScore, score);
         ui.SetScore(score);
@@ -537,7 +551,7 @@ public partial class GameManager
 
     // The boss bar, in two halves while a boss fights beside a second foe (Shirogane and Kuon).
     // Kuon's half is a spirit violet, apart from Shirogane's ice blue and the white of the damage trail.
-    static readonly Color KuonBarColour = new Color(0.72f, 0.6f, 1f);
+    internal static readonly Color KuonBarColour = new Color(0.72f, 0.6f, 1f);
 
     void ShowBossHealth(Boss boss)
     {

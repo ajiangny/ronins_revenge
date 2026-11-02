@@ -269,6 +269,19 @@ const SOUNDS = {
       "A short energetic storm sting: a fast rolling Japanese taiko drumroll building up into a sharp thunderclap, " +
       "crackling electric sparks and a rumbling thunder tail, exciting and bright, video game sound effect, no music.",
   },
+  // Hibiki's sign-off at the temple gate; the game picks the notes, pitches and gaps at random.
+  TaikoHit: {
+    seconds: 0.5,
+    prompt:
+      "One single quick hit on a Japanese taiko drum with a wooden stick: a tight punchy woody strike with a short " +
+      "deep drum body, one hit only, dry close mic, no reverb tail, no music.",
+  },
+  TaikoThunder: {
+    seconds: 2.5,
+    prompt:
+      "A sudden huge thunderclap cracking overhead right after a drum hit, then a deep rolling thunder rumble fading " +
+      "out, with a crackle of electric sparks, powerful and bright, video game sound effect, no music.",
+  },
   SoulStingWater: {
     seconds: 2.5,
     prompt:

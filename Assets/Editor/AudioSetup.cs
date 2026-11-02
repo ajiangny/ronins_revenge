@@ -92,6 +92,8 @@ public static class AudioSetup
         (Sfx.SoulStingFire, 0.6f, 0f, 1f),
         (Sfx.SoulStingFrost, 0.6f, 0f, 1f),
         (Sfx.SoulStingStorm, 0.6f, 0f, 1f),
+        (Sfx.TaikoHit, 0.8f, 0.03f, 0.04f),
+        (Sfx.TaikoThunder, 0.8f, 0.02f, 1f),
         (Sfx.SoulStingWater, 0.6f, 0f, 1f),
         (Sfx.SoulStingSteel, 0.6f, 0f, 1f),
         // Asagi's water.

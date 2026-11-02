@@ -506,8 +506,9 @@ public static class NinjaArtSetup
                     visitor.FindPropertyRelative("artScale").floatValue = layout.artScale;
                     visitor.FindPropertyRelative("fps").floatValue = layout.fps;
                     visitor.FindPropertyRelative("leaveFps").floatValue = layout.leaveFps;
+                    visitor.FindPropertyRelative("drumContact").intValue = layout.drumContact;
                     string soul = VisitorName(layout.element);
-                    foreach (string clip in new[] { "Idle", "Talk", "Leave" })
+                    foreach (string clip in new[] { "Idle", "Talk", "Leave", "Drum" })
                     {
                         SerializedProperty frames = visitor.FindPropertyRelative(clip.ToLowerInvariant());
                         var found = new List<Sprite>();

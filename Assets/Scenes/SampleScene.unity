@@ -1329,6 +1329,8 @@ MonoBehaviour:
       - {fileID: 21300000, guid: dd2f4e06a3a7c4d148e72cbbb73beb5b, type: 3}
       - {fileID: 21300000, guid: 786f9101ceff14813b5a78b8b8f29959, type: 3}
       - {fileID: 21300000, guid: e12b364bde680497888e23303537bdcf, type: 3}
+      drum: []
+      drumContact: 2
       fps: 8
       leaveFps: 12
     - element: 1
@@ -1358,6 +1360,8 @@ MonoBehaviour:
       - {fileID: 21300000, guid: ec3e04ce7e8444e42b2eea324f16932c, type: 3}
       - {fileID: 21300000, guid: cf8145cc833a04163b22abd85c8b9b14, type: 3}
       - {fileID: 21300000, guid: b6b42fc5f7f654f09899a9ce0b441350, type: 3}
+      drum: []
+      drumContact: 2
       fps: 8
       leaveFps: 12
     - element: 2
@@ -1386,6 +1390,8 @@ MonoBehaviour:
       - {fileID: 21300000, guid: fee6d06abcd604de495fd5d15f566eb9, type: 3}
       - {fileID: 21300000, guid: 57fb91b5d66e64d1d87adb3551fabbfc, type: 3}
       - {fileID: 21300000, guid: 720a63f8828284cda9a83ead8419eb52, type: 3}
+      drum: []
+      drumContact: 2
       fps: 8
       leaveFps: 12
     visitorAt: {x: 296, y: 125}

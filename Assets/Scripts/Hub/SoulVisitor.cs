@@ -16,6 +16,10 @@ public class SoulVisitorArt
     public Sprite[] talk;
     [Tooltip("Breaking up from the feet into rising motes, ending empty; played backward it's their arrival.")]
     public Sprite[] leave;
+    [Tooltip("One stroke on their drum, raised to raised, replayed for each note before they go (Hibiki). Empty: they just go.")]
+    public Sprite[] drum;
+    [Tooltip("The drum clip's frame where the stick lands, when the note sounds.")]
+    public int drumContact = 2;
     public float fps = 8f;
     public float leaveFps = 12f;
 }
@@ -210,6 +214,52 @@ public class SoulVisitor : MonoBehaviour
         if (this == null) yield break;
         if (crackle != null) crackle.Stop();
         Destroy(gameObject);
+    }
+
+    public bool HasDrum => hasArt && Has(art.drum);
+
+    // Hibiki's sign-off: a quick roll of notes that's never the same twice, then one big stroke that brings the thunder.
+    public IEnumerator DrumRoll()
+    {
+        if (!HasDrum) yield break;
+        clip = null;
+        int notes = UnityEngine.Random.Range(6, 11);
+        for (int n = 0; n < notes; n++)
+        {
+            bool last = n == notes - 1;
+            // Mostly quick, with the odd held beat so it doesn't read as a steady pattern.
+            float stroke = last ? 0.34f : UnityEngine.Random.value < 0.25f ? UnityEngine.Random.Range(0.2f, 0.28f) : UnityEngine.Random.Range(0.09f, 0.16f);
+            bool landed = false;
+            for (float t = 0f; t < stroke; t += Time.deltaTime)
+            {
+                if (this == null) yield break;
+                int frame = Mathf.Min((int)(t / stroke * art.drum.Length), art.drum.Length - 1);
+                body.sprite = art.drum[frame];
+                if (!landed && frame >= art.drumContact)
+                {
+                    landed = true;
+                    Note(last);
+                }
+                yield return null;
+            }
+        }
+        if (this == null) yield break;
+        body.sprite = art.idle[0];
+        yield return new WaitForSeconds(0.45f);
+    }
+
+    void Note(bool last)
+    {
+        if (!last)
+        {
+            Sfx.Play(Sfx.TaikoHit, UnityEngine.Random.Range(0.7f, 1f), UnityEngine.Random.Range(0.85f, 1.25f));
+            return;
+        }
+        Sfx.Play(Sfx.TaikoHit, 1f, 0.8f);
+        Sfx.Play(Sfx.TaikoThunder);
+        Music.Duck(0.4f, 2f);
+        CameraShake.Add(0.3f);
+        ElementFx.Glow(Chest, colour, 0.8f, 5f, 0.7f);
     }
 
     // Their soul as a pickup looks in a run, its sparks with it; a soft glow without the frames.

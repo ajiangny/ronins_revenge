@@ -79,6 +79,7 @@ public partial class GameManager
         yield return visitor.Arrive(1.5f);
         if (visitor == null) yield break;
         yield return SayInTemple(said, colour, () => visitor.Head, visitor.Talk);
+        if (visitor != null && !LeavingTemple) yield return visitor.DrumRoll();
         if (visitor != null) yield return visitor.Depart(LeavingTemple ? 2.5f : 1f);
     }
 

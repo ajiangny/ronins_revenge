@@ -75,6 +75,9 @@ public static class Sfx
     public const string SoulStingFire = "SoulStingFire";
     public const string SoulStingFrost = "SoulStingFrost";
     public const string SoulStingStorm = "SoulStingStorm";
+    // Hibiki's sign-off at the temple gate: quick notes on her drum, and the thunder the last one brings.
+    public const string TaikoHit = "TaikoHit";
+    public const string TaikoThunder = "TaikoThunder";
     public const string SoulStingWater = "SoulStingWater";
     public const string SoulStingSteel = "SoulStingSteel";
 

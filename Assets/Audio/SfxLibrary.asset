@@ -680,6 +680,28 @@ MonoBehaviour:
     - 2.023832
     - 1.8429252
     ownSource: 0
+  - id: TaikoHit
+    clips:
+    - {fileID: 8300000, guid: bda6d999cfb364939aa11cb0ddb5b205, type: 3}
+    - {fileID: 8300000, guid: 7c4101bc2b92b4cbaa3b1d9c8bbf8e49, type: 3}
+    volume: 0.8
+    pitchJitter: 0.03
+    minInterval: 0.04
+    audible:
+    - 0.5485714
+    - 0.5485714
+    ownSource: 0
+  - id: TaikoThunder
+    clips:
+    - {fileID: 8300000, guid: 205c8b276ca014d5a8e44a247ca2863f, type: 3}
+    - {fileID: 8300000, guid: 365074a72f8aa42bdb7a2a38cb4c5040, type: 3}
+    volume: 0.8
+    pitchJitter: 0.02
+    minInterval: 1
+    audible:
+    - 2.0556917
+    - 2.5338776
+    ownSource: 0
   - id: SoulStingWater
     clips:
     - {fileID: 8300000, guid: 8079a6470999e47c1a495b6e2c271f1f, type: 3}

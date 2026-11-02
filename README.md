@@ -4,11 +4,47 @@ A Space Invaders remake re-themed as a lone chibi ronin holding a moonlit temple
 
 Built on the class template ([Oren-Steinberg/Space-Invaders-3D](https://github.com/Oren-Steinberg/Space-Invaders-3D)), Unity 6000.6.6f1, URP, the new Input System.
 
-**Running it:** open the project in Unity 6000.6.6f1, open `Assets/Scenes/SampleScene.unity` and press Play, or build the `Web` build profile (Build Profiles → Web → Build) and serve the output folder; the web build also runs on itch.io. Fights are played on keyboard or keyboard and mouse; a controller only works in the menus and the temple.
+**Author:** Andrew Jiang. Video Game Design and Development (CSCI 381/780), Fall 2026, Assignment 1. Individual work.
+
+**Running it:**
+
+- **In the Editor:** open the project in Unity 6000.6.6f1, open `Assets/Scenes/SampleScene.unity` and press Play.
+- **In a browser:** in Build Profiles, pick `Web` and press Build. Then serve the output folder with any static server, for example `python3 -m http.server 8000 -d <folder>`, and open `http://localhost:8000` (opening `index.html` straight from disk doesn't work; browsers block it). The build is about 97 MB, is Brotli-compressed with Unity's decompression fallback on, so it needs no special server headers, and it also runs on itch.io as an HTML5 upload.
+- **Input:** fights are played on keyboard or keyboard and mouse; a controller only works in the menus and the temple.
+
+**For grading:** DEV TOOLS on the title and pause menus (or F3) jumps to any stage or boss, and F4 toggles god mode, so every feature can be reached without playing through. See [Dev tools](#controls).
 
 The template's Space Invaders classes, prefabs and layers are renamed to the theme: `Alien` → `Samurai`, `AlienFleet` → `SamuraiArmy`, `AlienBullet` → `Arrow`, `AlienCounter` → `SamuraiCounter`, `Spaceship` → `Ronin`, `Dart` → `Projectile`, `ShieldWall`/`ShieldBlock` → `BlockerWall`/`Blocker`. The section on template code issues below uses the template's original names.
 
-**Contents:** [Controls](#controls) · [Required features](#required-features) · [Template code issues](#code-issues-found-in-the-template-and-fixed) · [Additional features](#additional-features-four-or-more-required) ([story](#story--dialogue), [levels](#run-structure--levels), [enemies](#enemies), [bosses](#bosses), [the ronin](#the-ronins-kit), [boons](#boons--builds), [meta-progression](#meta-progression--the-temple), [presentation](#presentation), [audio](#audio-elevenlabs)) · [Balancing](#balancing)
+**Contents:** [Assignment checklist](#assignment-checklist) · [Controls](#controls) · [Required features](#required-features) · [Template code issues](#code-issues-found-in-the-template-and-fixed) · [Additional features](#additional-features-four-or-more-required) ([story](#story--dialogue), [levels](#run-structure--levels), [enemies](#enemies), [bosses](#bosses), [the ronin](#the-ronins-kit), [boons](#boons--builds), [meta-progression](#meta-progression--the-temple), [presentation](#presentation), [audio](#audio-elevenlabs)) · [Balancing](#balancing) · [Credits and AI use](#credits-and-ai-use)
+
+## Assignment checklist
+
+Every item from the assignment sheet, and where it's done. The project meets the requirements of both CSCI 381 and CSCI 780. The game's own names replace the template's: an alien is a samurai, the spaceship is the ronin, and shields are the courtyard blockers.
+
+**Required (CSCI 381 and 780)**
+
+| Requirement | Status | Details |
+|---|---|---|
+| Remaining aliens speed up as others are destroyed | Done | [Required features](#required-features), `SamuraiArmy.CurrentSpeed()` |
+| Detect when the aliens have reached a point where the game can't be won | Done | [Required features](#required-features), `SamuraiArmy.HoldY`, `ArmyReachedRonin`, `GameManager.OnArmyReachedRonin` |
+| Prevent the spaceship from moving offscreen | Done | [Required features](#required-features), `Ronin.FixedUpdate()` |
+| Find and fix three issues in the template's code (381), four (780) | Done, six fixed | [Template code issues](#code-issues-found-in-the-template-and-fixed) |
+| Balance the game to be harder but still beatable (required for 780, optional for 381) | Done | [Balancing](#balancing) |
+
+**Choose four (all seven of the listed options are done)**
+
+| Option | Where it is in the game | Details |
+|---|---|---|
+| Starting and ending screen | Title screen with save slots; a results screen when the run is won, with score, time and rewards (`GameManager.ShowEndMenu`; to see it quickly, jump to Kagetsune in DEV TOOLS). A death has no separate screen: the killer has the last word and Oni wakes in the temple (`GameManager.FallToTemple`) | [Presentation](#presentation) |
+| Additional levels, changed from the first | Four stages of rounds, each with new armies, enemy kinds, maps and a boss (`GameManager.stages`) | [Run structure & levels](#run-structure--levels), [Enemies](#enemies), [Bosses](#bosses) |
+| Lives, with a graphic display | Hearts along the bottom-left of the screen (`GameUI.SetLives`) | [The ronin's kit](#the-ronins-kit) |
+| Shields | Breakable courtyard cover that shows its damage (`BlockerWall`, `Blocker`) | [The ronin's kit](#the-ronins-kit) |
+| Better graphics for the aliens and spaceship | Pixel-art ronin and undead samurai with full animation sets (`CharacterArt`) | [Presentation](#presentation) |
+| Animations when collisions occur | Death clips, bone and ash bursts, hit sparks, breaking cover (`Debris`, `Fx`) | [Presentation](#presentation) |
+| Replace the background | A top-down map for every stage and boss (`Backdrop`) | [Run structure & levels](#run-structure--levels) |
+
+**Extras beyond the sheet:** story and reactive dialogue, bosses, boons, the temple hub and meta-progression, and a full soundtrack and voice cast. None of them is counted toward the four options above.
 
 ## Controls
 
@@ -28,20 +64,22 @@ Two schemes, picked on two cards (KEYBOARD / KEYBOARD + MOUSE, each listing its 
 | Requirement | Where |
 |---|---|
 | Remaining aliens speed up as others are destroyed | `SamuraiArmy.CurrentSpeed()` scales linearly from `baseSpeed` to `baseSpeed × maxSpeedMultiplier` as the army shrinks. |
-| Detect when the game can no longer be won | In the original, an army that lands ends the game. Here the cover's row (`SamuraiArmy.holdDepth`) is the army's last row: each samurai that reaches it breaks formation and walks it on its own, left or right, smashing the cover, while the ranks behind keep collapsing onto it and the row lunges at the ronin, so the run goes on as a last stand. `ArmyReachedRonin` (an army at the ronin's head, `Ronin.TopY`, which the hold line keeps it from reaching) still ends the game as a safeguard. |
+| Detect when the game can no longer be won | In the original, an army that lands ends the game. Here the cover's row (`SamuraiArmy.holdDepth`) is the army's last row: each samurai that reaches it breaks formation and walks it on its own, left or right, smashing the cover, while the ranks behind keep collapsing onto it and the row lunges at the ronin, so the run goes on as a last stand. `ArmyReachedRonin` (an army at the ronin's head, `Ronin.TopY`) still ends the run on the spot, as a safeguard, and Oni falls back to the temple as he does after any death: `SamuraiArmy.HoldY` normally stops the army just above that height, so in ordinary play it's the last stand's lunges that take the remaining lives and end the run. |
 | Ship can't move offscreen | `Ronin.FixedUpdate()` clamps the ronin to the camera's visible width, using his sprite's measured bounds (the pivot isn't centred on the art). |
 | Balance (harder but beatable) | See [Balancing](#balancing). |
 
 ## Code issues found in the template and fixed
 
 1. **Dynamic Rigidbodies were moved by writing `transform.position` every physics step.** This fights the physics engine and teleports colliders. Aliens and the ship are now kinematic and move with `Rigidbody.MovePosition` (interpolated). Darts and alien bullets are launched once with `linearVelocity`.
-2. **Projectiles destroyed whatever they hit (`Destroy(coll.gameObject)`).** An alien bullet would delete the ship, a shield, or anything else outright, which made lives and shields impossible to add. Now each object handles its own collision: `Alien` dies, `Spaceship` loses a life, `ShieldBlock` takes damage, and the projectile only destroys itself. `Dart.TryConsume()` keeps one dart from killing two aliens in the same step.
+2. **Projectiles destroyed whatever they hit (`Destroy(coll.gameObject)`).** An alien bullet would delete the ship, a shield, or anything else outright, which made lives and shields impossible to add. Now each hit goes through the object it hit: anything the player can damage implements `IHittable` (`Alien` takes damage and dies, per source in `Damage.Of`), `Spaceship` loses a life, `ShieldBlock` wears down, and the projectile only destroys itself. A `spent` flag in `Dart.OnCollisionEnter` keeps one dart from killing two aliens in the same step.
 3. **The UI was polled and rebuilt every frame.** `AlienFleet.Update` copied the count into `AlienCounter`, and `AlienCounter.Update` rebuilt the string every frame, allocating garbage. The count is now pushed only when it changes (`AlienCounter.SetCount`, using TMP's non-allocating `SetText`).
 4. **Every alien rolled a random number to fire on every `FixedUpdate`.** That's N random checks per step, back-row aliens shooting through their own fleet, and a `static` cooldown that every alien shared. The fleet now fires one shot on a timer from the bottom alien of a column, sometimes aimed at the player's column.
 5. **The fleet's direction change relied on `Invoke("startSidewaysMotion", …)`.** It used a string method name (not refactor-safe, not camelCase), took two passes over the alien list, and started the bounds at `0` instead of ±infinity. It's replaced with a fixed drop distance tracked in `dropRemaining` and a single combined move-and-measure loop. Hard-coded `±16` bounds are replaced with bounds taken from the camera.
 6. **Leftover clutter and broken components.** The template had redundant `fleet.GetComponent<AlienFleet>()` calls on a field already typed `AlienFleet`, empty `Start`/`Update` methods (Unity still calls them), and commented-out dead code. Tuning values were public statics, so they didn't show in the Inspector; they're now `[SerializeField]`. The Spaceship also had **two** Rigidbodies (one in the prefab, one added in the scene) and a `MeshCollider` with no mesh. The `List<GameObject>` is now a typed `List<Alien>`.
 
 ## Additional features (four or more required)
+
+The [checklist](#assignment-checklist) maps these to the options on the assignment sheet.
 
 | Area | What's in it |
 |---|---|
@@ -320,8 +358,8 @@ Code and tooling: `Sfx`, `SfxLibrary`, `Music`, `Editor/AudioSetup.cs` → `Ninj
 
 The template was easy because the player could fire 20 shots per second and the fleet never sped up. Changes:
 
-- Player fire cooldown raised from 0.05 s to 0.35 s.
-- The army speeds up as it shrinks: up to 3.5× in round 1, rising to 4.2× by round 3.
+- Player fire cooldown raised from 0.05 s to 0.45 s.
+- The army speeds up as it shrinks: up to 3.5× in the first round, rising to 4.2× by the end of Stage 1 and 5× in the last round of Stage 4.
 - The army grows each round (24 / 36 / 40 samurai) and starts closer to the player, archers add three-arrow fans from round 2, and Taishō add unbreakable spears in round 3. Stage 2 adds Shieldbearers and divers; Stage 3 (55 / 60 / 72 samurai) adds Yurei whose arrows ignore cover, divers from its first round and a second Taishō rank. Stage 4 (60 / 72 / 78 samurai) mixes every kind with Bellringers, divers throughout and scouts from round 2.
 - Arrows come from the front line, partly aimed at the player, and get faster each round.
 - **Stage 2 is the spike.** Stage 1 teaches the plain army; from Stage 2 the army starts shooting back in earnest: volleys, fast and shielded arrows, ragged formations (squads and staggered ranks), 2-hit veteran ranks and one multi-hit Elite per round (Stage 1 holds its Elite back until round 3), with guarded (parry-only) arrows added in Stage 3. A volley round fires less often, so the pressure climbs without the screen filling. Values per round (`GameManager.Defaults.cs`; veteran rows counted from the top, chances are fast / shielded / guarded):
@@ -350,3 +388,14 @@ The template was easy because the player could fire 20 shots per second and the 
 - Because the base game is hard, souls give the player a way to build up power over a run. The paths, scouts and the end of each stage all give boons, and the Spirit Shuriken and Parry give tools for clearing columns and dealing with arrows. The rounds per stage, when the boss path opens, how many paths open, and the extra rounds' speed-up are tunable on `GameManager`.
 
 All of these values can be tuned in the Inspector on `GameManager` (the `stages` array, with each stage's `rounds`), `SamuraiArmy`, `Ronin` and `BlockerWall`. Benibana's timings are in `Benibana.cs`, Utsusemi's in `Utsusemi.cs`, Shirogane's in `Shirogane.cs`, Kagetsune's in `Kagetsune.cs`.
+
+## Credits and AI use
+
+The assignment allows AI assistance and imported graphics when the source permits them. Everything below that isn't the class template came from these sources, generated from my own prompts:
+
+- **Template:** [Oren-Steinberg/Space-Invaders-3D](https://github.com/Oren-Steinberg/Space-Invaders-3D), the class project this started from.
+- **Code:** written with AI assistance (Claude Code) from my own prompts.
+- **Pixel art, sprites, maps, effects and the pixel font:** made with [PixelLab](https://pixellab.ai) from my own prompts; some effects are drawn in code or with short scripts.
+- **Portraits and paintings:** GPT image generation from my own prompts.
+- **Sound effects, music and voices:** [ElevenLabs](https://elevenlabs.io) from my own prompts and scripts.
+- **Fonts:** [Cinzel](https://github.com/NDISCOVER/Cinzel) and Zen Kaku Gothic New, both under the SIL Open Font License (the licence texts are beside them in `Assets/Art/Fonts/`).

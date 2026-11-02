@@ -13,6 +13,9 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 | Screen shake (read `CameraShake.Center`, never the camera, for layout) | `CameraShake.cs` |
 | Fade to black between maps | `GameUI.FadeTo` (unscaled time) |
 | White hit flash | `HitFlash.cs` + `Art/Materials/SpriteFlash.shader` |
+| Cracked's seams: a copy of the sprite that draws only a hard network of cracks, on the art's own pixels and inside its silhouette | `CrackSeams.cs` + `Art/Materials/SpriteSeams.shader` (`FxLibrary.seamMaterial`). Without the material the tint alone shows it |
+| Steel's effects (`Fx.Steel` plays one at its own colours under the arrows, or a seam-coloured impact without the art) | `Fx/Steel_*`: Sparks, Crack, Anvil, Mend, Forge, Shatter, Grind, Scrap, ScrapHot, Shard, Filings, Ring. Iron and bright seams with hard edges, no soft alpha, never flat gold. Drawn by a PIL script kept with the drafts, not in PixelLab (`~/Drafts/SteelFx/draw.py`). A Forge frame is the plate's own art (`Blockers/SteelPlate`) cooling from white heat, so it matches the plate |
+| Draw order under arrows | `Arrow.DrawOrder` 4, `Fx.UnderArrows` 3: above the army and the cover, below a warlord at 5. Older effects still use the default order 60 |
 | Parry hit-stop | `GameManager.HitStop` |
 | Sound effects by id (pooled, ignores timeScale) | `Sfx.cs` + `SfxLibrary` asset (`Audio/SfxLibrary.asset`). A pool voice is free once its clip's audible part has played (`Sound.audible`, measured by Apply Audio, since the generated clips carry long silent tails); the march beat has its own source (`Sound.ownSource`) |
 | Music crossfade and ducking | `Music.cs` |

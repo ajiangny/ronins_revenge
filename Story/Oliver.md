@@ -5,7 +5,7 @@
 > **In game, with his art.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md), built and not yet
 > played by hand ([what was tested](../Docs/BOON_DESIGN.md#tested)). All his dialogue in [Lines](#lines) is in
 > `Dialogue.Lines.cs` except `Oliver_Dawn`. Part of it is voiced, and the rest plays as silent subtitles. His figure stands
-> on the dais behind the rack and his boon art is in. The auras and crackle have no art, and the freed beat and the rack's small
+> on the dais behind the rack and his boon art is in. His aura and crackle are in (forge-gold, `Fx/Aura_Steel`, `Fx/SoulCrackle_Steel`), and the freed beat and the rack's small
 > habits under [Arc across runs](#arc-across-runs) aren't in yet.
 
 | | |

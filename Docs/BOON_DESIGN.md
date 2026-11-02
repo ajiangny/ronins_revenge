@@ -690,7 +690,7 @@ round for scrap shed, points mended, plates formed, arrows stopped by cover and 
 
 ## 12. Steel in the rest of the game
 
-**Status: all 21 steps are built. The auras and crackle have no art and stay on their fallback. Not played by hand: see [Tested](#tested).**
+**Status: all 21 steps are built, and the effects pass is in, with `Aura_Steel` and `SoulCrackle_Steel` drawn. Not played by hand: see [Tested](#tested).**
 The spec was checked line by line against the scripts on 2026-11-01. §11 stays the
 authority on what Steel does; where the code forced a change it is listed under Overrides. The build list at the end
 is ordered so the game compiles and plays after every step, and Steel is out of reach until step 8.
@@ -847,9 +847,17 @@ byte. Screenshots were taken and looked at; no key was pressed:
   the army was cracked by direct call: the tint and flicker show, but subtly. The scrap is a pale soft disc that's hard to
   see on this ground. The field soul, its arrow, its pickup scene, the boon choice and the HUD's gold rings all worked.
 
+**The effects pass (2026-11-01).** Every Steel effect was run in play mode by a harness and screenshotted at the moment
+it shows, still with no real input. Through real paths, using `Ronin.Perform` for the moves: a slashed round with Anvil
+Blade and Whetstone (11 scrap, 4 mended, 4 plates, 3 spare), a thrown Lodestone blade catching 3 live arrows, a live
+arrow parried with Hammer Riposte, a live yari cut with Spear-Breaker, and Steel Shadow's unleash. By direct call:
+Cracked on samurai, Benibana and Kuon, Tamahagane, Red-Hot Iron, Quenching, Lightning Rod, Rust and Shrapnel. All on stage 1's path except
+the bosses'. Not seen: the other maps' ground, Utsusemi or Kagetsune cracked, a warlord's Steel Shadow, and any of the
+sounds, which were only wired, not heard.
+
 **Not tested:** Kagetsune and his summons with Steel; a real parried Iaido; real Utsusemi rocks; the real F5 key; a real
 Taisho yari at stage 1 round 3; stage 2 to 4 rounds; balance, including every number in §11 and the Ultimate fill rate; how
-a thrown Steel shuriken; the Ultimate's aura and crackle on their fallback; how the sting and voice sound; plates or tints
+how the sting and voice sound; plates or tints
 on any other map; a build, web or otherwise; a whole run with Steel. Docs that describe a Steel
 effect describe what the code is written to do, not something seen in play.
 

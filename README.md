@@ -224,9 +224,9 @@ A **Fire**, **Water**, **Lightning**, once you've met Asagi at the temple pond *
 - Kills made by these effects never trigger further effects, so there are no runaway chain reactions. The HUD shows the three slots (with cooldown sweeps) in a column up the left edge, starting above the ronin's head, with your passives stacked above them. Holding Tab (or the gamepad's View button) shows each slot's key and the name of its ability or boon.
 - The ronin changes to match: his spirit flames, slash waves, shuriken and parry flash take the colour of his boons. (`Boon`, `RoninLoadout`, `BoonEffects`, `Soul`, `BoonChoiceUI`, `ElementFx`)
 - **Sword Arts (technique scrolls).** Like Hades' Daedalus Hammer, a rare **technique scroll** changes one of the ronin's moves itself. A downed kite scout drops one 40% of the time (beside its soul), and any samurai has a 0.5% chance; at most two drop in a run. Catching one opens a steel-coloured **Sword Arts** screen with up to three arts you don't hold yet:
-  - **Split Slash:** a moment into its flight each slash splits, and two smaller, weaker slashes peel off to either side.
+  - **Split Slash:** a moment into its flight every third slash splits, and two smaller, weaker slashes peel off to either side.
   - **Piercing Slash:** each slash cuts through two samurai and through arrows instead of stopping at the first.
-  - **Echo Slash:** a quarter of your swings also send a ghostly slash that homes on an enemy.
+  - **Echo Slash:** half of your swings also send a ghostly slash that homes on an enemy.
   - **Scattering Star:** your shuriken splits as it leaves your hand, two lesser blades flying off at an angle to either side (each stops after a couple of samurai).
   - **Mirror Stance:** a landed parry holds its stance half a second longer, turning back every arrow that reaches you.
   Arts stack (the side slashes of Split Slash pierce too). The main slash works with the element Blade boons; Split Slash's side slashes are lesser ones: half damage to a boss and no boon effects. They sit with the passives on the HUD. (`TechniqueScroll`, `Boons.DrawArts`, `Ronin.LaunchSlash`, `Projectile.SplitAfter`)

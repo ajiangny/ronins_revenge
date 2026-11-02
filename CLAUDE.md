@@ -36,7 +36,7 @@ Kagetsune): read the character's file before writing their lines, scenes or art,
   fileIDs, so ID-only diffs after it are expected.
 - After script edits, check the Unity console for compile errors before using new types.
 - Dev tools (Editor, development builds, and release builds while `GameManager.devToolsInRelease` is on): DEV TOOLS on the title/pause menu or **F3** jumps to any stage or
-  boss; **F4** toggles god mode; **F1** kills the army, **F2** jumps to the last stage's boss, **F5** drops a soul (Fire → Frost → Storm → Water → Steel; a Water drop also marks Asagi as met, a Steel drop Oliver), **F6** drops a technique scroll, **F9** charges the ultimate, **F10** opens a Spirit Bead, **F11** a Spirit Thread.
+  boss; **F4** toggles god mode; **F1** kills the army, **F2** jumps to the last stage's boss, **F5** drops a soul (Fire → Frost → Storm → Water → Steel; a Water drop also marks Asagi as met, a Steel drop Oliver), **F6** drops a technique scroll, **F7** prints what each speaker could say and why, **F8** prints the balancing run log, **F9** charges the ultimate, **F10** opens a Spirit Bead, **F11** a Spirit Thread.
 - Serialized defaults in code (e.g. `GameManager.stages`) are only initial values; the scene's saved values win.
 
 ## Code conventions

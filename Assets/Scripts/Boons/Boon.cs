@@ -502,14 +502,14 @@ public static class Boons
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
         new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",
-            Description = "A moment into its flight, every <b>Slash</b> splits: two smaller, weaker slashes peel off to either side.",
+            Description = "A moment into its flight, every third <b>Slash</b> splits: two smaller, weaker slashes peel off to either side.",
             StatLabel = "Side slashes:", Values = new[] { 2f, 2f, 2f }, Format = Plus },
         new BoonDefinition { Id = BoonId.PiercingSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Piercing Slash",
             Description = "Your <b>Slash</b> cuts through samurai and arrows instead of stopping at the first.",
             StatLabel = "Samurai pierced:", Values = new[] { 2f, 2f, 2f }, Format = v => $"{v:0}" },
         new BoonDefinition { Id = BoonId.EchoSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Echo Slash",
             Description = "A swing may send a ghostly second <b>Slash</b> that hunts down an enemy.",
-            StatLabel = "Echo chance:", Values = new[] { 0.25f, 0.25f, 0.25f }, Format = Percent },
+            StatLabel = "Echo chance:", Values = new[] { 0.5f, 0.5f, 0.5f }, Format = Percent },
         // The shuriken's and the parry's arts, so a scroll reshapes more than the slash.
         new BoonDefinition { Id = BoonId.ScatterStar, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Scattering Star",
             Description = "Your <b>Shuriken</b> splits as it leaves your hand: two lesser blades fly off at an angle to either side.",

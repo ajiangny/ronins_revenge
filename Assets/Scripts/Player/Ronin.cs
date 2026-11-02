@@ -56,6 +56,8 @@ public class Ronin : MonoBehaviour
     [SerializeField] float slashSpeed = 0.85f;
     [SerializeField] float invulnerableTime = 2f;
     [SerializeField] float screenMargin = 0.2f;
+    [Tooltip("Swings between Split Slash forks: the Nth swing splits.")]
+    [SerializeField] int swingsPerSplit = 3;
     [Tooltip("Degrees off its heading that each side slash of Split Slash peels away at.")]
     [SerializeField] float splitAngle = 18f;
     [Tooltip("Art pixels the spirit wisps bob up and down.")]
@@ -721,16 +723,34 @@ public class Ronin : MonoBehaviour
     // from beside him, every blade of it a lesser one (KillSource.Clone) in its colours.
     void Fan(GameObject prefab, KillSource source, Sprite projectileSprite)
     {
-        FanFrom(prefab, source, projectileSprite, Muzzle, false);
+        // Decided once per swing so the clone's slash forks exactly when the ronin's does.
+        bool split = NextSwingSplits();
+        FanFrom(prefab, source, projectileSprite, Muzzle, false, split);
         if (!CloneOut) return;
-        FanFrom(prefab, KillSource.Clone, projectileSprite, CloneMuzzle, true);
+        FanFrom(prefab, KillSource.Clone, projectileSprite, CloneMuzzle, true, split);
         Fx.Play(Fx.SlashArc, CloneCentre + Vector3.up * 0.35f, CloneGlow, 0.8f);
     }
 
-    void FanFrom(GameObject prefab, KillSource source, Sprite projectileSprite, Vector3 from, bool clone)
+    // Split Slash forks every third swing, not every one, so the art doesn't flood the screen with side slashes.
+    // Without the art the count rests at zero, so a new run (or a freshly taken scroll) starts a fresh count.
+    int swingsSinceSplit;
+
+    bool NextSwingSplits()
+    {
+        if (!Loadout.Has(BoonId.SplitSlash, out _))
+        {
+            swingsSinceSplit = 0;
+            return false;
+        }
+        if (++swingsSinceSplit < swingsPerSplit) return false;
+        swingsSinceSplit = 0;
+        return true;
+    }
+
+    void FanFrom(GameObject prefab, KillSource source, Sprite projectileSprite, Vector3 from, bool clone, bool split)
     {
         Projectile slash = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
-        if (Loadout.Has(BoonId.SplitSlash, out _)) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent, clone));
+        if (split) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent, clone));
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
             Projectile ghost = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, EchoScale, clone);

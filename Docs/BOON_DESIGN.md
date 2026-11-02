@@ -255,6 +255,11 @@ crescent fans were cut down before they arrived.
 - **Ultimate boons** (`BoonSlot.Ultimate`, Hades' Calls, done since): Pyre Shadow, Frost Shadow and Storm Shadow lend
   the Shadow Clone their element, held one at a time and shown on the medallion.
 - **Split Slash's side slashes** are `Shadow` slashes too.
+- **Arts rebalance (Split down, Echo up).** Split Slash forked every swing and, with the clone, flooded the field; now only
+  every third swing forks (`Ronin.swingsPerSplit` = 3, counter `swingsSinceSplit`, zero while the art isn't held, so a
+  new run or fresh scroll starts at 0). The Shadow Clone mirrors the ronin's decision for that swing rather than keeping
+  its own count. Arts have no levels (every `Values` entry is equal), so there is no per-level scaling. Echo Slash's
+  homing-ghost chance went from 25% to 50% of swings (the clone rolls its own).
 - **Fire:** Flame Blade bursts on 40 / 55 / 70% of slash kills (on a boss hit, 60% of that); blasts burn 2 samurai (4 with
   Wildfire); Kindling 6 / 5 / 4 swings and its fireball no longer also sets off Flame Blade; Blazing Hands 8 / 14 / 20%.
 - **Storm:** Storm Blade 45 / 60 / 80%, Thunder Shuriken 40 / 55 / 70%, Static Charge 15 / 22 / 30%, Raijin's Drum every 6 hits.

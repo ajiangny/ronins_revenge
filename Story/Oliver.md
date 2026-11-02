@@ -55,13 +55,14 @@ men to move and has no intention of helping them. Fur all over, thick and blunt-
 tail. **The size is a memory**: from the bricks behind the anvil, the master was the biggest thing in the world, so
 that is the size a soul should be. The body is Jūsuke as a cat saw him from the floor. Jūsuke was a slight man.
 
-**The approved painting** (`~/Pictures/ronin-drafts/oliver/out/full_c.png` until it's in the project) is the authority
+**The approved painting** (`Assets/Art/Portraits/Oliver_Full.png`, the ornate repaint that matches the cast) is the authority
 for everything below the neck.
 
 **Costume** (a working smith's, worn-in, nothing ceremonial; Jūsuke's own, and it fits only because the soul built
 itself around it):
 
-- A patched, inky indigo work coat with its sleeves tied back by a dark cord, a small pale forge crest on the chest, and
+- A patched, deep indigo work coat in woven pattern, gold wave embroidery and bronze-gold edging on the sleeves, tied back
+  with braided indigo-and-gold cords and tassels, with a large gold anvil, hammer and tongs mon on the apron, and
   a pale cloth stomach wrap. The indigo stays near black, well clear of Asagi's sea-blue.
 - A heavy, scorched, rust-brown leather bib apron over it, too small across the chest, patched and riveted at the straps.
 - **Ash-black forearms and paws.** The forge's ash has settled in him and shows here, with leather work wraps at the

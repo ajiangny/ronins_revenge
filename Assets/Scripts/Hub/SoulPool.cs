@@ -112,8 +112,13 @@ public class SoulPool : MonoBehaviour
         }
         lastFeet = ronin.Feet;
         inWater = DepthAt(lastFeet) > 0f;
+        live = this;
         Sfx.PlayLoop(Sfx.PoolAmbience);
     }
+
+    // The pool whose ambience is playing: a rebuilt temple destroys the old pool at the end of the frame the new one
+    // started in, and that old pool must not stop the new one's loop.
+    static SoulPool live;
 
     static void Overlay(Transform t, Sprite sprite, Bounds ground)
     {
@@ -330,6 +335,6 @@ public class SoulPool : MonoBehaviour
     void OnDestroy()
     {
         if (ronin != null) ronin.Wade(0f);
-        Sfx.Stop(Sfx.PoolAmbience);
+        if (live == this) { live = null; Sfx.Stop(Sfx.PoolAmbience); }
     }
 }

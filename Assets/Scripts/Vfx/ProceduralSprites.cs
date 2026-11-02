@@ -652,7 +652,9 @@ public static class ProceduralSprites
     public static Sprite Ring(int radius)
     {
         radius = Mathf.Max(1, radius);
-        if (rings.TryGetValue(radius, out Sprite cached)) return cached;
+        // A cached ring is gone once its texture is destroyed (leaving Play mode, which keeps this static dictionary
+        // without a domain reload), and a destroyed sprite draws nothing: so it's made again.
+        if (rings.TryGetValue(radius, out Sprite cached) && cached != null) return cached;
         float rx = radius, ry = Mathf.Max(1f, radius * 0.55f);
         int width = radius * 2 + 3, height = Mathf.CeilToInt(ry) * 2 + 3;
         var texture = new Texture2D(width, height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };

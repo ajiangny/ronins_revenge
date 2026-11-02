@@ -57,6 +57,7 @@ the locked requirements: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART_GUIDE.md
 | [Oni](Oni.md) | Her partner. She remembers everything he has lost. Grief, patience, and steel. |
 | [Kagetsune](Kagetsune.md) | The lord she refused to kneel to. Her bell is the one that never rang. |
 | [Benibana](Benibana.md) | Pity, not judgement: she understands bargains made for others. |
+| [Oliver](Oliver.md) | "Jūsuke's cat." Her two blades came off the anvil Oni's did. "Clean Edges", he calls her, the highest thing he says of anyone, and he sits with her silent bell some nights. |
 
 ## Voice
 

@@ -104,6 +104,7 @@ the flute beside her, and she becomes the wisp that settles at his shoulder.
 | [Benibana](Benibana.md) | A tool that kept its bargain. He kept his, to the letter. |
 | [Utsusemi](Utsusemi.md) | A clock he winds. |
 | [Shirogane](Shirogane.md) | The one bell that never rang. It is the only thing that unsettles him. |
+| [Oliver](Oliver.md) | **He doesn't know.** A cat sleeps on his shoulder and was the first soul his coffin ever held. All he can recognise on Oni is the heat of the forge he had put out, and he must never learn more. |
 
 ## Voice
 

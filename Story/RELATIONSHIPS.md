@@ -14,8 +14,8 @@ Ids are conversation ids in `Assets/Scripts/Dialogue/Dialogue.Lines.cs` (voice c
 ## The web
 
 **Oni at the centre, and Kagetsune's hold.** Solid lines are Oni's bonds; dotted lines are Kagetsune's hold on
-each soul. Oliver is planned and not yet in game; every Oliver bond on this page is written in
-[Oliver.md](Oliver.md) and carried by no line.
+each soul. Oliver's lines are in game, part voiced and part silent subtitles, and they're listed in
+[Oliver.md](Oliver.md).
 
 ```mermaid
 graph LR
@@ -31,7 +31,7 @@ graph LR
     Oni --- |"his physician"| Mizore["Mizore<br/>Frost"]
     Oni --- |"his village; followed him up"| Hibiki["Hibiki<br/>Storm"]
     Oni --- |"pulls him out of the pool"| Asagi["Asagi<br/>Water"]
-    Oni --- |"minds his sword; Scabbard, then Seventh"| Oliver["Oliver<br/>Steel (planned)"]
+    Oni --- |"minds his sword; Scabbard, then Seventh"| Oliver["Oliver<br/>Steel"]
     Oni --- |"lives in his left wisp"| Poguru["Poguru"]
     Oni --- |"the men he led up"| Army["The dead army"]
 
@@ -61,7 +61,7 @@ graph TD
         Mizore["Mizore · Frost"]
         Hibiki["Hibiki · Storm"]
         Asagi["Asagi · Water"]
-        Oliver["Oliver · Steel (planned)"]
+        Oliver["Oliver · Steel"]
     end
     Poguru["Poguru"]
     Army["The dead army"]
@@ -107,7 +107,7 @@ graph TD
 
 Every character but Poguru and Asagi is Kagetsune's victim, and none of them serves him willingly any more. Kuon is
 bound to Shirogane by him but obeys only her. Asagi was never on the mountain and has no bell; she is the only
-soul he never held. Oliver (planned) is his victim by way of the commission's ash, and was in his coffin first, but
+soul he never held. Oliver is his victim by way of the commission's ash, and was in his coffin first, but
 no bell holds him and Kagetsune doesn't know he exists.
 
 ## Who was on the mountain
@@ -120,13 +120,11 @@ them to him and to each other.
 | **The court** | Mizore, Benibana (and her hidden congregation), the courtiers | Bells of rank. Mizore's is the small cracked one closest to his heart, the first he hung. |
 | **The army** | Akagane, his vanguard (now the dead army), the Bellringers (his shrine watch) | Bells of rank. Akagane's is the war bell on his right shoulder, the one the Bellringers answer. |
 | **The village** | Hibiki, her mother ("Ma"), the villagers, Oni's own people | No bells of their own: the whole village rings as one sound inside the coffin. |
-| Outside the three | Shirogane (a guard, like Oni), the monk (taken later, on the Pilgrim's Pass), Kuon (bound later, at the Frozen Shrine), Asagi (never went: she was on her hill, and heard the bells stop from there), Oliver (planned; dead a year already, asleep in the coffin when it opened, and out by a door) | Shirogane's never rang. Asagi has none. Oliver's collar bell has no tongue and holds nobody. |
+| Outside the three | Shirogane (a guard, like Oni), the monk (taken later, on the Pilgrim's Pass), Kuon (bound later, at the Frozen Shrine), Asagi (never went: she was on her hill, and heard the bells stop from there), Oliver (dead a year already, asleep in the coffin when it opened, and out by a door) | Shirogane's never rang. Asagi has none. Oliver's collar bell has no tongue and holds nobody. |
 
 ## What they call each other
 
 The fastest check before writing a line. Blank means they never address each other in game.
-
-Oliver's row and column are planned, not yet in any line.
 
 | Speaker → | Oni | Kagetsune | Shirogane | Akagane | Mizore | Hibiki | Asagi | Poguru | Oliver |
 |---|---|---|---|---|---|---|---|---|---|
@@ -147,7 +145,7 @@ Oliver's row and column are planned, not yet in any line.
 - Utsusemi: the machine is **"it"**, the monk inside is **"he"**. The voice softens when he surfaces.
 - Kuon never speaks (growls and howls only). Only Shirogane addresses it: "Kuon".
 - The army calls Oni "the Emperor's runaway dog", "traitor", "the coffin's demon".
-- Oliver (planned) on the others: Benibana "Smoke", Utsusemi "Bad Work", Kuon "the dog", Jūsuke "the master" (the name
+- Oliver on the others: Benibana "Smoke", Utsusemi "Bad Work", Kuon "the dog", Jūsuke "the master" (the name
   only in `Oliver_Meet_Cold`). Asagi doesn't correct "Fish", as she does "carp". Only Jūsuke ever said "Oliver" right.
 
 ## The bonds, pair by pair
@@ -168,7 +166,7 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Oni – Mizore | Her patient. She set his collarbone at sixteen; she watches the coffin take his memories and minds. Dry, never cruel. | `Mizore_Meet_*` (Steady → Collarbone → Smoke → Prince → Smiths → Oath), `Mizore_Hub_Sleep` |
 | Oni – Hibiki | From his village; she adored him and drummed him out the morning he left. He forgets her name; she admits she blames him and would follow him anyway. He wins back the river memory on his own. Never romantic. | `Hibiki_Meet_*` (Out → Name → Procession → OneBell → Blame → River), `Hibiki_Hub_RiverSong` |
 | Oni – Asagi | The koi of the pond he wakes in; she pulls him out every time and has from the first death. Warm, nosy, fussing; she knew his face from the hill years before and doesn't say so until her fifth chapter. He is her last patient, and she's sending him home. | `Asagi_Meet_Pool` (the temple), `Asagi_Meet_*` (Fry → Sleet → Prince → Monk → Flute → Home), `Asagi_Pond_*` (her station), `Asagi_Hub_Sleep` |
-| Oni – Oliver | Planned. He says he's minding the sword, not helping: "Scabbard", then "Seventh". They're losing the same thing at the same rate, a life by memory and a man by smell, and Oliver sees Oni's gaps first. Asks him one question, in `Oliver_Meet_Cold`. | (written in Oliver.md, not in game) `Oliver_Meet_*` (Rack → Box → Bell → Doll → Cold → Seventh) |
+| Oni – Oliver | He says he's minding the sword, not helping: "Scabbard", then "Seventh". They're losing the same thing at the same rate, a life by memory and a man by smell, and Oliver sees Oni's gaps first. Asks him one question, in `Oliver_Meet_Cold`. | `Oliver_Meet_*` (Rack → Box → Bell → Doll → Cold → Seventh) |
 | Oni – the army | His own men and the court guard, walking in the bodies they died in. Every one he cuts down goes back to the coffin. | `Tut_*`, Akagane's lines about "my men" |
 
 ### Boss and boss
@@ -208,11 +206,11 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Asagi – Shirogane | One of the two guards who sat by her pond: the one who listened. Asagi keeps her flat stone clear and never says who for. | `Asagi_Meet_Flute`, `Asagi_Ahead_Shirogane`, `Asagi_Felled_Shirogane`, `Asagi_Pickup_DiedShirogane`, `Asagi_Pond_Stone`, `Shirogane_Intro_Water` |
 | Asagi – Kagetsune | He climbed her hill young to ask how forever was done; she told him it wasn't worth having. She counts his armor as partly hers. He remembers the fish that told him no. | `Asagi_Meet_Prince`, `Asagi_Ahead_Kagetsune`, `Asagi_Ahead_KagetsuneWon`, `Asagi_Pickup_DiedKagetsune`, `Kagetsune_Intro_Water` |
 | Asagi – Kuon | A fellow guardian spirit: a shrine's, and a pond's. | (written in Asagi.md, not in game) |
-| Oliver – Benibana | Planned. "Smoke." The only soul who slept through her dance. He smelled her bell before she named it. She resents an animal who walked out without ever being offered a bargain. | Not in game |
-| Oliver – Utsusemi | Planned. "Bad Work"; "the animal". It razes what he mends and still counts one set of paws on the armor at night. Each carries a dead man's things. The monk, surfacing, would talk to the cat, not the body. | Not in game |
-| Oliver – Shirogane | Planned. "Clean Edges"; "Jūsuke's cat". Her blades came off the same anvil, and she kept them. Jūsuke's cough began the chain to her oath, hence "Seventh". Two silent bells, and he leaves her moment alone. | Not in game (`Oliver_Meet_Seventh` waits on `Shirogane_Intro_Oath`) |
-| Oliver – Kagetsune | Planned. "Terrible man. Good shoulder." **He doesn't know**, and must never. He knows only the heat of his dead smiths' forge on Oni. | Sample line in Oliver.md, not in game |
-| Oliver – Kuon | Planned. "The dog." Both walk the armor at night, so it alone knows about the shoulder, and it can't say. A very old stand-off. | Not in game |
+| Oliver – Benibana | "Smoke." The only soul who slept through her dance. He smelled her bell before she named it. She resents an animal who walked out without ever being offered a bargain. | [Oliver.md](Oliver.md) |
+| Oliver – Utsusemi | "Bad Work"; "the animal". It razes what he mends and still counts one set of paws on the armor at night. Each carries a dead man's things. The monk, surfacing, would talk to the cat, not the body. | [Oliver.md](Oliver.md) |
+| Oliver – Shirogane | "Clean Edges"; "Jūsuke's cat". Her blades came off the same anvil, and she kept them. Jūsuke's cough began the chain to her oath, hence "Seventh". Two silent bells, and he leaves her moment alone. | `Oliver_Meet_Seventh` waits on `Shirogane_Intro_Oath` |
+| Oliver – Kagetsune | "Terrible man. Good shoulder." **He doesn't know**, and must never. He knows only the heat of his dead smiths' forge on Oni. | `Oliver_Ahead_Kagetsune` |
+| Oliver – Kuon | "The dog." Both walk the armor at night, so it alone knows about the shoulder, and it can't say. A very old stand-off. | [Oliver.md](Oliver.md) |
 | Any other soul – Kuon | No stated bond. | — |
 
 ### Soul and soul
@@ -224,16 +222,16 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Mizore – Hibiki | The old woman who held the girl's wrist and counted her pulse to the end. The gentlest pair; only Hibiki could make Mizore laugh. | Duo **Superconductor** (`Duo_Superconductor_First`, `_Count`, `_Again`), `Mizore_Jealous_Hibiki`, `Hibiki_Jealous_Mizore`, `Mizore_Cut_Hibiki`, `Mizore_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsFrost` |
 | Asagi – Mizore | Teacher and student: the girl climbed the hill at twelve and was taught for six years, then went to the palace and never came back up. Warm against cold, the same medicine two ways. | Duo **Black Ice** (`Duo_BlackIce_First`, `_Hill`, `_Again`), `Asagi_Meet_Sleet`, `Asagi_Jealous_Mizore`, `Mizore_Jealous_Asagi`, `Asagi_Cut_Mizore`, `Asagi_Pickup_HoldsFrost`, `Mizore_Pickup_HoldsWater` |
 | Asagi – Akagane | "Carp." "Koi." He wants her out of his fire; she wets the enemy first. She calls him "little kettle" and he hates it. | Duo **Scalding Steam** (`Duo_ScaldingSteam_First`, `_Kettle`, `_Again`), `Asagi_Jealous_Akagane`, `Akagane_Jealous_Asagi`, `Asagi_Pickup_HoldsFire`, `Akagane_Pickup_HoldsWater` |
-| Oliver – Akagane | Planned. "Lacquer"; "cat". He wore armor off that anvil, fitted by a man half his age, and never asked what killed him. Oliver walked out through the doors his men held, and drops those men at Oni's feet still holding them. | Duo **Red-Hot Iron** (planned; written in Souls.md, not in game) |
-| Oliver – Mizore | Planned. "Cold Hands"; "the cat". She could lift Jūsuke with one arm and knows the body is a memory, and she says "...Yes. I suppose he was." She told him to stay in bed; he went home to the cat. She knows the word he said in the fever, and won't say it. | Duo **Quenching** (planned; written in Souls.md, not in game); sample line in Oliver.md |
-| Oliver – Hibiki | Planned. "Noise"; "Uncle Cat". She tries to pat him. Once she taps three on his anvil, and never again. He tells her once her village rings true. She gets one of his two purrs. Nobody says who tapped at the dawn. | Duo **Lightning Rod** (planned; written in Souls.md, not in game) |
-| Oliver – Asagi | Planned. "Fish"; "little loaf". Oni meets them a wake apart, and they've watched each other for ten deaths. He watches the bowl. She offered to wash the doll, once, and washing is what killed him. He has sat on everything but her flat stone. | Duo **Rust** (planned; written in Souls.md, not in game) |
+| Oliver – Akagane | "Lacquer"; "cat". He wore armor off that anvil, fitted by a man half his age, and never asked what killed him. Oliver walked out through the doors his men held, and drops those men at Oni's feet still holding them. | Duo **Red-Hot Iron**  |
+| Oliver – Mizore | "Cold Hands"; "the cat". She could lift Jūsuke with one arm and knows the body is a memory, and she says "...Yes. I suppose he was." She told him to stay in bed; he went home to the cat. She knows the word he said in the fever, and won't say it. | Duo **Quenching** ; sample line in Oliver.md |
+| Oliver – Hibiki | "Noise"; "Uncle Cat". She tries to pat him. Once she taps three on his anvil, and never again. He tells her once her village rings true. She gets one of his two purrs. Nobody says who tapped at the dawn. | Duo **Lightning Rod**  |
+| Oliver – Asagi | "Fish"; "little loaf". Oni meets them a wake apart, and they've watched each other for ten deaths. He watches the bowl. She offered to wash the doll, once, and washing is what killed him. He has sat on everything but her flat stone. | Duo **Rust**  |
 | Asagi – Hibiki | Asagi heard the girl's festival drum from her pond every summer. Hibiki adores her on sight and gets the "Great-Grandmother" Mizore refused her. | Duo **Thunder Rain** (`Duo_ThunderRain_First`, `_Festival`, `_Again`), `Asagi_Jealous_Hibiki`, `Hibiki_Jealous_Asagi`, `Asagi_Cut_Hibiki`, `Asagi_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsWater` |
 
 Jealousy, at a glance: Akagane is jealous of Hibiki most (a village girl's speed over the vanguard's fire), Mizore
 mildly, and dismisses Asagi ("stay in your pond, carp"). Mizore is dry about Fire ("fevers are popular, briefly"),
 worried about Storm, and stiff about her teacher. Hibiki sulks at Fire and Frost and adores Water. Asagi is fond
-of all three and gives the boon anyway. Oliver (planned) doesn't compete: another soul leading is a draft, and he
+of all three and gives the boon anyway. Oliver doesn't compete: another soul leading is a draft, and he
 reports it ("Smells wasted", "That rusts").
 
 ### Poguru and everyone
@@ -248,7 +246,7 @@ reports it ("Smells wasted", "That rusts").
 | Poguru – Mizore | Diagnosed as running warm. "Do souls get fevers?" | `Mizore_Poguru`, `Poguru_Soul_Frost` |
 | Poguru – Hibiki | His cape is the village's paper festival dragon, which she paraded round the well every summer: why it smells like lanterns. | `Hibiki_Poguru`, `Poguru_Talk_Cape`, `Poguru_Soul_Storm` |
 | Poguru – Asagi | "A FISH, and it's a LADY." The Dragon Gate: koi that climb the falls become dragons. He's in awe; she liked her pond. | `Asagi_Poguru`, `Poguru_Soul_Water` |
-| Poguru – Oliver | Planned. "Moth"; "the big kitty". Poguru gets the only cat jokes, about three of them. Oliver sits on the nest and pinned him once, gently. They agree the temple is damp. Both are small things wearing the biggest thing they half-remember. | Not in game |
+| Poguru – Oliver | "Moth"; "the big kitty". Poguru gets the only cat jokes, about three of them. Oliver sits on the nest and pinned him once, gently. They agree the temple is damp. Both are small things wearing the biggest thing they half-remember. | [Oliver.md](Oliver.md) |
 | Poguru – the army | He bonks their arrows; he says hi to them. | `Poguru_Tut_*`, `Poguru_Round_Wave` |
 
 ## Coverage: which pairs talk
@@ -259,21 +257,21 @@ chains, Poguru's talks), so he has no row. Read across a row to see who a charac
 
 | Speaker ↓ / about → | Benibana | Utsusemi | Shirogane | Kuon | Kagetsune | Akagane | Mizore | Hibiki | Asagi | Poguru | Oliver |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| **Benibana** | | ● | ◐ | ◐ | ● | ◐ | ◐ | ◐ | ◐ | ○ | ○ |
+| **Benibana** | | ● | ◐ | ◐ | ● | ◐ | ◐ | ◐ | ◐ | ○ | ◐ |
 | **Utsusemi** | ● | | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ◐ | ○ | ○ |
 | **Shirogane** | ● | ◐ | | ● | ● | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
 | **Kagetsune** | ● | ● | ● | ◐ | | ◐ | ◐ | ◐ | ◐ | ◐ | ○ |
-| **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ● | ◐ | ○ |
-| **Mizore** | ● | ● | ● | ○ | ● | ● | | ● | ● | ◐ | ○ |
-| **Hibiki** | ● | ● | ● | ○ | ● | ● | ● | | ● | ◐ | ○ |
-| **Asagi** | ● | ● | ● | ○ | ● | ● | ● | ● | | ◐ | ○ |
-| **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | ◐ | | ○ |
-| **Oliver** | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | |
+| **Akagane** | ● | ◐ | ● | ○ | ● | | ● | ● | ● | ◐ | ● |
+| **Mizore** | ● | ● | ● | ○ | ● | ● | | ● | ● | ◐ | ● |
+| **Hibiki** | ● | ● | ● | ○ | ● | ● | ● | | ● | ◐ | ● |
+| **Asagi** | ● | ● | ● | ○ | ● | ● | ● | ● | | ◐ | ● |
+| **Poguru** | ● | ● | ● | ◐ | ● | ◐ | ◐ | ◐ | ◐ | | ● |
+| **Oliver** | ● | ● | ● | ◐ | ● | ● | ● | ● | ● | ● | |
 
 The pattern: the souls talk about everyone; since the coffin gossip ([BOSS_ARCS.md](BOSS_ARCS.md)) the bosses talk
 about each other too, hearing one another come back into the coffin. Kuon is mentioned by every boss but by none of
-the souls (Asagi's Kuon line is written but not in game). Oliver is ○ all the way across, with Oni too: he has no line
-in game, and his sample lines are only in his file.
+the souls (Asagi's Kuon line is written but not in game). Oliver talks about everyone, and only the souls, Poguru and
+Benibana (`Benibana_Intro_Steel`) talk back: the other bosses' lines are still suggestions in his file.
 
 ## Where lines are missing
 
@@ -295,8 +293,8 @@ lines like these.
    (Doors, Prince, Blame are the heaviest beats of his guilt arc).
 6. **Kagetsune about Kuon and Poguru.** Carried: `Kagetsune_Intro_Kuon` ("It bit me.") and `Kagetsune_Intro_Spark`
    (Poguru is a spark of the armor's own fire that ran with Oni), answered at the nest by `Poguru_Talk_Spark`.
-7. **Oliver: everything.** His lines are now written in [Oliver.md](Oliver.md) and the Duos in [Souls.md](Souls.md), but
-   nothing is voiced or in game, and the other cast files don't list him yet. What they had to carry:
+7. **Oliver, the rest.** His lines in [Oliver.md](Oliver.md) and the Duos in [Souls.md](Souls.md) are in game, part of
+   them as silent subtitles, and the cast files with a bond table list him. Carried by those lines:
    - Hibiki's three taps on the anvil ("Don't."), and "Rang true, that one." about her village.
    - Mizore on the word Jūsuke said in the fever, and the enormous man (`seen Mizore_Meet_Smiths`).
    - Asagi and the flat stone, the doll (she asks once, and it isn't asked again), and her naming the rack: he'd been
@@ -319,10 +317,10 @@ ids.
 | `Asagi_Meet_Pool` (the temple, on the wake after the tenth death) | Water souls on the paths (`Save.Data.asagiMet`); her chain; `Asagi_Pond_Hello` |
 | `Asagi_Meet_Flute` (she admits she knew their faces) | `Asagi_Pond_Flute` |
 | `Asagi_Meet_Home` (needs Shirogane's oath, like Mizore's last chapter) | (written) `Asagi_Dawn` |
-| `Asagi_Meet_Pool`, `deaths ≥ 10` (the next wake; planned) | `Oliver_Meet_Rack` and his chain; Steel souls on the paths |
-| `Mizore_Meet_Smiths` (planned use) | Oliver's chapter on the enormous man, and Mizore's fever word |
-| `Shirogane_Intro_Oath` (planned use) | `Oliver_Meet_Seventh`, needing `Oliver_Meet_Cold`; from then on he says "Seventh" |
-| `Oliver_Meet_Seventh` (planned) | (written) `Oliver_Dawn`, the last beat of all, after `Asagi_Dawn` |
+| `Asagi_Meet_Pool`, `deaths ≥ 10` (a later wake) | `Oliver_Meet_Rack` and his chain; Steel souls on the paths |
+| `Mizore_Meet_Smiths` | Oliver's chapter on the enormous man, and Mizore's fever word |
+| `Shirogane_Intro_Oath` | `Oliver_Meet_Seventh`, needing `Oliver_Meet_Cold`; from then on he says "Seventh" |
+| `Oliver_Meet_Seventh` | (written) `Oliver_Dawn`, the last beat of all, after `Asagi_Dawn` |
 | `Akagane_Meet_Salute` | `Akagane_Hub_Salute`; (written) `Akagane_Freed` and the salute |
 | `Mizore_Meet_Oath` (needs Shirogane's oath, so she finishes last) | (written) `Mizore_Freed` |
 | `Hibiki_Meet_Name` | `Hibiki_Poguru`; (suggested) Oni's "Hibiki. ...Hibiki." |
@@ -362,5 +360,5 @@ existing cast already has a reason to know them.
 - No sexualised framing for anyone, and nothing romantic between Oni and Hibiki.
 - Give them a place among the three groups (court, army, village) or a reason they were outside them. Asagi is
   one precedent for "outside": she never left her hill, so she has no bell and Kagetsune no hold on her, and
-  she joins the souls only once Oni has met her in the temple. Oliver (planned) is the other: dead before the Night, in
+  she joins the souls only once Oni has met her in the temple. Oliver is the other: dead before the Night, in
   the coffin unsealed, so his collar bell holds nobody, and the ash is all that ties him to the armor.

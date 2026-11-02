@@ -70,6 +70,7 @@ speed, chain lightning, a faster draw. She does it at a run and talks the whole 
 | [Akagane](Akagane.md) (Fire) | "Captain Kettle", because he boils. His men marched to her drum and he hasn't forgiven the drum. She teases him relentlessly and runs to him first when something scares her. |
 | [Mizore](Mizore.md) (Frost) | "Grandmother." Not her grandmother. The woman who held her wrist at the end. Hibiki is the only one who can make Mizore laugh, and she's never heard it. |
 | [Asagi](Asagi.md) (Water) | "Great-Grandmother!" Asagi says "Yes, dear," and Hibiki has never been so pleased with anyone. The old koi heard her festival drum from the pond every summer; Hibiki didn't know anyone outside the village could. |
+| [Oliver](Oliver.md) (Steel) | "Uncle Cat." She keeps trying to pat him. Once she tapped three on his little anvil, and "Don't." stopped her dead. He's the only one who has told her that her village rang true. |
 
 **Jealousy.** Loud and sulky. If Oni favours Fire she complains the Captain is boring; if Frost, that Grandmother
 will make him sit still. Of Water, none: she tries to be cross with Great-Grandmother and can't. It always ends

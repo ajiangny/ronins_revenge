@@ -73,6 +73,7 @@ to keep them from spoiling. She sends them to Oni as Frost: freezes, ice, a stea
 | [Akagane](Akagane.md) (Fire) | The patient who never followed instructions. She set his arm; he called her a butcher. She calls him "Captain" in a tone that makes it a diagnosis. |
 | [Hibiki](Hibiki.md) (Storm) | The girl whose pulse she counted. She's gentler with Hibiki than with anyone and would deny it. Hibiki calls her "Grandmother"; Mizore says "I'm not your grandmother" every single time, and never means it less. |
 | [Asagi](Asagi.md) (Water) | Her teacher. Mizore climbed the hill at twelve, a herb-gatherer's daughter, and was taught for six years; then she went to the palace and never came back up, and has not decided whether that was cowardice. The only person she gives a title: **"Teacher"**. Asagi calls her "little sleet". They have disagreed about warmth for forty years. Their Duo, Black Ice, is the one place water turns to ice. |
+| [Oliver](Oliver.md) (Steel) | "The cat." The reason her patient walked home to die. She doesn't hold it against him. She could lift Jūsuke with one arm, and when he says the man was enormous she answers "...Yes. I suppose he was." |
 
 **Jealousy.** Quiet and cutting. She thinks Storm's speed will get Oni killed ("quick is how fevers spread") and
 that Fire is a patient refusing to rest. She doesn't compete; she just waits for him to come back to the cold. Of

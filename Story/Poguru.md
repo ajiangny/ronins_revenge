@@ -52,6 +52,7 @@ caped spirit. They live outside the repo and must never be committed.
 | The souls ([Souls](Souls.md)) | He half-recognises them: "it looks like someone familiar..." |
 | [Shirogane](Shirogane.md) | The wisps go warm near her. He doesn't know why, and Oni won't say. |
 | [Kagetsune](Kagetsune.md) | He hides in the wisp. He isn't proud of it. |
+| [Oliver](Oliver.md) | "The big kitty!" He sits on the nest, and he pinned Poguru under a paw once. They agree on one thing: the temple is DAMP. |
 
 ## Voice
 

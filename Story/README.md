@@ -23,7 +23,7 @@ each other, keeping score, and the phase 2 rewrite.
 | **Mizore** | the Court Physician | The Frost (Water) soul behind the Frost boons. | [Mizore.md](Mizore.md) |
 | **Hibiki** | the Village Drummer | The Storm (Lightning) soul behind the Storm boons. | [Hibiki.md](Hibiki.md) |
 | **Asagi** | the Pond Physician | The Water (Tide) soul behind the Water boons: the koi of the temple pond, who pulls Oni out of the pool each time he dies. Never in the coffin. Joins once he meets her in the temple. | [Asagi.md](Asagi.md) |
-| **Oliver** | the Smith's Cat | The Steel soul behind the Steel boons (planned, not yet in game): the master smith's cat, first thing ever in the coffin, unsealed. Minds Oni's sword; joins the wake after Asagi. | [Oliver.md](Oliver.md) |
+| **Oliver** | the Smith's Cat | The Steel soul behind the Steel boons: the master smith's cat, first thing ever in the coffin, unsealed. Minds Oni's sword; joins the wake after Asagi. | [Oliver.md](Oliver.md) |
 
 ## The betrayal
 

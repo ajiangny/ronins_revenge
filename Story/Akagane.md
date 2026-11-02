@@ -70,6 +70,7 @@ Akagane is the voice behind it.
 | [Mizore](Mizore.md) (Frost) | She set his broken arm once, at the palace, and he called her a butcher. She calls him a patient who never followed instructions. Mutual respect neither admits; they bicker like an old married staff. |
 | [Hibiki](Hibiki.md) (Storm) | A village girl who should never have been on the mountain. Her drum set the army's pace up it, and he hasn't forgiven the drum. He is gruff with her and quietly protective; she calls him "Captain Kettle" because he boils. |
 | [Asagi](Asagi.md) (Water) | "Carp." She corrects him every time: "Koi." A three-hundred-year-old fish calling him "little kettle" is more than he can stand, and he can't make her stop. Their Duo, Scalding Steam, is the one thing they agree on: wet them first. |
+| [Oliver](Oliver.md) (Steel) | "Cat", "that animal". The boy who fitted his armor came off that anvil, and the animal walked out through the doors his men were holding, facing out. "Which door?" "Yours." |
 
 **Jealousy.** He is jealous of Hibiki above all: Oni taking a village girl's speed over a soldier's fire is an
 insult to the vanguard. Of Mizore, less: he thinks cold is for people who've given up. Of Asagi, least and loudest:

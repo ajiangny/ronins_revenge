@@ -2,8 +2,11 @@
 
 [Back to the story](README.md) · [The souls](Souls.md)
 
-> **In progress, not yet in game.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md). His dialogue is
-> written in [Lines](#lines), but none of it is wired or voiced yet, and none is marked (in game).
+> **In game, without his art.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md), built and not yet
+> played by hand ([what was tested](../Docs/BOON_DESIGN.md#tested)). All his dialogue in [Lines](#lines) is in
+> `Dialogue.Lines.cs` except `Oliver_Dawn`. Part of it is voiced, and the rest plays as silent subtitles. His figure at
+> the rack and his boon art aren't in yet, and neither are the freed beat or the rack's small habits under
+> [Arc across runs](#arc-across-runs).
 
 | | |
 |---|---|
@@ -216,8 +219,8 @@ they were doing when they died: walls that hold, gaps closed, things mended. He 
 
 ## Relationships
 
-Proposals, like everything else here: nothing below is voiced or in game, and the other characters' files don't carry
-these bonds yet. Add a bond to their file when its first line is written. Ids are suggestions for the dialogue pass.
+What's said in game is in [Lines](#lines); the rest of each row is background for the lines still to come. Each
+character with a bond table in their file carries a line for him. Kuon's and the army's files have no table.
 
 He names people for what they're good for or what's wrong with them, as he does Oni. They call him a cat, and he has no
 view on it. Some of them have picked up "Oliver", and he doesn't answer to it.
@@ -281,16 +284,15 @@ These set the voice. The ones that made it are in [Lines](#lines), which wins wh
 | Kagetsune ahead | **Oliver:** "Terrible man. Good shoulder." |
 | Late: `Oliver_Meet_Doll` | **Oliver:** "I know it's a doll. I'm a cat. I'm not an idiot."<br>**Oliver:** "He sat up all winter sewing it, so it'd smell of him after. It smells of him less now."<br>**Oliver:** [to the doll, low] "Don't tell him." |
 
-**Voice design prompt** (a preview for the user to pick, as with `ASAGI`; `OLIVER` in `Tools/generate-voice.mjs` stays a
-`TODO` until then): "A very large, older male voice, extremely low, slow and gravelly, with a slight wheeze and a snuffle
+**Voice design prompt** (the prompt that made `OLIVER` in `Tools/generate-voice.mjs`): "A very large, older male voice, extremely low, slow and gravelly, with a slight wheeze and a snuffle
 on the breath, as if his nose doesn't quite work. Flat, deadpan, unbothered and permanently disappointed, like a tired
 craftsman looking at your work. No accent. He never raises his voice or hurries. Not menacing, and not a cartoon. Huge
 and close, and under it, very rarely, tender." Delivery tags: `[flat]`, `[gravel]`, `[unimpressed]`, `[a slow wheeze]`,
 `[to the doll, low]`.
 
 He gets the souls' faint coffin echo: he has been in it longer than anyone. That echo isn't an `FX` bake. It's the
-filters on `GameManager.soulVoice`, so he needs no `FX` entry, which would double it, and `GameManager.VoiceOf` needs
-`"Oliver"` added to its soul case when he's wired; until then he'd fall through to the bosses' source. As with the other
+filters on `GameManager.soulVoice`, so he needs no `FX` entry, which would double it, and `GameManager.VoiceOf` has him in its soul
+case. As with the other
 souls, the web build won't play it, since Unity's audio filters don't run there.
 
 ## What he wants
@@ -495,7 +497,7 @@ tables or `LINES`; take them if you like them.
 
 ## Arc across runs
 
-A planned chain, one chapter a run; the lines are in [Lines](#lines). **He unlocks at the weapon rack**, on the
+His chain, one chapter a run; the lines are in [Lines](#lines). **He unlocks at the weapon rack**, on the
 wake after Asagi is met (`seen Asagi_Meet_Pool`, `deaths ≥ 10`), so the two arrive together, with her first: Oni climbs out of the pool and finds his katana on the floor
 and something very large asleep on the rack's platform.
 

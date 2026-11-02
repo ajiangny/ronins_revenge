@@ -50,6 +50,7 @@ drawn. Full art direction: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART_GUIDE.
 | [Oni](Oni.md) | Envy and contempt at first: he got out and she didn't, and he is proof the bargain could have been refused. Later, the only person who understands her. |
 | [Kagetsune](Kagetsune.md) | The man who kept his promise to the letter. Her hatred for him is colder than anything she says to Oni. |
 | [Shirogane](Shirogane.md) | The one who refused. Benibana resents her for it, and admires her. |
+| [Oliver](Oliver.md) | "The cat." The only soul who slept through her dance, and who walked out without ever being offered a thing. He calls her "Smoke". |
 
 ## Voice
 

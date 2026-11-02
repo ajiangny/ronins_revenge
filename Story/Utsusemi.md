@@ -54,6 +54,7 @@ incandescent. Full art direction: [CHARACTER_ART_GUIDE.md](../Docs/CHARACTER_ART
 | [Oni](Oni.md) | A target. Underneath, the boy he saved. The monk breaks through only as it dies. |
 | [Kagetsune](Kagetsune.md) | Its winder. His bell answers its phase break. |
 | [Benibana](Benibana.md) | The monk once refused her confession. The machine doesn't remember why. |
+| [Oliver](Oliver.md) | "The animal." One set of paws on the armor at night, with no bell to match, still on its count. It razes the cover he mends. He calls it "Bad Work". |
 
 ## Voice
 

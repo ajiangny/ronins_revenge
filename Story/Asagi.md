@@ -94,6 +94,7 @@ The first soul he meets after she catches him is always hers: the next boon rewa
 | [Utsusemi](Utsusemi.md) | The monk who fed her every spring. She'd like his clock to stop, gently. |
 | [Benibana](Benibana.md) | Smoke drifted up the hill that night and settled on the water. She knew the smell from a dancer who'd once come up for her ankles. One line. |
 | [Kuon](Kuon.md) | A fellow guardian spirit, of a shrine, as she is of a pond. One line, with respect. |
+| [Oliver](Oliver.md) (Steel) | "Little loaf", "dear". He calls her "Fish", and she lets it stand. He watches the bowl and has never sat on her flat stone. She offered to wash the doll once, and won't again. |
 
 **Jealousy.** Mild, and mostly about the other healer. If Oni favours Frost she says Mizore always did over-chill
 a patient; if Fire, that he's running a temperature; if Storm, that he'll shake the water out of his bowl. She

@@ -195,7 +195,7 @@ He roasts whatever struck the last blow (`SaveData.lastDeathCause`: a boss, or t
 diving soldier, or the army reaching the ground), and for a boss which of its attacks it was (`SaveData.lastDeathAttack`,
 `DiedToAttack`): an attack's own roasts come before the boss's general ones. Each rests for its cooldown after it plays, so dying the same way
 again gets the next one. About half draw a word back from Oni: a dry clapback or a grunt, said over his head. Voiced
-(`Poguru_Roast_*`), except the attack lines marked below, which play as subtitles until recorded.
+(`Poguru_Roast_*`).
 
 | Requires | Cooldown | Id | Lines |
 |---|---|---|---|
@@ -216,17 +216,18 @@ again gets the next one. About half draw a word back from Oni: a dry clapback or
 | the army reached him | 3 | `Poguru_Roast_Invasion` | P: "They walked. They just WALKED to you. Very slowly. For a very long time." |
 | the army reached him | 3 | `Poguru_Roast_InvasionRow` | P: "Thin out the bottom row! I say it EVERY time! It's on my tips page!" · Oni: "...You have a tips page?" · P: "I have a TIPS PAGE!" |
 | the army reached him | 3 | `Poguru_Roast_InvasionNose` | P: "Were you napping? They marched right up to your nose!" · Oni: "I was awake." · P: "Your nose wasn't." |
-| Benibana's Crimson Iaido (`Benibana_Iaido`) | 3 | `Poguru_Roast_BenibanaIaido` | P: "The big red swoosh! You can't cut those, you PARRY them! Same as the spear!" · Oni: "Hmph." (not yet voiced) |
+| Benibana's Crimson Iaido (`Benibana_Iaido`) | 3 | `Poguru_Roast_BenibanaIaido` | P: "The big red swoosh! You can't cut those, you PARRY them! Same as the spear!" · Oni: "Hmph." |
 | Benibana | 3 | `Poguru_Roast_Benibana` | P: "You fell asleep in the middle of a sword fight! Napping is MY thing!" |
 | Benibana | 3 | `Poguru_Roast_BenibanaDance` | P: "She danced. You lost. To a DANCE." · Oni: "...It was a good dance." |
 | Utsusemi's Hyper Beam sweep, the one a rock shelters him from (`Utsusemi_HyperBeam`) | 3 | `Poguru_Roast_Utsusemi` | P: "Hide behind the rock! I said ROCK! You hid behind... air!" · Oni: "The rock fell apart." · P: "So you hide behind a DIFFERENT rock!" |
-| Utsusemi's sword lasers: the Heart Lantern and Midnight (`Utsusemi_SwordLaser`) | 3 | `Poguru_Roast_UtsusemiSword` | P: "I was right on top of the sword! Waving! The safe spot had a DRAGON on it!" · Oni: "...I saw you." · P: "Then why weren't you UNDER me?" (not yet voiced) |
+| Utsusemi's sword lasers: the Heart Lantern and Midnight (`Utsusemi_SwordLaser`) | 3 | `Poguru_Roast_UtsusemiSword` | P: "I was right on top of the sword! Waving! The safe spot had a DRAGON on it!" · Oni: "...I saw you." · P: "Then why weren't you UNDER me?" |
 | Utsusemi's Hyper Beam or a sword laser (he flies out and points for both) | 3 | `Poguru_Roast_UtsusemiPoint` | P: "Big shiny laser. I pointed. I flew out and POINTED, Oni." · Oni: "Hmph." |
-| Utsusemi, in its second phase (anything else, or the lines above resting) | 3 | `Poguru_Roast_UtsusemiHeart` | P: "Its heart opened up and it was ALL lasers in there. That's not how hearts work!" (not yet voiced) |
-| Kuon's Maw: any heavy Maw beam (`Shirogane_KuonMaw`) | 3 | `Poguru_Roast_ShiroganeMaw` | P: "The wolf drew a big glowy line on the floor first! And you stood right ON it!" · Oni: "...I was busy." · P: "Busy being a wolf snack!" (not yet voiced) |
+| Utsusemi's overload or Heart Lantern (`Utsusemi_Overload`, `Utsusemi_HeartLantern`) | 3 | `Poguru_Roast_UtsusemiHeart` | P: "Its heart opened up and it was ALL lasers in there. That's not how hearts work!" |
+| Utsusemi (any other blow, or the lines above resting) | 3 | `Poguru_Roast_UtsusemiClock` | P: "You lost to a CLOCK! A big walking clock in a hat!" · Oni: "...It had swords." · P: "And a HAT!" |
+| Kuon's Maw: any heavy Maw beam (`Shirogane_KuonMaw`) | 3 | `Poguru_Roast_ShiroganeMaw` | P: "The wolf drew a big glowy line first! And you stood right IN it!" · Oni: "...I was busy." · P: "Busy being a wolf snack!" |
 | Shirogane | 3 | `Poguru_Roast_Shirogane` | P: "She beat you with a sword! YOU have a sword! It's practically the same sword!" |
-| Shirogane | 3 | `Poguru_Roast_ShiroganeWolf` | P: "Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!" · Oni: "Tch." |
-| Kagetsune's Spirit Hyper Beam (`Kagetsune_SpiritHyperBeam`) | 3 | `Poguru_Roast_KagetsuneBeam` | P: "His big soul beam! The pale bit on the floor is SAFE. The teal bit is TOAST!" · Oni: "...Noted." · P: "It's going on my tips page!" (not yet voiced) |
+| Shirogane, in her second phase (Kuon only fights then) | 3 | `Poguru_Roast_ShiroganeWolf` | P: "Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!" · Oni: "Tch." |
+| Kagetsune's Spirit Hyper Beam (`Kagetsune_SpiritHyperBeam`) | 3 | `Poguru_Roast_KagetsuneBeam` | P: "His big soul beam! The pale rays are SAFE. The teal ones are TOAST!" · Oni: "...Noted." · P: "It's going on my tips page!" |
 | Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! But his hammer is SO big. Like, unfair big." · Oni: "I'll get under it." · P: "Good thing you're short!" |
 | Kagetsune | 3 | `Poguru_Roast_KagetsuneBells` | P: "All those bells! I couldn't even hear myself cheer for you!" |
 

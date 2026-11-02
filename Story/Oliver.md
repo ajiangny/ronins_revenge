@@ -457,7 +457,7 @@ He says these from the rack's dais, his talk clip on and the line over his head.
 ### `OliverTalk` (walking up to him at the rack)
 
 `Oliver_Meet_Rack` is the event's Story line, played by id on its wake. After it the row has a few words for him. `Oliver_Rack_Mine` is the
-same sentence as `Oliver_Greet_Mine`, under its own id, and has no clip yet.
+same sentence as `Oliver_Greet_Mine`, under its own id.
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
@@ -467,7 +467,7 @@ same sentence as `Oliver_Greet_Mine`, under its own id, and has no clip yet.
 | `Oliver_Rack_Dusting` | Repeatable | none | **Oliver:** "Don't dust it. The dust is holding it down." |
 | `Oliver_Rack_Nap` | Repeatable | none | **Oliver:** "I'm busy. Napping is work. Come back when it's over." |
 
-The four new ones have no clips yet. At the rack the word is picked in order (`GameManager.PickOliverTalk`): the meeting, then
+At the rack the word is picked in order (`GameManager.PickOliverTalk`): the meeting, then
 the chapter of his chain that's due (the `SoulPickup` Story lines, shared with the Steel boon screen: a chapter a run), then
 60% of the time a reactive `Oliver_Pickup_*` line if one fits, else an idle line from the `OliverTalk` bag or the
 `Oliver_Greet_*` bag, chosen by coin flip.

@@ -1583,8 +1583,16 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: cbae1880c50f34c3fbf6cc9b65a4757b, type: 3}
   - id: Oliver_Poguru_Rota_3
     clip: {fileID: 8300000, guid: cf6c27bec60de4484889e5ebe56cb56b, type: 3}
+  - id: Oliver_Rack_Dusting
+    clip: {fileID: 8300000, guid: ab8a9c783eb2a4a329a3c68d58002826, type: 3}
   - id: Oliver_Rack_Mine
     clip: {fileID: 8300000, guid: 0c129d3d642914b2ca6f9e06e36fc2e5, type: 3}
+  - id: Oliver_Rack_Nap
+    clip: {fileID: 8300000, guid: c5ade33351ae5434bb08e790be32d020, type: 3}
+  - id: Oliver_Rack_Sharp
+    clip: {fileID: 8300000, guid: b8d6286950b4b43ea94e6c9c2df491e2, type: 3}
+  - id: Oliver_Rack_Warm
+    clip: {fileID: 8300000, guid: c0d078e10024d4a6c9c1102186df2bd0, type: 3}
   - id: Oni_Hub_CountBenibana
     clip: {fileID: 8300000, guid: 340eac8d45a064f0d85113afb585809a, type: 3}
   - id: Oni_Hub_CountKagetsune
@@ -1699,6 +1707,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f4073a3d8a88c48ffb6dc250b802b03f, type: 3}
   - id: Poguru_Roast_BenibanaDance_2
     clip: {fileID: 8300000, guid: 2c7f56071837a4bac9bf0b587506711a, type: 3}
+  - id: Poguru_Roast_BenibanaIaido
+    clip: {fileID: 8300000, guid: a1f682704a30a4ccab60455be85ae177, type: 3}
+  - id: Poguru_Roast_BenibanaIaido_2
+    clip: {fileID: 8300000, guid: cb19447e9779e4a89b6bd4f07903e7ec, type: 3}
   - id: Poguru_Roast_Diver
     clip: {fileID: 8300000, guid: 0154834235cf84490ab3a0eb69b0be7f, type: 3}
   - id: Poguru_Roast_DiverHug
@@ -1737,10 +1749,22 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 565b3d5e2fb814deeafec6fc5a39c844, type: 3}
   - id: Poguru_Roast_Kagetsune_3
     clip: {fileID: 8300000, guid: bb28b6e9565a64d82a56951b7b5ce9c8, type: 3}
+  - id: Poguru_Roast_KagetsuneBeam
+    clip: {fileID: 8300000, guid: 6e4b1a026baa0496992d877d2d860393, type: 3}
+  - id: Poguru_Roast_KagetsuneBeam_2
+    clip: {fileID: 8300000, guid: 48cd9066857224311864b952e3bee1cd, type: 3}
+  - id: Poguru_Roast_KagetsuneBeam_3
+    clip: {fileID: 8300000, guid: 050d48fd25a30404ca8879b52b443793, type: 3}
   - id: Poguru_Roast_KagetsuneBells
     clip: {fileID: 8300000, guid: d135da530c058443c96939cc4573a693, type: 3}
   - id: Poguru_Roast_Shirogane
     clip: {fileID: 8300000, guid: 93d35cf15e9784a57b000207a1efec72, type: 3}
+  - id: Poguru_Roast_ShiroganeMaw
+    clip: {fileID: 8300000, guid: f7fd75135079942a0af5c329e82fdc4a, type: 3}
+  - id: Poguru_Roast_ShiroganeMaw_2
+    clip: {fileID: 8300000, guid: 1e68b3d032a0047f4bf0f215d7eacf15, type: 3}
+  - id: Poguru_Roast_ShiroganeMaw_3
+    clip: {fileID: 8300000, guid: 806578409dc73404d8b715417ee21dfc, type: 3}
   - id: Poguru_Roast_ShiroganeWolf
     clip: {fileID: 8300000, guid: 607595a499c7b43e0bac63098df08eef, type: 3}
   - id: Poguru_Roast_ShiroganeWolf_2
@@ -1775,10 +1799,24 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 943abb338a20d46488049981c9d2f5da, type: 3}
   - id: Poguru_Roast_Utsusemi_3
     clip: {fileID: 8300000, guid: fa15068641aad4297abf7253b1591d55, type: 3}
+  - id: Poguru_Roast_UtsusemiClock
+    clip: {fileID: 8300000, guid: b1a1b96ee4342441c95370422f77ddbd, type: 3}
+  - id: Poguru_Roast_UtsusemiClock_2
+    clip: {fileID: 8300000, guid: b54ded55b117843539e6608e5dfa631a, type: 3}
+  - id: Poguru_Roast_UtsusemiClock_3
+    clip: {fileID: 8300000, guid: d089443e2de414557917c045bd723950, type: 3}
+  - id: Poguru_Roast_UtsusemiHeart
+    clip: {fileID: 8300000, guid: 81bf4754514554dc19c62811f61aaa8b, type: 3}
   - id: Poguru_Roast_UtsusemiPoint
     clip: {fileID: 8300000, guid: 051394dcf62864474995cebbc368ff9e, type: 3}
   - id: Poguru_Roast_UtsusemiPoint_2
     clip: {fileID: 8300000, guid: c76efc35c8ef4479181d82134fccd946, type: 3}
+  - id: Poguru_Roast_UtsusemiSword
+    clip: {fileID: 8300000, guid: ca2b3facb3b614ab0b463b712e7f85d3, type: 3}
+  - id: Poguru_Roast_UtsusemiSword_2
+    clip: {fileID: 8300000, guid: 0355b1acb4ab042b38af1a95b33f0122, type: 3}
+  - id: Poguru_Roast_UtsusemiSword_3
+    clip: {fileID: 8300000, guid: 823782ae6b9174b95901ff7f70c3c3d6, type: 3}
   - id: Poguru_Round_Breathe
     clip: {fileID: 8300000, guid: bf3eabf68fa524adeb06f242488b18c5, type: 3}
   - id: Poguru_Round_Count

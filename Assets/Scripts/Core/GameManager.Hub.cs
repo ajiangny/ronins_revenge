@@ -78,7 +78,11 @@ public partial class GameManager
         Save.Write();
         if (said == null) yield break;
         yield return new WaitForSeconds(0.8f);
+        // Up off the planks for the scene, then the hammer falls once as the first soul is dropped at Oni's feet.
+        Oliver oliver = safeArea != null ? safeArea.OliverFigure : null;
+        if (oliver != null) oliver.Play(Oliver.Clip.Talk, true);
         yield return PlayTalk(said, new TalkOptions { keepHud = true });
+        if (oliver != null) oliver.Play(Oliver.Clip.Strike);
     }
 
     // Loading a journey: no flute intro, the page just fades off Oni already standing in the temple.
@@ -152,6 +156,8 @@ public partial class GameManager
                 safeArea.Reveal(StationKind.Asagi);
                 safeArea.AsagiFigure?.Play(Asagi.Clip.Lift);
             }
+            // Oni climbs out and finds something very large asleep on the rack's platform.
+            if (meetOliver) safeArea.ShowOliver(Oliver.Clip.Loaf, true);
             yield return ronin.WalkTo(BodyAt(safeArea.PoolExit), travelWalkSpeed * 0.3f);
             if (meetAsagi) safeArea.AsagiFigure?.Play(Asagi.Clip.Idle);
             if (lastRunNotes > 0) StartCoroutine(NoteTally(lastRunNotes));
@@ -405,7 +411,10 @@ public partial class GameManager
     {
         menu.Hide();
         Conversation said = Dialogue.Pick("Oliver", DialogueEvent.OliverTalk, Dialogue.Context(loadout));
+        Oliver oliver = safeArea.OliverFigure;
+        if (said != null && oliver != null) oliver.Play(Oliver.Clip.Talk, true);
         yield return PlayTalk(said, new TalkOptions { keepHud = true });
+        if (oliver != null) oliver.Play(Oliver.Clip.Idle);
         CloseStation();
     }
 

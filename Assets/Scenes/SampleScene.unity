@@ -1260,6 +1260,34 @@ MonoBehaviour:
       - {fileID: 21300000, guid: a2ab5b2e78d6947db8b7dbb9f97191e1, type: 3}
       - {fileID: 21300000, guid: 2fa48044c2d94467c8134da0bf6135c0, type: 3}
       fps: 6
+    oliverArt:
+      idle:
+      - {fileID: 21300000, guid: 4d539eb5127c14167a004f7b7db9f938, type: 3}
+      - {fileID: 21300000, guid: a9e4592b4a86f453090e7fc3fc4d02e3, type: 3}
+      - {fileID: 21300000, guid: d5a274d80ff5e42de8e158fe964ab78d, type: 3}
+      - {fileID: 21300000, guid: b42bd382fa1c04f18963940ea4defe90, type: 3}
+      - {fileID: 21300000, guid: fb7fb1a59d4f747e8a3f2031b154eb9a, type: 3}
+      - {fileID: 21300000, guid: 35ed299f151f74058a6229541721f7ef, type: 3}
+      - {fileID: 21300000, guid: 9698bbc4e2e0d4bafb3a29cf126c1c3b, type: 3}
+      - {fileID: 21300000, guid: 178a1bf199e3a4d799dacc18c2b08078, type: 3}
+      talk:
+      - {fileID: 21300000, guid: f303bf72062e6462a92ca5be82a1f503, type: 3}
+      - {fileID: 21300000, guid: 023464e40d10442e8937d917cefef2f8, type: 3}
+      - {fileID: 21300000, guid: 23281290ac10a467d99f3d4191b8d0cb, type: 3}
+      - {fileID: 21300000, guid: 41311728a65a940baa534ecce0cd8785, type: 3}
+      loaf:
+      - {fileID: 21300000, guid: 5c9f4b95e30fe492095717ac03651615, type: 3}
+      - {fileID: 21300000, guid: df85d075279c54669aaacb5925567092, type: 3}
+      - {fileID: 21300000, guid: f8986070a32b04c79be7730ebd149a85, type: 3}
+      - {fileID: 21300000, guid: 9e5fba960bfa74ccea0d9c61546db2ff, type: 3}
+      strike:
+      - {fileID: 21300000, guid: 68c9dadcc1fb94d5b811cff6b8443750, type: 3}
+      - {fileID: 21300000, guid: 73f74ee0726794909809e146cd377023, type: 3}
+      - {fileID: 21300000, guid: 335d7a65445ab4d93adf22462827d979, type: 3}
+      - {fileID: 21300000, guid: 3ce400241ebaa41e98cb1df4256ed315, type: 3}
+      - {fileID: 21300000, guid: 3b3bf8569b779481eb350a493832956b, type: 3}
+      - {fileID: 21300000, guid: e120411a74c08498889789caca354f44, type: 3}
+      fps: 4
     lamps:
     - px: {x: 100, y: 147}
       colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}

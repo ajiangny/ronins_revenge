@@ -80,6 +80,8 @@ public class SafeArea : MonoBehaviour
         public Sprite[] poolSouls = new Sprite[0];
         [Tooltip("Asagi's clips, for her station at the pool's rim (Ninja/Apply Maps). Empty draws her as a block of her sea-blue.")]
         public AsagiArt asagiArt = new AsagiArt();
+        [Tooltip("Oliver's clips, for his figure by the weapon rack (Ninja/Apply Maps). Empty draws him as a block of iron and forge-gold.")]
+        public OliverArt oliverArt = new OliverArt();
         public Lamp[] lamps = new Lamp[0];
         [Tooltip("Ground painted on the map he can't walk through (lanterns, a dais's edges, a kerb): rectangles in map pixels, x and y their top-left corner.")]
         public Rect[] walls = new Rect[0];
@@ -145,6 +147,12 @@ public class SafeArea : MonoBehaviour
     public Vector3 WakePoint => At(config.wakeSpot);
     // Asagi at the pool's rim, once her station is built; null before she's met.
     public Asagi AsagiFigure { get; private set; }
+    // Oliver by the rack; built always, and out of sight until he's met (ShowOliver).
+    public Oliver OliverFigure { get; private set; }
+    float oliverBaseY;
+    // Where he stands from the rack's base, in map pixels: right of it, past the floor Oni can walk, so he blocks neither
+    // the rack nor the spot Oni uses it from.
+    static readonly Vector2 OliverFromRack = new Vector2(52f, -20f);
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
@@ -242,6 +250,13 @@ public class SafeArea : MonoBehaviour
                 r.sprite = art;
             }
             else if (!station.onMap || !mapArt) r = Block(station.kind.ToString(), ProceduralSprites.White, at + Vector3.up * 0.7f, new Vector2(1.8f, 1.4f), station.placeholder, order - 1);
+            if (station.kind == StationKind.WeaponRack && mapSpace)
+            {
+                Vector3 feet = MapToWorld(station.propAt + OliverFromRack);
+                oliverBaseY = feet.y;
+                OliverFigure = Oliver.Create(area.oliverArt, transform, feet, ronin.ArtPixelSize, order - 1);
+                OliverFigure.gameObject.SetActive(Save.Data.oliverMet);
+            }
             if (r == null) continue;
             // A soft shadow where it meets the ground, so it stands on the floor rather than floating over it.
             Bounds b = r.bounds;
@@ -440,6 +455,14 @@ public class SafeArea : MonoBehaviour
         if (kind == StationKind.Asagi && pool != null) pool.Koi = false;
     }
 
+    // Oliver comes into the temple on the wake Oni meets him, in the clip he's found in.
+    public void ShowOliver(Oliver.Clip clip, bool loop = false)
+    {
+        if (OliverFigure == null) return;
+        OliverFigure.gameObject.SetActive(true);
+        OliverFigure.Play(clip, loop);
+    }
+
     // Where a station's prop stands: its place on the map, or just behind the spot he uses it from, so he faces it.
     Vector3 BaseOf(Station station) =>
         mapSpace && station.propAt != Vector2.zero ? MapToWorld(station.propAt) : At(station.spot) + Vector3.up * 0.2f;
@@ -536,6 +559,9 @@ public class SafeArea : MonoBehaviour
                     break;
             }
         }
+
+        // Behind his feet Oni is hidden by him, as by any prop.
+        if (OliverFigure != null) OliverFigure.SetOrder(feetY > oliverBaseY ? ronin.SpriteOrder + 5 : propOrder);
 
         foreach (var (r, footY, phase) in spirits)
         {

@@ -481,6 +481,16 @@ public static class NinjaArtSetup
                 frames.arraySize = found.Count;
                 for (int k = 0; k < found.Count; k++) frames.GetArrayElementAtIndex(k).objectReferenceValue = found[k];
             }
+            // Oliver's by the rack, the same way; a missing one falls back to his idle, or a block.
+            SerializedProperty oliver = area.FindPropertyRelative("oliverArt");
+            foreach (string clip in new[] { "Idle", "Talk", "Loaf", "Strike" })
+            {
+                SerializedProperty frames = oliver.FindPropertyRelative(clip.ToLowerInvariant());
+                var found = new List<Sprite>();
+                for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Characters/Oliver/Oliver_{clip}_{k}.png") is Sprite frame; k++) found.Add(frame);
+                frames.arraySize = found.Count;
+                for (int k = 0; k < found.Count; k++) frames.GetArrayElementAtIndex(k).objectReferenceValue = found[k];
+            }
             SerializedProperty stations = area.FindPropertyRelative("stations");
             for (int j = 0; j < stations.arraySize; j++)
             {

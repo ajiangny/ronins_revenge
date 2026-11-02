@@ -18,7 +18,7 @@ public class OliverArt
 }
 
 // Oliver, the Smith's Cat (Story/Oliver.md): the first thing that was ever in the coffin, in a smith's bulk he built out
-// of memory. He stands by the weapon rack once Oni has met him; the rack is his station, so he has none of his own. Code-
+// of memory. He stands at the top of the weapon rack's dais once Oni has met him, a station of his own. Code-
 // built by SafeArea at Oni's pixel size, which makes him about 1.8 times Oni's height, and animated on unscaled time so he
 // keeps moving while a talk scene holds the temple still.
 public class Oliver : MonoBehaviour
@@ -28,6 +28,15 @@ public class Oliver : MonoBehaviour
     // Without art: the placeholder's size in world units, about 1.8 times Oni's height.
     const float FallbackWidth = 1.6f, FallbackHeight = 1.9f;
     static readonly Color Iron = new Color(0.435f, 0.416f, 0.388f);
+    // The Zs he breathes out asleep: how many at once, how long each rises, and how far up and across, in world units.
+    const int SleepZs = 3;
+    const float SleepZSeconds = 2.7f, SleepZRise = 2.1f, SleepZDrift = 0.6f;
+    // Where they start, from his feet, in pixels of his art.
+    static readonly Vector2 SleepZStart = new Vector2(16f, 64f);
+    // Warm, like his hammer's heat: never a soul's teal.
+    static readonly Color SleepZColour = new Color(1f, 0.93f, 0.72f);
+    static readonly string[] SleepZRows = { "#####", "...#.", "..#..", ".#...", "#####" };
+    static Sprite sleepZ;
 
     OliverArt art;
     SpriteRenderer body;
@@ -37,6 +46,8 @@ public class Oliver : MonoBehaviour
     Sprite[] clip;
     bool clipLoop;
     float clipAt;
+    float artPixel;
+    SpriteRenderer[] zs;
 
     public SpriteRenderer Body => body;
     // His drawn extent.
@@ -59,6 +70,7 @@ public class Oliver : MonoBehaviour
     void Build(float pixel, int order)
     {
         hasArt = Has(art.idle);
+        artPixel = pixel;
         // A soft shadow where he meets the planks, as the other props have.
         shadow = Layer("Shadow", ProceduralSprites.Shadow, order - 2);
         shadow.color = new Color(0f, 0f, 0f, 0.45f);
@@ -95,6 +107,46 @@ public class Oliver : MonoBehaviour
         shadow.transform.localScale = new Vector3(b.size.x * 1.1f / ProceduralSprites.Shadow.bounds.size.x, b.size.x * 0.32f / ProceduralSprites.Shadow.bounds.size.y, 1f);
         glow.transform.localPosition = Vector3.up * (b.size.y * 0.15f);
         glow.transform.localScale = new Vector3(b.size.x * 1.6f / ProceduralSprites.SoftGlow.bounds.size.x, b.size.y * 0.5f / ProceduralSprites.SoftGlow.bounds.size.y, 1f);
+        zs = new SpriteRenderer[SleepZs];
+        for (int i = 0; i < SleepZs; i++)
+        {
+            zs[i] = Layer("SleepZ", SleepZ(), order + 1);
+            zs[i].gameObject.SetActive(false);
+        }
+    }
+
+    // A Z in five rows of pixels, one world unit a sprite pixel so its scale is set in Oni's pixels.
+    static Sprite SleepZ()
+    {
+        if (sleepZ != null) return sleepZ;
+        var texture = new Texture2D(5, 5, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
+        for (int y = 0; y < 5; y++)
+            for (int x = 0; x < 5; x++)
+                texture.SetPixel(x, 4 - y, SleepZRows[y][x] == '#' ? Color.white : Color.clear);
+        texture.Apply();
+        sleepZ = Sprite.Create(texture, new Rect(0f, 0f, 5f, 5f), new Vector2(0.5f, 0.5f), 1f);
+        return sleepZ;
+    }
+
+    // Zs rise off him one after another while he sleeps, growing as they go, and fade out at the top.
+    void UpdateSleepZs(float time)
+    {
+        bool asleep = hasArt && clip != null && clip == art.loaf;
+        // Just over the top of his back: the canvas stands far taller than the mound, so its bounds won't do.
+        Vector3 from = transform.position + new Vector3(SleepZStart.x * artPixel, SleepZStart.y * artPixel, 0f);
+        for (int i = 0; i < SleepZs; i++)
+        {
+            zs[i].gameObject.SetActive(asleep);
+            if (!asleep) continue;
+            float t = Mathf.Repeat(time / SleepZSeconds + i / (float)SleepZs, 1f);
+            // Whole pixels of size, so the Z stays crisp: 2 pixels of art per pixel, then 3.
+            float size = artPixel * (t < 0.45f ? 2f : 3f);
+            zs[i].transform.localScale = new Vector3(size, size, 1f);
+            zs[i].transform.position = from + new Vector3(SleepZDrift * t + 0.12f * Mathf.Sin(t * Mathf.PI * 3f), SleepZRise * t, 0f);
+            Color c = SleepZColour;
+            c.a = Mathf.Clamp01(t * 6f) * Mathf.Clamp01((1f - t) * 3f);
+            zs[i].color = c;
+        }
     }
 
     SpriteRenderer Layer(string name, Sprite sprite, int order)
@@ -131,6 +183,7 @@ public class Oliver : MonoBehaviour
         body.sortingOrder = order;
         glow.sortingOrder = order - 1;
         shadow.sortingOrder = order - 2;
+        foreach (SpriteRenderer z in zs) z.sortingOrder = order + 1;
         foreach (Transform child in transform)
             if (child.name == "Seam") child.GetComponent<SpriteRenderer>().sortingOrder = order + 1;
     }
@@ -140,6 +193,7 @@ public class Oliver : MonoBehaviour
         float time = Time.unscaledTime;
         Color heat = Boons.Info(Element.Steel).Color;
         glow.color = new Color(heat.r, heat.g, heat.b, 0.07f + 0.03f * Mathf.Sin(time * 0.6f));
+        UpdateSleepZs(time);
         if (!hasArt || clip == null) return;
         int frame = (int)((time - clipAt) * Mathf.Max(1f, art.fps));
         if (clipLoop) frame %= clip.Length;

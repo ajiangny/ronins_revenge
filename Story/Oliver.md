@@ -152,7 +152,7 @@ painting where they differ (coat, ash-black forearms, wraps, crate):
 > **Mood:** heavy, tired and unimpressed, not cute. Head tilted 1 px down. Dark selective outline.
 
 Clips (a proposal, for whoever builds his station): **Idle** (a very slow breath, whiskers shifting, one slow blink, a
-spark falling off the hammer), **Loaf** (asleep on the rack's platform, a mound with a doll beside it, before the meeting
+spark falling off the hammer), **Loaf** (asleep on the rack's platform, a mound with a doll beside it and warm Zs rising off him, before the meeting
 and sometimes after), **Talk** (the head lifts 1 px; the mouth barely moves), **Strike** (the hammer comes up slowly and
 falls once, the only fast thing he does), **Pounce** (for the field: a soul caught under one paw).
 

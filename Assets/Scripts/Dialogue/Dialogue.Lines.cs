@@ -840,6 +840,15 @@ public static partial class Dialogue
             Ol("Brought you this. It's still moving. Don't make a face.")),
         Talk("Oliver_Rack_Mine", Oli, OliTalk, Repeat, When(),
             Ol("I've sat on that. It's mine. You can borrow it.")),
+        // More for the rack's idle bag (no clips yet, so silent subtitles).
+        Talk("Oliver_Rack_Warm", Oli, OliTalk, Repeat, When(),
+            Ol("The iron's warm. Don't ask why.")),
+        Talk("Oliver_Rack_Sharp", Oli, OliTalk, Repeat, When(),
+            Ol("Edge is fine. I checked. With my face.")),
+        Talk("Oliver_Rack_Dusting", Oli, OliTalk, Repeat, When(),
+            Ol("Don't dust it. The dust is holding it down.")),
+        Talk("Oliver_Rack_Nap", Oli, OliTalk, Repeat, When(),
+            Ol("I'm busy. Napping is work. Come back when it's over.")),
         // His chain, one chapter a run. It ends on Oliver_Meet_Seventh: "Scabbard" and "He says" stop there and "Seventh" starts.
         Talk("Oliver_Meet_Draft", Oli, Soul, Story, When(Seen("Oliver_Meet_Rack"), RunsSince("Oliver_Meet_Rack", 1)),
             Ol("There's a gap in your wall, Scabbard. I can feel the draft from here. ...There. Don't touch it."),

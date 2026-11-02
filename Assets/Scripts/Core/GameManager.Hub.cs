@@ -489,12 +489,31 @@ public partial class GameManager
     // Oliver on the rack's dais: a word from him, a scene over the temple as it stands.
     IEnumerator TalkToOliver()
     {
-        Conversation said = Dialogue.Pick("Oliver", DialogueEvent.OliverTalk, Dialogue.Context(loadout));
+        Conversation said = PickOliverTalk();
         Oliver oliver = safeArea.OliverFigure;
         if (said != null && oliver != null) oliver.Play(Oliver.Clip.Talk, true);
         yield return PlayTalk(said, new TalkOptions { keepHud = true });
         if (oliver != null) oliver.Play(Oliver.Clip.Idle);
         CloseStation();
+    }
+
+    // His station word: the meeting if it's due, then the chapter of his chain that's due (its lines live on SoulPickup, so
+    // the boon screen and the rack share one chain, a chapter a run), else most times a reactive line for how the last run
+    // went, else an idle line from the bags (the rack's own, or his greetings), so he isn't one sentence on repeat.
+    const float OliverReactiveChance = 0.6f;
+
+    Conversation PickOliverTalk()
+    {
+        var ctx = Dialogue.Context(loadout);
+        Conversation said = Dialogue.Pick("Oliver", DialogueEvent.OliverTalk, ctx, Tier.Priority, Tier.Story)
+            ?? Dialogue.Pick("Oliver", DialogueEvent.SoulPickup, ctx, Tier.Priority, Tier.Story);
+        if (said == null && Random.value < OliverReactiveChance) said = Dialogue.Pick("Oliver", DialogueEvent.SoulPickup, ctx, Tier.Reactive, Tier.Reactive);
+        if (said != null) return said;
+        // Each event keeps its own bag, so neither repeats a line until all of its lines have played.
+        bool greeting = Random.value < 0.5f;
+        var first = greeting ? DialogueEvent.SoulPickup : DialogueEvent.OliverTalk;
+        var second = greeting ? DialogueEvent.OliverTalk : DialogueEvent.SoulPickup;
+        return Dialogue.Pick("Oliver", first, ctx, Tier.Repeatable) ?? Dialogue.Pick("Oliver", second, ctx, Tier.Repeatable);
     }
 
     void ShowRack(System.Action back, int startIndex = -1)

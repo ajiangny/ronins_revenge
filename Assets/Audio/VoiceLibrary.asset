@@ -95,6 +95,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f5cc11c39c0b34905b3ef7b6e9853be7, type: 3}
   - id: Akagane_Jealous_Mizore_2
     clip: {fileID: 8300000, guid: d73a24f5ab91f4b64a4861c78ec27530, type: 3}
+  - id: Akagane_Jealous_Steel
+    clip: {fileID: 8300000, guid: c751ba7575a324c36ba5aeeb8cfd4bb8, type: 3}
   - id: Akagane_Jealous_Storm
     clip: {fileID: 8300000, guid: 3aa5c6f4bc4094d89b585235520bef4d, type: 3}
   - id: Akagane_Jealous_Water
@@ -275,6 +277,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: ea06ff21f78ed4175b4da48d46f610e5, type: 3}
   - id: Asagi_Jealous_Mizore_4
     clip: {fileID: 8300000, guid: 182d6af6dc3ab4304b85c1c28a1fd4ab, type: 3}
+  - id: Asagi_Jealous_Steel
+    clip: {fileID: 8300000, guid: 397e9acb6a2ae4cf587214507b6983b7, type: 3}
   - id: Asagi_Jealous_Storm
     clip: {fileID: 8300000, guid: c4b40ee1b4670499db5b9fc2f14666cf, type: 3}
   - id: Asagi_Legendary_Again
@@ -493,6 +497,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6b9caa1cf76ec422785be18a30a43418, type: 3}
   - id: Benibana_Intro_SilverRests_2
     clip: {fileID: 8300000, guid: 4a7821178e1bf4357b1bfeb3e29ae304, type: 3}
+  - id: Benibana_Intro_Steel
+    clip: {fileID: 8300000, guid: 9bf41078d72e7488597b75a7207f46e5, type: 3}
+  - id: Benibana_Intro_Steel_2
+    clip: {fileID: 8300000, guid: b0daba826b6dd40b7afaafc64b3c68ec, type: 3}
   - id: Benibana_Intro_Storm
     clip: {fileID: 8300000, guid: 242e437790bf04460b3898ab530ce841, type: 3}
   - id: Benibana_Intro_Sutra
@@ -831,6 +839,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6583a92dc7d5646ecbdaef50d845ba35, type: 3}
   - id: Hibiki_Jealous_Mizore_3
     clip: {fileID: 8300000, guid: 90410880280c642b1a0c41c79b1c1102, type: 3}
+  - id: Hibiki_Jealous_Steel
+    clip: {fileID: 8300000, guid: e902233a311df4d3abc87b01ea6868da, type: 3}
   - id: Hibiki_Jealous_Water
     clip: {fileID: 8300000, guid: e04cd914c34144ed6bf7387a4c71ae9b, type: 3}
   - id: Hibiki_Laughed
@@ -1155,6 +1165,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a12ca5bc2c52e4339a800ea26263a6a4, type: 3}
   - id: Mizore_Jealous_Hibiki_3
     clip: {fileID: 8300000, guid: c106576a7ab8c49a68bc372bdf4dbb4b, type: 3}
+  - id: Mizore_Jealous_Steel
+    clip: {fileID: 8300000, guid: 1eb23daad43104eb58f72f4a834094a3, type: 3}
   - id: Mizore_Jealous_Storm
     clip: {fileID: 8300000, guid: 31b1d308d661d4040bda8f76700c7339, type: 3}
   - id: Mizore_Jealous_Water
@@ -1243,14 +1255,184 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e24a69a2058214943bb2ddbde1f76510, type: 3}
   - id: Mizore_Poguru_5
     clip: {fileID: 8300000, guid: 317d2afda7f954184981eb81ce9ea1dc, type: 3}
+  - id: Oliver_Ahead_Any
+    clip: {fileID: 8300000, guid: dfa2bbbb35fa443dc9b3e86056785b78, type: 3}
+  - id: Oliver_Ahead_Benibana
+    clip: {fileID: 8300000, guid: 73c65ba2cba454572882fde637bfbdbc, type: 3}
+  - id: Oliver_Ahead_BenibanaBell
+    clip: {fileID: 8300000, guid: cbaf24c02fcc347b1a42876d2ecc6cb7, type: 3}
+  - id: Oliver_Ahead_Kagetsune
+    clip: {fileID: 8300000, guid: 5cee2c10baec34f80af0e8dfcdcdcd19, type: 3}
+  - id: Oliver_Ahead_KagetsuneWon
+    clip: {fileID: 8300000, guid: 12ccca53b13ac4af6aa471a388e02d09, type: 3}
+  - id: Oliver_Ahead_Kuon
+    clip: {fileID: 8300000, guid: 5de4e70b72eef47a19b080d7b71344d8, type: 3}
+  - id: Oliver_Ahead_Seventh
+    clip: {fileID: 8300000, guid: 6fc62a547df364798b02c3460b79e8c2, type: 3}
+  - id: Oliver_Ahead_Shirogane
+    clip: {fileID: 8300000, guid: 3234f250babf5453887abaca4d5a1858, type: 3}
+  - id: Oliver_Ahead_Utsusemi
+    clip: {fileID: 8300000, guid: d4069d6f65f5e4e55a14646478398f5e, type: 3}
+  - id: Oliver_Ahead_UtsusemiWound
+    clip: {fileID: 8300000, guid: 00a0f1420907247458a05217e4f4cc28, type: 3}
+  - id: Oliver_Cut_Asagi
+    clip: {fileID: 8300000, guid: 2fad5627a785e4b59b64bf1b5df11636, type: 3}
+  - id: Oliver_Cut_Asagi_2
+    clip: {fileID: 8300000, guid: 2469769b7a3414279b61f3ac2b8ed5fd, type: 3}
+  - id: Oliver_Cut_Asagi_3
+    clip: {fileID: 8300000, guid: 9954c18fc2173437aa9da6043a625f59, type: 3}
+  - id: Oliver_Cut_Asagi_4
+    clip: {fileID: 8300000, guid: 74ffb1824c7d64c319e73ad027a71c1e, type: 3}
+  - id: Oliver_Cut_Asagi_5
+    clip: {fileID: 8300000, guid: 574a4e8247bc6413298b20dc5cc50cf7, type: 3}
+  - id: Oliver_Cut_Asagi_6
+    clip: {fileID: 8300000, guid: 7aa226aa7c960452abcba619372b581d, type: 3}
+  - id: Oliver_Cut_Cough
+    clip: {fileID: 8300000, guid: a4a18a3973f984bdbbaa8ae495825abd, type: 3}
+  - id: Oliver_Cut_Cough_2
+    clip: {fileID: 8300000, guid: ba8aea13bd3554a0c89cecd9a83acf0a, type: 3}
+  - id: Oliver_Cut_Cough_3
+    clip: {fileID: 8300000, guid: f971a5e714c5d4e50abdf5d63de155dc, type: 3}
+  - id: Oliver_Cut_Cough_4
+    clip: {fileID: 8300000, guid: 2bdcb87ea2c704dfe8e8b46562a5d815, type: 3}
+  - id: Oliver_Cut_Cough_5
+    clip: {fileID: 8300000, guid: d2c810ee12ec8421aaee11a541dc76f5, type: 3}
+  - id: Oliver_Cut_Door
+    clip: {fileID: 8300000, guid: 151690e8dad0e45178232c770505fe78, type: 3}
+  - id: Oliver_Cut_Door_2
+    clip: {fileID: 8300000, guid: fd9dfa4296be844ba826987774b8a091, type: 3}
+  - id: Oliver_Cut_Door_3
+    clip: {fileID: 8300000, guid: cdce584dc61cb4f76a85bf7c54020356, type: 3}
+  - id: Oliver_Cut_Door_4
+    clip: {fileID: 8300000, guid: a36ed95cef6404b98872133418e20e39, type: 3}
+  - id: Oliver_Cut_Feed
+    clip: {fileID: 8300000, guid: b87e4249374894300a659bf21e793cdf, type: 3}
+  - id: Oliver_Cut_Feed_2
+    clip: {fileID: 8300000, guid: 513ecb14a636f4cc687359063dfcb2af, type: 3}
+  - id: Oliver_Cut_Feed_3
+    clip: {fileID: 8300000, guid: 812e6cc3b7b4042cba54870ca91ac5ac, type: 3}
+  - id: Oliver_Cut_Feed_4
+    clip: {fileID: 8300000, guid: cb6c0eb3eca33458f89f7775f69d1638, type: 3}
+  - id: Oliver_Cut_Feed_5
+    clip: {fileID: 8300000, guid: 8c4ba52c4f61c4b488a3b1b171527614, type: 3}
+  - id: Oliver_Cut_Held
+    clip: {fileID: 8300000, guid: 52746befe6c1a4fbebbd77084d689b1e, type: 3}
+  - id: Oliver_Cut_Held_2
+    clip: {fileID: 8300000, guid: 9c72043d6ba8b4a189e34403a0480f9a, type: 3}
+  - id: Oliver_Cut_Held_3
+    clip: {fileID: 8300000, guid: 9927f6580514e4de79d9a9668e1ea7b5, type: 3}
+  - id: Oliver_Cut_Held_4
+    clip: {fileID: 8300000, guid: a941f3cba2cf3466eaa71e4f27ecfa96, type: 3}
+  - id: Oliver_Cut_Held_5
+    clip: {fileID: 8300000, guid: d91c032d880a94518abd911d2e2f04f7, type: 3}
+  - id: Oliver_Cut_Held_6
+    clip: {fileID: 8300000, guid: 9fd4e049aa6ba4c25a1e888a123de096, type: 3}
+  - id: Oliver_Cut_Pat
+    clip: {fileID: 8300000, guid: 038642246ef9048d3b7033ac0c8abfdf, type: 3}
+  - id: Oliver_Cut_Pat_2
+    clip: {fileID: 8300000, guid: 119fb049eadd24f2891a3b8b1c06e97a, type: 3}
+  - id: Oliver_Cut_Pat_3
+    clip: {fileID: 8300000, guid: 82895e92a96c74960838758f3d97545f, type: 3}
+  - id: Oliver_Cut_Pat_4
+    clip: {fileID: 8300000, guid: 3b9f24398d30a4f4099397e749334b69, type: 3}
+  - id: Oliver_Cut_True
+    clip: {fileID: 8300000, guid: 71314deff6d83480ea8dcd0e76af63b7, type: 3}
+  - id: Oliver_Cut_True_2
+    clip: {fileID: 8300000, guid: ec3d28e706f404f1b98d9da3c5082031, type: 3}
+  - id: Oliver_Cut_True_3
+    clip: {fileID: 8300000, guid: 5a40fb86c6a5b444aab212aa94a0fe4d, type: 3}
+  - id: Oliver_Cut_Wash
+    clip: {fileID: 8300000, guid: 2b0fc0a76d748411baa4a717c1bf40d1, type: 3}
+  - id: Oliver_Cut_Wash_3
+    clip: {fileID: 8300000, guid: 24d6721db63134a76ac1d86a55ad7b70, type: 3}
   - id: Oliver_Dawn
     clip: {fileID: 8300000, guid: 1c345d8465df248209f2abf7379bdc51, type: 3}
+  - id: Oliver_Felled_Any
+    clip: {fileID: 8300000, guid: dd12b5e20a0194ad1818485fcff171f7, type: 3}
+  - id: Oliver_Felled_Benibana
+    clip: {fileID: 8300000, guid: 55d0e5520f91040ea8256cfc25d1263b, type: 3}
+  - id: Oliver_Felled_Shirogane
+    clip: {fileID: 8300000, guid: 0b3c0b72afb094115bafffe82fc3cfa9, type: 3}
+  - id: Oliver_Felled_Utsusemi
+    clip: {fileID: 8300000, guid: a88f8dbe2edad4a81aacb81da26e4d70, type: 3}
+  - id: Oliver_Greet_Draft
+    clip: {fileID: 8300000, guid: e7970c3e03d764aec99b21c95bd474b7, type: 3}
+  - id: Oliver_Greet_Edge
+    clip: {fileID: 8300000, guid: 86b8fbee96ce74d55ad8b70e7392c53f, type: 3}
+  - id: Oliver_Greet_Mine
+    clip: {fileID: 8300000, guid: 196b063049995413f901b04c8fd7158a, type: 3}
+  - id: Oliver_Greet_Moving
+    clip: {fileID: 8300000, guid: 6a9bf59334f7c43b189fc10799c3b1c9, type: 3}
+  - id: Oliver_Greet_Pleased
+    clip: {fileID: 8300000, guid: b3198311d31d54b6ebcda93c4196d0b4, type: 3}
+  - id: Oliver_Greet_Scabbard
+    clip: {fileID: 8300000, guid: 2109f605d29bc4a4e872a45087be8007, type: 3}
+  - id: Oliver_Greet_Seventh
+    clip: {fileID: 8300000, guid: aa33227c9db2f4a518cd176397b76cbd, type: 3}
+  - id: Oliver_Greet_Up
+    clip: {fileID: 8300000, guid: c4c4b4de2633247ff90abec715d886cd, type: 3}
+  - id: Oliver_Hub_Anvil
+    clip: {fileID: 8300000, guid: 3e61c94d37a1444908b5704145f9944d, type: 3}
+  - id: Oliver_Hub_Anvil_2
+    clip: {fileID: 8300000, guid: 0c945f35460ee4379923539f62c7cc68, type: 3}
+  - id: Oliver_Hub_First
+    clip: {fileID: 8300000, guid: 9f3a2c566351b466fbb45624cfb80b28, type: 3}
+  - id: Oliver_Hub_Kagetsune
+    clip: {fileID: 8300000, guid: 83bd014f2ed7e4dd9b857f1de7b41b93, type: 3}
+  - id: Oliver_Hub_Name
+    clip: {fileID: 8300000, guid: aaa26d17b8973452697bd5557380b347, type: 3}
+  - id: Oliver_Hub_Name_3
+    clip: {fileID: 8300000, guid: af6762dba48f94357b877f13706392f4, type: 3}
+  - id: Oliver_Hub_Name_4
+    clip: {fileID: 8300000, guid: 0a2dfc3bfd3974ddf894664b104a4d9f, type: 3}
+  - id: Oliver_Hub_Rest
+    clip: {fileID: 8300000, guid: 094c81e59f2c94117843742a183da8e4, type: 3}
+  - id: Oliver_Hub_Sleep
+    clip: {fileID: 8300000, guid: 8234b11c22c084abba79eba492a4aa9f, type: 3}
+  - id: Oliver_Hub_Sleep_2
+    clip: {fileID: 8300000, guid: f91e16e4f79b74984b2f988c70377fd8, type: 3}
+  - id: Oliver_Hub_Sleep_3
+    clip: {fileID: 8300000, guid: 5d5fe37888f2646e9b63cc19fff00a49, type: 3}
   - id: Oliver_Infusion_Again
     clip: {fileID: 8300000, guid: 25d872fb570e34254bb1fe4465d518fa, type: 3}
   - id: Oliver_Infusion_Tamahagane
     clip: {fileID: 8300000, guid: 3f1421063804242a1b76fb3ff298192a, type: 3}
   - id: Oliver_Infusion_Tamahagane_2
     clip: {fileID: 8300000, guid: 18b7ecaf70df4493bbe39f70a0952983, type: 3}
+  - id: Oliver_Jealous_Akagane
+    clip: {fileID: 8300000, guid: c330d75f8c6bb4346927866d3d20f519, type: 3}
+  - id: Oliver_Jealous_Akagane_2
+    clip: {fileID: 8300000, guid: 6b4d168e587dc43b8bdf464be155a2ca, type: 3}
+  - id: Oliver_Jealous_Akagane_3
+    clip: {fileID: 8300000, guid: c0a2c3e22a3844bbb9d9044518c3cd5c, type: 3}
+  - id: Oliver_Jealous_Asagi
+    clip: {fileID: 8300000, guid: 47887334d7e5546a5ae1a5390af2cca6, type: 3}
+  - id: Oliver_Jealous_Asagi_2
+    clip: {fileID: 8300000, guid: a9264dba42b054540852d3d1072ec7c0, type: 3}
+  - id: Oliver_Jealous_Asagi_3
+    clip: {fileID: 8300000, guid: d4cf37f634ff84de18552949e2b0b15e, type: 3}
+  - id: Oliver_Jealous_Asagi_4
+    clip: {fileID: 8300000, guid: 7258c3954f4af464b9c9ade040a99c59, type: 3}
+  - id: Oliver_Jealous_Back
+    clip: {fileID: 8300000, guid: 7cc9c529674d54d1da1d6f6922b85162, type: 3}
+  - id: Oliver_Jealous_Fire
+    clip: {fileID: 8300000, guid: 34ff73fae3e96402b94c993d020c72ab, type: 3}
+  - id: Oliver_Jealous_Frost
+    clip: {fileID: 8300000, guid: ea022c77f52a6407eab71cb3f874159d, type: 3}
+  - id: Oliver_Jealous_Hibiki
+    clip: {fileID: 8300000, guid: 8e712d001c384424eba037c9de080bb1, type: 3}
+  - id: Oliver_Jealous_Hibiki_2
+    clip: {fileID: 8300000, guid: adeeee27aeb2d46d782ca00f78fdfbd9, type: 3}
+  - id: Oliver_Jealous_Hibiki_3
+    clip: {fileID: 8300000, guid: 41314b93e9d354022a561f8e5fe081a0, type: 3}
+  - id: Oliver_Jealous_Mizore
+    clip: {fileID: 8300000, guid: 8a9e26a3117b349ed9d7e4c7471a3481, type: 3}
+  - id: Oliver_Jealous_Mizore_2
+    clip: {fileID: 8300000, guid: ac696d5b055344271ae52c17c2f91514, type: 3}
+  - id: Oliver_Jealous_Storm
+    clip: {fileID: 8300000, guid: ed462d90f4ff349528aad56eb4c8f572, type: 3}
+  - id: Oliver_Jealous_Water
+    clip: {fileID: 8300000, guid: b717fa8f3625d491484ebfc7f2620cd7, type: 3}
   - id: Oliver_Legendary_Again
     clip: {fileID: 8300000, guid: b849f51166997423a9043e321f808f28, type: 3}
   - id: Oliver_Legendary_SpearBreaker
@@ -1339,6 +1521,70 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a7363f65695564df6a807f24316e3a13, type: 3}
   - id: Oliver_Meet_Seventh_6
     clip: {fileID: 8300000, guid: b1c7e05eb872043e8b07a7d712665abb, type: 3}
+  - id: Oliver_Pickup_Cleared
+    clip: {fileID: 8300000, guid: dbe1178fe39ef4121b817eed122a3f1b, type: 3}
+  - id: Oliver_Pickup_DiedArmy
+    clip: {fileID: 8300000, guid: 2f2c21e25b8db4743a42ac47aeb2ab33, type: 3}
+  - id: Oliver_Pickup_DiedBenibana
+    clip: {fileID: 8300000, guid: c498dd49f31374900b77d60d138801a3, type: 3}
+  - id: Oliver_Pickup_DiedKagetsune
+    clip: {fileID: 8300000, guid: 2dfb379d06b6e426ebfb255b5112da83, type: 3}
+  - id: Oliver_Pickup_DiedShirogane
+    clip: {fileID: 8300000, guid: 7705331cc6c99429aae5b7138919957b, type: 3}
+  - id: Oliver_Pickup_DiedUtsusemi
+    clip: {fileID: 8300000, guid: e54bb74e2dabc4cbf932971c4ea54c35, type: 3}
+  - id: Oliver_Pickup_FirstClear
+    clip: {fileID: 8300000, guid: 5d16d4097d3a0496c98a592094d555f8, type: 3}
+  - id: Oliver_Pickup_FirstClear_2
+    clip: {fileID: 8300000, guid: a8a931ab4b0d9496aa95ca93a739267e, type: 3}
+  - id: Oliver_Pickup_Gap
+    clip: {fileID: 8300000, guid: ca73fe4d41c9141f9b70eab61448bc42, type: 3}
+  - id: Oliver_Pickup_Gap_2
+    clip: {fileID: 8300000, guid: a0b6657464f96470e877316ecf299e2e, type: 3}
+  - id: Oliver_Pickup_Gap_3
+    clip: {fileID: 8300000, guid: df25e2eeaef6b48bdbe2f646caeb2b58, type: 3}
+  - id: Oliver_Pickup_HoldsFire
+    clip: {fileID: 8300000, guid: 2e00d9764f04d47a1926cea7b3243ab4, type: 3}
+  - id: Oliver_Pickup_HoldsFrost
+    clip: {fileID: 8300000, guid: 476ee9560127549de8cce73cfa3315a8, type: 3}
+  - id: Oliver_Pickup_HoldsStorm
+    clip: {fileID: 8300000, guid: 6cda69e33e8d441398d5fed6a02c61f1, type: 3}
+  - id: Oliver_Pickup_HoldsWater
+    clip: {fileID: 8300000, guid: ba14e9feaed694dc3bc1f06a3f71126e, type: 3}
+  - id: Oliver_Pickup_LowLives
+    clip: {fileID: 8300000, guid: 4d9dfd42f425f4660a5e62fb790de762, type: 3}
+  - id: Oliver_Pickup_ManyRuns
+    clip: {fileID: 8300000, guid: 0014ada9c380a42fdacdd563565511b9, type: 3}
+  - id: Oliver_Pickup_Offering
+    clip: {fileID: 8300000, guid: 7aa660ea679f74b4cacd4149ab9633ec, type: 3}
+  - id: Oliver_Pickup_VeryManyRuns
+    clip: {fileID: 8300000, guid: 5d5d1f035820f4f4497e88be64c05e07, type: 3}
+  - id: Oliver_Poguru
+    clip: {fileID: 8300000, guid: fbff50988276a4aa0a1cf3bfda71f31d, type: 3}
+  - id: Oliver_Poguru_2
+    clip: {fileID: 8300000, guid: 59c7728f5bf9b49838af8737b97e014f, type: 3}
+  - id: Oliver_Poguru_3
+    clip: {fileID: 8300000, guid: ddfc2d043776745039b6fd80da335ccd, type: 3}
+  - id: Oliver_Poguru_4
+    clip: {fileID: 8300000, guid: 94da7aeb9d4574768b01a2f1b33c2416, type: 3}
+  - id: Oliver_Poguru_5
+    clip: {fileID: 8300000, guid: 4516a486b00b14cb287280d41a7e337d, type: 3}
+  - id: Oliver_Poguru_Pinned
+    clip: {fileID: 8300000, guid: 85eed2f1d68324d62af1aeb2613e5d3f, type: 3}
+  - id: Oliver_Poguru_Pinned_2
+    clip: {fileID: 8300000, guid: e46bcd9c760264e998bc0e78426e387d, type: 3}
+  - id: Oliver_Poguru_Pinned_3
+    clip: {fileID: 8300000, guid: 823e3d8ef1e71441a83a0cfef01c228f, type: 3}
+  - id: Oliver_Poguru_Pinned_4
+    clip: {fileID: 8300000, guid: 859e15b4789d244dbb11ef7abddaaaf9, type: 3}
+  - id: Oliver_Poguru_Pinned_5
+    clip: {fileID: 8300000, guid: b8b00298d1510495fb6e294c1bc99e0b, type: 3}
+  - id: Oliver_Poguru_Rota
+    clip: {fileID: 8300000, guid: cbae1880c50f34c3fbf6cc9b65a4757b, type: 3}
+  - id: Oliver_Poguru_Rota_3
+    clip: {fileID: 8300000, guid: cf6c27bec60de4484889e5ebe56cb56b, type: 3}
+  - id: Oliver_Rack_Mine
+    clip: {fileID: 8300000, guid: 0c129d3d642914b2ca6f9e06e36fc2e5, type: 3}
   - id: Oni_Hub_CountBenibana
     clip: {fileID: 8300000, guid: 340eac8d45a064f0d85113afb585809a, type: 3}
   - id: Oni_Hub_CountKagetsune

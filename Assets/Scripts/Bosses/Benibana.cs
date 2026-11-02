@@ -16,6 +16,8 @@ public class Benibana : Boss
     static readonly Color VeilColour = new Color(0.16f, 0.14f, 0.17f, 0.72f);
 
     enum Move { SmokeRings, RosaryLash, Iaido, RosaryBloom }
+    // A move runs under its name ("Benibana_<Move>", Boss.Attack), so the shots and blows it lands can be told apart.
+    IEnumerator As(Move move, IEnumerator routine) => Attacking($"Benibana_{move}", routine);
 
     // Phase 1 is hard; phase 2 is relentless. Each value is (phase 1, phase 2).
     float Recovery => secondPhase ? 0.45f : 0.9f;
@@ -85,10 +87,10 @@ public class Benibana : Boss
                 movesSinceIaido = move == Move.Iaido ? 0 : movesSinceIaido + 1;
                 switch (move)
                 {
-                    case Move.SmokeRings: yield return SmokeRings(); break;
-                    case Move.RosaryLash: yield return RosaryLash(); break;
-                    case Move.Iaido: yield return Iaido(); break;
-                    case Move.RosaryBloom: yield return RosaryBloom(); break;
+                    case Move.SmokeRings: yield return As(move, SmokeRings()); break;
+                    case Move.RosaryLash: yield return As(move, RosaryLash()); break;
+                    case Move.Iaido: yield return As(move, Iaido()); break;
+                    case Move.RosaryBloom: yield return As(move, RosaryBloom()); break;
                 }
             }
         }
@@ -221,7 +223,7 @@ public class Benibana : Boss
         {
             foreach (float x in columns)
             {
-                if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.55f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+                if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.55f) Strike(new Vector3(x, ronin.Bounds.center.y, 0));
             }
             yield return null;
         }

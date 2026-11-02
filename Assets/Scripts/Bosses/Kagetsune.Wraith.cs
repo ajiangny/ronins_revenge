@@ -125,7 +125,7 @@ public partial class Kagetsune
                 // Along the ground it burns whatever it passes.
                 if (k >= 0.3f && k < 0.8f)
                 {
-                    if (Mathf.Abs(ronin.Bounds.center.x - at.x) < 1f) ronin.TakeHit(new Vector3(at.x, Row, 0));
+                    if (Mathf.Abs(ronin.Bounds.center.x - at.x) < 1f) Strike(new Vector3(at.x, Row, 0));
                     BeamEnd(at + Vector3.up * 2f, at, out Blocker cover);
                     if (cover != null) cover.Hit(at);
                     // Where it scrapes past, dust kicks up and the ground catches soul-fire, every step or so.
@@ -432,7 +432,7 @@ public partial class Kagetsune
             // The columns burn for their whole flash, not a single frame.
             for (float t = 0; t < ColumnSeconds; t += Time.deltaTime * Tempo)
             {
-                if (Mathf.Abs(ronin.Bounds.center.x - lanes[safe]) > halfWidth * 0.95f) ronin.TakeHit(ronin.Bounds.center);
+                if (Mathf.Abs(ronin.Bounds.center.x - lanes[safe]) > halfWidth * 0.95f) Strike(ronin.Bounds.center);
                 yield return null;
             }
             foreach (SpriteRenderer column in columns) StartCoroutine(FadeOut(column, 0.35f));

@@ -26,6 +26,11 @@ public class SaveData
     public int lastDeathCause;
     public int[] deathsByCause = new int[DeathCauses];
     public int deathStreak;
+    // Which boss attack landed it (Boss.Attack, "Utsusemi_HyperBeam"), empty for the army or a blow no move claimed, and
+    // the deaths counted per attack (parallel lists: JsonUtility has no dictionaries).
+    public string lastDeathAttack = "";
+    public List<string> deathAttacks = new List<string>();
+    public List<int> deathAttackCounts = new List<int>();
     // The element he held most when the last run ended (Element), or -1: whose soul speaks in the temple.
     public int lastRunElement = -1;
     // The stage he was on when the last run ended, counted from 1 (0 before any): how far he got.
@@ -114,6 +119,24 @@ public class SaveData
         firstsRun.Add(run);
         return true;
     }
+
+    // How many runs a boss attack has ended (Boss.Attack ids).
+    public int DeathsToAttack(string attack)
+    {
+        int i = deathAttacks.IndexOf(attack);
+        return i < 0 ? 0 : deathAttackCounts[i];
+    }
+
+    public void CountAttackDeath(string attack)
+    {
+        int i = deathAttacks.IndexOf(attack);
+        if (i < 0)
+        {
+            deathAttacks.Add(attack);
+            deathAttackCounts.Add(1);
+        }
+        else deathAttackCounts[i]++;
+    }
 }
 
 public static class Save
@@ -188,6 +211,12 @@ public static class Save
         if (read.winsVs.Length < 5) Array.Resize(ref read.winsVs, 5);
         if (read.freed == null || read.freed.Length < 5) Array.Resize(ref read.freed, 5);
         if (read.deathsByCause == null || read.deathsByCause.Length < SaveData.DeathCauses) Array.Resize(ref read.deathsByCause, SaveData.DeathCauses);
+        read.lastDeathAttack ??= "";
+        if (read.deathAttacks == null || read.deathAttackCounts == null || read.deathAttacks.Count != read.deathAttackCounts.Count)
+        {
+            read.deathAttacks = new List<string>();
+            read.deathAttackCounts = new List<int>();
+        }
         if (read.firsts == null || read.firstsRun == null || read.firsts.Count != read.firstsRun.Count)
         {
             read.firsts = new List<string>();
@@ -254,7 +283,7 @@ public static class Save
 
     // A finished run: a clear, or a death and what caused it. Restarting or quitting mid-run records nothing.
     public static void EndRun(bool cleared, BossKind killer, DeathCause cause = DeathCause.None, Element? mostHeld = null, bool secondPhase = false,
-        int stage = 0)
+        int stage = 0, string attack = null)
     {
         SaveData d = Data;
         d.lastStage = stage;
@@ -266,6 +295,8 @@ public static class Save
         d.lastKiller = cleared ? -1 : (int)killer;
         d.lastKillerSecondPhase = !cleared && killer != BossKind.None && secondPhase;
         d.lastDeathCause = cleared ? 0 : (int)cause;
+        // Only a boss's own moves are named; the army's blows keep their DeathCause.
+        d.lastDeathAttack = cleared || killer == BossKind.None ? "" : attack ?? "";
         d.deathStreak = cleared ? 0 : same ? d.deathStreak + 1 : 1;
         if (cleared) d.runsCleared++;
         else
@@ -273,6 +304,7 @@ public static class Save
             d.deaths++;
             d.deathsTo[(int)killer]++;
             d.deathsByCause[(int)cause]++;
+            if (d.lastDeathAttack != "") d.CountAttackDeath(d.lastDeathAttack);
         }
         d.hubPending = true;
         Write();

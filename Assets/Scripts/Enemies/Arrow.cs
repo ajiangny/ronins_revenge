@@ -33,6 +33,8 @@ public class Arrow : MonoBehaviour
     public bool Unbreakable { get; private set; }
     // What it counts as if it lands the last blow (Save.EndRun).
     public DeathCause Cause { get; set; } = DeathCause.Arrow;
+    // The boss attack that fired it (Boss.Attack, stamped in Boss.Shoot), null for the army's.
+    public string Attack { get; set; }
     // Drifts through the courtyard blockers without wearing them down (Utsusemi's lace).
     public bool PassesCover { get; set; }
     // Flies on through other shots that pass shots too, so a boss's overlapping patterns don't break each other

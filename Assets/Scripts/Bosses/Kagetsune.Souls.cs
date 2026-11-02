@@ -310,7 +310,7 @@ public partial class Kagetsune
             SpriteRenderer laser = Bar(top, spot, 0.35f, new Color(0.85f, 1f, 0.95f, 0.95f), 56);
             transient.Remove(laser.gameObject);
             Sfx.Play(Sfx.LanternBeam, 0.5f, 1.3f);
-            if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < 0.9f) ronin.TakeHit(spot + Vector3.up * 0.5f);
+            if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < 0.9f) Strike(spot + Vector3.up * 0.5f);
             Fx.Play(Fx.Impact, spot, Teal, 1.6f);
             GroundFire.Scorch(spot, soul: true);
             yield return new WaitForSeconds(0.15f);

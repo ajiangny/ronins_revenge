@@ -302,7 +302,7 @@ public partial class Kagetsune : Boss
                 }
                 // A soul he has swallowed lends its power to his next plain blows.
                 Borrow(move);
-                yield return Play(move);
+                yield return Attacking($"Kagetsune_{move}", Play(move));
                 // The ultimate ends the combo.
                 if (move == Move.ThousandBells) i = combo;
                 yield return Wait(secondPhase ? 0.2f : 0.3f);

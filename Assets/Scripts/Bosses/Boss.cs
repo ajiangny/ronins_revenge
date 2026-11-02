@@ -157,6 +157,10 @@ public abstract class Boss : MonoBehaviour, IHittable
     protected Color bodyTint = Color.white;
     // Telegraphs and hazards the current attack has out; cleared when the attack is interrupted.
     protected readonly List<GameObject> transient = new List<GameObject>();
+    // The attack whose code is running right now ("Utsusemi_HyperBeam"), set by Attacking for each step of a move and
+    // null between them: stamped on the shots it fires and the blows it lands, so a death can name the move
+    // (SaveData.lastDeathAttack, Poguru's roasts).
+    protected string Attack { get; private set; }
 
     float frozenUntil;
     float soakedUntil;
@@ -372,7 +376,35 @@ public abstract class Boss : MonoBehaviour, IHittable
     // Runs the rest of an attack that has already been launched on its own, outside the fight loop, so a stagger
     // doesn't cut it short. Yield on it to wait for it while nothing interrupts. Launched parts keep real time (not
     // boss time): the daze is the boss's, not its attack's. Detach whatever they draw.
-    protected Coroutine Launch(IEnumerator rest) => StartCoroutine(rest);
+    // The launched part keeps the attack it was launched from.
+    protected Coroutine Launch(IEnumerator rest) => StartCoroutine(Attacking(Attack, rest));
+
+    // Runs a move with `attack` as its Attack: set for each of its steps (and the steps of anything it yields on) and
+    // put back after, so two loops fighting at once (Shirogane and Kuon) never take each other's name. Coroutines the
+    // move starts on its own run untagged after their first step; Launch keeps the tag.
+    protected IEnumerator Attacking(string attack, IEnumerator routine)
+    {
+        if (attack == null) return routine;
+        return Tagged(attack, routine);
+    }
+
+    IEnumerator Tagged(string attack, IEnumerator routine)
+    {
+        while (true)
+        {
+            string outer = Attack;
+            Attack = attack;
+            bool more;
+            try { more = routine.MoveNext(); }
+            finally { Attack = outer; }
+            if (!more) yield break;
+            object step = routine.Current;
+            yield return step is IEnumerator nested ? Tagged(attack, nested) : step;
+        }
+    }
+
+    // A blow straight to the ronin (a beam, a falling weight), named for the attack that landed it.
+    protected void Strike(Vector3 contact, string attack = null) => ronin.TakeHit(contact, DeathCause.None, attack ?? Attack);
 
     void ClearLaunched()
     {
@@ -581,12 +613,12 @@ public abstract class Boss : MonoBehaviour, IHittable
     }
 
     // Where a beam from `from` to `end` crosses the ronin's height, it burns him (unless cover stopped it above him).
-    protected void HitIfCrossed(Vector3 from, Vector3 end)
+    protected void HitIfCrossed(Vector3 from, Vector3 end, string attack = null)
     {
         float y = ronin.Bounds.center.y;
         if (end.y > y + 0.2f) return;
         float beamX = Mathf.Lerp(from.x, end.x, Mathf.InverseLerp(from.y, end.y, y));
-        if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) ronin.TakeHit(new Vector3(beamX, y, 0));
+        if (Mathf.Abs(ronin.Bounds.center.x - beamX) < 0.45f) Strike(new Vector3(beamX, y, 0), attack);
     }
 
     // Lays a bar along from-to at the given width (beams redrawn every frame).
@@ -619,6 +651,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     {
         Arrow arrow = Instantiate(arrowPrefab, position, Quaternion.identity);
         arrow.Launch(velocity, 2.5f);
+        arrow.Attack = Attack;
         // A summoned soul's shots and the Emperor's skulls share the field: they fly through each other.
         if (Summoned) arrow.PassesShots = true;
         return arrow;

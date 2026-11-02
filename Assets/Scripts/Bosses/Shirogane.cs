@@ -21,6 +21,8 @@ public partial class Shirogane : Boss
 
     enum Move { CrescentSlash, BladeRain, MoonlitDash, BladeBarrage, MirrorMoon, Moonsplitter, OathFang, Moonfall, Glacier,
         WolfCharge, Howl, TwinAssault, WolfPack, EclipseFang, SpiritMaw, SpiritLances, WolfFang, FrozenHowl }
+    // A move runs under its name ("Shirogane_<Move>", Boss.Attack), so the shots and blows it lands can be told apart.
+    IEnumerator As(Move move, IEnumerator routine) => Attacking($"Shirogane_{move}", routine);
 
     // Each value is (phase 1, phase 2 with Kuon, phase 2 enraged): with the wolf at her side she gives no quarter, and
     // once it has fallen she gives less still.
@@ -249,17 +251,17 @@ public partial class Shirogane : Boss
                 movesSinceParry = move == Move.Moonsplitter || move == Move.OathFang ? 0 : movesSinceParry + 1;
                 switch (move)
                 {
-                    case Move.CrescentSlash: yield return CrescentSlash(); break;
-                    case Move.BladeRain: yield return BladeRain(); break;
-                    case Move.MoonlitDash: yield return MoonlitDash(); break;
-                    case Move.BladeBarrage: yield return BladeBarrage(); break;
-                    case Move.MirrorMoon: yield return MirrorMoon(); break;
-                    case Move.Moonsplitter: yield return Moonsplitter(); break;
-                    case Move.OathFang: yield return OathFang(); break;
-                    case Move.Moonfall: yield return Moonfall(); break;
-                    case Move.Glacier: yield return Glacier(); break;
-                    case Move.TwinAssault: yield return TwinAssault(); break;
-                    case Move.EclipseFang: yield return EclipseFang(); break;
+                    case Move.CrescentSlash: yield return As(move, CrescentSlash()); break;
+                    case Move.BladeRain: yield return As(move, BladeRain()); break;
+                    case Move.MoonlitDash: yield return As(move, MoonlitDash()); break;
+                    case Move.BladeBarrage: yield return As(move, BladeBarrage()); break;
+                    case Move.MirrorMoon: yield return As(move, MirrorMoon()); break;
+                    case Move.Moonsplitter: yield return As(move, Moonsplitter()); break;
+                    case Move.OathFang: yield return As(move, OathFang()); break;
+                    case Move.Moonfall: yield return As(move, Moonfall()); break;
+                    case Move.Glacier: yield return As(move, Glacier()); break;
+                    case Move.TwinAssault: yield return As(move, TwinAssault()); break;
+                    case Move.EclipseFang: yield return As(move, EclipseFang()); break;
                 }
                 borrowed = false;
                 yield return Wait(secondPhase ? 0.15f : 0.25f);
@@ -318,13 +320,13 @@ public partial class Shirogane : Boss
             wolfMovesSinceHowl = move == Move.FrozenHowl ? 0 : wolfMovesSinceHowl + 1;
             switch (move)
             {
-                case Move.WolfCharge: yield return WolfCharge(); break;
-                case Move.Howl: yield return Howl(); break;
-                case Move.WolfPack: yield return WolfPack(); break;
-                case Move.SpiritMaw: yield return SpiritMaw(); break;
-                case Move.SpiritLances: yield return SpiritLances(); break;
-                case Move.WolfFang: yield return WolfFang(); break;
-                case Move.FrozenHowl: yield return FrozenHowl(); break;
+                case Move.WolfCharge: yield return As(move, WolfCharge()); break;
+                case Move.Howl: yield return As(move, Howl()); break;
+                case Move.WolfPack: yield return As(move, WolfPack()); break;
+                case Move.SpiritMaw: yield return As(move, SpiritMaw()); break;
+                case Move.SpiritLances: yield return As(move, SpiritLances()); break;
+                case Move.WolfFang: yield return As(move, WolfFang()); break;
+                case Move.FrozenHowl: yield return As(move, FrozenHowl()); break;
             }
             wolfBusy = false;
             yield return WolfWait(wolf.Enraged ? Random.Range(0.4f, 0.7f) : Random.Range(0.7f, 1.2f));

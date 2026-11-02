@@ -200,6 +200,9 @@ public partial class Utsusemi
     // The Hyper Beam: its wind-up, its sweep from edge to edge, how many times a laser's breadth it's drawn, and how
     // far either side of where its middle crosses the ronin's height it burns.
     const float HyperChargeSeconds = 2.2f, HyperSweepSeconds = 3f, HyperWidth = 3.2f, HyperReach = 1.1f;
+    // Only the sweep itself is the Hyper Beam (the one a rock saves him from, Poguru's rock roasts): its overload's
+    // wild lasers and falling rocks have names of their own.
+    const string HyperBeamAttack = "Utsusemi_HyperBeam";
 
     // The Hyper Beam (second phase only). In super armour it overloads as at its phase break, lasers firing wild from
     // its eye and core (these ones burn) while the hall shakes and rocks rain down, one or two coming to rest and
@@ -391,7 +394,7 @@ public partial class Utsusemi
         float a = RowCross(core, lastX, middle.y), b = RowCross(core, x, middle.y);
         if (middle.x < Mathf.Min(a, b) - HyperReach || middle.x > Mathf.Max(a, b) + HyperReach) return;
         BeamEnd(core, middle, out Blocker cover);
-        if (cover == null && !InSwordWard(middle.x)) ronin.TakeHit(middle);
+        if (cover == null && !InSwordWard(middle.x)) Strike(middle, HyperBeamAttack);
     }
 
     // Where a ray from `from` to x on the ground crosses height y.
@@ -575,7 +578,7 @@ public partial class Utsusemi
             Fx.Play(Fx.SmokePuff, foot + Vector3.up * 0.2f, new Color(0.8f, 0.75f, 0.7f, 0.8f), 0.9f);
             Sfx.Play(Sfx.BlockerBreak, 0.35f, Random.Range(0.8f, 1.1f));
             CameraShake.Add(0.06f);
-            if (harmful && Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth + 0.3f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            if (harmful && Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth + 0.3f) Strike(new Vector3(x, ronin.Bounds.center.y, 0), "Utsusemi_Rockfall");
             Destroy(root);
             yield break;
         }

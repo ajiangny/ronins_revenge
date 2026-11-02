@@ -343,7 +343,7 @@ public partial class Utsusemi
                 HitStop?.Invoke(0.08f);
                 AddStance(ParriedChopStance);
             }
-            else ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            else Strike(new Vector3(x, ronin.Bounds.center.y, 0));
         }
         if (Fx.Play(Fx.UtsuChop, point, Color.white, 2.4f) == null) Fx.Play(Fx.Impact, point, CoreRed, 1.2f);
         ElementFx.Glow(point, Color.white, 0.6f, 1.8f, 0.15f);

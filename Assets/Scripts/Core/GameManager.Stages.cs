@@ -64,7 +64,7 @@ public partial class GameManager
         if (activeBoss != null)
         {
             army.Disband(activeBoss.Colour);
-            ronin.TakeHit(ronin.Bounds.center);
+            ronin.TakeHit(ronin.Bounds.center, DeathCause.None, $"{Stage.boss}_Levy");
             return;
         }
         if (godMode)
@@ -95,7 +95,8 @@ public partial class GameManager
             lives = Mathf.Min(lives + (int)healed, maxLives);
             ui.SetLives(lives, maxLives);
             Color water = Boons.Info(Element.Tide).Color;
-            if (Fx.Play(Fx.TideWave, ronin.Feet, Color.white, 3f) == null) ElementFx.Wave(ronin.Feet + Vector3.down, ronin.Feet + Vector3.up * 4f, water, 5f, 0.7f, ronin.art.deathParticles);
+            // The koi's falls: crests climbing up from his feet, at the art's own size.
+            if (!TideFx.Column(ronin.Feet, ronin.Feet + Vector3.up * 4f)) ElementFx.Wave(ronin.Feet + Vector3.down, ronin.Feet + Vector3.up * 4f, water, 5f, 0.7f, ronin.art.deathParticles);
             Fx.Play(Fx.BoonPillar, ronin.Feet, water, 1.4f);
             Sfx.Play(Sfx.TideWave);
             Sfx.Play(Sfx.SoulCollect, 1f, 1.2f);
@@ -146,14 +147,14 @@ public partial class GameManager
                 message = $"\"{Dialogue.Fill(last.Lines[0].Text, Dialogue.Context())}\"";
             }
             EndGame("DEFEATED", message, new Color(1f, 0.3f, 0.3f), Sfx.DefeatSting, false, activeBoss != null ? Stage.boss : BossKind.None,
-                ronin.LastHitCause);
+                ronin.LastHitCause, ronin.LastHitAttack);
         }
     }
 
     // A run that ends in a clear or a death is remembered for the next one; the killer is the boss he fell to, or
     // None for the army.
     void EndGame(string title, string message, Color color, string sting, bool cleared, BossKind killer = BossKind.None,
-        DeathCause cause = DeathCause.None)
+        DeathCause cause = DeathCause.None, string attack = null)
     {
         state = State.GameOver;
         tutorial.Abort();
@@ -163,7 +164,8 @@ public partial class GameManager
         RunLog.EndSegment(lives, maxLives, null);
         BankTimeBonus();
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  time {Clock(runTime)}  time bonus {roundBonusTotal + stageBonusTotal}  notes {notesThisRun}  held: {HeldSummary()}");
-        Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase, stageIndex + 1);
+        Save.EndRun(cleared, killer, cause, loadout.DominantElement, activeBoss != null && activeBoss.SecondPhase, stageIndex + 1,
+            attack);
         lastRunNotes = notesThisRun;
         if (activeBoss != null) activeBoss.Halt();
         ClearSummons();

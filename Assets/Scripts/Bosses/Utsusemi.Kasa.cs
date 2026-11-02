@@ -157,6 +157,7 @@ public partial class Utsusemi
             hatsOut++;
         }
         Arrow hat = Own(Instantiate(arrowPrefab, Head, Quaternion.identity));
+        hat.Attack = Attack;
         // Launched straight down so its heading stays level; Steer then flies it along the curve without turning it.
         hat.Launch(Vector3.down * 0.01f, 5f);
         hat.MakeUnbreakable(null);

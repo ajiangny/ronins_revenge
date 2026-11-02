@@ -198,7 +198,7 @@ public partial class Utsusemi
             if (harmful && ground)
             {
                 to = BeamEnd(from, to, out Blocker cover);
-                if (cover == null) BeamHit(from, to);
+                if (cover == null) BeamHit(from, to, "Utsusemi_Overload");
                 ground = cover == null;
             }
             DrawBeam(beam, from, to, t < 0.04f, ground);

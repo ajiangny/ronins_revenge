@@ -508,7 +508,8 @@ public partial class Shirogane
     // from the jaws with a shockwave, snaps open wide, burns pulsing with spirit light streaming down it and
     // splashing where it lands, then pinches shut and the arena's dark lifts. With a sweep its foot drags after him
     // at that speed, slower than he runs.
-    // A light one (Kuon's quick lances) leaves the arena lit and shakes it less.
+    // A light one (Kuon's quick lances) leaves the arena lit and shakes it less, and keeps its move's name; a heavy one
+    // is the Maw, whichever move fires it (Spirit Maw, the Eclipse Fang, the Frozen Howl).
     IEnumerator MawBeam(float x, float halfWidth, float seconds, bool heavy = true, float sweep = 0f)
     {
         Vector3 from = WolfMouth;
@@ -571,7 +572,7 @@ public partial class Shirogane
             Stretch(core, from, to, 0.35f * w * open);
             Stretch(glow, from, to, 3.4f * w * open);
             if (splash != null) splash.transform.position = to;
-            if (Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+            if (Mathf.Abs(ronin.Bounds.center.x - x) < halfWidth) Strike(new Vector3(x, ronin.Bounds.center.y, 0), heavy ? "Shirogane_KuonMaw" : null);
             if (Time.time >= nextSpark)
             {
                 // Sparks thrown off the beam's edges along its length.

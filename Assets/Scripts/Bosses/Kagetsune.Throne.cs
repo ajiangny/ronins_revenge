@@ -142,7 +142,7 @@ public partial class Kagetsune
         if (cover != null) cover.Hit(spot);
         for (float t = 0; t < EruptSeconds && burns; t += Time.deltaTime)
         {
-            if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < width / 2f) ronin.TakeHit(new Vector3(spot.x, ronin.Bounds.center.y, 0));
+            if (ronin != null && Mathf.Abs(ronin.Bounds.center.x - spot.x) < width / 2f) Strike(new Vector3(spot.x, ronin.Bounds.center.y, 0));
             yield return null;
         }
         if (burns) GroundFire.Scorch(spot, soul: true);
@@ -265,7 +265,7 @@ public partial class Kagetsune
                 if (!hit && Mathf.Abs(ronin.Bounds.center.x - xs[i]) < 0.95f && tip.y <= ronin.Bounds.center.y + 0.3f)
                 {
                     hit = true;
-                    ronin.TakeHit(new Vector3(xs[i], ronin.Bounds.center.y, 0));
+                    Strike(new Vector3(xs[i], ronin.Bounds.center.y, 0));
                 }
             }
             yield return null;
@@ -587,7 +587,7 @@ public partial class Kagetsune
         CameraShake.Add(0.3f);
         HitStop?.Invoke(0.03f);
         TimeRipple.Emit(ground, 3f, 0.4f, 0.4f);
-        if (Mathf.Abs(ronin.Bounds.center.x - ground.x) < OfudaBlastHalf) ronin.TakeHit(new Vector3(ground.x, ronin.Bounds.center.y, 0));
+        if (Mathf.Abs(ronin.Bounds.center.x - ground.x) < OfudaBlastHalf) Strike(new Vector3(ground.x, ronin.Bounds.center.y, 0));
         BeamEnd(top, ground, out Blocker cover);
         if (cover != null) cover.Hit(ground);
         GroundFire.Scorch(ground, 1.6f, soul: true);
@@ -805,7 +805,7 @@ public partial class Kagetsune
             float at = Mathf.InverseLerp(top.y, ground, Row);
             float rowCentre = Mathf.Lerp(top.x, centre, at), rowHalf = Mathf.Lerp(chestHalf, half, at);
             float x = ronin.Bounds.center.x;
-            if (Mathf.Abs(x - rowCentre) < rowHalf + 0.2f) ronin.TakeHit(new Vector3(Mathf.Clamp(x, rowCentre - rowHalf, rowCentre + rowHalf), Row, 0));
+            if (Mathf.Abs(x - rowCentre) < rowHalf + 0.2f) Strike(new Vector3(Mathf.Clamp(x, rowCentre - rowHalf, rowCentre + rowHalf), Row, 0), "Kagetsune_SpiritHyperBeam");
             // It doesn't stop at cover: every piece it stands on burns through.
             if (Time.time >= nextBurn)
             {

@@ -20,6 +20,8 @@ public partial class Utsusemi : Boss
     static readonly Color GhostGold = new Color(1f, 0.8f, 0.35f);
 
     enum Move { KasaWheel, Lattice, HourStrikes, PlumbLines, HeartLantern, Midnight, Escapement, StoppedHour, HyperBeam }
+    // A move runs under its name ("Utsusemi_<Move>", Boss.Attack), so the shots and blows it lands can be told apart.
+    IEnumerator As(Move move, IEnumerator routine) => Attacking($"Utsusemi_{move}", routine);
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
     float Recovery => secondPhase ? 0.35f : 0.7f;
@@ -182,7 +184,7 @@ public partial class Utsusemi : Boss
                 hyperNext = false;
                 lastLaser = Move.HyperBeam;
                 movesSinceLaser = 0;
-                yield return HyperBeam(false);
+                yield return As(Move.HyperBeam, HyperBeam(false));
                 continue;
             }
             // Winding: it stands still for a beat between combos. This is the opening.
@@ -191,7 +193,7 @@ public partial class Utsusemi : Boss
             // Low on its last bar, once: the Thirteenth Hour.
             if (secondPhase && !thirteenthStruck && Health <= MaxHealth * ThirteenthAt && !swordOut && !swordWheeling)
             {
-                yield return ThirteenthHour();
+                yield return Attacking("Utsusemi_ThirteenthHour", ThirteenthHour());
                 continue;
             }
 
@@ -205,7 +207,7 @@ public partial class Utsusemi : Boss
                 if (!kicked && Camped)
                 {
                     kicked = true;
-                    yield return PendulumKick();
+                    yield return Attacking("Utsusemi_PendulumKick", PendulumKick());
                 }
                 Move move = NextMove(hourStruck);
                 // A short shuffle to a new spot before a move, not a long walk: the lasers walk to the centre
@@ -224,15 +226,15 @@ public partial class Utsusemi : Boss
                 if (laser) lastLaser = move;
                 switch (move)
                 {
-                    case Move.KasaWheel: yield return KasaWheel(); break;
-                    case Move.Lattice: yield return LaceLattice(); break;
-                    case Move.HourStrikes: yield return HourStrikes(); break;
-                    case Move.PlumbLines: yield return PlumbLines(); break;
-                    case Move.HeartLantern: yield return HeartLantern(); break;
-                    case Move.Midnight: yield return Midnight(); break;
-                    case Move.Escapement: yield return Escapement(); break;
-                    case Move.StoppedHour: yield return StoppedHour(); break;
-                    case Move.HyperBeam: yield return HyperBeam(true); break;
+                    case Move.KasaWheel: yield return As(move, KasaWheel()); break;
+                    case Move.Lattice: yield return As(move, LaceLattice()); break;
+                    case Move.HourStrikes: yield return As(move, HourStrikes()); break;
+                    case Move.PlumbLines: yield return As(move, PlumbLines()); break;
+                    case Move.HeartLantern: yield return As(move, HeartLantern()); break;
+                    case Move.Midnight: yield return As(move, Midnight()); break;
+                    case Move.Escapement: yield return As(move, Escapement()); break;
+                    case Move.StoppedHour: yield return As(move, StoppedHour()); break;
+                    case Move.HyperBeam: yield return As(move, HyperBeam(true)); break;
                 }
             }
         }

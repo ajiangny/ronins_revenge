@@ -112,7 +112,7 @@ public partial class Utsusemi
         mark.Struck();
 
         plantedSword = PlantSword(ground);
-        if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.6f) ronin.TakeHit(new Vector3(x, ronin.Bounds.center.y, 0));
+        if (Mathf.Abs(ronin.Bounds.center.x - x) < 0.6f) Strike(new Vector3(x, ronin.Bounds.center.y, 0), "Utsusemi_SwordThrow");
         if (Fx.Play(Fx.UtsuChop, ground, Color.white, 1.8f) == null) Fx.Play(Fx.Impact, ground, SwordGlow, 1f);
         Debris.BurstSprites(ground, art.deathParticles, new Color(0.6f, 0.55f, 0.45f), 6, 0.6f, 4f);
         ElementFx.Glow(ground + Vector3.up * 1.2f, Color.white, 0.8f, 2.5f, 0.25f);
@@ -374,11 +374,12 @@ public partial class Utsusemi
     }
 
     // A beam that crosses the ronin's height burns him, unless he stands within the planted sword's ward: the whole
-    // ward is his cover, not just the shade the blade casts.
-    void BeamHit(Vector3 from, Vector3 end)
+    // ward is his cover, not just the shade the blade casts. Unless told otherwise it's a sword laser (the Heart
+    // Lantern's sweep and Midnight's hands), the one Poguru says to hide behind the sword from.
+    void BeamHit(Vector3 from, Vector3 end, string attack = "Utsusemi_SwordLaser")
     {
         if (InSwordWard(ronin.Bounds.center.x)) return;
-        HitIfCrossed(from, end);
+        HitIfCrossed(from, end, attack);
     }
 
     bool InSwordWard(float x) => plantedSword != null && Mathf.Abs(x - plantedSword.transform.position.x) <= SwordCoverWidth / 2f;

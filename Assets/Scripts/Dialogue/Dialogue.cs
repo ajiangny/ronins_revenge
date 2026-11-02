@@ -110,6 +110,11 @@ public static partial class Dialogue
     public static Req DiedTo(DeathCause cause) => new Req($"killed by {cause} last run", c => !c.Save.lastRunCleared && c.Save.lastDeathCause == (int)cause);
     public static Req DeathsBy(DeathCause cause, int n) => new Req($"{n}+ deaths by {cause}", c => c.Save.deathsByCause[(int)cause] >= n);
     public static Req Streak(int n) => new Req($"{n}+ deaths in a row the same way", c => !c.Save.lastRunCleared && c.Save.deathStreak >= n);
+    // Which boss attack struck it (Boss.Attack ids such as "Utsusemi_HyperBeam"; any of several for a family), and how
+    // many runs that attack has ended.
+    public static Req DiedToAttack(params string[] attacks) => new Req($"killed by {string.Join(" or ", attacks)} last run",
+        c => !c.Save.lastRunCleared && Array.IndexOf(attacks, c.Save.lastDeathAttack) >= 0);
+    public static Req DeathsByAttack(string attack, int n) => new Req($"{n}+ deaths by {attack}", c => c.Save.DeathsToAttack(attack) >= n);
     public static Req LivesLeft(int n) => new Req($"{n} lives left", c => c.Lives == n);
     public static Req Offering => new Req("a Spirit Offering", c => c.Offering);
     public static Req HoldsDuo => new Req("holds a Duo", c => c.Loadout != null && HasDuo(c.Loadout));

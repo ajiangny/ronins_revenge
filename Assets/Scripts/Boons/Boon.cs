@@ -427,6 +427,12 @@ public static class Boons
             StatLabel = "Soaks that crack:", Values = new[] { 1f, 1f, 1f }, Format = v => "all",
             Requires = l => HoldsAny(l, TideBoons) && HoldsAny(l, SteelBoons) },
 
+        new BoonDefinition { Id = BoonId.RedHotIron, Element = Element.Fire, Partner = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Red-Hot Iron",
+            Description = "Your <b>Scrap</b> falls red-hot, burning away the arrows in its path.",
+            StatLabel = "Arrows burned per scrap:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
+            Requires = l => HoldsAny(l, BlastBoons) && HoldsAny(l, SteelBoons) },
+
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",

@@ -68,7 +68,7 @@ public static class BulletHell
         }
     }
 
-    static int Mask => (Layer >= 0 ? 1 << Layer : 0) | LayerMask.GetMask("Arrow");
+    public static int Mask => (Layer >= 0 ? 1 << Layer : 0) | LayerMask.GetMask("Arrow");
 
     // Makes a boss's shot one of the curtain: on the bullet layer, counted against the budget, and capped when parried.
     public static Arrow Enlist(Arrow shot, bool capped = true)

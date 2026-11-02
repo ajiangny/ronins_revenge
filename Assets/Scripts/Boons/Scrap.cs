@@ -10,6 +10,12 @@ public class Scrap : MonoBehaviour
     const float DrawSize = 0.32f;
     const float SeamSize = 0.6f;
     const int SortingOrder = 30;
+    // Red-Hot Iron: what a falling piece burns, how close, and how often it looks. Many may fall at once, so it checks
+    // every third frame and with no garbage.
+    const int MaxBurns = 2;
+    const float BurnReach = 1f;
+    const int BurnEveryFrames = 3;
+    static readonly Collider[] Nearby = new Collider[16];
 
     // How many are in the air, so a burst can't fill the screen (BoonEffects.MaxScrapLive).
     public static int Live { get; private set; }
@@ -20,8 +26,11 @@ public class Scrap : MonoBehaviour
     float landY;
     float fallen;
     Action<float> landed;
+    bool hot;
+    int burnsLeft;
+    Color fire;
 
-    public static Scrap Drop(Vector3 from, float toX, float toY, Transform parent, Action<float> onLanded)
+    public static Scrap Drop(Vector3 from, float toX, float toY, Transform parent, Action<float> onLanded, bool redHot = false, Color ember = default)
     {
         var scrap = new GameObject("Scrap").AddComponent<Scrap>();
         scrap.transform.SetParent(parent);
@@ -34,10 +43,13 @@ public class Scrap : MonoBehaviour
 
         var art = scrap.gameObject.AddComponent<SpriteRenderer>();
         art.sprite = ProceduralSprites.Disc;
-        art.color = Statuses.CrackColor;
+        art.color = redHot ? Color.Lerp(Statuses.CrackColor, ember, 0.75f) : Statuses.CrackColor;
+        scrap.hot = redHot;
+        scrap.burnsLeft = MaxBurns;
+        scrap.fire = ember;
         art.sortingOrder = SortingOrder;
         scrap.transform.localScale = Vector3.one * (DrawSize / art.sprite.bounds.size.y);
-        Color seam = Statuses.SeamColor;
+        Color seam = redHot ? ember : Statuses.SeamColor;
         // The glow's size is in the disc's scaled space, so it's measured against the disc.
         Projectile.CreateGlow(scrap.transform, SeamSize / DrawSize, SortingOrder - 1, new Color(seam.r, seam.g, seam.b, 0.6f));
         return scrap;
@@ -53,10 +65,24 @@ public class Scrap : MonoBehaviour
         // Shed from below the cover's top (a diver at the wall): it has no way to fall, so it lands at once.
         float t = drop > 0f ? Mathf.Clamp01(fallen / drop) : 1f;
         transform.position = new Vector3(Mathf.Lerp(startX, targetX, t), Mathf.Lerp(startY, landY, t), 0f);
+        if (hot && burnsLeft > 0 && Time.frameCount % BurnEveryFrames == 0) BurnArrows();
         if (t < 1f) return;
         Action<float> land = landed;
         landed = null;
         land?.Invoke(targetX);
         Destroy(gameObject);
+    }
+
+    // The same arrows Storm Step's static would break: spears and what only a parry answers fly on.
+    void BurnArrows()
+    {
+        int found = Physics.OverlapSphereNonAlloc(transform.position, BurnReach, Nearby, BulletHell.Mask, QueryTriggerInteraction.Collide);
+        for (int i = 0; i < found && burnsLeft > 0; i++)
+        {
+            Arrow arrow = Nearby[i].GetComponentInParent<Arrow>();
+            if (arrow == null || arrow.Unbreakable || arrow.Reflectable || arrow.Unparryable) continue;
+            arrow.Burn(fire);
+            burnsLeft--;
+        }
     }
 }

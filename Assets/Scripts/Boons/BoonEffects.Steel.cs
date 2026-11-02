@@ -29,7 +29,7 @@ public partial class BoonEffects
             Blocker hurt = wall.NearestHurt(at.x, BossFight ? float.MaxValue : ScrapReach);
             float toX = hurt != null ? hurt.transform.position.x : at.x;
             if (Scrap.Live >= MaxScrapLive) Settle(toX, points);
-            else Scrap.Drop(at, toX, wall.TopY, wall.transform, x => Settle(x, points));
+            else Scrap.Drop(at, toX, wall.TopY, wall.transform, x => Settle(x, points), loadout.Find(BoonId.RedHotIron) != null, Fire);
         }
     }
 

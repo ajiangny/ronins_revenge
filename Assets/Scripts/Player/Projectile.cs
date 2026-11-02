@@ -50,6 +50,10 @@ public class Projectile : MonoBehaviour
     public bool CutsArrows { get; set; }
     // A Spirit Shuriken (his, or the clone's): it passes over his cover and through arrows.
     public bool Spinning { get; set; }
+    // A steel shard: it crosses his cover without chipping it, since a burst must not set off the next one.
+    public bool PassesCover { get; set; }
+    // Whetstone: it crosses the wall's cover, wearing it down.
+    public bool Whets { get; set; }
 
     Rigidbody body;
     SpriteRenderer art;
@@ -279,10 +283,18 @@ public class Projectile : MonoBehaviour
     {
         if (spent) return;
 
+        // Steel plates are one-way: every shot of his passes them unchipped.
+        Blocker met = coll.collider.GetComponentInParent<Blocker>();
+        if (met != null && (met.Plate || PassesCover))
+        {
+            KeepFlying(coll.collider);
+            return;
+        }
+
         // The ronin's own projectiles pass through each other, and a homing shot passes everything on its way
         // to the enemy it picked (arrows, the samurai in front) except the ronin's cover, which still stops a
         // parried arrow. A parried boss slash cuts through cover too (below).
-        bool cover = coll.collider.GetComponentInParent<Blocker>() != null;
+        bool cover = met != null;
         bool passes = TargetAlive() && !IsTarget(coll.collider) && !(cover && Source != KillSource.Reflected)
             && (pickTarget == null || HomingAge < PassThroughSeconds);
         if (coll.collider.GetComponentInParent<Projectile>() != null || passes)

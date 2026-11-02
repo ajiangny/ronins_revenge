@@ -12,21 +12,35 @@ public class Blocker : MonoBehaviour
     Sprite[] debris;
     int maxHealth;
     int health;
+    int baseHealth;
     bool destroyed;
+
+    // One of the wall's own, not one of Utsusemi's rocks or his planted sword, which Steel leaves alone.
+    public bool InWall { get; set; }
+    // A steel plate: one-way cover that Oni's shots pass and arrows stop on.
+    public bool Plate { get; set; }
+    // Built by Steel, so breaking it pays nothing: no heart, no Shrapnel.
+    public bool Forged { get; set; }
+    public bool Standing => !destroyed;
+    public bool Hurt => !destroyed && health < maxHealth;
+    // Whole, and with room left to be tempered above how it was built (Tamahagane).
+    public bool CanTemper(int bound) => !destroyed && !Hurt && maxHealth < baseHealth + bound;
 
     public void Init(int hitPoints, SpriteRenderer tileRenderer, Sprite[] states, Sprite[] debrisSprites)
     {
         tile = tileRenderer;
         damageStates = states;
         debris = debrisSprites;
-        maxHealth = health = hitPoints;
+        maxHealth = health = baseHealth = hitPoints;
         UpdateSprite();
     }
 
     void OnCollisionEnter(Collision coll)
     {
         // The Spirit Shuriken passes over the ronin's own cover.
-        if (coll.collider.GetComponentInParent<Projectile>() is { Spinning: true }) return;
+        Projectile shot = coll.collider.GetComponentInParent<Projectile>();
+        // The projectile decides what a pass does (Projectile.OnCollisionEnter), so this doesn't hang on who's called first.
+        if (shot != null && (shot.Spinning || shot.PassesCover || Plate || (shot.Whets && InWall))) return;
         if (coll.collider.GetComponentInParent<Arrow>() is { PassesCover: true }) return;
         Hit(coll.GetContact(0).point);
     }
@@ -41,13 +55,35 @@ public class Blocker : MonoBehaviour
         if (health <= 0)
         {
             Demolish();
-            Broken?.Invoke(transform.position);
+            if (!Forged) Broken?.Invoke(transform.position);
         }
         else
         {
             Sfx.Play(Sfx.BlockerHit, 0.7f);
             UpdateSprite();
         }
+    }
+
+    // Scrap or a hammer's ring: health back, never above its maximum. Mending doesn't re-arm anything, since each
+    // blocker can only break once a round.
+    public void Mend(int points)
+    {
+        if (destroyed || points <= 0 || !Hurt) return;
+        // Measured against what's missing, so restoring everything can't overflow.
+        health = points >= maxHealth - health ? maxHealth : health + points;
+        UpdateSprite();
+    }
+
+    // Tamahagane: whole cover grows past new, up to `bound` above how it was built. The maximum rises with it, because
+    // UpdateSprite indexes out of range if health passes it.
+    public void Temper(int points, int bound)
+    {
+        if (destroyed || points <= 0) return;
+        int gain = Mathf.Min(points, baseHealth + bound - maxHealth);
+        if (gain <= 0) return;
+        maxHealth += gain;
+        health += gain;
+        UpdateSprite();
     }
 
     public void Demolish()

@@ -43,6 +43,8 @@ public class Arrow : MonoBehaviour
     // One of a bullet-hell curtain's: a parry sends only a few of these back (Ronin.RiposteCap) and pops the rest,
     // so a parry into a dense stream doesn't turn into a swarm of homing ripostes.
     public bool CappedRiposte { get; set; }
+    // A bell (BulletHell.MakeResonant): the parry that opens a way, so Lodestone Shuriken leaves it flying.
+    public bool Resonant { get; set; }
     public Vector3 Velocity => body.linearVelocity;
     // The halo's colour, which its landing shadow is drawn in.
     public Color GlowColor => glow != null ? glow.color : glowColor;

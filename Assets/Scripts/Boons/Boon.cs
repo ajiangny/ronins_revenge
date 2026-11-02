@@ -366,6 +366,10 @@ public static class Boons
             StatLabel = "Samurai cracked:", Values = new[] { 1f, 2f, 2f }, Format = Plus,
             ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
             LevelStep = 1f, Whole = true, Max = 4f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
+        new BoonDefinition { Id = BoonId.LodestoneShuriken, Element = Element.Steel, Slot = BoonSlot.Special, Name = "Lodestone Shuriken",
+            Description = "Your <b>Shuriken</b> draws in arrows, which fall as <b>Scrap</b>, and <b>Cracks</b> the samurai it passes.",
+            StatLabel = "Arrows caught:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 6f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,

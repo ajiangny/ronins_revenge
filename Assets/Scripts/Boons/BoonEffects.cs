@@ -349,6 +349,11 @@ public partial class BoonEffects
         {
             shuriken.gameObject.AddComponent<ShurikenWake>().Begin(army, () => Bosses, () => FightingWolf, WakeRadius, soak, Water);
         }
+        // Lodestone Shuriken: draws in the shots round the blade, as scrap, and cracks what it passes.
+        if (loadout.Has(BoonId.LodestoneShuriken, out float catches) && shuriken != null)
+        {
+            shuriken.gameObject.AddComponent<ShurikenLodestone>().Begin(army, () => Bosses, () => FightingWolf, WakeRadius, (int)catches, at => ShedScrap(at));
+        }
         if (BossFight)
         {
             OnShurikenThrownAtBoss();

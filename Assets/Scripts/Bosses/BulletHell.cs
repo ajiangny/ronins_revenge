@@ -225,6 +225,7 @@ public static class BulletHell
         if (shot == null) return null;
         Vector3 last = shot.transform.position;
         shot.CappedRiposte = false;
+        shot.Resonant = true;
         shot.Parried = riposte => Resonance(riposte != null ? riposte.transform.position : last);
         return shot;
     }

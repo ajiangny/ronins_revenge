@@ -57,6 +57,14 @@ public partial class GameManager
         yield return ronin.WalkTo(ronin.Home, travelWalkSpeed);
     }
 
+    // The last row was held too long and the whole army is rushing him. Disabled controls also stop a stray arrow
+    // taking a life on the way, so the run ends the one way.
+    void OnArmyOverrunning()
+    {
+        if (state != State.Playing) return;
+        ronin.ControlsEnabled = false;
+    }
+
     void OnArmyReachedRonin()
     {
         if (state != State.Playing) return;
@@ -69,6 +77,7 @@ public partial class GameManager
         }
         if (godMode)
         {
+            ronin.ControlsEnabled = true;
             KillArmy();
             return;
         }

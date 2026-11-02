@@ -590,6 +590,7 @@ public partial class GameManager : MonoBehaviour
         army.SamuraiKilled += OnSamuraiKilled;
         army.ArmyDefeated += OnArmyDefeated;
         army.ArmyReachedRonin += OnArmyReachedRonin;
+        army.Overrunning += OnArmyOverrunning;
         army.DiveStarted += OnDiveStarted;
         ronin.Hit += OnRoninHit;
         ronin.ShurikenThrown += OnShurikenThrown;
@@ -611,6 +612,7 @@ public partial class GameManager : MonoBehaviour
         army.SamuraiKilled -= OnSamuraiKilled;
         army.ArmyDefeated -= OnArmyDefeated;
         army.ArmyReachedRonin -= OnArmyReachedRonin;
+        army.Overrunning -= OnArmyOverrunning;
         army.DiveStarted -= OnDiveStarted;
         ronin.Hit -= OnRoninHit;
         ronin.ShurikenThrown -= OnShurikenThrown;
@@ -735,6 +737,7 @@ public partial class GameManager : MonoBehaviour
             effects.Tick();
             if (RunLog.Enabled) RunLog.Tick(Time.deltaTime, army.Frozen, ArmyGap());
         }
+        ui.SetOverrun(army.OverrunProgress, army.OverrunSecondsLeft);
         ronin.UltimateLocked = tutorial.Active;
         UpdateUltimateAura();
         boonChoice.UltimateShown = !tutorial.Active || tutorial.ShowsUltimate;

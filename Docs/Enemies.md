@@ -15,7 +15,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   steady `lungeSpeed` (its `duration` from the distance) and walks back). Every warning (`Warn`: `WarnDive`, a `BladeRing`, a small
   shake) also draws `DrawTell`, a red streak from the samurai to the ronin and a mark at his `Feet`, until it launches. One at a time:
   no lunge while any diver is out, and no dives once `holding`.
-  `ArmyReachedRonin` (a landing at `Ronin.TopY`) is only a safeguard now. In `DiveContact` a parrying ronin (`Ronin.Parrying`,
+  While anyone holds the row (`RowOccupied`; a row soldier out on a lunge counts, one the tide lifted doesn't) `SamuraiArmy.Overrun.cs` counts `overrunTime` up, draining at `overrunRecovery` times the speed while it's clear; `GameUI.SetOverrun` draws `OverrunProgress` as the red glow and word at the foot of the screen, over a quickening `MarchStep`. When it runs out `RushRonin` throws every soldier at him over `overrunRush` seconds (`Overrunning`: controls off, so no stray hit) and then raises `ArmyReachedRonin`, which ends the run as `DeathCause.Invasion`; a levy (`Muster`) has no clock. `ArmyReachedRonin` also fires on a landing at `Ronin.TopY`, a safeguard the hold line keeps out of reach. In `DiveContact` a parrying ronin (`Ronin.Parrying`,
   within `parryReach`) flings a lunger or diver away (`Ronin.ParryBody`, `Samurai.Knock` tints it, dive phase 3 arcs it off,
   then `Kill(KillSource.Deflected)`). Rounds with `LevelConfig.diveInterval` send a samurai from behind the
   front rank on a telegraphed bezier swoop at the ronin (`StartDive`/`UpdateDives`): it hits blockers (`Blocker.Hit`)

@@ -12,7 +12,7 @@ public partial class SamuraiArmy
     // Call it from Update (or a physics callback), not FixedUpdate: see the note on setting the position below.
     public bool Shove(Samurai soldier, float up)
     {
-        if (Entering || soldier == null || soldier.IsDead || up <= 0f || IsDiving(soldier)) return false;
+        if (Entering || overrunning || soldier == null || soldier.IsDead || up <= 0f || IsDiving(soldier)) return false;
         Vector3 at = soldier.Body.position;
         float viewTop = CameraShake.Center.y + cam.orthographicSize - samuraiRadius - 0.3f;
         float lift = Mathf.Min(up, MaxShove, soldier.HomeY - at.y, viewTop - at.y);

@@ -60,6 +60,12 @@ public partial class SamuraiArmy : MonoBehaviour
     [Header("Last stand")]
     [Tooltip("How far below the top of the cover the army's last row lies. Each samurai that reaches it breaks formation and walks that row on its own, smashing the cover, while the ranks behind keep collapsing onto it and the row lunges at the ronin instead of the run ending.")]
     [SerializeField] float holdDepth = 2f;
+    [Tooltip("Seconds soldiers can stand in the last row before the whole army rushes the ronin and the run ends. The bottom of the screen glows red as it runs out. 0 turns it off.")]
+    [SerializeField] float overrunTime = 20f;
+    [Tooltip("How many times faster that time drains back while the last row is clear.")]
+    [SerializeField] float overrunRecovery = 2f;
+    [Tooltip("Seconds the final rush takes to reach the ronin.")]
+    [SerializeField] float overrunRush = 0.9f;
     [Tooltip("Average seconds between lunges once the army holds the cover's row.")]
     [SerializeField] float lungeInterval = 2.4f;
     [Tooltip("Seconds a lunger shakes under its warning before it launches.")]
@@ -234,6 +240,7 @@ public partial class SamuraiArmy : MonoBehaviour
         target = player;
         landingY = landingLineY;
         holding = false;
+        levy = false;
         lastBottom = float.PositiveInfinity;
         blockerTopY = blockerTop;
         direction = 1f;
@@ -296,6 +303,7 @@ public partial class SamuraiArmy : MonoBehaviour
     public void Muster(LevelConfig config, Transform player, float landingLineY, float blockerTop, Vector3 from, float seconds, Color soul)
     {
         SpawnStage(config, player, landingLineY, blockerTop, false);
+        levy = true;
         foreach (Samurai soldier in soldiers) DrawAt(soldier, LevyOrder);
         mustering = StartCoroutine(FallIn(from, seconds, soul));
     }
@@ -465,6 +473,7 @@ public partial class SamuraiArmy : MonoBehaviour
     {
         if (mustering != null) StopCoroutine(mustering);
         mustering = null;
+        ResetOverrun();
         foreach (Samurai soldier in soldiers)
         {
             Destroy(soldier.gameObject);
@@ -626,6 +635,8 @@ public partial class SamuraiArmy : MonoBehaviour
             ArmyReachedRonin?.Invoke();
             return;
         }
+
+        if (UpdateOverrun(dt)) return;
 
         if (Time.time >= nextShotTime)
         {

@@ -51,7 +51,7 @@ the scene keeps pointing at `Name.cs`. Keep new members in the part they belong 
 
 - `GameManager`: `Defaults` (the stages and safe areas as written in code), `Menus`, `Hub`, `Dev`, `Rounds`,
   `Rewards`, `Bosses`, `Talk`, `Stages` and `Clock` (the time bonus).
-- `SamuraiArmy`: `Formation` (slot layout by `FormationShape`), `Elite` (veteran rows and the round's Elite), `Knockback` (`Shove`); `Samurai`: `Rank` (Elite, veteran, Burning's tick), `Throw` (the attack clip and its release frame).
+- `SamuraiArmy`: `Formation` (slot layout by `FormationShape`), `Elite` (veteran rows and the round's Elite), `Knockback` (`Shove`), `Overrun` (the last row's countdown and final rush); `Samurai`: `Rank` (Elite, veteran, Burning's tick), `Throw` (the attack clip and its release frame).
 - `Utsusemi`: `Kasa`, `Lattice`, `Hours`, `Plumb`, `Lantern`, `Beams`, `Overload` and `Clock`, one per move family.
 - `Kagetsune`: `Kit` (stride, bullets, telegraph and effect helpers), `Throne` (phase 1), `Wraith` (phase 2), `Souls`
   (the summoned bosses and their borrowed powers), `Levy` (his levy of the dead army), `Beam` (how the Spirit Hyper Beam is drawn) and `Phase` (the break and his fall).

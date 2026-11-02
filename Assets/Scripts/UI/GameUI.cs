@@ -206,6 +206,7 @@ public class GameUI : MonoBehaviour
 
     void Awake()
     {
+        BuildOverrunGlow();
         BuildHud();
         BuildBossBar();
         BuildSubtitle();
@@ -234,6 +235,58 @@ public class GameUI : MonoBehaviour
             yield return null;
         }
         fade.color = new Color(0f, 0f, 0f, alpha);
+    }
+
+    // Red light rising from the foot of the screen while soldiers hold the last row (SamuraiArmy.OverrunProgress), and
+    // a word in the strip under the ronin's feet to say what it means. First on the canvas, so it lies under the HUD.
+    void BuildOverrunGlow()
+    {
+        overrunGlow = Stretch(CreateRect("OverrunGlow", transform, Vector2.zero, Vector2.zero, Vector2.zero));
+        Image image = overrunGlow.gameObject.AddComponent<Image>();
+        image.sprite = ProceduralSprites.FadeDown;
+        image.raycastTarget = false;
+        // FadeDown is solid at its top: turned over, the light is strongest at the screen's edge.
+        overrunGlow.localScale = new Vector3(1f, -1f, 1f);
+        overrunGlowImage = image;
+        overrunGlow.gameObject.SetActive(false);
+
+        overrunWord = CreateText("OverrunWord", new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(900, 36), 26, TextAlignmentOptions.Bottom);
+        overrunWord.characterSpacing = 8;
+        overrunWord.color = new Color(1f, 0.82f, 0.78f);
+        Style(overrunWord, TextStyle.Hint);
+        overrunWord.gameObject.SetActive(false);
+    }
+
+    RectTransform overrunGlow;
+    Image overrunGlowImage;
+    TextMeshProUGUI overrunWord;
+    float overrunShown;
+    int overrunWordSeconds = -1;
+
+    // Called every frame. The glow eases toward `progress`, grows and pulses faster as the time runs out.
+    public void SetOverrun(float progress, float secondsLeft)
+    {
+        if (progress <= 0f && overrunShown <= 0f) return;
+        overrunShown = Mathf.MoveTowards(overrunShown, progress, Time.unscaledDeltaTime * 1.5f);
+        bool on = overrunShown > 0f;
+        if (overrunGlow.gameObject.activeSelf != on) overrunGlow.gameObject.SetActive(on);
+        // Word only while the clock is really running, so it's gone the moment the army falls.
+        bool word = progress > 0f;
+        if (overrunWord.gameObject.activeSelf != word) overrunWord.gameObject.SetActive(word);
+        if (!on) return;
+
+        overrunGlow.anchorMin = Vector2.zero;
+        overrunGlow.anchorMax = new Vector2(1f, Mathf.Lerp(0.14f, 0.42f, overrunShown));
+        float pulse = 0.72f + 0.28f * Mathf.Sin(Time.unscaledTime * Mathf.Lerp(3f, 12f, overrunShown));
+        overrunGlowImage.color = new Color(0.95f, 0.08f, 0.05f, Mathf.Lerp(0.3f, 0.9f, overrunShown) * pulse);
+
+        int seconds = Mathf.CeilToInt(secondsLeft);
+        if (word && seconds != overrunWordSeconds)
+        {
+            overrunWordSeconds = seconds;
+            if (seconds > 0) overrunWord.SetText("CLEAR THE LAST ROW  {0}", seconds);
+            else overrunWord.SetText("OVERRUN");
+        }
     }
 
     // Arcade layout, kept minimal: one row each side of the boss bar, score top left and stage/round top right, each a

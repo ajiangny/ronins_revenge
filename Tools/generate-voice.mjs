@@ -50,10 +50,10 @@ const POGURU = "vHGbxklwUU4QPMN7Wam1";
 // rough and swaggering with a coward underneath, a period-drama villain grunt. All of them share it. They are dead
 // (Story/Army.md), so their takes are read hollow and rasping and baked through GHOST below.
 const SOLDIER = "r3povynJfMX3y8tUT4Jg";
-// Oliver (Story/Oliver.md has the prompt): not designed yet, so his lines can't be voiced until the user picks a preview
-// and its id goes here. He gets no FX entry: his coffin echo is GameManager.soulVoice's, like the other souls', and a bake
+// Designed in ElevenLabs for Oliver (Story/Oliver.md has the prompt): very large, low and gravelly, with a wheeze and a
+// snuffle, flat and disappointed, rarely tender. He gets no FX entry: his coffin echo is GameManager.soulVoice's, like the other souls', and a bake
 // would double it.
-const OLIVER = "TODO_VOICE_ID";
+const OLIVER = "P7tsKo1uFE8PU6eXpPfu";
 
 // The dead army's voice, baked into the mp3 with ffmpeg so it sounds the same in WebGL builds, where Unity's audio
 // filters don't run: the take pitched down ~12% at the same speed, doubled by a slow chorus with a tomb echo, and a

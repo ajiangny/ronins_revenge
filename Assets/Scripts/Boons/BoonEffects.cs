@@ -46,6 +46,8 @@ public partial class BoonEffects
     const float TideShadowPush = 0.6f;
     // Riptide Blade soaks the boss on this share of its kill chance, like Flame Blade's bursts.
     const float BossRiptideShare = 0.6f;
+    // Undertow Riposte's wave also washes away the arrows this close round him as it rolls out.
+    const float UndertowWashRadius = 3.5f;
 
     readonly SamuraiArmy army;
     readonly Ronin ronin;
@@ -101,6 +103,10 @@ public partial class BoonEffects
     static Color Storm => Boons.Info(Element.Lightning).Color;
     static Color Water => Boons.Info(Element.Tide).Color;
 
+    // Riptide Blade's tidal wave slash soaks what it touches itself (Ronin.SoakStruck), so its hits never roll the
+    // column wave as well: one wave doesn't break into another.
+    static bool TideSlashing => Projectile.Striking != null && Projectile.Striking.Washes;
+
     // Flame Blade's roll. Kindling's fireball counts as a slash for the other blades, but brings its own blast, so it
     // never sets off Flame Blade's as well.
     bool FlameBursts(float share)
@@ -123,7 +129,7 @@ public partial class BoonEffects
                     foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Ignite(Statuses.BurnSeconds);
                 }
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, BlastRadius, (int)value, samurai);
-                if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, value);
+                if (loadout.Has(BoonId.RiptideBlade, out _) && !TideSlashing && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, Statuses.SoakSeconds);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     EncaseOrChill(position, value);
@@ -290,7 +296,7 @@ public partial class BoonEffects
                 if (AnvilRings) boss.Crack(Statuses.CrackSeconds);
                 if (ronin.FullHeat) boss.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) BossBlast(point, BlastRadius, boss);
-                if (loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) SoakBoss(boss, point, value);
+                if (loadout.Has(BoonId.RiptideBlade, out _) && !TideSlashing && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) SoakBoss(boss, point, Statuses.SoakSeconds);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     // A blow on the frozen boss shatters the ice for an extra point of damage; otherwise she freezes.
@@ -436,6 +442,7 @@ public partial class BoonEffects
             {
                 foreach (Boss boss in Bosses) SoakBoss(boss, boss.Centre, UndertowSoakSeconds);
                 if (WolfFight) Wolf.Soak(UndertowSoakSeconds);
+                WashArrows(ronin.Bounds.center, UndertowWashRadius);
                 GreatWave(ronin.Bounds.center, Boss.Centre);
             }
             return;
@@ -445,6 +452,7 @@ public partial class BoonEffects
         {
             army.PushBack(value * Statuses.PushScale);
             foreach (Samurai front in army.FrontRank()) front.Soak(UndertowSoakSeconds);
+            WashArrows(ronin.Bounds.center, UndertowWashRadius);
             GreatWave(ronin.Bounds.center, army.Centre);
         }
         if (loadout.Has(BoonId.ThunderRiposte, out value))
@@ -569,15 +577,16 @@ public partial class BoonEffects
             if (Mathf.Abs(arrow.transform.position.x - from.x) <= ColumnHalfWidth && arrow.transform.position.y >= from.y - 1f) arrow.Wash(Water);
         }
         Vector3 crest = new Vector3(from.x, top + 1f, 0f);
-        if (Fx.Play(Fx.TideWave, from, Color.white, 2f) == null) ElementFx.Wave(from, crest, Water, 2f, 0.45f, ronin.art.deathParticles);
+        if (!TideFx.Column(from, crest)) ElementFx.Wave(from, crest, Water, 2f, 0.45f, ronin.art.deathParticles);
         CameraShake.Add(0.06f);
         Sfx.Play(Sfx.TideWave, 0.8f, 1.1f);
     }
 
-    // Undertow Riposte and Tide Shadow: a wave the width of the field rolls up from `from` toward `to`.
+    // Undertow Riposte and Tide Shadow: a wave the width of the field rolls up from `from` toward `to`, in rows of
+    // native-size crests (TideFx.Great).
     void GreatWave(Vector3 from, Vector3 to)
     {
-        if (Fx.Play(Fx.TideWave, from, Color.white, 4f) == null) ElementFx.Wave(from, to, Water, 7f, 0.6f, ronin.art.deathParticles);
+        if (!TideFx.Great(from, to)) ElementFx.Wave(from, to, Water, 7f, 0.6f, ronin.art.deathParticles);
         CameraShake.Add(0.15f);
         Sfx.Play(Sfx.TideWave);
     }
@@ -644,7 +653,7 @@ public partial class BoonEffects
                 if (ronin.FullHeat) Wolf.Ignite(Statuses.BurnSeconds);
                 if (loadout.Has(BoonId.FlameBlade, out _) && FlameBursts(BossFlameShare)) WolfBlast(point, BlastRadius);
                 if (WolfFight && loadout.Has(BoonId.StormBlade, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
-                if (WolfFight && loadout.Has(BoonId.RiptideBlade, out value) && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) Wolf.Soak(value);
+                if (WolfFight && loadout.Has(BoonId.RiptideBlade, out _) && !TideSlashing && Random.value < loadout.Extra(BoonId.RiptideBlade) * BossRiptideShare) Wolf.Soak(Statuses.SoakSeconds);
                 if (WolfFight && loadout.Has(BoonId.FrostBlade, out _)) Wolf.Chill(Statuses.ChillSeconds);
                 break;
             case KillSource.Shuriken:

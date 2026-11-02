@@ -37,7 +37,7 @@ Tools/                the ElevenLabs scripts (npm run music | sfx | voice)
 | `Dialogue/` | `Dialogue` (+ `Dialogue.Lines`), `DialogueScene`, `Poguru`, `Tutorial`, `TrainingSoldier` | Reactive conversations and their picker, talk scenes, Poguru and his tutorial | [Progression](Docs/Progression.md), [GameFlow](Docs/GameFlow.md) |
 | `UI/` | `GameUI`, `MenuUI`, `BoonChoiceUI`, `SwirlUI`, `ResourceTray`, `SpriteAnimatorUI` | The HUD, menu pages, the boon screen, the resource tray | [UI](Docs/UI.md) |
 | `World/` | `Backdrop`, `Atmosphere`, `BlockerWall`, `Blocker`, `CameraShake` | Maps and travel, each map's mood, the cover row, the camera | [World](Docs/World.md) |
-| `Vfx/` | `Fx`, `FxPlayer`, `FxLibrary`, `ElementFx`, `Debris`, `HitFlash`, `SpriteOutline`, `ProceduralSprites`, `SpriteAnimator`, `CharacterArt` | Pixel effects by id, code-built glows and bolts, debris, hit flashes, procedural sprites, sprite clips | [Art](Docs/Art.md) |
+| `Vfx/` | `Fx`, `FxPlayer`, `FxLibrary`, `ElementFx`, `TideFx`, `Debris`, `HitFlash`, `SpriteOutline`, `ProceduralSprites`, `SpriteAnimator`, `CharacterArt` | Pixel effects by id, code-built glows and bolts, Asagi's waves laid out from native-size crests, debris, hit flashes, procedural sprites, sprite clips | [Art](Docs/Art.md) |
 | `Audio/` | `Music`, `Sfx`, `SfxLibrary`, `VoiceLibrary` | Music, sound effects by id, the voice clips | [Art](Docs/Art.md) |
 
 `GameManager` owns the run and is what everything reports to; the state machine and the flow from title to dawn are

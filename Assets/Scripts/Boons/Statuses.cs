@@ -4,7 +4,7 @@ using UnityEngine;
 // element's mark. Most samurai fall to one hit, so the army's statuses work on its arrows rather than its health,
 // and none of them takes a samurai out of the fight (a samurai that can't shoot is as good as dead): Burning ones'
 // shots go wild, Chilled ones loose slow arrows, a Jolted one's next shot fizzles, and Soaked ones (Asagi's) take
-// one more from every boon effect. On a warlord each gives an edge instead: Burning breaks her stance faster,
+// one more from every boon effect and from Oni's own blade, so a two-hit samurai falls to one slash. On a warlord each gives an edge instead: Burning breaks her stance faster,
 // Chilled lengthens her next freeze, Jolted adds a point to the ronin's next blow. Cracked (Oliver's) gives no edge on
 // a foe at all: it only pays in cover, as scrap shed by Oni's own hit.
 // The Infusions (Ember Heart, Hoarfrost, Static Field, Deep Current, Tamahagane) deepen them once an element is held three times.
@@ -14,6 +14,8 @@ public static class Statuses
     public const float ChillSeconds = 4f;
     public const float JoltSeconds = 4f;
     public const float CrackSeconds = 4f;
+    // Riptide Blade's soak (its column wave and its tidal wave slash). Deep Current doubles every soak.
+    public const float SoakSeconds = 4f;
     // A cracked warlord's next own hit knocks loose this much scrap, at most once per this many seconds, however many
     // warlords stand: the payout is cover, and there is one wall.
     public const float BossCrackCooldown = 5f;

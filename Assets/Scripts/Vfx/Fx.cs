@@ -13,6 +13,8 @@ public static class Fx
     // Asagi's water: a wave rolling up the field, and the splash where a samurai or boss is soaked.
     public const string TideWave = "TideWave";
     public const string Splash = "Splash";
+    // Riptide Blade's tidal wave slash: a wide crest that loops while it flies up the field.
+    public const string TideSlash = "TideSlash";
     public const string SlashArc = "SlashArc";
     public const string WardBubble = "WardBubble";
     public const string BoonPillar = "BoonPillar";

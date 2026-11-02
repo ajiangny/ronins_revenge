@@ -55,6 +55,10 @@ public class Projectile : MonoBehaviour
     // Whetstone: it crosses the wall's cover, wearing it down, with this chance of sparing each blocker.
     public bool Whets { get; set; }
     public float WhetSpared { get; set; }
+    // Riptide Blade's tidal wave slash: washes away the arrows it crosses and rolls over his cover, and stops at the
+    // first thing it hits that isn't a samurai (a warlord, Kuon, a scout), so a boss takes it once.
+    public bool Washes { get; private set; }
+    Color washColor;
 
     Rigidbody body;
     SpriteRenderer art;
@@ -156,6 +160,29 @@ public class Projectile : MonoBehaviour
         art.transform.localScale = new Vector3(size, size, 1f);
         if (!art.TryGetComponent(out SpriteAnimator animator)) animator = art.gameObject.AddComponent<SpriteAnimator>();
         animator.Play(frames, true, null, fps);
+    }
+
+    // Makes this slash a tidal wave: a hitbox `width` by `height` world units, sized from its art, that cuts through
+    // `pierce` samurai, washes away the ordinary arrows it crosses and passes over cover. Call after Launch, since
+    // Launch scales the hitbox this overrides. The glow is stretched under the crest to match.
+    public void Tidal(float width, float height, int pierce, Color water)
+    {
+        Washes = true;
+        washColor = water;
+        PassesCover = true;
+        pierceLeft = pierce;
+        Vector3 scale = transform.lossyScale;
+        foreach (BoxCollider box in GetComponentsInChildren<BoxCollider>())
+        {
+            box.size = new Vector3(width / scale.x, height / scale.y, box.size.z);
+        }
+        glow.transform.localScale = new Vector3(width * 1.15f / scale.x, height * 2.2f / scale.y, 1f);
+    }
+
+    // Stretches the art sideways only: the stand-in for the tidal wave slash when its own art is missing.
+    public void StretchArt(float factor)
+    {
+        art.transform.localScale = Vector3.Scale(art.transform.localScale, new Vector3(factor, 1f, 1f));
     }
 
     // Seeks whatever picker returns, steering at homingTurnRate. When the target falls (its colliders switch off)
@@ -350,6 +377,15 @@ public class Projectile : MonoBehaviour
             return;
         }
 
+        // The tidal wave washes the ordinary arrows it crosses away; spears and the shots only a parry answers keep
+        // flying, and the wave rolls on past them.
+        if (Washes && coll.collider.GetComponentInParent<Arrow>() is Arrow arrow)
+        {
+            if (!arrow.Unbreakable && !arrow.Reflectable) arrow.Wash(washColor);
+            KeepFlying(coll.collider);
+            return;
+        }
+
         IHittable target = coll.collider.GetComponentInParent<IHittable>();
         if (target != null)
         {
@@ -359,7 +395,8 @@ public class Projectile : MonoBehaviour
             Striking = null;
             Impacted?.Invoke(transform.position, target);
             Landed?.Invoke(Source, target);
-            if (pierceLeft > 0)
+            // A wave breaks on anything bigger than a samurai, so a warlord with several colliders takes it once.
+            if (pierceLeft > 0 && !(Washes && !(target is Samurai)))
             {
                 pierceLeft--;
                 KeepFlying(coll.collider);

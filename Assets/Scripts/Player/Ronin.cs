@@ -751,7 +751,10 @@ public class Ronin : MonoBehaviour
 
     void FanFrom(GameObject prefab, KillSource source, Sprite projectileSprite, Vector3 from, bool clone, bool split)
     {
-        Projectile slash = LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
+        // Riptide Blade: his own slash (never the clone's) may roll out as a tidal wave.
+        Projectile slash = !clone && source == KillSource.Slash && Loadout.Has(BoonId.RiptideBlade, out float tide) && UnityEngine.Random.value < tide
+            ? LaunchTideSlash(prefab, from, projectileSprite)
+            : LaunchSlash(prefab, from, Vector3.up, source, projectileSprite, 1f, clone);
         if (split) slash.SplitAfter(SplitDelay, parent => SplitOff(prefab, projectileSprite, parent, clone));
         if (Loadout.Has(BoonId.EchoSlash, out float echo) && UnityEngine.Random.value < echo)
         {
@@ -780,6 +783,55 @@ public class Ronin : MonoBehaviour
         // Hot metal has hard edges: no halo round Steel's slash.
         if (!clone && Loadout.SlotElement(BoonSlot.Attack) == Element.Steel) projectile.HardEdged();
         return projectile;
+    }
+
+    // Riptide Blade's tidal wave slash: a crest about three and a half slashes wide that cuts through a few samurai,
+    // soaks everything it touches and washes away the arrows it crosses. It is still a slash, so its kills count as
+    // his own (Healing Spring, the drum), but BoonEffects never sends Riptide's column wave off one of them.
+    const int TideSlashPierce = 3;
+    // The hitbox spans this share of the crest's drawn width, short of its thin trailing tips, and is this tall.
+    const float TideSlashHitShare = 0.8f;
+    const float TideSlashHitHeight = 0.35f;
+    // Without the TideSlash art: the slash sprite drawn this many times wider, and a hitbox this wide.
+    const float TideSlashFallbackStretch = 3.5f;
+    const float TideSlashFallbackWidth = 2.1f;
+
+    Projectile LaunchTideSlash(GameObject prefab, Vector3 from, Sprite projectileSprite)
+    {
+        Projectile wave = LaunchSlash(prefab, from, Vector3.up, KillSource.Slash, projectileSprite, 1f);
+        Color water = Boons.Info(Element.Tide).Color;
+        Sprite[] frames = Fx.Frames(Fx.TideSlash);
+        float width;
+        if (frames != null && frames.Length > 0)
+        {
+            // Drawn at its native size on the pixel grid, never stretched.
+            wave.Animate(frames, 12f, frames[0].bounds.size.y);
+            wave.Tint(Color.white, water);
+            width = frames[0].bounds.size.x * TideSlashHitShare;
+        }
+        else
+        {
+            wave.StretchArt(TideSlashFallbackStretch);
+            wave.Tint(Color.Lerp(Color.white, water, 0.5f), water);
+            width = TideSlashFallbackWidth;
+        }
+        int pierce = TideSlashPierce + (Loadout.Has(BoonId.PiercingSlash, out float passes) ? (int)passes : 0);
+        wave.Tidal(width, TideSlashHitHeight, pierce, water);
+        wave.Impacted += (point, target) => SoakStruck(target);
+        if (Fx.Play(Fx.Splash, from, Color.white, 1f) == null) ElementFx.Glow(from, water, 0.6f, 2.4f, 0.3f);
+        Sfx.Play(Sfx.TideWave, 0.7f, 1.25f);
+        return wave;
+    }
+
+    // Whatever the tidal wave touches is soaked: a samurai, a warlord, or Kuon.
+    static void SoakStruck(IHittable target)
+    {
+        switch (target)
+        {
+            case Samurai samurai: samurai.Soak(Statuses.SoakSeconds); break;
+            case Boss boss when !boss.IsDead: boss.Soak(Statuses.SoakSeconds); break;
+            case SpiritWolf wolf: wolf.Soak(Statuses.SoakSeconds); break;
+        }
     }
 
     // Split Slash: two smaller, lesser slashes (half damage to bosses, no boon effects) peel off either side of the

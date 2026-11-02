@@ -334,17 +334,19 @@ public static class Boons
 
         // Water: tide. Soaks (so every other element's effect hits harder), rolls the army back, washes arrows away,
         // and heals. Asagi's boons make few kills of their own; the Soaked status is what they're for.
+        // Its first stat was a flat 4 s soak (now Statuses.SoakSeconds); it is the tidal wave slash's chance since the
+        // Water review (BOON_DESIGN §13).
         new BoonDefinition { Id = BoonId.RiptideBlade, Element = Element.Tide, Slot = BoonSlot.Attack, Name = "Riptide Blade",
-            Description = "A <b>Slash</b> kill may send a wave up its column: every samurai in it is <b>Soaked</b> and its arrows wash away.",
-            StatLabel = "Soak time:", Values = new[] { 4f, 4f, 4f }, Format = Seconds,
-            ExtraLabel = "Chance:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
-            LevelStep = 0.4f, Max = 8f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
+            Description = "Your <b>Slash</b> may roll out as a tidal wave that cuts through samurai, <b>Soaking</b> them, and washes arrows away. A <b>Slash</b> kill may send a wave up its column.",
+            StatLabel = "Tidal wave:", Values = new[] { 0.2f, 0.28f, 0.36f }, Format = Percent,
+            ExtraLabel = "Column wave:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
+            LevelStep = 0.04f, Max = 0.5f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
         new BoonDefinition { Id = BoonId.TidewakeShuriken, Element = Element.Tide, Slot = BoonSlot.Special, Name = "Tidewake Shuriken",
             Description = "Your <b>Shuriken</b> leaves a wake: arrows it passes wash away, and samurai it passes are <b>Soaked</b>.",
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
         new BoonDefinition { Id = BoonId.UndertowRiposte, Element = Element.Tide, Slot = BoonSlot.Parry, Name = "Undertow Riposte",
-            Description = "A successful <b>Parry</b> sends a wave that pushes the army back up the field and <b>Soaks</b> its front rank.",
+            Description = "A successful <b>Parry</b> sends a wave that washes away the arrows around you, pushes the army back up the field and <b>Soaks</b> its front rank.",
             StatLabel = "Push back:", Values = new[] { 0.3f, 0.45f, 0.6f }, Format = Plus,
             LevelStep = 0.08f, Max = 0.9f },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Tidal Renewal",

@@ -42,7 +42,7 @@ public class Samurai : MonoBehaviour, IHittable
     public bool IsDead { get; private set; }
     // Frozen solid by Frost Blade or an ice shard: holds its fire, and the ronin's next hit shatters it.
     public bool Encased => Time.time < encasedUntil;
-    // Soaked by Asagi's water: every boon effect deals it one more (TakeHit), and the Duos build on it.
+    // Soaked by Asagi's water: every boon effect and Oni's own hits deal it one more (TakeHit), and the Duos build on it.
     public bool Soaked => Time.time < soakedUntil;
     // The other elements' statuses (Statuses.cs): Burning sends its shots wild, Chilled slows its arrows, and Jolted
     // makes its next shot fizzle.
@@ -282,8 +282,8 @@ public class Samurai : MonoBehaviour, IHittable
         return ice;
     }
 
-    // Soaks the samurai for a while: a sea-blue wash and a splash. Nothing on its own; it's what the other effects
-    // hit harder, and what Black Ice, Scalding Steam and Thunder Rain look for.
+    // Soaks the samurai for a while: a sea-blue wash and a splash. Oni's own blows and every effect hit it harder,
+    // and Black Ice, Scalding Steam and Thunder Rain look for it.
     public void Soak(float seconds)
     {
         if (IsDead || seconds <= 0f) return;
@@ -430,8 +430,10 @@ public class Samurai : MonoBehaviour, IHittable
         if (IsDead || army.Entering) return;
         // Ice is brittle: any of the ronin's own hits shatters an encased samurai outright.
         if (Encased && source != KillSource.Effect) damage = health;
-        // Soaked, every boon effect (blast, strike, shard, wave, drum) lands one point harder: the one place it's added.
-        if (Soaked && source == KillSource.Effect) damage++;
+        // Soaked, every boon effect (blast, strike, shard, wave, drum) and Oni's own blade lands one point harder, so a
+        // waterlogged shieldbearer or taisho falls to one slash: the one place it's added. The lesser blades (forks,
+        // the clone's) don't, as they set off nothing else either.
+        if (Soaked && !Damage.IsLesser(source)) damage++;
         health -= damage;
         if (health <= 0)
         {

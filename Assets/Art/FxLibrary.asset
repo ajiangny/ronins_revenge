@@ -408,6 +408,37 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 7119dc5e75ff2469aafd65634b59ca10, type: 3}
     fps: 18
     loop: 0
+  - id: TideWave
+    frames:
+    - {fileID: 21300000, guid: 38b68d2bbce340d6a83c6a2e541e4c95, type: 3}
+    - {fileID: 21300000, guid: 48a618132cbc409b8dac832bf0439e65, type: 3}
+    - {fileID: 21300000, guid: 7f434a79df3a42299561a3e5892ceb4f, type: 3}
+    - {fileID: 21300000, guid: 381d1101a0be4fb6850de0cf2e9f0fe0, type: 3}
+    - {fileID: 21300000, guid: 0c4512e3def64f319598d4f86746bb62, type: 3}
+    - {fileID: 21300000, guid: a425becdefff4084b0852629340f2915, type: 3}
+    - {fileID: 21300000, guid: d18e532620bb4aa3b1f23b8847abdd57, type: 3}
+    fps: 14
+    loop: 0
+  - id: Splash
+    frames:
+    - {fileID: 21300000, guid: 145c8b553a91402bbdb3b4d43a50c7ba, type: 3}
+    - {fileID: 21300000, guid: dfb16813378a448e9209da16721e163f, type: 3}
+    - {fileID: 21300000, guid: 2c55abce683b4697b9ba1cca54720960, type: 3}
+    - {fileID: 21300000, guid: 89dec23f09fb4e0fb6eb11dd03d7aae0, type: 3}
+    - {fileID: 21300000, guid: d36bb560303a46dea0756ae7ec309dcf, type: 3}
+    - {fileID: 21300000, guid: 46f41a0d62724f5faa242a6ca5040eda, type: 3}
+    fps: 16
+    loop: 0
+  - id: TideSlash
+    frames:
+    - {fileID: 21300000, guid: 9e3987fff9114c98bf2b5ba824f8c912, type: 3}
+    - {fileID: 21300000, guid: 22263539a48c43699a232f6ac6e63bee, type: 3}
+    - {fileID: 21300000, guid: dec77bd270154186888c603fc044b12d, type: 3}
+    - {fileID: 21300000, guid: 7706485e48de434ebc57e2c76b0cf5ac, type: 3}
+    - {fileID: 21300000, guid: 357c71e3d4584c8a8fc6ff0ada79a33f, type: 3}
+    - {fileID: 21300000, guid: 2a7e8874e2a1468fb899b5ea2044d59f, type: 3}
+    fps: 12
+    loop: 1
   - id: Beni_SmokeRing
     frames:
     - {fileID: 21300000, guid: 0c028f014d8214ade9db3daaee3708c3, type: 3}

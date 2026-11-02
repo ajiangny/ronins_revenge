@@ -354,7 +354,7 @@ Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost 
 
 | Boon | Slot | Common / Rare / Epic |
 |---|---|---|
-| **Riptide Blade** | Attack | A slash kill may (40 / 55 / 70%) send a wave up the victim's column: every samurai in it is soaked (4 s) and the arrows in the column wash away. On a boss hit, the same chance soaks the boss. |
+| **Riptide Blade** | Attack | A slash kill may (40 / 55 / 70%) send a wave up the victim's column: every samurai in it is soaked (4 s) and the arrows in the column wash away. On a boss hit, the same chance soaks the boss. Since §13 a slash may also roll out as a tidal wave (20 / 28 / 36%). |
 | **Tidewake Shuriken** | Special | The shuriken leaves a wake: arrows it passes wash away, samurai it passes within reach are soaked for 3 / 4 / 5 s, a boss it passes too. |
 | **Undertow Riposte** | Parry | A parry sends a wave that pushes the army back up 0.3 / 0.45 / 0.6 units and soaks the front row. On a boss, soaks it. |
 | **Tidal Renewal** | Passive, instant | +1 / +1 / +2 max life. Moved here from Frost: it's her medicine and her name. |
@@ -1050,3 +1050,42 @@ Play a full round with no Steel after step 3.
 **If time runs out:** 1 to 8 are a complete fifth element. Cut in this order: 19, 20, 16, 14, 15, 13, 12, 17, 11, 10,
 9. Without a boon's step its definition doesn't exist, so it's simply never offered. Step 18 can stay at a code-only
 colour with no menu run; step 21's short version can't be cut.
+
+## 13. Water review: a mono-Water build that plays
+
+**The problem.** Water read as the weakest element in play. Soaked did nothing on its own (§7: "+1 from every boon
+effect"), and Water's own boons deal almost no damage, so the +1 only paid once a second element was held. A run
+that drew mostly Asagi's souls soaked samurai and then cut them down exactly as it would have without her. Her waves
+also looked weak: there were no `TideWave` frames, so every wave fell back to one stretched procedural glow.
+
+**What changed** (three changes, each kept small):
+
+| Change | Before | After | Why |
+|---|---|---|---|
+| **Riptide Blade's tidal wave slash** | Riptide's first stat was a flat 4 s soak (4 / 4 / 4, +0.4 s a level, to 8 s) | A slash rolls out as a tidal wave 20 / 28 / 36% of the time (+4% a level, the column chance's half step, to 50%). Soak is fixed at `Statuses.SoakSeconds` 4 s (Deep Current still doubles it). The column wave keeps its 40 / 55 / 70% (+8%, to 90%) | Gives the Attack slot something to do on every swing, not only on a kill. The rarity line now changes something (it didn't before) |
+| **Soaked counts for Oni's blade** | +1 from boon effects only | A soaked *samurai* also takes +1 from Oni's own hits (not the lesser blades: Split Slash's forks, Scattering Star's, the clone's). Bosses and Kuon unchanged | Soak is worth applying with no second element: a soaked shieldbearer, taisho or bellringer (2 health) falls to one slash. Most samurai have 1 health, so the rank and file aren't affected; bosses stay as they are so the boss fights' tuning holds |
+| **Undertow Riposte washes** | Push + front rank soaked | Also washes away the ordinary arrows within 3.5 units of Oni | The parry boon now defends the moment it fires, not only by rolling the army back |
+
+**The tidal wave slash.** A crest about three and a half normal slashes wide (hitbox 0.8 of the 128 px art's width,
+about 2.1 units, against the slash's 0.6; 0.35 tall). It cuts through 3 samurai and stops on the fourth (Piercing
+Slash adds its 2), soaks everything it touches, washes the ordinary arrows it crosses (spears and parry-only shots fly
+on), rolls over his cover without chipping it (a wave that wide would otherwise break on the wall most swings), and on
+a warlord, Kuon or a scout it hits once, soaks, and is spent. Its kills are `KillSource.Slash`: they are his own
+blade's, so they fill Healing Spring and the drum, and Blazing Hands at full heat ignites round them; but `BoonEffects.TideSlashing`
+keeps Riptide's own column wave (and its boss soak roll) off them, so one wave never breaks into another. Only his own
+slash rolls it, never the clone's or Echo Slash's ghost.
+
+**What it's worth.** A plain slash kills one samurai. At Common the wave adds roughly 0.2 × 3 = 0.6 kills per swing
+at best (a packed column), less in a thinned army, and the soak it leaves makes the next swing a one-hit kill on the
+tough ranks. That is about Flame Blade's Common (40% to burn 2 on a kill, 0.8 per kill), with defence (washed arrows)
+in place of reach.
+
+**Balance to watch** (`RunLog`): the slash kill share of Water runs (it should rise, but stay below a Fire run's
+effect share); arrows washed per round with Undertow (if the parry clears the screen, lower the radius to 2.5);
+whether two-health samurai stop mattering in soaked runs (if so, limit the blade's +1 to the tidal wave's own hits).
+
+**Effects.** `Fx.TideWave` (7 frames, 112×64, foot 24 px up like FrostWave), `Fx.TideSlash` (6 looping frames,
+128×48) and `Fx.Splash` (6 frames, 48×48) are drawn on the pixel grid by a PIL script in Aura_Tide's palette, and
+played at their native size. `TideFx.Column` chains crests up Riptide's column (and Dragon Gate's falls); `TideFx.Great`
+lays four staggered rows of them across the view for Undertow Riposte and Tide Shadow. `ElementFx.Wave` stays the
+fallback without the art.

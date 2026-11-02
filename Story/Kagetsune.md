@@ -50,9 +50,9 @@ skull flame).
 
 ## His fight
 
-**Stage:** "The Mountain Shrine", the stair up to the hall where the Night of a Thousand Bells was held. Its rounds
+**Stage:** "The Mountain Shrine", a broad landing on the stair up to the hall where the Night of a Thousand Bells was held. Its rounds
 bring every kind of soldier and his **Bellringers**, shrine guards whose tolls rouse the army to fire twice as fast;
-cutting one down silences its bell. **Arena:** no moon. The coronation courtyard under a starless black sky, lit only
+cutting one down silences its bell. **Arena:** no moon. The coronation courtyard, open flagstones around a great bronze seal with the hall's shut doors along the top, under a starless black sky, lit only
 by teal soul-fire braziers and his own chest.
 
 Two bars of 210, the hardest fight in the game, tuned for an Oni carrying a full set of boons. He barely moves: a

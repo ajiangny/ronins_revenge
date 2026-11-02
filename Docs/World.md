@@ -17,7 +17,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 - `Backdrop.cs` — moonlit courtyard, sakura petals, blood moon for boss fights; `Show(Map)` swaps to another map's
   ground and petals (the moon blends from the map's own tints). Maps: `Art/Sprites/Background/` —
   `BambooRoad_Stage1` (a dirt road with bamboo only at the edges), `Pass_Stage2` (the Pilgrim's Pass), `Arena_Benibana` (maple shrine),
-  `Arena_Utsusemi` (clockwork temple floor), `Mountain_Stage4` (the shrine stair) and `Arena_Kagetsune` (the coronation courtyard), generated with PixelLab. `CourtyardGrass` with its bushes and lanterns
+  `Arena_Utsusemi` (clockwork temple floor), `Mountain_Stage4` (a broad paved landing on the shrine stair, steps along its top and bottom edges) and `Arena_Kagetsune` (the coronation courtyard, the hall front along its top edge), generated with PixelLab. On these two the ground runs edge to edge from map y 40 to 362 (of 384), with only flat marks on it and nothing upright, because soldiers, the ronin and Kagetsune all reach the far sides of the view. `CourtyardGrass` with its bushes and lanterns
   is the fallback for any stage without a rounds map in `NinjaArtSetup.RoundsGrounds` (`Shrine_Stage3` is stage 3's;
   `Arena_Shirogane` her court).
   `GameManager.Start` shows stage 1's map (behind the title menu too).

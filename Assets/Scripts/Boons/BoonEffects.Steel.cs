@@ -33,7 +33,7 @@ public partial class BoonEffects
         }
     }
 
-    // Mend, plate, spare, so a scrap is never dead, even after Utsusemi razes the wall.
+    // Mend, temper, plate, spare, so a scrap is never dead, even after Utsusemi razes the wall.
     void Settle(float x, int points)
     {
         Blocker hurt = wall.NearestHurt(x, BossFight ? float.MaxValue : ScrapReach);
@@ -43,6 +43,18 @@ public partial class BoonEffects
             Fx.Play(Fx.Impact, hurt.transform.position, Statuses.SeamColor, 0.7f);
             Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
             return;
+        }
+        // Tamahagane: whole cover tempers beyond new, before a plate, which is only better if nothing can be tempered.
+        if (loadout.Find(BoonId.Tamahagane) != null)
+        {
+            Blocker whole = wall.NearestUntempered(x, ScrapReach, Statuses.TemperBound);
+            if (whole != null)
+            {
+                whole.Temper(points, Statuses.TemperBound);
+                Fx.Play(Fx.Impact, whole.transform.position, Statuses.SeamColor, 0.9f);
+                Sfx.Play(Sfx.BlockerHit, 0.5f, 1.6f);
+                return;
+            }
         }
         // No new Blocker in a warlord's fight: it would be a beam stop no warning showed.
         if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach, null))

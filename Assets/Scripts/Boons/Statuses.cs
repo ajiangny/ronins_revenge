@@ -18,6 +18,9 @@ public static class Statuses
     // warlords stand: the payout is cover, and there is one wall.
     public const float BossCrackCooldown = 5f;
     public const int BossCrackScrap = 3;
+    // Tamahagane: a warlord's crack knocks more loose, and scrap can temper cover this far above how it was built.
+    const int TamahaganeBossScrap = 5;
+    public const int TemperBound = 2;
 
     // A Burning samurai's shots fly off up to this many degrees from straight down.
     public const float WildAngle = 35f;
@@ -61,6 +64,9 @@ public static class Statuses
         bool hoarfrost = loadout.Find(BoonId.Hoarfrost) != null;
         bool field = loadout.Find(BoonId.StaticField) != null;
         bool current = loadout.Find(BoonId.DeepCurrent) != null;
+        bool tamahagane = loadout.Find(BoonId.Tamahagane) != null;
+        CrackScale = tamahagane ? loadout.Value(BoonId.Tamahagane) : 1f;
+        BossCrackScrapNow = tamahagane ? TamahaganeBossScrap : BossCrackScrap;
         BurnScale = ember ? loadout.Value(BoonId.EmberHeart) : 1f;
         BossBurnStance = ember ? EmberHeartStanceBoost : BurnStanceBoost;
         ChillScale = hoarfrost ? loadout.Value(BoonId.Hoarfrost) : 1f;

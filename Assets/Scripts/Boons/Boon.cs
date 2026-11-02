@@ -469,6 +469,11 @@ public static class Boons
             Description = "<b>Soaked</b> lasts twice as long, and every tide push rolls the army back half again as far.",
             StatLabel = "Soak time:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
             Requires = l => l.ElementCount(Element.Tide) >= InfusionCount },
+        new BoonDefinition { Id = BoonId.Tamahagane, Element = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Infusion,
+            Name = "Tamahagane",
+            Description = "<b>Cracked</b> lasts twice as long, and <b>Scrap</b> can temper cover beyond new.",
+            StatLabel = "Crack time:", Values = new[] { 2f, 2f, 2f }, Format = v => $"x{v:0}",
+            Requires = l => l.ElementCount(Element.Steel) >= InfusionCount },
 
         // Sword Arts: dropped as Technique Scrolls (mostly by scouts), at most two a run. Element is unused.
         new BoonDefinition { Id = BoonId.SplitSlash, Slot = BoonSlot.Passive, Kind = BoonKind.Art, Name = "Split Slash",

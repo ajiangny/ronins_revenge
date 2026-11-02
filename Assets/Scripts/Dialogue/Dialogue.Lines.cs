@@ -1024,7 +1024,7 @@ public static partial class Dialogue
             P("A big kitty, a fish in a bowl AND a bird granny, all in one temple. Who's doing the ROTA?"), Ol("..."),
             P("He looked at the bowl. He looked at the bird. Oni, he's doing the rota in his HEAD."))),
         Cooled(Once, Talk("Oliver_Poguru_Pinned", Oli, Soul, Tier.Reactive, When(Seen("Oliver_Poguru"), RunsSince("Oliver_Poguru", 3)),
-            P("Oni? Oni. I'm under a glove."), Ol("...Moth."), P("Why am I under a glove?"), Ol("How'd that get there."),
+            P("Oni? Oni. I'm under a paw."), Ol("...Moth."), P("Why am I under a paw?"), Ol("How'd that get there."),
             P("YOU PUT ME HERE!"))),
         Talk("Akagane_Jealous_Steel", "Akagane", DialogueEvent.SoulJealous, Repeat, When(Most(Element.Steel)),
             Say("Akagane", "Walls. I had a wall. I had it facing the wrong way.")),

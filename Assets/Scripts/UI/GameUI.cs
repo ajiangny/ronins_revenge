@@ -276,9 +276,10 @@ public class GameUI : MonoBehaviour
         if (!on) return;
 
         overrunGlow.anchorMin = Vector2.zero;
-        overrunGlow.anchorMax = new Vector2(1f, Mathf.Lerp(0.14f, 0.42f, overrunShown));
-        float pulse = 0.72f + 0.28f * Mathf.Sin(Time.unscaledTime * Mathf.Lerp(3f, 12f, overrunShown));
-        overrunGlowImage.color = new Color(0.95f, 0.08f, 0.05f, Mathf.Lerp(0.3f, 0.9f, overrunShown) * pulse);
+        // A thin band hugging the edge: the warning mustn't cover the ronin or the shots falling on him.
+        overrunGlow.anchorMax = new Vector2(1f, Mathf.Lerp(0.035f, 0.09f, overrunShown));
+        float pulse = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * Mathf.Lerp(2f, 7f, overrunShown));
+        overrunGlowImage.color = new Color(0.95f, 0.08f, 0.05f, Mathf.Lerp(0.4f, 0.8f, overrunShown) * pulse);
 
         int seconds = Mathf.CeilToInt(secondsLeft);
         if (word && seconds != overrunWordSeconds)

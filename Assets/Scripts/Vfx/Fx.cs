@@ -118,8 +118,27 @@ public static class Fx
     public const string KageLockOn = "Kage_LockOn";
     public const string KageSoulRise = "Kage_SoulRise";
 
+    // Steel's, drawn on the pixel grid: iron with bright seams and hard sparks, never flat gold. Sparks off struck metal;
+    // seams splitting as something is Cracked; Anvil Blade's ring; a weld across mended cover; a plate cooling from white
+    // heat; shards flying from what broke; a blade's grind on Whetstone; the falling scrap, plain and Red-Hot; Shrapnel's
+    // shard; the filings round a Lodestone blade; and the great ring off Hammer Riposte and Steel Shadow.
+    public const string SteelSparks = "Steel_Sparks";
+    public const string SteelCrack = "Steel_Crack";
+    public const string SteelAnvil = "Steel_Anvil";
+    public const string SteelMend = "Steel_Mend";
+    public const string SteelForge = "Steel_Forge";
+    public const string SteelShatter = "Steel_Shatter";
+    public const string SteelGrind = "Steel_Grind";
+    public const string SteelScrap = "Steel_Scrap";
+    public const string SteelScrapHot = "Steel_ScrapHot";
+    public const string SteelShard = "Steel_Shard";
+    public const string SteelFilings = "Steel_Filings";
+    public const string SteelRing = "Steel_Ring";
+
     // Effects drawn above characters; auras pass a lower order to sit behind them.
     const int DefaultOrder = 60;
+    // Over the army and the cover, under the arrows (Arrow.DrawOrder), so what Steel throws about never hides a shot.
+    public const int UnderArrows = 3;
 
     public static FxLibrary Library { get; set; }
 
@@ -132,6 +151,13 @@ public static class Fx
 
     // A clip's frames, for things that animate themselves (projectiles, tiles); null when it's missing.
     public static Sprite[] Frames(string id) => Library != null ? Library.Find(id)?.frames : null;
+
+    // One of Steel's effects at its own colours, under the arrows. Without its art a seam-coloured impact stands in.
+    public static FxPlayer Steel(string id, Vector3 position, float scale = 1f, int order = UnderArrows)
+    {
+        FxPlayer played = Play(id, position, Color.white, scale, null, order);
+        return played != null ? played : Play(Impact, position, Statuses.SeamColor, scale * 0.7f, null, order);
+    }
 
     public static FxPlayer Play(string id, Vector3 position, Color color, float scale = 1f, Transform follow = null, int order = DefaultOrder)
     {

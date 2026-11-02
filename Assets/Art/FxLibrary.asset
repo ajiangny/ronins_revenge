@@ -181,6 +181,18 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 30a843fcb2fc94ec3818de0a5fbcbbe5, type: 3}
     fps: 12
     loop: 1
+  - id: Aura_Steel
+    frames:
+    - {fileID: 21300000, guid: f28eb8ff57af940d5a8d7a1ec998d497, type: 3}
+    - {fileID: 21300000, guid: 39765df5af4344e8bb6bc6a74104b3f3, type: 3}
+    - {fileID: 21300000, guid: 1dfe0c88e1dd44d4ebeeaf6920041a0d, type: 3}
+    - {fileID: 21300000, guid: ce90283912bc04f01b3368b06c59e78b, type: 3}
+    - {fileID: 21300000, guid: 107b837331083400b8845be68f4d3df6, type: 3}
+    - {fileID: 21300000, guid: dbd70f93f937044b3bba525c7b9129a0, type: 3}
+    - {fileID: 21300000, guid: 06da86ff6f18c4064a818b1c8d10dc5b, type: 3}
+    - {fileID: 21300000, guid: 095aa781987c048be9c3f92d530792d9, type: 3}
+    fps: 12
+    loop: 1
   - id: Aura_Shadow
     frames:
     - {fileID: 21300000, guid: a812cb742e6704057b9784ccb6334eb5, type: 3}
@@ -265,6 +277,137 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 81125ce2528ac4e3993c8458a4b6e9ff, type: 3}
     fps: 12
     loop: 1
+  - id: SoulCrackle_Steel
+    frames:
+    - {fileID: 21300000, guid: 8a1b7b6d3d4994b65bf2500a89bcf8b3, type: 3}
+    - {fileID: 21300000, guid: bf0fcc17f2f7a4e2ab0d550df063f258, type: 3}
+    - {fileID: 21300000, guid: a4de148fd54064d6993a4554beff1e49, type: 3}
+    - {fileID: 21300000, guid: 0b3f88cfea6364795b92cb94004b8cd4, type: 3}
+    - {fileID: 21300000, guid: 1cef55d54209e4e5b8ae1098c4d36b45, type: 3}
+    - {fileID: 21300000, guid: 7d7b568e343324d018f83aec956dfc1a, type: 3}
+    fps: 12
+    loop: 1
+  - id: Steel_Sparks
+    frames:
+    - {fileID: 21300000, guid: ed049f76eb3fa41308e1d2c98fda3c90, type: 3}
+    - {fileID: 21300000, guid: 03f0205ced4c44eeaac11d410ec940fa, type: 3}
+    - {fileID: 21300000, guid: d30cd561ef5b048c3962c8011e0fccec, type: 3}
+    - {fileID: 21300000, guid: a4077fb02bbd34689b2c5b2436379ae8, type: 3}
+    - {fileID: 21300000, guid: e698cbd60820244cd911430e4176bd5c, type: 3}
+    - {fileID: 21300000, guid: 6225ead98f9be4d7caa1e7542db379cc, type: 3}
+    fps: 18
+    loop: 0
+  - id: Steel_Crack
+    frames:
+    - {fileID: 21300000, guid: 1cc5ee61e8d9341ac8f3861fcc55819c, type: 3}
+    - {fileID: 21300000, guid: 41d1102886a6c4e379944c62ed2f47d3, type: 3}
+    - {fileID: 21300000, guid: 24f03dfdd1e0b4f23b55332012402caf, type: 3}
+    - {fileID: 21300000, guid: 97c085e2fbed64560b8cdf0b3884a50d, type: 3}
+    - {fileID: 21300000, guid: 48d72ad55433f42d994083115c1a5c55, type: 3}
+    fps: 16
+    loop: 0
+  - id: Steel_Anvil
+    frames:
+    - {fileID: 21300000, guid: 4dff1eae6796049458f69c01c855b4e9, type: 3}
+    - {fileID: 21300000, guid: 30da214711ce64f64991f9ca874173a0, type: 3}
+    - {fileID: 21300000, guid: ad78cd30ec55b4a3a84cca15d95ca8e8, type: 3}
+    - {fileID: 21300000, guid: f6911a61983da4c6b9cbb4743e1163a2, type: 3}
+    - {fileID: 21300000, guid: e088d0acde83f4be99d31338aa4cc7c3, type: 3}
+    - {fileID: 21300000, guid: 1b0b79e0effa64fb18068af6611d5ec3, type: 3}
+    - {fileID: 21300000, guid: b9702f41964b94ccfa2ad6c8d9af1ae4, type: 3}
+    fps: 18
+    loop: 0
+  - id: Steel_Mend
+    frames:
+    - {fileID: 21300000, guid: e94a7af76e06042fe86febe0c1cf02ad, type: 3}
+    - {fileID: 21300000, guid: f24d93a6b07594c1e90c299d9a8e3dbe, type: 3}
+    - {fileID: 21300000, guid: f82bcfc6c7c4249fc82b9863f28e8129, type: 3}
+    - {fileID: 21300000, guid: 1a7e065ff36ab461fbe1bbc5b74ac68b, type: 3}
+    - {fileID: 21300000, guid: b229596a840a245ebaaf28ccde671eff, type: 3}
+    - {fileID: 21300000, guid: 61ebf758eb0c0438684f083c454eaba4, type: 3}
+    - {fileID: 21300000, guid: 7f2db1d35af1945bdb4e1ff85d3ded9f, type: 3}
+    fps: 16
+    loop: 0
+  - id: Steel_Forge
+    frames:
+    - {fileID: 21300000, guid: b8c9cf43b2e444d169ccb4fbf8b0d237, type: 3}
+    - {fileID: 21300000, guid: 0b2fca994337d4f25b562db1dc7a729e, type: 3}
+    - {fileID: 21300000, guid: 6a4fb08a5c93743b09c01efaab70bb19, type: 3}
+    - {fileID: 21300000, guid: d0c49e32827244ba18eee5ac58284bd1, type: 3}
+    - {fileID: 21300000, guid: 9316caca7400f4b9886a89e4688fbc07, type: 3}
+    - {fileID: 21300000, guid: 164e5109fad1845d8b7799cde2b1aa76, type: 3}
+    - {fileID: 21300000, guid: 4ed6d531034c84cb7b0bdf3ad131aeec, type: 3}
+    - {fileID: 21300000, guid: ceb7bf36887e74706a3f539af8743913, type: 3}
+    fps: 16
+    loop: 0
+  - id: Steel_Shatter
+    frames:
+    - {fileID: 21300000, guid: 70b4a4ddf3d334c489cb1624539dd911, type: 3}
+    - {fileID: 21300000, guid: c1e522087562a4f0ea6a3158ebd79b3c, type: 3}
+    - {fileID: 21300000, guid: 9b402f2784bbd45439f709f4cce05fc3, type: 3}
+    - {fileID: 21300000, guid: 91f263282238149c1903fbcf2fc6fc87, type: 3}
+    - {fileID: 21300000, guid: 1c1a8799e22ba4047af511dfe20f110b, type: 3}
+    - {fileID: 21300000, guid: 9f082b4b11fa04b51a698eef1d3ca6b9, type: 3}
+    - {fileID: 21300000, guid: 19ff16c8f6688486e90195a1ddb749b5, type: 3}
+    fps: 16
+    loop: 0
+  - id: Steel_Grind
+    frames:
+    - {fileID: 21300000, guid: 10edcdac53a4843d4b0f9decf25d1306, type: 3}
+    - {fileID: 21300000, guid: 73bec6b44918541a68b9d756b8c54167, type: 3}
+    - {fileID: 21300000, guid: 60824e9f9c0184d778f3b92ff77ea4e0, type: 3}
+    - {fileID: 21300000, guid: 8fb77ee448a424abfb4754d0d5fb37ac, type: 3}
+    - {fileID: 21300000, guid: 5508a807b81264f07b186a2b5cb8aa8c, type: 3}
+    fps: 18
+    loop: 0
+  - id: Steel_Scrap
+    frames:
+    - {fileID: 21300000, guid: 0d78ac6396e5f42a6abdd646ceee6582, type: 3}
+    - {fileID: 21300000, guid: b38b29126b7404c1fb8d3b2111af9e09, type: 3}
+    - {fileID: 21300000, guid: 465c3265a98a845d48c6a910aa66de23, type: 3}
+    - {fileID: 21300000, guid: 775f2e4168b364b998a07829c843f98c, type: 3}
+    fps: 12
+    loop: 1
+  - id: Steel_ScrapHot
+    frames:
+    - {fileID: 21300000, guid: 041a30f5a4fcd49f3b69faf8402998f1, type: 3}
+    - {fileID: 21300000, guid: ab62e5f3a73ed4d14a0302b5f1278f77, type: 3}
+    - {fileID: 21300000, guid: 8e3c5eb8dbeef4d6390ba951141c101d, type: 3}
+    - {fileID: 21300000, guid: 8af1f5231758f4bcfaf1fe926a5afe78, type: 3}
+    fps: 12
+    loop: 1
+  - id: Steel_Shard
+    frames:
+    - {fileID: 21300000, guid: ae1a35fab55284a7aa7aab65487e98ba, type: 3}
+    - {fileID: 21300000, guid: f7d55d66a667245c487143ac0ae8d08f, type: 3}
+    - {fileID: 21300000, guid: 2be3b79eda8404998afaadb71f5e42cc, type: 3}
+    - {fileID: 21300000, guid: 28361f86036d74e788aa3ff02e91f5ac, type: 3}
+    fps: 14
+    loop: 1
+  - id: Steel_Filings
+    frames:
+    - {fileID: 21300000, guid: db15c5d42d3b74567b2b17cc6da9fcd1, type: 3}
+    - {fileID: 21300000, guid: af5c9ada90535460ca324193eaa75f66, type: 3}
+    - {fileID: 21300000, guid: a6920875829d3416eb2c8514606851b3, type: 3}
+    - {fileID: 21300000, guid: 57e14d774245943bf8ef06f69b7f5a86, type: 3}
+    - {fileID: 21300000, guid: c4ef69d69e58041dc9e4f10570e35e1f, type: 3}
+    - {fileID: 21300000, guid: 90cab3c09d7a84b1090ab9784cdb39d0, type: 3}
+    - {fileID: 21300000, guid: 328fc1371b2684a3b9dce8e4bdfab6c2, type: 3}
+    - {fileID: 21300000, guid: 8e2fb9d63656947109f8145e006628d5, type: 3}
+    fps: 12
+    loop: 1
+  - id: Steel_Ring
+    frames:
+    - {fileID: 21300000, guid: 34cc264d2d4814a1f9703103d24ec675, type: 3}
+    - {fileID: 21300000, guid: a63e703e3f17f47018b1bab022b5214f, type: 3}
+    - {fileID: 21300000, guid: 45e4ef3856c944eadb1ab4ce391b2eca, type: 3}
+    - {fileID: 21300000, guid: a1f7b4a460b884712869184862892b19, type: 3}
+    - {fileID: 21300000, guid: 37c5cae1793944650a80081ce2de562f, type: 3}
+    - {fileID: 21300000, guid: 0bbdd5c7f2b7c4d8ebf566b14cc7aed4, type: 3}
+    - {fileID: 21300000, guid: 0a2337247f19344c59dbe79ea1a489c5, type: 3}
+    - {fileID: 21300000, guid: 7119dc5e75ff2469aafd65634b59ca10, type: 3}
+    fps: 18
+    loop: 0
   - id: Beni_SmokeRing
     frames:
     - {fileID: 21300000, guid: 0c028f014d8214ade9db3daaee3708c3, type: 3}
@@ -1023,3 +1166,4 @@ MonoBehaviour:
     fps: 14
     loop: 0
   flashMaterial: {fileID: 2100000, guid: ad810dcaebb004c3fb92ce8fb77cce10, type: 2}
+  seamMaterial: {fileID: 2100000, guid: 026a0fe2909d648969d8a56fbc091447, type: 2}

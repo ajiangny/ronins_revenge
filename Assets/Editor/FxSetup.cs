@@ -10,6 +10,7 @@ public static class FxSetup
     const string FxRoot = "Assets/Art/Sprites/Fx/";
     const string LibraryPath = "Assets/Art/FxLibrary.asset";
     const string FlashMaterialPath = "Assets/Art/Materials/HitFlash.mat";
+    const string SeamMaterialPath = "Assets/Art/Materials/CrackSeams.mat";
     const string ScenePath = "Assets/Scenes/SampleScene.unity";
 
     // id, frames per second, loops, and where the effect's anchor sits in its canvas (0..1 from the bottom-left).
@@ -40,6 +41,18 @@ public static class FxSetup
         (Fx.SoulCrackle(Element.Lightning), 12, true, Centre),
         (Fx.SoulCrackle(Element.Tide), 12, true, Centre),
         (Fx.SoulCrackle(Element.Steel), 12, true, Centre),
+        (Fx.SteelSparks, 18, false, Centre),
+        (Fx.SteelCrack, 16, false, Centre),
+        (Fx.SteelAnvil, 18, false, Centre),
+        (Fx.SteelMend, 16, false, Centre),
+        (Fx.SteelForge, 16, false, Centre),
+        (Fx.SteelShatter, 16, false, Centre),
+        (Fx.SteelGrind, 18, false, Centre),
+        (Fx.SteelScrap, 12, true, Centre),
+        (Fx.SteelScrapHot, 12, true, Centre),
+        (Fx.SteelShard, 14, true, Centre),
+        (Fx.SteelFilings, 12, true, Centre),
+        (Fx.SteelRing, 18, false, Centre),
         // Asagi's water: the wave rolls up from its foot, like the frost wave; the splash sits on what it soaks.
         (Fx.TideWave, 14, false, new Vector2(0.5f, 24f / 64f)),
         (Fx.Splash, 16, false, Centre),
@@ -167,6 +180,7 @@ public static class FxSetup
         }
         library.clips = clips.ToArray();
         library.flashMaterial = FlashMaterial();
+        library.seamMaterial = SeamMaterial();
         EditorUtility.SetDirty(library);
         AssetDatabase.SaveAssets();
 
@@ -201,6 +215,15 @@ public static class FxSetup
             frames.Add(AssetDatabase.LoadAssetAtPath<Sprite>(path));
         }
         return frames.ToArray();
+    }
+
+    static Material SeamMaterial()
+    {
+        var material = AssetDatabase.LoadAssetAtPath<Material>(SeamMaterialPath);
+        if (material != null) return material;
+        material = new Material(Shader.Find("Ninja/SpriteSeams"));
+        AssetDatabase.CreateAsset(material, SeamMaterialPath);
+        return material;
     }
 
     static Material FlashMaterial()

@@ -18,6 +18,8 @@ public class FxLibrary : ScriptableObject
     public Clip[] clips;
     [Tooltip("Draws a sprite as a solid silhouette in its vertex colour (Ninja/SpriteFlash), for hit flashes.")]
     public Material flashMaterial;
+    [Tooltip("Draws only a sprite's cracks (Ninja/SpriteSeams), for Cracked's bright seams.")]
+    public Material seamMaterial;
 
     // Effects are looked up on every hit and kill, so the clips are indexed by id on first use (and again if
     // Apply VFX swaps the array).

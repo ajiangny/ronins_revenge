@@ -52,13 +52,21 @@ men to move and has no intention of helping them. Fur all over, thick and blunt-
 tail. **The size is a memory**: from the bricks behind the anvil, the master was the biggest thing in the world, so
 that is the size a soul should be. The body is Jūsuke as a cat saw him from the floor. Jūsuke was a slight man.
 
+**The approved painting** (`~/Pictures/ronin-drafts/oliver/out/full_c.png` until it's in the project) is the authority
+for everything below the neck.
+
 **Costume** (a working smith's, worn-in, nothing ceremonial; Jūsuke's own, and it fits only because the soul built
 itself around it):
 
-- A heavy, scorched, dark leather bib apron, too small across the chest, patched and riveted at the straps.
-- Thick leather gauntlets to mid-forearm, the palms burned shiny. The paw-hands fill them completely.
-- A wide belt slung under the belly: tongs, two punches and a rasp, each worn smooth. Dark wrappings at the shins, and
+- A patched, inky indigo work coat with its sleeves tied back by a dark cord, a small pale forge crest on the chest, and
+  a pale cloth stomach wrap. The indigo stays near black, well clear of Asagi's sea-blue.
+- A heavy, scorched, rust-brown leather bib apron over it, too small across the chest, patched and riveted at the straps.
+- **Ash-black forearms and paws.** The forge's ash has settled in him and shows here, with leather work wraps at the
+  wrists instead of gauntlets. On his hammer arm the hammer's forge-gold cracks run on through the fur, up to the elbow.
+- A wide belt slung under the belly: tongs, a punch and a rasp, each worn smooth. Leather wrappings at the shins, and
   bare hind paws, because he has never once kept a boot on.
+- **The crate.** The foreign crate he arrived in, roped on his back like a pack, standing above and behind one shoulder,
+  with a ship and a star burned into the planks. He has never accepted that a box might not be for him.
 - **The collar.** A narrow, cracked leather strap, half-buried in the ruff, from when he was the size of a loaf. On it
   hangs a small, plain bronze bell with no tongue: see [The bell](#the-bell).
 
@@ -99,7 +107,8 @@ and the tongueless bell hanging below on a strap where the others have a chain.
 | Pupils | `#16110F` |
 | Nose, inner ear | `#7A4F45`, `#C9A58E` |
 | Leather: apron and collar, highlight | `#3A2A20`, `#5A4030` |
-| Gauntlets | `#4E3324` |
+| Wraps, crate planks | `#4E3324`, `#8A6A45` |
+| Coat, forearms and paws | `#262A3C`, `#2A282E` |
 | Iron: hammer and tools, edge | `#2B2D33`, `#5C6068` |
 | Bronze: bell, rivets | `#8A6330` |
 | Plush: body, hair and glasses | `#1C1B20`, `#141216` |
@@ -108,15 +117,16 @@ and the tongueless bell hanging below on a strap where the others have a chain.
 Gold stays clear of Fire (`#FF6133`) and the Legendary card orange (about `#FF9933`). **No teal** anywhere until he's
 freed. **No red cord or ofuda:** those are Kagetsune's.
 
-**Silhouette at 64×64.** A wide dome on a wider barrel, with almost no neck. Read in order: the huge flat head with two
-tiny ears at its far corners; the white whiskers breaking the outline on both sides; the block of hammer low on one
-side with a gold line in it; a small lumpy figure with sticking-up hair dangling at the other hip. Black it in: it
-should still say *cat, hammer, something tied to him*. It must not read as a bear (ears too small and too far apart
+**Silhouette at 64×64.** A wide dome on a wider barrel, with almost no neck and a square crate standing behind one
+shoulder. Read in order: the huge flat head with two tiny ears at its far corners; the crate's block; the white whiskers
+breaking the outline; the block of hammer low on one side with a gold line in it; a small lumpy figure with sticking-up
+hair dangling at the other hip. Black it in: it should still say *cat, crate, hammer*. It must not read as a bear (ears too small and too far apart
 to be round bear ears, flat face, whiskers), as Kagetsune (hammer low, never on the shoulder) or as a mascot (no big
 smile, no raised paw).
 
 **Pixel art brief** (`Assets/Art/Sprites/Characters/Oliver/Oliver_<Clip>_<i>.png`, PixelLab, the temple's front-facing
-chibi style, standing at the weapon rack; no reference photo needed):
+chibi style, standing at the weapon rack). The head and proportions below stand; the costume follows the approved
+painting where they differ (coat, ash-black forearms, wraps, crate):
 
 > 64×64 canvas, transparent, feet on the row y = 60, slight three-quarter front view. An enormous fat grey tabby cat
 > standing on its hind legs, dressed as a blacksmith. **Head:** about 28 px wide by 22 px tall, x 18–46, y 8–30, as wide

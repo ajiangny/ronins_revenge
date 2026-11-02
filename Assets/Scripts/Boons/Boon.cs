@@ -441,6 +441,11 @@ public static class Boons
             Description = "Once a stage, a blow that would take your last life is turned aside, and the koi climbs the falls: 2 lives are healed.",
             StatLabel = "Lives healed:", Values = new[] { 2f, 2f, 2f }, Format = Plus,
             Requires = l => TwoSlotsOf(l, Element.Tide) },
+        new BoonDefinition { Id = BoonId.SpearBreaker, Element = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
+            Name = "Spear-Breaker",
+            Description = "Your <b>Slash</b> breaks cursed spears, and each falls as <b>Scrap</b>.",
+            StatLabel = "Scrap per spear:", Values = new[] { 1f, 1f, 1f }, Format = Plus,
+            Requires = l => TwoSlotsOf(l, Element.Steel) },
 
         // Infusions: three boons of one element, any slot. Each deepens its element's status, so committing to an
         // element pays through its passives too.

@@ -236,6 +236,11 @@ public partial class GameManager
         Heart.Spawn(position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
     }
 
+    void OnSpearBroken(Vector3 position)
+    {
+        if (state == State.Playing) effects.OnSpearBroken(position);
+    }
+
     // Hearts only heal: at full health they wait on his row until he's lost a life.
     bool CanHeal() => state != State.GameOver && lives < maxLives;
 

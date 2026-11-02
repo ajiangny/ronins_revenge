@@ -53,6 +53,7 @@ public static class Statuses
     public static float BossBurnStance { get; private set; } = BurnStanceBoost;
     public static int BossJoltBonus { get; private set; } = JoltBonus;
     public static bool JoltWholeRank { get; private set; }
+    public static bool SpearBreaker { get; private set; }
 
     public static void From(RoninLoadout loadout)
     {
@@ -68,5 +69,6 @@ public static class Statuses
         BossJoltBonus = field ? StaticFieldJoltBonus : JoltBonus;
         SoakScale = current ? loadout.Value(BoonId.DeepCurrent) : 1f;
         PushScale = current ? 1.5f : 1f;
+        SpearBreaker = loadout.Find(BoonId.SpearBreaker) != null;
     }
 }

@@ -157,6 +157,7 @@ public class Samurai : MonoBehaviour, IHittable
         {
             Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             spear.MakeUnbreakable(spearSprite);
+            spear.CursedSpear = true;
             spear.Launch(aim * (arrowSpeed * SpearSpeedMultiplier), 1.5f * life);
             Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
             return;

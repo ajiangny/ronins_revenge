@@ -272,6 +272,8 @@ public partial class BoonEffects
         float value;
         // Above the switch, so a crack this same blow applies pays on the next one.
         PayBossCrack(boss, point, source);
+        // Spear-Breaker: a warlord's heavy shot parried home cracks her, so the Legendary isn't idle where lives are lost.
+        if (source == KillSource.Reflected && Statuses.SpearBreaker) boss.Crack(Statuses.CrackSeconds);
         switch (source)
         {
             case KillSource.Slash:
@@ -618,6 +620,7 @@ public partial class BoonEffects
         if (!WolfFight) return;
         float value;
         PayWolfCrack(point, source);
+        if (source == KillSource.Reflected && Statuses.SpearBreaker) Wolf.Crack(Statuses.CrackSeconds);
         switch (source)
         {
             case KillSource.Slash:

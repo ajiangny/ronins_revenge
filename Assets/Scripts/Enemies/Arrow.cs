@@ -45,6 +45,11 @@ public class Arrow : MonoBehaviour
     public bool CappedRiposte { get; set; }
     // A bell (BulletHell.MakeResonant): the parry that opens a way, so Lodestone Shuriken leaves it flying.
     public bool Resonant { get; set; }
+    // A Taisho's yari, the one thing Spear-Breaker may break. Set only at Samurai.Fire: MakeUnbreakable and DeathCause
+    // also cover Utsusemi's hats and sword, and the tutorial's spears teach that a spear can't be cut.
+    public bool CursedSpear { get; set; }
+    // Spear-Breaker has cut a yari down.
+    public static event System.Action<Vector3> SpearBroken;
     public Vector3 Velocity => body.linearVelocity;
     // The halo's colour, which its landing shadow is drawn in.
     public Color GlowColor => glow != null ? glow.color : glowColor;
@@ -262,6 +267,12 @@ public class Arrow : MonoBehaviour
         else if (PassesCover && coll.collider.GetComponentInParent<Blocker>() != null)
         {
             KeepFlying(coll.collider);
+            return;
+        }
+        else if (CursedSpear && Statuses.SpearBreaker && coll.collider.GetComponentInParent<Projectile>() is { Source: KillSource.Slash })
+        {
+            SpearBroken?.Invoke(transform.position);
+            Shatter();
             return;
         }
         else if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)

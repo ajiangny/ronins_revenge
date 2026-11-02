@@ -107,6 +107,14 @@ public partial class BoonEffects
         Fx.Play(Fx.Impact, position, Statuses.SeamColor, 1.2f);
     }
 
+    // Spear-Breaker: a Taisho's yari cut down falls as scrap.
+    public void OnSpearBroken(Vector3 position)
+    {
+        if (!loadout.Has(BoonId.SpearBreaker, out float scrap)) return;
+        ShedScrap(position, (int)scrap);
+        Sfx.Play(Sfx.BlockerBreak, 0.6f, 1.3f);
+    }
+
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
     // pays at most once per BossCrackCooldown.
     void PayBossCrack(Boss boss, Vector3 point, KillSource source)

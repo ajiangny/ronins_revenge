@@ -29,7 +29,7 @@ public partial class Samurai
         Points *= 3;
         transform.localScale *= EliteScale;
         // The clan's colour washed towards white, so it never reads as a shot's gold, bronze, red or violet.
-        Color edge = Color.Lerp(clan, Color.white, 0.35f);
+        Color edge = Color.Lerp(clan, Color.white, 0.15f);
         SpriteOutline.Wrap(Look, edge, Color.white);
         eliteGlowColour = new Color(clan.r, clan.g, clan.b, 0.5f);
         eliteGlow = Projectile.CreateGlow(transform, 1.8f / transform.lossyScale.x, Look.sortingOrder - 1, eliteGlowColour);

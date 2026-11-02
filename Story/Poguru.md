@@ -281,7 +281,7 @@ own unlocks last one run, Asagi two, the rest three.
 |---|---|
 | SLASH (key) | "A cut flies up the field. Cover stops it, so step out first!" |
 | SHURIKEN (key) | "Big and sparkly, slow to come back. Save it for crowds." |
-| PARRY (key) | "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!" |
+| PARRY (key) | "Just before an arrow lands. A good parry is ready again straight away! Violet blows can't be parried. Dodge those!" |
 | SPEARS | "The glowing red ones go right through cover. Move!" |
 | HEARTS | "From broken cover, and rarely a soldier. At full lives they wait on your row." |
 | THE ARMY | "If it reaches your row, it's over. Thin out the bottom rank!" |

@@ -39,6 +39,16 @@ gets back, unless a soul like Akagane catches it first ([Akagane.md](Akagane.md)
 | Bellringer | A hollow shrine watchman in rotted white and red, his jaw bound shut with cloth, a hand bell on a cord. | Akagane's shrine watch, dead at their posts. Their tolls drive the army to fire faster. |
 | Scout | A shrouded corpse lashed to a torn, blood-stained paper kite, drifting across the top of the sky like a hanged man. | Scouts who flew the signal kites on the night. A soul always slips out of a downed one. |
 
+## The Sworn Guard and the veterans
+
+Not every ember has gone quite dull. In each march there is one soldier, **the Sworn Guard** (any kind can be him; code:
+the round's Elite), who still remembers the oath he swore on the stair. He stands taller than the ranks, his ember
+burns brighter in his clan's colour, and he takes several blows to fall, more with every stage, because an oath is
+harder to cut than flesh. When he finally goes down his soul always slips free, as if it had been waiting to be let go.
+
+Some whole ranks are **veterans**, the court's old hands, steel-edged and tougher than the levy around them: they take
+two cuts. They are the same dead men in the same bodies, only longer sworn.
+
 ## The tutorial's five
 
 The five soldiers who find Oni first (speaker "Ashigaru", Story in [Poguru.md](Poguru.md)) are ordinary dead
@@ -57,4 +67,5 @@ rasping moan cut short, bones clattering down, a tread of bone and rusted armour
 - They fall to bones and ash, never blood. Rot and bone, no gore.
 - Teal only in their eye-embers (their own souls). Their armour and clan colours are dull and dead.
 - They never talk about wanting anything for themselves; they repeat orders.
+- The Sworn Guard burns in his clan's colour and veterans wear a cold steel edge. Neither wears gold, bronze, red or violet, which belong to the shots.
 - Mechanics don't depend on the look: each kind's attacks are as written in `SamuraiKind.cs`.

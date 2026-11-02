@@ -22,6 +22,10 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `OnCleared` runs on a halt or fall for anything kept outside `transient`. Lines: `BossLine { Intro, Phase, Defeat }`. What each
   boss says follows its story file in [Story/](../Story/README.md) (one per character, plus the planned Kagetsune);
   keep `Line()`, `Tools/generate-voice.mjs` and that file in step.
+- Shot colours (`ShotClass`, drawn by `Arrow.Dress` on every boss shot): white = cut or parry; **red** = parry-only
+  (`Unbreakable`/`Reflectable`: Benibana's Iaido crescent, Shirogane's Moonsplitter moons, Fang of the Oath and ice
+  pillars, Utsusemi's cleaves, Kagetsune's Soul Coffin); **violet** = dodge-only (`Unparryable`: seal-darts, Glacier
+  spires; the old crimson); **bronze** = bells. See [Enemies](Enemies.md#bullet-hell).
 - `Benibana.cs` — Stage 1 boss, "The Crimson Smoke" (two 70 HP bars). Moves: Smoke Rings, Rosary Lash, Crimson Iaido
   (only a parry answers it: `Arrow.OnCollisionEnter` lets reflectable shots cut through slashes and cover; parried
   back it staggers her and `Arrow.Shatter` breaks any Iaido crescent it meets), Rosary Bloom (phase 2 only; ends with
@@ -82,7 +86,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `RoamMeanwhile` beside an attack, stopped in `OnStaggered`) rather than blinking. Shots (all through `Fire`, at `ShotSpeed` 1.35× the speeds in the moves, with `Arrow.PassesShots` so her and Kuon's
   overlapping patterns fly through each other): `Crescent` (breakable),
   `GhostSword` (`PassesCover`), `IcePillar` (unbreakable, parryable, `PassesCover`, its capsule drawn out by
-  `Arrow.Lengthen`; `Fx.ShiroIcePillar`), `IceSpire` (a glacier spire: unbreakable and `Unparryable`; `Fx.ShiroIceSpire`),
+  `Arrow.Lengthen`; `Fx.ShiroIcePillar`), `IceSpire` (a glacier spire: `Unparryable`, so violet and unbreakable; `Fx.ShiroIceSpire`),
   both bursting into `Fx.ShiroIceShatter` via `ShatterAtGround`, `Orb`, and `Charge` (an unbreakable wolf bolt that `DissolveAtGround`; it and the Fang are dressed by `WolfShot` in Kuon's charge clip at its own proportions with a `Wake` of afterimages, and their lanes are marked by `MarkBeam` from the perch).
   Every sword slash plays `WolfSlash` (`Fx.ShiroIceSlash`, a frost arc turned to the swing, and the `Fx.ShiroWolfSlash`
   ice wolf's head that `Lunge`s along it; `Fx.SlashArc` without the art). Telegraphs:
@@ -165,7 +169,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `SlamDown`s on the ronin's lane, a third held a random 0.4-1 s, then an aftershock on the first crack, which `Relight` flares back up first (`Crack`'s teal glow dies in 0.6 s so a spent crack reads dark); Coffer Slam's
   blow is `SlamDown(xs, ring, weight)`, which hit-stops and `TimeRipple`s, and hardened its tell can feint onto the
   ronin halfway), and the parry-only Last Toll (`Fx.KageGreatBell`, unbreakable, `MakeReflectable`, `Pursue`).
-  **Bullet hell** (built from `BulletHell`, all his skulls `Enlist`ed; `BellShot`/`SealDart` are his bronze and crimson
+  **Bullet hell** (built from `BulletHell`, all his skulls `Enlist`ed; `BellShot`/`SealDart` are his bronze and violet
   shots; `Hardened` = phase 2 or past half of bar 1): the Toll of Fealty is a `Spiral` per toll from `Waist`; the
   Rosary Curtain (`RosaryCurtain`, `Move.Curtain`) drops gapped `Curtain` rows stepped by `NextGap`, one gapless row
   with a bell when hardened; the slam's `SlamRing`; hardened, the Spirit Hyper Beam sweeps faster; the Last Toll's
@@ -186,7 +190,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   ronin's lane; `CoffinOnChain`/`SetCoffin`), Soul Harvest (`SoulHarvest`: rows of floor glows that rise as skulls
   through the ronin's row, `HomeToChest` bending them into his chest above it, gaps stepped by `NextGap`), Wraith Swarm
   (the Thousand-Soul Bloom: a `Ring` from the chest under `HaltAndAim`), Soul River (`SoulRiver`,
-  `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), the parry-only Soul Coffin (seal-darts flank it; `Fx.KageCoffin` on a
+  `Move.River`: curtain rows round a sine channel kept under `MaxDodgeSpeed`, bells on its banks), the parry-only Soul Coffin (violet seal-darts flank it; `Fx.KageCoffin` on a
   chain; parried, its hit (`OnHitBy`, on `Damaged`) sees `coffinThrownAt` and sets `exposedUntil`, which a stagger pushes back past itself, doubling `DamageMultiplier`), the Night
   of a Thousand Bells (`ultimate`, every `Ultimate` moves: `Darkness`, eight lanes, five waves with a stepping
   safe lane (a pale `HyperSafeColour` strip under it each tell) that burn for `ColumnSeconds`, then a gapless curtain with a bell over the ronin, then exposed), and the summoned souls (`Kagetsune.Souls.cs`): `CallSoul` raises a real boss through `Boss.Summon` (→

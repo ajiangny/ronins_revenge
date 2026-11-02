@@ -48,7 +48,7 @@ Title ─Start─▶ Choose a journey ─new slot (control cards, flute intro)�
   picks it: `RewardPath.Release` floats its reward away up the field (to come back as that round's reward) and `WalkOn` has him follow it into the dark and out at his place for the next round on the same map (cover and music kept), or
   the boss's goes on to `StageCleared`. A stage's first round is always a soul (`BeginRound`), whose banner shows "Reward:" and the
   reward's `RewardIcon` loop, glowing in its `RewardColour`, centred under its body line (in words, "Reward: …", only when it has no icon). After `maxRounds` only the boss is left. Rounds past `Stage.rounds` come from `ExtraRound`: the last round,
-  `extraRoundSpeedUp`/`extraRoundFireCut` per extra round, +5% aimed, a Taisho top row, one more row from the second.
+  `extraRoundSpeedUp`/`extraRoundFireCut` per extra round, +5% aimed, a Taisho top row, one more row from the second. It also carries over the last round's formation (`shape`, `squads`, `squadGap`), `rowHealth`, `volley` and arrow chances, and its `eliteHealth` goes up by one per extra round.
 - **Run log (dev tools):** `RunLog` appends a line per round and boss (time, hits, lives, kills by source with the effect share, frozen time, the army's closest approach), the portals and boons taken and the run's end to `runlog.txt` in `Application.persistentDataPath`; F8 prints the current run.
 - Key methods: `StartGame`, `BeginRound`, `OnArmyDefeated` → `EndRound` → `ChoosePath` / `StageCleared` → `BeginBoss` / `OfferStageBoon`,
   `NextStage` → `EnterStage`, `EndGame`. Blockers are rebuilt at the start of every round (`BeginRound`) and on a new map.

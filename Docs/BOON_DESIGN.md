@@ -345,10 +345,14 @@ Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost 
 - **Soaked**, the status (`Samurai.Soaked`, `Boss.Soaked`; a sea-blue tint and drips). A soaked target takes **+1
   from every boon effect** (blasts, strikes, shards, waves). It does nothing on its own: it's the amplifier that
   makes mixing a second element pay, which the three-status note in §6 asked for.
-- **The tide push** (`SamuraiArmy.PushBack(units)`). The formation is lifted back up the screen, undoing march
-  steps, never above where it spawned. The loose last row is lifted with it and sinks back at the march's pace
-  (rejoining the formation would spread the march edge to edge, so it would turn and drop at once). Space Invaders'
-  whole tension is the descent; Water is the one element that rolls it back.
+- **The tide push** (`RollingWave` + `SamuraiArmy.Shove(soldier, units)`). A band of water rolls up the field and
+  lifts each soldier it passes back up the screen, once, soaking it as it goes. A soldier is never lifted above its own
+  slot height (`Samurai.HomeY`) or the top of the view, and it stays where it lands, so the formation goes ragged
+  rather than sliding as one block. A loose last-row soldier stays loose and sinks back at the march's pace (rejoining
+  the formation would spread the march edge to edge, so it would turn and drop at once); the army stops holding once
+  every soldier is off the last row. Space Invaders' whole tension is the descent; Water is the one element that rolls
+  it back. *Nov 2026:* the first version, `PushBack`, lifted the whole formation as one teleporting block and was
+  removed; Undertow is now a narrow band, Tide Shadow a view-wide one, and Riptide's column wave a thin fast one.
 - **Washing arrows** (`Arrow.Wash`): like Wildfire's burn, for ordinary arrows only, never spears or other
   unbreakable shots.
 
@@ -356,10 +360,10 @@ Screen name "Water" (and `Element.Water` keeps meaning Frost, since every Frost 
 |---|---|---|
 | **Riptide Blade** | Attack | A slash kill may (40 / 55 / 70%) send a wave up the victim's column: every samurai in it is soaked (4 s) and the arrows in the column wash away. On a boss hit, the same chance soaks the boss. Since §13 a slash may also roll out as a tidal wave (20 / 28 / 36%). |
 | **Tidewake Shuriken** | Special | The shuriken leaves a wake: arrows it passes wash away, samurai it passes within reach are soaked for 3 / 4 / 5 s, a boss it passes too. |
-| **Undertow Riposte** | Parry | A parry sends a wave that pushes the army back up 0.3 / 0.45 / 0.6 units and soaks the front row. On a boss, soaks it. |
+| **Undertow Riposte** | Parry | A parry sends a narrow wave up the field that pushes back and soaks each samurai it passes by 0.3 / 0.45 / 0.6 units (soldiers stay pushed; capped by their slot height). On a boss, soaks it. |
 | **Tidal Renewal** | Passive, instant | +1 / +1 / +2 max life. Moved here from Frost: it's her medicine and her name. |
 | **Healing Spring** | Passive | Every 45 / 35 / 25 kills by Oni's own hits (not effects) restores one lost life, or pays points at full health. |
-| **Tide Shadow** | Ultimate | Unleashing the clone sends a great wave: every arrow washes away and the army is pushed up 0.6 (a boss is soaked). Clone kills soak their neighbours. |
+| **Tide Shadow** | Ultimate | Unleashing the clone sends a great wave: every arrow washes away and a view-wide wave pushes each samurai it passes up 1 unit (a boss is soaked). Clone kills soak their neighbours. |
 | **Dragon Gate** | Legendary (two Tide slots) | Once a stage, a blow that would take the last life is turned aside and 2 lives are healed. The koi climbs the falls. |
 
 Frost loses Tidal Renewal and gains **Cold Compress** (Passive): when Oni is hit, the army freezes for 1 / 1.5 / 2 s,
@@ -466,6 +470,12 @@ often. Instead Burning sends a samurai's shots **wild** (up to 35° off, ember-r
 **fizzles**, leaving it unhurt. The cost of 1 HP that remains: Soaked's +1 and Thermal Shock's ×2 do nothing to an
 ordinary samurai. If that needs fixing, the targeted answer is a rank of 2-HP veteran shooters in later stages, not HP
 everywhere.
+
+*Nov 2026:* that answer is in. Veteran rows (`LevelConfig.rowHealth`, 2 HP, from stage 2) and one Elite per round
+(`eliteHealth`, 4 to 6 HP) give Soaked's +1 and Thermal Shock's x2 something to bite on, and Burning now ticks. A
+Burning soldier with more than one HP loses 1 (2 if Soaked) every `Statuses.BurnTick` (1.5 s) but is clamped at 1 HP:
+a burn that could finish a soldier would be the "status as good as a kill" problem again, and would chain Effect-kill
+boons off a passive tick, so Fire wears the tough ones down and the slash still decides when they fall.
 
 **Passives that play.** The three stat-stick passives each gained a behaviour tied to their element's status:
 

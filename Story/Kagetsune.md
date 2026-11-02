@@ -58,7 +58,7 @@ by teal soul-fire braziers and his own chest.
 Two bars of 210, the hardest fight in the game, tuned for an Oni carrying a full set of boons. He barely moves: a
 few heavy steps that shake the ground. His power is the souls, so he fights as a **bullet hell** of soul-skulls,
 always leaving Oni a gap he can reach along his one row. Bronze is a bell Oni can parry to ring a way open
-(Resonance); crimson is imperial law, a seal-dart no parry turns.
+(Resonance); violet is imperial law, a seal-dart no parry turns.
 
 **Phase 1, the Thousand-Soul Throne.**
 

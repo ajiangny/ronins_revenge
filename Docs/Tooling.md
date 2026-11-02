@@ -13,3 +13,5 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
 - `Editor/PixelArtImporter.cs`: everything under `Assets/Art/Sprites/` imports as crisp pixel art.
 - `Editor/WebImportSettings.cs`: portraits, the logo, sound effects and voice lines get web-friendly settings;
   `Ninja/Apply Web Import Settings` reimports them.
+- `Editor/NinjaArtSetup.cs`: `Ninja/Apply Stages` copies `GameManager.DefaultStages()` into the scene, now including each
+  round's `shape`, `squads`, `squadGap`, `rowHealth`, `eliteHealth`, `volley` and the three arrow chances.

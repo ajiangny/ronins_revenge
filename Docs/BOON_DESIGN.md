@@ -482,3 +482,208 @@ everything that arrives). Scrolls now draw from five arts.
 swings reached full heat (cooldown ×0.88 at Common); Storm Step's static popped an arrow beside him; Mirror Stance held
 0.50 s; a charged, scattered shuriken left as three blades and jolted what it passed.
 
+## 11. The fifth element: Steel (Oliver)
+
+**Status: in progress.** Every number below is a paper value and none has been play tested. The code
+references were checked against the current scripts.
+
+**Why a fifth.** Four elements give six Duos; a fifth adds four more pairs, a fifth Legendary and a fifth Infusion. It
+also fills the one gap left in the lane. Fire and Storm deal damage, Frost controls, Water soaks and heals, and nothing
+touches the **cover**: twelve blockers (four sites of three, 18 to 20 health a site, 72 to 80 in all) that are rebuilt
+every round and only ever worn down. Steel's identity is that **attacking rebuilds cover**. The soul is Oliver, the cat
+smith with the spirit-charged hammer. Like Asagi he arrives late, so the first runs keep the smaller pool.
+
+**Code name.** `Element.Steel`, appended to the enum, with its `BoonId`s appended too, so saved indexes and the icon
+array keep meaning what they did. The family is `SteelBoons`: Anvil Blade, Lodestone Shuriken, Hammer Riposte, Steel
+Shadow.
+
+### What the code forced
+
+Four facts decide the design, and each one changes the first draft.
+
+- **Scrap falling straight down lands in his firing lane.** He shoots from the gaps between sites, so what he kills
+  stands above a gap. Falling straight, scrap would either miss the hurt cover or plate the gap shut in front of him.
+  Every slash stops on a blocker and chips it (`Blocker.OnCollisionEnter`, `Projectile.OnCollisionEnter`), which is
+  exactly what got Glacier Wall cut (§4). So scrap is drawn sideways, and plates let his shots through.
+- **Homing shots stop at cover and chip it** (`Projectile.cs`, the `passes` test). A steel shard built by copying
+  `LaunchIceShard` would chip the cover beside the one that burst, could break it, and could set off Shrapnel again.
+  Steel shards must pass cover.
+- **`Blocker.Broken` pays a heart 20% of the time** (`GameManager.OnBlockerBroken`). One-point plates raising it would
+  be a healing farm.
+- **Cover is more than bushes.** `BeamEnd` stops a beam on any `Blocker`, Utsusemi's Hyper Beam is measured against its
+  rocks' shade, and those rocks and its planted sword are `Blocker`s with `int.MaxValue` health. A new plate would be
+  a safe spot no warning showed, and adding to `int.MaxValue` overflows. So in a warlord's fight Steel never adds a
+  `Blocker`, and it only mends the wall's own children.
+
+### The status and scrap rules
+
+**Cracked** (`Samurai.Crack`, `Boss.Crack`, `SpiritWolf.Crack`; 4 s, dull iron with bright seams, `Statuses.CrackSeconds`).
+Most samurai die in one hit, so it works on cover, not health.
+
+| Status | Applied by | On the army | On a warlord | On Kuon |
+|---|---|---|---|---|
+| Cracked (4 s) | Steel's boons (below) | felled by Oni's own hit, sheds 1 scrap | his next own hit knocks loose 3 scrap and spends it, at most once per 5 s (`BossCrackCooldown`, as `BossFrostCooldown` limits frost) | as a warlord, sharing the cooldown: the hammer is spirit-charged, so a spirit cracks too, and Kuon's usual reason for its own form (no stance, no freeze) doesn't apply |
+
+This is the one status that gives no edge against the warlord herself: Burning fills her stance, Chilled holds her
+longer, Jolted and Soaked add damage. Cracked only pays in cover, so the 60–120 s fight target isn't touched.
+
+**Only his own hits shed scrap** (`Damage.Procs(source)`). A `KillSource.Effect` kill of a cracked samurai sheds
+nothing, and neither do Shadow or Clone kills, because a kill by an effect must not trigger another effect. An effect
+may still *apply* Cracked, as blasts apply Burning.
+
+**Scrap** (one piece, one point) falls from where it was shed and is resolved in this order:
+
+1. **Mend.** Hurt wall cover within 2.5 units sideways draws it in and regains 1 health, never above its maximum.
+2. **Plate.** In a round, with no hurt cover in reach, it forms a **steel plate** in the gap below.
+3. **Spare.** Otherwise it's worth half a hit on the Ultimate's bar, so scrap is never dead, even after Utsusemi razes
+   the wall.
+
+In a warlord's fight step 2 is skipped and step 1 reaches any hurt wall cover on the field.
+
+**Steel plates:**
+- 1 health, at most 4 standing (`MaxPlates`), gone at the round's end with the rest of the cover.
+- **One-way:** every projectile of Oni's passes through without chipping it, the way the shuriken does. Arrows stop on
+  it. Spears, yurei arrows and boss slashes pass as they pass all cover.
+
+**What Steel builds pays nothing when it breaks.** Plates and blockers raised by Steel Shadow raise neither a heart nor
+Shrapnel. Mending a blocker doesn't re-arm it either: each of the twelve can burst only once a round.
+
+**Steel shards** are `KillSource.Effect`, 1 damage, homing, and pass cover. They set off nothing.
+
+### Boons
+
+| Boon | Slot | Common / Rare / Epic | Card text |
+|---|---|---|---|
+| **Anvil Blade** | Attack | Chance 40 / 55 / 70%; samurai cracked 1 / 2 / 2 | A <b>Slash</b> kill may ring the anvil: it sheds <b>Scrap</b> and <b>Cracks</b> the samurai beside it. |
+| **Lodestone Shuriken** | Special | Arrows caught 2 / 3 / 4 | Your <b>Shuriken</b> draws in arrows, which fall as <b>Scrap</b>, and <b>Cracks</b> the samurai it passes. |
+| **Hammer Riposte** | Parry | Cover mended 1 / 2 / 3 | A successful <b>Parry</b> rings out and mends the cover nearest you. |
+| **Steel Shadow** | Ultimate | Crack time 3 / 4 / 5 s | Unleashing your <b>Shadow Clone</b> restores all your cover, and its kills <b>Crack</b> their neighbours. |
+| **Whetstone** | Passive | Cover spared 15 / 30 / 45% | Your <b>Slash</b> passes through your own cover, wearing it down, and pierces one samurai. |
+| **Shrapnel** | Passive | Shards 2 / 3 / 4 | When your cover breaks, it bursts into homing steel <b>Shards</b>. |
+| **Spear-Breaker** | Legendary (two Steel slots: `TwoSlotsOf(l, Element.Steel)`) | Scrap per spear 1 | Your <b>Slash</b> breaks cursed spears, and each falls as <b>Scrap</b>. |
+| **Tamahagane** | Infusion (`ElementCount(Element.Steel) >= InfusionCount`, 3 of any slot) | Crack time ×2 | <b>Cracked</b> lasts twice as long, and <b>Scrap</b> can temper cover beyond new. |
+
+What each does beyond its card, which stays lean as the other cards do:
+
+- **Anvil Blade.** The proc sheds one scrap at once, so it pays before anything cracked is cut down. Those cracked are
+  the nearest in the victim's rank (`SamuraiInRank`). On a boss or Kuon, a `BossRiptideShare` (60%) of its chance cracks
+  the target.
+- **Lodestone Shuriken.** Catches within 2 units, each arrow becoming a scrap on the spot. It skips what Storm Step's
+  static skips (`Unbreakable`, `Reflectable`, `Unparryable`) and any shot with `Parried` set. Cracks within
+  `WakeRadius`, once each, built like `ShurikenWake`; a boss or Kuon it passes is cracked too.
+- **Hammer Riposte.** The nearest hurt wall blocker within 3 units takes the points. With none, in a round, a plate
+  forms above him; in a warlord's fight, the points go to the nearest hurt wall cover anywhere, or the target is simply
+  cracked. On a boss or Kuon it always cracks.
+- **Steel Shadow.** In a round, standing cover returns to full and fallen cover is raised. In a warlord's fight only
+  standing cover is restored, so no new `Blocker` appears. On a boss the unleashing cracks it, and clone hits crack on
+  `CloneBossShare` (25%). Clone kills shed nothing themselves; the neighbours they crack pay when Oni cuts them down.
+- **Whetstone.** Only `KillSource.Slash` passes, and it gains one pierce however many blockers it crosses. Each blocker
+  still takes a chip unless the spared roll succeeds. A site lasts about 20 s of slashing at the 60% bound, so holding
+  still under cover always costs something.
+- **Shrapnel.** Fires on hits only, as `Blocker.Broken` does; trampling and razing pay nothing. Shards home as Frost's
+  do. Against a warlord or Kuon the count is halved, rounded up. Worst case in a round is 12 × 4 = 48 shards, which
+  takes about 72 slashes of his own, more than clearing the round with those slashes would need, so breaking his own
+  cover on purpose doesn't beat shooting.
+- **Spear-Breaker.** On a warlord or Kuon, parrying one of their unbreakable shots home also cracks them, so the
+  Legendary isn't idle in the fights where lives are lost. See below for what it may break.
+- **Tamahagane.** `Statuses.CrackScale` 2. Scrap at full cover over-tempers it, up to 2 points above its original
+  maximum; this raises `maxHealth` too, because `UpdateSprite` indexes out of range if health passes it. A warlord's
+  crack knocks loose 5 scrap, not 3.
+
+### What Spear-Breaker may break
+
+**Exactly one thing: the yari a Taisho throws in `Samurai.Fire`.** Mark it with a new `Arrow.CursedSpear`, set at that
+call site (`Samurai.cs`, the `Kind == SamuraiKind.Taisho` branch), and test the flag in `Arrow.OnCollisionEnter`'s
+`Unbreakable` branch for a `Projectile` whose `Source` is `KillSource.Slash`.
+
+Neither of the two obvious shortcuts is safe:
+
+- **Not inside `MakeUnbreakable(Sprite)`, and not by `Cause == DeathCause.Spear`.** Utsusemi's flying hats and sword
+  call `hat.MakeUnbreakable(null)` (`Utsusemi.Kasa.cs`), the same overload, which sets that cause too.
+- **Not by `Unbreakable`.** That also covers Shirogane's charges, pillars, spires, moons and Fang, Utsusemi's hour
+  cleaves, and Kagetsune's bell and coffin. Several are also `Reflectable` set pieces, whose parry is what breaks a
+  warlord's stance (`SetPieceStance`). If a slash could cut them, the parry that makes those fights would have no job.
+
+Also left alone: the tutorial's `GameManager.SpawnSpear` and `TrainingSoldier`, which teach that spears can't be cut.
+The Taisho in Kagetsune's levy throw through the same `Samurai.Fire`, so their yari can be broken; his own shots can't.
+
+Steel shards don't break spears, unlike in the draft. Homing shots slip past arrows on the way to their target (the
+`passes` test), so they would never touch one. Clone slashes and Split Slash's forks don't either: `Source` is what's
+checked, and they're `Clone` and `Shadow`.
+
+### Duos
+
+| Duo | Pair | Effect | Card text |
+|---|---|---|---|
+| **Red-Hot Iron** | Fire + Steel | Each scrap burns up to 2 ordinary arrows within 1 unit of its path (`Arrow.Burn`, skipping what Storm Step skips). | Your <b>Scrap</b> falls red-hot, burning away the arrows in its path. |
+| **Quenching** | Frost + Steel | Oni's own hit on a samurai that's encased, or while the army is frozen, sheds scrap whether cracked or not, and that scrap mends 2. A freeze on a boss cracks it; the cold reaches Kuon as it does for Chilled. | Samurai you cut down frozen or held in ice shed <b>Scrap</b> that mends double. |
+| **Lightning Rod** | Storm + Steel | An arrow chipping wall cover strikes the front samurai of the nearest column to it (`ClosestColumnTo`, `FrontSamuraiInColumn`), at most once per 3 s; on a boss, once per 8 s. | When an arrow chips your cover, <b>Lightning</b> strikes up its lane. |
+| **Rust** | Water + Steel | Every `Soak` also cracks, on the army, a warlord and Kuon alike. | Whatever you <b>Soak</b> is <b>Cracked</b> too. |
+
+Each needs one boon of the partner's family and one of `SteelBoons`, so each must work whichever family boon is held.
+That rules out two of the draft's triggers (below).
+
+### Levels
+
+The §5 conventions apply. A whole step is first earned at Lv 2, so a Lv 3 Common matches a Lv 1 Rare.
+
+| Boon | Step per level (first) | Bound |
+|---|---|---|
+| Anvil Blade chance | +8% | 90% |
+| Anvil Blade samurai cracked | +1 (whole) | 4 |
+| Lodestone Shuriken | +1 arrow (whole) | 6 |
+| Hammer Riposte | +1 point (whole) | 5 |
+| Steel Shadow | +0.4 s | 8 s |
+| Whetstone | +8% spared | 60% |
+| Shrapnel | +1 shard (whole) | 5 |
+
+Spear-Breaker, Tamahagane and the Duos are capstones, so they aren't levelled.
+
+### What changed from the draft, and why
+
+| Draft | Now | Why |
+|---|---|---|
+| **Reinforced Cover** (+1 / 2 / 3 toughness) | Cut; **Whetstone** takes its slot | It is Glacier Wall again: only numbers, and more of his own slashes stopped (§4). Whetstone turns cover into something he spends to attack. |
+| Scrap falls straight; plates any gap | Drawn up to 2.5 units; plates one-way, capped at 4, none in a warlord's fight | Straight down lands in his firing lane, and a solid plate shuts it. In a warlord's fight a new `Blocker` is an unmarked beam stop. |
+| A cracked samurai that dies sheds scrap | Only to his own hits | An effect kill must not trigger a further effect. |
+| A hit on a cracked boss sheds scrap | Next own hit, 3 scrap, spent, 5 s cooldown | Slashing every 0.45 s would have refilled the wall without limit. |
+| Lodestone's caught arrows return as shards "cracking what they hit" | Caught arrows fall as scrap; the blade cracks what it passes | A 1-health samurai dies to the shard, so the crack did nothing, and an Effect kill sheds nothing. This also puts the core identity on the Special. |
+| Quenching: on an army freeze, every cover mended 1 | Frozen or encased kills shed double scrap | Frost Blade and Frozen Riposte encase but never freeze the army, so the Duo would be dead with them. Glacial Shuriken every 6 s would also have mended 12 points each time, unasked. |
+| Rust: a soaked and cracked samurai's next spear turns plain | Every soak also cracks | It only touched Taisho, so it did nothing in stage 1 or against most warlords. |
+| Lightning Rod: strikes the shooter, no limit | Strikes up the lane, once per 3 s (8 s on a boss) | Arrows don't record who shot them, and an unlimited trigger could have restarted the 55–66% effect kill share of §4. |
+| Spear-Breaker: slashes and shards | Slashes only, one call site | See above. |
+| Shrapnel, any break | Own cover only, pays once a blocker, halved on a boss | Otherwise plates and a Whetstone slash would feed it without limit. |
+| Kept: Anvil Blade, Hammer Riposte, Steel Shadow, Red-Hot Iron, Tamahagane | Numbers and boss clauses settled | They hold up. |
+
+### Balance to watch (`RunLog`)
+
+Steel, like Water, should make few kills of its own. `EndSegment` doesn't log cover, so add `RunLog.Note` lines per
+round for scrap shed, points mended, plates formed, arrows stopped by cover and spare scrap.
+
+- **Hit-free rounds are the main risk.** Rounds should still hit him about every other round (§4). If Steel builds
+  stop being hit, lower Whetstone's bound first, then `MaxPlates`.
+- **Scrap against arrows.** On paper Common Anvil Blade gives about 14 mends in a 40-samurai round, and Epic about 30,
+  against 20 to 80 arrows loosed. Epic is meant to keep pace, not to win. An estimate, not a measurement.
+- **Standing still.** Check how long he stays under one site with Whetstone. Dodging must still matter, and spears and
+  yurei arrows are what's meant to move him.
+- **Effect kill share**, with Shrapnel and Lightning Rod held. It should stay well below the 55–66% that forced §4's
+  caps.
+- **The Ultimate's fill rate** from spare scrap, especially against Utsusemi. If Steel Shadow returns too often, lower
+  spare scrap to a third of a hit.
+- **Warlord damage from Shrapnel.** Benibana has only 70 health, so she is the fight to check.
+- **Hearts per round** must not rise with Steel held. If they do, something it built is raising `Broken`.
+
+### Questions for the integration pass
+
+1. Spare scrap fills the Ultimate, which until now only his own hits filled. Is that acceptable to the Ultimate's
+   design, or should spare scrap pay points, as Healing Spring does at full health?
+2. Confirm Utsusemi's and Kagetsune's beam warnings stay true with mended cover, since mending adds no `Blocker` but
+   does keep one standing longer.
+3. Frozen Riposte calls `struck.Freeze` directly rather than `FreezeBoss`, so Quenching's boss crack needs a hook there.
+4. Kagetsune's summoned souls: do cracks and the shared 5 s cooldown apply per boss or across all of them?
+5. Whetstone beside Piercing Slash (`CutsArrows`), Echo Slash and Kindling's fireball, which all count as `Slash`:
+   does the pierce stack sensibly?
+6. Do the Tutorial's and Poguru's lines that spears can't be cut need a variant once Spear-Breaker is held?
+7. Colour: `Boons.ArtColor` is already "polished steel" for Sword Arts, and bronze sits near `BeadColor` and
+   Kagetsune's bronze. What is Steel's colour on cards and the HUD?
+8. Lodestone in a `BulletHell` curtain: do `CappedRiposte` shots count as caught, and should they share `RiposteCap`?

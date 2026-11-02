@@ -1,0 +1,328 @@
+# Oliver, the Smith's Cat
+
+[Back to the story](README.md) · [The souls](Souls.md)
+
+> **In progress, not yet in game.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md). Dialogue tables
+> and the relationships in depth are to come; `Oliver_*` ids below are proposals, and none is marked (in game).
+
+| | |
+|---|---|
+| Role | The **Steel** soul. He will speak for every Steel boon. |
+| Was | The cat of the Emperor's secret forge: a flat-faced foreign cat who slept on the warm bricks behind the master smith's anvil for eleven years. |
+| Is | The first thing that was ever in the coffin. He climbed in to sleep. He wears a smith's bulk that he built out of memory, carries his master's hammer and a doll of his master, and has no sealed bell. |
+| Wants | To hear three taps on an anvil. Failing that, the armor broken, and somewhere warm. |
+| Helps Oni because | Oni's katana came off Jūsuke's anvil and still smells of him, a little. Where the sword goes, Oliver goes. He would like it noted that he isn't helping Oni. He is minding the sword. |
+| Signature | A vast, flat, permanently disappointed face, long white whiskers, a glowing forge hammer held low, and a badly sewn doll hanging from his belt. |
+
+**Oliver** is the one foreign name in the cast, because he is the one foreign thing in it. He came off a southern
+trader's ship in a crate of foreign iron, a cat of a kind nobody in the province had seen, and the crew's name for him
+came with him. Jūsuke couldn't quite say it (*Oribā*) and said it anyway. Nobody else has ever got it right, and
+Oliver has never answered to it from anyone else. His epithet is what he'd tell you if he told you anything: not a
+smith. The smith's.
+
+**Esuhira Jūsuke** (family name first; a fiction, drawn loosely from the friend the plush is based on) is the
+master. Everyone called him Jūsuke, and Oliver calls him "the master". See [The master](#the-master).
+
+## Look
+
+**The head is the real Oliver, and it must stay a cat's.** Everything below the neck is invention; the head is a
+portrait.
+
+- **Shape.** An exotic shorthair: a broad, round, flat-fronted head, wider than it is tall, with heavy plush cheeks
+  and no muzzle to speak of. The whole face sits on one plane. The neck has vanished into a thick ruff.
+- **Coat.** Soft, dense, blue-grey tabby, smoky rather than striped, washed with warm fawn over the cheeks and through
+  the flanks, as if he'd been lightly toasted. Dark charcoal-grey bars run straight up the forehead from between the
+  eyes, in the classic tabby lines, and break into broken bars across the chest and shoulders.
+- **Muzzle and chest.** Pale cream chin and muzzle pads, spreading into a cream-and-fawn bib under the chin.
+- **Eyes.** Very large and very round, set wide apart: deep copper-amber, almost orange-brown, with big dark pupils and
+  a wet shine. A heavy fold of fur over each eye gives the brow its worried, sulking slope.
+- **Nose and mouth.** A tiny, short, dusky brown-rose nose pushed up high, level with the bottom of the eyes, with a
+  deep crease running down from it into a small, downturned mouth. He isn't frowning. It is simply his face.
+- **Ears.** Small, rounded, set far apart on the corners of the head, pale inside with fine tufts. One sits a little
+  lower than the other.
+- **Whiskers.** Long, fine and pure white, far too long for the face, sweeping down and out past the chin to the chest.
+  The brightest thing on him.
+- **Expression.** Head tilted slightly down and to one side, looking at you from under the brow, mournful and
+  unimpressed. Never smiling, never a tongue out (that's Poguru), never sparkly-eyed. All the comedy comes from how
+  gravely this face takes everything.
+
+**Build.** Huge: taller and far wider than Oni, a barrel of a body with sloped shoulders, forearms like bolsters, a
+low-slung belly and short, thick, planted legs. He is heavy, not tubby: he stands like something that would take four
+men to move and has no intention of helping them. Fur all over, thick and blunt-fingered paw-hands, a short, thick
+tail. **The size is a memory**: from the bricks behind the anvil, the master was the biggest thing in the world, so
+that is the size a soul should be. The body is Jūsuke as a cat saw him from the floor. Jūsuke was a slight man.
+
+**Costume** (a working smith's, worn-in, nothing ceremonial; Jūsuke's own, and it fits only because the soul built
+itself around it):
+
+- A heavy, scorched, dark leather bib apron, too small across the chest, patched and riveted at the straps.
+- Thick leather gauntlets to mid-forearm, the palms burned shiny. The paw-hands fill them completely.
+- A wide belt slung under the belly: tongs, two punches and a rasp, each worn smooth. Dark wrappings at the shins, and
+  bare hind paws, because he has never once kept a boot on.
+- **The collar.** A narrow, cracked leather strap, half-buried in the ruff, from when he was the size of a loaf. On it
+  hangs a small, plain bronze bell with no tongue: see [The bell](#the-bell).
+
+**The hammer.** Jūsuke's forge hammer, not a war hammer: a short ash haft and a plain, square-faced cross-peen head
+of black iron, about the size of Oliver's own head, drawn with a working tool's proportions. He carries it low in his
+right hand, head down, usually resting on the ground. Thin **forge-gold seams** glow through cracks in the iron, like
+metal just out of the fire and cooling, brightest on the striking face, a dull ember at the seams' edges, and a few
+sparks falling off it. It has never gone cold: it holds the last heat of the last forge fire. **It is not soul-fire and
+never teal.** It glows by being hot, so it stays a shape with bright lines in it, never an aura or a beam.
+
+**The plush.** A very simplified doll of the master, **hanging from Oliver's belt** on a short knotted cord at his left
+hip, where it swings when he walks. It's about the length of his paw and only a few shapes:
+
+- A round pale head with a mop of near-black wool on top and a pair of dark rectangular wire glasses, a little crooked.
+  Two black bead eyes and one stitch of moustache. That's the whole face.
+- A plain black sack of a body cut from a work shirt, with stubby arms, one longer than the other.
+- Grubby and worn thin. **It is not cute on purpose.** It was made by a dying man who was bad at sewing, and it should
+  read at a glance as *a little man with glasses*, nothing more detailed.
+
+**His soul** (for the boon screen, `Soul_Steel_Painted`, in the set described in [Souls.md](Souls.md)): a squat
+forge-gold flame like a pour from a crucible, cracked with bright seams, with the curl of a sleeping cat at its core
+and the tongueless bell hanging below on a strap where the others have a chain.
+
+**Palette.**
+
+| Use | Hex |
+|---|---|
+| **Steel element colour:** forge-gold glow, hammer seams | `#E0A83A` |
+| Seam core, sparks | `#FFE08A` |
+| Seam edge (thin lines only) | `#D9822B` |
+| Fur: tabby bars, outline side | `#4A4650` |
+| Fur: blue-grey mid | `#7C7884` |
+| Fur: light | `#A5A0A8` |
+| Fur: warm fawn wash | `#B89878` |
+| Muzzle, bib | `#EADCC3` |
+| Whiskers | `#F5F2EA` |
+| Eyes: copper, bright rim | `#B8602A`, `#E08A3C` |
+| Pupils | `#16110F` |
+| Nose, inner ear | `#7A4F45`, `#C9A58E` |
+| Leather: apron and collar, highlight | `#3A2A20`, `#5A4030` |
+| Gauntlets | `#4E3324` |
+| Iron: hammer and tools, edge | `#2B2D33`, `#5C6068` |
+| Bronze: bell, rivets | `#8A6330` |
+| Plush: body, hair and glasses | `#1C1B20`, `#141216` |
+| Plush: face cloth | `#D9B99A` |
+
+Gold stays clear of Fire (`#FF6133`) and the Legendary card orange (about `#FF9933`). **No teal** anywhere until he's
+freed. **No red cord or ofuda:** those are Kagetsune's.
+
+**Silhouette at 64×64.** A wide dome on a wider barrel, with almost no neck. Read in order: the huge flat head with two
+tiny ears at its far corners; the white whiskers breaking the outline on both sides; the block of hammer low on one
+side with a gold line in it; a small lumpy figure with sticking-up hair dangling at the other hip. Black it in: it
+should still say *cat, hammer, something tied to him*. It must not read as a bear (ears too small and too far apart
+to be round bear ears, flat face, whiskers), as Kagetsune (hammer low, never on the shoulder) or as a mascot (no big
+smile, no raised paw).
+
+**Pixel art brief** (`Assets/Art/Sprites/Characters/Oliver/Oliver_<Clip>_<i>.png`, PixelLab, the temple's front-facing
+chibi style, standing at the weapon rack; no reference photo needed):
+
+> 64×64 canvas, transparent, feet on the row y = 60, slight three-quarter front view. An enormous fat grey tabby cat
+> standing on its hind legs, dressed as a blacksmith. **Head:** about 28 px wide by 22 px tall, x 18–46, y 8–30, as wide
+> as a dinner plate, perfectly round, with a totally flat face, no snout and no neck. Blue-grey fur (`#7C7884`) with
+> warm fawn cheeks (`#B89878`), three dark vertical stripes up the forehead (`#4A4650`). **Eyes:** two big round copper
+> eyes (`#B8602A`, 5×5 px), big black pupils, one white highlight pixel each, 4 px apart, each with a dark sloped line of
+> brow over it so the face looks glum. **Nose:** a 2 px dusky brown dot placed high, level with the bottom of the eyes,
+> with a 3 px down-turned mouth under it. Pale cream patch on the chin (`#EADCC3`). **Ears:** tiny rounded ears, 5 px, at
+> the far top corners of the head. **Whiskers:** three or four 1 px near-white lines each side (`#F5F2EA`), drooping
+> outward and down, long enough to pass the edge of the head and reach the chest. **Body:** 36 px wide, x 14–50, y
+> 28–54, a huge barrel with sloped shoulders and thick arms, short stubby legs, bare paws. Cream bib under the chin,
+> half hiding a thin brown collar with a tiny 3 px bronze bell. Dark brown leather apron (`#3A2A20`) over the belly with
+> two straps. Dark leather gauntlets on both arms (`#4E3324`). A belt under the belly with small iron tongs on it.
+> **Viewer's left, the cat's right hand:** a short wooden hammer held low with its square black iron head (`#2B2D33`,
+> about 12×9 px) resting by the foot, cracked with 1 px glowing gold lines (`#E0A83A`, one or two `#FFE08A` pixels).
+> No soft glow halo, no teal. **Viewer's right, hanging from the belt at the cat's left hip on a 2 px cord:** a tiny
+> cloth doll, about 8×11 px: a pale round head with a scribble of black hair on top, a 4×2 px outline of dark glasses,
+> a plain black body with stubby arms. Nothing else on it.
+> **Mood:** heavy, tired and unimpressed, not cute. Head tilted 1 px down. Dark selective outline.
+
+Clips (a proposal, for whoever builds his station): **Idle** (a very slow breath, whiskers shifting, one slow blink, a
+spark falling off the hammer), **Loaf** (asleep on the rack's platform, a mound with a doll beside it, before the meeting
+and sometimes after), **Talk** (the head lifts 1 px; the mouth barely moves), **Strike** (the hammer comes up slowly and
+falls once, the only fast thing he does), **Pounce** (for the field: a soul caught under one gauntlet).
+
+**The painting** (`Assets/Art/Portraits/Oliver_Closeup.png`, `Oliver_Full.png`; the boss portraits' dark fantasy style):
+real, densely rendered fur on a real cat's head, on a massive smith's body lit from below by the hammer. The doll's
+crooked stitches should be visible. Brief in [the art guide](../Docs/CHARACTER_ART_GUIDE.md).
+
+## The master
+
+**Jūsuke** was the youngest master anyone had heard of: he had the forge at nineteen and was about thirty when he
+died, so "old master" only ever means *former*. He was a slight, untidy man with a mess of dark hair, a thin moustache
+he was vain about, and a black work shirt. He wore dark rectangular glasses, because years of
+reading the colour of hot iron had taken most of his eyes. He made the guards' blades, Oni's long katana among them,
+before he ever made anything secret. He talked to the cat constantly and to everyone else rarely. There were six at his
+anvil: him and five journeymen.
+
+## History
+
+- **The crate.** Oliver arrived in a crate of southern iron and was found asleep in it. He has never accepted that a
+  box might not be for him. Jūsuke kept him because he was warm, and because he sat behind the anvil through a full
+  day's striking without once flinching, which no apprentice had managed.
+- **The bricks.** For eleven years he slept on the warm bricks behind the anvil. He can't forge and doesn't pretend to.
+  But he has heard a hundred thousand strokes, and he knows from the sound whether a weld has taken and from the smell
+  whether a heat has been wasted. **Three taps on the anvil meant supper.** Two meant *move*. One was only a hammer.
+- **The commission.** An order came from the palace, wrapped in court-purple silk, for a thing no smith should have
+  made. For the first time, the forge's ash was wrong. Six men breathed it. Oliver, being a cat, washed: every evening,
+  all that year, he licked the ash off his own coat and off his master's sleeves. It killed the men in a winter. In
+  him it settled, the way iron takes a quench, and it stayed. He is the heaviest thing he has ever been, and it isn't
+  the size.
+- <a id="the-bell"></a>**The bell.** The first bell cast for the armor was a test, poured with no tongue, and it went
+  on the scrap pile. Jūsuke fished it out and hung it on the cat, because a bell warns the birds, and a bell with no
+  tongue doesn't. It's the only joke the commission ever produced. It has never rung, it holds nobody, and it isn't one
+  of *the* bells. Bronze from the same pot edges Kagetsune's armor.
+- **The doll.** That last winter, coughing, Jūsuke sat up nights and sewed a doll of himself from his own work shirt,
+  stuffed with the wool from his bedding, and tied it to the cat's end of the bench so there'd be something that smelled
+  of him afterwards. He was very bad at it.
+- **The cold.** Mizore told him to stay in bed ([Mizore_Meet_Smiths](Mizore.md)). He walked home instead, because there
+  was a cat to feed, and he died on the forge floor, the last of the six. Oliver lay on him until he went cold. Then
+  Oliver picked up the doll and went to the warmest thing left in the building: the coffin, finished, open on its
+  trestles, its lining still holding the heat of the last fire. **He left. The box was warm. That was all it was.**
+- **The lid.** The Emperor's men came to fetch the coffin that spring. Nobody checks a box for a cat. They put the lid
+  on and carried it away. He died in the dark somewhere on the road, with the doll's cord in his teeth, and his soul stayed
+  where it was, curled up, the first thing the coffin ever held. No one had sealed him. No bell was cast. There's
+  nothing on the armor to say he's there.
+- **The Night.** When the lid came off, thousands poured in. Oliver got out. Ask him how and he'll say "Door." The ash
+  still ties him to the armor, as a bell ties the others, but with no bell it's only a tug, so unlike them he can walk
+  as far as the hill. A soul takes the shape of what it remembers, as [Poguru](Poguru.md) took the paper dragon's. His
+  remembered the biggest thing in the world.
+- **Since.** He has walked the whole of the armor, at night, and smelled every bell on it. It took a long time. He
+  sleeps on Kagetsune's shoulder when it suits him; nobody has ever noticed where a cat sleeps. Jūsuke isn't on any
+  bell: he died a year before the Night, so he was never in the coffin at all. Oliver knew that by the second night. He
+  went on checking. Then, one night, he smelled the master's work going by on the hip of a man running away, and
+  followed it up a hill, and got on the rack.
+
+## How a Steel soul reaches Oni
+
+A soul that dies still *holding* something won't sink and won't burn: a man holding a door, a line, a child's hand. Its
+hands won't open. It comes back toward the coffin slow and heavy, and the pull slides off it. Oliver knows those; he
+came in that way himself, with his teeth shut on a doll's cord.
+
+He catches them like a cat catches anything. He watches for a long time, pounces, pins it under one gauntlet, and gives
+it one stroke of the hammer to make it hold together. **Then he carries it to Oni and drops it at his feet, and waits.**
+That is the boon screen: a thing he killed for you, and you had better look pleased. What those souls give is what
+they were doing when they died: walls that hold, gaps closed, things mended. He also just hates a draft.
+
+## Personality and speech
+
+The comedy and the grief are the same joke: a colossal, grave, disappointed animal with no idea how to be anything
+else, who keeps a doll tied to his belt and would kill you for it.
+
+- **Slow, low, flat, heavy.** He speaks like a large thing settling. Sentences stop when he loses interest. Akagane
+  shouts, Mizore cuts, Hibiki runs, Asagi fusses; Oliver can't be bothered, and every line is about something he minds
+  enormously.
+- **A verdict, then nothing.** He doesn't explain or argue. He judges by **sound, smell and warmth**, never by theory:
+  "That rang wrong." "Smells wasted." "Not warm." Only the master's work is ever good, and he only says so by not
+  saying otherwise.
+- **Cat logic stated as law.** Boxes are for sitting in. Doors are to be open, then shut, then open. If he has sat on
+  it, it's his. He never treats any of this as funny, and **he never makes a joke he knows is a joke**.
+- **"He says."** He reports the doll's opinions, always insulting, always about workmanship, in the same flat voice: "He
+  says your edge is a disgrace." The doll never speaks, moves or gets a voice. **No ventriloquism.** He is not confused
+  about what it is, as `Oliver_Meet_Doll` makes clear. It is how he keeps a man's opinions going after the man.
+- **The only soft voice** is to the doll, low and sideways, and he doesn't know it's audible.
+- **Never:** "meow", "nya", purr puns, "paw-sitive" or any wordplay on cats; baby talk; a smile; a hug; a speech. He may
+  purr, about twice in the whole game, like a bellows in another room, and deny it. Others may call him a cat. He has no
+  view on it.
+- **He calls Oni "Scabbard"**, the thing the sword is kept in. Late on, once, and after that always: **"Seventh"**.
+  Never "Guardsman", "little fry", "young man" or "little demon". Jūsuke is **"the master"**; he says the name only in
+  `Oliver_Meet_Cold`. He calls Mizore **"Cold Hands"**, since she told the master to stay in bed and he respects her for
+  being right about it. The others' names for each other and for him are for the relationships pass.
+
+### Sample lines
+
+These set the voice and are proposals only.
+
+| Moment | Lines |
+|---|---|
+| The meeting: the rack, the katana on the floor, a mound on the platform | **Oni:** "...That's my sword."<br>**Oliver:** "His. You've been carrying it. Badly." |
+| First soul at Oni's feet | **Oliver:** "Brought you this. It's still moving. Don't make a face." |
+| A Steel pickup | **Oliver:** "There's a gap in your wall, Scabbard. I can feel the draft from here. ...There. Don't touch it." |
+| The doll | **Oliver:** "He says your edge is a disgrace."<br>**Oni:** "...That's a doll."<br>**Oliver:** "He's resting." |
+| How he got in | **Oliver:** "It was warm. I got in. They put the lid on. Nobody checks a box." |
+| With Mizore | **Mizore:** "Jūsuke? I lifted him onto my cot with one arm. He weighed less than his apron."<br>**Oliver:** "He was enormous."<br>**Mizore:** "...Yes. I suppose he was." |
+| Kagetsune ahead | **Oliver:** "Terrible man. Good shoulder." |
+| Late: `Oliver_Meet_Doll` | **Oliver:** "I know it's a doll. I'm a cat. I'm not an idiot."<br>**Oliver:** "He sat up all winter sewing it, so it'd smell of him after. It smells of him less now."<br>**Oliver:** [to the doll, low] "Don't tell him." |
+
+**Voice design prompt** (for later; a preview for the user to pick, as with `ASAGI`): "A very large, older male voice,
+extremely low, slow and gravelly, with a slight wheeze and a snuffle on the breath, as if his nose doesn't quite work.
+Flat, deadpan, unbothered and permanently disappointed, like a tired craftsman looking at your work. No accent. He
+never raises his voice or hurries. Huge and close, and under it, very rarely, tender." Delivery tags: `[flat]`,
+`[gravel]`, `[unimpressed]`, `[a slow wheeze]`, `[to the doll, low]`. He gets the souls' faint coffin echo: he has been
+in it longer than anyone.
+
+## What he wants
+
+- **What he says:** the sword kept properly, the gaps shut, and nobody touching the doll. Asagi has offered to wash it.
+  Once.
+- **What he's doing:** finishing the job. The master knew what he'd made. Oliver slept in it for a year and knows every
+  place it runs warm, which is every place it's thin.
+- **What he wants:** three taps on an anvil. He knows it's not going to happen. A cat waits by the door anyway.
+- **What he's afraid of:** the day the doll stops smelling of anything. He is losing a man by smell, a little every
+  night, as Oni is losing a life by memory. He notices Oni's forgetting before Oni does, and he doesn't say it kindly,
+  and he's the only one who knows exactly what it's like.
+
+## Arc across runs
+
+A planned chain, one chapter a run; the dialogue pass writes the tables. **He unlocks at the weapon rack**, on the
+wake after Asagi is met (`seen Asagi_Meet_Pool`, `deaths ≥ 10`), so the two arrive together, with her first: Oni climbs out of the pool and finds his katana on the floor
+and something very large asleep on the rack's platform.
+
+1. **The rack** (`Oliver_Meet_Rack`, the hub): "His." Oni's sword, a stranger's claim, and the first soul dropped at his
+   feet.
+2. **The draft:** he mends Oni's walls and insults them. The doll's first opinions.
+3. **The box** (`Oliver_Meet_Box`): how he got in. Told as a complaint.
+4. **The enormous man** (needs `seen Mizore_Meet_Smiths`): Mizore mentions the patient she could lift with one arm.
+   Oliver doesn't discuss it. The player sees what the body is.
+5. **The bell** (`Oliver_Meet_Bell`): Oni finally asks about the collar. A test piece, a joke, the first one poured.
+   "Doesn't ring. That's the point of it."
+6. **The doll** (`Oliver_Meet_Doll`): he has always known. It smells of him less now.
+7. **The cold** (`Oliver_Meet_Cold`): the one time he says the name. "Jūsuke went cold. I lay on him till he did. Then
+   I left. The box was warm." Every bell checked, and he isn't on any of them, and Oliver knew by the second night. It's
+   the only thing he has ever asked Oni: not forgiveness, only whether the man had it right, whether you can leave and
+   have it not matter. Oni, who led them all up the mountain, answers in about two words.
+8. **The seventh** (`Oliver_Meet_Seventh`, needs `seen Shirogane_Intro_Oath`, like the other last chapters): there were
+   six at the anvil and the job isn't finished. He looks at the blade for a long time. "It's been kept. ...Get up,
+   Seventh." From then on he says Seventh, and the doll stops having complaints.
+
+Alongside it, at the rack: he sits on whatever Oni has just been reading, and the sword's edge starts turning up
+sharper than Oni left it. Nobody mentions this.
+
+## Freed (the ending)
+
+He has no sealed bell, so nothing goes silent for him, and the tongueless one never rings: that's Shirogane's moment and
+he doesn't touch it. The ash burns out of him with the rest of the armor. His is the last beat of all, after Asagi's,
+and only if `Oliver_Meet_Seventh` has played; otherwise he goes unseen.
+
+The dawn reaches the temple step. The forge-gold seams in the hammer cool to plain black iron for the first time, and
+the hammer is set down. The big body goes out like a banked fire, gold to teal to nothing, and what is left on the
+warm stone in the first sun in the game is a small, flat-faced grey cat the size of a loaf, with a cracked collar. The
+doll has come off with the belt. He has never been warm since the forge. He sits in it.
+
+Then, from a long way down the valley, under Oni's flute, as Hibiki's drumbeat answers it: three small taps of a hammer
+on an anvil. The cat lifts his head.
+
+| Moment | Line |
+|---|---|
+| The third tap | `Oliver_Dawn`: **Oliver:** "...That's supper." |
+
+He takes the doll by the cord, drags it to the little field anvil he hauled up to the rack, gets it on top, and leaves it
+there, square, the way you'd leave a thing for someone who won't need it now. Then he walks off down the hill, not
+hurrying, and rises from somewhere past the edge of the frame as plain teal soul-fire. The bell makes no sound. Nobody
+sees who was tapping, and the game never says.
+
+## Keep consistent
+
+- He was in the coffin, unsealed, before anyone. **He has no sealed bell**, and his collar bell is the first *cast*,
+  never hung; Mizore's is still the first hung, and Shirogane's is still the one that never rang by choice.
+- Six smiths: Jūsuke and five journeymen, all dead by spring, a year before the Night. **Jūsuke's soul is not in the
+  coffin**, and no line may promise Oni can free him. Oliver knows.
+- The body is a memory. Jūsuke was slight. Oliver will never concede it, and nobody needs to explain it outright.
+- The hammer is forge-gold and glows by heat. **Never teal** until freed, never an aura, never carried on the shoulder.
+- The doll is very simple: mop of hair, glasses, black sack. It hangs from his belt and is never carried in his arms. It
+  has no purple on it, so it can't read as Storm.
+- The doll never speaks, moves or acts. "He says" is always Oliver's. Nobody but Oliver touches it. It is never washed.
+- He can't forge. He can only judge, strike once and mend. He's the smith's, not a smith.
+- He is a grave, grumpy, grieving animal and never a mascot. No cat puns from anyone but Poguru, and Poguru gets few.
+- He calls Oni "Scabbard", then "Seventh" from `Oliver_Meet_Seventh` on. Never "Oni".
+- The real-world references (the cat's and the friend's photos) stay outside the repo, like Poguru's.

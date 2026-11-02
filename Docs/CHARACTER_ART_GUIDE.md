@@ -89,6 +89,26 @@ Known issue: `Kagetsune_Phase_Full.png` appears to carry a soft teal/crimson gra
 
 Pixel sprite: PixelLab character "Kagetsune P1" (pro mode from `Kagetsune_Full.png`, styled on Shirogane's sprite) and its "Unchained Wraith" state, five clips each (Idle, Slam, Toll, Hit, Defeat) in `Art/Sprites/Characters/Kagetsune[Phase2]/`. It keeps the horns, the hammer-on-shoulder silhouette, the bells at the waist and the teal chest glow readable at chibi scale, and is drawn about one and a half times the other bosses' size (`BossArtSetup.KagetsuneScale`). The Wraith state burns teal at the horns and through cracks in the armor, with skull spirits about him.
 
+## Oliver — the Smith's Cat (in progress)
+
+The Steel soul. Story, palette table and the full pixel brief are in `Story/Oliver.md`; read it first, because the details carry the story (the body is a cat's memory of how big his master looked, the doll is the master's own bad sewing, the bell has no tongue). A soul, so the set is `Oliver_Closeup.png` and `Oliver_Full.png` with no Phase 2, plus the boon-screen soul `Soul_Steel_Painted.png`.
+
+Identity: a real exotic shorthair's head on a colossal blacksmith's body. The head is a portrait of the user's friend's cat and is locked: broad, round, totally flat face with heavy cheeks and no neck; dense blue-grey tabby washed with warm fawn, dark vertical forehead bars; cream chin and bib; very large, round, wide-set copper-amber eyes under sloping brow folds; a tiny dusky nose set high, a deep crease into a small down-turned mouth; small rounded ears at the far corners of the head; very long, fine pure-white whiskers reaching the chest. Head slightly tilted, looking up from under the brow, mournful and unimpressed. Render real, dense fur with a dark fantasy finish. It is not a mascot, a cartoon or a bear: no smile, no tongue, no sparkling eyes, no human features on the face.
+
+Body and costume: barrel-chested, sloped shoulders, bolster forearms, short planted legs, a short thick tail, blunt paw-hands. A scorched dark leather bib apron, too small, riveted at the straps; thick burned leather gauntlets; a low belt with tongs, punches and a rasp; dark shin wrappings and bare hind paws; a narrow cracked collar half-buried in the ruff with a small plain bronze bell that visibly has no tongue. The blacksmith concept art the user supplied is for bulk and costume ideas only; don't copy it.
+
+Weapon, the **master's hammer**: a working forge hammer, not a war hammer, with a short ash haft and a square-faced cross-peen head of black iron about the size of his own head. Carried low in the right hand, head toward the ground, **never on the shoulder** (that's Kagetsune's silhouette). Crisp forge-gold seams through cracks in the iron, brightest on the striking face, with a thin ember edge and a few falling sparks. Hot metal, not magic: no aura, no beam, no soft bloom.
+
+The **plush**: a very simplified doll hanging from his belt on a short cord at the left hip, never carried in his arms. About a paw long: a round pale head with a mop of near-black wool, crooked dark rectangular wire glasses, black bead eyes, one stitch of moustache, and a plain black sack body with uneven stubby arms. Use the supplied photo for styling only, and draw a doll, not a likeness of a real face.
+
+Palette: blue-grey, fawn and cream fur, dark leather, black iron, bronze fittings, and **forge-gold** (`#E0A83A`, core `#FFE08A`, thin edge `#D9822B`) as the only glow. **No teal** in any of his set: he is teal only in the ending's freed beat, where he is a small ordinary cat. No red cord or ofuda (Kagetsune's), and keep the gold apart from Fire's orange-red and the Legendary card's orange.
+
+Composition: lit from below and one side by the hammer, against night. The close-up follows the shared dialogue-portrait framing, with the eyes about 0.19 down the canvas, whiskers and doll inside the frame. The face is the focus; the doll and the hammer are secondary.
+
+References: outside the repo and never committed, like Poguru's: the user's photo of the cat (authority for the head), two blacksmith concept paintings (build and costume ideas), the photo of their friend (the plush's styling). Filenames as for the other souls in `Assets/Art/Portraits/`.
+
+Pixel sprite: to be made in PixelLab from the brief in `Story/Oliver.md`, 64×64, `Art/Sprites/Characters/Oliver/`. At chibi scale, the flat head, the whiskers breaking the outline, the low hammer's gold line and the doll's mop of hair must all still read in silhouette.
+
 ## Revision and new-character workflow
 
 1. Read this guide and inspect the current reference images. Identify which features are locked and exactly what the user wants changed.

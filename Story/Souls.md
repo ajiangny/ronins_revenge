@@ -1,11 +1,16 @@
-# The four souls: Akagane, Mizore, Hibiki and Asagi
+# The five souls: Akagane, Mizore, Hibiki, Asagi and Oliver
 
 [Back to the story](README.md)
 
-The Fire, Frost, Storm and Water souls get faces, names and voices. They talk to Oni on the boon screen the way
+The Fire, Frost, Storm, Water and Steel souls get faces, names and voices. They talk to Oni on the boon screen the way
 Hades' Olympians talk to Zagreus when he picks up their boons. Three of them are people from the Night of a Thousand
 Bells, one each from the court, the army and Oni's own village, the three groups he led up the mountain. The fourth
-was never on the mountain: she is the koi of the temple pond he wakes in, and she joins once he has met her there.
+was never on the mountain: she is the koi of the temple pond he wakes in, and she joins once he has met her there. The
+fifth was in the coffin a year before anyone: the cat of the forge that made it, who climbed in to sleep. He joins on
+the next wake after her.
+
+**Oliver isn't in game yet.** His boons are paper ([BOON_DESIGN §11](../Docs/BOON_DESIGN.md)), and nothing of his is
+voiced or wired. Every Steel line, id and bond on this page is a plan.
 
 | Soul | Element | Was | Group | Calls Oni | File |
 |---|---|---|---|---|---|
@@ -13,6 +18,7 @@ was never on the mountain: she is the koi of the temple pond he wakes in, and sh
 | **Mizore**, the Court Physician | Frost | Physician to the court for forty years; sat with the old Emperor as he died, and his nine-year-old son | The court | "Oni", "young man" | [Mizore.md](Mizore.md) |
 | **Hibiki**, the Village Drummer | Storm | The festival drummer of Oni's home village, seventeen; drummed the procession up the mountain | The village | "Oni", "my lord guardsman" | [Hibiki.md](Hibiki.md) |
 | **Asagi**, the Pond Physician | Water | The koi of the temple pond on Oni's hill, three hundred years old; taught Mizore; pulls Oni out of the pool each time he dies | The hill (outside the three) | "little fry", "flute boy" | [Asagi.md](Asagi.md) |
+| **Oliver**, the Smith's Cat (planned) | Steel | The cat of the Emperor's secret forge, eleven years on the bricks behind Esuhira Jūsuke's anvil; first thing ever in the coffin, unsealed; wears his master's bulk from memory | The forge (outside the three) | "Scabbard", then "Seventh" | [Oliver.md](Oliver.md) |
 
 - **Akagane** is anger with somewhere to go. He blames Oni, blames himself more, and aims his fire at Kagetsune.
 - **Mizore** is cold, steady care. She treats Oni as a patient, pities Kagetsune as the boy he was, and holds the
@@ -21,6 +27,8 @@ was never on the mountain: she is the koi of the temple pond he wakes in, and sh
   conditions, and the one whose name he forgets.
 - **Asagi** is warm, nosy care, Mizore's opposite and her teacher. She was never in the coffin, has no bell, and is
   the only one who could leave and doesn't. She has decided Oni is her last patient.
+- **Oliver** is grief with nowhere to put it, too large and too cross to say so. He has no sealed bell. He says he's
+  minding the sword, and he reports the doll's complaints about it.
 
 ## Where they stand in the story
 
@@ -35,13 +43,20 @@ This fits the README's "Every boon is a soul stolen back" and adds faces to it:
 - **Asagi is the exception.** She was on her hill that night, not in the hall, so the coffin never had her. The
   souls that slip past it on the way back *with Oni* sink into her pond, the tired ones that only want to be clean
   of it, and she lifts them out and hands them to him as Water. Her boons open only after he has met her in the
-  temple (`Save.Data.asagiMet`), a few runs in.
+  temple (`Save.Data.asagiMet`), after Oni's tenth death.
+- **Oliver is the other exception, from the far end.** He was in the coffin first and got out on the Night; no bell
+  holds him, only the ash he licked off his master's sleeves, so the armor's pull is a tug and he can walk as far as
+  the hill. A soul that dies still holding something (a door, a line, a child's hand) comes back too heavy for the
+  pull. He watches it, pounces, strikes it once to hold it together and drops it at Oni's feet as Steel. Planned to
+  open on the wake after Asagi is met (`seen Asagi_Meet_Pool`, `deaths ≥ 10`), so Oni meets the two nearly together.
 - Their element colours are what hold them out of the coffin. **None of them is ever teal** until they're freed in
   the ending, when the colour burns out of them and they rise as plain soul-fire like every other freed soul.
-  Asagi's sea-blue is simply her own; the pool she stands in is teal, and that is soul-fire, not her.
+  Asagi's sea-blue is simply her own; the pool she stands in is teal, and that is soul-fire, not her. Oliver's
+  forge-gold is plain heat, the last of the last forge fire.
 - They are Kagetsune's victims and none of them serves him. Each blames Oni to a different degree (Akagane most,
   Hibiki least and then, honestly, a little) and each helps him anyway, for their own reason. Asagi is nobody's
-  victim; she blames herself, for being honest with a boy who climbed her hill.
+  victim; she blames herself, for being honest with a boy who climbed her hill. Oliver blames nobody out loud. The
+  commission killed his master and him, and Kagetsune doesn't know he exists.
 
 ### Tie-ins to the existing cast
 
@@ -51,11 +66,13 @@ This fits the README's "Every boon is a soul stolen back" and adds faces to it:
 | Mizore | Treated her ankles, saw the rosary, kept the secret. | Wants to learn how the soul was wound into gears, to undo it. | **Told her about the dying smiths**, which is where Shirogane's suspicion and the oath came from. | Held his hand as his father died, and told him "Everyone dies, my prince. Even emperors." Her bell is closest to his heart. |
 | Hibiki | Watched the dance; "then everyone got so sleepy." | The tea monk who let village children wear his hat at the well. | Held her sword once and dropped it. | Saw him once from the procession. The village got no bells of its own; it rings as one sound inside the coffin. |
 | Asagi | A dancer came up the hill for her ankles once; that night the smoke drifted up and settled on the pond. | The monk stopped at her pond every spring and fed her rice, and talked to the fish, not the body. | One of the two guards who sat by her pond; the one who listened. She keeps her stone clear. | Climbed her hill young to ask how forever was done. She told him it wasn't worth having. No bell: he never had her. |
+| Oliver (planned) | Slept through her dance, in the box. Smelled every bell, so he knew hers before she said. "Smoke." | Razes what he mends. "Bad Work." It still counts one set of paws on the armor at night. | Her two blades came off Jūsuke's anvil, and she kept them right: "Clean Edges". Jūsuke's cough began the chain to her oath. | Sleeps on his shoulder; **Kagetsune doesn't know**, and never may. "Terrible man. Good shoulder." |
 
 ## Elements, boons and Duos
 
 Code names differ from screen names: `Element.Fire` = Fire, `Element.Water` = Frost, `Element.Lightning` = Storm,
-`Element.Tide` = Water (added last, so saves made before her keep their `lastRunElement`).
+`Element.Tide` = Water (added after them, so saves made before her keep their `lastRunElement`), and, planned,
+`Element.Steel` = Steel, appended after her for the same reason.
 
 | Soul | Element | Core boons (family) | Passives | Legendary |
 |---|---|---|---|---|
@@ -63,6 +80,7 @@ Code names differ from screen names: `Element.Fire` = Fire, `Element.Water` = Fr
 | Mizore | `Water` | Frost Blade, Glacial Shuriken, Frozen Riposte (Ice) | Cold Compress (the army freezes when he's hit), Glacier Shell | **Still Water**: "Slow the pulse and a fever loses its hurry." |
 | Hibiki | `Lightning` | Storm Blade, Thunder Shuriken, Thunder Riposte (Strike) | Storm Step, Static Charge | **Raijin's Drum**: her own festival drum. |
 | Asagi | `Tide` | Riptide Blade, Tidewake Shuriken, Undertow Riposte (Tide: waves that soak, wash arrows away and push the army back up) | Tidal Renewal (her medicine; it was Mizore's until she arrived), Healing Spring | **Dragon Gate**: the koi climbs the falls; once a stage the last blow is turned aside and heals him. |
+| Oliver (planned; [§11](../Docs/BOON_DESIGN.md), numbers unplayed) | `Steel` | Anvil Blade, Lodestone Shuriken, Hammer Riposte (`SteelBoons`: Cracked and Scrap, so attacking rebuilds cover) | Whetstone, Shrapnel | **Spear-Breaker**: his slash breaks the cursed spears, and each falls as Scrap. Infusion: **Tamahagane**. |
 
 | Duo | Souls | Their bond |
 |---|---|---|
@@ -72,24 +90,37 @@ Code names differ from screen names: `Element.Fire` = Fire, `Element.Water` = Fr
 | **Scalding Steam** | Akagane + Asagi | "Carp." "Koi." He wants her out of his fire; she wets the enemy first so the steam carries. |
 | **Black Ice** | Mizore + Asagi | Teacher and student. The one place water turns to ice, and the one argument they've had for forty years: warm the patient or chill him. |
 | **Thunder Rain** | Hibiki + Asagi | Asagi heard the girl's festival drum from her pond every summer. Hibiki adores her on sight. |
+| **Red-Hot Iron** (planned) | Akagane + Oliver | Akagane wore armor off that anvil and had it lacquered, and Oliver has never let it go. Fire on iron is the one use of his fire Oliver won't call wasted, and he won't say that either. |
+| **Quenching** (planned) | Mizore + Oliver | A quench is how the ash took him, and she's the one who told the master to stay in bed. "Cold Hands" knows when to stop, which is all a quench is. She doesn't mention the size of the man. |
+| **Lightning Rod** (planned) | Hibiki + Oliver | He stands still and she strikes up the lane when his wall is chipped. It's the only time she's glad of something that doesn't move, and she pats it. Her three taps on his anvil stay unspoken. |
+| **Rust** (planned) | Asagi + Oliver | The worst word he knows, and it's her water doing it, so he'll allow it on someone else's iron. She offered to wash the doll once, and neither of them is going to raise it here. "Fish." "Yes, dear." |
 
 ### Rivalries and jealousy
 
-| Jealous soul | Of Fire | Of Frost | Of Storm | Of Water |
-|---|---|---|---|---|
-| Akagane | | Mild: "cold is for people who've given up." | Strong: a village girl's speed over the vanguard's fire is an insult. | Dismissive: "stay in your pond, carp." |
-| Mizore | Dry: "fevers are popular, briefly." | | Worried: "quick is how fevers spread." | Stiff: her teacher watching her work. |
-| Hibiki | Sulky: "Captain Kettle doesn't even smile." | Sulky: "Grandmother made you sit still." | | None. "Great-Grandmother!" |
-| Asagi | Fond: "running a temperature." | Fond: "sleet over-chills a patient." | Fond: "you'll slosh me." | |
+| Jealous soul | Of Fire | Of Frost | Of Storm | Of Water | Of Steel (planned) |
+|---|---|---|---|---|---|
+| Akagane | | Mild: "cold is for people who've given up." | Strong: a village girl's speed over the vanguard's fire is an insult. | Dismissive: "stay in your pond, carp." | Bitter: "Walls. I had a wall. I had it facing the wrong way." |
+| Mizore | Dry: "fevers are popular, briefly." | | Worried: "quick is how fevers spread." | Stiff: her teacher watching her work. | Dry: "a patch isn't a treatment." |
+| Hibiki | Sulky: "Captain Kettle doesn't even smile." | Sulky: "Grandmother made you sit still." | | None. "Great-Grandmother!" | Sulky: "Uncle Cat won't even let me pat him." |
+| Asagi | Fond: "running a temperature." | Fond: "sleet over-chills a patient." | Fond: "you'll slosh me." | | Fond: "all that iron, dear. You'll sink." |
+| Oliver (planned) | Flat: "Smells wasted." | Flat: "Cold Hands knows when to stop. You don't." | Flat: "Noise." | Flat: "That rusts." | |
 
 Nicknames: Hibiki calls Akagane **"Captain Kettle"**, Mizore **"Grandmother"** ("I'm not your grandmother") and Asagi
 **"Great-Grandmother"** ("Yes, dear."). Akagane calls Mizore **"physician"**, Hibiki **"girl"**, Asagi **"carp"**
 ("Koi."). Mizore calls Akagane **"Captain"**, Hibiki by her name, Asagi **"Teacher"**. Asagi calls Oni **"little
 fry"** and **"flute boy"**, Mizore **"little sleet"**, Akagane **"little kettle"**, everyone **"dear"**.
 
+Planned, with Oliver: he calls Oni **"Scabbard"**, then **"Seventh"**, Mizore **"Cold Hands"**, Akagane **"Lacquer"**,
+Hibiki **"Noise"**, Asagi **"Fish"** (uncorrected: "He isn't wrong, dear."), Poguru **"Moth"**, and his master **"the
+master"**. Hibiki calls him **"Uncle Cat"**, Asagi **"little loaf"**, Akagane **"cat"**, Mizore **"the cat"**, Shirogane
+**"Jūsuke's cat"**, Poguru **"the big kitty"**. Oni says **"...Cat"**. Others have picked up "Oliver"; he doesn't answer
+to it, and only Jūsuke ever said it right.
+
 ## Duo conversations
 
-The same conversation plays whichever soul offers the Duo. Each line's speaker swaps the bust.
+The same conversation plays whichever soul offers the Duo. Each line's speaker swaps the bust. Steel's four aren't
+written yet; build them from the bonds above, as `Duo_RedHotIron_*`, `Duo_Quenching_*`, `Duo_LightningRod_*` and
+`Duo_Rust_*`, each with a `_First`, a later chapter and an `_Again`.
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
@@ -129,7 +160,7 @@ Also built and voiced, in the order of "When each event fires" below (`GameManag
 Repeatable about one first screen in three), `SoulJealous` (`Dialogue.Most` / `Rival`; its Repeatables about half the
 time a rival leads), and the souls' temple lines as the `SoulHub` event (`SaveData.lastRunElement`; Story and Reactive
 always, a Repeatable 40% of the time, only when Oni has nothing of his own to say). Later screens of a soul in the
-same run stay quiet unless a Legendary or Duo is on offer. Not yet: the freed beats.
+same run stay quiet unless a Legendary or Duo is on offer. Not yet: the freed beats, and anything of Oliver's.
 
 Everything below is a suggestion for the dialogue system being built in parallel; field names follow
 `Assets/Scripts/Core/SaveData.cs` where it already has them.
@@ -141,11 +172,11 @@ Each table row in the soul files is one conversation:
 | Field | Value |
 |---|---|
 | `id` | The first column. Ids never end in a digit, so `<id>_<n>` voice names can't collide. |
-| `speaker` | The soul who owns it (`Akagane`, `Mizore`, `Hibiki`, `Asagi`). Duo records: the soul offering the boon. |
+| `speaker` | The soul who owns it (`Akagane`, `Mizore`, `Hibiki`, `Asagi`, and later `Oliver`). Duo records: the soul offering the boon. |
 | `event` | The section it sits in: `SoulPickup`, `SoulJealous`, `Duo`, `Legendary`, `BossAhead`, `BossFelled`, `HubReturn`. |
 | `tier` | `Story` (play once), `Reactive` (play once when marked "once", else gated by `runsSince` itself), `Repeatable` (shuffle bag). |
 | `requires` | All must hold (notation below). |
-| `lines` | Ordered `{ speaker, text }`. Speakers: the four souls and `Oni`. |
+| `lines` | Ordered `{ speaker, text }`. Speakers: the five souls and `Oni`. |
 
 The Story first-meeting chains are written so that each needs the previous one and `runsSince previous ≥ 1`: at most
 one chapter per soul per run.
@@ -243,6 +274,8 @@ gen, `Assets/Art/Portraits/Soul_<Fire|Water|Lightning>_Painted.png`); in play th
   bachi, and the red festival cord with its tin bells.
 - **Asagi (Water):** a sea-blue flame shaped like a standing wave with her koi circling at its core, a ring of wave
   crests, drops hanging in the air, and no bell at all: a glass bowl's rim where the others have their chain.
+- **Oliver (Steel, planned):** a squat forge-gold flame like a pour from a crucible, cracked with bright seams, the curl
+  of a sleeping cat at its core, and the tongueless bell below on a strap where the others have a chain.
 
 ## Voice
 
@@ -279,6 +312,11 @@ Each rises in teal, its element colour burning out. At dawn a single drumbeat an
 valley. Asagi has no bell and nothing to burn out of her: her beat is the dawn itself, when the pond runs clear
 (`Asagi_Dawn`, if `Asagi_Meet_Home` has played).
 
+Last of all, planned, `Oliver_Dawn`, if `Oliver_Meet_Seventh` has played; otherwise he goes unseen. He has no sealed bell
+and the tongueless one never rings. The hammer cools to plain iron, and a loaf-sized cat sits in the sun on the temple
+step. Under the flute and Hibiki's drumbeat, from down the valley, come three small taps. "...That's supper." The game
+never says who tapped ([Oliver.md](Oliver.md#freed-the-ending)).
+
 ## Suggested lines for other files
 
 Not added to their files; take them if you like them.
@@ -287,6 +325,8 @@ Not added to their files; take them if you like them.
   collect my bells, little demon. They are still mine." Now in game as `Kagetsune_Intro_Souls`.
 - **Kagetsune** `KilledOni`, `holds Fire ≥ 3`: "Akagane's fire. He knelt so well, once."
 - **Oni** `HubReturn`, `seen Hibiki_Meet_Name`: "Hibiki. ...Hibiki. Hibiki." (repeating it, so he keeps it)
+- **Kagetsune** `BossIntro`, `holds Steel`: he knows the forge's heat and never the cat, so it isn't a bell he can
+  claim and `Kagetsune_Intro_Souls` stays as it is. "My smiths are dead. Who is blowing on that fire?"
 
 ## Open questions
 

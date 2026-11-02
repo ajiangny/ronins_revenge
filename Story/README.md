@@ -23,6 +23,7 @@ each other, keeping score, and the phase 2 rewrite.
 | **Mizore** | the Court Physician | The Frost (Water) soul behind the Frost boons. | [Mizore.md](Mizore.md) |
 | **Hibiki** | the Village Drummer | The Storm (Lightning) soul behind the Storm boons. | [Hibiki.md](Hibiki.md) |
 | **Asagi** | the Pond Physician | The Water (Tide) soul behind the Water boons: the koi of the temple pond, who pulls Oni out of the pool each time he dies. Never in the coffin. Joins once he meets her in the temple. | [Asagi.md](Asagi.md) |
+| **Oliver** | the Smith's Cat | The Steel soul behind the Steel boons (planned, not yet in game): the master smith's cat, first thing ever in the coffin, unsealed. Minds Oni's sword; joins the wake after Asagi. | [Oliver.md](Oliver.md) |
 
 ## The betrayal
 
@@ -64,7 +65,9 @@ new faces on his armor cast as snarling oni.
   over the boss fights (blood, steel, spirit) belong to the bosses, not to Kagetsune.
 - **Boons.** When a soldier dies, its soul sometimes slips past the coffin's pull as a Fire, Frost or Storm soul.
   It lends Oni its power because he is the only one who might set it free. Every boon is a soul stolen back. Once
-  he has met Asagi, the tired souls that slip back *with* him sink into her pond and come to him as Water.
+  he has met Asagi, the tired souls that slip back *with* him sink into her pond and come to him as Water. Planned,
+  not yet in game: souls that die still holding something come back too heavy for the pull, and
+  [Oliver](Oliver.md) pounces on them and drops them at Oni's feet as Steel.
   Technique scrolls are pages of Oni's own sword arts, the parts of himself the dying took.
 - **Teal fire.** The fire pouring from Kagetsune's chest is the same teal as Oni's spirit flames and wisps,
   because Oni tore himself out of it.

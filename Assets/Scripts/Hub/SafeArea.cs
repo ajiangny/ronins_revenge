@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 
 // What a station does when Oni uses it.
-public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths, Poguru, Asagi }
+public enum StationKind { Exit, FluteSongs, Memorial, WeaponRack, Oaths, Poguru, Asagi, Oliver }
 
 // A little life a station gives off: incense smoke rising, light glinting on blades, a soft glow.
 public enum StationFx { None, Incense, Glint, Glow }
@@ -147,13 +147,9 @@ public class SafeArea : MonoBehaviour
     public Vector3 WakePoint => At(config.wakeSpot);
     // Asagi at the pool's rim, once her station is built; null before she's met.
     public Asagi AsagiFigure { get; private set; }
-    // Oliver by the rack; built always, and out of sight until he's met (ShowOliver).
+    // Oliver at the top of the rack's dais; built always, and out of sight until he's met (ShowOliver).
     public Oliver OliverFigure { get; private set; }
     float oliverBaseY;
-    // Where he stands from the rack's base, in map pixels: straight behind it, at the top of the dais, so he
-    // blocks neither the rack nor the spot Oni uses it from.
-    static readonly Vector2 OliverFromRack = new Vector2(0f, -98f);
-    static readonly Vector2 OliverFootprint = new Vector2(2.6f, 0.7f);
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
@@ -242,6 +238,13 @@ public class SafeArea : MonoBehaviour
                 standing.Add(new Standing { station = station, renderer = AsagiFigure.Body, baseY = at.y, art = AsagiFigure.Bounds, figure = AsagiFigure, nextFx = float.MaxValue });
                 continue;
             }
+            if (station.kind == StationKind.Oliver)
+            {
+                oliverBaseY = at.y;
+                OliverFigure = Oliver.Create(area.oliverArt, transform, at, ronin.ArtPixelSize, order - 1);
+                OliverFigure.gameObject.SetActive(!station.hidden);
+                continue;
+            }
             Sprite art = station.isSealed && station.sealedArt != null ? station.sealedArt : station.art;
             if (art != null)
             {
@@ -251,13 +254,6 @@ public class SafeArea : MonoBehaviour
                 r.sprite = art;
             }
             else if (!station.onMap || !mapArt) r = Block(station.kind.ToString(), ProceduralSprites.White, at + Vector3.up * 0.7f, new Vector2(1.8f, 1.4f), station.placeholder, order - 1);
-            if (station.kind == StationKind.WeaponRack && mapSpace)
-            {
-                Vector3 feet = MapToWorld(station.propAt + OliverFromRack);
-                oliverBaseY = feet.y;
-                OliverFigure = Oliver.Create(area.oliverArt, transform, feet, ronin.ArtPixelSize, order - 1);
-                OliverFigure.gameObject.SetActive(Save.Data.oliverMet);
-            }
             if (r == null) continue;
             // A soft shadow where it meets the ground, so it stands on the floor rather than floating over it.
             Bounds b = r.bounds;
@@ -460,6 +456,8 @@ public class SafeArea : MonoBehaviour
     public void ShowOliver(Oliver.Clip clip, bool loop = false)
     {
         if (OliverFigure == null) return;
+        foreach (Station station in config.stations)
+            if (station.kind == StationKind.Oliver) station.hidden = false;
         OliverFigure.gameObject.SetActive(true);
         OliverFigure.Play(clip, loop);
     }
@@ -487,12 +485,6 @@ public class SafeArea : MonoBehaviour
                 if (station.hidden || station.footprint.x <= 0f || station.footprint.y <= 0f) continue;
                 Vector3 at = BaseOf(station);
                 blocks.Add(new Rect(at.x - station.footprint.x / 2f, at.y - 0.1f, station.footprint.x, station.footprint.y));
-            }
-            // Oni can walk the dais, so once he's there Oliver stands in the way; the dais stays open either side of him.
-            if (OliverFigure != null && OliverFigure.gameObject.activeSelf)
-            {
-                Vector3 feet = OliverFigure.transform.position;
-                blocks.Add(new Rect(feet.x - OliverFootprint.x / 2f, feet.y - 0.1f, OliverFootprint.x, OliverFootprint.y));
             }
             return blocks.ToArray();
         }
@@ -525,6 +517,7 @@ public class SafeArea : MonoBehaviour
         float lift = station.art != null ? station.art.bounds.size.y * mapPixel * station.art.pixelsPerUnit + 0.5f : 1.8f;
         foreach (Standing s in standing)
             if (s.station == station && s.figure != null) lift = s.figure.Bounds.size.y + 0.5f;
+        if (station.kind == StationKind.Oliver && OliverFigure != null) lift = OliverFigure.Bounds.size.y + 0.5f;
         Vector3 at = station.onMap ? At(station.spot) : BaseOf(station);
         prompt.transform.position = new Vector3(at.x, Mathf.Max(at.y + lift, At(station.spot).y + 1.2f), 0f);
     }

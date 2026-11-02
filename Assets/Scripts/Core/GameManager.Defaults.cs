@@ -45,6 +45,10 @@ public partial class GameManager
                 // straight up its middle), used from the flagstones beside her. Hidden until he's met her (SaveData.asagiMet).
                 new SafeArea.Station { kind = StationKind.Asagi, label = "ASAGI", spot = new Vector2(0.42f, 0.217f), propAt = new Vector2(310f, 294f),
                     placeholder = Asagi.Colour, footprint = new Vector2(0.8f, 0.3f), reach = 1.8f },
+                // Oliver at the top of the rack's dais, straight behind the rack, used from the boards in front of him.
+                // Hidden until Oni has met him (SaveData.oliverMet).
+                new SafeArea.Station { kind = StationKind.Oliver, label = "OLIVER", spot = new Vector2(0.8168f, 0.3238f), propAt = new Vector2(562f, 242f),
+                    placeholder = new Color(0.878f, 0.659f, 0.227f), footprint = new Vector2(2.6f, 0.7f), reach = 1.8f },
             },
             // The ghost-fires at either side, and the two stone lanterns at the dais, lit.
             lamps = new[]

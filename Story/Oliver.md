@@ -451,7 +451,7 @@ There's no `Oliver_Felled_Kagetsune`, as there's none for the other souls: no bo
 | `Oliver_Hub_Kagetsune` | Reactive | `lastRunElement = Steel`, `lastKiller = Kagetsune`, `runsSince Oliver_Hub_Kagetsune ≥ 4` | **Oliver:** "Felt that from the shoulder. Sit down." |
 | `Oliver_Hub_Rest` | Repeatable | `lastRunElement = Steel` | **Oliver:** "Off. That's mine." |
 
-### `OliverTalk` (the rack's TALK row)
+### `OliverTalk` (walking up to him at the rack)
 
 `Oliver_Meet_Rack` is the event's Story line, played by id on its wake. After it the row has one word for him. It's the
 same sentence as `Oliver_Greet_Mine`, under its own id, and has no clip yet.

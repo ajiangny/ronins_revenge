@@ -64,7 +64,7 @@ public partial class GameManager
     }
 
     // The wake after Asagi's, at the soonest: it asks for asagiMet, which is only set once her scene has been read, so
-    // the two can't fall on one wake. He's at the rack by story, so no new station (Story/Oliver.md).
+    // the two can't fall on one wake. His station stands at the top of the rack's dais.
     const int OliverDeaths = 10;
     bool OliverDue => Save.Data.deaths >= OliverDeaths && Save.Data.asagiMet && !Save.Data.oliverMet;
 
@@ -112,6 +112,7 @@ public partial class GameManager
         foreach (SafeArea.Station station in area.stations)
         {
             if (station.kind == StationKind.Asagi) station.hidden = !Save.Data.asagiMet;
+            if (station.kind == StationKind.Oliver) station.hidden = !Save.Data.oliverMet;
             if (station.kind != StationKind.Oaths) continue;
             station.isSealed = !(Oaths.Unlocked && Save.Data.oathsUnsealed);
             station.label = station.isSealed ? "SEALED STONE" : "OATH STONE";
@@ -269,6 +270,7 @@ public partial class GameManager
             case StationKind.WeaponRack: OpenStation(() => ShowRack(CloseStation)); break;
             case StationKind.Poguru: OpenStation(() => ShowPoguru(CloseStation)); break;
             case StationKind.Asagi: OpenStation(() => StartCoroutine(TalkToAsagi())); break;
+            case StationKind.Oliver: OpenStation(() => StartCoroutine(TalkToOliver())); break;
             case StationKind.Oaths:
                 if (Oaths.Unlocked) OpenStation(() => ShowOaths(CloseStation));
                 else ui.ShowSubtitle("Oni", "Bound in chains. Not until the Emperor falls.", OniColour, 2.5f);
@@ -406,10 +408,9 @@ public partial class GameManager
 
     // The weapon rack (Hades' Infernal Arms): the katana is the only weapon so far, and the kunai a skin for it that
     // looks and sounds different but plays the same. The pick is kept in the save.
-    // Oliver on the rack: a word from him, a scene over the temple as it stands.
+    // Oliver on the rack's dais: a word from him, a scene over the temple as it stands.
     IEnumerator TalkToOliver()
     {
-        menu.Hide();
         Conversation said = Dialogue.Pick("Oliver", DialogueEvent.OliverTalk, Dialogue.Context(loadout));
         Oliver oliver = safeArea.OliverFigure;
         if (said != null && oliver != null) oliver.Play(Oliver.Clip.Talk, true);
@@ -444,7 +445,6 @@ public partial class GameManager
         }
         // The ultimate (SaveData.ultimate) isn't offered here while Shadow Clone is the only one; it comes back once
         // there are more to choose between.
-        if (Save.Data.oliverMet) items.Add(MenuUI.Item.Button("TALK", () => StartCoroutine(TalkToOliver()), "The cat on the rack."));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
             startIndex >= 0 ? startIndex : (int)carried);

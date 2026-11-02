@@ -801,9 +801,10 @@ is read before `MeetAsagi` sets it, the two can never fall on one wake: `bool me
 at the same place in `EnterSafeArea`. The `!meetAsagi` is only a guard for dev saves. `WakeTalk(meetAsagi ||
 meetOliver)`.
 
-**No new station.** The scene's saved `stations` win over `DefaultSafeAreas`, so a seventh kind would need
-`Ninja/Apply Maps`. He is at the rack by story anyway: `ShowRack` gets a TALK row when `oliverMet`, and step 19's
-figure stands by the rack without being a station.
+**His own station (changed after play testing).** This first said no new station, with a TALK row on `ShowRack`, but the
+user walked up to him and couldn't speak to him. He is now `StationKind.Oliver`, appended to the enum and added to the
+scene by `Ninja/Apply Maps`, hidden until `oliverMet`; the rack's TALK row is gone. Where steps 8 and 19 below mention
+that row, this replaces them.
 
 ### Tested
 

@@ -4,7 +4,7 @@ A Space Invaders remake re-themed as a lone chibi ronin holding a moonlit temple
 
 Built on the class template ([Oren-Steinberg/Space-Invaders-3D](https://github.com/Oren-Steinberg/Space-Invaders-3D)), Unity 6000.6.6f1, URP, the new Input System.
 
-**Running it:** open the project in Unity 6000.6.6f1, open `Assets/Scenes/SampleScene.unity` and press Play, or build the `Web` build profile (Build Profiles → Web → Build) and serve the output folder; the web build also runs on itch.io. It plays in a browser or the Editor at 16:9; a controller works alongside the keyboard.
+**Running it:** open the project in Unity 6000.6.6f1, open `Assets/Scenes/SampleScene.unity` and press Play, or build the `Web` build profile (Build Profiles → Web → Build) and serve the output folder; the web build also runs on itch.io. Fights are played on keyboard or keyboard and mouse; a controller only works in the menus and the temple.
 
 The template's Space Invaders classes, prefabs and layers are renamed to the theme: `Alien` → `Samurai`, `AlienFleet` → `SamuraiArmy`, `AlienBullet` → `Arrow`, `AlienCounter` → `SamuraiCounter`, `Spaceship` → `Ronin`, `Dart` → `Projectile`, `ShieldWall`/`ShieldBlock` → `BlockerWall`/`Blocker`. The section on template code issues below uses the template's original names.
 

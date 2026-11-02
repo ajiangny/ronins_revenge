@@ -62,7 +62,7 @@ itself around it):
   a pale cloth stomach wrap. The indigo stays near black, well clear of Asagi's sea-blue.
 - A heavy, scorched, rust-brown leather bib apron over it, too small across the chest, patched and riveted at the straps.
 - **Ash-black forearms and paws.** The forge's ash has settled in him and shows here, with leather work wraps at the
-  wrists instead of gauntlets. On his hammer arm the hammer's forge-gold cracks run on through the fur, up to the elbow.
+  wrists. On his hammer arm the hammer's forge-gold cracks run on through the fur, up to the elbow.
 - A wide belt slung under the belly: tongs, a punch and a rasp, each worn smooth. Leather wrappings at the shins, and
   bare hind paws, because he has never once kept a boot on.
 - **The crate.** The foreign crate he arrived in, roped on his back like a pack, standing above and behind one shoulder,
@@ -139,7 +139,7 @@ painting where they differ (coat, ash-black forearms, wraps, crate):
 > outward and down, long enough to pass the edge of the head and reach the chest. **Body:** 36 px wide, x 14–50, y
 > 28–54, a huge barrel with sloped shoulders and thick arms, short stubby legs, bare paws. Cream bib under the chin,
 > half hiding a thin brown collar with a tiny 3 px bronze bell. Dark brown leather apron (`#3A2A20`) over the belly with
-> two straps. Dark leather gauntlets on both arms (`#4E3324`). A belt under the belly with small iron tongs on it.
+> two straps. Ash-black forearms and paws (`#2A282E`) with dark leather wraps at the wrists (`#4E3324`). A belt under the belly with small iron tongs on it.
 > **Viewer's left, the cat's right hand:** a short wooden hammer held low with its square black iron head (`#2B2D33`,
 > about 12×9 px) resting by the foot, cracked with 1 px glowing gold lines (`#E0A83A`, one or two `#FFE08A` pixels).
 > No soft glow halo, no teal. **Viewer's right, hanging from the belt at the cat's left hip on a 2 px cord:** a tiny
@@ -150,7 +150,7 @@ painting where they differ (coat, ash-black forearms, wraps, crate):
 Clips (a proposal, for whoever builds his station): **Idle** (a very slow breath, whiskers shifting, one slow blink, a
 spark falling off the hammer), **Loaf** (asleep on the rack's platform, a mound with a doll beside it, before the meeting
 and sometimes after), **Talk** (the head lifts 1 px; the mouth barely moves), **Strike** (the hammer comes up slowly and
-falls once, the only fast thing he does), **Pounce** (for the field: a soul caught under one gauntlet).
+falls once, the only fast thing he does), **Pounce** (for the field: a soul caught under one paw).
 
 **The painting** (`Assets/Art/Portraits/Oliver_Closeup.png`, `Oliver_Full.png`; the boss portraits' dark fantasy style):
 real, densely rendered fur on a real cat's head, on a massive smith's body lit from below by the hammer. The doll's
@@ -209,7 +209,7 @@ A soul that dies still *holding* something won't sink and won't burn: a man hold
 hands won't open. It comes back toward the coffin slow and heavy, and the pull slides off it. Oliver knows those; he
 came in that way himself, with his teeth shut on a doll's cord.
 
-He catches them like a cat catches anything. He watches for a long time, pounces, pins it under one gauntlet, and gives
+He catches them like a cat catches anything. He watches for a long time, pounces, pins it under one paw, and gives
 it one stroke of the hammer to make it hold together. **Then he carries it to Oni and drops it at his feet, and waits.**
 That is the boon screen: a thing he killed for you, and you had better look pleased. What those souls give is what
 they were doing when they died: walls that hold, gaps closed, things mended. He also just hates a draft.
@@ -228,8 +228,8 @@ view on it. Some of them have picked up "Oliver", and he doesn't answer to it.
 | [Asagi](Asagi.md) (Water) | **"Fish."** She doesn't correct it, though "carp" gets "Koi." every time: "He isn't wrong, dear." She calls him **"little loaf"** and "dear", the only one who talks to the cat under the body, and she has never been told about the collar. Oni meets them a wake apart, but they've been neighbours for ten deaths, each watching the other not say anything. He has been on the rack since early on, and she didn't mention it. **He watches the bowl.** For a long time, the way he watches anything he might pounce on. He has never moved, she has never turned her back, and she knows just what she's looking at. She is the only soul who was never in the coffin and he is the first who ever was. **She offered to wash the doll, once.** It was meant kindly: clean water is what she has. He looked at her until she stopped, and she hasn't asked again. Washing is what killed him, the ash off his coat and off the master's sleeves, every evening for a year; she has worked that out and doesn't say so. **He has sat on everything in the temple except her flat stone.** Nobody told him. "Smells kept." Neither of them has ever mentioned that either. |
 | [Mizore](Mizore.md) (Frost) | **"Cold Hands."** She calls him **"the cat"**. Jūsuke told her he was walking home because there was a cat to feed, so she knew of him before she met him, and he's the reason her patient died on a forge floor instead of her cot. She doesn't hold it against him, and he respects her for having been right. **She could lift Jūsuke with one arm, and she's a small woman.** She's the one soul who knows exactly whose body that is and how far out the measurements are. She says so once ("He weighed less than his apron"), gets "He was enormous", and answers "...Yes. I suppose he was." It's the gentlest thing she does outside Hibiki. She knows that wheeze isn't only his nose: it's the cough she heard six times. She heard Jūsuke say a word through the fever and took it for raving until she heard what the cat is called. She knows how it should sound, and has never tried it, because it isn't hers. And she is a crane, and the bell on his collar has no tongue so that it won't warn the birds. He's looked. She's noticed. Nobody brings it up but Poguru. |
 | [Hibiki](Hibiki.md) (Storm) | **"Uncle Cat"**, after Grandmother and Great-Grandmother; the family she's collecting has room. He calls her **"Noise."** She tries to pat him. She keeps trying, on most screens they share, narrating it, and he looks at her until she stops, or doesn't stop; never the doll, which she knew not to touch without being told. Stopping is how the coffin catches you, by her account, and he is the stillest thing she has ever met and has slept in it for a year. Then the two that hurt. **She taps on everything.** Once, without thinking, she knocks three on the little anvil at the rack, and he is up and across the courtyard before she finishes, the only fast thing he does outside a strike. He sees who it was. "Don't." Her jokes stop dead, she never does it again, and she never tells anyone why. And he's the only soul who has heard her village from inside: **"Rang true, that one. Only thing in there that does."** He says it once, unasked, and she goes quiet for a whole boon screen. One of his two purrs in the game is hers, very late, when she finally gets her hand on his head. He denies it. At the dawn her drumbeat answers Oni's flute just before the three taps. **No line may say who was tapping, and she is not to be ruled out.** |
-| [Akagane](Akagane.md) (Fire) | **"Lacquer."** Akagane calls him **"cat"** and "that animal". He wore armor off that anvil for years: the plate under the copper is Jūsuke's work, fitted by a man half his age who told a captain to stand still, with the cat watching from the bricks. The copper-red is someone else's, and Oliver has told him what the master said about it. He knows every man's name and every man's mother's name, and he never asked what killed the boy who made his armor; he was told it was a cough. **"Door."** The one way out of that hall was through the doors he set his men to hold, facing out. Oliver walked out between them. He is the only one who saw the vanguard's backs from the inside, and he thinks nothing of it, because nobody stops a cat at a door. And the souls who die holding something include the men who held those doors to the end, so sometimes what Oliver pins under a gauntlet and drops at Oni's feet is one of Akagane's. Akagane starts to shout, and then has to look at what it's still holding. His war bell hangs on the Emperor's right shoulder. Oliver won't say which shoulder is the good one, and Akagane has asked. |
-| [Poguru](Poguru.md) | **"Moth."** Poguru calls him **"the big kitty"**, to his face, and is the only one allowed cat jokes; he gets about three in the whole game (cat, fish and bird in one temple: "Who's doing the ROTA?"). Oliver never answers them. A small bright thing that bobs in the air is the hardest test of his self-control in the temple, and he has pinned Poguru under one gauntlet exactly once, very gently, then seemed surprised to find him there. He sits on the nest. It's his now. **They agree on one thing, that the temple is damp**, and Poguru has never been so happy. Both of them are a small thing wearing the biggest thing they half-remember, and only one of them knows it. He slept a year in the fire Poguru came out of, so he knew what the dragon was by smell long before `Kagetsune_Intro_Spark`, and hasn't said. Poguru fears Kagetsune's bells but keeps asking to look at this one: it's the only bell that can't do anything. |
+| [Akagane](Akagane.md) (Fire) | **"Lacquer."** Akagane calls him **"cat"** and "that animal". He wore armor off that anvil for years: the plate under the copper is Jūsuke's work, fitted by a man half his age who told a captain to stand still, with the cat watching from the bricks. The copper-red is someone else's, and Oliver has told him what the master said about it. He knows every man's name and every man's mother's name, and he never asked what killed the boy who made his armor; he was told it was a cough. **"Door."** The one way out of that hall was through the doors he set his men to hold, facing out. Oliver walked out between them. He is the only one who saw the vanguard's backs from the inside, and he thinks nothing of it, because nobody stops a cat at a door. And the souls who die holding something include the men who held those doors to the end, so sometimes what Oliver pins under a paw and drops at Oni's feet is one of Akagane's. Akagane starts to shout, and then has to look at what it's still holding. His war bell hangs on the Emperor's right shoulder. Oliver won't say which shoulder is the good one, and Akagane has asked. |
+| [Poguru](Poguru.md) | **"Moth."** Poguru calls him **"the big kitty"**, to his face, and is the only one allowed cat jokes; he gets about three in the whole game (cat, fish and bird in one temple: "Who's doing the ROTA?"). Oliver never answers them. A small bright thing that bobs in the air is the hardest test of his self-control in the temple, and he has pinned Poguru under one paw exactly once, very gently, then seemed surprised to find him there. He sits on the nest. It's his now. **They agree on one thing, that the temple is damp**, and Poguru has never been so happy. Both of them are a small thing wearing the biggest thing they half-remember, and only one of them knows it. He slept a year in the fire Poguru came out of, so he knew what the dragon was by smell long before `Kagetsune_Intro_Spark`, and hasn't said. Poguru fears Kagetsune's bells but keeps asking to look at this one: it's the only bell that can't do anything. |
 | [Kagetsune](Kagetsune.md) | **"Terrible man. Good shoulder."** Kagetsune has no name for him, because **he doesn't know.** A cat sleeps on his shoulder, the first soul his coffin ever held was a stray asleep in the lining, and nothing on the armor says so. Poguru hides from him and Oliver naps on him, and knows every place the armor runs warm, which is every place it's thin. All Kagetsune can recognise on Oni is the heat of a forge he had put out ("My smiths are dead. Who is blowing on that fire?"). **He must never learn about the cat**, not in a line, a boast or his defeat. The bronze on his armor came out of the same pot as the collar bell. His hold is the ash and nothing else: a tug, with no bell, no summons and no name. |
 | [Shirogane](Shirogane.md) | **"Clean Edges."** It's the highest thing he says about anyone, and he says it as a name. She calls him **"Jūsuke's cat"**: he made the guards' blades, so her two came off the same anvil as Oni's, and in all these years she has kept them as they were meant to be kept. She and Oliver judge the same katana, she by how it's swung and he by how it smells, and they reach the same verdict: "you still wield the blade I remember", "It's been kept." The chain runs straight through her: Jūsuke coughed, Mizore told her, she went to Oni, they swore, she cut the tether. There would be no sword to mind without the six smiths. Oliver gets there at the end, which is why his last chapter waits on her oath and why it's "Seventh". There are two silent bells, one by refusal and one by a joke. He has smelled hers, he sits with it some nights, and he stays out of her moment at the end. |
 | [Utsusemi](Utsusemi.md) | **"Bad Work."** He can hear it coming: "That rang wrong." The machine has only **"the animal"** for him, as it says of the wolf that animals never kept its time. It's still counting one set of paws on the armor at night, with no bell to match, and since it never lies it would say so if anyone asked. It razes the cover he mends. Each carries a dead man's things around in a body built for the job, the difference being that nobody wound Oliver. Every tick is one tap, and one was only ever a hammer, so it's the worst sound he knows. If the monk surfaces, he does what he did at Asagi's pond and speaks to the small thing, not the body. Oliver would like it stopped properly by someone who knows how. |
@@ -306,8 +306,10 @@ souls, the web build won't play it, since Unity's audio filters don't run there.
 
 ## Lines
 
-Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). All of it is planned: none of these ids is in
-`Dialogue.cs`, and their clips wait on his voice (`Tools/generate-voice.mjs`). `holds Steel` and `most = Steel` are
+Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). All of it is in `Dialogue.Lines.cs`, and
+`Oliver_Dawn` is the one line that isn't, since the freed beats aren't built. His meeting chain is voiced (48 clips
+with his Legendary, Infusion and `Oliver_Dawn`) and so are his four Duos; every other line waits for `npm run voice`
+(`Tools/generate-voice.mjs`) and plays meanwhile as a silent subtitle. `holds Steel` and `most = Steel` are
 `Element.Steel` in code. Oni's lines are voiced under their own number, as with every soul; a silent "..." keeps its
 number and has no clip.
 
@@ -389,7 +391,7 @@ The Frost lines are the same words on purpose: it's all he ever says about it.
 | `Oliver_Jealous_Frost` | Repeatable | `most = Frost` | **Oliver:** "Cold Hands knows when to stop. You don't." |
 | `Oliver_Jealous_Storm` | Repeatable | `most = Storm` | **Oliver:** "Noise." |
 | `Oliver_Jealous_Water` | Repeatable | `most = Water` | **Oliver:** "That rusts." |
-| `Oliver_Jealous_Back` | Repeatable | none | **Oliver:** "You left a door open." |
+| `Oliver_Jealous_Back` | Repeatable | none (the event already means another soul leads; `Dialogue.Rival` in code) | **Oliver:** "You left a door open." |
 
 ### `Legendary` (Spear-Breaker)
 
@@ -446,6 +448,15 @@ There's no `Oliver_Felled_Kagetsune`, as there's none for the other souls: no bo
 | `Oliver_Hub_Name` | Reactive, once | `lastRunElement = Steel`, `seen Oliver_Meet_Rack` | **Oni:** "Oliver."<br>**Oliver:** "..."<br>**Oni:** "...Cat."<br>**Oliver:** "What." |
 | `Oliver_Hub_Kagetsune` | Reactive | `lastRunElement = Steel`, `lastKiller = Kagetsune`, `runsSince Oliver_Hub_Kagetsune ≥ 4` | **Oliver:** "Felt that from the shoulder. Sit down." |
 | `Oliver_Hub_Rest` | Repeatable | `lastRunElement = Steel` | **Oliver:** "Off. That's mine." |
+
+### `OliverTalk` (the rack's TALK row)
+
+`Oliver_Meet_Rack` is the event's Story line, played by id on its wake. After it the row has one word for him. It's the
+same sentence as `Oliver_Greet_Mine`, under its own id, and has no clip yet.
+
+| id | Tier | Requires | Lines |
+|---|---|---|---|
+| `Oliver_Rack_Mine` | Repeatable | none | **Oliver:** "I've sat on that. It's mine. You can borrow it." |
 
 ### Crossovers
 

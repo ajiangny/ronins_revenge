@@ -1093,9 +1093,9 @@ const LINES = {
   Kagetsune_Phase_Clean: [KAGETSUNE, "[cold, almost admiring, then commanding] Untouched. You were always my finest guard. Kneel, and be it again."],
   Kagetsune_Phase_Unchained: [KAGETSUNE, "[roaring, exultant] Every chain, broken! Every soul, MINE!"],
   Kagetsune_Phase_Home: [KAGETSUNE, "[deep, commanding, echoing] Come out, all of you. Your lord is calling."],
-  // Oliver, the Smith's Cat (Story/Oliver.md), planned: none of these is in Dialogue.cs yet. Ids follow
-  // Conversation.VoiceId, counting Oni's lines and the other souls' in their own voices; a silent "..." keeps its number
-  // unvoiced. All of this block is held back by HELD_FOR_OLIVER below until OLIVER has a real id.
+  // Oliver, the Smith's Cat (Story/Oliver.md). All in Dialogue.cs except Oliver_Dawn, which waits on the freed beats. Ids
+  // follow Conversation.VoiceId, counting Oni's lines and the other souls' in their own voices; a silent "..." keeps
+  // its number unvoiced.
   // First: his meeting and his Story chain.
   Oliver_Meet_Rack: [ONI, "[low, quiet, wary] ...That's my sword."],
   Oliver_Meet_Rack_2: [OLIVER, "[flat, gravel, unimpressed] His. You've been carrying it. [a slow wheeze] Badly."],
@@ -1259,6 +1259,7 @@ const LINES = {
   Oliver_Hub_Name_4: [OLIVER, "[flat, unimpressed] What."],
   Oliver_Hub_Kagetsune: [OLIVER, "[flat, gravel] Felt that from the shoulder. Sit down."],
   Oliver_Hub_Rest: [OLIVER, "[flat, a matter of law] Off. That's mine."],
+  Oliver_Rack_Mine: [OLIVER, "[flat, a matter of law] I've sat on that. It's mine. You can borrow it."],
   Oliver_Cut_Door: [AKAGANE, "[gruff, suspicious] That hall had one way out, and I set my men on it. How does an animal get past the vanguard?"],
   Oliver_Cut_Door_2: [OLIVER, "[flat, gravel] Door."],
   Oliver_Cut_Door_3: [AKAGANE, "[barking] Which door?"],

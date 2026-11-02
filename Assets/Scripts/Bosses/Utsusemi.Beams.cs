@@ -283,7 +283,7 @@ public partial class Utsusemi
         }
         RestPoguru();
         PlayIdle();
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
     // Its wind-up: arms flung back as its core swells (its attack pose without that clip), streaks of light pulled

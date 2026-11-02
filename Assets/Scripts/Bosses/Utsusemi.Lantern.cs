@@ -118,7 +118,7 @@ public partial class Utsusemi
         ElementFx.Glow(ground + Vector3.up * 1.2f, Color.white, 0.8f, 2.5f, 0.25f);
         Sfx.Play(Sfx.SwordPlant);
         CameraShake.Add(0.3f);
-        yield return Wait(0.3f);
+        yield return Wait(0.15f);
     }
 
     // The sword in flight, wheeling end over end from `start` to where its blade meets the ground at `to` (or, for a
@@ -433,7 +433,7 @@ public partial class Utsusemi
         for (int i = 0; i < 3; i++)
         {
             Tick(0.7f);
-            yield return Wait(0.25f);
+            yield return Wait(0.12f);
         }
     }
 }

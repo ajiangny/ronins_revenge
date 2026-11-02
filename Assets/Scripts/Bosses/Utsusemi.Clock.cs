@@ -171,7 +171,7 @@ public partial class Utsusemi
             if (Mathf.Abs(Mathf.DeltaAngle(a, clearAngle)) < 16f) continue;
             GearShot(from, Quaternion.Euler(0, 0, a) * Vector3.right * 6f);
         }
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
         PlayIdle();
     }
 
@@ -312,7 +312,7 @@ public partial class Utsusemi
         yield return Launch(LooseCleaves(loosed, Mathf.Max(0.3f, lastRowLands - 0.7f)));
         PlayIdle();
         Beat();
-        yield return Wait(0.6f);
+        yield return Wait(0.3f);
     }
 
     // An hour cleave left hanging in stopped time, facing the ronin: unbreakable, sent back only by a parry.

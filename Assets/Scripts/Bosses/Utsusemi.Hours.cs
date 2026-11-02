@@ -131,7 +131,7 @@ public partial class Utsusemi
             {
                 Beat();
                 Sfx.Play(Sfx.ClockTick, 0.5f, 0.6f);
-                yield return Wait(0.3f);
+                yield return Wait(0.15f);
             }
         }
         yield return Dash(row, HourDashTime);
@@ -473,7 +473,7 @@ public partial class Utsusemi
         Sfx.Play(Sfx.MidnightChime, 0.6f, 1.4f);
         CameraShake.Add(0.35f);
         ElementFx.Glow(from, Color.white, 0.8f, 3f, 0.25f);
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
     // Fast, but it turns as fast as the ronin runs: there's no outrunning it, only parrying it.

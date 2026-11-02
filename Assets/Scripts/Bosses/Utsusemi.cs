@@ -24,9 +24,10 @@ public partial class Utsusemi : Boss
     IEnumerator As(Move move, IEnumerator routine) => Attacking($"Utsusemi_{move}", routine);
 
     // Each value is (phase 1, phase 2): once unwound, its clock runs fast.
-    float Recovery => secondPhase ? 0.35f : 0.7f;
-    float ComboChance => secondPhase ? 0.85f : 0.65f;
-    int MaxCombo => secondPhase ? 3 : 2;
+    // A soul the Emperor summons keeps a longer rest and shorter combos: it already overlaps his own attacks.
+    float Recovery => (secondPhase ? 0.15f : 0.35f) * (Summoned ? 2f : 1f);
+    float ComboChance => secondPhase ? 0.9f : 0.75f;
+    int MaxCombo => (secondPhase ? 4 : 3) - (Summoned ? 1 : 0);
     float StepTime => secondPhase ? 0.11f : 0.16f;
     const float StepLength = 0.9f;
 

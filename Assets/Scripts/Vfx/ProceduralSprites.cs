@@ -517,7 +517,8 @@ public static class ProceduralSprites
 
     // A small gold cog, turning: frames a quarter of a tooth apart, so looping them spins it. Gold with a dark rim
     // and hub, in colour (not white), for Utsusemi's gear-tooth shots.
-    public static Sprite[] Cog => cog != null ? cog : cog = BuildCog(15, 8, 4);
+    // Checks a frame, not the array: domain reload is off, so a second play keeps the array of destroyed sprites.
+    public static Sprite[] Cog => cog != null && cog[0] != null ? cog : cog = BuildCog(15, 8, 4);
     static Sprite[] cog;
 
     static Sprite[] BuildCog(int size, int teeth, int frames)
@@ -557,7 +558,7 @@ public static class ProceduralSprites
     // A small pixel-art flame in a stepped molten palette (white core, gold, orange, a dark red edge), flickering
     // through frames that each lick a different way. One texel per unit and pivoted at its base: scale it by the
     // pixel size of whatever it burns on, so its pixels match that sprite's.
-    public static Sprite[] PixelFlame => pixelFlame != null ? pixelFlame : pixelFlame = BuildPixelFlame(9, 15, 6);
+    public static Sprite[] PixelFlame => pixelFlame != null && pixelFlame[0] != null ? pixelFlame : pixelFlame = BuildPixelFlame(9, 15, 6);
     static Sprite[] pixelFlame;
 
     static Sprite[] BuildPixelFlame(int width, int height, int frames)

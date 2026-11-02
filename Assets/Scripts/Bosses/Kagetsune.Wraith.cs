@@ -24,7 +24,7 @@ public partial class Kagetsune
             Fx.Play(Fx.Impact, Chest, Teal, 2f);
             ElementFx.Glow(Chest, Teal, 1f, 6f, 0.4f);
             StartCoroutine(BulletHell.HaltAndAim(bloom, () => ronin.Bounds.center, 0.55f, 0.45f, 2, 0.55f, 7.5f, Wait));
-            yield return Wait(1.7f);
+            yield return Wait(1.4f);
         }
     }
 
@@ -166,7 +166,7 @@ public partial class Kagetsune
         Drop(coffin);
         Drop(chain);
         yield return SlamDown(xs, true, 1.1f);
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
     // The coffin-hammer's head as a swung weight: its art, or a dark slab without it.
@@ -266,7 +266,7 @@ public partial class Kagetsune
         HitFlash.Flash(sprite, 0.12f);
         TimeRipple.Emit(Chest, 5f, 0.4f, 0.6f, true);
         BulletHell.Ring(Skull, Chest, 14, 3f, Random.Range(0f, 25f));
-        yield return Wait(0.6f);
+        yield return Wait(0.3f);
     }
 
     // A rising soul turns toward his chest once it's above the ronin's row, and is gone when it gets there.
@@ -322,7 +322,7 @@ public partial class Kagetsune
             yield return null;
         }
         Drop(chain);
-        yield return Wait(0.4f);
+        yield return Wait(0.25f);
     }
 
     // His stance breaks (the coffin or the Last Toll sent home, or a meter filled by blows).

@@ -243,7 +243,7 @@ public partial class Shirogane
 
         exposed = true;
         PlayIdle();
-        yield return Wait(2f);
+        yield return Wait(1.5f);
         exposed = false;
         yield return wolf.Vanish();
         yield return wolf.ReturnHome();

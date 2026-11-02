@@ -76,7 +76,7 @@ public partial class Kagetsune
             }
             if (wave < waves - 1) yield return Wait(secondPhase ? 0.75f : 0.9f);
         }
-        yield return Wait(1.4f);
+        yield return Wait(0.8f);
     }
 
     // How wide the cone of cracks opens, how fast a crack runs, how far apart its columns rise, how long a column's
@@ -332,7 +332,7 @@ public partial class Kagetsune
         Drop(mark[0]);
         Drop(relit);
         yield return SlamDown(shock, false, 0.8f);
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
     // The spent crack flaring back to life before the aftershock: a ground glow swelling and pulsing faster.

@@ -258,7 +258,7 @@ public static class Boons
             LevelStep = 1f, Whole = true, Max = 5f },
         // Once a flat cut to the slash's cooldown; now it builds while he keeps swinging, and pays at full heat.
         new BoonDefinition { Id = BoonId.BlazingHands, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Blazing Hands",
-            Description = "Keep swinging and your hands heat up: each quick <b>Slash</b> comes faster. At full heat, a slash kill sets the samurai beside it <b>Burning</b>.",
+            Description = "Quick <b>Slashes</b> heat your hands and come faster. At full heat, a kill sets the samurai beside it <b>Burning</b>.",
             StatLabel = "Slash cooldown at full heat:", Values = new[] { 0.12f, 0.2f, 0.28f }, Format = MinusPercent,
             LevelStep = 0.04f, Max = 0.4f },
         new BoonDefinition { Id = BoonId.Kindling, Element = Element.Fire, Slot = BoonSlot.Passive, Name = "Kindling",
@@ -268,7 +268,7 @@ public static class Boons
 
         // Water: ice. Encases, freezes, shatters, protects.
         new BoonDefinition { Id = BoonId.FrostBlade, Element = Element.Water, Slot = BoonSlot.Attack, Name = "Frost Blade",
-            Description = "A <b>Slash</b> kill may encase up to two nearby samurai in ice. Cut one down and it freezes where it stands; strike the ice to <b>Shatter</b> it into shards.",
+            Description = "A <b>Slash</b> kill may encase up to two nearby samurai in ice. Strike a frozen one to <b>Shatter</b> it into shards.",
             StatLabel = "Freeze time:", Values = new[] { 1.5f, 2f, 2.5f }, Format = Seconds,
             ExtraLabel = "Shards:", ExtraValues = new[] { 1f, 2f, 3f },
             LevelStep = 0.28f, ExtraLevelStep = 1f, ExtraWhole = true, ExtraMax = 5f },
@@ -337,7 +337,7 @@ public static class Boons
         // Its first stat was a flat 4 s soak (now Statuses.SoakSeconds); it is the tidal wave slash's chance since the
         // Water review (BOON_DESIGN §13).
         new BoonDefinition { Id = BoonId.RiptideBlade, Element = Element.Tide, Slot = BoonSlot.Attack, Name = "Riptide Blade",
-            Description = "Your <b>Slash</b> may roll out as a tidal wave that cuts through samurai, <b>Soaking</b> them, and washes arrows away. A <b>Slash</b> kill may send a wave up its column.",
+            Description = "Your <b>Slash</b> may become a tidal wave that cuts through and <b>Soaks</b> samurai. A <b>Slash</b> kill may send a wave up its column.",
             StatLabel = "Tidal wave:", Values = new[] { 0.2f, 0.28f, 0.36f }, Format = Percent,
             ExtraLabel = "Column wave:", ExtraValues = new[] { 0.4f, 0.55f, 0.7f }, ExtraFormat = Percent,
             LevelStep = 0.04f, Max = 0.5f, ExtraLevelStep = 0.08f, ExtraMax = 0.9f },
@@ -346,19 +346,19 @@ public static class Boons
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
         new BoonDefinition { Id = BoonId.UndertowRiposte, Element = Element.Tide, Slot = BoonSlot.Parry, Name = "Undertow Riposte",
-            Description = "A successful <b>Parry</b> sends a wave rolling up the field from you: arrows around you wash away, and every samurai it passes is pushed back and <b>Soaked</b>.",
+            Description = "A <b>Parry</b> sends a wave up the field: it washes arrows away, and pushes back and <b>Soaks</b> every samurai it passes.",
             StatLabel = "Push back:", Values = new[] { 1.0f, 1.2f, 1.4f }, Format = Plus,
             LevelStep = 0.1f, Max = 1.6f },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
             Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
         new BoonDefinition { Id = BoonId.HealingSpring, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Healing Spring",
-            Description = "Every so many samurai cut down by your own hand (or three blows on a warlord for each), a lost life is restored (or points, at full health).",
+            Description = "Every so many kills by your own hand (three blows on a warlord count as one) restores a life, or gives points at full health.",
             StatLabel = "Kills per life:", Values = new[] { 45f, 35f, 25f }, Format = v => $"{v:0}",
             LevelStep = -5f, Whole = true, Min = 15f },
 
         new BoonDefinition { Id = BoonId.TideShadow, Element = Element.Tide, Slot = BoonSlot.Ultimate, Name = "Tide Shadow",
-            Description = "Unleashing your <b>Shadow Clone</b> sends a great wave rolling up the whole field: every arrow washes away and every samurai is pushed back. Its kills <b>Soak</b> their neighbours.",
+            Description = "Your <b>Shadow Clone</b> sends a wave up the whole field, washing arrows away and pushing samurai back. Its kills <b>Soak</b> neighbours.",
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
 

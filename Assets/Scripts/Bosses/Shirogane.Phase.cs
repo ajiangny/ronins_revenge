@@ -301,22 +301,6 @@ public partial class Shirogane
     {
         SpriteRenderer blade = SwordPicture(from, Random.Range(-20f, 20f));
         transient.Remove(blade.gameObject);
-        StartCoroutine(Tumble(blade, spin));
-    }
-
-    IEnumerator Tumble(SpriteRenderer blade, float spin)
-    {
-        Vector3 velocity = new Vector3(spin * 1.2f, 1.5f, 0f);
-        float ground = GroundY + 0.4f;
-        while (blade != null && blade.transform.position.y > ground)
-        {
-            velocity += Vector3.down * 12f * Time.deltaTime;
-            blade.transform.position += velocity * Time.deltaTime;
-            blade.transform.Rotate(0, 0, spin * 400f * Time.deltaTime);
-            yield return null;
-        }
-        if (blade == null) yield break;
-        Sfx.Play(Sfx.Deflect, 0.5f, 0.8f);
-        Fader.Fade(blade, 2.5f);
+        TumblingBlade.Drop(blade, spin, GroundY + 0.4f);
     }
 }

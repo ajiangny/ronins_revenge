@@ -26,9 +26,10 @@ public partial class Shirogane : Boss
 
     // Each value is (phase 1, phase 2 with Kuon, phase 2 enraged): with the wolf at her side she gives no quarter, and
     // once it has fallen she gives less still.
-    float Recovery => enraged ? 0.25f : secondPhase ? 0.5f : 0.8f;
-    float ComboChance => enraged ? 0.85f : secondPhase ? 0.75f : 0.6f;
-    int MaxCombo => enraged ? 4 : secondPhase ? 3 : 2;
+    // A soul the Emperor summons keeps a longer rest and shorter combos: it already overlaps his own attacks.
+    float Recovery => (enraged ? 0.12f : secondPhase ? 0.25f : 0.4f) * (Summoned ? 2f : 1f);
+    float ComboChance => enraged ? 0.9f : secondPhase ? 0.85f : 0.7f;
+    int MaxCombo => (enraged ? 5 : secondPhase ? 4 : 3) - (Summoned ? 1 : 0);
     float GlideSpeed => enraged ? 10f : secondPhase ? 7.5f : 5f;
     float CrescentSpeed => enraged ? 11f : secondPhase ? 9f : 8f;
     float RainWarning => enraged ? 0.6f : secondPhase ? 0.7f : 0.9f;
@@ -241,7 +242,8 @@ public partial class Shirogane : Boss
                     // The ultimate ends every combo: nothing follows it but her recovery.
                     i = combo;
                 }
-                else if (move != Move.MoonlitDash && move != Move.TwinAssault && move != Move.MirrorMoon)
+                // Only some follow-ups reposition first: a glide before every move read as a rest between them.
+                else if (move != Move.MoonlitDash && move != Move.TwinAssault && move != Move.MirrorMoon && (i == 0 || Random.value < 0.35f))
                 {
                     yield return Glide(NearX(1.5f, 3.5f));
                 }
@@ -264,7 +266,7 @@ public partial class Shirogane : Boss
                     case Move.EclipseFang: yield return As(move, EclipseFang()); break;
                 }
                 borrowed = false;
-                yield return Wait(secondPhase ? 0.15f : 0.25f);
+                yield return Wait(secondPhase ? 0.08f : 0.12f);
             }
         }
     }
@@ -329,7 +331,7 @@ public partial class Shirogane : Boss
                 case Move.FrozenHowl: yield return As(move, FrozenHowl()); break;
             }
             wolfBusy = false;
-            yield return WolfWait(wolf.Enraged ? Random.Range(0.4f, 0.7f) : Random.Range(0.7f, 1.2f));
+            yield return WolfWait(wolf.Enraged ? Random.Range(0.25f, 0.45f) : Random.Range(0.4f, 0.75f));
         }
         wolfBusy = false;
         hunting = null;

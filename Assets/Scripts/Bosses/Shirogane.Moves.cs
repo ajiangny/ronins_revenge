@@ -33,7 +33,7 @@ public partial class Shirogane
             WolfSlash(Hands, again, 2.6f);
             CrescentFan(again, 9f);
         }
-        yield return Wait(0.3f);
+        yield return Wait(0.15f);
     }
 
     // Her sword slash: a frost arc sweeps out from `at` toward `aim` and an ice wolf's head lunges along it, jaws
@@ -141,7 +141,7 @@ public partial class Shirogane
         Sfx.Play(Sfx.GhostSwordFall, 0.9f, 0.8f);
         yield return Wait(0.25f);
         RingingFence();
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
     // After the rain, a short fence of ghost swords falls over the ronin with one bronze-edged ringing blade at its
@@ -268,7 +268,7 @@ public partial class Shirogane
         yield return Wait(0.4f);
         LooseRow(outer, 30f);
         Sfx.Play(Sfx.GhostSwordFall, 0.8f, 1.1f);
-        yield return Wait(0.3f);
+        yield return Wait(0.15f);
     }
 
     // Eases a wheeling sword from its orbit into a line above her, spaced for its row's dive angle.
@@ -363,7 +363,7 @@ public partial class Shirogane
             transient.Remove(reflection.gameObject);
             Fader.Fade(reflection, 0.4f);
         }
-        yield return Wait(0.3f);
+        yield return Wait(0.15f);
     }
 
     static Vector3 ReflectionHands(SpriteRenderer reflection)
@@ -446,7 +446,7 @@ public partial class Shirogane
             StartCoroutine(Close(moon, starts[i], bends[i], seconds));
         }
         IgnoreEachOther(pair);
-        yield return Wait(0.6f);
+        yield return Wait(0.35f);
     }
 
     // How far above the ronin the crossing moons' curves bend back in.
@@ -685,7 +685,7 @@ public partial class Shirogane
 
         exposed = true;
         PlayIdle();
-        yield return Wait(2f);
+        yield return Wait(1.5f);
         exposed = false;
     }
 
@@ -705,7 +705,7 @@ public partial class Shirogane
         StartCoroutine(Spire(Mathf.Clamp(beside, lo, hi), tell));
         yield return Wait(tell + 0.3f);
         if (enraged) yield return Spire(Mathf.Clamp(ronin.Bounds.center.x, lo, hi), 0.8f);
-        yield return Wait(0.4f);
+        yield return Wait(0.2f);
     }
 
 }

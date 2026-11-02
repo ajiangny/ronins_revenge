@@ -28,9 +28,9 @@ public partial class Kagetsune : Boss
     const int UltimateEvery = 6;
     const float ExposedSeconds = 1.8f;
 
-    float Recovery => secondPhase ? (lastBell ? 0.35f : 0.45f) : 0.7f;
-    float ComboChance => secondPhase ? 0.65f : 0.55f;
-    int MaxCombo => 4;
+    float Recovery => secondPhase ? (lastBell ? 0.15f : 0.2f) : 0.35f;
+    float ComboChance => secondPhase ? 0.8f : 0.7f;
+    int MaxCombo => 5;
     float ShotSpeed => secondPhase ? 1.2f : 1f;
 
     public override string Title => "KAGETSUNE";
@@ -305,7 +305,7 @@ public partial class Kagetsune : Boss
                 yield return Attacking($"Kagetsune_{move}", Play(move));
                 // The ultimate ends the combo.
                 if (move == Move.ThousandBells) i = combo;
-                yield return Wait(secondPhase ? 0.2f : 0.3f);
+                yield return Wait(secondPhase ? 0.1f : 0.15f);
             }
         }
     }

@@ -37,10 +37,11 @@ public class SpiritWolf : MonoBehaviour, IHittable
     public bool Soaked => Time.time < soakedUntil;
     // The other statuses (Statuses.cs). Kuon has no stance to break and frost can't hold a spirit, so they're its own:
     // Burning, the ronin's blows bite half again as deep; Chilled, its next daze lasts longer; Jolted, his next blow
-    // discharges for more.
+    // discharges for more. Cracked pays as a warlord's does: the hammer is spirit-charged, so a spirit cracks too.
     public bool Burning => Time.time < burningUntil;
     public bool Chilled => Time.time < chilledUntil;
     public bool Jolted => Time.time < joltedUntil;
+    public bool Cracked => Time.time < crackedUntil;
     // She has fallen and it fights on for both of them.
     public bool Enraged { get; private set; }
     // Only while it stands in plain sight: not in mist, not as the charge coming down a lane.
@@ -51,6 +52,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
     float burningUntil;
     float chilledUntil;
     float joltedUntil;
+    float crackedUntil;
     // Burning's extra bite, in parts of a point until they add up to a whole one.
     float burnChip;
     static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
@@ -202,6 +204,15 @@ public class SpiritWolf : MonoBehaviour, IHittable
         if (!Armed || IsBroken || seconds <= 0f) return;
         joltedUntil = Mathf.Max(joltedUntil, Time.time + seconds);
     }
+
+    public void Crack(float seconds)
+    {
+        if (!Armed || IsBroken || seconds <= 0f) return;
+        crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+    }
+
+    // Oni's blow has knocked the scrap loose: the crack is spent.
+    public void SpendCrack() => crackedUntil = 0f;
 
     // Stays put for a move fired from where it stands, then pads on again.
     public void Hold() => held = true;
@@ -587,6 +598,7 @@ public class SpiritWolf : MonoBehaviour, IHittable
         if (Burning) body = Color.Lerp(body, Statuses.BurnColor, 0.3f + 0.08f * Mathf.Sin(Time.time * 9f));
         if (Chilled) body = Color.Lerp(body, Statuses.ChillColor, 0.35f);
         if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) body = Color.Lerp(body, Statuses.JoltColor, 0.45f);
+        if (Cracked) body = Color.Lerp(body, Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackColor, 0.4f);
         sprite.color = new Color(body.r, body.g, body.b, a * 0.78f * flicker);
         transform.localScale = Vector3.one * scale * grown * (1f + 0.25f * rage);
         Color halo = Color.Lerp(new Color(0.3f + 0.5f * glare, 0.9f, 1f), RageColour, 0.7f * rage);

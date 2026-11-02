@@ -49,6 +49,8 @@ public class Samurai : MonoBehaviour, IHittable
     public bool Burning => Time.time < burningUntil;
     public bool Chilled => Time.time < chilledUntil;
     public bool Jolted => Time.time < joltedUntil;
+    // Steel: dull iron with bright seams. Oni's own blow on a cracked samurai sheds scrap (BoonEffects.OnKill).
+    public bool Cracked => Time.time < crackedUntil;
     // Black Ice: how much longer a soaked samurai stays encased. Set from the loadout by the GameManager.
     public static float BlackIce = 1f;
 
@@ -64,6 +66,7 @@ public class Samurai : MonoBehaviour, IHittable
     float burningUntil;
     float chilledUntil;
     float joltedUntil;
+    float crackedUntil;
     // The statuses last tinted in, so a status wearing off retints once.
     int shownStatus;
     SpriteRenderer iceGlow;
@@ -317,6 +320,14 @@ public class Samurai : MonoBehaviour, IHittable
         SetFrost(frost);
     }
 
+    // Steel: its armour splits along the seams. It changes nothing until Oni's own blow cuts it down.
+    public void Crack(float seconds)
+    {
+        if (IsDead || seconds <= 0f) return;
+        crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+        SetFrost(frost);
+    }
+
     // A Jolted samurai tried to shoot: the charge snaps through its bow and the shot is lost. It costs the charge,
     // not the samurai: blowing it up made the status as good as a kill.
     void Fizzle()
@@ -327,7 +338,7 @@ public class Samurai : MonoBehaviour, IHittable
         SetFrost(frost);
     }
 
-    int StatusMask => (Soaked ? 1 : 0) | (Burning ? 2 : 0) | (Chilled ? 4 : 0) | (Jolted ? 8 : 0);
+    int StatusMask => (Soaked ? 1 : 0) | (Burning ? 2 : 0) | (Chilled ? 4 : 0) | (Jolted ? 8 : 0) | (Cracked ? 16 : 0);
 
     // Encases the samurai in ice for a while: full ice tint and a frozen pose. Black Ice holds a soaked one longer.
     public void Encase(float seconds)
@@ -346,7 +357,7 @@ public class Samurai : MonoBehaviour, IHittable
         UpdateAlert();
         // A status wearing off retints once (Burning and Jolted ones flicker while they last); a ghost's body breathes in and out
         // of sight, slowly, each on its own beat.
-        if ((shownStatus != StatusMask || Jolted || Burning) && !IsDead) SetFrost(frost);
+        if ((shownStatus != StatusMask || Jolted || Burning || Cracked) && !IsDead) SetFrost(frost);
         if (ghostGlow != null && !Encased && !IsDead) SetFrost(frost);
         if (iceGlow == null || Encased) return;
         Thaw();
@@ -382,6 +393,12 @@ public class Samurai : MonoBehaviour, IHittable
         if (Burning) clan = Color.Lerp(clan, Statuses.BurnColor, 0.4f + 0.1f * Mathf.Sin(Time.time * 9f));
         if (Chilled) clan = Color.Lerp(clan, Statuses.ChillColor, 0.5f);
         if (Jolted) clan = Color.Lerp(clan, Statuses.JoltColor, Mathf.Sin(Time.time * 30f) > 0.3f ? 0.6f : 0.2f);
+        if (Cracked)
+        {
+            clan = Color.Lerp(clan, Statuses.CrackColor, 0.5f);
+            // The seams catch the light now and then.
+            if (Mathf.Sin(Time.time * 7f + transform.position.x) > 0.75f) clan = Color.Lerp(clan, Statuses.SeamColor, 0.5f);
+        }
         Color body = Encased ? IceColor : Color.Lerp(clan, FrostColor, frost * 0.7f);
         if (Kind == SamuraiKind.Yurei && !Encased)
         {

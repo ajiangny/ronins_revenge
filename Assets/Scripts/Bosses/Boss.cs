@@ -163,6 +163,7 @@ public abstract class Boss : MonoBehaviour, IHittable
     float burningUntil;
     float chilledUntil;
     float joltedUntil;
+    float crackedUntil;
     float staggeredUntil;
     float nextHurtLine;
     float age;
@@ -184,10 +185,11 @@ public abstract class Boss : MonoBehaviour, IHittable
     public bool Soaked => Time.time < soakedUntil;
     static readonly Color SoakTint = new Color(0.18f, 0.48f, 1f);
     // The other elements' statuses (Statuses.cs): Burning breaks her stance faster, Chilled lengthens her next freeze,
-    // Jolted adds to the ronin's next blow.
+    // Jolted adds to the ronin's next blow, and Cracked knocks scrap loose from her next own hit (BoonEffects.OnBossHit).
     public bool Burning => Time.time < burningUntil;
     public bool Chilled => Time.time < chilledUntil;
     public bool Jolted => Time.time < joltedUntil;
+    public bool Cracked => Time.time < crackedUntil;
     // How fast the boss's clock runs: a freeze or a stagger stops her.
     protected float Tempo => Frozen || Staggered ? 0f : 1f;
     protected float HalfWidth => Camera.main.orthographicSize * Camera.main.aspect;
@@ -434,6 +436,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (Burning) tint = Color.Lerp(tint, Statuses.BurnColor, 0.25f + 0.08f * Mathf.Sin(Time.time * 9f));
         if (Chilled) tint = Color.Lerp(tint, Statuses.ChillColor, 0.2f);
         if (Jolted && Mathf.Sin(Time.time * 30f) > 0.5f) tint = Color.Lerp(tint, Statuses.JoltColor, 0.4f);
+        if (Cracked) tint = Color.Lerp(tint, Mathf.Sin(Time.time * 7f) > 0.75f ? Statuses.SeamColor : Statuses.CrackColor, 0.3f);
         sprite.color = Frozen ? Color.Lerp(tint, new Color(0.55f, 0.8f, 1f), 0.6f) : tint;
     }
 
@@ -657,6 +660,15 @@ public abstract class Boss : MonoBehaviour, IHittable
         joltedUntil = Mathf.Max(joltedUntil, Time.time + seconds);
     }
 
+    public void Crack(float seconds)
+    {
+        if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
+        crackedUntil = Mathf.Max(crackedUntil, Time.time + seconds * Statuses.CrackScale);
+    }
+
+    // Oni's blow has knocked the scrap loose: the crack is spent.
+    public void SpendCrack() => crackedUntil = 0f;
+
     // Soaks the boss: a splash, and every boon effect on her lands harder until it dries.
     public void Soak(float seconds)
     {
@@ -798,7 +810,7 @@ public abstract class Boss : MonoBehaviour, IHittable
         SecondPhase = true;
         PhaseBreaking = true;
         armorChip = 0;
-        staggeredUntil = frozenUntil = soakedUntil = burningUntil = chilledUntil = joltedUntil = 0;
+        staggeredUntil = frozenUntil = soakedUntil = burningUntil = chilledUntil = joltedUntil = crackedUntil = 0;
         SetPoise(0f);
         Interrupt();
         IEnumerator scene = PhaseBreak();

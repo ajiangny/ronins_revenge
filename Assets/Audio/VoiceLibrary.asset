@@ -573,6 +573,30 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 7d887f6ff520c423bb3ad21704479b56, type: 3}
   - id: Duo_BlackIce_Hill_4
     clip: {fileID: 8300000, guid: c8167b21c7d0b4cd294ae46b834e38e6, type: 3}
+  - id: Duo_LightningRod_Again
+    clip: {fileID: 8300000, guid: 49f9223f34b2543c394fc8363c8569fe, type: 3}
+  - id: Duo_LightningRod_Again_2
+    clip: {fileID: 8300000, guid: 1f9adf174f31040fc8f91f861f251bc6, type: 3}
+  - id: Duo_LightningRod_First
+    clip: {fileID: 8300000, guid: 91dc3c88444da409aa9778ac54832198, type: 3}
+  - id: Duo_LightningRod_First_2
+    clip: {fileID: 8300000, guid: 7fe426384e7e2463c9cdd9a1ca5b816b, type: 3}
+  - id: Duo_LightningRod_First_3
+    clip: {fileID: 8300000, guid: bd1a57f1cfa8e479fae11bc22864a7a0, type: 3}
+  - id: Duo_LightningRod_First_4
+    clip: {fileID: 8300000, guid: e7c68f6fba4a944dc9c8eaa988284f41, type: 3}
+  - id: Duo_LightningRod_First_5
+    clip: {fileID: 8300000, guid: ed44b1fc175b0434db5fb0a1da6750aa, type: 3}
+  - id: Duo_LightningRod_Taps
+    clip: {fileID: 8300000, guid: deb9e70252c0445d7b0e8e696ab70a3b, type: 3}
+  - id: Duo_LightningRod_Taps_2
+    clip: {fileID: 8300000, guid: 1afdbb3b85ae94fd988f6d9bba6640c8, type: 3}
+  - id: Duo_LightningRod_Taps_3
+    clip: {fileID: 8300000, guid: c87b3f4ed1d4548a79210fc1609604d1, type: 3}
+  - id: Duo_LightningRod_Taps_4
+    clip: {fileID: 8300000, guid: 64e40f3e65f3b4f5a99feeb1b97d112b, type: 3}
+  - id: Duo_LightningRod_Taps_5
+    clip: {fileID: 8300000, guid: 2d51a8ec99dfc43a0ab9510f5f88db76, type: 3}
   - id: Duo_PlasmaArc_Again
     clip: {fileID: 8300000, guid: df1e5c9567e9d4d6fbb10f20060b36aa, type: 3}
   - id: Duo_PlasmaArc_Again_2
@@ -591,6 +615,68 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a78b44e2014da4cc89ac4a5be55d890f, type: 3}
   - id: Duo_PlasmaArc_Pace_3
     clip: {fileID: 8300000, guid: 778d8e2728b564807a178ca7fa821e5c, type: 3}
+  - id: Duo_Quenching_Again
+    clip: {fileID: 8300000, guid: 9159db84e4712478f8dd467802f2122d, type: 3}
+  - id: Duo_Quenching_Again_2
+    clip: {fileID: 8300000, guid: b8ac1fd110ca849bb968db1a2ebf1d33, type: 3}
+  - id: Duo_Quenching_First
+    clip: {fileID: 8300000, guid: 030dfb2a8666247b982350f1ada4a301, type: 3}
+  - id: Duo_Quenching_First_2
+    clip: {fileID: 8300000, guid: a01ae4b52338b480c91c7a8b8661ead9, type: 3}
+  - id: Duo_Quenching_First_3
+    clip: {fileID: 8300000, guid: b111e3f72c2d74efc9be3f325f46d971, type: 3}
+  - id: Duo_Quenching_First_4
+    clip: {fileID: 8300000, guid: 2707a3031709046009b77cbaeca30707, type: 3}
+  - id: Duo_Quenching_Word
+    clip: {fileID: 8300000, guid: 4a67eebcccfa348069515a423e39d683, type: 3}
+  - id: Duo_Quenching_Word_3
+    clip: {fileID: 8300000, guid: 5e8704919e13940b282d75e29092be7b, type: 3}
+  - id: Duo_Quenching_Word_4
+    clip: {fileID: 8300000, guid: f0db635c6565849aaba15981cd6829da, type: 3}
+  - id: Duo_RedHotIron_Again
+    clip: {fileID: 8300000, guid: 0874a894afc274201b23bc02fe064946, type: 3}
+  - id: Duo_RedHotIron_Again_2
+    clip: {fileID: 8300000, guid: 5cbb6b12ba68e46979956861d4327409, type: 3}
+  - id: Duo_RedHotIron_First
+    clip: {fileID: 8300000, guid: a4c00044a7ae74ef291f7080c646f360, type: 3}
+  - id: Duo_RedHotIron_First_3
+    clip: {fileID: 8300000, guid: ea47150316e534385a895832988eb6b3, type: 3}
+  - id: Duo_RedHotIron_First_4
+    clip: {fileID: 8300000, guid: 977df953cb3ff4973b695d93bed2e63e, type: 3}
+  - id: Duo_RedHotIron_First_5
+    clip: {fileID: 8300000, guid: 6681113b3993546b4ba9e71d80848aa2, type: 3}
+  - id: Duo_RedHotIron_Shoulder
+    clip: {fileID: 8300000, guid: de6130af3a3464fefb95676d6b1b316d, type: 3}
+  - id: Duo_RedHotIron_Shoulder_2
+    clip: {fileID: 8300000, guid: 7636a12f8570149f2a83ef939e7bf85c, type: 3}
+  - id: Duo_RedHotIron_Shoulder_3
+    clip: {fileID: 8300000, guid: fbd9f330e2cff4ddeadd404cc42ac991, type: 3}
+  - id: Duo_RedHotIron_Shoulder_5
+    clip: {fileID: 8300000, guid: a463802e7c15a4d32ad5efb855b0f59f, type: 3}
+  - id: Duo_Rust_Again
+    clip: {fileID: 8300000, guid: 4300d64906a4b4686a47ff981cd95e35, type: 3}
+  - id: Duo_Rust_Again_2
+    clip: {fileID: 8300000, guid: 45837d6802a7241d98661c3620d51a94, type: 3}
+  - id: Duo_Rust_First
+    clip: {fileID: 8300000, guid: cd0bb0d72766f40aba48b95dc50b459b, type: 3}
+  - id: Duo_Rust_First_2
+    clip: {fileID: 8300000, guid: 7300dfba0c02d4be79755842454dad1e, type: 3}
+  - id: Duo_Rust_First_3
+    clip: {fileID: 8300000, guid: b865859a23d4e4266bd39cd3884762a6, type: 3}
+  - id: Duo_Rust_First_4
+    clip: {fileID: 8300000, guid: 2168a64c7fb834ab49f3fd85fc70401c, type: 3}
+  - id: Duo_Rust_First_5
+    clip: {fileID: 8300000, guid: a71bfd4d802d648ef828a91911326be5, type: 3}
+  - id: Duo_Rust_Stone
+    clip: {fileID: 8300000, guid: f20e1434b1d724ac99dd66649e61eb01, type: 3}
+  - id: Duo_Rust_Stone_2
+    clip: {fileID: 8300000, guid: e861d7a7ac51a4189b6bfcf345788d29, type: 3}
+  - id: Duo_Rust_Stone_3
+    clip: {fileID: 8300000, guid: 162150cfc18964a79a6c345345e41376, type: 3}
+  - id: Duo_Rust_Stone_4
+    clip: {fileID: 8300000, guid: af331c2a09c2143588d73707f8ada2fd, type: 3}
+  - id: Duo_Rust_Stone_5
+    clip: {fileID: 8300000, guid: 44b0f384ca558468594424004a740986, type: 3}
   - id: Duo_ScaldingSteam_Again
     clip: {fileID: 8300000, guid: c47ca00aed5bf484ab627367c50411a2, type: 3}
   - id: Duo_ScaldingSteam_Again_2
@@ -1157,6 +1243,102 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: e24a69a2058214943bb2ddbde1f76510, type: 3}
   - id: Mizore_Poguru_5
     clip: {fileID: 8300000, guid: 317d2afda7f954184981eb81ce9ea1dc, type: 3}
+  - id: Oliver_Dawn
+    clip: {fileID: 8300000, guid: 1c345d8465df248209f2abf7379bdc51, type: 3}
+  - id: Oliver_Infusion_Again
+    clip: {fileID: 8300000, guid: 25d872fb570e34254bb1fe4465d518fa, type: 3}
+  - id: Oliver_Infusion_Tamahagane
+    clip: {fileID: 8300000, guid: 3f1421063804242a1b76fb3ff298192a, type: 3}
+  - id: Oliver_Infusion_Tamahagane_2
+    clip: {fileID: 8300000, guid: 18b7ecaf70df4493bbe39f70a0952983, type: 3}
+  - id: Oliver_Legendary_Again
+    clip: {fileID: 8300000, guid: b849f51166997423a9043e321f808f28, type: 3}
+  - id: Oliver_Legendary_SpearBreaker
+    clip: {fileID: 8300000, guid: da18c754b0a6f414f8c249955b536d61, type: 3}
+  - id: Oliver_Legendary_SpearBreaker_2
+    clip: {fileID: 8300000, guid: 0580a53bcdd9b47b993cb6ba8fef420d, type: 3}
+  - id: Oliver_Meet_Bell
+    clip: {fileID: 8300000, guid: 646b7d28560ae4593b437925796cff22, type: 3}
+  - id: Oliver_Meet_Bell_2
+    clip: {fileID: 8300000, guid: 57dfde3fe861f44008b187e5ee792159, type: 3}
+  - id: Oliver_Meet_Bell_3
+    clip: {fileID: 8300000, guid: 4d2d874f6abb54f61922daaef6b948e0, type: 3}
+  - id: Oliver_Meet_Bell_4
+    clip: {fileID: 8300000, guid: f57e6d25f0a1a4643aec4f5eea94b1bb, type: 3}
+  - id: Oliver_Meet_Bell_5
+    clip: {fileID: 8300000, guid: 6c33e3b25efb14d3eb9d8e526d089c7c, type: 3}
+  - id: Oliver_Meet_Box
+    clip: {fileID: 8300000, guid: b23d0de3e825a41269506dfaa34c64c6, type: 3}
+  - id: Oliver_Meet_Box_2
+    clip: {fileID: 8300000, guid: e6789de4e6c404ab5b165801457bc3d3, type: 3}
+  - id: Oliver_Meet_Box_3
+    clip: {fileID: 8300000, guid: 0e00f2e37f5314f7fa0b707e96e25bba, type: 3}
+  - id: Oliver_Meet_Box_4
+    clip: {fileID: 8300000, guid: 6b4c80945f9b34ce796f0966d2dca4e9, type: 3}
+  - id: Oliver_Meet_Box_5
+    clip: {fileID: 8300000, guid: a4ed864d30d774484adc3564b1c46e2e, type: 3}
+  - id: Oliver_Meet_Cold
+    clip: {fileID: 8300000, guid: 1d051d48718b64e1f8939749f1532cbb, type: 3}
+  - id: Oliver_Meet_Cold_2
+    clip: {fileID: 8300000, guid: 6ec27866a067c43399f9654a7ba13c2c, type: 3}
+  - id: Oliver_Meet_Cold_3
+    clip: {fileID: 8300000, guid: e1db88c47adae43fdb14437e4cc2814c, type: 3}
+  - id: Oliver_Meet_Cold_4
+    clip: {fileID: 8300000, guid: 21d87856567cc40ada284e67911ce8e1, type: 3}
+  - id: Oliver_Meet_Cold_5
+    clip: {fileID: 8300000, guid: f6f0b95d9dcd44a368647dad5d751b6d, type: 3}
+  - id: Oliver_Meet_Cold_6
+    clip: {fileID: 8300000, guid: d593e8a7c17fa4058b849c135e08787f, type: 3}
+  - id: Oliver_Meet_Doll
+    clip: {fileID: 8300000, guid: 2a051d227af7141aebb4e8a6e051e4b6, type: 3}
+  - id: Oliver_Meet_Doll_2
+    clip: {fileID: 8300000, guid: e8f5cc5f617984a71bccb3748cd5af35, type: 3}
+  - id: Oliver_Meet_Doll_3
+    clip: {fileID: 8300000, guid: 2a7651a81ecb547e3b66a1c2b155503c, type: 3}
+  - id: Oliver_Meet_Doll_4
+    clip: {fileID: 8300000, guid: e09972dcbfdda4dec9cc60daab7a345a, type: 3}
+  - id: Oliver_Meet_Draft
+    clip: {fileID: 8300000, guid: b3b9f728b23a942249c1b85466ea01b6, type: 3}
+  - id: Oliver_Meet_Draft_2
+    clip: {fileID: 8300000, guid: cb29eabf25b49447eb9a8954189c7765, type: 3}
+  - id: Oliver_Meet_Draft_3
+    clip: {fileID: 8300000, guid: 7506f60e326e3411b964c692da205d87, type: 3}
+  - id: Oliver_Meet_Draft_4
+    clip: {fileID: 8300000, guid: 34d9885d231c74d54ab7ca06fe2ab228, type: 3}
+  - id: Oliver_Meet_Enormous
+    clip: {fileID: 8300000, guid: abebb23a666a74c7cb6572d39f961934, type: 3}
+  - id: Oliver_Meet_Enormous_2
+    clip: {fileID: 8300000, guid: 9b604cc061f96487cbc5e681024d9d24, type: 3}
+  - id: Oliver_Meet_Enormous_3
+    clip: {fileID: 8300000, guid: d9900d1f17bb7478c91ba7cc959a6d15, type: 3}
+  - id: Oliver_Meet_Enormous_4
+    clip: {fileID: 8300000, guid: b44c4fbc41f914997b5b5f2f93c7a4c2, type: 3}
+  - id: Oliver_Meet_Enormous_5
+    clip: {fileID: 8300000, guid: 6b5054239b2a7456cabf84207ebf5bb1, type: 3}
+  - id: Oliver_Meet_Rack
+    clip: {fileID: 8300000, guid: 05a7a430ed41946948d102d7a41b39b5, type: 3}
+  - id: Oliver_Meet_Rack_2
+    clip: {fileID: 8300000, guid: 973883f818b954d29ac54961113e8429, type: 3}
+  - id: Oliver_Meet_Rack_3
+    clip: {fileID: 8300000, guid: 13847f3c41f15413a9efda79db5ad758, type: 3}
+  - id: Oliver_Meet_Rack_4
+    clip: {fileID: 8300000, guid: ea97d111153a546fdaa529c53b87be85, type: 3}
+  - id: Oliver_Meet_Rack_5
+    clip: {fileID: 8300000, guid: 2471b98f6646c45e78ff41dd32b40f46, type: 3}
+  - id: Oliver_Meet_Rack_6
+    clip: {fileID: 8300000, guid: d08f58e7cd7ac4e17a1812c567a76f42, type: 3}
+  - id: Oliver_Meet_Seventh
+    clip: {fileID: 8300000, guid: d8a3812b415dc4d38b1324c5c6ff8f18, type: 3}
+  - id: Oliver_Meet_Seventh_2
+    clip: {fileID: 8300000, guid: 70377cafc629543de94e45afa44e356b, type: 3}
+  - id: Oliver_Meet_Seventh_3
+    clip: {fileID: 8300000, guid: d2a225e25fe93455db24bdbd6896a1a4, type: 3}
+  - id: Oliver_Meet_Seventh_4
+    clip: {fileID: 8300000, guid: fbc72851704ba46b3abff1340130291e, type: 3}
+  - id: Oliver_Meet_Seventh_5
+    clip: {fileID: 8300000, guid: a7363f65695564df6a807f24316e3a13, type: 3}
+  - id: Oliver_Meet_Seventh_6
+    clip: {fileID: 8300000, guid: b1c7e05eb872043e8b07a7d712665abb, type: 3}
   - id: Oni_Hub_CountBenibana
     clip: {fileID: 8300000, guid: 340eac8d45a064f0d85113afb585809a, type: 3}
   - id: Oni_Hub_CountKagetsune

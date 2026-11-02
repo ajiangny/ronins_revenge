@@ -634,6 +634,7 @@ MonoBehaviour:
   mizoreCloseup: {fileID: 21300000, guid: b5c3a3e041e3946158e6a725a709c327, type: 3}
   hibikiCloseup: {fileID: 21300000, guid: 1c1a8e443b485410fb586a6a7a21cc7c, type: 3}
   asagiCloseup: {fileID: 21300000, guid: b67bd87389af644bba3b30a817815c80, type: 3}
+  oliverCloseup: {fileID: 0}
   poguruArt:
     idle:
     - {fileID: 21300000, guid: 3bf6ddac069384009b50def4167cbab8, type: 3}

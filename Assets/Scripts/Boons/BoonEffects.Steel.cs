@@ -20,12 +20,28 @@ public partial class BoonEffects
     // Lightning Rod strikes a warlord less often than the army's front.
     const float RodBossSeconds = 8f;
 
+    // RunLog's tallies, per segment: hit-free rounds are the main risk with Steel, and cover never showed in the log.
+    int scrapShed;
+    int pointsMended;
+    int platesFormed;
+    int spareScrap;
+    int arrowsStopped;
+
     static Color Steel => Boons.Info(Element.Steel).Color;
+
+    // One line for the segment just played, when Steel did anything in it.
+    public void LogSteel()
+    {
+        if (scrapShed + pointsMended + platesFormed + spareScrap + arrowsStopped == 0) return;
+        RunLog.Note($"steel: {scrapShed} scrap, {pointsMended} mended, {platesFormed} plates, {spareScrap} spare, {arrowsStopped} arrows stopped by cover");
+        scrapShed = pointsMended = platesFormed = spareScrap = arrowsStopped = 0;
+    }
 
     // Scrap from `from`, each piece drawn to the hurt cover nearest it as it falls. What it does is settled on landing,
     // so a target gone by then isn't a bug.
     void ShedScrap(Vector3 from, int count = 1, int points = 1)
     {
+        scrapShed += count;
         for (int i = 0; i < count; i++)
         {
             Vector3 at = from + Vector3.right * Random.Range(-ScrapSpread, ScrapSpread);
@@ -43,6 +59,7 @@ public partial class BoonEffects
         if (hurt != null)
         {
             hurt.Mend(points);
+            pointsMended += points;
             Fx.Play(Fx.Impact, hurt.transform.position, Statuses.SeamColor, 0.7f);
             Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
             return;
@@ -62,9 +79,11 @@ public partial class BoonEffects
         // No new Blocker in a warlord's fight: it would be a beam stop no warning showed.
         if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach, null))
         {
+            platesFormed++;
             Sfx.Play(Sfx.BlockerHit, 0.6f, 0.8f);
             return;
         }
+        spareScrap++;
         ronin.ChargeSpare();
     }
 
@@ -91,8 +110,12 @@ public partial class BoonEffects
             if (WolfFight) Wolf.Crack(Statuses.CrackSeconds);
         }
         Blocker hurt = wall.NearestHurt(at.x, BossFight ? float.MaxValue : HammerReach);
-        if (hurt != null) hurt.Mend(points);
-        else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates) wall.TryPlate(at.x, ScrapReach, null);
+        if (hurt != null)
+        {
+            hurt.Mend(points);
+            pointsMended += points;
+        }
+        else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(at.x, ScrapReach, null)) platesFormed++;
         Fx.Play(Fx.Impact, at, Steel, 1.2f);
         Sfx.Play(Sfx.BlockerHit, 0.7f, 0.7f);
     }
@@ -143,6 +166,7 @@ public partial class BoonEffects
     // front of the nearest column. The limit is the guard against the effect kill share of §4 coming back.
     public void OnCoverChipped(Vector3 position)
     {
+        arrowsStopped++;
         if (!loadout.Has(BoonId.LightningRod, out float seconds) || Time.time < nextRod) return;
         if (BossFight)
         {

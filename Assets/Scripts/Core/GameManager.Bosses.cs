@@ -565,6 +565,7 @@ public partial class GameManager
     // She kneels and fades; her soul rises and becomes the stage's boon.
     IEnumerator BossFell()
     {
+        effects.LogSteel();
         RunLog.EndSegment(lives, maxLives, null);
         state = State.Transition;
         ronin.ControlsEnabled = false;

@@ -615,6 +615,7 @@ public partial class GameManager
 
     IEnumerator EndRound()
     {
+        effects.LogSteel();
         RunLog.EndSegment(lives, maxLives, null);
         PayRoundBonus();
         state = State.Transition;

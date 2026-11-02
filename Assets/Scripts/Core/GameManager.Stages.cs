@@ -159,6 +159,7 @@ public partial class GameManager
         tutorial.Abort();
         // Before EndRun counts the dawn, so the first one (before the stone unseals) pays nothing.
         if (cleared) notesThisRun += Oaths.ClaimBounty();
+        effects.LogSteel();
         RunLog.EndSegment(lives, maxLives, null);
         BankTimeBonus();
         RunLog.EndRun($"{title}  stage {stageIndex + 1} round {roundIndex + 1}  time {Clock(runTime)}  time bonus {roundBonusTotal + stageBonusTotal}  notes {notesThisRun}  held: {HeldSummary()}");

@@ -2,8 +2,8 @@
 
 [Back to the story](README.md) · [The souls](Souls.md)
 
-> **In progress, not yet in game.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md). Dialogue tables
-> are to come; `Oliver_*` ids below are proposals, and none is marked (in game).
+> **In progress, not yet in game.** Steel's abilities are in [BOON_DESIGN §11](../Docs/BOON_DESIGN.md). His dialogue is
+> written in [Lines](#lines), but none of it is wired or voiced yet, and none is marked (in game).
 
 | | |
 |---|---|
@@ -258,7 +258,7 @@ else, who keeps a doll tied to his belt and would kill you for it.
 
 ### Sample lines
 
-These set the voice and are proposals only.
+These set the voice. The ones that made it are in [Lines](#lines), which wins where they differ.
 
 | Moment | Lines |
 |---|---|
@@ -271,12 +271,17 @@ These set the voice and are proposals only.
 | Kagetsune ahead | **Oliver:** "Terrible man. Good shoulder." |
 | Late: `Oliver_Meet_Doll` | **Oliver:** "I know it's a doll. I'm a cat. I'm not an idiot."<br>**Oliver:** "He sat up all winter sewing it, so it'd smell of him after. It smells of him less now."<br>**Oliver:** [to the doll, low] "Don't tell him." |
 
-**Voice design prompt** (for later; a preview for the user to pick, as with `ASAGI`): "A very large, older male voice,
-extremely low, slow and gravelly, with a slight wheeze and a snuffle on the breath, as if his nose doesn't quite work.
-Flat, deadpan, unbothered and permanently disappointed, like a tired craftsman looking at your work. No accent. He
-never raises his voice or hurries. Huge and close, and under it, very rarely, tender." Delivery tags: `[flat]`,
-`[gravel]`, `[unimpressed]`, `[a slow wheeze]`, `[to the doll, low]`. He gets the souls' faint coffin echo: he has been
-in it longer than anyone.
+**Voice design prompt** (a preview for the user to pick, as with `ASAGI`; `OLIVER` in `Tools/generate-voice.mjs` stays a
+`TODO` until then): "A very large, older male voice, extremely low, slow and gravelly, with a slight wheeze and a snuffle
+on the breath, as if his nose doesn't quite work. Flat, deadpan, unbothered and permanently disappointed, like a tired
+craftsman looking at your work. No accent. He never raises his voice or hurries. Not menacing, and not a cartoon. Huge
+and close, and under it, very rarely, tender." Delivery tags: `[flat]`, `[gravel]`, `[unimpressed]`, `[a slow wheeze]`,
+`[to the doll, low]`.
+
+He gets the souls' faint coffin echo: he has been in it longer than anyone. That echo isn't an `FX` bake. It's the
+filters on `GameManager.soulVoice`, so he needs no `FX` entry, which would double it, and `GameManager.VoiceOf` needs
+`"Oliver"` added to its soul case when he's wired; until then he'd fall through to the bosses' source. As with the other
+souls, the web build won't play it, since Unity's audio filters don't run there.
 
 ## What he wants
 
@@ -289,17 +294,195 @@ in it longer than anyone.
   night, as Oni is losing a life by memory. He notices Oni's forgetting before Oni does, and he doesn't say it kindly,
   and he's the only one who knows exactly what it's like.
 
+## Lines
+
+Notation for `requires` is in [Souls.md](Souls.md#requirement-notation). All of it is planned: none of these ids is in
+`Dialogue.cs`, and their clips wait on his voice (`Tools/generate-voice.mjs`). `holds Steel` and `most = Steel` are
+`Element.Steel` in code. Oni's lines are voiced under their own number, as with every soul; a silent "..." keeps its
+number and has no clip.
+
+Two gates to keep when wiring these. Anything with "Scabbard" or a "He says" needs `!seen Oliver_Meet_Seventh`, and
+anything with "Seventh" needs `seen Oliver_Meet_Seventh`; lines outside the chain mostly don't call Oni anything, so
+that they survive the change.
+
+### The meeting (the temple, on a wake)
+
+Plays once, on the wake after `Asagi_Meet_Pool`. Oni climbs out of the pool and finds his katana on the floor, and
+something very large asleep on the rack's platform. The `runsSince` keeps him off the very wake she's met, so the two
+arrive one after the other. Like hers, the first soul after it should be his.
+
+| id | Requires | Lines |
+|---|---|---|
+| `Oliver_Meet_Rack` | `seen Asagi_Meet_Pool`, `deaths ≥ 10`, `runsSince Asagi_Meet_Pool ≥ 1`, `!seen Oliver_Meet_Rack` | **Oni:** "...That's my sword."<br>**Oliver:** "His. You've been carrying it. Badly."<br>**Oni:** "...Whose?"<br>**Oliver:** "Not yours. You're what it's kept in. Scabbard."<br>**Oni:** "...Cat."<br>**Oliver:** "Brought you this. It's still moving. Don't make a face." |
+
+### `SoulPickup`: first meeting (Story, play once, one per run)
+
+| id | Requires | Lines |
+|---|---|---|
+| `Oliver_Meet_Draft` | `seen Oliver_Meet_Rack`, `runsSince Oliver_Meet_Rack ≥ 1` | **Oliver:** "There's a gap in your wall, Scabbard. I can feel the draft from here. ...There. Don't touch it."<br>**Oliver:** "He says your edge is a disgrace."<br>**Oni:** "...That's a doll."<br>**Oliver:** "He's resting." |
+| `Oliver_Meet_Box` | `seen Oliver_Meet_Draft`, `runsSince Oliver_Meet_Draft ≥ 1` | **Oni:** "You smell of the coffin."<br>**Oliver:** "It was warm. I got in. They put the lid on."<br>**Oliver:** "Nobody checks a box, Scabbard."<br>**Oni:** "...How did you get out?"<br>**Oliver:** "Door." |
+| `Oliver_Meet_Enormous` | `seen Oliver_Meet_Box`, `runsSince Oliver_Meet_Box ≥ 1`, `seen Mizore_Meet_Smiths` | **Oni:** "Six smiths, Mizore said. Yours?"<br>**Oliver:** "The master. Biggest thing in the building."<br>**Mizore:** "Jūsuke? I lifted him onto my cot with one arm. He weighed less than his apron."<br>**Oliver:** "He was enormous."<br>**Mizore:** "...Yes. I suppose he was." |
+| `Oliver_Meet_Bell` | `seen Oliver_Meet_Enormous`, `runsSince Oliver_Meet_Enormous ≥ 1` | **Oni:** "That bell. There's no tongue in it."<br>**Oliver:** "Doesn't ring. That's the point of it."<br>**Oliver:** "First one they poured. Scrap. He hung it on me so the birds wouldn't hear."<br>**Oni:** "...He was joking."<br>**Oliver:** "Only time that year." |
+| `Oliver_Meet_Doll` | `seen Oliver_Meet_Bell`, `runsSince Oliver_Meet_Bell ≥ 1` | **Oni:** "You know that's a doll."<br>**Oliver:** "I know it's a doll. I'm a cat. I'm not an idiot."<br>**Oliver:** "He sat up all winter sewing it, so it'd smell of him after. It smells of him less now."<br>**Oliver:** "Don't tell him." |
+| `Oliver_Meet_Cold` | `seen Oliver_Meet_Doll`, `runsSince Oliver_Meet_Doll ≥ 1` | **Oliver:** "Three taps on the anvil was supper. Two was move. One was only a hammer."<br>**Oliver:** "Jūsuke went cold. I lay on him till he did. Then I left. The box was warm."<br>**Oliver:** "I've smelled every bell on that armor. He isn't on one. I knew by the second night."<br>**Oliver:** "You left too, Scabbard. You'd know. Can you leave, and have it not matter?"<br>**Oni:** "...It matters."<br>**Oliver:** "...Thought so." |
+| `Oliver_Meet_Seventh` | `seen Oliver_Meet_Cold`, `seen Shirogane_Intro_Oath`, `runsSince Oliver_Meet_Cold ≥ 1` | **Oliver:** "He coughed. Cold Hands told Clean Edges. Clean Edges went to you. So here you are."<br>**Oliver:** "Six at that anvil. The job's not finished."<br>**Oliver:** "...It's been kept."<br>**Oni:** "What does he say?"<br>**Oliver:** "Nothing. No complaints."<br>**Oliver:** "Get up, Seventh." |
+
+`Oliver_Meet_Cold` is the one place he says the name. It's also where the player learns what three taps mean, which
+`Duo_LightningRod_Taps` may have played before and `Oliver_Dawn` depends on. `Oliver_Meet_Seventh` ends his chain and
+marks him ready for the dawn.
+
+### `SoulPickup`: reactive (Reactive)
+
+| id | Requires | Lines |
+|---|---|---|
+| `Oliver_Pickup_DiedBenibana` | `lastKiller = Benibana`, `runsSince Oliver_Pickup_DiedBenibana ≥ 3` | **Oliver:** "Smoke shows you where the draft is. You stood in it." |
+| `Oliver_Pickup_DiedUtsusemi` | `lastKiller = Utsusemi`, `runsSince Oliver_Pickup_DiedUtsusemi ≥ 3` | **Oliver:** "It razed what I mended. Then you stood where it was." |
+| `Oliver_Pickup_DiedShirogane` | `lastKiller = Shirogane`, `runsSince Oliver_Pickup_DiedShirogane ≥ 3` | **Oliver:** "Clean cut. Nothing to complain of." |
+| `Oliver_Pickup_DiedKagetsune` | `lastKiller = Kagetsune`, `runsSince Oliver_Pickup_DiedKagetsune ≥ 3` | **Oliver:** "Warm where it's thin. You hit somewhere cold." |
+| `Oliver_Pickup_DiedArmy` | `lastKiller = Army`, `runsSince Oliver_Pickup_DiedArmy ≥ 3` | **Oliver:** "Killed by rust. Don't tell him." |
+| `Oliver_Pickup_FirstClear` | `clears ≥ 1`, `lastCleared`, play once | **Oliver:** "He went over. I had to move."<br>**Oliver:** "Back up by morning. Shoulder's still good. Again." |
+| `Oliver_Pickup_Cleared` | `lastCleared`, `seen Oliver_Pickup_FirstClear`, `runsSince Oliver_Pickup_Cleared ≥ 2` | **Oliver:** "You put him down. I had to move again." |
+| `Oliver_Pickup_HoldsFire` | `holds Fire ≥ 1`, play once | **Oliver:** "Burnt paint. That's Lacquer." |
+| `Oliver_Pickup_HoldsFrost` | `holds Frost ≥ 1`, play once | **Oliver:** "Cold Hands has had you. Good. Hold still while this sets." |
+| `Oliver_Pickup_HoldsStorm` | `holds Storm ≥ 1`, play once | **Oliver:** "You're humming. That's Noise. Stand further off." |
+| `Oliver_Pickup_HoldsWater` | `holds Water ≥ 1`, play once | **Oliver:** "Wet. Fish has had you. Dry that blade." |
+| `Oliver_Pickup_ManyRuns` | `runs ≥ 25`, play once | **Oliver:** "Twenty-five times up this hill. The sword's held up. You're the one that keeps breaking." |
+| `Oliver_Pickup_VeryManyRuns` | `runs ≥ 50`, play once | **Oliver:** "Fifty. The edge wears. You don't. That's the wrong way round." |
+| `Oliver_Pickup_LowLives` | `lives = 1` | **Oliver:** "One left. Don't stand in the gap." |
+| `Oliver_Pickup_Offering` | event offers `SpiritOffering` | **Oliver:** "Nothing left that's moving. Have the warm spot. Once." |
+| `Oliver_Pickup_Gap` | `seen Oliver_Meet_Box`, `runs ≥ 15`, play once | **Oliver:** "You've got a new gap. Since last night. I can smell it."<br>**Oni:** "...What's gone?"<br>**Oliver:** "You won't miss it. That's the trouble with it." |
+
+### `SoulPickup`: greetings (Repeatable)
+
+| id | Requires | Lines |
+|---|---|---|
+| `Oliver_Greet_Moving` | none | **Oliver:** "It's still moving. Don't make a face." |
+| `Oliver_Greet_Draft` | none | **Oliver:** "Draft." |
+| `Oliver_Greet_Pleased` | none | **Oliver:** "Brought you this. Look pleased." |
+| `Oliver_Greet_Mine` | none | **Oliver:** "I've sat on that. It's mine. You can borrow it." |
+| `Oliver_Greet_Edge` | `!seen Oliver_Meet_Seventh` | **Oliver:** "He says your grip's worse than your edge." |
+| `Oliver_Greet_Scabbard` | `!seen Oliver_Meet_Seventh` | **Oliver:** "Scabbard." |
+| `Oliver_Greet_Seventh` | `seen Oliver_Meet_Seventh` | **Oliver:** "Seventh." |
+| `Oliver_Greet_Up` | `seen Oliver_Meet_Seventh` | **Oliver:** "Up, Seventh. There's a draft." |
+
+### `SoulJealous`
+
+The Frost lines are the same words on purpose: it's all he ever says about it.
+
+| id | Tier | Requires | Lines |
+|---|---|---|---|
+| `Oliver_Jealous_Akagane` | Reactive, once | `most = Fire` | **Oliver:** "Smells wasted."<br>**Akagane:** "It's fire, cat. It's meant to smell."<br>**Oliver:** "Lacquer." |
+| `Oliver_Jealous_Mizore` | Reactive, once | `most = Frost` | **Oliver:** "Cold Hands knows when to stop. You don't."<br>**Mizore:** "The cat is correct, young man." |
+| `Oliver_Jealous_Hibiki` | Reactive, once | `most = Storm` | **Oliver:** "Noise."<br>**Hibiki:** "Good noise! Uncle Cat, that's the nicest thing you've ever said to me!"<br>**Oliver:** "It isn't." |
+| `Oliver_Jealous_Asagi` | Reactive, once | `most = Water` | **Oliver:** "That rusts."<br>**Asagi:** "Only what's left out in it, little loaf."<br>**Oliver:** "Fish."<br>**Asagi:** "Yes, dear." |
+| `Oliver_Jealous_Fire` | Repeatable | `most = Fire` | **Oliver:** "Smells wasted." |
+| `Oliver_Jealous_Frost` | Repeatable | `most = Frost` | **Oliver:** "Cold Hands knows when to stop. You don't." |
+| `Oliver_Jealous_Storm` | Repeatable | `most = Storm` | **Oliver:** "Noise." |
+| `Oliver_Jealous_Water` | Repeatable | `most = Water` | **Oliver:** "That rusts." |
+| `Oliver_Jealous_Back` | Repeatable | none | **Oliver:** "You left a door open." |
+
+### `Legendary` (Spear-Breaker)
+
+These judge the spears by their sound and say nothing of who made them, so they stand however the ruling on the
+tutorial's "Emperor's own forge" goes. If the spears are ruled not to be the master's, "Not ours." (from the army's row under
+[Relationships](#relationships)) can open `Oliver_Legendary_SpearBreaker`. It isn't in this table or in `LINES`, because
+it would be false if they are. That row carries the same dependency until the ruling.
+
+| id | Tier | Lines |
+|---|---|---|
+| `Oliver_Legendary_SpearBreaker` | Story, once | **Oliver:** "Those spears ring wrong. Every one. I've listened to it all night."<br>**Oliver:** "Hit one. It'll go. What falls is scrap, and scrap's worth something." |
+| `Oliver_Legendary_Again` | Repeatable | **Oliver:** "Break another. I like the sound." |
+
+### `Legendary` event: Infusion (Tamahagane)
+
+| id | Tier | Lines |
+|---|---|---|
+| `Oliver_Infusion_Tamahagane` | Story, once | **Oliver:** "Tamahagane. Three days in the furnace, and he wouldn't let me near it."<br>**Oliver:** "What's cracked stays cracked. What's mended comes back better than new. Don't ask me how. I only sat there." |
+| `Oliver_Infusion_Again` | Repeatable | **Oliver:** "That's the good steel. Don't waste it." |
+
+### `Duo`
+
+His Duos (Red-Hot Iron with Akagane, Quenching with Mizore, Lightning Rod with Hibiki, Rust with Asagi) are in
+[Souls.md](Souls.md#duo-conversations).
+
+### Boss reactions
+
+There's no `Oliver_Felled_Kagetsune`, as there's none for the other souls: no boon follows him.
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Oliver_Ahead_Benibana` | `BossAhead` | Story, once | `nextBoss = Benibana` | **Oliver:** "Smoke. Useful. Shows you where the draft is." |
+| `Oliver_Ahead_BenibanaBell` | `BossAhead` | Story, once | `nextBoss = Benibana`, `seen Benibana_Intro_Bell` | **Oliver:** "Third from the left. I knew that. Nobody asked." |
+| `Oliver_Ahead_Utsusemi` | `BossAhead` | Story, once | `nextBoss = Utsusemi` | **Oliver:** "Bad Work. Hear it? That rang wrong." |
+| `Oliver_Ahead_UtsusemiWound` | `BossAhead` | Story, once | `nextBoss = Utsusemi`, `seen Utsusemi_Intro_WindDown` | **Oliver:** "Whoever wound that didn't know how. Stop it properly." |
+| `Oliver_Ahead_Shirogane` | `BossAhead` | Story, once | `nextBoss = Shirogane` | **Oliver:** "Clean Edges. Same anvil as yours. She kept hers." |
+| `Oliver_Ahead_Kuon` | `BossAhead` | Story, once | `nextBoss = Shirogane`, `seen Kagetsune_Intro_Kuon` | **Oliver:** "The dog's up there. It bit him before I thought of it. I'd like that noted." |
+| `Oliver_Ahead_Kagetsune` | `BossAhead` | Story, once | `nextBoss = Kagetsune` | **Oliver:** "Terrible man. Good shoulder." |
+| `Oliver_Ahead_KagetsuneWon` | `BossAhead` | Story, once | `nextBoss = Kagetsune`, `winsVs Kagetsune ≥ 1` | **Oliver:** "It's thin wherever it's warm. I've slept on all of them." |
+| `Oliver_Ahead_Seventh` | `BossAhead` | Story, once | `nextBoss = Kagetsune`, `seen Oliver_Meet_Seventh` | **Oliver:** "Six men made that. Go and finish it, Seventh." |
+| `Oliver_Ahead_Any` | `BossAhead` | Repeatable | none | **Oliver:** "Something heavy ahead. Don't drop the sword." |
+| `Oliver_Felled_Benibana` | `BossFelled` | Reactive, once | `felled = Benibana` | **Oliver:** "Smoke's gone. Slept through that one too." |
+| `Oliver_Felled_Utsusemi` | `BossFelled` | Reactive, once | `felled = Utsusemi` | **Oliver:** "Stopped. Good. Worst sound there is." |
+| `Oliver_Felled_Shirogane` | `BossFelled` | Reactive, once | `felled = Shirogane` | **Oliver:** "Clean. ...I sit with her bell, some nights. It's quiet." |
+| `Oliver_Felled_Any` | `BossFelled` | Repeatable | none | **Oliver:** "Down. Check the sword." |
+
+### `SoulHub` (in the temple, after a run he mostly held his element)
+
+| id | Tier | Requires | Lines |
+|---|---|---|---|
+| `Oliver_Hub_First` | Story, once | `lastRunElement = Steel` | **Oliver:** "Sword's on the floor again. It's damp in here. I've sat on most of it." |
+| `Oliver_Hub_Sleep` | Story, once | `lastRunElement = Steel`, `runs ≥ 6` | **Oliver:** "You don't sleep."<br>**Oni:** "...I play."<br>**Oliver:** "I know. I sleep through it." |
+| `Oliver_Hub_Anvil` | Story, once | `lastRunElement = Steel`, `seen Oliver_Meet_Cold` | **Oni:** "You hauled an anvil up here. You can't forge."<br>**Oliver:** "No." |
+| `Oliver_Hub_Name` | Reactive, once | `lastRunElement = Steel`, `seen Oliver_Meet_Rack` | **Oni:** "Oliver."<br>**Oliver:** "..."<br>**Oni:** "...Cat."<br>**Oliver:** "What." |
+| `Oliver_Hub_Kagetsune` | Reactive | `lastRunElement = Steel`, `lastKiller = Kagetsune`, `runsSince Oliver_Hub_Kagetsune ≥ 4` | **Oliver:** "Felt that from the shoulder. Sit down." |
+| `Oliver_Hub_Rest` | Repeatable | `lastRunElement = Steel` | **Oliver:** "Off. That's mine." |
+
+### Crossovers
+
+Lines with the other characters. `Oliver_Cut_Asagi` is the one place "He isn't wrong, dear." gets said. `Oliver_Cut_Pat`
+holds the first of his two purrs; the second isn't spent. `Benibana_Intro_Steel` is a `BossIntro` line like her other
+`holds` lines, and it's here, not in her file, until he's in game. The last four are the `Of Steel` column of the
+jealousy table in [Souls.md](Souls.md#rivalries-and-jealousy).
+
+| id | Event | Tier | Requires | Lines |
+|---|---|---|---|---|
+| `Oliver_Cut_Door` | `SoulPickup` | Reactive, once | `holds Fire`, `seen Akagane_Meet_Doors`, `seen Oliver_Meet_Box` | **Akagane:** "That hall had one way out, and I set my men on it. How does an animal get past the vanguard?"<br>**Oliver:** "Door."<br>**Akagane:** "Which door?"<br>**Oliver:** "Yours. They were facing out."<br>**Akagane:** "..." |
+| `Oliver_Cut_Held` | `SoulPickup` | Reactive, once | `holds Fire`, `seen Oliver_Cut_Door`, `runsSince Oliver_Cut_Door ≥ 2` | **Akagane:** "That's one of mine under your hand, cat. Get off him."<br>**Oliver:** "He's holding something."<br>**Akagane:** "Holding what?"<br>**Oliver:** "Look at his hands."<br>**Akagane:** "...The door. He's still holding the door."<br>**Akagane:** "Give him to the Guardsman. Carefully." |
+| `Oliver_Cut_Cough` | `SoulPickup` | Reactive, once | `holds Fire`, `seen Oliver_Meet_Enormous` | **Oliver:** "Good plate, under the paint."<br>**Akagane:** "A boy half my age fitted it. Told me to stand still. Me."<br>**Oliver:** "You moved."<br>**Akagane:** "...What became of him? A cough, they said."<br>**Oliver:** "They said." |
+| `Oliver_Cut_Feed` | `SoulPickup` | Reactive, once | `holds Frost`, `seen Oliver_Meet_Enormous` | **Mizore:** "I told him he'd die on the road. He said there was a cat to feed."<br>**Oliver:** "You said stay in bed."<br>**Mizore:** "I did."<br>**Oliver:** "You were right."<br>**Mizore:** "It doesn't help." |
+| `Oliver_Cut_True` | `SoulPickup` | Reactive, once | `holds Storm`, `seen Hibiki_Meet_OneBell`, `seen Oliver_Meet_Box` | **Oliver:** "Noise."<br>**Hibiki:** "What? I didn't even say anything yet!"<br>**Oliver:** "Your village. I heard it from inside. Rang true, that one. Only thing in there that does."<br>**Hibiki:** "..." |
+| `Oliver_Cut_Pat` | `SoulPickup` | Reactive, once | `holds Storm`, `seen Oliver_Meet_Seventh`, `seen Duo_LightningRod_Taps` | **Hibiki:** "Got him! Oni, I got him, my hand's on his head! ...Oni. Uncle Cat's purring."<br>**Oliver:** "Bellows."<br>**Hibiki:** "There's no bellows here!"<br>**Oliver:** "Bad one." |
+| `Oliver_Cut_Asagi` | `SoulPickup` | Reactive, once | `holds Water`, `seen Oliver_Meet_Rack`, `seen Asagi_Meet_Fry` | **Oni:** "The thing on the rack. You knew."<br>**Asagi:** "Since your second death, dear. He sat up there and watched me pull you out."<br>**Oni:** "You didn't say."<br>**Asagi:** "You didn't ask, little fry."<br>**Oliver:** "Fish."<br>**Asagi:** "He isn't wrong, dear." |
+| `Oliver_Cut_Wash` | `SoulPickup` | Reactive, once | `holds Water`, `seen Oliver_Meet_Doll` | **Asagi:** "That little man on your belt could do with a rinse, dear. I've clean water."<br>**Oliver:** "..."<br>**Asagi:** "...No. Of course not. Forgive an old fish, little loaf." |
+| `Oliver_Poguru` | `SoulPickup` | Reactive, once | `seen Oliver_Meet_Rack` | **Poguru:** "Oni! That's a big kitty! And he's on my NEST!"<br>**Oliver:** "Mine."<br>**Poguru:** "It's MY nest! ...Is it damp for you too?"<br>**Oliver:** "Damp."<br>**Poguru:** "IT'S SO DAMP! Oni, he GETS it!" |
+| `Oliver_Poguru_Rota` | `SoulPickup` | Reactive, once | `seen Oliver_Poguru`, `seen Asagi_Poguru`, `seen Mizore_Poguru` | **Poguru:** "A big kitty, a fish in a bowl AND a bird granny, all in one temple. Who's doing the ROTA?"<br>**Oliver:** "..."<br>**Poguru:** "He looked at the bowl. He looked at the bird. Oni, he's doing the rota in his HEAD." |
+| `Oliver_Poguru_Pinned` | `SoulPickup` | Reactive, once | `seen Oliver_Poguru`, `runsSince Oliver_Poguru ≥ 3` | **Poguru:** "Oni? Oni. I'm under a glove."<br>**Oliver:** "...Moth."<br>**Poguru:** "Why am I under a glove?"<br>**Oliver:** "How'd that get there."<br>**Poguru:** "YOU PUT ME HERE!" |
+| `Benibana_Intro_Steel` | `BossIntro` | Reactive, once | `holds Steel`, `seen Oliver_Meet_Box` | **Benibana:** "Forge heat, and cat. He was in the box that night, shepherd, asleep through my whole dance."<br>**Benibana:** "A thousand watched me, and you had to be cut loose. He walked out, and nobody had offered him a thing." |
+| `Akagane_Jealous_Steel` | `SoulJealous` | Repeatable | `most = Steel` | **Akagane:** "Walls. I had a wall. I had it facing the wrong way." |
+| `Mizore_Jealous_Steel` | `SoulJealous` | Repeatable | `most = Steel` | **Mizore:** "A patch isn't a treatment." |
+| `Hibiki_Jealous_Steel` | `SoulJealous` | Repeatable | `most = Steel` | **Hibiki:** "Uncle Cat won't even let me pat him!" |
+| `Asagi_Jealous_Steel` | `SoulJealous` | Repeatable | `most = Steel` | **Asagi:** "All that iron, dear. You'll sink." |
+
+### Suggestions for the bosses' files
+
+Each of these bosses has `holds` lines at `BossIntro`, so they'd go in the same way once Steel exists. They aren't in the
+tables or `LINES`; take them if you like them.
+
+- **Shirogane**, `holds Steel`: "Jūsuke's cat. I can smell the forge on you. He'll tell you what I told you, in fewer words."
+- **Utsusemi**, `seen Oliver_Meet_Box`: "One set of paws on the armor, at night. No bell to match. The animal is on my count. Tick... tock..." It never lies, so this is the nearest the armor comes to knowing; keep it from reaching Kagetsune.
+- **Kagetsune**, `holds Steel`: the forge line already in [Souls.md](Souls.md#suggested-lines-for-other-files). It must stay about the heat, never the cat.
+
 ## Arc across runs
 
-A planned chain, one chapter a run; the dialogue pass writes the tables. **He unlocks at the weapon rack**, on the
+A planned chain, one chapter a run; the lines are in [Lines](#lines). **He unlocks at the weapon rack**, on the
 wake after Asagi is met (`seen Asagi_Meet_Pool`, `deaths ≥ 10`), so the two arrive together, with her first: Oni climbs out of the pool and finds his katana on the floor
 and something very large asleep on the rack's platform.
 
 1. **The rack** (`Oliver_Meet_Rack`, the hub): "His." Oni's sword, a stranger's claim, and the first soul dropped at his
    feet.
-2. **The draft:** he mends Oni's walls and insults them. The doll's first opinions.
+2. **The draft** (`Oliver_Meet_Draft`): he mends Oni's walls and insults them. The doll's first opinions.
 3. **The box** (`Oliver_Meet_Box`): how he got in. Told as a complaint.
-4. **The enormous man** (needs `seen Mizore_Meet_Smiths`): Mizore mentions the patient she could lift with one arm.
+4. **The enormous man** (`Oliver_Meet_Enormous`, needs `seen Mizore_Meet_Smiths`): Mizore mentions the patient she could lift with one arm.
    Oliver doesn't discuss it. The player sees what the body is.
 5. **The bell** (`Oliver_Meet_Bell`): Oni finally asks about the collar. A test piece, a joke, the first one poured.
    "Doesn't ring. That's the point of it."

@@ -224,10 +224,10 @@ Each entry: the bond, from each side where they differ; the shared fact; the con
 | Mizore – Hibiki | The old woman who held the girl's wrist and counted her pulse to the end. The gentlest pair; only Hibiki could make Mizore laugh. | Duo **Superconductor** (`Duo_Superconductor_First`, `_Count`, `_Again`), `Mizore_Jealous_Hibiki`, `Hibiki_Jealous_Mizore`, `Mizore_Cut_Hibiki`, `Mizore_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsFrost` |
 | Asagi – Mizore | Teacher and student: the girl climbed the hill at twelve and was taught for six years, then went to the palace and never came back up. Warm against cold, the same medicine two ways. | Duo **Black Ice** (`Duo_BlackIce_First`, `_Hill`, `_Again`), `Asagi_Meet_Sleet`, `Asagi_Jealous_Mizore`, `Mizore_Jealous_Asagi`, `Asagi_Cut_Mizore`, `Asagi_Pickup_HoldsFrost`, `Mizore_Pickup_HoldsWater` |
 | Asagi – Akagane | "Carp." "Koi." He wants her out of his fire; she wets the enemy first. She calls him "little kettle" and he hates it. | Duo **Scalding Steam** (`Duo_ScaldingSteam_First`, `_Kettle`, `_Again`), `Asagi_Jealous_Akagane`, `Akagane_Jealous_Asagi`, `Asagi_Pickup_HoldsFire`, `Akagane_Pickup_HoldsWater` |
-| Oliver – Akagane | Planned. "Lacquer"; "cat". He wore armor off that anvil, fitted by a man half his age, and never asked what killed him. Oliver walked out through the doors his men held, and drops those men at Oni's feet still holding them. | Duo **Red-Hot Iron** (planned, unwritten) |
-| Oliver – Mizore | Planned. "Cold Hands"; "the cat". She could lift Jūsuke with one arm and knows the body is a memory, and she says "...Yes. I suppose he was." She told him to stay in bed; he went home to the cat. She knows the word he said in the fever, and won't say it. | Duo **Quenching** (planned, unwritten); sample line in Oliver.md |
-| Oliver – Hibiki | Planned. "Noise"; "Uncle Cat". She tries to pat him. Once she taps three on his anvil, and never again. He tells her once her village rings true. She gets one of his two purrs. Nobody says who tapped at the dawn. | Duo **Lightning Rod** (planned, unwritten) |
-| Oliver – Asagi | Planned. "Fish"; "little loaf". Oni meets them a wake apart, and they've watched each other for ten deaths. He watches the bowl. She offered to wash the doll, once, and washing is what killed him. He has sat on everything but her flat stone. | Duo **Rust** (planned, unwritten) |
+| Oliver – Akagane | Planned. "Lacquer"; "cat". He wore armor off that anvil, fitted by a man half his age, and never asked what killed him. Oliver walked out through the doors his men held, and drops those men at Oni's feet still holding them. | Duo **Red-Hot Iron** (planned; written in Souls.md, not in game) |
+| Oliver – Mizore | Planned. "Cold Hands"; "the cat". She could lift Jūsuke with one arm and knows the body is a memory, and she says "...Yes. I suppose he was." She told him to stay in bed; he went home to the cat. She knows the word he said in the fever, and won't say it. | Duo **Quenching** (planned; written in Souls.md, not in game); sample line in Oliver.md |
+| Oliver – Hibiki | Planned. "Noise"; "Uncle Cat". She tries to pat him. Once she taps three on his anvil, and never again. He tells her once her village rings true. She gets one of his two purrs. Nobody says who tapped at the dawn. | Duo **Lightning Rod** (planned; written in Souls.md, not in game) |
+| Oliver – Asagi | Planned. "Fish"; "little loaf". Oni meets them a wake apart, and they've watched each other for ten deaths. He watches the bowl. She offered to wash the doll, once, and washing is what killed him. He has sat on everything but her flat stone. | Duo **Rust** (planned; written in Souls.md, not in game) |
 | Asagi – Hibiki | Asagi heard the girl's festival drum from her pond every summer. Hibiki adores her on sight and gets the "Great-Grandmother" Mizore refused her. | Duo **Thunder Rain** (`Duo_ThunderRain_First`, `_Festival`, `_Again`), `Asagi_Jealous_Hibiki`, `Hibiki_Jealous_Asagi`, `Asagi_Cut_Hibiki`, `Asagi_Pickup_HoldsStorm`, `Hibiki_Pickup_HoldsWater` |
 
 Jealousy, at a glance: Akagane is jealous of Hibiki most (a village girl's speed over the vanguard's fire), Mizore
@@ -295,8 +295,8 @@ lines like these.
    (Doors, Prince, Blame are the heaviest beats of his guilt arc).
 6. **Kagetsune about Kuon and Poguru.** Carried: `Kagetsune_Intro_Kuon` ("It bit me.") and `Kagetsune_Intro_Spark`
    (Poguru is a spark of the armor's own fire that ran with Oni), answered at the nest by `Poguru_Talk_Spark`.
-7. **Oliver: everything.** Nothing is voiced or in game, and the other cast files don't list him yet. Worth writing
-   first:
+7. **Oliver: everything.** His lines are now written in [Oliver.md](Oliver.md) and the Duos in [Souls.md](Souls.md), but
+   nothing is voiced or in game, and the other cast files don't list him yet. What they had to carry:
    - Hibiki's three taps on the anvil ("Don't."), and "Rang true, that one." about her village.
    - Mizore on the word Jūsuke said in the fever, and the enormous man (`seen Mizore_Meet_Smiths`).
    - Asagi and the flat stone, the doll (she asks once, and it isn't asked again), and her naming the rack: he'd been

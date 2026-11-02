@@ -92,7 +92,7 @@ Code names differ from screen names: `Element.Fire` = Fire, `Element.Water` = Fr
 | **Thunder Rain** | Hibiki + Asagi | Asagi heard the girl's festival drum from her pond every summer. Hibiki adores her on sight. |
 | **Red-Hot Iron** (planned) | Akagane + Oliver | Akagane wore armor off that anvil and had it lacquered, and Oliver has never let it go. Fire on iron is the one use of his fire Oliver won't call wasted, and he won't say that either. |
 | **Quenching** (planned) | Mizore + Oliver | A quench is how the ash took him, and she's the one who told the master to stay in bed. "Cold Hands" knows when to stop, which is all a quench is. She doesn't mention the size of the man. |
-| **Lightning Rod** (planned) | Hibiki + Oliver | He stands still and she strikes up the lane when his wall is chipped. It's the only time she's glad of something that doesn't move, and she pats it. Her three taps on his anvil stay unspoken. |
+| **Lightning Rod** (planned) | Hibiki + Oliver | He stands still and she strikes up the lane when his wall is chipped. It's the only time she's glad of something that doesn't move, and she pats it. Her three taps on his anvil come once (`Duo_LightningRod_Taps`), and neither of them ever says what they mean. |
 | **Rust** (planned) | Asagi + Oliver | The worst word he knows, and it's her water doing it, so he'll allow it on someone else's iron. She offered to wash the doll once, and neither of them is going to raise it here. "Fish." "Yes, dear." |
 
 ### Rivalries and jealousy
@@ -118,9 +118,8 @@ to it, and only Jūsuke ever said it right.
 
 ## Duo conversations
 
-The same conversation plays whichever soul offers the Duo. Each line's speaker swaps the bust. Steel's four aren't
-written yet; build them from the bonds above, as `Duo_RedHotIron_*`, `Duo_Quenching_*`, `Duo_LightningRod_*` and
-`Duo_Rust_*`, each with a `_First`, a later chapter and an `_Again`.
+The same conversation plays whichever soul offers the Duo. Each line's speaker swaps the bust. Steel's four, the last
+twelve rows, are planned and unvoiced like the rest of him.
 
 | id | Tier | Requires | Lines |
 |---|---|---|---|
@@ -142,6 +141,18 @@ written yet; build them from the bonds above, as `Duo_RedHotIron_*`, `Duo_Quench
 | `Duo_ThunderRain_First` | Story, once | offers `ThunderRain` | **Hibiki:** "Great-Grandmother! Water and lightning! Is that safe?"<br>**Asagi:** "Not for them, dear."<br>**Hibiki:** "...I like her, Oni." |
 | `Duo_ThunderRain_Festival` | Story, once | offers `ThunderRain`, `seen Duo_ThunderRain_First`, `runsSince Duo_ThunderRain_First ≥ 2` | **Asagi:** "There was a girl in the valley who drummed at the summer festival. I could hear it from the pond, every year."<br>**Hibiki:** "...That was me. That was ME!"<br>**Asagi:** "I know, dear. You were always a little fast." |
 | `Duo_ThunderRain_Again` | Repeatable | offers `ThunderRain` | **Hibiki:** "Rain and thunder!"<br>**Asagi:** "Wet first. Then loud." |
+| `Duo_RedHotIron_First` | Story, once | offers `RedHotIron` | **Akagane:** "Your scrap, my fire. Red-hot iron, cat. Go on. Tell me that smells wasted."<br>**Oliver:** "..."<br>**Akagane:** "Nothing? Hm. I'll take that."<br>**Oliver:** "Lacquer."<br>**Akagane:** "...There it is." |
+| `Duo_RedHotIron_Shoulder` | Story, once | offers `RedHotIron`, `seen Duo_RedHotIron_First`, `runsSince Duo_RedHotIron_First ≥ 2`, `seen Oliver_Ahead_Kagetsune` | **Akagane:** "My bell hangs on his right shoulder. You sleep on one of them. Which is the good one?"<br>**Oliver:** "The warm one."<br>**Akagane:** "Which one is that, cat?"<br>**Oliver:** "..."<br>**Akagane:** "...That animal. Burn them, Guardsman." |
+| `Duo_RedHotIron_Again` | Repeatable | offers `RedHotIron` | **Akagane:** "Heat it."<br>**Oliver:** "Don't waste it." |
+| `Duo_Quenching_First` | Story, once | offers `Quenching` | **Mizore:** "Cold on hot iron. A moment too long and it cracks."<br>**Oliver:** "Cold Hands knows when to stop."<br>**Mizore:** "Was that a compliment?"<br>**Oliver:** "It rang." |
+| `Duo_Quenching_Word` | Story, once | offers `Quenching`, `seen Duo_Quenching_First`, `runsSince Duo_Quenching_First ≥ 2`, `seen Oliver_Meet_Enormous` | **Mizore:** "He said a word, in that last fever. Over and over. I took it for raving."<br>**Oliver:** "..."<br>**Mizore:** "I know what it was now. I know how it's said. I won't say it. It isn't mine."<br>**Oliver:** "No." |
+| `Duo_Quenching_Again` | Repeatable | offers `Quenching` | **Mizore:** "Hot, then cold."<br>**Oliver:** "Stop when it rings." |
+| `Duo_LightningRod_First` | Story, once | offers `LightningRod` | **Hibiki:** "Uncle Cat! You stand still, they chip your wall, and I go right up the lane at them! Ba-dum!"<br>**Oliver:** "Noise."<br>**Hibiki:** "I never liked anything that stayed put before. Good wall. Good, good wall."<br>**Oliver:** "You're patting it."<br>**Hibiki:** "I'm patting it!" |
+| `Duo_LightningRod_Taps` | Story, once | offers `LightningRod`, `seen Duo_LightningRod_First`, `runsSince Duo_LightningRod_First ≥ 2`, `seen Oliver_Meet_Box` | **Hibiki:** "Your little anvil's got a lovely note, Uncle Cat! Listen! Tok, tok, tok"<br>**Oliver:** "Don't."<br>**Hibiki:** "I only"<br>**Oliver:** "Don't."<br>**Hibiki:** "...Okay." |
+| `Duo_LightningRod_Again` | Repeatable | offers `LightningRod` | **Hibiki:** "Stay there, Uncle Cat!"<br>**Oliver:** "Wasn't going anywhere." |
+| `Duo_Rust_First` | Story, once | offers `Rust` | **Asagi:** "Leave a little of my water on old iron overnight, little loaf, and see what you've got."<br>**Oliver:** "Rust."<br>**Asagi:** "On theirs, dear. Not on yours."<br>**Oliver:** "...On theirs. Fish."<br>**Asagi:** "Yes, dear." |
+| `Duo_Rust_Stone` | Story, once | offers `Rust`, `seen Duo_Rust_First`, `runsSince Duo_Rust_First ≥ 2`, `seen Asagi_Meet_Flute` | **Asagi:** "You've sat on the altar, dear, and the woodpile, and the little dragon's nest. You've sat on my gourd."<br>**Oliver:** "Mine now."<br>**Asagi:** "Everything in the temple, I should think. Nearly."<br>**Oliver:** "Smells kept."<br>**Asagi:** "...Yes, dear." |
+| `Duo_Rust_Again` | Repeatable | offers `Rust` | **Asagi:** "A little water, little loaf."<br>**Oliver:** "Not on mine." |
 
 ---
 
@@ -287,7 +298,8 @@ gen, `Assets/Art/Portraits/Soul_<Fire|Water|Lightning>_Painted.png`); in play th
   doesn't rename anything.
 - **Voices, designed:** `AKAGANE`, `MIZORE`, `HIBIKI`, `ASAGI` in `Tools/generate-voice.mjs` (Akagane's made angrier,
   with a Japanese accent; Asagi's given a glassy ring in `FX`, and no coffin echo, since she was never in it). Every
-  `SoulPickup` line is voiced; Duo, Legendary and the other events still need theirs.
+  `SoulPickup` line is voiced; Duo, Legendary and the other events still need theirs. `OLIVER` is still a `TODO`: his lines
+  are written in `LINES` and held out of a bare `npm run voice` until a voice is picked.
 - **Lines:** add `LINES` entries in the existing form, with bracketed delivery tags:
   `Akagane_Meet_Angry_2: [AKAGANE, "[dry, gruff] Angry. Yes. That's the word for it. [low] Hello, Guardsman."]`.
   Duo lines take the speaking soul's voice per line. Then `npm run voice -- <names>` from `Tools/`.

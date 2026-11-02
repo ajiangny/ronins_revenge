@@ -50,16 +50,14 @@ public partial class GameManager
                 new SafeArea.Station { kind = StationKind.Oliver, label = "OLIVER", spot = new Vector2(0.8168f, 0.3238f), propAt = new Vector2(562f, 242f),
                     placeholder = new Color(0.878f, 0.659f, 0.227f), footprint = new Vector2(2.6f, 0.7f), reach = 1.8f },
             },
-            // The ghost-fire on the left, and the two stone lanterns at the dais, lit.
+            // The two stone lanterns at the dais, lit.
             lamps = new[]
             {
-                new SafeArea.Lamp { px = new Vector2(100f, 147f), colour = new Color(0.45f, 1f, 0.9f, 0.2f), radius = 2.6f },
                 new SafeArea.Lamp { px = new Vector2(120f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
                 new SafeArea.Lamp { px = new Vector2(242f, 224f), colour = new Color(1f, 0.65f, 0.35f, 0.28f), radius = 2.2f },
             },
-            // The ghost-fire on the left, lifted off the map so it flickers; the right one's gone, since it hung over Oliver's
-            // head and his name. The pool is left to the souls.
-            spirits = new[] { new Vector2(100f, 154f) },
+            // No ghost-fires: the pool is left to the souls.
+            spirits = new Vector2[0],
             // The gate's doorway, whose leaves swing open as he comes up; past its threshold he's under its beam and
             // roof (raised off the map's top, so he stays hidden walking out of view) and between its posts.
             gateDoors = new Rect(309f, 58f, 70f, 50f),

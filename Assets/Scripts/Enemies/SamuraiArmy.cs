@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class SamuraiArmy : MonoBehaviour
+public partial class SamuraiArmy : MonoBehaviour
 {
     [Header("Inscribed")]
     [FormerlySerializedAs("alienPrefab")] public Samurai samuraiPrefab;
@@ -238,7 +238,7 @@ public class SamuraiArmy : MonoBehaviour
         shownFrost = 0f;
         spawnTopY = config.topRowY;
 
-        float spacingX = Mathf.Min(maxSpacingX, 0.6f * 2f * HalfWidth() / Mathf.Max(1, config.columns - 1));
+        float spacingX = SpacingFor(config);
         // The formation starts with its front rank just above the view, then MarchIn brings it down to its slots.
         float frontRowY = config.topRowY - (config.rows - 1) * spacingY;
         entryOffset = aboveView ? Mathf.Max(0f, CameraShake.Center.y + cam.orthographicSize + entryMargin + samuraiRadius - frontRowY) : 0f;
@@ -247,17 +247,21 @@ public class SamuraiArmy : MonoBehaviour
         {
             for (int row = 0; row < config.rows; row++)
             {
-                Vector3 position = new Vector3((col - (config.columns - 1) / 2f) * spacingX, config.topRowY - row * spacingY + entryOffset, 0);
+                if (!HasSlot(config, col, row)) continue;
+                Vector3 position = new Vector3(SlotX(config, col, row, spacingX), config.topRowY - row * spacingY + entryOffset, 0);
                 Samurai soldier = Instantiate(samuraiPrefab, position, Quaternion.identity, transform);
                 SamuraiKind kind = KindForRow(config, row);
                 soldier.StandIn = OwnArt(kind) == null;
                 soldier.Init(this, col, PointsFor(kind, row), config.samuraiColor, ArtFor(kind), kind,
                     kind == SamuraiKind.Taisho ? taishoHealth : kind == SamuraiKind.Shieldbearer ? shieldHealth
                     : kind == SamuraiKind.Bellringer ? bellHealth : 1);
+                soldier.Row = row;
+                soldier.HomeY = config.topRowY - row * spacingY;
                 soldier.SetTouchable(false);
                 soldiers.Add(soldier);
             }
         }
+        Promote(config);
         startingCount = soldiers.Count;
         samuraiCounter.SetCount(soldiers.Count);
     }
@@ -626,6 +630,7 @@ public class SamuraiArmy : MonoBehaviour
         {
             ThrowSpear();
         }
+        UpdateElite();
         UpdateBells();
         if (level.diveInterval > 0 && Time.time >= nextDiveTime)
         {

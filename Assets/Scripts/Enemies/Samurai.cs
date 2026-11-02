@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Samurai : MonoBehaviour, IHittable
+public partial class Samurai : MonoBehaviour, IHittable
 {
     static readonly Color FrostColor = new Color(0.55f, 0.8f, 1f);
     // Encased samurai are drawn fully icy with a pale halo, so they stand out from the army's lighter frost tint.
@@ -116,7 +116,7 @@ public class Samurai : MonoBehaviour, IHittable
     // bellringer bronze and a yurei a stronger cyan, so each still reads apart from the archers.
     public bool StandIn { get; set; }
 
-    public void Fire(float arrowSpeed)
+    public void Fire(float arrowSpeed, ShotMods mods = default)
     {
         if (Kind == SamuraiKind.Shieldbearer || Kind == SamuraiKind.Bellringer) return;
         if (Jolted)
@@ -366,6 +366,7 @@ public class Samurai : MonoBehaviour, IHittable
     void Update()
     {
         UpdateAlert();
+        UpdateBurn();
         // A status wearing off retints once (Burning and Jolted ones flicker while they last); a ghost's body breathes in and out
         // of sight, slowly, each on its own beat.
         if ((shownStatus != StatusMask || Jolted || Burning || Cracked) && !IsDead) SetFrost(frost);
@@ -513,4 +514,13 @@ public class Samurai : MonoBehaviour, IHittable
             Destroy(gameObject);
         }
     }
+}
+
+// What one army shot is rolled with (SamuraiArmy.FireShot): a faster arrow, a shielded one that takes `toughness`
+// cuts, or a guarded one that only a parry stops. Default is a plain arrow.
+public struct ShotMods
+{
+    public float speed;
+    public int toughness;
+    public bool guarded;
 }

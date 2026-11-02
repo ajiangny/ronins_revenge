@@ -31,6 +31,8 @@ public class Arrow : MonoBehaviour
     public Color Color => art.color;
     // A Taisho's spear: slashes and arrows break on it and it cuts through cover, so it can only be dodged or parried.
     public bool Unbreakable { get; private set; }
+    // Unbreakable but still stopped by the courtyard blockers (an army's guarded arrow, Guard).
+    public bool BreaksOnCover { get; private set; }
     // What it counts as if it lands the last blow (Save.EndRun).
     public DeathCause Cause { get; set; } = DeathCause.Arrow;
     // The boss attack that fired it (Boss.Attack, stamped in Boss.Shoot), null for the army's.
@@ -135,6 +137,13 @@ public class Arrow : MonoBehaviour
         {
             capsule.height = Mathf.Max(capsule.radius * 2f, length / capsule.transform.lossyScale.y);
         }
+    }
+
+    // A guarded army arrow: slashes break on it like a spear, but unlike a spear it still breaks on cover.
+    public void Guard()
+    {
+        Unbreakable = true;
+        BreaksOnCover = true;
     }
 
     // Unbreakable in its own look, for a boss shot that draws itself (Utsusemi's hour cleave).

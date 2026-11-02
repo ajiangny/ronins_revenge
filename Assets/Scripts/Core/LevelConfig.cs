@@ -26,8 +26,31 @@ public class LevelConfig
     [Range(0, 1)] public float aimedShotChance = 0.25f;
     [FormerlySerializedAs("bulletSpeed")] public float arrowSpeed = 7f;
 
+    [Tooltip("Extra army shots: this many shooters from different columns loose together. 1 means one at a time.")]
+    public int volley = 1;
+    [Tooltip("Chance that an army arrow flies faster than arrowSpeed.")]
+    [Range(0, 1)] public float fastArrowChance;
+    [Tooltip("Chance that an army arrow is shielded and takes an extra cut to break.")]
+    [Range(0, 1)] public float toughArrowChance;
+    [Tooltip("Chance that an army arrow is guarded: it can't be cut, only parried, dodged or stopped by cover.")]
+    [Range(0, 1)] public float guardedArrowChance;
+
+    [Tooltip("How the formation is laid out.")]
+    public FormationShape shape = FormationShape.Grid;
+    [Tooltip("Squads shape: how many separate blocks the columns split into.")]
+    public int squads = 1;
+    [Tooltip("Squads shape: extra gap between blocks, in column spacings.")]
+    public float squadGap = 1f;
+    [Tooltip("Hit points per row from the top; 0 or rows past the end keep the kind's own.")]
+    public int[] rowHealth;
+    [Tooltip("Hit points of the round's one Elite. 0 means no Elite.")]
+    public int eliteHealth;
+
     [FormerlySerializedAs("alienColor")] public Color samuraiColor = new Color(0f, 0.98f, 0.6f);
 
-    // A copy to tune for one round (the oaths) without touching the stage's own; rowKinds is shared, read-only.
+    // A copy to tune for one round (the oaths) without touching the stage's own; rowKinds and rowHealth are shared, read-only.
     public LevelConfig Clone() => (LevelConfig)MemberwiseClone();
 }
+
+// How SamuraiArmy lays out a round's slots (SamuraiArmy.Formation.cs).
+public enum FormationShape { Grid, Staggered, Squads, Wedge }

@@ -97,6 +97,16 @@ public partial class BoonEffects
         Sfx.Play(Sfx.BlockerBreak, 0.8f, 0.7f);
     }
 
+    // Shrapnel: his cover broke under a hit, so it bursts. Halved against a warlord or Kuon, rounded up, since Benibana
+    // has only 70 health. Blocker.Broken doesn't fire for what Steel built, so this can't feed itself.
+    public void OnCoverBroken(Vector3 position)
+    {
+        if (!loadout.Has(BoonId.Shrapnel, out float shards)) return;
+        int count = BossFight ? ((int)shards + 1) / 2 : (int)shards;
+        for (int i = 0; i < count; i++) ronin.LaunchSteelShard(position, ronin.RiposteTarget);
+        Fx.Play(Fx.Impact, position, Statuses.SeamColor, 1.2f);
+    }
+
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
     // pays at most once per BossCrackCooldown.
     void PayBossCrack(Boss boss, Vector3 point, KillSource source)

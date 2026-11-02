@@ -230,7 +230,9 @@ public partial class GameManager
 
     void OnBlockerBroken(Vector3 position)
     {
-        if (state != State.Playing || tutorial.Active || Random.value >= heartDropChance) return;
+        if (state != State.Playing || tutorial.Active) return;
+        effects.OnCoverBroken(position);
+        if (Random.value >= heartDropChance) return;
         Heart.Spawn(position, ui.LifeIcon, ronin, CanHeal, OnHeartCollected);
     }
 

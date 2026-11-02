@@ -382,6 +382,10 @@ public static class Boons
             Description = "Your <b>Slash</b> passes through your own cover, wearing it down, and pierces one samurai.",
             StatLabel = "Cover spared:", Values = new[] { 0.15f, 0.3f, 0.45f }, Format = Percent,
             LevelStep = 0.08f, Max = 0.6f },
+        new BoonDefinition { Id = BoonId.Shrapnel, Element = Element.Steel, Slot = BoonSlot.Passive, Name = "Shrapnel",
+            Description = "When your cover breaks, it bursts into homing steel <b>Shards</b>.",
+            StatLabel = "Shards:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 5f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,

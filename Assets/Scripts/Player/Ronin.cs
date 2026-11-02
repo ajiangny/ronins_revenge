@@ -905,6 +905,20 @@ public class Ronin : MonoBehaviour
         shard.FreezeOnHit = freezeSeconds;
     }
 
+    // Shrapnel's shard: homes as an ice shard does, but crosses his cover unchipped, since a shard that chipped the cover
+    // beside it could break it and set off the next burst. An effect, so it sets off nothing.
+    public void LaunchSteelShard(Vector3 from, Func<Transform> picker)
+    {
+        Transform first = picker();
+        Vector3 direction = first != null ? (first.position - from).normalized : Vector3.up;
+        Projectile shard = SpawnProjectile(projectilePrefab, from);
+        shard.Launch(direction, 0.8f, 0, KillSource.Effect, scale: 1.1f, lifetimeMultiplier: 2f);
+        shard.Home(picker);
+        shard.PassesCover = true;
+        shard.Tint(Statuses.CrackColor, Statuses.SeamColor);
+        shard.ParryAura(Statuses.SeamColor);
+    }
+
     void FixedUpdate()
     {
         if (walking) return;

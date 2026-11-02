@@ -228,7 +228,7 @@ again gets the next one. About half draw a word back from Oni: a dry clapback or
 | Shirogane | 3 | `Poguru_Roast_Shirogane` | P: "She beat you with a sword! YOU have a sword! It's practically the same sword!" |
 | Shirogane, in her second phase (Kuon only fights then) | 3 | `Poguru_Roast_ShiroganeWolf` | P: "Even the wolf was winning. The WOLF, Oni. It doesn't have thumbs!" · Oni: "Tch." |
 | Kagetsune's Spirit Hyper Beam (`Kagetsune_SpiritHyperBeam`) | 3 | `Poguru_Roast_KagetsuneBeam` | P: "His big soul beam! The pale rays are SAFE. The teal ones are TOAST!" · Oni: "...Noted." · P: "It's going on my tips page!" |
-| Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! But his hammer is SO big. Like, unfair big." · Oni: "I'll get under it." · P: "Good thing you're short!" |
+| Kagetsune | 3 | `Poguru_Roast_Kagetsune` | P: "So close! Then that hammer came down and the whole mountain jumped. I jumped too!" · Oni: "...Next time I'll move first." · P: "I'll jump first! We'll BOTH be ready!" |
 | Kagetsune | 3 | `Poguru_Roast_KagetsuneBells` | P: "All those bells! I couldn't even hear myself cheer for you!" |
 
 ### Crossovers

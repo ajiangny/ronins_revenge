@@ -174,6 +174,14 @@ public partial class BoonEffects
                 if (target != samurai) target.Soak(value);
             }
         }
+        // The kill sheds nothing itself: the neighbours it cracks pay when Oni cuts them down.
+        if (loadout.Has(BoonId.SteelShadow, out value))
+        {
+            foreach (Samurai target in army.SamuraiWithin(position, IceRadius))
+            {
+                if (target != samurai) target.Crack(value);
+            }
+        }
         if (loadout.Has(BoonId.FrostShadow, out value))
         {
             EncaseOrChill(position, value);
@@ -236,6 +244,8 @@ public partial class BoonEffects
             WashArrows(at, float.MaxValue);
             GreatWave(at, BossFight ? Boss.Centre : army.Centre);
         }
+        // Steel Shadow, above Frost Shadow's early return.
+        if (loadout.Has(BoonId.SteelShadow, out float crack) && (BossFight || army.Remaining > 0)) UnleashSteelShadow(at, crack);
         if (!loadout.Has(BoonId.FrostShadow, out float seconds)) return;
         if (BossFight) foreach (Boss boss in Bosses) FreezeBoss(boss, seconds * 0.5f * loadout.FreezeMultiplier);
         else if (army.Remaining > 0) FreezeArmy(seconds * loadout.FreezeMultiplier);
@@ -294,6 +304,7 @@ public partial class BoonEffects
                 if (Random.value >= CloneBossShare) break;
                 if (loadout.Has(BoonId.PyreShadow, out _)) BossBlast(point, PyreRadius, boss);
                 if (loadout.Has(BoonId.TideShadow, out value)) SoakBoss(boss, point, value);
+                if (loadout.Has(BoonId.SteelShadow, out value)) boss.Crack(value);
                 if (loadout.Has(BoonId.FrostShadow, out value) && !boss.Frozen && Time.time >= nextBossFrost)
                 {
                     nextBossFrost = Time.time + BossFrostCooldown;
@@ -625,6 +636,7 @@ public partial class BoonEffects
                 if (loadout.Has(BoonId.PyreShadow, out _)) WolfBlast(point, PyreRadius);
                 if (WolfFight && loadout.Has(BoonId.StormShadow, out value) && Random.value < value) Strike(point + Vector3.up * 5f, Wolf.Centre, Wolf);
                 if (WolfFight && loadout.Has(BoonId.TideShadow, out value)) Wolf.Soak(value);
+                if (WolfFight && loadout.Has(BoonId.SteelShadow, out value)) Wolf.Crack(value);
                 if (WolfFight && loadout.Has(BoonId.FrostShadow, out _)) Wolf.Chill(Statuses.ChillSeconds);
                 break;
         }

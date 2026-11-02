@@ -374,6 +374,10 @@ public static class Boons
             Description = "A successful <b>Parry</b> rings out and mends the cover nearest you.",
             StatLabel = "Cover mended:", Values = new[] { 1f, 2f, 3f }, Format = Plus,
             LevelStep = 1f, Whole = true, Max = 5f },
+        new BoonDefinition { Id = BoonId.SteelShadow, Element = Element.Steel, Slot = BoonSlot.Ultimate, Name = "Steel Shadow",
+            Description = "Unleashing your <b>Shadow Clone</b> restores all your cover, and its kills <b>Crack</b> their neighbours.",
+            StatLabel = "Crack time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
+            LevelStep = 0.4f, Max = 8f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,

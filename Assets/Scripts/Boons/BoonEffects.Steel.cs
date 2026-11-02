@@ -82,6 +82,21 @@ public partial class BoonEffects
         Sfx.Play(Sfx.BlockerHit, 0.7f, 0.7f);
     }
 
+    // Steel Shadow: the wall comes back whole. Fallen cover is raised only in a round, since in a warlord's fight a new
+    // Blocker would be a beam stop no warning showed; there the unleashing cracks instead.
+    void UnleashSteelShadow(Vector3 at, float crack)
+    {
+        wall.Restore(raise: !BossFight);
+        if (BossFight)
+        {
+            foreach (Boss boss in Bosses) boss.Crack(crack);
+            if (WolfFight) Wolf.Crack(crack);
+        }
+        Fx.Play(Fx.Impact, at, Steel, 1.6f);
+        CameraShake.Add(0.15f);
+        Sfx.Play(Sfx.BlockerBreak, 0.8f, 0.7f);
+    }
+
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
     // pays at most once per BossCrackCooldown.
     void PayBossCrack(Boss boss, Vector3 point, KillSource source)

@@ -377,7 +377,8 @@ public partial class GameManager
             case "Mizore": return SoulSpeaker(name, "The Court Physician", Element.Water, mizoreCloseup, new Vector2(0.72f, 0.18f), 0.95f);
             case "Hibiki": return SoulSpeaker(name, "The Village Drummer", Element.Lightning, hibikiCloseup, new Vector2(0.67f, 0.22f));
             case "Asagi": return SoulSpeaker(name, "The Pond Physician", Element.Tide, asagiCloseup, new Vector2(0.63f, 0.26f), 0.88f);
-            case "Oliver": return SoulSpeaker(name, "The Smith's Cat", Element.Steel, oliverCloseup, new Vector2(0.38f, 0.19f));
+            // Oliver towers: drawn large with his eyes raised, so his ears clear the top of Oni's hair.
+            case "Oliver": return SoulSpeaker(name, "The Smith's Cat", Element.Steel, oliverCloseup, new Vector2(0.38f, 0.19f), 1.15f, 60f);
             // He's small, so his painting is drawn a little smaller than the souls'; his pixel frames stand in without it.
             case "Poguru":
                 return new DialogueScene.Speaker { name = "Poguru", epithet = "The Lost Dragon", colour = PoguruColour, art = poguruCloseup,
@@ -403,7 +404,7 @@ public partial class GameManager
     // `eyes` is where the soul's eyes sit in their close-up, 0-1 across and down; `scale` is their height as a share of
     // ScenePortraitHeight. Below 1 they stand shorter than the screen, their painting's top fading out rather than cut;
     // at 1 they're placed like Oni, drawn screen-tall with the top pushed just off screen.
-    DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes, float scale = 0.83f) => new DialogueScene.Speaker
+    DialogueScene.Speaker SoulSpeaker(string name, string epithet, Element element, Sprite closeup, Vector2 eyes, float scale = 0.83f, float eyeLift = 0f) => new DialogueScene.Speaker
     {
         name = name,
         epithet = epithet,
@@ -412,6 +413,7 @@ public partial class GameManager
         focus = eyes,
         height = ScenePortraitHeight * scale,
         mayStandShort = scale < 1f,
+        eyeLift = eyeLift,
         soulFrames = ArtFor(element)?.soulFrames,
     };
 

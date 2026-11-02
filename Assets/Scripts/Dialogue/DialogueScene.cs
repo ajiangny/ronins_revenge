@@ -26,6 +26,8 @@ public class DialogueScene : MonoBehaviour
         public bool right;
         // Drawn at `height` even when that's shorter than the screen, the painting's cut top feathered away instead.
         public bool mayStandShort;
+        // Raises their eyes above the slot's eye point, for someone who should stand over the one they're talking to.
+        public float eyeLift;
     }
 
     public struct Line
@@ -226,7 +228,7 @@ public class DialogueScene : MonoBehaviour
     {
         slot.owner = who.name;
         float side = who.right ? -1f : 1f;
-        Vector2 eyes = new Vector2(side * EyePoint.x, EyePoint.y);
+        Vector2 eyes = new Vector2(side * EyePoint.x, EyePoint.y + who.eyeLift);
         slot.glow.color = new Color(who.colour.r, who.colour.g, who.colour.b, GlowLit);
         slot.glow.rectTransform.anchoredPosition = eyes + new Vector2(0f, -260f);
         RectTransform art = slot.art.rectTransform;

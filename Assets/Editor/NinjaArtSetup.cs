@@ -461,6 +461,7 @@ public static class NinjaArtSetup
             if (i < layouts.Length) CopyLayout(area, layouts[i]);
             area.FindPropertyRelative("poolWater").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.Water);
             area.FindPropertyRelative("poolRimFront").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.RimFront);
+            area.FindPropertyRelative("roofFront").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(TempleLayers.RoofFront);
             SerializedProperty fires = area.FindPropertyRelative("spiritFrames");
             var fireFrames = new List<Sprite>();
             for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Fx/Temple_GhostFire_{k}.png") is Sprite frame; k++) fireFrames.Add(frame);

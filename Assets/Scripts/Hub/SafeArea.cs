@@ -76,6 +76,8 @@ public class SafeArea : MonoBehaviour
         public Sprite poolWater;
         [Tooltip("The near half of the pool's rim cut out of the map, drawn over his shins while he wades.")]
         public Sprite poolRimFront;
+        [Tooltip("The fallen roof beside the rack's dais cut out of the map (Ninja/Temple/Cut Roof Layer): Oliver stands behind it.")]
+        public Sprite roofFront;
         [Tooltip("A soul rising off the water, played as it drifts up and fades. Empty: a soft glow rises instead.")]
         public Sprite[] poolSouls = new Sprite[0];
         [Tooltip("Asagi's clips, for her station at the pool's rim (Ninja/Apply Maps). Empty draws her as a block of her sea-blue.")]
@@ -243,6 +245,20 @@ public class SafeArea : MonoBehaviour
                 oliverBaseY = at.y;
                 OliverFigure = Oliver.Create(area.oliverArt, transform, at, ronin.ArtPixelSize, order - 1);
                 OliverFigure.gameObject.SetActive(!station.hidden);
+                // The roof hides him rather than being drawn over him, so the map's own roof shows through, as dark as
+                // the moon's shade leaves it. Whatever order he's on, and Oni's, which keeps Oni behind it too.
+                if (area.roofFront != null && mapSpace)
+                {
+                    var roof = new GameObject("RoofFront").AddComponent<SpriteMask>();
+                    roof.transform.SetParent(transform, false);
+                    roof.sprite = area.roofFront;
+                    roof.alphaCutoff = 0.5f;
+                    roof.isCustomRangeActive = true;
+                    roof.backSortingOrder = order - 4;
+                    roof.frontSortingOrder = ronin.SpriteOrder + 5;
+                    roof.transform.position = new Vector3(ground.center.x, ground.center.y, 0f);
+                    roof.transform.localScale = Vector3.one * (ground.size.y / area.roofFront.bounds.size.y);
+                }
                 continue;
             }
             Sprite art = station.isSealed && station.sealedArt != null ? station.sealedArt : station.art;

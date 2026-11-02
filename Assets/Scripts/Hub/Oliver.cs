@@ -107,6 +107,8 @@ public class Oliver : MonoBehaviour
         shadow.transform.localScale = new Vector3(b.size.x * 1.1f / ProceduralSprites.Shadow.bounds.size.x, b.size.x * 0.32f / ProceduralSprites.Shadow.bounds.size.y, 1f);
         glow.transform.localPosition = Vector3.up * (b.size.y * 0.15f);
         glow.transform.localScale = new Vector3(b.size.x * 1.6f / ProceduralSprites.SoftGlow.bounds.size.x, b.size.y * 0.5f / ProceduralSprites.SoftGlow.bounds.size.y, 1f);
+        // The roof beside the dais hides him (SafeArea); his Zs rise over it.
+        body.maskInteraction = glow.maskInteraction = shadow.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
         zs = new SpriteRenderer[SleepZs];
         for (int i = 0; i < SleepZs; i++)
         {

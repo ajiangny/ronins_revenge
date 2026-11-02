@@ -420,6 +420,13 @@ public static class Boons
             StatLabel = "Rank struck:", Values = new[] { 1f, 1f, 1f }, Format = v => "all",
             Requires = l => HoldsAny(l, StrikeBoons) && HoldsAny(l, TideBoons) },
 
+        // Steel's Duos take the older element as Element, so each counts toward that element's Infusion, not Tamahagane.
+        new BoonDefinition { Id = BoonId.Rust, Element = Element.Tide, Partner = Element.Steel, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,
+            Name = "Rust",
+            Description = "Whatever you <b>Soak</b> is <b>Cracked</b> too.",
+            StatLabel = "Soaks that crack:", Values = new[] { 1f, 1f, 1f }, Format = v => "all",
+            Requires = l => HoldsAny(l, TideBoons) && HoldsAny(l, SteelBoons) },
+
         // Legendaries: two core slots of one element.
         new BoonDefinition { Id = BoonId.Wildfire, Element = Element.Fire, Slot = BoonSlot.Passive, Kind = BoonKind.Legendary,
             Name = "Wildfire",

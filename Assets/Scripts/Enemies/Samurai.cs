@@ -289,6 +289,7 @@ public class Samurai : MonoBehaviour, IHittable
         if (IsDead || seconds <= 0f) return;
         bool fresh = !Soaked;
         soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds * Statuses.SoakScale);
+        if (Statuses.Rust) Crack(Statuses.CrackSeconds);
         if (fresh)
         {
             if (Fx.Play(Fx.Splash, transform.position, Color.white, 0.9f) == null) ElementFx.Glow(transform.position, SoakColor, 0.5f, 1.4f, 0.3f);

@@ -675,6 +675,8 @@ public abstract class Boss : MonoBehaviour, IHittable
         if (IsDead || PhaseBreaking || Down || seconds <= 0f) return;
         bool fresh = !Soaked;
         soakedUntil = Mathf.Max(soakedUntil, Time.time + seconds * Statuses.SoakScale);
+        // Above the return, so a soak on what's already wet cracks it too.
+        if (Statuses.Rust) Crack(Statuses.CrackSeconds);
         if (!fresh) return;
         if (Fx.Play(Fx.Splash, Centre, Color.white, 1.4f) == null) ElementFx.Glow(Centre, SoakTint, 0.8f, 2.4f, 0.35f);
         Sfx.Play(Sfx.Splash, 0.8f, 0.85f);

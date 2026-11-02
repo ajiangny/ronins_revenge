@@ -117,7 +117,8 @@ public partial class Samurai : MonoBehaviour, IHittable
     // bellringer bronze and a yurei a stronger cyan, so each still reads apart from the archers.
     public bool StandIn { get; set; }
 
-    public void Fire(float arrowSpeed, ShotMods mods = default)
+    // Looses its shot at the release frame of Samurai.Throw's clip; Fire there is what the army calls.
+    void Loose(float arrowSpeed, ShotMods mods)
     {
         if (Kind == SamuraiKind.Shieldbearer || Kind == SamuraiKind.Bellringer) return;
         if (Jolted)
@@ -145,6 +146,7 @@ public partial class Samurai : MonoBehaviour, IHittable
             List<Arrow> fan = Arrow.Fan(arrowPrefab, muzzle, aim, 3, ArcherSpread, arrowSpeed * 0.9f, life);
             foreach (Arrow arrow in fan)
             {
+                WearShot(arrow);
                 Mark(arrow, chilled, burning);
                 ShieldShot(arrow, mods);
             }
@@ -159,7 +161,9 @@ public partial class Samurai : MonoBehaviour, IHittable
             {
                 arrow.PassesCover = true;
                 arrow.Cause = DeathCause.GhostArrow;
-                arrow.Tint(GhostArrow, GhostGlow);
+                WearShot(arrow);
+                // The spirit arrow's own art is already ghost-pale; only the plain arrow needs the tint.
+                arrow.Tint(art.shot != null ? Color.white : GhostArrow, GhostGlow);
                 ShieldShot(arrow, mods);
             }
             if (mods.guarded) pair[0].Guard();
@@ -179,11 +183,13 @@ public partial class Samurai : MonoBehaviour, IHittable
         {
             Arrow arrow = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             arrow.Launch(aim * arrowSpeed, life);
+            WearShot(arrow);
             Mark(arrow, chilled, burning);
             ShieldShot(arrow, mods);
             if (mods.guarded) arrow.Guard();
         }
-        Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
+        // An archer's string is sharp; a thrown spear is a lower, heavier whoosh.
+        Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 0.8f);
     }
 
     static readonly Color ChilledArrowGlow = new Color(0.6f, 0.9f, 1f, 0.5f);
@@ -205,6 +211,7 @@ public partial class Samurai : MonoBehaviour, IHittable
     // A bellringer lifts its bell: it shudders and glows for a beat before the toll, so the haste can be seen coming.
     public void WarnToll(float seconds)
     {
+        Gesture();
         HitFlash.Flash(animator.Renderer, 0.15f);
         ElementFx.Glow(transform.position, TollColor, 0.6f, 1.6f, seconds, transform);
     }
@@ -222,6 +229,7 @@ public partial class Samurai : MonoBehaviour, IHittable
     // lunge at the ronin, for as long as the warning lasts. It pops in oversized so it catches the eye.
     public void WarnDive(float seconds)
     {
+        if (Kind == SamuraiKind.Shieldbearer) Gesture();
         HitFlash.Flash(animator.Renderer, 0.18f);
         Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.5f, 0.4f), 0.8f);
         Sfx.Play(Sfx.SamuraiCry, 0.7f, 1.2f);
@@ -389,6 +397,7 @@ public partial class Samurai : MonoBehaviour, IHittable
     {
         UpdateAlert();
         UpdateBurn();
+        UpdateThrow();
         // A status wearing off retints once (Burning and Jolted ones flicker while they last); a ghost's body breathes in and out
         // of sight, slowly, each on its own beat.
         if ((shownStatus != StatusMask || Jolted || Burning || Cracked) && !IsDead) SetFrost(frost);
@@ -488,6 +497,7 @@ public partial class Samurai : MonoBehaviour, IHittable
         // A shield turns the blow with a bright spark and a clang instead of a thud.
         if (Kind == SamuraiKind.Shieldbearer)
         {
+            Gesture();
             Fx.Play(Fx.Impact, transform.position + Vector3.down * 0.3f, new Color(0.8f, 0.9f, 1f), 1f);
             Sfx.Play(Sfx.Deflect, 0.7f, 1.2f);
         }

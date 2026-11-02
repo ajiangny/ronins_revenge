@@ -61,6 +61,7 @@ MonoBehaviour:
   marchBeatDistance: 1.2
   spearInterval: 4.5
   taishoHealth: 2
+  fastArrowScale: 1.25
   shieldHealth: 2
   bellringerArt: {fileID: 11400000, guid: 2ab58ebda15d8479fa6115667328309f, type: 2}
   shieldbearerArt: {fileID: 11400000, guid: 11a7b1f7e62ec470ba8b2116257a03af, type: 2}
@@ -68,6 +69,7 @@ MonoBehaviour:
   scoutArt: {fileID: 11400000, guid: bc3301291f93744afad25a525491e5e1, type: 2}
   bellHealth: 2
   bellInterval: 6
+  eliteFireInterval: 2.4
   tollWarning: 0.6
   tollHaste: 2.5
   tollFireScale: 0.5

@@ -215,6 +215,8 @@ public partial class SamuraiArmy : MonoBehaviour
         }
     }
     public bool Frozen => Time.time < frozenUntil;
+    // Marching and shooting: false once the army is cleared or the round is over.
+    public bool Fighting => advancing;
     // How much of the speed-up as the army thins it actually gets (Still Water halves it).
     public float SpeedUpScale { get; set; } = 1f;
 

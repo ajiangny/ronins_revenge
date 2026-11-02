@@ -184,6 +184,19 @@ public class Arrow : MonoBehaviour
         animator.Play(frames, true, null, fps);
     }
 
+    // Draws this shot as a soldier's own missile, pointing down and length world units long. It changes how the shot
+    // looks and nothing it can do: the colour language still says that. A long one's hitbox runs along its shaft.
+    public void Wear(Sprite sprite, float length)
+    {
+        art.sprite = sprite;
+        art.transform.localScale = Vector3.one * (length / sprite.bounds.size.y);
+        if (length > 1.1f && GetComponentInChildren<Collider>() is CapsuleCollider capsule)
+        {
+            capsule.height = length * 0.8f / capsule.transform.lossyScale.y;
+        }
+        Redress();
+    }
+
     // Recolours an ordinary arrow and its halo (a yurei's spirit arrows) without changing its shape or hitbox.
     public void Tint(Color color, Color glowTint)
     {

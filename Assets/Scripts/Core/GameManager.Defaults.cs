@@ -86,15 +86,15 @@ public partial class GameManager
     public static StageConfig[] DefaultStages() => new[]
     {
         // Stage 1 teaches the plain grid: one arrow at a time, no veterans, no shielded or guarded shots.
+        // The first two rounds teach the plain army; the Elite waits for round 3.
         new StageConfig
         {
             name = "The Bamboo Road",
             rounds = new[]
             {
-                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 0.8f,   aimedShotChance = 0.3f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    eliteHealth = 4 },
+                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 0.8f,   aimedShotChance = 0.3f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
                 new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.72f, aimedShotChance = 0.35f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 9f, eliteHealth = 4 },
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 9f },
                 new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.64f, aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true, diveInterval = 7f,
                     shape = FormationShape.Staggered, eliteHealth = 4 },

@@ -6,7 +6,16 @@ public class CharacterArt : ScriptableObject
 {
     [Tooltip("Looping idle, or the two-step march for samurai.")]
     public Sprite[] idle;
+    [Tooltip("A soldier's throw, shot or ring, played once and then back to the march.")]
     public Sprite[] attack;
+    [Tooltip("The attack frame on which a soldier's missile leaves its hand.")]
+    public int attackRelease;
+    [Tooltip("Frames per second for a soldier's attack clip.")]
+    public float attackFps = 14f;
+    [Tooltip("What this soldier throws or shoots, pointing down. Empty: the plain arrow.")]
+    public Sprite shot;
+    [Tooltip("How long that missile is drawn, in world units.")]
+    public float shotLength = 1f;
     public Sprite[] hit;
     public Sprite[] death;
     [Tooltip("The ronin's katana parry stance. Falls back to the attack clip when empty.")]

@@ -30,7 +30,7 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   (`Samurai.HomeY`, set at spawn) and the top of the view; it stays where it lands, so the formation goes ragged; divers
   are skipped, a loose soldier stays loose, and the army stops `holding` once none is left in the last row
   (`AnyAtRow`). `SamuraiArmy.Elite.cs`: `Promote` runs after the spawn and raises the veteran rows (`rowHealth`, an
-  `int[]` by row from the top, 0 keeps the kind's own; only ever raises) and picks the round's one Elite
+  `int[]` by row from the top, 0 keeps the kind's own; only ever raises) and picks the round's one Elite (stage 1 has none until round 3: `eliteHealth` 0)
   (`LevelConfig.eliteHealth`, 0 for none) from the soldiers that can shoot, near the middle of the formation;
   `UpdateElite` (from `FixedUpdate`) fires the Elite's own shot every `eliteFireInterval` (2.4 s average) at 1.1x speed,
   shielded when the stage rolls shields. Volleys: each `FireShot` looses `LevelConfig.volley` shots from columns at
@@ -72,6 +72,13 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `Arrow.Dress` draws it as a `SpriteOutline` edge plus halo; it runs once `Start` has run and again whenever a flag
   changes. `Tint` recolours a plain arrow (the yurei's). Its yari art
   (`Art/Sprites/Projectiles/Spear.png`) reaches it through `Samurai.spearSprite`, wired by `Ninja/Apply Sprite Art`.
+- `Samurai.Throw.cs` — `Fire` plays `CharacterArt.attack` and `Loose` (the old firing body) runs on the clip's `attackRelease`
+  frame, at `attackFps`; picked again mid-clip it looses at once. A windup is dropped if the thrower dies, is encased or
+  frozen, starts a dive, or the army stops (`SamuraiArmy.Fighting`). `Gesture` plays the clip with no missile: a
+  bellringer on `WarnToll`, a shieldbearer when struck or on `WarnDive`. Each kind's missile is `CharacterArt.shot`, drawn
+  by `Arrow.Wear(sprite, length)` (looks only; a long one's hitbox runs along its shaft): `Projectiles/ThrownSpear`
+  (Ashigaru), `WarArrow` (Archer), `GhostArrow` (Yurei). The Taisho keeps `Spear`. `Ninja/Apply Sprite Art` sets all of it
+  in `SamuraiArt`. Art must point down, and the Ashigaru's spear stays free of red, which means parry-only.
 - `SamuraiCounter.cs` — the army's remaining-samurai count; its scene text is hidden by `GameUI`, as the HUD no longer shows it.
 
 ## Mini-enemy: Scout

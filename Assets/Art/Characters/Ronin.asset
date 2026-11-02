@@ -21,6 +21,10 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 4bb4061641662442996589597fbe28f3, type: 3}
   - {fileID: 21300000, guid: 2dab8a80cbbdc4700be8ae8cd9aaf6f1, type: 3}
   - {fileID: 21300000, guid: e615b6653c56048b78320d74cb20d57a, type: 3}
+  attackRelease: 0
+  attackFps: 14
+  shot: {fileID: 0}
+  shotLength: 1
   hit:
   - {fileID: 21300000, guid: fde0ce36f7ddd452c8f8a0538a60a74f, type: 3}
   - {fileID: 21300000, guid: cac602b6f03a54dfe87d23fbd68b366d, type: 3}

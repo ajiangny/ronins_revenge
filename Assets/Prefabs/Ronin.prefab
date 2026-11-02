@@ -31,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 784039696892928048}
+  - {fileID: 790976892889462956}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-4749980093501252791
@@ -55,6 +55,7 @@ MonoBehaviour:
   slashSpeed: 0.85
   invulnerableTime: 2
   screenMargin: 0.2
+  swingsPerSplit: 3
   splitAngle: 18
   wispBobPixels: 1.5
   wispPeriod: 1.8
@@ -96,7 +97,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!1 &8823163307639320874
+--- !u!1 &5880116243426642941
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,10 +105,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 784039696892928048}
-  - component: {fileID: 3197745401303751495}
-  - component: {fileID: 506349844097843312}
-  - component: {fileID: 3795245776513535325}
+  - component: {fileID: 790976892889462956}
+  - component: {fileID: 1574643783895195528}
+  - component: {fileID: 6959149791712947195}
+  - component: {fileID: 1028021130349754458}
   m_Layer: 6
   m_Name: Ronin
   m_TagString: Untagged
@@ -115,13 +116,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &784039696892928048
+--- !u!4 &790976892889462956
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8823163307639320874}
+  m_GameObject: {fileID: 5880116243426642941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.98, z: 0}
@@ -130,14 +131,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4779731714239369018}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &3197745401303751495
+--- !u!212 &1574643783895195528
 SpriteRenderer:
   serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8823163307639320874}
+  m_GameObject: {fileID: 5880116243426642941}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -190,26 +191,26 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
---- !u!114 &506349844097843312
+--- !u!114 &6959149791712947195
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8823163307639320874}
+  m_GameObject: {fileID: 5880116243426642941}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4562f20f09b5b424a874f16a9f79d183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
   fps: 8
---- !u!65 &3795245776513535325
+--- !u!65 &1028021130349754458
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8823163307639320874}
+  m_GameObject: {fileID: 5880116243426642941}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2

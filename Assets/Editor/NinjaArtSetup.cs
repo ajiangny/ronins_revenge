@@ -721,7 +721,22 @@ public static class NinjaArtSetup
         Sprite[] death = Frames(name, "Death");
         var picked = new System.Collections.Generic.List<Sprite>();
         for (int i = 2; i < death.Length; i += 2) picked.Add(death[i]);
-        return SaveArt(name, Frames(name, "March"), null, null, picked.ToArray(), particles, 6f, 8f);
+        CharacterArt art = SaveArt(name, Frames(name, "March"), Frames(name, "Attack"), null, picked.ToArray(), particles, 6f, 8f);
+        // Which frame the missile leaves on, and what the missile is. A Taisho's yari is Samurai.spearSprite.
+        (int release, string shot, float length) = name switch
+        {
+            "Ashigaru" => (2, "ThrownSpear", 1.25f),
+            "Bushi" => (6, "WarArrow", 0.95f),
+            "Yurei" => (6, "GhostArrow", 1f),
+            "Taisho" => (3, null, 0f),
+            _ => (0, null, 1f),
+        };
+        art.attackRelease = release;
+        art.attackFps = 14f;
+        art.shot = shot != null && HasSprite("Projectiles/" + shot) ? Load("Projectiles/" + shot) : null;
+        art.shotLength = length;
+        EditorUtility.SetDirty(art);
+        return art;
     }
 
     static CharacterArt OwnSamuraiArt(string name, Sprite[] particles) =>

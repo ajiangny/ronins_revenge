@@ -17,7 +17,18 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 22fbb5bb2b19543f78424ac1edf02fd0, type: 3}
   - {fileID: 21300000, guid: b76f9bbe686464629877595267f6da5e, type: 3}
   - {fileID: 21300000, guid: c1c067828b4074a248f7a428104f9031, type: 3}
-  attack: []
+  attack:
+  - {fileID: 21300000, guid: 9f240b86737b4b58ae0ec55990599699, type: 3}
+  - {fileID: 21300000, guid: ee99f89205574bf1aab0520788bd60e9, type: 3}
+  - {fileID: 21300000, guid: 3fb4b7c4ffcb4d0ba2cc3028f5ef562f, type: 3}
+  - {fileID: 21300000, guid: a174083b53ad4da6838584941f2453b0, type: 3}
+  - {fileID: 21300000, guid: 6fd09bc3fced444b94c721c87ff97e76, type: 3}
+  - {fileID: 21300000, guid: a15ab88d8d574417aa78d3d7f9e17963, type: 3}
+  - {fileID: 21300000, guid: 3fd95165aae94d1d8e1856a7d6e7278a, type: 3}
+  attackRelease: 2
+  attackFps: 14
+  shot: {fileID: 21300000, guid: ac8bee0a9a9d47a3903b940d9a412be2, type: 3}
+  shotLength: 1.25
   hit: []
   death:
   - {fileID: 21300000, guid: 7583b7954ffae4ad6b1ab60cda1082e1, type: 3}
@@ -33,6 +44,8 @@ MonoBehaviour:
   walkUpRight: []
   walkDownLeft: []
   walkDownRight: []
+  walkLeft: []
+  walkRight: []
   idleDown: []
   idleLeft: []
   idleRight: []

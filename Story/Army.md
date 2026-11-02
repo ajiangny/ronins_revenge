@@ -31,17 +31,17 @@ gets back, unless a soul like Akagane catches it first ([Akagane.md](Akagane.md)
 
 | Kind (code) | Look | Story |
 |---|---|---|
-| Ashigaru | A skeletal foot soldier in a rotted jingasa straw hat and the rags of a clan coat, a rusted yari in hand. | The levied spearmen, the bulk of the vanguard. |
+| Ashigaru | A skeletal foot soldier in a rotted jingasa straw hat and the rags of a clan coat, a rusted yari in hand. | The levied spearmen, the bulk of the vanguard. They hurl their rusted yari, and the coffin puts another in their hands. |
 | Archer (`Bushi` art) | A corpse bushi in cracked lamellar, grey skin pulled tight to the skull, a warped yumi. | The court's bowmen. Three arrows at once, as they were drilled. |
 | Taishō | A revenant general: horned kabuto, a cracked menpō mask over a bare skull, a tattered horo cape, the eye slits lit. | Akagane's officers. They still throw the Emperor's cursed spears. |
 | Shieldbearer | A hulking dead man behind a temple door torn from its hinges, nailed with iron and plastered with ofuda. | They tore the hall's doors down to shield the line, and never put them down. |
-| Yurei | An onryō: white burial kimono, long black hair over the face, no feet, sleeves trailing into mist. | The souls whose bodies are gone entirely, so the coffin doesn't bother giving them one. Their arrows are as bodiless as they are and pass through cover. |
+| Yurei | An onryō: white burial kimono, long black hair over the face, no feet, sleeves trailing into mist. | The souls whose bodies are gone entirely, so the coffin doesn't bother giving them one. Their pale spirit arrows are as bodiless as they are, dissolve into mist behind the head, and pass through cover. |
 | Bellringer | A hollow shrine watchman in rotted white and red, his jaw bound shut with cloth, a hand bell on a cord. | Akagane's shrine watch, dead at their posts. Their tolls drive the army to fire faster. |
 | Scout | A shrouded corpse lashed to a torn, blood-stained paper kite, drifting across the top of the sky like a hanged man. | Scouts who flew the signal kites on the night. A soul always slips out of a downed one. |
 
 ## The Sworn Guard and the veterans
 
-Not every ember has gone quite dull. In each march there is one soldier, **the Sworn Guard** (any kind can be him; code:
+Not every ember has gone quite dull. In each march from the road's third round on there is one soldier, **the Sworn Guard** (any kind can be him; code:
 the round's Elite), who still remembers the oath he swore on the stair. He stands taller than the ranks, his ember
 burns brighter in his clan's colour, and he takes several blows to fall, more with every stage, because an oath is
 harder to cut than flesh. When he finally goes down his soul always slips free, as if it had been waiting to be let go.

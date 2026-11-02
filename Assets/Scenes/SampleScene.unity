@@ -1516,7 +1516,7 @@ MonoBehaviour:
       squads: 1
       squadGap: 1
       rowHealth: 
-      eliteHealth: 4
+      eliteHealth: 0
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 9
       rows: 4
@@ -1537,7 +1537,7 @@ MonoBehaviour:
       squads: 1
       squadGap: 1
       rowHealth: 
-      eliteHealth: 4
+      eliteHealth: 0
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 10
       rows: 4

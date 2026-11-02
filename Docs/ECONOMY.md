@@ -24,7 +24,7 @@ Heat. A death in stage 1
 brings in roughly 80–120, a full clear about 900, so the first death buys something and maxing the shop takes about
 five clears. Notes go into the save the moment they're earned, so quitting mid-run keeps them.
 
-*Nov 2026:* each round's Elite (`LevelConfig.eliteHealth`) always lets a soul slip free, one per round (about 12 extra
+*Nov 2026:* each round's Elite (`LevelConfig.eliteHealth`) always lets a soul slip free, one per round from Stage 1's third round (about 10 extra
 souls over a four-stage run), even when it is the round's last kill and the normal drop would have given nothing. Only
 one soul can be on the field at a time, so if one is already falling the Elite pays 5 notes (`Upgrades.PerScout`)
 instead. Poguru's practice armies have no Elite.

@@ -1225,6 +1225,12 @@ public class Ronin : MonoBehaviour
             riposte.Home(RiposteTarget);
             riposte.Mimic(arrowArt);
             riposte.ParryAura(Color.Lerp(Color.white, parryColor, 0.7f));
+            // Hammer Riposte: gold light round a shot would read as bronze's parry-me, so it goes back as hot iron instead.
+            if (Loadout.Has(BoonId.HammerRiposte, out _))
+            {
+                riposte.HardEdged();
+                riposte.HotTail(Statuses.SeamColor, new Color32(0xF5, 0x9A, 0x2E, 255));
+            }
             sent = riposte;
         }
         arrow.Riposte = sent;

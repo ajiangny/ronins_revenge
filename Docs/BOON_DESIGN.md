@@ -687,3 +687,300 @@ round for scrap shed, points mended, plates formed, arrows stopped by cover and 
 7. Colour: `Boons.ArtColor` is already "polished steel" for Sword Arts, and bronze sits near `BeadColor` and
    Kagetsune's bronze. What is Steel's colour on cards and the HUD?
 8. Lodestone in a `BulletHell` curtain: do `CappedRiposte` shots count as caught, and should they share `RiposteCap`?
+
+## 12. Steel in the rest of the game
+
+**Status: integration spec, nothing built yet.** Checked line by line against the scripts on 2026-11-01. §11 stays the
+authority on what Steel does; where the code forced a change it is listed under Overrides. The build list at the end
+is ordered so the game compiles and plays after every step, and Steel is out of reach until step 8.
+
+### The eight questions
+
+| # | Question | Decision | Why |
+|---|---|---|---|
+| 1 | Spare scrap and the Ultimate | **Keep it: half a hit** (`step * 0.5`, 1/80 of the bar with `ultimateHits` 40, Storm Shadow's bonus included), through a new `Ronin.ChargeSpare()` with `ChargeUltimate`'s guards. | Effects shed nothing, so all scrap traces back to his own blow, parry or throw, and the rule "only his own hits fill it" holds in spirit. Points would be a dead reward against Utsusemi. A cracked warlord pays 3 scrap per 5 s, 1.5 hits against about 11 slash hits in that time, so about +14%. `UltimateActive` blocks it, so it can't feed itself. |
+| 2 | Beam warnings with mended cover | **They stay true; no change.** | Beams and wall cover never meet. Utsusemi's `RazeCover` demolishes the wall before the fight, and its cover-stopped beams (Heart Lantern, Midnight, Hyper Beam, Thirteenth Hour) are phase 2 only, while a summoned Utsusemi is first-phase only, so `DrawHyperFan` only ever measures rocks and the sword, which Steel never touches (`InWall` false). Kagetsune's Spirit Hyper Beam ignores cover and its fan says so. His `SlamDown` measures `BeamEnd` at the blow and demolishes what it meets, whatever its health. |
+| 3 | Quenching at Frozen Riposte | **A helper, `QuenchBoss(Boss)`, called from `FreezeBoss` and at `struck.Freeze` in `OnRiposteImpact`.** Don't reroute that line through `FreezeBoss`. | `FreezeBoss` also Chills, which would change Frozen Riposte for every build without Steel. The helper cracks the boss, and Kuon too when `WolfFight`, as `FreezeBoss` chills it. |
+| 4 | Crack cooldown and Kagetsune's summons | **Crack per boss, cooldown shared**: one `nextBossCrack` in `BoonEffects`, for all bosses and Kuon. | The payout is cover, and there is one wall. Per-boss cooldowns would double the income for having a soul out. `nextBossFrost` already works this way. |
+| 5 | Whetstone with Piercing, Echo, Kindling | **+1 pierce once a shot, only on a plain slash.** Piercing Slash: 2 becomes 3 after crossing. Echo's ghost and Kindling's fireball pass and wear cover but gain no pierce. | A pierced fireball would call `Impacted` twice, so two great blasts from one swing. A homing shot with extra pierce re-targets and can circle (see `TurnGrowthPerSecond`'s comment). Forks and Clone shots stop at cover, as §11 says. |
+| 6 | "Spears can't be cut" lines | **No variants.** Only Oliver's Legendary line answers them (step 20). | The Tutorial runs on an empty loadout, and `SpawnSpear` and `TrainingSoldier` never get the new flag. `Poguru_First_Taisho` is a first, heard in stage 1 long before `deaths ≥ 10`. The roasts and Tips row say parry or move, which stay true. |
+| 7 | Steel's colour | **`#E0A83A` on cards, HUD, souls and aura. On the field, Steel's objects are iron with bright seams (`#6F6A63`, seam `#FFE08A`), never flat gold.** | Hue 40°. CIE76 ΔE: Fire 49, Offering 22, Legendary 21, Bronze stand-in 17, `BulletHell.Bronze` 15, `BeadColor` 13, `ArtColor` 73. Fire and Art are clear. A Bead path can sit beside a Steel path, but icon and label tell them apart. Bronze means "the parry that opens a way", so a gold scrap in a Kagetsune curtain would lie; hence iron. Spear-Breaker's orange label on a gold ring is legible and is its only pairing. `ArtColor` keeps its name: it's a comment, not a clash. |
+| 8 | Lodestone in `BulletHell` curtains | **Curtain shots can be caught, and don't touch `RiposteCap`.** The boon's count (2 to 6 a throw) is the cap. | `RiposteCap` stops a swarm of homing ripostes, and a caught shot makes none. Tidewake, Wildfire and Storm Step already pop curtain shots, with no cap at all. A hole round a straight-flying blade costs a 5 to 6 s cooldown. Bells stay uncaught (Override 1). |
+
+### Overrides of §11
+
+1. **Lodestone's skip list.** §11 skips "any shot with `Parried` set", but `Kagetsune.Skull` sets `Parried = FreeSoul`
+   on every skull, so Lodestone would catch nothing from him. Skip a new `Arrow.Resonant` instead, set in
+   `BulletHell.MakeResonant`, so only bells are spared.
+2. **Spear-Breaker on a warlord or Kuon cracks on `KillSource.Reflected` only.** `Ronin.Deflect` keeps no record that
+   a `Deflected` shot was heavy, so a parried hat or pillar can't be told apart. In practice: Iaido, cleave, moons,
+   Fang, Last Toll and coffin crack; hats and pillars don't.
+3. **Homing shots do touch arrows.** §11 says they slip past and never touch one, but `Arrow.OnCollisionEnter`
+   destroys an ordinary arrow on any contact, whatever the shot does. So Steel shards break ordinary arrows in
+   passing, as ice shards do, and Echo's ghost (its `Source` is `Slash`) breaks a yari in passing. The conclusion
+   stands for shards, Clone slashes and forks. Echo is a slash, so the card stays true; leave it.
+4. **"Your own cover" means `Blocker.InWall`.** Whetstone stops at Utsusemi's rocks and sword. Slashing out from a
+   rock's shade would remove the Hyper Beam's whole risk.
+5. **"The gap below" needs a rule.** If the spot under the scrap is taken, `TryPlate` steps outward by 0.5 up to
+   `ScrapReach` 2.5. With none free the scrap is spare.
+6. **Plates go at the next `Rebuild`, not on the round's last kill**, with the rest of the cover, so they stand
+   through the path choice. `Rebuild` also runs before every boss (`TravelTo` → `ShowMap`), so no plate reaches a
+   warlord's fight.
+7. **Tamahagane's temper comes before the plate**: mend, temper, plate, spare. A plate is only better if nothing can
+   be tempered.
+
+### How it plays
+
+**Every warlord:** no plates, scrap reaches any hurt wall cover, Shrapnel is halved (rounded up), cracks only pay in
+cover.
+
+| Boss | Cover | What Steel does | To watch |
+|---|---|---|---|
+| **Benibana** | Full wall at the start. Smoke rings chip it; `SmashBlockers` demolishes and pays nothing. | Steel's home fight: mending is visible and worth it. A parried Iaido cracks her with Spear-Breaker. | Shrapnel: 12 blockers × 3 shards at most is 36 damage (72 soaked) against two 70 bars, once a fight since cover is only rebuilt by the map. |
+| **Utsusemi** | None after `RazeCover`: rocks and sword only, unlimited health. | Steel's weakest fight, by design. All scrap is spare; Whetstone and Shrapnel idle; Steel Shadow restores nothing but still cracks. `Crack` lands through super armour as `Chill` does; it gives no edge there. | Ultimate fill rate. If it returns too often, a third of a hit (§11). |
+| **Shirogane and Kuon** | Full wall, but ghost swords, pillars and spires pass it, so it lasts. | Kuon cracks like a warlord, on the shared cooldown; a hidden Kuon can't be struck, so its crack waits. The Fang parried at Kuon cracks Kuon. Quenching reaches Kuon through `QuenchBoss`. | Wall usually full, so spare scrap is high; check that Steel Shadow isn't always up. |
+| **Kagetsune** | Full wall, worn fast: cracks and slams `Demolish`; Hyper Beam, Ofuda and pendulum `Hit`. | Summons take cracks on the shared cooldown. Levy soldiers crack and shed; their Taisho yari can be broken. Lodestone catches skulls (Override 1), never bells or darts. | His beam breaking the wall raises `Broken`, so Shrapnel fires during it (halved). Fine, but look. |
+
+| Stage (rounds) | New to Steel's play | Steel's answer |
+|---|---|---|
+| 1 (24 / 36 / 40) | Archer fans from round 2, Taisho from round 3 | More arrows means more for Lodestone and Lightning Rod. Round 3 is the first yari for Spear-Breaker. |
+| 2 | Shieldbearers (2 HP), divers | A crack doesn't change health: a shieldbearer takes its two hits and sheds on the kill. Divers `Hit` cover and pop plates, which pays nothing. |
+| 3 (55 / 60 / 72) | Yurei, whose arrows pass cover | Cover and plates don't stop them, so Steel still has to dodge, as intended. Lodestone can catch them. |
+| 4 (60 / 72 / 78) | Bellringers, scouts, every kind | Bellringers crack and shed. Scouts aren't `Samurai`, so they never crack. |
+
+### Everything else it touches
+
+- **Sword Arts.** Piercing and Echo: question 5. Split Slash's forks are `Shadow`: they pass plates, stop at cover and
+  shed nothing. Scattering Star's blades raise no `ShurikenThrown`, so only the main blade is Lodestone's. Mirror
+  Stance: Hammer Riposte pays once, as `LandParry` fires `Parried` once a parry.
+- **Other Ultimate boons.** One slot, so Steel Shadow replaces them. `OnUltimateStarted` returns early when Frost
+  Shadow isn't held, so Steel's block must go **above** line 235.
+- **Flute Songs, Oaths.** Nothing enumerates elements, so no change. Keen Eye helps Hammer, Spirit Wind helps
+  Lodestone, Rain of Arrows raises Lodestone's and Lightning Rod's supply.
+- **Spirit Beads, Threads, Exchange.** All generic once each boon has `LevelStep`. Anvil Blade copies Flame Blade's
+  shape (`Value` whole, `Extra` chance), so an Exchange carries level cleanly. `Spear-Breaker` and the Duos stay after
+  an Exchange takes their requirement away, like every capstone.
+- **Duos and Infusions that count.** The old families and `ElementCount` never see Steel. New Duos take the older
+  element as `Element` and Steel as `Partner`, as Water's do, so Red-Hot Iron counts toward Ember Heart, Quenching
+  toward Hoarfrost, Lightning Rod toward Static Field and Rust toward Deep Current, and none toward Tamahagane.
+  Lightning Rod's `Strike` sets off Plasma Arc, Thunder Rain and Superconductor as Raijin's Drum does; its 3 s limit
+  is the guard.
+- **HUD.** Medallions, rings and Tab tips read `Boons.Info` and `Description`: no change. `SetIcon` draws a coloured
+  disc and a letter past the end of `boonIcons`. The passive column grows 52 px a boon with no limit; picks are capped
+  by the run (12 to 16), not by the element count, so a fifth element doesn't worsen it. No HUD for cover, and no
+  extra card text.
+- **`RunLog`.** Sized by `KillSource`, not `Element`: no change to its arrays. Steel's tallies go through `Note` (step
+  17).
+- **Fate's Thread and Banishing Bell.** `Refill` and `banished` work on `BoonId` through `Boons.Draw`: no change.
+
+### Where five elements break an assumption
+
+| Place | What happens | Fix |
+|---|---|---|
+| `Boons.Elements[]` | `Info(Steel)` throws | Same commit as the enum (step 1) |
+| `SoulOf`, `StingFor` | Default to Hibiki and Storm's sting: wrong, silently | Step 1 |
+| `VoiceOf` (`GameManager.Talk`) | Unknown speaker gets `null`, the boss source | Step 1 |
+| `SpeakerFor` | Unknown name gets a blank white speaker | Step 1 |
+| `Ronin.SlashUpgrades`, `ShurikenUpgrades`, `RiposteUpgrades` | Steel slots would add no stance bonus | Step 1 |
+| `AvailableElements` | Gates Tide by hand; Steel would be open from run 1 | Step 1 gates it on `oliverMet` |
+| `PickSoulElement` | One owed soul. With both owed (Asagi's unpaid at his next death), Asagi first, then Oliver; `taken` lets a second path show the other | Step 8 |
+| `BoonArtSetup.Variants` | `elementArt.arraySize = Variants.Length`, so Steel is dropped until listed | Step 18 |
+| `FxSetup`, `AudioSetup`, `UiSetup.Souls`, `generate-sfx.mjs` | Lists by hand | Step 18 |
+| `elementArt` in the scene | 4 entries; the enum-sized default is ignored. **Safe:** `ArtFor` returns null and every use is `?.` | Optional, step 18 |
+| Soul lean | Uniform half the time, now 1 in 5, so Legendaries and Infusions come a little less often. Bias is generic | Watch `RunLog`; don't retune today |
+
+**Safe, checked:** `elementCounts` and `RunLog.kills` size from their enums; `RoninLoadout.slots` is `BoonSlot`, not
+elements; `Poguru.eyes`, `SoulPool.shimmer` and the beam's vertices are unrelated 4s; `Rival`, `Most` and F5's cycle
+use the enum.
+
+### The unlock
+
+`OliverDue => deaths >= OliverDeaths (10) && asagiMet && !oliverMet`. Because it asks for `asagiMet` and `meetAsagi`
+is read before `MeetAsagi` sets it, the two can never fall on one wake: `bool meetOliver = !meetAsagi && OliverDue;`
+at the same place in `EnterSafeArea`. The `!meetAsagi` is only a guard for dev saves. `WakeTalk(meetAsagi ||
+meetOliver)`.
+
+**No new station.** The scene's saved `stations` win over `DefaultSafeAreas`, so a seventh kind would need
+`Ninja/Apply Maps`. He is at the rack by story anyway: `ShowRack` gets a TALK row when `oliverMet`, and step 19's
+figure stands by the rack without being a station.
+
+### Build list
+
+Each step is one commit. Nothing touches `.unity` or `.prefab` on disk, and only step 18 and the art half of step 19
+need Unity to run a menu; all others work with the placeholder fallback. Test with F5 (soul) and the dev jumps; check
+the console after each. **Enums are appended to, never reordered.**
+
+**1. Foundation.** `Boon.cs`: append `Steel` to `Element`; append to `BoonId` in this order `AnvilBlade,
+LodestoneShuriken, HammerRiposte, SteelShadow, Whetstone, Shrapnel, SpearBreaker, Tamahagane, RedHotIron, Quenching,
+LightningRod, Rust`; add `Elements[4]`: `new ElementInfo("Steel", "the smith's cat of the Emperor's forge lends you
+his master's hammer.", new Color32(0xE0, 0xA8, 0x3A, 255))`; add `static readonly BoonId[] SteelBoons` (the first
+four). Definitions wait for their steps, so nothing unbuilt is ever offered. `SaveData.cs`: `oliverMet`,
+`oliverSoulOwed` after Asagi's (JsonUtility fills old saves with false). `GameManager.Rewards.cs`: `AvailableElements`
+also skips `Steel` unless `oliverMet`; `SoulOf` `"Oliver"`; `StingFor` `Sfx.SoulStingSteel`, with the const added to
+`Sfx.cs` (`Sting` already checks `Sfx.Has`). `GameManager.Talk.cs`: `VoiceOf` adds `"Oliver"` to `soulVoice`;
+`SpeakerFor` copies Asagi's case: `SoulSpeaker(name, "The Smith's Cat", Element.Steel, oliverCloseup, new
+Vector2(0.5f, 0.3f))`; `GameManager.cs`: `[SerializeField] Sprite oliverCloseup` (null is fine). `Ronin.cs`: add the
+three slot boons to its upgrade arrays. *Test:* compiles; a normal run never shows Steel; F5's fifth press gives a
+Steel soul with a Spirit Offering (nothing defined yet).
+
+**2. Cracked.** `Statuses.cs`: `CrackSeconds` 4, `BossCrackCooldown` 5, `BossCrackScrap` 3, `CrackColor` `#6F6A63`,
+`SeamColor` `#FFE08A`, `CrackScale` 1 and `BossCrackScrapNow` set in `From` (step 12 fills them). `Samurai.cs`: copy
+`Jolt`: `Cracked`, `crackedUntil`, `Crack(seconds)`; bit 16 in `StatusMask`; in `SetFrost`, `clan = Lerp(clan,
+CrackColor, 0.5)` with a seam flicker as Jolted has. `Boss.cs`: copy `Jolt` (same `IsDead || PhaseBreaking || Down`
+guards), add `SpendCrack()`; tint in `FixedUpdate`. `SpiritWolf.cs`: copy its `Jolt` (`Armed && !IsBroken`) and
+`SpendCrack`; tint near line 586. *Test:* call `Crack` through the console; the tint shows and fades.
+
+**3. Cover can be mended.** `Blocker.cs`: `baseHealth` in `Init`; `InWall`, `Plate`, `Forged`; `Hurt => !destroyed &&
+health < maxHealth`; `Mend(int points)`, never above `maxHealth`, which calls `UpdateSprite`; `Temper(int points, int
+bound)`, raising `maxHealth` with `health`, up to `baseHealth + bound`; `Hit` raises `Broken` only if `!Forged`. Then
+this in `OnCollisionEnter`, replacing the Spinning line:
+
+```csharp
+Projectile shot = coll.collider.GetComponentInParent<Projectile>();
+// The projectile decides what a pass does (Projectile.OnCollisionEnter), so this doesn't hang on who's called first.
+if (shot != null && (shot.Spinning || shot.PassesCover || Plate || (shot.Whets && InWall))) return;
+```
+
+`Projectile.cs`: add `PassesCover` and `Whets` (false for now, so nothing changes yet). First thing after `spent` in
+`OnCollisionEnter`: `Blocker met = coll.collider.GetComponentInParent<Blocker>(); if (met != null && (met.Plate ||
+PassesCover)) { KeepFlying(coll.collider); return; }`. `BlockerWall.cs`: `CreateBlocker` returns its `Blocker`, sets
+`InWall`, and records a `Slot { type, look, centre, blocker }` in a list both `Rebuild` and `Clear` empty; add
+`NearestHurt(x, reach)`, `NearestUntempered(x, reach, bound)`, `PlateCount`, `TryPlate(x, reach, sprite)` (Override 5;
+copy `CreateBlocker`, `Init(1, art, new[] { sprite }, null)`, `Debris.BurstSprites` is null-safe; `Plate = Forged =
+true`; 1.1 × 0.8 units; `ProceduralSprites.White` tinted iron) and `Restore(bool raise)` (standing to full; if
+`raise`, rebuild each null slot `Forged`, removing plates it lands on). Skip children that aren't `Blocker`s. *Test:*
+a normal run plays exactly as before.
+
+**4. Scrap and Anvil Blade (the core loop).** New `Boons/Scrap.cs`, a code-built mover, no prefab: an iron
+`ProceduralSprites.Disc` with a small `Projectile.CreateGlow` seam, falling at 9 u/s from where it was shed to
+`wall.TopY` while drawing to a target x, on `Time.deltaTime`, parented to the wall so `Rebuild` clears it; calls back
+on landing. `BoonEffects.cs`: add `partial`, take `BlockerWall wall` in the constructor (one call site,
+`GameManager.ResetLoadout`). New `Boons/BoonEffects.Steel.cs`, holding from here on all of Steel: `const ScrapReach =
+2.5f`, `MaxPlates = 4`, `MaxScrapLive = 12` (past it a scrap lands at once); `nextBossCrack`; `ShedScrap(from, count =
+1, points = 1)` (spread ±0.5); and `Settle`, resolved at landing so a target gone by then isn't a bug:
+
+```csharp
+Blocker hurt = wall.NearestHurt(x, BossFight ? float.MaxValue : ScrapReach);
+if (hurt != null) { hurt.Mend(points); return; }
+if (tempered) { /* step 12 */ }
+if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(x, ScrapReach, plateSprite)) return;
+ronin.ChargeSpare();
+```
+
+Also `Ronin.ChargeSpare()` (split `ChargeUltimate`'s step out; question 1). Hooks: `OnKill`, `case Slash`: the Anvil's
+roll on `Extra`: `ShedScrap(position)`, crack `(int)value` nearest in `army.SamuraiInRank(samurai)`. `OnKill` after
+the `Procs` guard: `if (samurai.Cracked) ShedScrap(position)`. `OnBossHit` and `OnWolfHit`: **before** the `switch`,
+`if (Damage.Procs(source) && boss.Cracked && Time.time >= nextBossCrack) { ...SpendCrack(); ShedScrap(point,
+Statuses.BossCrackScrapNow); }`, so a crack applied by this same blow pays on the next, then `case Slash`: the roll ×
+`BossRiptideShare` cracks. Define **Anvil Blade** from §11, copying Flame Blade's fields. *Test:* F5 to Steel, dev
+jump to S1; a kill may shed scrap, hurt cover mends, a plate forms and slashes pass it, arrows pop it, no heart.
+
+**5. Lodestone Shuriken.** `Arrow.cs`: `public bool Resonant`, set in `BulletHell.MakeResonant`. New
+`Boons/ShurikenLodestone.cs`, a copy of `ShurikenWake`: cracks in `WakeRadius` once each (bosses and Kuon at the same
+×4 test); catches the nearest shots in 2 units until its count runs out, skipping `Unbreakable`, `Reflectable`,
+`Unparryable`, `Resonant`; `Pop` in `CrackColor`, `ShedScrap` from the arrow. Hook in `OnShurikenThrown` beside
+Tidewake, **above** the `BossFight` return at line 345. Define the boon. *Test:* round 2's fans; Benibana's Bloom; a
+bell passes.
+
+**6. Hammer Riposte.** `BoonEffects.OnParried`, **above** the `if (BossFight)` return: `RingHammer((int)value)`. Boss
+fight: crack `Bosses` and `FightingWolf`, mend `NearestHurt` anywhere. Round: `NearestHurt` within 3; none, `TryPlate`
+at his x. `Fx.Impact` in the element's colour. `Ronin.Deflect`'s fallback branch already colours the riposte. Define
+the boon. *Test:* parries in round 1 and on Benibana.
+
+**7. Steel Shadow.** `OnUltimateStarted`, **above** line 235's early return: `wall.Restore(raise: !BossFight)`, crack
+`Bosses` and `FightingWolf`, only in a boss fight or with `army.Remaining > 0`. `OnCloneKill`: crack
+`SamuraiWithin(position, IceRadius)`, skipping the victim. `OnBossHit` and `OnWolfHit`, `case Clone` after the
+`CloneBossShare` break: crack. Define the boon. All four slots now work. *Test:* F9; fallen cover returns; breaking it
+pays nothing.
+
+**8. The unlock (Steel reaches players here).** `GameManager.Hub.cs`: copy `AsagiDue`, `MeetAsagi` to `OliverDue`,
+`MeetOliver` (sets `oliverMet`, `oliverSoulOwed`, `AddFirst(Firsts.Oliver, Save.Run)`, plays `Oliver_Meet_Rack`, no
+figure call yet); `EnterSafeArea`, as under The unlock. `Rewards.cs`: `PickSoulElement`, after Asagi's line: `if
+(Save.Data.oliverSoulOwed && (taken == null || !taken.Contains(Element.Steel))) return Element.Steel;`. `OfferBoons`:
+clear it, copying Tide's. `Dialogue.cs`: `Firsts.Oliver = "Met_Oliver"`; append `OliverTalk` to `DialogueEvent`.
+`SaveData.Backfill`: `if (d.oliverMet) d.AddFirst(Firsts.Oliver, 0);`. `Dialogue.Lines.cs`: `const string Oli`,
+`Ol(text)`, then `Oliver_Meet_Rack` from `Story/Oliver.md`'s sample, `When(Seen("Asagi_Meet_Pool"),
+NotSeen("Oliver_Meet_Rack"))`, a `SoulPickup` Repeat from the same table, a `SoulHub` Repeat. They run silent until
+voiced. `ShowRack`: a TALK row before BACK when `oliverMet`, copying `TalkToAsagi` with `DialogueEvent.OliverTalk`.
+`GameManager.Dev.cs`: F5's Steel branch, copying Tide's, and its comment. *Test:* save at `deaths` 10 with `asagiMet`;
+next wake plays his scene; first soul is Steel. A save with neither gets Asagi only.
+
+**Past this point every step can be cut alone.**
+
+**9. Whetstone.** `Ronin.LaunchSlash`: `projectile.Whets = source == KillSource.Slash && has`, with `WhetSpared` the
+value; the same in `ThrowFireball` when `!clone`. `Blocker.Wear(point, spared)`: `Random.value < spared` skips `Hit`.
+`Projectile.OnCollisionEnter`, after step 3's line: `if (met != null && Whets && met.InWall) { met.Wear(...); if
+(!whetted && !Kindled && pickTarget == null) { whetted = true; pierceLeft++; } KeepFlying(coll.collider); return; }`.
+Define the boon. *Test:* slash from under a site, with Piercing, Echo and Kindling; a fireball blasts once.
+
+**10. Shrapnel.** `Ronin.LaunchSteelShard(from, picker)`, a copy of `LaunchIceShard`: no `FreezeOnHit`, `PassesCover =
+true`, tinted iron. `GameManager.OnBlockerBroken`: split the guard so the heart's roll comes after
+`effects.OnCoverBroken(position)` for `state == Playing && !tutorial.Active`. There: count, halved and rounded up if
+`BossFight`, picker `ronin.RiposteTarget`. Define the boon. *Test:* a broken blocker bursts; a shard crosses cover
+unchipped; a plate bursts nothing.
+
+**11. Spear-Breaker.** `Arrow.cs`: `CursedSpear`, set only in `Samurai.Fire`'s Taisho branch; a static `SpearBroken`;
+in `OnCollisionEnter` above the `Unbreakable` branch, `else if (CursedSpear && Statuses.SpearBreaker &&
+coll.collider.GetComponentInParent<Projectile>() is { Source: KillSource.Slash }) {
+SpearBroken?.Invoke(transform.position); Shatter(); return; }`. `Statuses.From` sets the flag.
+`GameManager.OnEnable`/`OnDisable` subscribe beside `Blocker.Broken` (domain reload is off, so both are needed).
+`OnBossHit`, `OnWolfHit`: `source == Reflected` cracks (Override 2). Define the boon with `TwoSlotsOf`. *Test:* round
+3 yari; a parried Iaido; `Tut_Spear` unaffected.
+
+**12. Tamahagane.** `Statuses.From`: `CrackScale` 2, `BossCrackScrapNow` 5; `Crack` already multiplies. `Settle`'s
+temper line: `wall.NearestUntempered(x, ScrapReach, 2)`, `Temper(points, 2)`. Define the Infusion.
+
+**13. Rust.** `Statuses.Rust`; one line at the end of `Samurai.Soak`, `Boss.Soak` and `SpiritWolf.Soak`: `if
+(Statuses.Rust) Crack(Statuses.CrackSeconds);`. Define the Duo: `Element.Tide`, `Partner` Steel, `HoldsAny(TideBoons)`
+and `HoldsAny(SteelBoons)`.
+
+**14. Red-Hot Iron.** `Scrap`: `hot` flag; every third frame, up to 2 arrows within 1 unit, Storm Step's skips,
+`Burn(Fire)`, with `Physics.OverlapSphereNonAlloc` as `BulletHell.Resonance` does rather than `FindObjectsByType`,
+since many scrap may fall at once. Tint it ember. Define the Duo (`Fire`).
+
+**15. Quenching.** `OnKill`, after the `Procs` guard: `samurai.Encased || army.Frozen` sheds scrap with `points` 2,
+cracked or not, in place of the plain shed (`Kill` leaves `encasedUntil` set, so this reads true for a statue too).
+`QuenchBoss` from question 3, gated on the boon. Define the Duo (`Water`).
+
+**16. Lightning Rod.** `Blocker.OnCollisionEnter`: a static `Chipped(Vector3)` when an `Arrow` strikes `InWall &&
+!Plate`, after the `PassesCover` return. `GameManager` subscribes as in step 11; `effects.OnCoverChipped`: 3 s limit
+in a round, `Strike` on `army.FrontSamuraiInColumn(army.ClosestColumnTo(x))`; 8 s on a boss, `Strike` the boss. Define
+the Duo (`Lightning`). *Watch* effect share.
+
+**17. `RunLog`.** `BoonEffects.Steel`: tallies for scrap shed, points mended, plates formed, spare scrap, and arrows
+stopped (`Chipped`, so subscribe regardless of the Duo); `LogSteel()` writes one `RunLog.Note` when any is above 0,
+and clears. Call it above the `EndSegment` lines in `EndRound` and `GameManager.Bosses.cs:568`, `Stages.cs:162`.
+
+**18. Art and sound, through Unity only.** Code first: `BoonArtSetup.Variants` adds `(Element.Steel, "Steel", 40f /
+360f, 1.05f)`; `FxSetup` adds `Fx.Aura(Element.Steel)`, `Fx.SoulCrackle(Element.Steel)`; `AudioSetup` adds
+`SoulStingSteel`, `generate-sfx.mjs` its prompt; `UiSetup.Souls` adds `"Oliver"`, which needs the `oliverCloseup`
+field from step 1. Then in the Editor: `Ninja/Apply Boon Art` (it resizes the scene's `ElementArt[]` to 5 and rewrites
+`boonIcons`; a missing icon stays a disc), `Apply VFX`, `Apply Audio`, `Apply UI Fonts`. Each menu tolerates missing
+files, so run them with whatever art exists. Art from `Story/Oliver.md`: `UI/Boons/<BoonId>`,
+`Effects/Soul_Steel_<i>`, `Projectiles/ShurikenArt_Steel`, `Portraits/Oni_Boon_Steel`, `Soul_Steel_Painted`,
+`Oliver_Closeup`. Expect recoloured assets to appear; review them before committing.
+
+**19. Oliver at the rack.** New `Hub/Oliver.cs`, a copy of `Asagi.cs` with clips `Idle, Talk, Loaf` and a code-built
+placeholder, in forge-gold and grey. `SafeArea.Config.oliverArt`; `SafeArea.Build`: `OliverFigure` at the rack's
+`propAt` when `Save.Data.oliverMet`, sorted with `standing`. `MeetOliver` and the TALK row play its clips.
+`NinjaArtSetup.SetUpSafeAreas`: copy Asagi's clip loop, then `Ninja/Apply Maps`, only when frames exist.
+
+**20. His lines.** `Dialogue.Lines.cs`, the rest of Oliver's first chain and `Oliver_Legendary_SpearBreaker`,
+`OffersBoon(BoonId.SpearBreaker)`, a proposal in his voice: "Cursed yari. Not his. He'd have got the balance right.
+...Hit it where it rings thin, Scabbard." `Duo_*` lines for the four Duos, copying `Duo_ScaldingSteam_First`. Read
+`Story/Oliver.md` first; voices come from the connector's `creative_design_voice` with the user picking a preview, so
+plan that with the user.
+
+**21. Docs.** `ARCHITECTURE.md` (Boons row: five statuses, `Scrap`, `ShurikenLodestone`; Hub: `Oliver`),
+`Docs/Boons.md`, `Docs/World.md` (plates), `Docs/Hub.md`, `Docs/Player.md`, `README.md`, `Story/Oliver.md` and
+`Story/Souls.md`. `Dev.cs`'s and `CLAUDE.md`'s F5 lists should say Fire → Frost → Storm → Water → Steel; `CLAUDE.md`
+is the user's, so raise it with them. Add a "Tested" paragraph here. Do a short version of this step first if time is
+about to run out, since the write-up is what's graded.
+
+**Riskiest:** steps 3 and 9, since they sit in the collision path of the game's main attack. Both `OnCollisionEnter`s
+fire for one contact and neither order is promised, which is why `Blocker` returns and `Projectile` does the wearing.
+Play a full round with no Steel after step 3.
+
+**If time runs out:** 1 to 8 are a complete fifth element. Cut in this order: 19, 20, 16, 14, 15, 13, 12, 17, 11, 10,
+9. Without a boon's step its definition doesn't exist, so it's simply never offered. Step 18 can stay at a code-only
+colour with no menu run; step 21's short version can't be cut.

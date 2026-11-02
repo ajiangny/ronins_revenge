@@ -1390,7 +1390,12 @@ MonoBehaviour:
       - {fileID: 21300000, guid: fee6d06abcd604de495fd5d15f566eb9, type: 3}
       - {fileID: 21300000, guid: 57fb91b5d66e64d1d87adb3551fabbfc, type: 3}
       - {fileID: 21300000, guid: 720a63f8828284cda9a83ead8419eb52, type: 3}
-      drum: []
+      drum:
+      - {fileID: 21300000, guid: b382274481dd44f28867fc06aa609541, type: 3}
+      - {fileID: 21300000, guid: d1a9d255241b044949d37a9cfb51128d, type: 3}
+      - {fileID: 21300000, guid: 99b8ab9e7f2074a139f2c72b45587491, type: 3}
+      - {fileID: 21300000, guid: 25714efa8dc764ce69414ca852fd2227, type: 3}
+      - {fileID: 21300000, guid: 09b19027a4945470cae55d2e1e4db3e9, type: 3}
       drumContact: 2
       fps: 8
       leaveFps: 12

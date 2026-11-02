@@ -1304,9 +1304,6 @@ MonoBehaviour:
     - px: {x: 100, y: 147}
       colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}
       radius: 2.6
-    - px: {x: 562, y: 178}
-      colour: {r: 0.45, g: 1, b: 0.9, a: 0.2}
-      radius: 2.6
     - px: {x: 120, y: 224}
       colour: {r: 1, g: 0.65, b: 0.35, a: 0.28}
       radius: 2.2
@@ -1366,7 +1363,6 @@ MonoBehaviour:
       height: 12
     spirits:
     - {x: 100, y: 154}
-    - {x: 562, y: 186}
     spiritFrames:
     - {fileID: 21300000, guid: e0b9e805250664b7aad065478841235f, type: 3}
     - {fileID: 21300000, guid: 20110a41f73614d1b83be236ba458d98, type: 3}

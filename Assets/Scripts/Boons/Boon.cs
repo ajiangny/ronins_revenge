@@ -370,6 +370,10 @@ public static class Boons
             Description = "Your <b>Shuriken</b> draws in arrows, which fall as <b>Scrap</b>, and <b>Cracks</b> the samurai it passes.",
             StatLabel = "Arrows caught:", Values = new[] { 2f, 3f, 4f }, Format = Plus,
             LevelStep = 1f, Whole = true, Max = 6f },
+        new BoonDefinition { Id = BoonId.HammerRiposte, Element = Element.Steel, Slot = BoonSlot.Parry, Name = "Hammer Riposte",
+            Description = "A successful <b>Parry</b> rings out and mends the cover nearest you.",
+            StatLabel = "Cover mended:", Values = new[] { 1f, 2f, 3f }, Format = Plus,
+            LevelStep = 1f, Whole = true, Max = 5f },
 
         // Duos: one core boon from each of two elements.
         new BoonDefinition { Id = BoonId.ThermalShock, Element = Element.Fire, Partner = Element.Water, Slot = BoonSlot.Passive, Kind = BoonKind.Duo,

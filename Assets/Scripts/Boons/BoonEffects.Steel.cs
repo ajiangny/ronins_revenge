@@ -9,6 +9,8 @@ public partial class BoonEffects
     const float ScrapReach = 2.5f;
     const float ScrapSpread = 0.5f;
     const int MaxPlates = 4;
+    // How far from him Hammer Riposte's ring reaches, in a round.
+    const float HammerReach = 3f;
     // Past this many in the air a scrap lands at once.
     const int MaxScrapLive = 12;
 
@@ -61,6 +63,23 @@ public partial class BoonEffects
         for (int i = 0; i < rank.Count && i < cracks; i++) rank[i].Crack(Statuses.CrackSeconds);
         Fx.Play(Fx.Impact, position, Steel, 1f);
         Sfx.Play(Sfx.Deflect, 0.5f, 1.3f);
+    }
+
+    // Hammer Riposte: the parry rings out. On a warlord or Kuon it always cracks, and the points go to the nearest hurt
+    // cover anywhere; in a round to hurt cover near him, or a plate above him when there's none.
+    void RingHammer(int points)
+    {
+        Vector3 at = ronin.Bounds.center;
+        if (BossFight)
+        {
+            foreach (Boss boss in Bosses) boss.Crack(Statuses.CrackSeconds);
+            if (WolfFight) Wolf.Crack(Statuses.CrackSeconds);
+        }
+        Blocker hurt = wall.NearestHurt(at.x, BossFight ? float.MaxValue : HammerReach);
+        if (hurt != null) hurt.Mend(points);
+        else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates) wall.TryPlate(at.x, ScrapReach, null);
+        Fx.Play(Fx.Impact, at, Steel, 1.2f);
+        Sfx.Play(Sfx.BlockerHit, 0.7f, 0.7f);
     }
 
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and

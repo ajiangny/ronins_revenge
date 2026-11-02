@@ -396,6 +396,7 @@ public partial class BoonEffects
             shurikenCharged = true;
             ElementFx.Glow(ronin.Bounds.center, Storm, 0.6f, 2f, 0.3f);
         }
+        if (loadout.Has(BoonId.HammerRiposte, out value)) RingHammer((int)value);
         if (BossFight)
         {
             if (loadout.Has(BoonId.ThunderRiposte, out value))

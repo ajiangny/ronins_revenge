@@ -85,64 +85,89 @@ public partial class GameManager
 
     public static StageConfig[] DefaultStages() => new[]
     {
+        // Stage 1 teaches the plain grid: one arrow at a time, no veterans, no shielded or guarded shots.
         new StageConfig
         {
             name = "The Bamboo Road",
             rounds = new[]
             {
-                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 0.8f,   aimedShotChance = 0.3f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f) },
+                new LevelConfig { columns = 8,  rows = 3, topRowY = 8.5f, baseSpeed = 2.3f, maxSpeedMultiplier = 3.5f, fireInterval = 0.8f,   aimedShotChance = 0.3f,  arrowSpeed = 7f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
+                    eliteHealth = 4 },
                 new LevelConfig { columns = 9,  rows = 4, topRowY = 8.4f, baseSpeed = 2.5f, maxSpeedMultiplier = 4f,   fireInterval = 0.72f, aimedShotChance = 0.35f, arrowSpeed = 7.5f, samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 9f },
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 9f, eliteHealth = 4 },
                 new LevelConfig { columns = 10, rows = 4, topRowY = 8.2f, baseSpeed = 2.7f, maxSpeedMultiplier = 4.2f, fireInterval = 0.64f, aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0f, 0.98f, 0.6f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true, diveInterval = 7f },
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru }, scouts = true, diveInterval = 7f,
+                    shape = FormationShape.Staggered, eliteHealth = 4 },
             },
             boss = BossKind.Benibana,
         },
+        // Stage 2 is the spike: veteran rows, squads with lanes between them, volleys of two, fast and shielded arrows.
+        // A volley round fires less often, so the pressure climbs without the screen filling.
         new StageConfig
         {
             name = "The Pilgrim's Pass",
             rounds = new[]
             {
-                new LevelConfig { columns = 10, rows = 4, topRowY = 8.3f, baseSpeed = 2.6f, maxSpeedMultiplier = 4f,   fireInterval = 0.68f, aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 7f },
-                new LevelConfig { columns = 11, rows = 4, topRowY = 8.3f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.2f, fireInterval = 0.64f,  aimedShotChance = 0.4f,  arrowSpeed = 8f,   samuraiColor = new Color(0.4f, 0.6f, 1f),
-                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 5.1f },
-                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.6f, aimedShotChance = 0.45f, arrowSpeed = 8.5f, samuraiColor = new Color(0.4f, 0.6f, 1f),
+                new LevelConfig { columns = 10, rows = 4, topRowY = 8.3f, baseSpeed = 2.6f, maxSpeedMultiplier = 4f,   fireInterval = 0.6f,  aimedShotChance = 0.4f,  arrowSpeed = 8.2f, samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 7f,
+                    shape = FormationShape.Squads, squads = 2, squadGap = 1.5f, rowHealth = new[] { 0, 2, 0, 0 },
+                    fastArrowChance = 0.15f, toughArrowChance = 0.15f, eliteHealth = 4 },
+                new LevelConfig { columns = 11, rows = 4, topRowY = 8.3f, baseSpeed = 2.8f, maxSpeedMultiplier = 4.2f, fireInterval = 1.05f, aimedShotChance = 0.45f, arrowSpeed = 8.4f, samuraiColor = new Color(0.4f, 0.6f, 1f),
+                    rowKinds = new[] { SamuraiKind.Archer, SamuraiKind.Ashigaru }, diveInterval = 5.1f,
+                    shape = FormationShape.Staggered, rowHealth = new[] { 2, 0 }, volley = 2,
+                    fastArrowChance = 0.2f, toughArrowChance = 0.2f, eliteHealth = 4 },
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.95f, aimedShotChance = 0.45f, arrowSpeed = 8.8f, samuraiColor = new Color(0.4f, 0.6f, 1f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer },
-                    diveInterval = 4.2f, scouts = true },
+                    diveInterval = 4.2f, scouts = true,
+                    shape = FormationShape.Squads, squads = 3, squadGap = 1f, rowHealth = new[] { 0, 2, 0, 0, 0 }, volley = 2,
+                    fastArrowChance = 0.2f, toughArrowChance = 0.25f, eliteHealth = 4 },
             },
             boss = BossKind.Utsusemi,
         },
+        // Stage 3 adds guarded arrows (parry-only) and a five-HP Elite; its last round looses volleys of three.
         new StageConfig
         {
             name = "The Frozen Shrine",
             rounds = new[]
             {
-                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.6f, aimedShotChance = 0.45f, arrowSpeed = 8.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 5.1f },
-                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.2f, maxSpeedMultiplier = 4.6f, fireInterval = 0.56f,  aimedShotChance = 0.5f,  arrowSpeed = 9f,   samuraiColor = new Color(0.75f, 0.9f, 1f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f, scouts = true },
-                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.4f, maxSpeedMultiplier = 4.8f, fireInterval = 0.52f, aimedShotChance = 0.55f, arrowSpeed = 9.5f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                new LevelConfig { columns = 11, rows = 5, topRowY = 8.5f, baseSpeed = 3f,   maxSpeedMultiplier = 4.4f, fireInterval = 0.85f, aimedShotChance = 0.5f,  arrowSpeed = 9f,   samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Ashigaru, SamuraiKind.Shieldbearer }, diveInterval = 5.1f,
+                    shape = FormationShape.Staggered, rowHealth = new[] { 0, 0, 2, 2, 0 }, volley = 2,
+                    fastArrowChance = 0.25f, toughArrowChance = 0.25f, guardedArrowChance = 0.1f, eliteHealth = 5 },
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.2f, maxSpeedMultiplier = 4.6f, fireInterval = 0.78f, aimedShotChance = 0.5f,  arrowSpeed = 9.3f, samuraiColor = new Color(0.75f, 0.9f, 1f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f, scouts = true,
+                    shape = FormationShape.Squads, squads = 3, squadGap = 1f, rowHealth = new[] { 0, 2, 0, 0, 0 }, volley = 2,
+                    fastArrowChance = 0.25f, toughArrowChance = 0.3f, guardedArrowChance = 0.12f, eliteHealth = 5 },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.4f, maxSpeedMultiplier = 4.8f, fireInterval = 1.05f, aimedShotChance = 0.55f, arrowSpeed = 9.8f, samuraiColor = new Color(0.75f, 0.9f, 1f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Taisho, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
-                    diveInterval = 3.4f, scouts = true },
+                    diveInterval = 3.4f, scouts = true,
+                    shape = FormationShape.Staggered, rowHealth = new[] { 0, 0, 0, 2, 0, 0 }, volley = 3,
+                    fastArrowChance = 0.3f, toughArrowChance = 0.3f, guardedArrowChance = 0.15f, eliteHealth = 5 },
             },
             boss = BossKind.Shirogane,
         },
         // The mountain shrine where the Night of a Thousand Bells was held: every kind of soldier he has, and his
-        // bellringers, whose tolls rouse the ranks. The army wears crimson and bronze, the court's colours.
+        // bellringers, whose tolls rouse the ranks. The army wears crimson and bronze, the court's colours. Its Elite
+        // takes six hits.
         new StageConfig
         {
             name = "The Mountain Shrine",
             rounds = new[]
             {
-                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.3f, maxSpeedMultiplier = 4.6f, fireInterval = 0.56f,  aimedShotChance = 0.5f,  arrowSpeed = 9f,   samuraiColor = new Color(1f, 0.55f, 0.4f),
-                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f },
-                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.5f, maxSpeedMultiplier = 4.8f, fireInterval = 0.53f, aimedShotChance = 0.55f, arrowSpeed = 9.5f, samuraiColor = new Color(1f, 0.55f, 0.4f),
+                new LevelConfig { columns = 12, rows = 5, topRowY = 8.6f, baseSpeed = 3.3f, maxSpeedMultiplier = 4.6f, fireInterval = 0.72f, aimedShotChance = 0.55f, arrowSpeed = 9.5f, samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Archer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer }, diveInterval = 4.2f,
+                    shape = FormationShape.Squads, squads = 2, squadGap = 1.5f, rowHealth = new[] { 0, 0, 2, 0, 0 }, volley = 2,
+                    fastArrowChance = 0.3f, toughArrowChance = 0.3f, guardedArrowChance = 0.15f, eliteHealth = 6 },
+                new LevelConfig { columns = 12, rows = 6, topRowY = 8.8f, baseSpeed = 3.5f, maxSpeedMultiplier = 4.8f, fireInterval = 1f,    aimedShotChance = 0.55f, arrowSpeed = 9.8f, samuraiColor = new Color(1f, 0.55f, 0.4f),
                     rowKinds = new[] { SamuraiKind.Bellringer, SamuraiKind.Taisho, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Shieldbearer },
-                    diveInterval = 3.8f, scouts = true },
-                new LevelConfig { columns = 13, rows = 6, topRowY = 9f,   baseSpeed = 3.6f, maxSpeedMultiplier = 5f,   fireInterval = 0.5f, aimedShotChance = 0.6f,  arrowSpeed = 10f,  samuraiColor = new Color(1f, 0.55f, 0.4f),
+                    diveInterval = 3.8f, scouts = true,
+                    shape = FormationShape.Staggered, rowHealth = new[] { 0, 0, 2, 0, 2, 0 }, volley = 3,
+                    fastArrowChance = 0.3f, toughArrowChance = 0.3f, guardedArrowChance = 0.18f, eliteHealth = 6 },
+                new LevelConfig { columns = 13, rows = 6, topRowY = 9f,   baseSpeed = 3.6f, maxSpeedMultiplier = 5f,   fireInterval = 0.9f,  aimedShotChance = 0.6f,  arrowSpeed = 10.3f, samuraiColor = new Color(1f, 0.55f, 0.4f),
                     rowKinds = new[] { SamuraiKind.Taisho, SamuraiKind.Bellringer, SamuraiKind.Yurei, SamuraiKind.Archer, SamuraiKind.Bellringer, SamuraiKind.Shieldbearer },
-                    diveInterval = 3f, scouts = true },
+                    diveInterval = 3f, scouts = true,
+                    shape = FormationShape.Squads, squads = 3, squadGap = 1f, rowHealth = new[] { 0, 0, 2, 2, 0, 0 }, volley = 3,
+                    fastArrowChance = 0.35f, toughArrowChance = 0.35f, guardedArrowChance = 0.2f, eliteHealth = 6 },
             },
             boss = BossKind.Kagetsune,
         },

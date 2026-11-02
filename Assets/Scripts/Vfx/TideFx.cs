@@ -3,8 +3,8 @@ using UnityEngine;
 
 // Asagi's waves, drawn from the TideWave clip at its native size and never stretched: Riptide's column wave is a run
 // of crests racing up the column, and the great wave (Undertow Riposte, Tide Shadow) is rows of crests side by side
-// across the whole field, each row breaking a moment after the one below it. Both return false when the clip is
-// missing, so the caller keeps its ElementFx.Wave.
+// across the whole field, each row breaking a moment after the one below it. A band is one row of crests across a
+// rolling wave's width (RollingWave). All return false when the clip is missing, so the caller keeps its fallback.
 public class TideFx : MonoBehaviour
 {
     // Up a column: a crest every ColumnStep units, each StepDelay seconds after the one below it.
@@ -47,6 +47,22 @@ public class TideFx : MonoBehaviour
                 float x = centre - halfWidth + shift + i * AcrossStep;
                 run.queue.Add((row * RowDelay + Random.Range(0f, RowJitter), new Vector3(x, y, 0f)));
             }
+        }
+        return true;
+    }
+
+    // One row of crests across a band `halfWidth` either side of `centre`, all at once (a RollingWave lays one every
+    // unit or so it travels, so the crests ride up with it). The crests are spread evenly so the band is covered
+    // edge to edge without stretching any of them.
+    public static bool Band(Vector3 centre, float halfWidth)
+    {
+        if (!Fx.Has(Fx.TideWave)) return false;
+        int across = Mathf.Max(1, Mathf.CeilToInt(2f * halfWidth / AcrossStep));
+        float gap = across > 1 ? (2f * halfWidth - AcrossStep) / (across - 1) : 0f;
+        float left = centre.x - (across - 1) * gap * 0.5f;
+        for (int i = 0; i < across; i++)
+        {
+            Fx.Play(Fx.TideWave, new Vector3(left + i * gap, centre.y, 0f), Color.white, 1f, null, Fx.UnderArrows);
         }
         return true;
     }

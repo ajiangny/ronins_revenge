@@ -346,9 +346,9 @@ public static class Boons
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
         new BoonDefinition { Id = BoonId.UndertowRiposte, Element = Element.Tide, Slot = BoonSlot.Parry, Name = "Undertow Riposte",
-            Description = "A successful <b>Parry</b> sends a wave that washes away the arrows around you, pushes the army back up the field and <b>Soaks</b> its front rank.",
-            StatLabel = "Push back:", Values = new[] { 0.3f, 0.45f, 0.6f }, Format = Plus,
-            LevelStep = 0.08f, Max = 0.9f },
+            Description = "A successful <b>Parry</b> sends a wave rolling up the field from you: arrows around you wash away, and every samurai it passes is pushed back and <b>Soaked</b>.",
+            StatLabel = "Push back:", Values = new[] { 1.0f, 1.2f, 1.4f }, Format = Plus,
+            LevelStep = 0.1f, Max = 1.6f },
         new BoonDefinition { Id = BoonId.TidalRenewal, Element = Element.Tide, Slot = BoonSlot.Passive, Name = "Tidal Renewal",
             Description = "The temple pond deepens your spirit. Gain <b>Max Lives</b>, filled at once (up to 5).",
             StatLabel = "Max lives:", Values = new[] { 1f, 1f, 2f }, Format = Plus, Instant = true },
@@ -358,7 +358,7 @@ public static class Boons
             LevelStep = -5f, Whole = true, Min = 15f },
 
         new BoonDefinition { Id = BoonId.TideShadow, Element = Element.Tide, Slot = BoonSlot.Ultimate, Name = "Tide Shadow",
-            Description = "Unleashing your <b>Shadow Clone</b> sends a great wave: every arrow washes away and the army is pushed back. Its kills <b>Soak</b> their neighbours.",
+            Description = "Unleashing your <b>Shadow Clone</b> sends a great wave rolling up the whole field: every arrow washes away and every samurai is pushed back. Its kills <b>Soak</b> their neighbours.",
             StatLabel = "Soak time:", Values = new[] { 3f, 4f, 5f }, Format = Seconds,
             LevelStep = 0.4f, Max = 8f },
 

@@ -61,7 +61,7 @@ public partial class Utsusemi
 
     // Escapement: the clock it winds. It rocks side to side like an escapement's anchor, and on every tick its core
     // spits a small fan of gear teeth at the ronin, the beat quickening as it goes. Every fourth tick is a bronze bell:
-    // parried, it rings out and bursts the teeth around it. Once unwound, crimson darts bracket him on the off-beats,
+    // parried, it rings out and bursts the teeth around it. Once unwound, violet darts bracket him on the off-beats,
     // so standing still is right as often as stepping.
     IEnumerator Escapement()
     {
@@ -111,7 +111,7 @@ public partial class Utsusemi
                 // Either side of him, a clear stretch between: the step he'd take is the one they punish.
                 foreach (float off in new[] { -1.9f, 1.9f })
                 {
-                    BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, (at + Vector3.right * off - from).normalized * 7.5f)), BulletHell.Crimson);
+                    BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, (at + Vector3.right * off - from).normalized * 7.5f)), BulletHell.Violet);
                 }
             }
             else BulletHell.Fan((f, v) => GearShot(f, v), from, at, 3, secondPhase ? 9f : 8f, secondPhase ? 7.5f : 6.5f);
@@ -350,13 +350,13 @@ public partial class Utsusemi
     // How often the stopped clock sends a ring through the frozen air while it holds.
     const float HeldPulse = 0.45f;
 
-    // A fragment of its burning lace, hung in stopped time: unparryable and through cover, but a cut breaks it.
-    // Without the phase-two lace art, a molten seal-dart.
+    // A fragment of its burning lace, hung in stopped time: unparryable, through cover, and blades break on it, so
+    // the only answer is to move. Without the phase-two lace art, a violet seal-dart.
     Arrow Needle(Vector3 from, Vector3 velocity)
     {
         Arrow shot = BulletHell.Enlist(Shoot(from, velocity));
         Sprite[] frames = Fx.Frames(Fx.UtsuLaceP2);
-        if (frames == null) return BulletHell.MakeSealDart(shot, Molten);
+        if (frames == null) return BulletHell.MakeSealDart(shot, BulletHell.Violet);
         shot.Restyle(frames, 8f, Color.white, new Vector2(0.85f, 0.85f), 0.27f, new Color(Molten.r, Molten.g, Molten.b, 0.45f), 1f);
         // Each hangs at its own tilt, like a shard caught mid-fall.
         shot.Art.transform.localRotation = Quaternion.Euler(0, 0, Random.Range(-20f, 20f));

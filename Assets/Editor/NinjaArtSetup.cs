@@ -299,6 +299,17 @@ public static class NinjaArtSetup
                 round.FindPropertyRelative("fireInterval").floatValue = level.fireInterval;
                 round.FindPropertyRelative("aimedShotChance").floatValue = level.aimedShotChance;
                 round.FindPropertyRelative("arrowSpeed").floatValue = level.arrowSpeed;
+                round.FindPropertyRelative("volley").intValue = level.volley;
+                round.FindPropertyRelative("fastArrowChance").floatValue = level.fastArrowChance;
+                round.FindPropertyRelative("toughArrowChance").floatValue = level.toughArrowChance;
+                round.FindPropertyRelative("guardedArrowChance").floatValue = level.guardedArrowChance;
+                round.FindPropertyRelative("shape").enumValueIndex = (int)level.shape;
+                round.FindPropertyRelative("squads").intValue = level.squads;
+                round.FindPropertyRelative("squadGap").floatValue = level.squadGap;
+                SerializedProperty health = round.FindPropertyRelative("rowHealth");
+                health.arraySize = level.rowHealth?.Length ?? 0;
+                for (int h = 0; h < health.arraySize; h++) health.GetArrayElementAtIndex(h).intValue = level.rowHealth[h];
+                round.FindPropertyRelative("eliteHealth").intValue = level.eliteHealth;
                 round.FindPropertyRelative("samuraiColor").colorValue = level.samuraiColor;
             }
         }

@@ -16,9 +16,24 @@ public class Arrow : MonoBehaviour
     [Tooltip("How long the Taisho's spear is drawn, in world units.")]
     [SerializeField] float spearLength = 1.4f;
 
+    // How far the ShotClass edge stands out round the art, in world units.
+    const float OutlineWidth = 0.05f;
+    // The shield ring's size against the art, and the ring sprite's radius in pixels (small, so its line reads thick).
+    const float ShieldSize = 0.9f;
+    const int ShieldRingRadius = 8;
+
     bool deflected;
     SpriteRenderer art;
     SpriteRenderer glow;
+    // The ShotClass edge (null without the flat material) and the ring a tough shot wears while it holds.
+    SpriteOutline outline;
+    SpriteRenderer shield;
+    // Something gave the halo its own colour (a restyle, a tint, a spear), which an open shot keeps over plain white.
+    bool glowSet;
+    // Dressed once Start has run; flags set before then (straight after Instantiate) are picked up there.
+    bool started;
+    bool unparryable, resonant;
+    int toughness = 1;
     Rigidbody body;
     Vector3 velocity;
     Quaternion heading;
@@ -46,13 +61,30 @@ public class Arrow : MonoBehaviour
     public Projectile Riposte { get; set; }
     // Told what a parry sent back in its place, so its thrower can dress it (the Emperor's skulls fly home as freed souls).
     public System.Action<Projectile> Parried { get; set; }
-    // A crimson seal-dart: the parry fizzles on it, so it can only be dodged.
-    public bool Unparryable { get; set; }
+    // A violet seal-dart: the parry fizzles on it, and blades break on it too, so it can only be dodged.
+    public bool Unparryable
+    {
+        get => unparryable;
+        set
+        {
+            unparryable = value;
+            if (value) Unbreakable = true;
+            Redress();
+        }
+    }
     // One of a bullet-hell curtain's: a parry sends only a few of these back (Ronin.RiposteCap) and pops the rest,
     // so a parry into a dense stream doesn't turn into a swarm of homing ripostes.
     public bool CappedRiposte { get; set; }
     // A bell (BulletHell.MakeResonant): the parry that opens a way, so Lodestone Shuriken leaves it flying.
-    public bool Resonant { get; set; }
+    public bool Resonant
+    {
+        get => resonant;
+        set
+        {
+            resonant = value;
+            Redress();
+        }
+    }
     // A Taisho's yari, the one thing Spear-Breaker may break. Set only at Samurai.Fire: MakeUnbreakable and DeathCause
     // also cover Utsusemi's hats and sword, and the tutorial's spears teach that a spear can't be cut.
     public bool CursedSpear { get; set; }
@@ -74,8 +106,40 @@ public class Arrow : MonoBehaviour
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
         art.sortingOrder = Mathf.Max(art.sortingOrder, DrawOrder);
-        glow = Projectile.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
+        // Two under the art, so the ShotClass edge (one under) sits between them.
+        glow = Projectile.CreateGlow(transform, 0.8f, art.sortingOrder - 2, glowColor);
         ArrowShadow.Attach(this);
+    }
+
+    // Whoever fired it has restyled and flagged it by now (they do it straight after Instantiate).
+    void Start()
+    {
+        started = true;
+        Dress();
+    }
+
+    // Draws its ShotClass: an edge round the art and, for red and violet, the halo in that colour too. An open shot
+    // keeps a halo something else coloured (a chilled or burning arrow, a yurei's, a boss's) and a bell keeps its
+    // bronze one. Safe to call again whenever its flags change: the edge is made once and recoloured after that.
+    public void Dress()
+    {
+        if (art == null) return;
+        ShotClass kind = ShotClasses.Of(this);
+        Color edge = ShotClasses.Edge(kind), shine = ShotClasses.Shimmer(kind);
+        if (outline != null) outline.Recolour(edge, shine);
+        else outline = SpriteOutline.Wrap(art, edge, shine, cardinal: true, worldThickness: OutlineWidth);
+        if (glow != null)
+        {
+            if (kind == ShotClass.Guarded || kind == ShotClass.Sealed) glow.color = ShotClasses.Glow(kind);
+            else if (kind == ShotClass.Open && !glowSet) glow.color = ShotClasses.OpenGlow;
+        }
+        ShowShield();
+    }
+
+    // Flags changed after it was dressed: dress it again. Before Start, Start does it.
+    void Redress()
+    {
+        if (started) Dress();
     }
 
     // Turns an arrow into another kind of shot (a smoke ring, a slash wave). artSize is in world units;
@@ -87,10 +151,16 @@ public class Arrow : MonoBehaviour
         Vector2 spriteSize = sprite.bounds.size;
         art.transform.localScale = new Vector3(artSize.x / spriteSize.x, artSize.y / spriteSize.y, 1f);
         glow.color = glowTint;
+        glowSet = true;
         glow.transform.localScale = Vector3.one * glowSize;
         // The prefab's hitbox is a capsule; restyled shots use it as a ball of the given radius.
         Collider hitbox = GetComponentInChildren<Collider>();
-        if (hitbox == null) return;
+        if (hitbox != null) FitHitbox(hitbox, hitRadius);
+        Redress();
+    }
+
+    void FitHitbox(Collider hitbox, float hitRadius)
+    {
         float local = hitRadius / Mathf.Max(hitbox.transform.lossyScale.x, hitbox.transform.lossyScale.y);
         switch (hitbox)
         {
@@ -119,6 +189,8 @@ public class Arrow : MonoBehaviour
     {
         art.color = color;
         glow.color = glowTint;
+        glowSet = true;
+        Redress();
     }
 
     // A set piece is a parry-only move (the hour cleave, the Last Toll): sent home, it fills most of a stance meter.
@@ -126,6 +198,7 @@ public class Arrow : MonoBehaviour
     {
         ReflectTarget = target;
         SetPiece = setPiece;
+        Redress();
     }
 
     public bool SetPiece { get; private set; }
@@ -144,15 +217,17 @@ public class Arrow : MonoBehaviour
     {
         Unbreakable = true;
         BreaksOnCover = true;
+        Redress();
     }
 
     // Unbreakable in its own look, for a boss shot that draws itself (Utsusemi's hour cleave).
     public void MakeUnbreakable()
     {
         Unbreakable = true;
+        Redress();
     }
 
-    // Swaps in the Taisho's yari and gives it a pulsing crimson halo so it reads as a different threat from plain arrows.
+    // Swaps in the Taisho's yari and gives it a pulsing red halo so it reads as a different threat from plain arrows.
     // Without spear art, a darkened, bigger arrow stands in.
     public void MakeUnbreakable(Sprite spear)
     {
@@ -173,15 +248,24 @@ public class Arrow : MonoBehaviour
         }
         else
         {
-            art.color = new Color(0.55f, 0.35f, 0.75f);
+            // A dark rust red: violet is kept for shots that can only be dodged.
+            art.color = new Color(0.55f, 0.22f, 0.2f);
             art.transform.localScale *= 1.35f;
         }
         glow.color = new Color(1f, 0.1f, 0.2f, 0.6f);
+        glowSet = true;
         glow.transform.localScale *= 1.4f;
+        Redress();
     }
 
     void Update()
     {
+        // A tough shot's shield breathes gently while it holds.
+        if (shield != null && shield.enabled)
+        {
+            shield.color = new Color(1f, 1f, 1f, 0.8f * (0.75f + 0.25f * Mathf.Sin(Time.time * 5f)));
+        }
+        // Pulses the halo's strength only, keeping the hue its ShotClass gave it.
         if (!Unbreakable) return;
         float pulse = 0.45f + 0.25f * Mathf.Sin(Time.time * 14f);
         glow.color = new Color(glow.color.r, glow.color.g, glow.color.b, pulse);
@@ -291,6 +375,13 @@ public class Arrow : MonoBehaviour
             ShatterToIron();
             return;
         }
+        // A guarded army arrow shrugs off blades like a spear but, unlike one, still ends on cover: it falls through to
+        // the plain arrow's end below, and the blocker takes its own hit as usual.
+        else if (BreaksOnCover && coll.collider.GetComponentInParent<Blocker>() != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
         else if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
         {
             KeepFlying(coll.collider);
@@ -309,8 +400,45 @@ public class Arrow : MonoBehaviour
         Destroy(gameObject);
     }
 
-    // How many plain slashes it takes to cut this shot down.
-    public int Toughness { get; set; } = 1;
+    // How many plain slashes it takes to cut this shot down. Above one it wears a white shield ring, which shrinks
+    // with each cut and is gone at the last.
+    public int Toughness
+    {
+        get => toughness;
+        set
+        {
+            toughness = value;
+            ShowShield();
+        }
+    }
+
+    void ShowShield()
+    {
+        if (art == null) return;
+        if (toughness <= 1)
+        {
+            if (shield != null) shield.enabled = false;
+            return;
+        }
+        if (shield == null)
+        {
+            shield = new GameObject("Shield").AddComponent<SpriteRenderer>();
+            shield.transform.SetParent(transform, false);
+            shield.sprite = ProceduralSprites.Ring(ShieldRingRadius);
+            shield.color = new Color(1f, 1f, 1f, 0.8f);
+        }
+        shield.enabled = true;
+        shield.sortingLayerID = art.sortingLayerID;
+        shield.sortingOrder = art.sortingOrder + 1;
+        // Sized to the art as drawn now (a restyle rescales it), a little bigger for each extra cut it holds. The ring
+        // sprite is drawn squashed for the pool's perspective, so it's stretched back to a circle.
+        Vector2 drawn = Vector2.Scale(art.sprite != null ? (Vector2)art.sprite.bounds.size : Vector2.one, art.transform.lossyScale);
+        float size = Mathf.Max(Mathf.Abs(drawn.x), Mathf.Abs(drawn.y)) * ShieldSize * (1f + 0.15f * (toughness - 2));
+        Vector2 ring = shield.sprite.bounds.size;
+        Vector3 parent = transform.lossyScale;
+        shield.transform.localScale = new Vector3(size / ring.x / Mathf.Max(0.0001f, parent.x),
+            size / ring.y / Mathf.Max(0.0001f, parent.y), 1f);
+    }
 
     // Wildfire: a fire blast burns the arrow away.
     public void Burn(Color fire)

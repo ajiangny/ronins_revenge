@@ -82,8 +82,9 @@ public partial class GameManager
         return sworn;
     }
 
-    // A round past the stage's configured ones: its last round again, marching faster and shooting more often, with
-    // a commander in the back rank and, from the second extra round, one more rank (up to six).
+    // A round past the stage's configured ones: its last round again (same formation, volleys and arrow rolls), marching
+    // faster and shooting more often, with a tougher Elite, a commander in the back rank and, from the second extra
+    // round, one more rank (up to six).
     LevelConfig ExtraRound()
     {
         int key = stageIndex * 100 + roundIndex;
@@ -111,6 +112,17 @@ public partial class GameManager
             fireInterval = last.fireInterval * Mathf.Pow(1f - extraRoundFireCut, extra),
             aimedShotChance = Mathf.Min(0.7f, last.aimedShotChance + 0.05f * extra),
             arrowSpeed = last.arrowSpeed,
+            volley = last.volley,
+            fastArrowChance = last.fastArrowChance,
+            toughArrowChance = last.toughArrowChance,
+            guardedArrowChance = last.guardedArrowChance,
+            shape = last.shape,
+            squads = last.squads,
+            squadGap = last.squadGap,
+            // The rows keep their order (only the back gains a rank), so the veteran rows stay where they were.
+            rowHealth = last.rowHealth,
+            // Each extra round's Elite takes one more hit than the stage's last.
+            eliteHealth = last.eliteHealth + 1,
             samuraiColor = last.samuraiColor,
         };
         extraRoundFor = key;
@@ -205,6 +217,12 @@ public partial class GameManager
         }
 
         LevelConfig round = Sworn(Round);
+        // Poguru's practice armies have no Elite. Sworn may hand back the stage's own config, so it's copied first.
+        if (tutorial.Active && round.eliteHealth > 0)
+        {
+            round = round.Clone();
+            round.eliteHealth = 0;
+        }
         army.SpawnStage(round, ronin.transform, ronin.TopY, blockers.TopY);
         ui.SetStage(stageIndex + 1, stages.Length, roundIndex + 1, 0);
         string body = roundIndex >= Stage.rounds.Length + 1 ? "Their finest march."
@@ -266,11 +284,13 @@ public partial class GameManager
         var kinds = new HashSet<SamuraiKind>();
         foreach (Samurai soldier in army.Soldiers) kinds.Add(soldier.Kind);
         foreach (SamuraiKind kind in kinds) Save.Meet(Foes.Of(kind));
+        if (army.Elite != null) Save.Meet(Foes.Elite);
     }
 
     void OnSamuraiKilled(Samurai samurai, KillSource source)
     {
         Save.FoeKilled(Foes.Of(samurai.Kind));
+        if (samurai.IsElite) Save.FoeKilled(Foes.Elite);
         RunLog.Kill(source);
         Earn(Upgrades.PerSamurai);
         score += samurai.Points * (stageIndex + 1);
@@ -287,6 +307,13 @@ public partial class GameManager
         effects.OnKill(samurai, source);
         // A boss's levy drops no souls or scrolls: a boon screen mid-fight would stop the duel.
         if (activeBoss != null) return;
+        // The Elite always lets a soul slip free, even as the round's last kill (when MaybeDropSoul gives nothing); with
+        // one already falling it pays a scout's notes instead.
+        if (samurai.IsElite && !tutorial.Active)
+        {
+            if (activeSoul == null) SpawnSoul(samurai.transform.position, PickSoulElement());
+            else Earn(Upgrades.PerScout);
+        }
         if (killSoulsThisStage < killSoulsPerStage && Random.value < killSoulChance && activeSoul == null && army.Remaining > 0)
         {
             killSoulsThisStage++;
@@ -315,12 +342,12 @@ public partial class GameManager
         if (state == State.Playing && !hitStopping) StartCoroutine(HitStop(parryHitStop));
     }
 
-    // The first time a parry meets a crimson shot it can't turn, the game says so once.
+    // The first time a parry meets a violet shot it can't turn, the game says so once.
     void OnParryFizzled()
     {
         if (toldUnparryable || state != State.Playing) return;
         toldUnparryable = true;
-        ui.ShowSubtitle(null, "Some blows can't be turned. Dodge the crimson.", BulletHell.Crimson, 3f);
+        ui.ShowSubtitle(null, "Some blows can't be turned. Dodge the violet.", BulletHell.Violet, 3f);
     }
 
     void OnStatueShattered(Vector3 position, bool soaked)

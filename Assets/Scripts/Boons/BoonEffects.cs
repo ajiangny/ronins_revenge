@@ -42,12 +42,19 @@ public partial class BoonEffects
     // Storm Step's static reaches arrows this far from him. Static Charge's shuriken jolts what it passes this close.
     const float StaticReach = 2.4f;
     const float ChargedShurikenReach = 1.2f;
-    // Tide Shadow's great wave pushes the army back this far.
-    const float TideShadowPush = 0.6f;
+    // Tide Shadow's great wave pushes each samurai it passes back this far (SamuraiArmy.Shove caps it).
+    const float TideShadowPush = 1f;
     // Riptide Blade soaks the boss on this share of its kill chance, like Flame Blade's bursts.
     const float BossRiptideShare = 0.6f;
     // Undertow Riposte's wave also washes away the arrows this close round him as it rolls out.
     const float UndertowWashRadius = 3.5f;
+    // Undertow Riposte's wave is a band this far either side of him, rolling up the field at WaveSpeed.
+    const float UndertowHalfWidth = 1.3f;
+    const float WaveSpeed = 16f;
+    // Riptide Blade's column wave is narrower and faster.
+    const float ColumnWaveSpeed = 20f;
+    // A fire blast's survivors are knocked back this far, so the explosion is felt by the ones it doesn't kill.
+    const float BlastShove = 0.35f;
 
     readonly SamuraiArmy army;
     readonly Ronin ronin;
@@ -129,7 +136,7 @@ public partial class BoonEffects
                     foreach (Samurai target in army.SamuraiWithin(position, IceRadius)) target.Ignite(Statuses.BurnSeconds);
                 }
                 if (loadout.Has(BoonId.FlameBlade, out value) && FlameBursts(1f)) Blast(position, BlastRadius, (int)value, samurai);
-                if (loadout.Has(BoonId.RiptideBlade, out _) && !TideSlashing && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(samurai.Column, position, Statuses.SoakSeconds);
+                if (loadout.Has(BoonId.RiptideBlade, out _) && !TideSlashing && Random.value < loadout.Extra(BoonId.RiptideBlade)) ColumnWave(position, Statuses.SoakSeconds);
                 if (loadout.Has(BoonId.FrostBlade, out value))
                 {
                     EncaseOrChill(position, value);
@@ -246,19 +253,27 @@ public partial class BoonEffects
     const float CloneBossShare = 0.25f;
 
     // Frost Shadow: the clone comes out in a wave of frost that freezes the army (or holds the boss a moment).
-    // Tide Shadow: a great wave that washes every arrow away and rolls the army back (or soaks the boss).
+    // Tide Shadow: a great wave that washes every arrow away and rolls up the whole field, pushing back every samurai
+    // it passes (or soaks the boss).
     public void OnUltimateStarted(Vector3 at)
     {
         if (loadout.Has(BoonId.TideShadow, out float soak))
         {
+            WashArrows(at, float.MaxValue);
             if (BossFight)
             {
                 foreach (Boss boss in Bosses) boss.Soak(soak);
                 if (WolfFight) Wolf.Soak(soak);
+                GreatWave(at, Boss.Centre);
             }
-            else if (army.Remaining > 0) army.PushBack(TideShadowPush * Statuses.PushScale);
-            WashArrows(at, float.MaxValue);
-            GreatWave(at, BossFight ? Boss.Centre : army.Centre);
+            else
+            {
+                // Centred on the view, a little wider than it, so the samurai at the edges are caught too.
+                RollingWave.Roll(army, new Vector3(CameraShake.Center.x, at.y), ViewHalfWidth() + 1f, WaveSpeed,
+                    TideShadowPush * Statuses.PushScale, 0f, Water);
+                CameraShake.Add(0.15f);
+                Sfx.Play(Sfx.TideWave);
+            }
         }
         // Steel Shadow, above Frost Shadow's early return.
         if (loadout.Has(BoonId.SteelShadow, out float crack) && (BossFight || army.Remaining > 0)) UnleashSteelShadow(at, crack);
@@ -447,13 +462,14 @@ public partial class BoonEffects
             }
             return;
         }
-        // Undertow Riposte: a wave rolls up from him, pushes the army back and soaks its front rank.
+        // Undertow Riposte: a wave rolls up the field from him, pushing back and soaking each samurai it passes.
         if (loadout.Has(BoonId.UndertowRiposte, out value) && army.Remaining > 0)
         {
-            army.PushBack(value * Statuses.PushScale);
-            foreach (Samurai front in army.FrontRank()) front.Soak(UndertowSoakSeconds);
-            WashArrows(ronin.Bounds.center, UndertowWashRadius);
-            GreatWave(ronin.Bounds.center, army.Centre);
+            Vector3 at = ronin.Bounds.center;
+            WashArrows(at, UndertowWashRadius);
+            RollingWave.Roll(army, at, UndertowHalfWidth, WaveSpeed, value * Statuses.PushScale, UndertowSoakSeconds, Water);
+            CameraShake.Add(0.1f);
+            Sfx.Play(Sfx.TideWave);
         }
         if (loadout.Has(BoonId.ThunderRiposte, out value))
         {
@@ -528,7 +544,10 @@ public partial class BoonEffects
         foreach (Samurai target in army.SamuraiWithin(position, radius))
         {
             if (burned++ < most) target.TakeHit(thermal && (target.Encased || army.Frozen) ? (int)iceDamage : 1, KillSource.Effect);
-            if (!target.IsDead) target.Ignite(Statuses.BurnSeconds);
+            if (target.IsDead) continue;
+            target.Ignite(Statuses.BurnSeconds);
+            // The ones it doesn't kill (veterans, Elites, those past its few) are thrown back by it, so it lands.
+            army.Shove(target, BlastShove);
         }
         BurnArrows(position, radius);
         if (steam) WashArrows(position, radius);
@@ -557,33 +576,19 @@ public partial class BoonEffects
         }
     }
 
-    // Riptide Blade: a wave runs up the victim's column from where it fell, soaking every samurai in the column and
-    // washing away the arrows in that lane.
-    void ColumnWave(int column, Vector3 from, float soak)
+    // Riptide Blade: a narrow, fast wave runs up the victim's lane from just below where it fell, soaking every
+    // samurai it passes (whatever the formation's shape, so a staggered column is followed by its x, not its index)
+    // and washing away the arrows in that lane.
+    void ColumnWave(Vector3 from, float soak)
     {
         if (army.Remaining == 0) return;
-        float top = from.y;
-        foreach (Samurai soldier in army.Soldiers)
-        {
-            if (soldier.IsDead) continue;
-            // The loose last row has left its columns: the wave soaks whoever stands in its lane.
-            if (army.IsLoose(soldier) ? Mathf.Abs(soldier.Body.position.x - from.x) > ColumnHalfWidth : soldier.Column != column) continue;
-            soldier.Soak(soak);
-            top = Mathf.Max(top, soldier.Body.position.y);
-        }
-        foreach (Arrow arrow in Object.FindObjectsByType<Arrow>())
-        {
-            if (arrow.Unbreakable || arrow.Reflectable) continue;
-            if (Mathf.Abs(arrow.transform.position.x - from.x) <= ColumnHalfWidth && arrow.transform.position.y >= from.y - 1f) arrow.Wash(Water);
-        }
-        Vector3 crest = new Vector3(from.x, top + 1f, 0f);
-        if (!TideFx.Column(from, crest)) ElementFx.Wave(from, crest, Water, 2f, 0.45f, ronin.art.deathParticles);
+        RollingWave.Roll(army, from + Vector3.down, ColumnHalfWidth, ColumnWaveSpeed, 0f, soak, Water);
         CameraShake.Add(0.06f);
         Sfx.Play(Sfx.TideWave, 0.8f, 1.1f);
     }
 
-    // Undertow Riposte and Tide Shadow: a wave the width of the field rolls up from `from` toward `to`, in rows of
-    // native-size crests (TideFx.Great).
+    // Undertow Riposte and Tide Shadow in a boss fight: a wave the width of the field rolls up from `from` toward
+    // `to`, in rows of native-size crests (TideFx.Great).
     void GreatWave(Vector3 from, Vector3 to)
     {
         if (!TideFx.Great(from, to)) ElementFx.Wave(from, to, Water, 7f, 0.6f, ronin.art.deathParticles);
@@ -593,6 +598,13 @@ public partial class BoonEffects
 
     // Undertow Riposte's wave and Tide Shadow's boss soak have no time of their own on the card: a short, fixed one.
     const float UndertowSoakSeconds = 3f;
+
+    // Half the view's width, from the resting camera.
+    static float ViewHalfWidth()
+    {
+        Camera cam = Camera.main;
+        return cam != null ? cam.orthographicSize * cam.aspect : 9f;
+    }
 
     void SoakBoss(Boss boss, Vector3 point, float seconds)
     {

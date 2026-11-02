@@ -11,6 +11,8 @@ using UnityEngine;
 public static class Statuses
 {
     public const float BurnSeconds = 3f;
+    // A Burning soldier with more than one hit point loses one (two if Soaked) this often, never its last (Samurai.UpdateBurn).
+    public const float BurnTick = 1.5f;
     public const float ChillSeconds = 4f;
     public const float JoltSeconds = 4f;
     public const float CrackSeconds = 4f;

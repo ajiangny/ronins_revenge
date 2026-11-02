@@ -101,7 +101,7 @@ public static class Fx
     public const string KageOfuda = "Kage_Ofuda";
     public const string KageGreatBell = "Kage_GreatBell";
     public const string KageCoffin = "Kage_Coffin";
-    // The bullet-hell kit's: the bronze bell-shot a parry rings into Resonance, and the crimson seal-dart no parry turns.
+    // The bullet-hell kit's: the bronze bell-shot a parry rings into Resonance, and the violet seal-dart no parry turns.
     public const string KageBellShot = "Kage_BellShot";
     public const string KageSealDart = "Kage_SealDart";
     // His set dressing: a hanging bell for the Night of a Thousand Bells, a chain link drawn tiled along its length,

@@ -1508,6 +1508,15 @@ MonoBehaviour:
       fireInterval: 0.8
       aimedShotChance: 0.3
       arrowSpeed: 7
+      volley: 1
+      fastArrowChance: 0
+      toughArrowChance: 0
+      guardedArrowChance: 0
+      shape: 0
+      squads: 1
+      squadGap: 1
+      rowHealth: 
+      eliteHealth: 4
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 9
       rows: 4
@@ -1520,6 +1529,15 @@ MonoBehaviour:
       fireInterval: 0.72
       aimedShotChance: 0.35
       arrowSpeed: 7.5
+      volley: 1
+      fastArrowChance: 0
+      toughArrowChance: 0
+      guardedArrowChance: 0
+      shape: 0
+      squads: 1
+      squadGap: 1
+      rowHealth: 
+      eliteHealth: 4
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     - columns: 10
       rows: 4
@@ -1532,6 +1550,15 @@ MonoBehaviour:
       fireInterval: 0.64
       aimedShotChance: 0.4
       arrowSpeed: 8
+      volley: 1
+      fastArrowChance: 0
+      toughArrowChance: 0
+      guardedArrowChance: 0
+      shape: 1
+      squads: 1
+      squadGap: 1
+      rowHealth: 
+      eliteHealth: 4
       samuraiColor: {r: 0, g: 0.98, b: 0.6, a: 1}
     boss: 1
     roundsMap:
@@ -1656,9 +1683,18 @@ MonoBehaviour:
       diveInterval: 7
       baseSpeed: 2.6
       maxSpeedMultiplier: 4
-      fireInterval: 0.68
+      fireInterval: 0.6
       aimedShotChance: 0.4
-      arrowSpeed: 8
+      arrowSpeed: 8.2
+      volley: 1
+      fastArrowChance: 0.15
+      toughArrowChance: 0.15
+      guardedArrowChance: 0
+      shape: 2
+      squads: 2
+      squadGap: 1.5
+      rowHealth: 00000000020000000000000000000000i
+      eliteHealth: 4
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     - columns: 11
       rows: 4
@@ -1668,9 +1704,18 @@ MonoBehaviour:
       diveInterval: 5.1
       baseSpeed: 2.8
       maxSpeedMultiplier: 4.2
-      fireInterval: 0.64
-      aimedShotChance: 0.4
-      arrowSpeed: 8
+      fireInterval: 1.05
+      aimedShotChance: 0.45
+      arrowSpeed: 8.4
+      volley: 2
+      fastArrowChance: 0.2
+      toughArrowChance: 0.2
+      guardedArrowChance: 0
+      shape: 1
+      squads: 1
+      squadGap: 1
+      rowHealth: 0200000000000000i
+      eliteHealth: 4
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     - columns: 11
       rows: 5
@@ -1680,9 +1725,18 @@ MonoBehaviour:
       diveInterval: 4.2
       baseSpeed: 3
       maxSpeedMultiplier: 4.4
-      fireInterval: 0.6
+      fireInterval: 0.95
       aimedShotChance: 0.45
-      arrowSpeed: 8.5
+      arrowSpeed: 8.8
+      volley: 2
+      fastArrowChance: 0.2
+      toughArrowChance: 0.25
+      guardedArrowChance: 0
+      shape: 2
+      squads: 3
+      squadGap: 1
+      rowHealth: 0000000002000000000000000000000000000000i
+      eliteHealth: 4
       samuraiColor: {r: 0.4, g: 0.6, b: 1, a: 1}
     boss: 2
     roundsMap:
@@ -1807,9 +1861,18 @@ MonoBehaviour:
       diveInterval: 5.1
       baseSpeed: 3
       maxSpeedMultiplier: 4.4
-      fireInterval: 0.6
-      aimedShotChance: 0.45
-      arrowSpeed: 8.5
+      fireInterval: 0.85
+      aimedShotChance: 0.5
+      arrowSpeed: 9
+      volley: 2
+      fastArrowChance: 0.25
+      toughArrowChance: 0.25
+      guardedArrowChance: 0.1
+      shape: 1
+      squads: 1
+      squadGap: 1
+      rowHealth: 0000000000000000020000000200000000000000i
+      eliteHealth: 5
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     - columns: 12
       rows: 5
@@ -1819,9 +1882,18 @@ MonoBehaviour:
       diveInterval: 4.2
       baseSpeed: 3.2
       maxSpeedMultiplier: 4.6
-      fireInterval: 0.56
+      fireInterval: 0.78
       aimedShotChance: 0.5
-      arrowSpeed: 9
+      arrowSpeed: 9.3
+      volley: 2
+      fastArrowChance: 0.25
+      toughArrowChance: 0.3
+      guardedArrowChance: 0.12
+      shape: 2
+      squads: 3
+      squadGap: 1
+      rowHealth: 0000000002000000000000000000000000000000i
+      eliteHealth: 5
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     - columns: 12
       rows: 6
@@ -1831,9 +1903,18 @@ MonoBehaviour:
       diveInterval: 3.4
       baseSpeed: 3.4
       maxSpeedMultiplier: 4.8
-      fireInterval: 0.52
+      fireInterval: 1.05
       aimedShotChance: 0.55
-      arrowSpeed: 9.5
+      arrowSpeed: 9.8
+      volley: 3
+      fastArrowChance: 0.3
+      toughArrowChance: 0.3
+      guardedArrowChance: 0.15
+      shape: 1
+      squads: 1
+      squadGap: 1
+      rowHealth: 000000000000000000000000020000000000000000000000i
+      eliteHealth: 5
       samuraiColor: {r: 0.75, g: 0.9, b: 1, a: 1}
     boss: 3
     roundsMap:
@@ -1958,9 +2039,18 @@ MonoBehaviour:
       diveInterval: 4.2
       baseSpeed: 3.3
       maxSpeedMultiplier: 4.6
-      fireInterval: 0.56
-      aimedShotChance: 0.5
-      arrowSpeed: 9
+      fireInterval: 0.72
+      aimedShotChance: 0.55
+      arrowSpeed: 9.5
+      volley: 2
+      fastArrowChance: 0.3
+      toughArrowChance: 0.3
+      guardedArrowChance: 0.15
+      shape: 2
+      squads: 2
+      squadGap: 1.5
+      rowHealth: 0000000000000000020000000000000000000000i
+      eliteHealth: 6
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     - columns: 12
       rows: 6
@@ -1970,9 +2060,18 @@ MonoBehaviour:
       diveInterval: 3.8
       baseSpeed: 3.5
       maxSpeedMultiplier: 4.8
-      fireInterval: 0.53
+      fireInterval: 1
       aimedShotChance: 0.55
-      arrowSpeed: 9.5
+      arrowSpeed: 9.8
+      volley: 3
+      fastArrowChance: 0.3
+      toughArrowChance: 0.3
+      guardedArrowChance: 0.18
+      shape: 1
+      squads: 1
+      squadGap: 1
+      rowHealth: 000000000000000002000000000000000200000000000000i
+      eliteHealth: 6
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     - columns: 13
       rows: 6
@@ -1982,9 +2081,18 @@ MonoBehaviour:
       diveInterval: 3
       baseSpeed: 3.6
       maxSpeedMultiplier: 5
-      fireInterval: 0.5
+      fireInterval: 0.9
       aimedShotChance: 0.6
-      arrowSpeed: 10
+      arrowSpeed: 10.3
+      volley: 3
+      fastArrowChance: 0.35
+      toughArrowChance: 0.35
+      guardedArrowChance: 0.2
+      shape: 2
+      squads: 3
+      squadGap: 1
+      rowHealth: 000000000000000002000000020000000000000000000000i
+      eliteHealth: 6
       samuraiColor: {r: 1, g: 0.55, b: 0.4, a: 1}
     boss: 4
     roundsMap:

@@ -19,9 +19,11 @@ public static class BulletHell
     public const int Budget = 140;
     public const float ResonanceRadius = 2.5f;
 
-    // The colour language every fight keeps: crimson can't be parried, bronze is the parry that opens a way.
+    // The colour language every fight keeps (ShotClass, drawn by Arrow.Dress): white can be cut or parried, red only
+    // parried, violet only dodged, and bronze is the parry that opens a way.
     public static readonly Color Bronze = new Color(0.88f, 0.62f, 0.32f);
     public static readonly Color Crimson = new Color(0.95f, 0.15f, 0.12f);
+    public static readonly Color Violet = ShotClasses.SealedEdge;
 
     public delegate Arrow Shooter(Vector3 from, Vector3 velocity);
 
@@ -230,13 +232,15 @@ public static class BulletHell
         return shot;
     }
 
-    // Dresses a shot as a crimson seal-dart: the parry fizzles on it, and cover doesn't stop it.
+    // Dresses a shot as a violet seal-dart: the parry fizzles on it, and cover doesn't stop it. The art is only half
+    // tinted, so the violet edge and halo of its ShotClass are what read.
     public static Arrow MakeSealDart(Arrow shot, Color tint)
     {
         if (shot == null) return null;
         Sprite[] frames = Fx.Frames(Fx.KageSealDart);
-        if (frames != null) shot.Restyle(frames, 10f, tint, new Vector2(0.45f, 1.1f), 0.22f, new Color(tint.r, tint.g, tint.b, 0.5f), 1.1f);
-        else shot.Restyle(ProceduralSprites.White, tint, new Vector2(0.16f, 0.9f), 0.22f, new Color(tint.r, tint.g, tint.b, 0.55f), 1.1f);
+        Color art = Color.Lerp(Color.white, tint, 0.5f);
+        if (frames != null) shot.Restyle(frames, 10f, art, new Vector2(0.45f, 1.1f), 0.22f, ShotClasses.SealedGlow, 1.1f);
+        else shot.Restyle(ProceduralSprites.White, art, new Vector2(0.16f, 0.9f), 0.22f, ShotClasses.SealedGlow, 1.1f);
         shot.Unparryable = true;
         shot.PassesCover = true;
         return shot;

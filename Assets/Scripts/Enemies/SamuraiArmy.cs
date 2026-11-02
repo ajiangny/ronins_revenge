@@ -28,6 +28,8 @@ public partial class SamuraiArmy : MonoBehaviour
     [SerializeField] float spearInterval = 4.5f;
     [Tooltip("Taisho take this many hits to fall.")]
     [SerializeField] int taishoHealth = 2;
+    [Tooltip("An army arrow rolled fast (LevelConfig.fastArrowChance) flies this many times arrowSpeed.")]
+    [SerializeField] float fastArrowScale = 1.25f;
     [Tooltip("Shieldbearers take this many hits to fall.")]
     [SerializeField] int shieldHealth = 2;
     [Tooltip("The Bellringer's own look. Wired by Ninja/Apply Sprite Art; empty draws it as a bronze-tinted Bushi.")]
@@ -42,6 +44,8 @@ public partial class SamuraiArmy : MonoBehaviour
     [SerializeField] int bellHealth = 2;
     [Tooltip("Average seconds between tolls. One living bellringer rings each time.")]
     [SerializeField] float bellInterval = 6f;
+    [Tooltip("Average seconds between the Elite's own shots, on top of the army's fire.")]
+    [SerializeField] float eliteFireInterval = 2.4f;
     [Tooltip("Seconds a bellringer glows before its bell tolls.")]
     [SerializeField] float tollWarning = 0.6f;
     [Tooltip("Seconds the army fires faster after a toll.")]
@@ -183,8 +187,6 @@ public partial class SamuraiArmy : MonoBehaviour
     float ringAt;
     float landingY;
     float blockerTopY;
-    // Where the top rank stood once the march-in ended: the tide never pushes the army back above it.
-    float spawnTopY;
     float frozenUntil;
     float shownFrost;
     float marchTravel;
@@ -236,7 +238,6 @@ public partial class SamuraiArmy : MonoBehaviour
         dropRemaining = 0f;
         frozenUntil = 0f;
         shownFrost = 0f;
-        spawnTopY = config.topRowY;
 
         float spacingX = SpacingFor(config);
         // The formation starts with its front rank just above the view, then MarchIn brings it down to its slots.
@@ -448,6 +449,7 @@ public partial class SamuraiArmy : MonoBehaviour
         nextSpearTime = Time.time + spearInterval;
         nextDiveTime = Time.time + level.diveInterval;
         nextBellTime = Time.time + bellInterval;
+        nextEliteShot = Time.time + eliteFireInterval;
         hasteUntil = 0f;
         ringing = null;
     }
@@ -471,6 +473,7 @@ public partial class SamuraiArmy : MonoBehaviour
         dives.Clear();
         advancing = false;
         Entering = false;
+        elite = null;
         samuraiCounter.SetCount(0);
     }
 
@@ -838,36 +841,6 @@ public partial class SamuraiArmy : MonoBehaviour
         marchBeat = (marchBeat + 1) % MarchPitches.Length;
     }
 
-    // Asagi's tide: lifts the whole formation back up the field by `units`, undoing march steps, never above where
-    // it spawned. Divers' slots move with it so they glide back into the right place. The loose last row is lifted too
-    // and keeps walking on its own, sinking back at the march's pace (rejoining the formation would spread it edge to
-    // edge, so it would turn and drop at once). An army lifted clear of the last row holds afresh when it gets back.
-    public void PushBack(float units)
-    {
-        if (soldiers.Count == 0 || Entering || units <= 0f) return;
-        float top = float.NegativeInfinity;
-        foreach (Samurai soldier in soldiers)
-        {
-            if (!IsDiving(soldier)) top = Mathf.Max(top, soldier.Body.position.y);
-        }
-        if (top == float.NegativeInfinity) return;
-        float lift = Mathf.Min(units, spawnTopY - top);
-        if (lift <= 0f) return;
-        Vector3 step = Vector3.up * lift;
-        foreach (Dive dive in dives) dive.slot += step;
-        // Set, not MovePosition: the kinematic bodies only queue a MovePosition for the next physics step, and the
-        // march's own MovePosition in FixedUpdate would replace it with the old position plus a step.
-        foreach (Samurai soldier in soldiers)
-        {
-            if (IsDiving(soldier)) continue;
-            Vector3 at = soldier.Body.position + step;
-            soldier.transform.position = at;
-            soldier.Body.position = at;
-        }
-        if (lastBottom < float.PositiveInfinity) lastBottom += lift;
-        if (holding && lastBottom - samuraiRadius > HoldY + 0.2f) holding = false;
-    }
-
     // The lowest rank in formation: the samurai a wave breaking on the front soaks.
     public List<Samurai> FrontRank()
     {
@@ -904,6 +877,7 @@ public partial class SamuraiArmy : MonoBehaviour
         frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
         nextShotTime = Mathf.Max(nextShotTime, frozenUntil + 0.3f);
         nextSpearTime = Mathf.Max(nextSpearTime, frozenUntil + 0.3f);
+        nextEliteShot = Mathf.Max(nextEliteShot, frozenUntil + 0.3f);
         UpdateFrostTint();
     }
 
@@ -936,12 +910,34 @@ public partial class SamuraiArmy : MonoBehaviour
         }
     }
 
-    // Only the front soldier of a column fires, so shots never come from behind the front line.
+    // Only the front soldier of a column fires, so shots never come from behind the front line. Each call is one
+    // volley: level.volley shooters from spread-out columns, with fireInterval the average seconds between volleys.
     void FireShot()
     {
         float haste = Time.time < hasteUntil ? tollFireScale : 1f;
         nextShotTime = Time.time + level.fireInterval * haste * UnityEngine.Random.Range(0.5f, 1.5f);
+        if (soldiers.Count == 0) return;
 
+        var used = new List<int>();
+        used.Add(FirstShot());
+        for (int i = 1; i < Mathf.Max(1, level.volley); i++)
+        {
+            // The rest of the volley comes from columns at least two apart from those already loosing, so it always
+            // leaves a gap to stand in.
+            int column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
+            for (int tries = 0; tries < 6 && used.Exists(c => Mathf.Abs(c - column) <= 1); tries++)
+            {
+                column = soldiers[UnityEngine.Random.Range(0, soldiers.Count)].Column;
+            }
+            used.Add(column);
+            Samurai shooter = FrontShooterInColumn(column);
+            if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods());
+        }
+    }
+
+    // The volley's lead shot, aimed at the ronin some of the time. Returns the column it came from.
+    int FirstShot()
+    {
         int column;
         bool aimed = target != null && UnityEngine.Random.value < level.aimedShotChance;
         // The loose row has left its columns: an aimed shot comes from whichever of it walks nearest the ronin.
@@ -958,8 +954,8 @@ public partial class SamuraiArmy : MonoBehaviour
             }
             if (nearest != null)
             {
-                nearest.Fire(level.arrowSpeed);
-                return;
+                nearest.Fire(level.arrowSpeed, RollMods());
+                return nearest.Column;
             }
         }
         if (aimed)
@@ -974,7 +970,18 @@ public partial class SamuraiArmy : MonoBehaviour
         // Shieldbearers never fire, so the column's front shooter looses over their heads. A front shooter encased in ice
         // holds its whole column's fire.
         Samurai shooter = FrontShooterInColumn(column);
-        if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed);
+        if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods());
+        return column;
+    }
+
+    // What this one shot is rolled with: guarded (parry-only) outranks shielded; either can also fly fast.
+    ShotMods RollMods()
+    {
+        var mods = new ShotMods { speed = 1f, toughness = 1 };
+        if (UnityEngine.Random.value < level.guardedArrowChance) mods.guarded = true;
+        else if (UnityEngine.Random.value < level.toughArrowChance) mods.toughness = 2;
+        if (UnityEngine.Random.value < level.fastArrowChance) mods.speed = fastArrowScale;
+        return mods;
     }
 
     // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line.
@@ -1092,6 +1099,7 @@ public partial class SamuraiArmy : MonoBehaviour
     public void OnSamuraiKilled(Samurai soldier, KillSource source)
     {
         if (!soldiers.Remove(soldier)) return;
+        if (soldier == elite) elite = null;
         loose.Remove(soldier);
         dives.RemoveAll(d =>
         {

@@ -1,5 +1,6 @@
 // How a samurai fights. The army's rows take their kind from LevelConfig.rowKinds. The save keeps these names (the
-// encyclopedia's Foes ids), so never rename a value; a new kind also needs a Foes.All entry.
+// encyclopedia's Foes ids), so never rename a value; a new kind also needs a Foes.All entry. Never add a kind named
+// Elite: that id is the encyclopedia's Foes.Elite, the round's Elite that any kind can be (Samurai.MakeElite).
 public enum SamuraiKind
 {
     Ashigaru,

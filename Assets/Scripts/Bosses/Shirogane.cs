@@ -721,7 +721,8 @@ public partial class Shirogane : Boss
     {
         Arrow spire = Fire(from, Vector3.down * speed);
         Sprite[] frames = Fx.Frames(Fx.ShiroIceSpire);
-        Color halo = new Color(DeepIce.r, DeepIce.g, DeepIce.b, 0.5f);
+        // Violet, the colour of a shot that can only be dodged.
+        Color halo = ShotClasses.SealedGlow;
         if (frames != null) spire.Restyle(frames, 8f, Color.white, new Vector2(SpireWidth, SpireLength), SpireRadius, halo, SpireWidth * 1.3f);
         else spire.Restyle(ProceduralSprites.White, new Color(0.6f, 0.82f, 1f, 0.92f), new Vector2(SpireWidth * 0.7f, SpireLength * 0.95f), SpireRadius, halo, SpireWidth * 1.3f);
         spire.Lengthen(SpireLength * 0.85f);

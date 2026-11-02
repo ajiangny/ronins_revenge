@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public static class Foes
 {
     public const string Scout = "Scout";
+    // Not a SamuraiKind: any kind can be the round's Elite (Samurai.MakeElite), so no kind may ever be named this.
+    public const string Elite = "Elite";
     public const string Kuon = "Kuon";
 
     public static string Of(SamuraiKind kind) => kind.ToString();
@@ -40,6 +42,8 @@ public static class Foes
             "Souls whose bodies are gone entirely, so the coffin doesn't bother giving them one. Their arrows pass through cover."),
         Army(SamuraiKind.Bellringer, "BELLRINGER", "The Shrine Watch",
             "Akagane's watchmen, dead at their posts with their jaws bound shut. Every toll drives the army to fire faster."),
+        new Foe { id = Elite, name = "ELITE", epithet = "The Sworn Guard", accent = MenuUI.Accent,
+            line = "The one soldier in each army who still remembers the oath he swore. He takes blow after blow to fall, and his soul always slips free." },
         new Foe { id = Scout, name = "KITE SCOUT", epithet = "The Hanged Kite", accent = MenuUI.Accent,
             line = "A shrouded corpse lashed to a torn signal kite, drifting across the sky like a hanged man. Souls slip out of the ones that fall." },
         Warlord(BossKind.Benibana, "BENIBANA", "The Crimson Smoke", Benibana.Crimson,

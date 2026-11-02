@@ -55,9 +55,9 @@ public partial class Kagetsune
         else Sfx.Play(Sfx.MidnightChime, 0.3f, 1.9f);
     }
 
-    // His other two bullets: a bronze bell a parry rings into Resonance, and a crimson seal-dart no parry turns.
+    // His other two bullets: a bronze bell a parry rings into Resonance, and a violet seal-dart no parry turns.
     Arrow BellShot(Vector3 from, Vector3 velocity) => BulletHell.MakeBell(BulletHell.Enlist(Shoot(from, velocity * ShotSpeed), capped: false));
-    Arrow SealDart(Vector3 from, Vector3 velocity) => BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, velocity * ShotSpeed), capped: false), SealRed);
+    Arrow SealDart(Vector3 from, Vector3 velocity) => BulletHell.MakeSealDart(BulletHell.Enlist(Shoot(from, velocity * ShotSpeed), capped: false), BulletHell.Violet);
 
     // The ronin's row, and the stretch of it a curtain spans.
     float Row => ronin.Bounds.center.y;

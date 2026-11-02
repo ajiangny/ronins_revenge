@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -124,6 +125,8 @@ public partial class Samurai : MonoBehaviour, IHittable
             Fizzle();
             return;
         }
+        // The spear is the Taisho's own and isn't rolled; everything else takes the volley's speed now, before the chill.
+        if (Kind != SamuraiKind.Taisho && mods.speed > 0f) arrowSpeed *= mods.speed;
         // Chilled, its arrows crawl, frost-pale, and live long enough to still reach the ground.
         bool chilled = Chilled;
         float life = 1f;
@@ -139,17 +142,27 @@ public partial class Samurai : MonoBehaviour, IHittable
         Vector3 muzzle = transform.position + Vector3.down * (0.5f * transform.lossyScale.y + 0.1f);
         if (Kind == SamuraiKind.Archer)
         {
-            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, aim, 3, ArcherSpread, arrowSpeed * 0.9f, life)) Mark(arrow, chilled, burning);
+            List<Arrow> fan = Arrow.Fan(arrowPrefab, muzzle, aim, 3, ArcherSpread, arrowSpeed * 0.9f, life);
+            foreach (Arrow arrow in fan)
+            {
+                Mark(arrow, chilled, burning);
+                ShieldShot(arrow, mods);
+            }
+            // Only the middle arrow is guarded, so the fan is never wholly uncuttable.
+            if (mods.guarded) fan[1].Guard();
         }
         else if (Kind == SamuraiKind.Yurei)
         {
             // Spirit arrows: a parted pair that drifts through the blockers, so cover only shelters from the living.
-            foreach (Arrow arrow in Arrow.Fan(arrowPrefab, muzzle, aim, 2, YureiSpread, arrowSpeed * 0.85f, life))
+            List<Arrow> pair = Arrow.Fan(arrowPrefab, muzzle, aim, 2, YureiSpread, arrowSpeed * 0.85f, life);
+            foreach (Arrow arrow in pair)
             {
                 arrow.PassesCover = true;
                 arrow.Cause = DeathCause.GhostArrow;
                 arrow.Tint(GhostArrow, GhostGlow);
+                ShieldShot(arrow, mods);
             }
+            if (mods.guarded) pair[0].Guard();
             Sfx.Play(Sfx.ArrowFire, 0.5f, 1.3f);
             return;
         }
@@ -167,12 +180,20 @@ public partial class Samurai : MonoBehaviour, IHittable
             Arrow arrow = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             arrow.Launch(aim * arrowSpeed, life);
             Mark(arrow, chilled, burning);
+            ShieldShot(arrow, mods);
+            if (mods.guarded) arrow.Guard();
         }
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 1f);
     }
 
     static readonly Color ChilledArrowGlow = new Color(0.6f, 0.9f, 1f, 0.5f);
     static readonly Color WildArrowGlow = new Color(1f, 0.45f, 0.15f, 0.5f);
+
+    // A shielded shot takes that many plain cuts to break.
+    static void ShieldShot(Arrow arrow, ShotMods mods)
+    {
+        if (mods.toughness > 1) arrow.Toughness = mods.toughness;
+    }
 
     // A status shows on the arrows it changes: frost-pale for a Chilled one's, ember for a Burning one's wild shots.
     static void Mark(Arrow arrow, bool chilled, bool burning)
@@ -302,6 +323,7 @@ public partial class Samurai : MonoBehaviour, IHittable
     public void Ignite(float seconds)
     {
         if (IsDead || seconds <= 0f) return;
+        if (!Burning) nextBurnTick = Time.time + Statuses.BurnTick;
         burningUntil = Mathf.Max(burningUntil, Time.time + seconds * Statuses.BurnScale);
         SetFrost(frost);
     }

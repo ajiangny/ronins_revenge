@@ -489,6 +489,11 @@ public partial class GameManager
                 art = army != null && army.ScoutArt != null ? army.ScoutArt : Row(hasRows ? byRow.Length - 1 : 0);
                 standIn = army != null && army.ScoutArt != null ? Color.white : Scout.KiteColor;
                 break;
+            // Any kind can be the Elite; the page shows it as the archer it most often is, warmer than the ranks.
+            case Foes.Elite:
+                art = army != null && hasRows ? army.ArtOf(SamuraiKind.Archer) : null;
+                standIn = new Color(1f, 0.92f, 0.8f);
+                break;
             case Foes.Kuon:
                 tint = new Color(1f, 1f, 1f, 0.85f);
                 fps = 8f;
@@ -584,7 +589,7 @@ public partial class GameManager
         string body = "<size=28><align=left>" +
             Row(Keyed("SLASH", Moves.Slash), "A cut flies up the field. Cover stops it, so step out first!") +
             Row(Keyed("SHURIKEN", Moves.Shuriken), "Big and sparkly, slow to come back. Save it for crowds.") +
-            Row(Keyed("PARRY", Moves.Parry), "Just before an arrow lands. A good parry is ready again straight away! Crimson blows can't be parried. Dodge those!") +
+            Row(Keyed("PARRY", Moves.Parry), "Just before an arrow lands. A good parry is ready again straight away! Violet blows can't be parried. Dodge those!") +
             Row("SPEARS", "The glowing red ones go right through cover. Move!") +
             Row("HEARTS", "From broken cover, and rarely a soldier. At full lives they wait on your row.") +
             Row("THE ARMY", "If it reaches your row, it's over. Thin out the bottom rank!") +

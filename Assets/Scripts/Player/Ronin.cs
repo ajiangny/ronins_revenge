@@ -102,7 +102,7 @@ public class Ronin : MonoBehaviour
     public event Action ParryStarted;
     // Raised once per parry, on the first arrow it deflects.
     public event Action Parried;
-    // Raised when a parry meets a shot it can't turn (a crimson seal-dart), once per parry.
+    // Raised when a parry meets a shot it can't turn (a violet seal-dart), once per parry.
     public event Action ParryFizzled;
 
     public bool ControlsEnabled { get; set; }
@@ -895,12 +895,12 @@ public class Ronin : MonoBehaviour
         Shade(shuriken, shurikenTint);
     }
 
-    // The seal holds his blade: a dull red spark and no parry, and the cooldown isn't spent.
+    // The seal holds his blade: a violet spark and no parry, and the cooldown isn't spent.
     void SealedParry()
     {
         if (Time.time - lastSealedParry < 0.3f) return;
         lastSealedParry = Time.time;
-        Fx.Play(Fx.Impact, Bounds.center + Vector3.up * 0.35f, new Color(0.9f, 0.15f, 0.15f), 0.8f);
+        Fx.Play(Fx.Impact, Bounds.center + Vector3.up * 0.35f, BulletHell.Violet, 0.8f);
         Sfx.Play(Sfx.Deflect, 0.4f, 0.55f);
     }
 

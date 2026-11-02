@@ -28,13 +28,13 @@ public partial class GameManager
         yield return PlayConversation(said, colour);
     }
 
-    // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended. On the wake he meets Asagi, her
-    // scene (played by EnterSafeArea) takes the place of his line.
-    IEnumerator WakeTalk(bool meetAsagi)
+    // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended. On the wake he meets Asagi or
+    // Oliver, their scene (played by EnterSafeArea) takes the place of his line.
+    IEnumerator WakeTalk(bool metSomeone)
     {
         bool pending = Save.Data.hubPending;
         // The meeting itself has already played (EnterSafeArea); it stands in for his own line.
-        if (!meetAsagi) yield return HubReturn();
+        if (!metSomeone) yield return HubReturn();
         yield return new WaitForSeconds(pending ? 0.6f : 1f);
         if (pending) yield return PoguruBark(DialogueEvent.PoguruWake);
         // Out of the wisp (if his word didn't already bring him) and off to his nest.
@@ -61,6 +61,24 @@ public partial class GameManager
         if (asagi != null) asagi.Play(Asagi.Clip.Talk, true);
         yield return PlayTalk(said, new TalkOptions { keepHud = true });
         if (asagi != null) asagi.Play(Asagi.Clip.Idle);
+    }
+
+    // The wake after Asagi's, at the soonest: it asks for asagiMet, which is only set once her scene has been read, so
+    // the two can't fall on one wake. He's at the rack by story, so no new station (Story/Oliver.md).
+    const int OliverDeaths = 10;
+    bool OliverDue => Save.Data.deaths >= OliverDeaths && Save.Data.asagiMet && !Save.Data.oliverMet;
+
+    IEnumerator MeetOliver()
+    {
+        Save.Data.hubPending = false;
+        Conversation said = Dialogue.Find("Oliver_Meet_Rack");
+        Save.Data.oliverMet = true;
+        Save.Data.AddFirst(Firsts.Oliver, Save.Run);
+        Save.Data.oliverSoulOwed = true;
+        Save.Write();
+        if (said == null) yield break;
+        yield return new WaitForSeconds(0.8f);
+        yield return PlayTalk(said, new TalkOptions { keepHud = true });
     }
 
     // Loading a journey: no flute intro, the page just fades off Oni already standing in the temple.
@@ -117,6 +135,8 @@ public partial class GameManager
         if (wake)
         {
             bool meetAsagi = AsagiDue;
+            // Only a guard for dev saves: OliverDue already asks for asagiMet, which MeetAsagi hasn't set yet.
+            bool meetOliver = !meetAsagi && OliverDue;
             ronin.PlaceAt(BodyAt(safeArea.WakePoint));
             yield return ui.FadeTo(1f, 0f);
             yield return new WaitForSeconds(0.4f);
@@ -138,7 +158,8 @@ public partial class GameManager
             lastRunNotes = 0;
             // Her scene plays before he gets his controls back, so a press at her station can't open a second one.
             if (meetAsagi) yield return MeetAsagi();
-            StartCoroutine(WakeTalk(meetAsagi));
+            if (meetOliver) yield return MeetOliver();
+            StartCoroutine(WakeTalk(meetAsagi || meetOliver));
         }
         // The floor is where his feet may go; the clamp is on his body.
         Vector3 lift = BodyAt(Vector3.zero);
@@ -379,6 +400,15 @@ public partial class GameManager
 
     // The weapon rack (Hades' Infernal Arms): the katana is the only weapon so far, and the kunai a skin for it that
     // looks and sounds different but plays the same. The pick is kept in the save.
+    // Oliver on the rack: a word from him, a scene over the temple as it stands.
+    IEnumerator TalkToOliver()
+    {
+        menu.Hide();
+        Conversation said = Dialogue.Pick("Oliver", DialogueEvent.OliverTalk, Dialogue.Context(loadout));
+        yield return PlayTalk(said, new TalkOptions { keepHud = true });
+        CloseStation();
+    }
+
     void ShowRack(System.Action back, int startIndex = -1)
     {
         string muted = MenuUI.MutedHex(false);
@@ -405,6 +435,7 @@ public partial class GameManager
         }
         // The ultimate (SaveData.ultimate) isn't offered here while Shadow Clone is the only one; it comes back once
         // there are more to choose between.
+        if (Save.Data.oliverMet) items.Add(MenuUI.Item.Button("TALK", () => StartCoroutine(TalkToOliver()), "The cat on the rack."));
         items.Add(MenuUI.Item.Button("BACK", back, ""));
         menu.Show("WEAPON RACK", $"<size=30><color=#{muted}>What he takes through the gate.</color></size>", items.ToArray(), back,
             startIndex >= 0 ? startIndex : (int)carried);

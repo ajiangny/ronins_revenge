@@ -829,6 +829,18 @@ public static partial class Dialogue
         Talk("Asagi_Hub_Sleep", Asa, DialogueEvent.SoulHub, Story, When(LastRunElement(Element.Tide), Runs(6)),
             A("Do you sleep, in between? Sleet asked you that, I expect. She asks everyone."), O("...I play."), A("I know. I can hear it from the water.")),
 
+        // Oliver, the smith's cat, on the weapon rack (Story/Oliver.md). They run silent until voiced. He meets Oni on a
+        // wake after Asagi's, and these stand in for the rest of his lines so he's never silent at a soul or the rack.
+        Talk("Oliver_Meet_Rack", Oli, OliTalk, Story, When(Seen("Asagi_Meet_Pool"), NotSeen("Oliver_Meet_Rack")),
+            O("...That's my sword."), Ol("His. You've been carrying it. Badly."), O("...Whose?"),
+            Ol("Not yours. You're what it's kept in. Scabbard."), O("...Cat."), Ol("Brought you this. It's still moving. Don't make a face.")),
+        Talk("Oliver_Rack_Mine", Oli, OliTalk, Repeat, When(),
+            Ol("I've sat on that. It's mine. You can borrow it.")),
+        Talk("Oliver_Greet_Moving", Oli, Soul, Repeat, When(),
+            Ol("It's still moving. Don't make a face.")),
+        Talk("Oliver_Hub_Rest", Oli, DialogueEvent.SoulHub, Repeat, When(LastRunElement(Element.Steel)),
+            Ol("Off. That's mine.")),
+
         // Asagi at the pool's rim (AsagiTalk): the hands under his arms on the wake after his tenth death, before any
         // Water soul can drop, and then her station talk, once a visit, like Poguru's nest.
         Talk("Asagi_Meet_Pool", Asa, AsaTalk, Story, When(Deaths(10), NotSeen("Asagi_Meet_Pool")),
@@ -1111,6 +1123,10 @@ public static partial class Dialogue
     const string Asa = "Asagi";
     const DialogueEvent AsaTalk = DialogueEvent.AsagiTalk;
     static DialogueLine A(string text) => Say(Asa, text);
+    // Oliver, the Steel soul, voiced in OLIVER in Tools/generate-voice.mjs.
+    const string Oli = "Oliver";
+    const DialogueEvent OliTalk = DialogueEvent.OliverTalk;
+    static DialogueLine Ol(string text) => Say(Oli, text);
     // The tutorial's soldiers, in the soldier voice (SOLDIER in Tools/generate-voice.mjs).
     public const string Soldier = "Ashigaru";
     static DialogueLine S(string text) => Say(Soldier, text);

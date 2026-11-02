@@ -67,6 +67,8 @@ public partial class GameManager
     {
         // The first soul after meeting Asagi is always hers.
         if (Save.Data.asagiSoulOwed && (taken == null || !taken.Contains(Element.Tide))) return Element.Tide;
+        // Likewise Oliver's. With both owed Asagi goes first, and `taken` lets a second path show the other.
+        if (Save.Data.oliverSoulOwed && (taken == null || !taken.Contains(Element.Steel))) return Element.Steel;
         Element[] available = AvailableElements();
         if (taken != null && taken.Count > 0)
         {
@@ -309,6 +311,11 @@ public partial class GameManager
         if (element == Element.Tide && Save.Data.asagiSoulOwed)
         {
             Save.Data.asagiSoulOwed = false;
+            Save.Write();
+        }
+        if (element == Element.Steel && Save.Data.oliverSoulOwed)
+        {
+            Save.Data.oliverSoulOwed = false;
             Save.Write();
         }
 

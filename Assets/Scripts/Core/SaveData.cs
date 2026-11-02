@@ -210,6 +210,7 @@ public static class Save
         if (d.seen.Contains("Hibiki_Meet_Out")) d.AddFirst(Firsts.Soul(Element.Lightning), 0);
         if (d.seen.Contains("Asagi_Meet_Fry")) d.AddFirst(Firsts.Soul(Element.Tide), 0);
         if (d.asagiMet) d.AddFirst(Firsts.Asagi, 0);
+        if (d.oliverMet) d.AddFirst(Firsts.Oliver, 0);
         if (d.seen.Contains("Poguru_Scout_First")) d.AddFirst(Firsts.Scout, 0);
         if (d.seen.Contains("Poguru_Stage_Pass")) d.AddFirst(Firsts.Enemy(SamuraiKind.Shieldbearer), 0);
         if (d.seen.Contains("Poguru_Stage_Divers")) d.AddFirst(Firsts.Divers, 0);

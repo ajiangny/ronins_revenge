@@ -67,7 +67,7 @@ public partial class GameManager
     }
 
     // Testing shortcuts (Editor and development builds): F1 wipes out the current army, F2 skips to the last
-    // stage's boss, F3 opens the dev menu, F4 toggles god mode, F5 drops a soul (Fire, Frost, Storm in turn) at the
+    // stage's boss, F3 opens the dev menu, F4 toggles god mode, F5 drops a soul (Fire, Frost, Storm, Water, Steel in turn) at the
     // ronin's feet, F10 opens a Spirit Bead's screen and F11 a Spirit Thread's.
     void DevHotkeys(Keyboard keyboard)
     {
@@ -107,6 +107,13 @@ public partial class GameManager
                 Save.Data.asagiMet = true;
                 // Count the meeting as heard too, or her station would open on it and her chain stay gated.
                 Dialogue.Find("Asagi_Meet_Pool");
+                Save.Write();
+            }
+            // A Steel soul stands in for meeting Oliver the same way.
+            if (element == Element.Steel && !Save.Data.oliverMet)
+            {
+                Save.Data.oliverMet = true;
+                Dialogue.Find("Oliver_Meet_Rack");
                 Save.Write();
             }
             SpawnSoul(ronin.Feet + Vector3.up * 2f, element);

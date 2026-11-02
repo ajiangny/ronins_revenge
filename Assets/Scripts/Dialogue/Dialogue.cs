@@ -16,7 +16,9 @@ public enum DialogueEvent { BossIntro, BossPhase, BossDefeat, KilledOni, HubRetu
     // (Firsts, DialogueContext.Just). Priority lines only, and no repeatable: with nothing new he stays quiet.
     PoguruFirst,
     // Kagetsune's summons in his phase 2, and the souls' answers, by arc: played by id (Boss.Say), never picked.
-    Echo }
+    Echo,
+    // Oliver on the weapon rack in the temple: his meeting on a wake, then the rack's TALK row (Story/Oliver.md).
+    OliverTalk }
 
 // Priority conversations are the major events (a first item, a first meeting): they play once and jump every queue.
 // Story conversations play once, in the order they're written; Reactive ones answer how things stand and outrank
@@ -331,6 +333,7 @@ public static class Firsts
     public const string Divers = "Enemy_Divers";
     public const string Scout = "Enemy_Scout";
     public const string Asagi = "Met_Asagi";
+    public const string Oliver = "Met_Oliver";
     public const string Legendary = "Boon_AnyLegendary";
     public const string Duo = "Boon_AnyDuo";
     public const string SongBought = "Temple_Song";

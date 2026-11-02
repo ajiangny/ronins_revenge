@@ -188,6 +188,8 @@ Her Duos (Plasma Arc with Akagane, Superconductor with Mizore) are in
 
 ### `SoulHub` (in the temple, after a run he mostly held their element)
 
+These are said in person: Hibiki takes shape by the temple gate as a pixel figure in the painting's pose (stick raised and a hand on her taiko, level with Oni; she plays a quick random roll that ends in thunder before she goes), says the line and goes back into a soul that rises over the wall.
+
 | id | Tier | Requires | Lines |
 |---|---|---|---|
 | `Hibiki_Hub_First` | Story, once | `lastRunElement = Storm` | **Hibiki:** "You can see the village roofs from up here! ...Well. Where they were." |

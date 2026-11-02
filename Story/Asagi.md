@@ -222,6 +222,8 @@ Her Duos (Scalding Steam with Akagane, Black Ice with Mizore, Thunder Rain with 
 
 ### `SoulHub` (in the temple, after a run he mostly held her element)
 
+She says these from the pool's rim, her talk clip on and the line over her bowl. She lives here, so she doesn't leave as the visiting souls do.
+
 | id | Tier | Requires | Lines |
 |---|---|---|---|
 | `Asagi_Hub_First` | Story, once | `lastRunElement = Water` | **Asagi:** "You carried my water all night. Did it feel like home? It's allowed to." |

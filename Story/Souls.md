@@ -246,9 +246,10 @@ the offers.
 
 ### HubReturn
 
-On the title hill after a death or win (`ShowTitleMenu` with `Save.Data.hubPending`). Oni's own `HubReturn` Story
-lines win; a soul line plays only when he has none, at most one a return, from the soul of `lastRunElement`. Show it
-as a subtitle with the bust, not a full panel: the hill is his.
+On the wake in the temple after a death or win (`WakeTalk`, with `Save.Data.hubPending`). Oni's own `HubReturn` Story
+lines win; a soul line plays only when he has none, at most one a return, from the soul of `lastRunElement`. The soul
+shows up to say it: Akagane, Mizore and Hibiki take shape by the gate, say it over their heads and rise away as a soul
+(Hibiki plays her drum first); Asagi and Oliver, who live there, say it from where they stand.
 
 ## The boon screen
 

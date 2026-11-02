@@ -194,6 +194,8 @@ His Duos (Thermal Shock with Mizore, Plasma Arc with Hibiki) are two-soul conver
 
 ### `SoulHub` (in the temple, after a run he mostly held their element)
 
+These are said in person: Akagane takes shape by the temple gate as a pixel figure in the painting's pose (his war fan raised and his cloak burning, 1.3 times Oni's height, embers rising off him), says the line and goes back into a soul that rises over the wall.
+
 | id | Tier | Requires | Lines |
 |---|---|---|---|
 | `Akagane_Hub_First` | Story, once | `lastRunElement = Fire` | **Akagane:** "So this is where you go. A temple pool and a flute. I always wondered." |

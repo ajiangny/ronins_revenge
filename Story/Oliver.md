@@ -443,6 +443,8 @@ There's no `Oliver_Felled_Kagetsune`, as there's none for the other souls: no bo
 
 ### `SoulHub` (in the temple, after a run he mostly held his element)
 
+He says these from the rack's dais, his talk clip on and the line over his head. He lives here, so he doesn't leave as the visiting souls do.
+
 | id | Tier | Requires | Lines |
 |---|---|---|---|
 | `Oliver_Hub_First` | Story, once | `lastRunElement = Steel` | **Oliver:** "Sword's on the floor again. It's damp in here. I've sat on most of it." |

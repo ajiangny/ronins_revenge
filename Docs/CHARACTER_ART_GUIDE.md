@@ -107,7 +107,11 @@ Composition: lit from below and one side by the hammer, against night. The close
 
 References: outside the repo and never committed, like Poguru's: the user's photo of the cat (authority for the head), two blacksmith concept paintings (build and costume ideas), the photo of their friend (the plush's styling). Filenames as for the other souls in `Assets/Art/Portraits/`.
 
-Pixel sprite: to be made in PixelLab from the brief in `Story/Oliver.md`, 64×64, `Art/Sprites/Characters/Oliver/`. At chibi scale, the flat head, the whiskers breaking the outline, the low hammer's gold line and the doll's mop of hair must all still read in silhouette.
+Pixel sprite: PixelLab, from the brief in `Story/Oliver.md`, 96×96, `Art/Sprites/Characters/Oliver/`. At chibi scale, the flat head, the whiskers breaking the outline, the low hammer's gold line and the doll's mop of hair must all still read in silhouette.
+
+## Akagane, Mizore, Hibiki — pixel figures at the temple gate
+
+`Art/Sprites/Characters/<Soul>/`, Idle, Talk, Leave (Hibiki also Drum), hand-built from one approved 96×96 take each (PixelLab `create_image_pro`, the painting as reference, `Ronin_IdleSouth_0` as style, style copy for outline, detail and shading) and drawn smaller in the game (`artScale`), in finer pixels than Oni's. Keep a take's pixels: shrinking one, or regenerating or repainting it at Oni's pixel size, lost what made it good each time it was tried. Each holds their painting's pose.
 
 ## Revision and new-character workflow
 

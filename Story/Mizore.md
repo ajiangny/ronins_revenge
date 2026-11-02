@@ -189,6 +189,8 @@ Her Duos (Thermal Shock with Akagane, Superconductor with Hibiki) are in
 
 ### `SoulHub` (in the temple, after a run he mostly held their element)
 
+These are said in person: Mizore takes shape by the temple gate as a pixel figure in the painting's pose (crane head in profile, needle raised, 1.2 times Oni's height), says the line and goes back into a soul that rises over the wall.
+
 | id | Tier | Requires | Lines |
 |---|---|---|---|
 | `Mizore_Hub_First` | Story, once | `lastRunElement = Frost` | **Mizore:** "Her flute, on the altar. You still look at it like it might break. Good." |

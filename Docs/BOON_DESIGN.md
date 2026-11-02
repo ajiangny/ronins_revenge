@@ -837,7 +837,7 @@ byte. Screenshots were taken and looked at; no key was pressed:
 - **Fonts.** Zen Kaku Gothic has no `ū` at all, so a re-bake could never fix the body text. Deleting the baked fonts was
   blocked by the tool's safety check, so `ū` was added to `Cinzel SDF` in place, and `UiSetup` makes Cinzel the body
   font's fallback. "Jūsuke" now draws in the scene, but as a thin serif capital among bold gothic letters.
-- **Temple.** He stands right of the rack at the size wanted, out of the rack's use spot, whose prompt still shows. Oni
+- **Temple.** He stands at the top of the dais behind the rack (moved there from a tight corner at the user's request) at the size wanted, out of the rack's use spot. Oni
   sorts over him in front and under him behind. He's absent before the meeting; on a replayed wake he went Loaf, Talk,
   Strike, Idle (the Strike was seen as one frame), and `oliverMet` was set.
 - **Talk.** `Oliver_Meet_Cold`: the close-up is framed well and `soulVoice` was playing the right clips. Nobody listened.

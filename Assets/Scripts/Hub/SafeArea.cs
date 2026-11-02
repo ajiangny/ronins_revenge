@@ -150,9 +150,10 @@ public class SafeArea : MonoBehaviour
     // Oliver by the rack; built always, and out of sight until he's met (ShowOliver).
     public Oliver OliverFigure { get; private set; }
     float oliverBaseY;
-    // Where he stands from the rack's base, in map pixels: right of it, past the floor Oni can walk, so he blocks neither
-    // the rack nor the spot Oni uses it from.
-    static readonly Vector2 OliverFromRack = new Vector2(52f, -20f);
+    // Where he stands from the rack's base, in map pixels: straight behind it, at the top of the dais, so he
+    // blocks neither the rack nor the spot Oni uses it from.
+    static readonly Vector2 OliverFromRack = new Vector2(0f, -98f);
+    static readonly Vector2 OliverFootprint = new Vector2(2.6f, 0.7f);
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
@@ -486,6 +487,12 @@ public class SafeArea : MonoBehaviour
                 if (station.hidden || station.footprint.x <= 0f || station.footprint.y <= 0f) continue;
                 Vector3 at = BaseOf(station);
                 blocks.Add(new Rect(at.x - station.footprint.x / 2f, at.y - 0.1f, station.footprint.x, station.footprint.y));
+            }
+            // Oni can walk the dais, so once he's there Oliver stands in the way; the dais stays open either side of him.
+            if (OliverFigure != null && OliverFigure.gameObject.activeSelf)
+            {
+                Vector3 feet = OliverFigure.transform.position;
+                blocks.Add(new Rect(feet.x - OliverFootprint.x / 2f, feet.y - 0.1f, OliverFootprint.x, OliverFootprint.y));
             }
             return blocks.ToArray();
         }

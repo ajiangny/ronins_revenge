@@ -76,6 +76,12 @@ public class ElementFx : MonoBehaviour
         Glow(to, color, 0.8f, 2.2f, 0.35f);
     }
 
+    // A straight hard line that's gone at once: Steel's reach, from a blade to the arrow it drew in or an anvil to those it cracked.
+    public static void Tether(Vector3 from, Vector3 to, Color color, Material material, float seconds = 0.14f)
+    {
+        BoltLayer(from, to, color, material, 0.06f, Fx.UnderArrows, seconds, 2, 0f);
+    }
+
     static void BoltLayer(Vector3 from, Vector3 to, Color color, Material material, float width, int order,
         float seconds = 0.28f, int points = 10, float jag = 0.35f)
     {

@@ -42,13 +42,14 @@ public partial class BoonEffects
     void ShedScrap(Vector3 from, int count = 1, int points = 1)
     {
         scrapShed += count;
+        Fx.Steel(Fx.SteelSparks, from, 0.75f);
         for (int i = 0; i < count; i++)
         {
             Vector3 at = from + Vector3.right * Random.Range(-ScrapSpread, ScrapSpread);
             Blocker hurt = wall.NearestHurt(at.x, BossFight ? float.MaxValue : ScrapReach);
             float toX = hurt != null ? hurt.transform.position.x : at.x;
             if (Scrap.Live >= MaxScrapLive) Settle(toX, points);
-            else Scrap.Drop(at, toX, wall.TopY, wall.transform, x => Settle(x, points), loadout.Find(BoonId.RedHotIron) != null, Fire);
+            else Scrap.Drop(at, toX, wall.TopY, wall.transform, x => Settle(x, points), loadout.Find(BoonId.RedHotIron) != null, Fire, points > 1);
         }
     }
 
@@ -60,7 +61,7 @@ public partial class BoonEffects
         {
             hurt.Mend(points);
             pointsMended += points;
-            Fx.Play(Fx.Impact, hurt.transform.position, Statuses.SeamColor, 0.7f);
+            Fx.Steel(Fx.SteelMend, hurt.transform.position);
             Sfx.Play(Sfx.BlockerHit, 0.5f, 1.4f);
             return;
         }
@@ -71,7 +72,9 @@ public partial class BoonEffects
             if (whole != null)
             {
                 whole.Temper(points, Statuses.TemperBound);
-                Fx.Play(Fx.Impact, whole.transform.position, Statuses.SeamColor, 0.9f);
+                // Heated past new: the weld and a wider spray than a mend, and its bands stay on the cover.
+                Fx.Steel(Fx.SteelMend, whole.transform.position, 1.5f);
+                Fx.Steel(Fx.SteelSparks, whole.transform.position, 1.5f);
                 Sfx.Play(Sfx.BlockerHit, 0.5f, 1.6f);
                 return;
             }
@@ -84,6 +87,9 @@ public partial class BoonEffects
             return;
         }
         spareScrap++;
+        // Nothing to mend: it rings off the ground and goes to the Ultimate's bar.
+        Fx.Steel(Fx.SteelSparks, new Vector3(x, wall.TopY, 0f), 0.75f);
+        Sfx.Play(Sfx.BlockerHit, 0.25f, 1.9f);
         ronin.ChargeSpare();
     }
 
@@ -94,8 +100,12 @@ public partial class BoonEffects
         ShedScrap(position);
         List<Samurai> rank = army.SamuraiInRank(samurai);
         rank.Sort((a, b) => (a.Body.position - position).sqrMagnitude.CompareTo((b.Body.position - position).sqrMagnitude));
-        for (int i = 0; i < rank.Count && i < cracks; i++) rank[i].Crack(Statuses.CrackSeconds);
-        Fx.Play(Fx.Impact, position, Steel, 1f);
+        for (int i = 0; i < rank.Count && i < cracks; i++)
+        {
+            rank[i].Crack(Statuses.CrackSeconds);
+            ElementFx.Tether(position, rank[i].Body.position, Statuses.SeamColor, boltMaterial);
+        }
+        Fx.Steel(Fx.SteelAnvil, position);
         Sfx.Play(Sfx.Deflect, 0.5f, 1.3f);
     }
 
@@ -114,9 +124,12 @@ public partial class BoonEffects
         {
             hurt.Mend(points);
             pointsMended += points;
+            Fx.Steel(Fx.SteelMend, hurt.transform.position);
+            ElementFx.Tether(at, hurt.transform.position, Statuses.SeamColor, boltMaterial);
         }
         else if (!BossFight && army.Remaining > 0 && wall.PlateCount < MaxPlates && wall.TryPlate(at.x, ScrapReach)) platesFormed++;
-        Fx.Play(Fx.Impact, at, Steel, 1.2f);
+        // Doubled, so the ring runs out about as far as his reach.
+        Fx.Steel(Fx.SteelRing, at, 2f);
         Sfx.Play(Sfx.BlockerHit, 0.7f, 0.7f);
     }
 
@@ -130,9 +143,11 @@ public partial class BoonEffects
             foreach (Boss boss in Bosses) boss.Crack(crack);
             if (WolfFight) Wolf.Crack(crack);
         }
-        Fx.Play(Fx.Impact, at, Steel, 1.6f);
+        Fx.Steel(Fx.SteelRing, at, 3f);
+        Fx.Steel(Fx.SteelShatter, at, 2f);
         CameraShake.Add(0.15f);
         Sfx.Play(Sfx.BlockerBreak, 0.8f, 0.7f);
+        Sfx.Play(Sfx.HammerSlam, 0.5f, 1.2f);
     }
 
     // Shrapnel: his cover broke under a hit, so it bursts. Halved against a warlord or Kuon, rounded up, since Benibana
@@ -142,7 +157,8 @@ public partial class BoonEffects
         if (!loadout.Has(BoonId.Shrapnel, out float shards)) return;
         int count = BossFight ? ((int)shards + 1) / 2 : (int)shards;
         for (int i = 0; i < count; i++) ronin.LaunchSteelShard(position, ronin.RiposteTarget);
-        Fx.Play(Fx.Impact, position, Statuses.SeamColor, 1.2f);
+        Fx.Steel(Fx.SteelShatter, position, 1.5f);
+        Sfx.Play(Sfx.Deflect, 0.4f, 1.5f);
     }
 
     // Spear-Breaker: a Taisho's yari cut down falls as scrap.
@@ -158,6 +174,9 @@ public partial class BoonEffects
     void QuenchBoss(Boss boss)
     {
         if (loadout.Find(BoonId.Quenching) == null) return;
+        // Hot iron in cold water: a burst of steam.
+        Fx.Play(Fx.SmokePuff, boss.Centre, Color.white, 2f, null, Fx.UnderArrows);
+        Sfx.Play(Sfx.Splash, 0.5f, 1.5f);
         boss.Crack(Statuses.CrackSeconds);
         if (WolfFight) Wolf.Crack(Statuses.CrackSeconds);
     }
@@ -168,17 +187,20 @@ public partial class BoonEffects
     {
         arrowsStopped++;
         if (!loadout.Has(BoonId.LightningRod, out float seconds) || Time.time < nextRod) return;
+        // The bolt leaves from the cover that was struck, not the sky, so what set it off is plain.
         if (BossFight)
         {
             nextRod = Time.time + RodBossSeconds;
-            Strike(Boss.Centre + Vector3.up * 6f, Boss.Centre, Boss);
+            Fx.Steel(Fx.SteelSparks, position);
+            Strike(position, Boss.Centre, Boss);
             return;
         }
         if (army.Remaining == 0) return;
         Samurai front = army.FrontSamuraiInColumn(army.ClosestColumnTo(position.x));
         if (front == null || front.IsDead) return;
         nextRod = Time.time + seconds;
-        Strike(front.transform.position + Vector3.up * 6f, front);
+        Fx.Steel(Fx.SteelSparks, position);
+        Strike(position, front);
     }
 
     // Slashing every 0.45 s would refill the wall without limit, so a warlord's crack is spent by his next own blow and
@@ -188,6 +210,8 @@ public partial class BoonEffects
         if (!Damage.Procs(source) || !boss.Cracked || Time.time < nextBossCrack) return;
         nextBossCrack = Time.time + Statuses.BossCrackCooldown;
         boss.SpendCrack();
+        Fx.Steel(Fx.SteelShatter, point, 1.5f, boss.SpriteOrder + 1);
+        Sfx.Play(Sfx.BlockerBreak, 0.5f, 1.2f);
         ShedScrap(point, Statuses.BossCrackScrapNow);
     }
 
@@ -196,6 +220,8 @@ public partial class BoonEffects
         if (!Damage.Procs(source) || !Wolf.Cracked || Time.time < nextBossCrack) return;
         nextBossCrack = Time.time + Statuses.BossCrackCooldown;
         Wolf.SpendCrack();
+        Fx.Steel(Fx.SteelShatter, point, 1.5f, Wolf.SpriteOrder + 1);
+        Sfx.Play(Sfx.BlockerBreak, 0.5f, 1.2f);
         ShedScrap(point, Statuses.BossCrackScrapNow);
     }
 

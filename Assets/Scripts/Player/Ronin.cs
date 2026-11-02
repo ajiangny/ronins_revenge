@@ -22,6 +22,8 @@ public class Ronin : MonoBehaviour
     // Burning and Frozen Riposte shots: drawn sizes in world units, and the shards' fan either side of straight up.
     const float FireballSize = 1.3f;
     const float ShardSize = 0.8f;
+    // Shrapnel's shard, drawn at its art's native 24 pixels.
+    const float SteelShardSize = 0.5f;
     const float ShardSpread = 25f;
     const float ThunderShurikenSpeed = 1.9f;
     // Kindling's fireball: hitbox scale, drawn size against a Burning Riposte fireball, and speed against a slash.
@@ -753,6 +755,8 @@ public class Ronin : MonoBehaviour
         }
         if (clone) Shade(projectile, attackTint);
         else projectile.Tint(attackTint, attackGlow);
+        // Hot metal has hard edges: no halo round Steel's slash.
+        if (!clone && Loadout.SlotElement(BoonSlot.Attack) == Element.Steel) projectile.HardEdged();
         return projectile;
     }
 
@@ -915,8 +919,18 @@ public class Ronin : MonoBehaviour
         shard.Launch(direction, 0.8f, 0, KillSource.Effect, scale: 1.1f, lifetimeMultiplier: 2f);
         shard.Home(picker);
         shard.PassesCover = true;
-        shard.Tint(Statuses.CrackColor, Statuses.SeamColor);
         shard.ParryAura(Statuses.SeamColor);
+        Sprite[] frames = Fx.Frames(Fx.SteelShard);
+        if (frames != null && frames.Length > 0)
+        {
+            shard.Animate(frames, 14f, SteelShardSize);
+            shard.HardEdged();
+            shard.HotTail(Statuses.SeamColor, new Color32(0xF5, 0x9A, 0x2E, 255));
+        }
+        else
+        {
+            shard.Tint(Statuses.CrackColor, Statuses.SeamColor);
+        }
     }
 
     void FixedUpdate()

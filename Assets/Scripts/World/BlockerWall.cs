@@ -273,9 +273,11 @@ public class BlockerWall : MonoBehaviour
         }
 
         Blocker made = plate.AddComponent<Blocker>();
-        made.Init(1, art, new[] { look }, null);
+        made.Init(1, art, new[] { look }, Fx.Frames(Fx.SteelScrap));
         made.InWall = made.Plate = made.Forged = true;
         plates.Add(made);
+        // It forms white-hot and cools, the white-hot shape standing over the plate until it has.
+        Fx.Steel(Fx.SteelForge, plate.transform.position);
         return true;
     }
 
@@ -287,6 +289,7 @@ public class BlockerWall : MonoBehaviour
         {
             if (slot.blocker != null && slot.blocker.Standing)
             {
+                if (slot.blocker.Hurt) Fx.Steel(Fx.SteelMend, slot.centre);
                 slot.blocker.Mend(int.MaxValue);
                 continue;
             }
@@ -298,6 +301,8 @@ public class BlockerWall : MonoBehaviour
             }
             slot.blocker = BuildBlocker(slot.type, slot.look, slot.centre);
             slot.blocker.Forged = true;
+            Fx.Steel(Fx.SteelMend, slot.centre, 1.5f);
+            Fx.Steel(Fx.SteelSparks, slot.centre, 1.5f);
         }
     }
 }

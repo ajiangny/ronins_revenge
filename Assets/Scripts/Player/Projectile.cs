@@ -175,6 +175,31 @@ public class Projectile : MonoBehaviour
         parryAura = CreateGlow(transform, parryAuraSize, art.sortingOrder - 2, color);
     }
 
+    // Steel's shots carry no soft light: no halo, and the parry aura's afterimages alone mark the path.
+    public void HardEdged()
+    {
+        glow.enabled = false;
+        if (parryAura != null) parryAura.enabled = false;
+    }
+
+    // A hard hot streak behind the shot, whole bars rather than a glow: seam-bright near it, cooling further back.
+    public void HotTail(Color near, Color far)
+    {
+        const float BarWidth = 2f / 48f;
+        const float BarLength = 0.25f;
+        float scale = transform.lossyScale.y;
+        for (int i = 0; i < 2; i++)
+        {
+            var bar = new GameObject("Tail").AddComponent<SpriteRenderer>();
+            bar.transform.SetParent(transform, false);
+            bar.transform.localPosition = Vector3.down * ((0.2f + BarLength * (i + 0.5f)) / scale);
+            bar.transform.localScale = new Vector3(BarWidth, BarLength, 1f) / scale;
+            bar.sprite = ProceduralSprites.White;
+            bar.color = i == 0 ? near : far;
+            bar.sortingOrder = art.sortingOrder - 1;
+        }
+    }
+
     void AcquireTarget()
     {
         target = pickTarget?.Invoke();
@@ -298,11 +323,16 @@ public class Projectile : MonoBehaviour
         // extra pierce re-targets and can circle.
         if (met != null && Whets && met.InWall)
         {
-            met.Wear(coll.GetContact(0).point, WhetSpared);
+            Vector3 ground = coll.GetContact(0).point;
+            Fx.Steel(Fx.SteelGrind, ground, 1.5f);
+            Sfx.Play(Sfx.BlockerHit, 0.3f, 1.9f);
+            met.Wear(ground, WhetSpared);
             if (!whetted && !Kindled && pickTarget == null)
             {
                 whetted = true;
                 pierceLeft++;
+                // It leaves the stone sharper: the bright edge says this one will go through a samurai.
+                art.color = Color.Lerp(art.color, Statuses.SeamColor, 0.6f);
             }
             KeepFlying(coll.collider);
             return;

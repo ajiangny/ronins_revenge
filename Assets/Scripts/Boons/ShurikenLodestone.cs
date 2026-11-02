@@ -27,6 +27,8 @@ public class ShurikenLodestone : MonoBehaviour
         radius = reach;
         catchesLeft = catches;
         caught = onCaught;
+        // The field shows as iron filings carried round the blade, under the arrows, gone with it. Nothing without the art.
+        Fx.Play(Fx.SteelFilings, transform.position, Color.white, 1f, transform, Fx.UnderArrows);
     }
 
     void FixedUpdate()
@@ -62,7 +64,7 @@ public class ShurikenLodestone : MonoBehaviour
         {
             catchesLeft--;
             Vector3 at = inReach[i].transform.position;
-            inReach[i].Pop(Statuses.CrackColor);
+            inReach[i].Catch();
             caught?.Invoke(at);
         }
     }

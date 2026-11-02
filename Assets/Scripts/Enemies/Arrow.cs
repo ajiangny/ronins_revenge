@@ -4,6 +4,10 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Arrow : MonoBehaviour
 {
+    // Over the effects that pass for scenery (Fx.UnderArrows), the army and the cover, so a shot can always be read;
+    // under a warlord (order 5), who still looses them from behind her.
+    public const int DrawOrder = 4;
+
     [Header("Inscribed")]
     [SerializeField] float lifetime = 4f;
     [Tooltip("Draws the arrow bigger than its hitbox so it's easy to see coming.")]
@@ -65,6 +69,7 @@ public class Arrow : MonoBehaviour
         colliders = GetComponentsInChildren<Collider>();
         art = GetComponentInChildren<SpriteRenderer>();
         art.transform.localScale *= artScale;
+        art.sortingOrder = Mathf.Max(art.sortingOrder, DrawOrder);
         glow = Projectile.CreateGlow(transform, 0.8f, art.sortingOrder - 1, glowColor);
         ArrowShadow.Attach(this);
     }
@@ -272,7 +277,7 @@ public class Arrow : MonoBehaviour
         else if (CursedSpear && Statuses.SpearBreaker && coll.collider.GetComponentInParent<Projectile>() is { Source: KillSource.Slash })
         {
             SpearBroken?.Invoke(transform.position);
-            Shatter();
+            ShatterToIron();
             return;
         }
         else if (Unbreakable && coll.collider.GetComponentInParent<Ronin>() == null)
@@ -318,11 +323,30 @@ public class Arrow : MonoBehaviour
         Destroy(gameObject);
     }
 
+    // Lodestone and Red-Hot Iron: gone with no burst of its own, since the sparks Steel throws off are the burst.
+    public void Catch()
+    {
+        if (deflected) return;
+        deflected = true;
+        gameObject.SetActive(false);
+        Destroy(gameObject);
+    }
+
     // A parried Iaido meeting the next one breaks it in a burst of crimson.
     void Shatter()
     {
         Fx.Play(Fx.Impact, transform.position, new Color(1f, 0.3f, 0.35f), 1.6f);
         Fx.Play(Fx.SlashArc, transform.position, new Color(1f, 0.25f, 0.3f), 1.5f);
+        Sfx.Play(Sfx.WardShatter, 0.8f, 0.8f);
+        CameraShake.Add(0.2f);
+        Destroy(gameObject);
+    }
+
+    // Spear-Breaker: the yari snaps into iron, in two tumbling halves. It's Oni's doing, so no crimson.
+    void ShatterToIron()
+    {
+        Fx.Steel(Fx.SteelShatter, transform.position, 1.5f);
+        Debris.BurstSprites(transform.position, new[] { art.sprite }, Color.white, 2, art.transform.lossyScale.x * 0.7f, 5f);
         Sfx.Play(Sfx.WardShatter, 0.8f, 0.8f);
         CameraShake.Add(0.2f);
         Destroy(gameObject);

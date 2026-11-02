@@ -148,7 +148,13 @@ public partial class BoonEffects
         if (!Damage.Procs(source)) return;
         // Quenching: cut down frozen or held in ice, it sheds whether cracked or not, and that scrap mends double. Kill
         // leaves encasedUntil set, so this reads true for a statue too.
-        if (loadout.Has(BoonId.Quenching, out float quenched) && (samurai.Encased || army.Frozen)) ShedScrap(position, 1, (int)quenched);
+        if (loadout.Has(BoonId.Quenching, out float quenched) && (samurai.Encased || army.Frozen))
+        {
+            // Hot iron in cold water: a burst of steam, and the piece that falls is the heavy one.
+            Fx.Play(Fx.SmokePuff, position, Color.white, 1.2f, null, Fx.UnderArrows);
+            Sfx.Play(Sfx.Splash, 0.4f, 1.6f);
+            ShedScrap(position, 1, (int)quenched);
+        }
         else if (samurai.Cracked) ShedScrap(position);
         BeatDrum();
         FillSpring(SpringPerKill);
@@ -370,7 +376,12 @@ public partial class BoonEffects
         // Lodestone Shuriken: draws in the shots round the blade, as scrap, and cracks what it passes.
         if (loadout.Has(BoonId.LodestoneShuriken, out float catches) && shuriken != null)
         {
-            shuriken.gameObject.AddComponent<ShurikenLodestone>().Begin(army, () => Bosses, () => FightingWolf, WakeRadius, (int)catches, at => ShedScrap(at));
+            shuriken.HardEdged();
+            shuriken.gameObject.AddComponent<ShurikenLodestone>().Begin(army, () => Bosses, () => FightingWolf, WakeRadius, (int)catches, at =>
+            {
+                ElementFx.Tether(shuriken.transform.position, at, Statuses.SeamColor, boltMaterial);
+                ShedScrap(at);
+            });
         }
         if (BossFight)
         {

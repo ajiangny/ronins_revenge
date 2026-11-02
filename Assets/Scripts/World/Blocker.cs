@@ -16,6 +16,10 @@ public class Blocker : MonoBehaviour
     int health;
     int baseHealth;
     bool destroyed;
+    // Tamahagane's bright bands across cover tempered beyond new, one a point.
+    SpriteRenderer[] temperBands;
+    const float TemperBandHeight = 2f / 48f;
+    const float TemperBandGap = 6f / 48f;
 
     // One of the wall's own, not one of Utsusemi's rocks or his planted sword, which Steel leaves alone.
     public bool InWall { get; set; }
@@ -101,7 +105,9 @@ public class Blocker : MonoBehaviour
         if (destroyed) return;
         destroyed = true;
         Debris.BurstSprites(transform.position, debris, Color.white, 4, 0.8f, 4f);
-        Fx.Play(Fx.SmokePuff, transform.position, new Color(1f, 1f, 1f, 0.85f), 1.2f);
+        // Iron doesn't puff: a plate goes in shards.
+        if (Plate) Fx.Steel(Fx.SteelShatter, transform.position);
+        else Fx.Play(Fx.SmokePuff, transform.position, new Color(1f, 1f, 1f, 0.85f), 1.2f);
         Sfx.Play(Sfx.BlockerBreak);
         Destroy(gameObject);
     }
@@ -111,5 +117,31 @@ public class Blocker : MonoBehaviour
     {
         float damage = maxHealth > 1 ? (float)(maxHealth - health) / (maxHealth - 1) : 0f;
         tile.sprite = damageStates[Mathf.RoundToInt(damage * (damageStates.Length - 1))];
+        ShowTemper();
+    }
+
+    // The points above how it was built show as bands on its face, so what's tempered can be told from what's whole, and
+    // they go as those points are knocked off.
+    void ShowTemper()
+    {
+        int above = health - baseHealth;
+        if (temperBands == null && above <= 0) return;
+        if (temperBands == null)
+        {
+            temperBands = new SpriteRenderer[Statuses.TemperBound];
+            Bounds face = tile.bounds;
+            for (int i = 0; i < temperBands.Length; i++)
+            {
+                var band = new GameObject("Temper").AddComponent<SpriteRenderer>();
+                band.transform.SetParent(transform, true);
+                band.transform.position = new Vector3(face.center.x, face.center.y + (i - 0.5f) * TemperBandGap, 0f);
+                band.transform.localScale = new Vector3(face.size.x * 0.8f, TemperBandHeight, 1f);
+                band.sprite = ProceduralSprites.White;
+                band.color = Statuses.SeamColor;
+                band.sortingOrder = tile.sortingOrder + 1;
+                temperBands[i] = band;
+            }
+        }
+        for (int i = 0; i < temperBands.Length; i++) temperBands[i].enabled = i < above;
     }
 }

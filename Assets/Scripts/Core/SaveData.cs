@@ -212,7 +212,15 @@ public static class Save
 
     static SaveData Parse(string json)
     {
-        SaveData read = string.IsNullOrEmpty(json) ? new SaveData() : JsonUtility.FromJson<SaveData>(json) ?? new SaveData();
+        SaveData read;
+        // A corrupt string in PlayerPrefs (a cut-short write, a hand edit) must not stop the game loading: it reads as
+        // a fresh slot rather than throwing on every start.
+        try { read = string.IsNullOrEmpty(json) ? new SaveData() : JsonUtility.FromJson<SaveData>(json) ?? new SaveData(); }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Save could not be read, starting it fresh: " + e.Message);
+            read = new SaveData();
+        }
         // A save from before a field grew keeps its old length.
         if (read.deathsTo.Length < 5) Array.Resize(ref read.deathsTo, 5);
         if (read.winsVs.Length < 5) Array.Resize(ref read.winsVs, 5);

@@ -58,6 +58,15 @@ public partial class GameManager
             },
             // No ghost-fires: the pool is left to the souls.
             spirits = new Vector2[0],
+            // The souls who visit stand on the flagstones just left of the doors, clear of his way out. Each scale sets
+            // their height beside Oni: Akagane 1.3 times his, Mizore 1.2, Hibiki level with him.
+            visitorAt = new Vector2(296f, 125f),
+            visitorArt = new[]
+            {
+                new SoulVisitorArt { element = Element.Fire, artScale = 0.657f },
+                new SoulVisitorArt { element = Element.Water, artScale = 0.694f },
+                new SoulVisitorArt { element = Element.Lightning, artScale = 0.5275f },
+            },
             // The gate's doorway, whose leaves swing open as he comes up; past its threshold he's under its beam and
             // roof (raised off the map's top, so he stays hidden walking out of view) and between its posts.
             gateDoors = new Rect(309f, 58f, 70f, 50f),

@@ -430,8 +430,9 @@ public partial class GameManager
         }
     }
 
-    // A line spoken outside a fight (the ending): voiced when the clip is there, always subtitled, waited out.
-    IEnumerator Say(string speaker, Color colour, AudioClip clip, string text)
+    // A line spoken outside a fight (the ending): voiced when the clip is there, always subtitled, waited out. Given
+    // `over` (a world point over the speaker) the line hangs there; given `cut`, it stops as soon as that turns true.
+    IEnumerator Say(string speaker, Color colour, AudioClip clip, string text, System.Func<Vector3> over = null, System.Func<bool> cut = null)
     {
         float seconds = clip != null ? clip.length : 2.5f;
         if (clip != null)
@@ -450,8 +451,24 @@ public partial class GameManager
         // On the title page Oni speaks from his corner, clear of the menu, his portrait standing on the plate; in play
         // a line is just words.
         bool hill = state == State.Title;
-        ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, hill ? HillSpeech : null, hill ? PortraitFor(speaker) : null);
-        yield return new WaitForSeconds(seconds + 0.5f);
+        if (over != null) ui.ShowSubtitleOver(speaker, text, colour, seconds + 0.6f, ui.CanvasPoint(over()) + ((RectTransform)ui.transform).rect.size / 2f, over);
+        else ui.ShowSubtitle(speaker, text, colour, seconds + 0.6f, hill ? HillSpeech : null, hill ? PortraitFor(speaker) : null);
+        if (cut == null)
+        {
+            yield return new WaitForSeconds(seconds + 0.5f);
+            yield break;
+        }
+        for (float t = 0f; t < seconds + 0.5f; t += Time.deltaTime)
+        {
+            if (cut())
+            {
+                oniVoice.Stop();
+                soulVoice.Stop();
+                ui.HideSubtitle();
+                yield break;
+            }
+            yield return null;
+        }
     }
 
     // Shirogane's soul, free at last: her spirit wisp rises from where she stood and settles at his shoulder.

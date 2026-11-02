@@ -492,6 +492,31 @@ public static class NinjaArtSetup
                 frames.arraySize = found.Count;
                 for (int k = 0; k < found.Count; k++) frames.GetArrayElementAtIndex(k).objectReferenceValue = found[k];
             }
+            // The souls who visit the gate: their clips by name, their sizes and spot from the layout.
+            if (i < layouts.Length)
+            {
+                area.FindPropertyRelative("visitorAt").vector2Value = layouts[i].visitorAt;
+                SerializedProperty visitors = area.FindPropertyRelative("visitorArt");
+                visitors.arraySize = layouts[i].visitorArt.Length;
+                for (int v = 0; v < layouts[i].visitorArt.Length; v++)
+                {
+                    SoulVisitorArt layout = layouts[i].visitorArt[v];
+                    SerializedProperty visitor = visitors.GetArrayElementAtIndex(v);
+                    visitor.FindPropertyRelative("element").intValue = (int)layout.element;
+                    visitor.FindPropertyRelative("artScale").floatValue = layout.artScale;
+                    visitor.FindPropertyRelative("fps").floatValue = layout.fps;
+                    visitor.FindPropertyRelative("leaveFps").floatValue = layout.leaveFps;
+                    string soul = VisitorName(layout.element);
+                    foreach (string clip in new[] { "Idle", "Talk", "Leave" })
+                    {
+                        SerializedProperty frames = visitor.FindPropertyRelative(clip.ToLowerInvariant());
+                        var found = new List<Sprite>();
+                        for (int k = 0; AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteRoot}Characters/{soul}/{soul}_{clip}_{k}.png") is Sprite frame; k++) found.Add(frame);
+                        frames.arraySize = found.Count;
+                        for (int k = 0; k < found.Count; k++) frames.GetArrayElementAtIndex(k).objectReferenceValue = found[k];
+                    }
+                }
+            }
             SerializedProperty stations = area.FindPropertyRelative("stations");
             for (int j = 0; j < stations.arraySize; j++)
             {
@@ -508,6 +533,14 @@ public static class NinjaArtSetup
         }
         so.ApplyModifiedPropertiesWithoutUndo();
     }
+
+    static string VisitorName(Element element) => element switch
+    {
+        Element.Fire => "Akagane",
+        Element.Water => "Mizore",
+        Element.Lightning => "Hibiki",
+        _ => element.ToString(),
+    };
 
     static void CopyLayout(SerializedProperty area, SafeArea.Config layout)
     {

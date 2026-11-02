@@ -8,25 +8,102 @@ using UnityEngine.Serialization;
 // The temple between runs: loading into it, waking in its pool, its stations and their pages, and setting out.
 public partial class GameManager
 {
+    // How often a soul with only a repeatable word for him says it.
+    const float SoulHubRepeatChance = 0.4f;
+
     IEnumerator HubReturn()
     {
         if (!Save.Data.hubPending) yield break;
         Save.Data.hubPending = false;
         Conversation said = Dialogue.Pick("Oni", DialogueEvent.HubReturn, Dialogue.Context());
         Color colour = OniColour;
+        Element? soul = null;
         // With nothing of his own to say, the soul he leaned on most last run may speak instead.
         if ((said == null || said.Lines.Length == 0) && Save.Data.lastRunElement >= 0)
         {
             var element = (Element)Save.Data.lastRunElement;
             var ctx = Dialogue.Context(null, element);
             said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Priority, Tier.Reactive);
-            if (said == null && Random.value < 0.4f) said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Repeatable);
+            if (said == null && Random.value < SoulHubRepeatChance) said = Dialogue.Pick(SoulOf(element), DialogueEvent.SoulHub, ctx, Tier.Repeatable);
             colour = Boons.Info(element).Color;
+            soul = element;
         }
         if (said == null || said.Lines.Length == 0) yield break;
+        if (soul is Element speaker && safeArea != null)
+        {
+            yield return SoulSpeaks(said, speaker, colour);
+            yield break;
+        }
         yield return new WaitForSeconds(1.5f);
         yield return PlayConversation(said, colour);
     }
+
+    // The soul is there to say it: Asagi and Oliver from where they stand, the others at the gate (SoulVisit).
+    IEnumerator SoulSpeaks(Conversation said, Element element, Color colour)
+    {
+        yield return element switch
+        {
+            Element.Tide when safeArea.AsagiFigure != null && safeArea.AsagiFigure.gameObject.activeSelf => ResidentSpeaks(said, colour, () => safeArea.AsagiFigure.Bounds,
+                talking => safeArea.AsagiFigure.Play(talking ? Asagi.Clip.Talk : Asagi.Clip.Idle, talking)),
+            Element.Steel when safeArea.OliverFigure != null && safeArea.OliverFigure.gameObject.activeSelf => ResidentSpeaks(said, colour, () => safeArea.OliverFigure.Bounds,
+                talking => safeArea.OliverFigure.Play(talking ? Oliver.Clip.Talk : Oliver.Clip.Idle, talking)),
+            Element.Tide or Element.Steel => PlainSoulLine(said, colour),
+            _ => SoulVisit(said, element, colour),
+        };
+    }
+
+    IEnumerator PlainSoulLine(Conversation said, Color colour)
+    {
+        yield return new WaitForSeconds(1.5f);
+        yield return PlayConversation(said, colour);
+    }
+
+    IEnumerator ResidentSpeaks(Conversation said, Color colour, System.Func<Bounds> figure, System.Action<bool> talk)
+    {
+        yield return new WaitForSeconds(1.5f);
+        if (safeArea == null) yield break;
+        Vector3 Head()
+        {
+            Bounds b = figure();
+            return new Vector3(b.center.x, b.max.y + 0.2f, 0f);
+        }
+        yield return SayInTemple(said, colour, Head, talk);
+        if (safeArea != null) talk(false);
+    }
+
+    // After the run, a soul who doesn't live here comes to the gate: they take shape, say their line over their own
+    // head, and go back into a soul that rises over the wall. If he sets out first they don't finish: they just go.
+    IEnumerator SoulVisit(Conversation said, Element element, Color colour)
+    {
+        SoulVisitor visitor = safeArea.SpawnVisitor(element, ArtFor(element)?.soulFrames);
+        yield return visitor.Arrive(1.5f);
+        if (visitor == null) yield break;
+        yield return SayInTemple(said, colour, () => visitor.Head, visitor.Talk);
+        if (visitor != null) yield return visitor.Depart(LeavingTemple ? 2.5f : 1f);
+    }
+
+    // He's on his way out through the gate, or the temple's already gone.
+    bool LeavingTemple => safeArea == null || safeArea.HoldGateOpen;
+
+    // A conversation said in the temple, each line over its speaker: Oni's over him, the soul's over `head`, with their
+    // talk clip while it's theirs. It breaks off if he sets out.
+    IEnumerator SayInTemple(Conversation said, Color colour, System.Func<Vector3> head, System.Action<bool> talk)
+    {
+        DialogueContext ctx = Dialogue.Context();
+        for (int i = 0; i < said.Lines.Length && !LeavingTemple; i++)
+        {
+            DialogueLine line = said.Lines[i];
+            bool oni = line.Speaker == "Oni";
+            talk(!oni);
+            AudioClip clip = voiceLibrary != null ? voiceLibrary.Find(said.VoiceId(i)) : null;
+            yield return Say(line.Speaker, oni ? OniColour : colour, clip, Dialogue.Fill(line.Text, ctx),
+                oni ? OniHead : head, () => LeavingTemple);
+            if (LeavingTemple) yield break;
+        }
+        talk(false);
+    }
+
+    Vector3 OniHead() => new Vector3(ronin.Bounds.center.x, ronin.Bounds.max.y + 0.3f, 0f);
 
     // Oni's line as he climbs out of the pool, then Poguru's, after a run that ended. On the wake he meets Asagi or
     // Oliver, their scene (played by EnterSafeArea) takes the place of his line.

@@ -84,6 +84,10 @@ public class SafeArea : MonoBehaviour
         public AsagiArt asagiArt = new AsagiArt();
         [Tooltip("Oliver's clips, for his figure by the weapon rack (Ninja/Apply Maps). Empty draws him as a block of iron and forge-gold.")]
         public OliverArt oliverArt = new OliverArt();
+        [Tooltip("The souls who visit the gate after a run, and how large each is drawn (Ninja/Apply Maps). A missing clip draws them as a column of their element's glow.")]
+        public SoulVisitorArt[] visitorArt = new SoulVisitorArt[0];
+        [Tooltip("Where a visiting soul's feet stand, in map pixels from the top-left. Zero: beside the Exit station.")]
+        public Vector2 visitorAt;
         public Lamp[] lamps = new Lamp[0];
         [Tooltip("Ground painted on the map he can't walk through (lanterns, a dais's edges, a kerb): rectangles in map pixels, x and y their top-left corner.")]
         public Rect[] walls = new Rect[0];
@@ -152,6 +156,8 @@ public class SafeArea : MonoBehaviour
     // Oliver at the top of the rack's dais; built always, and out of sight until he's met (ShowOliver).
     public Oliver OliverFigure { get; private set; }
     float oliverBaseY;
+    SoulVisitor visitor;
+    float visitorBaseY;
     public Rect WalkArea { get; private set; }
 
     public float MapPixel => mapPixel;
@@ -159,6 +165,17 @@ public class SafeArea : MonoBehaviour
     // Held open while he sets out, whether or not he's near; Opened once the leaves have swung all the way.
     public bool HoldGateOpen { get; set; }
     public bool GateOpened => leaves == null || gateOpen >= 1f;
+
+    // A soul come to the gate to say their line, standing clear of his way out; its clips, if any, come from the config.
+    public SoulVisitor SpawnVisitor(Element element, Sprite[] soulFrames)
+    {
+        if (visitor != null) Destroy(visitor.gameObject);
+        SoulVisitorArt art = System.Array.Find(config.visitorArt, a => a.element == element) ?? new SoulVisitorArt { element = element };
+        Vector3 feet = mapSpace && config.visitorAt != Vector2.zero ? MapToWorld(config.visitorAt) : PointOf(StationKind.Exit) + new Vector3(-2.6f, -0.6f, 0f);
+        visitorBaseY = feet.y;
+        visitor = SoulVisitor.Create(art, transform, feet, ronin.ArtPixelSize, propOrder, soulFrames);
+        return visitor;
+    }
 
     // Where he stands once he's climbed out of the pool, just past its far rim; a step up from the wake spot without one.
     public Vector3 PoolExit => pool != null ? MapToWorld(config.poolCentre - new Vector2(0f, config.poolRadii.y + 24f)) : WakePoint + Vector3.up * 1.6f;
@@ -578,6 +595,7 @@ public class SafeArea : MonoBehaviour
 
         // Behind his feet Oni is hidden by him, as by any prop.
         if (OliverFigure != null) OliverFigure.SetOrder(feetY > oliverBaseY ? ronin.SpriteOrder + 5 : propOrder);
+        if (visitor != null) visitor.SetOrder(feetY > visitorBaseY ? ronin.SpriteOrder + 5 : propOrder);
 
         foreach (var (r, footY, phase) in spirits)
         {

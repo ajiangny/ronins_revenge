@@ -624,6 +624,13 @@ public class GameUI : MonoBehaviour
         subtitlePlate.gameObject.SetActive(true);
     }
 
+    // Fades the line out early, where it stands: its speaker has gone.
+    public void HideSubtitle()
+    {
+        subtitleUntil = 0f;
+        subtitleFollow = null;
+    }
+
     // The centred subtitle's sizes, and the smaller bubble's over a speaker in the field: the readable floor (26px at
     // 1080p), so it marks who's talking without covering the fight.
     const float SubtitleSize = 34f, SpeakerSize = 30f, OverSize = 26f;

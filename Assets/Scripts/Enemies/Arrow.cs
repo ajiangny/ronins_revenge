@@ -233,6 +233,14 @@ public class Arrow : MonoBehaviour
         Redress();
     }
 
+    // An army's violet shot: dodge-only like a seal-dart, but it still ends on cover like a guarded arrow, so hiding
+    // works where a parry doesn't.
+    public void Seal()
+    {
+        Unparryable = true;
+        BreaksOnCover = true;
+    }
+
     // Unbreakable in its own look, for a boss shot that draws itself (Utsusemi's hour cleave).
     public void MakeUnbreakable()
     {

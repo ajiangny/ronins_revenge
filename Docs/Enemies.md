@@ -33,10 +33,16 @@ Part of the [architecture map](../ARCHITECTURE.md). Scripts live under `Assets/S
   `int[]` by row from the top, 0 keeps the kind's own; only ever raises) and picks the round's one Elite (stage 1 has none until round 3: `eliteHealth` 0)
   (`LevelConfig.eliteHealth`, 0 for none) from the soldiers that can shoot, near the middle of the formation;
   `UpdateElite` (from `FixedUpdate`) fires the Elite's own shot every `eliteFireInterval` (2.4 s average) at 1.1x speed,
-  shielded when the stage rolls shields. Volleys: each `FireShot` looses `LevelConfig.volley` shots from columns at
-  least two apart; every shot is rolled by `RollMods` into a `ShotMods` (`speed`, `toughness`, `guarded`) from
-  `fastArrowChance` (speed `fastArrowScale`, 1.25), `toughArrowChance` (`Toughness` 2) and `guardedArrowChance`
-  (`Arrow.Guard`; outranks shielded). Poguru's practice armies and Kagetsune's levy keep every new field off.
+  shielded when the stage rolls shields, and sealed (violet) with chance `eliteSealedChance` (0.3) plus twice the round's
+  `sealedArrowChance`, capped at `MaxSealedChance` (0.6), so violet arrives first from Stage 1's round-3 Elite. Volleys: each `FireShot` looses `LevelConfig.volley` shots from columns at
+  least two apart; every shot is rolled by `RollMods(shooter)` into a `ShotMods` (`speed`, `toughness`, `guarded`, `sealedShot`) from
+  `fastArrowChance` (speed `fastArrowScale`, 1.25), `toughArrowChance` (`Toughness` 2), `guardedArrowChance`
+  (`Arrow.Guard`; outranks shielded) and `sealedArrowChance` (outranks guarded): the sealed chance is scaled by the
+  shooter's `SealedWeight` (Ashigaru 0.6, Archer 1, Yurei 1.3, Taisho 2.5) and `veteranSealedScale` (1.5) for a veteran,
+  capped at 0.6. `ThrowSpear` rolls too, so the Taisho throws violet yari most of all. In `Samurai.Loose` a sealed roll
+  calls `Arrow.Seal` (`Unparryable`, but still ends on cover) on the one arrow, the fan's middle arrow or the yurei
+  pair's first (which still drifts through cover); a sealed yari is just `Unparryable`, still cuts through cover, and
+  Spear-Breaker still snaps it. Poguru's practice armies and Kagetsune's levy keep every new field off.
   `Samurai.Rank.cs`: `MakeElite` (x1.25 scale, x3 points, clan-coloured halo and edge), `MakeVeteran` (+10 points, a
   thin steel edge) and `UpdateBurn` (Burning wears a soldier with more than one HP down every `Statuses.BurnTick`, never
   to zero).

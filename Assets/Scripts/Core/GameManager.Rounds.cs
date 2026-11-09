@@ -116,6 +116,7 @@ public partial class GameManager
             fastArrowChance = last.fastArrowChance,
             toughArrowChance = last.toughArrowChance,
             guardedArrowChance = last.guardedArrowChance,
+            sealedArrowChance = last.sealedArrowChance,
             shape = last.shape,
             squads = last.squads,
             squadGap = last.squadGap,

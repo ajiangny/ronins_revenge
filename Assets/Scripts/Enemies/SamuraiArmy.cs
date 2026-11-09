@@ -30,6 +30,10 @@ public partial class SamuraiArmy : MonoBehaviour
     [SerializeField] int taishoHealth = 2;
     [Tooltip("An army arrow rolled fast (LevelConfig.fastArrowChance) flies this many times arrowSpeed.")]
     [SerializeField] float fastArrowScale = 1.25f;
+    [Tooltip("A veteran's shot is this many times likelier to be sealed (violet, dodge-only) than its kind's.")]
+    [SerializeField] float veteranSealedScale = 1.5f;
+    [Tooltip("The Elite's shot is sealed (violet, dodge-only) at least this often, plus twice the round's sealedArrowChance.")]
+    [Range(0, 1)] [SerializeField] float eliteSealedChance = 0.3f;
     [Tooltip("Shieldbearers take this many hits to fall.")]
     [SerializeField] int shieldHealth = 2;
     [Tooltip("The Bellringer's own look. Wired by Ninja/Apply Sprite Art; empty draws it as a bronze-tinted Bushi.")]
@@ -944,7 +948,7 @@ public partial class SamuraiArmy : MonoBehaviour
             }
             used.Add(column);
             Samurai shooter = FrontShooterInColumn(column);
-            if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods());
+            if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods(shooter));
         }
     }
 
@@ -967,7 +971,7 @@ public partial class SamuraiArmy : MonoBehaviour
             }
             if (nearest != null)
             {
-                nearest.Fire(level.arrowSpeed, RollMods());
+                nearest.Fire(level.arrowSpeed, RollMods(nearest));
                 return nearest.Column;
             }
         }
@@ -983,27 +987,44 @@ public partial class SamuraiArmy : MonoBehaviour
         // Shieldbearers never fire, so the column's front shooter looses over their heads. A front shooter encased in ice
         // holds its whole column's fire.
         Samurai shooter = FrontShooterInColumn(column);
-        if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods());
+        if (shooter != null && shooter.CanFire) shooter.Fire(level.arrowSpeed, RollMods(shooter));
         return column;
     }
 
-    // What this one shot is rolled with: guarded (parry-only) outranks shielded; either can also fly fast.
-    ShotMods RollMods()
+    // What this one shot is rolled with: sealed (dodge-only) outranks guarded (parry-only), which outranks shielded;
+    // any can also fly fast. The stronger the shooter, the likelier its shot is sealed.
+    ShotMods RollMods(Samurai shooter)
     {
         var mods = new ShotMods { speed = 1f, toughness = 1 };
-        if (UnityEngine.Random.value < level.guardedArrowChance) mods.guarded = true;
+        float sealedChance = level.sealedArrowChance * SealedWeight(shooter.Kind) * (shooter.IsVeteran ? veteranSealedScale : 1f);
+        if (UnityEngine.Random.value < Mathf.Min(sealedChance, MaxSealedChance)) mods.sealedShot = true;
+        else if (UnityEngine.Random.value < level.guardedArrowChance) mods.guarded = true;
         else if (UnityEngine.Random.value < level.toughArrowChance) mods.toughness = 2;
         if (UnityEngine.Random.value < level.fastArrowChance) mods.speed = fastArrowScale;
         return mods;
     }
 
-    // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line.
+    // No roll is ever sure to come up violet, however strong the shooter.
+    const float MaxSealedChance = 0.6f;
+
+    // How much likelier than an archer's a kind's shot is to be sealed: the foot soldier least, the Taisho's yari most.
+    static float SealedWeight(SamuraiKind kind) => kind switch
+    {
+        SamuraiKind.Ashigaru => 0.6f,
+        SamuraiKind.Yurei => 1.3f,
+        SamuraiKind.Taisho => 2.5f,
+        _ => 1f,
+    };
+
+    // A random living Taisho throws; arrows pass through samurai, so it doesn't need a clear line. Only the sealed roll
+    // touches a yari (Samurai.Loose ignores the rest for it).
     void ThrowSpear()
     {
         nextSpearTime = Time.time + spearInterval * UnityEngine.Random.Range(0.7f, 1.3f);
         List<Samurai> taisho = soldiers.FindAll(s => s.Kind == SamuraiKind.Taisho && !s.Encased);
         if (taisho.Count == 0) return;
-        taisho[UnityEngine.Random.Range(0, taisho.Count)].Fire(level.arrowSpeed);
+        Samurai thrower = taisho[UnityEngine.Random.Range(0, taisho.Count)];
+        thrower.Fire(level.arrowSpeed, RollMods(thrower));
     }
 
     // A living bellringer lifts its bell, glows for a beat, then tolls: the army fires faster for a while. Cut down

@@ -34,6 +34,8 @@ public class LevelConfig
     [Range(0, 1)] public float toughArrowChance;
     [Tooltip("Chance that an army arrow is guarded: it can't be cut, only parried, dodged or stopped by cover.")]
     [Range(0, 1)] public float guardedArrowChance;
+    [Tooltip("Chance that an army shot is sealed (violet): it can't be cut or parried, only dodged or stopped by cover. Scaled per kind and for veterans (SamuraiArmy.RollMods).")]
+    [Range(0, 1)] public float sealedArrowChance;
 
     [Tooltip("How the formation is laid out.")]
     public FormationShape shape = FormationShape.Grid;

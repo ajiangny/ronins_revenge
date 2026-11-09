@@ -303,6 +303,7 @@ public static class NinjaArtSetup
                 round.FindPropertyRelative("fastArrowChance").floatValue = level.fastArrowChance;
                 round.FindPropertyRelative("toughArrowChance").floatValue = level.toughArrowChance;
                 round.FindPropertyRelative("guardedArrowChance").floatValue = level.guardedArrowChance;
+                round.FindPropertyRelative("sealedArrowChance").floatValue = level.sealedArrowChance;
                 round.FindPropertyRelative("shape").enumValueIndex = (int)level.shape;
                 round.FindPropertyRelative("squads").intValue = level.squads;
                 round.FindPropertyRelative("squadGap").floatValue = level.squadGap;

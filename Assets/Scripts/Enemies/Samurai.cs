@@ -150,8 +150,9 @@ public partial class Samurai : MonoBehaviour, IHittable
                 Mark(arrow, chilled, burning);
                 ShieldShot(arrow, mods);
             }
-            // Only the middle arrow is guarded, so the fan is never wholly uncuttable.
-            if (mods.guarded) fan[1].Guard();
+            // Only the middle arrow is sealed or guarded, so the fan is never wholly dodge-only or uncuttable.
+            if (mods.sealedShot) fan[1].Seal();
+            else if (mods.guarded) fan[1].Guard();
         }
         else if (Kind == SamuraiKind.Yurei)
         {
@@ -166,7 +167,9 @@ public partial class Samurai : MonoBehaviour, IHittable
                 arrow.Tint(art.shot != null ? Color.white : GhostArrow, GhostGlow);
                 ShieldShot(arrow, mods);
             }
-            if (mods.guarded) pair[0].Guard();
+            // A sealed spirit arrow keeps PassesCover: it drifts through the blockers like the rest of the pair.
+            if (mods.sealedShot) pair[0].Seal();
+            else if (mods.guarded) pair[0].Guard();
             Sfx.Play(Sfx.ArrowFire, 0.5f, 1.3f);
             return;
         }
@@ -175,6 +178,8 @@ public partial class Samurai : MonoBehaviour, IHittable
             Arrow spear = Instantiate(arrowPrefab, muzzle, Quaternion.identity);
             spear.MakeUnbreakable(spearSprite);
             spear.CursedSpear = true;
+            // A violet yari can't be parried either; it still cuts through cover, and Spear-Breaker still snaps it.
+            if (mods.sealedShot) spear.Unparryable = true;
             spear.Launch(aim * (arrowSpeed * SpearSpeedMultiplier), 1.5f * life);
             Sfx.Play(Sfx.ArrowFire, 0.9f, 0.65f);
             return;
@@ -186,7 +191,8 @@ public partial class Samurai : MonoBehaviour, IHittable
             WearShot(arrow);
             Mark(arrow, chilled, burning);
             ShieldShot(arrow, mods);
-            if (mods.guarded) arrow.Guard();
+            if (mods.sealedShot) arrow.Seal();
+            else if (mods.guarded) arrow.Guard();
         }
         // An archer's string is sharp; a thrown spear is a lower, heavier whoosh.
         Sfx.Play(Sfx.ArrowFire, 0.6f, Kind == SamuraiKind.Archer ? 1.15f : 0.8f);
@@ -549,10 +555,11 @@ public partial class Samurai : MonoBehaviour, IHittable
 }
 
 // What one army shot is rolled with (SamuraiArmy.FireShot): a faster arrow, a shielded one that takes `toughness`
-// cuts, or a guarded one that only a parry stops. Default is a plain arrow.
+// cuts, a guarded one that only a parry stops, or a sealed (violet) one that can only be dodged. Default is a plain arrow.
 public struct ShotMods
 {
     public float speed;
     public int toughness;
     public bool guarded;
+    public bool sealedShot;
 }

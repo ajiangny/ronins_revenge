@@ -41,13 +41,20 @@ public partial class SamuraiArmy
         elite.MakeElite(c.eliteHealth, c.samuraiColor);
     }
 
-    // The Elite's own shot timer, run from FixedUpdate: a slightly faster shot, shielded once the stage rolls shields.
+    // The Elite's own shot timer, run from FixedUpdate: a slightly faster shot, shielded once the stage rolls shields,
+    // and often violet (dodge-only), more so as the stages roll sealed shots for the ranks.
     void UpdateElite()
     {
         if (elite == null || elite.IsDead || IsDiving(elite) || !elite.CanFire || Time.time < nextEliteShot) return;
         // A bell's toll hastens it like the rest of the army.
         float haste = Time.time < hasteUntil ? tollFireScale : 1f;
         nextEliteShot = Time.time + eliteFireInterval * haste * Random.Range(0.7f, 1.3f);
-        elite.Fire(level.arrowSpeed, new ShotMods { speed = 1.1f, toughness = level.toughArrowChance > 0f ? 2 : 1 });
+        float sealedChance = Mathf.Min(eliteSealedChance + 2f * level.sealedArrowChance, MaxSealedChance);
+        elite.Fire(level.arrowSpeed, new ShotMods
+        {
+            speed = 1.1f,
+            toughness = level.toughArrowChance > 0f ? 2 : 1,
+            sealedShot = Random.value < sealedChance,
+        });
     }
 }
